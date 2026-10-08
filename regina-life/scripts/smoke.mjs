@@ -47,6 +47,7 @@ const auditPins = () => page.evaluate(() => {
   return { n: pins.length, bad };
 });
 // software WebGL can spend seconds on one frame (e.g. right after a resize), so wait until the hub has really consumed the snap + refit instead of sleeping
+await page.addStyleTag({ content: '.pin .pl,.pin .pe{transition:none !important}' }); // measure real layout, not a label mid-fade (software WebGL barely ticks CSS transitions)
 const settleHub = async () => { await page.evaluate(() => { __regina.hub.snapNext = true; }); await page.waitForFunction(() => !__regina.hub.snapNext && !__regina.hub.dirty, null, { timeout: 90000 }); await wait(300); };
 await step('home map: pins do not overlap or hide', async () => {
   await settleHub(); let r = await auditPins(); if (r.n !== 7 || r.bad.length) throw new Error('close view: ' + JSON.stringify(r));
