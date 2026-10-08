@@ -285,3 +285,11 @@ body::after{content:"";position:fixed;inset:-50%;width:200%;height:200%;pointer-
 
 .eyebrow{font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){body::after,h2,.hero h1 .ln>span,.timer,.total strong,.bigword span{animation:none}}
+
+/* product cards: second photo on hover, sold-out state */
+.card .pic{position:relative}
+.card .pic img.alt{position:absolute;inset:0;opacity:0;transition:opacity .45s ease}
+.card:hover .pic img.alt{opacity:1}
+.card.sold .pic img{filter:grayscale(1) brightness(.6)}
+.badge{position:absolute;left:10px;top:10px;z-index:2;font-size:10px;letter-spacing:.14em;padding:6px 10px;border-radius:999px;background:#050505cc;border:1px solid var(--line2)}
+.meta .stock{text-transform:uppercase}

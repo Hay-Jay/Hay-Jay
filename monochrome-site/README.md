@@ -4,6 +4,7 @@ Static site for MONOCHROME® (no build step). Open `index.html` or serve the fol
 
 - `index.html` / `styles.css` / `main.js` — the site
 - `assets/` — emblem and wordmark
+- `data/products.js` — snapshot of the Shopify catalogue; refresh with `node scripts/sync-products.mjs`
 - `404.html`, `robots.txt`, `sitemap.xml`, `site.webmanifest`, `netlify.toml` — error page, SEO, installable-app manifest and host config
 
 ## Config (top of `main.js`)
