@@ -52,11 +52,14 @@ export class CameraRig {
     const k = t < 1 ? 1 : 1 - Math.exp(-dt * 9);
     this.pos.lerp(safe, this.pos.distanceTo(safe) > 40 ? 1 : k);
     if (t < 1) this.pos.copy(safe);
+    this._clampIndoor(this.pos);
     this.camera.position.copy(this.pos);
     this.camera.lookAt(this.look.x, this.look.y + 0.05 + sit, this.look.z);
     const tf = this.mode === 'follow' ? 62 + speedNorm * 9 : this.mode === 'creator' ? 38 : 48;
     this.fov += (tf - this.fov) * (1 - Math.exp(-dt * 5));
     if (Math.abs(this.camera.fov - this.fov) > 0.01) { this.camera.fov = this.fov; this.camera.updateProjectionMatrix(); }
   }
-  snap(player) { this.look.set(player.pos.x, 1.5, player.pos.z); this.pos.set(player.pos.x + Math.sin(this.yaw) * this.dist, 3, player.pos.z + Math.cos(this.yaw) * this.dist); }
+  /** Never let the camera leave the room it's in (walls aren't colliders). */
+  _clampIndoor(v) { if (!this.indoor || !this.bounds) return; const b = this.bounds; v.x = THREE.MathUtils.clamp(v.x, b.x0 - 0.15, b.x1 + 0.15); v.z = THREE.MathUtils.clamp(v.z, b.z0 - 0.15, b.z1 + 0.15); v.y = Math.min(v.y, 2.95); }
+  snap(player) { this.look.set(player.pos.x, 1.5, player.pos.z); this.pos.set(player.pos.x + Math.sin(this.yaw) * this.dist, 3, player.pos.z + Math.cos(this.yaw) * this.dist); this._clampIndoor(this.pos); }
 }

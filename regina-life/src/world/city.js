@@ -6,6 +6,8 @@ import { facadeTextures, asphaltTexture, intersectionTexture, concreteTexture, g
 import { CollisionGrid } from './collision.js';
 import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById } from './cityData.js';
 import { buildLandmarks } from './landmarks.js';
+import { BILLBOARDS, DAY_PRICE, THEMES } from '../data/billboards.js';
+import { drawBillboard } from './textures.js';
 
 const R2 = ROAD_W / 2;
 const PALETTES = {
@@ -128,6 +130,9 @@ export function buildCity({ quality = 'high' } = {}) {
     const mk = reserve({ x0: 14, z0: 12, x1: 46, z1: 36 });
     const m = building({ ...mk, floors: 2, style: 'stucco', color: '#f3e3c5', roofColor: '#3a3d42', storefront: true });
     doorOn({ ...mk, ...m }, 'n', 'Enter Prairie Corner Market', 'market', 'door_market', { sign: { text: 'PRAIRIE CORNER', sub: 'MARKET · Fresh daily' }, accent: '#3bb273' });
+    const gy = reserve({ x0: 122, z0: 12, x1: 154, z1: 36 });
+    const gb = building({ ...gy, floors: 2, style: 'glass', color: '#d6e8ff', roofColor: '#2f3438', storefront: true });
+    doorOn({ ...gy, ...gb }, 'n', 'Enter Prairie Fitness', 'gym', 'door_gym', { sign: { text: 'PRAIRIE FITNESS', sub: 'Open 24 hours' }, accent: '#3bd6c6' });
     const th = reserve({ x0: 14, z0: -40, x1: 46, z1: -12 });
     const t = building({ ...th, floors: 2, style: 'concrete', color: '#ededed', roofColor: '#34373b', storefront: true });
     doorOn({ ...th, ...t }, 's', 'Enter Prairie Threads', 'threads', 'door_threads', { sign: { text: 'PRAIRIE THREADS', sub: 'Clothing · Accessories' }, accent: '#8e6bd8' });
@@ -250,8 +255,9 @@ export function buildCity({ quality = 'high' } = {}) {
   }
 
   /* ---------------- Wascana: lake, park, bridge, Albert St south ---------------- */
-  const lakeShape = new THREE.Shape(lake.map(([x, z]) => new THREE.Vector2(x, z)));
-  const lakeMesh = new THREE.Mesh(new THREE.ShapeGeometry(lakeShape).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f6f8f', roughness: 0.12, metalness: 0.25, transparent: true, opacity: 0.93, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
+  // shape y = -z so that rotateX(-90°) lays it flat with its normal pointing UP (the old +90° made it face down and get culled)
+  const lakeShape = new THREE.Shape(lake.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const lakeMesh = new THREE.Mesh(new THREE.ShapeGeometry(lakeShape).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f6f8f', roughness: 0.12, metalness: 0.25, transparent: true, opacity: 0.93, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
   lakeMesh.position.y = 0.05; lakeMesh.receiveShadow = true; lakeMesh.name = 'lake'; group.add(lakeMesh);
   // park lawn
   {
@@ -335,6 +341,31 @@ export function buildCity({ quality = 'high' } = {}) {
     if (d.id === 'downtown' || d.id === 'wascana') continue;
     hood({ ...d, skipR: extras.skip[d.id] ?? 0, density: d.id === 'airport' ? 0.3 : d.id === 'uofr' ? 0.35 : 0.82, r: d.r });
   }
+
+  /* ---------------- billboards ---------------- */
+  const boards = [];
+  {
+    const metal = new THREE.MeshStandardMaterial({ color: '#2b2e33', roughness: 0.5, metalness: 0.6 });
+    for (const b of BILLBOARDS) {
+      const mega = b.tier === 'mega', W = mega ? 15 : 10.5, Hh = mega ? 7.5 : 5.25, poleH = mega ? 9 : 6.5;
+      const root = new THREE.Group(); root.position.set(b.x, 0, b.z); root.rotation.y = b.yaw; group.add(root);
+      for (const sx of [-1, 1]) { const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.36, poleH + Hh * 0.5, 8), metal); pl.position.set(sx * (W * 0.32), (poleH + Hh * 0.5) / 2, -0.4); pl.castShadow = true; root.add(pl); }
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(W + 0.7, Hh + 0.7, 0.5), metal); frame.position.set(0, poleH + Hh / 2, -0.15); frame.castShadow = true; root.add(frame);
+      const cv = document.createElement('canvas'); cv.width = 768; cv.height = Math.round(768 * (Hh / W));
+      const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+      const mat = new THREE.MeshStandardMaterial({ map: tex, emissiveMap: tex, emissive: new THREE.Color('#ffffff'), emissiveIntensity: 0.25, roughness: 0.6 });
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), mat); face.position.set(0, poleH + Hh / 2, 0.12); root.add(face);
+      const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
+      colliders.add(b.x - 1.5 - Math.abs(rx) * W * 0.32, b.z - 1.5 - Math.abs(rz) * W * 0.32, b.x + 1.5 + Math.abs(rx) * W * 0.32, b.z + 1.5 + Math.abs(rz) * W * 0.32, poleH);
+      const board = { ...b, cv, tex, mat, mega, priceLabel: `$${(DAY_PRICE[b.tier] / 100).toFixed(0)} / day` };
+      boards.push(board);
+      interactables.push({ id: 'bb_' + b.id, kind: 'billboard', boardId: b.id, x: b.x + fx * 10, z: b.z + fz * 10, radius: 9, label: `Billboard · ${b.name}` });
+    }
+  }
+  const refreshBillboards = (ads = {}, now = Date.now()) => {
+    for (const b of boards) { const a = ads[b.id]; drawBillboard(b.cv, a && a.until > now ? a : null, { tier: b.tier, priceLabel: b.priceLabel }, THEMES); b.tex.needsUpdate = true; }
+  };
+  refreshBillboards();
 
   /* ---------------- instanced props ---------------- */
   const props = new THREE.Group(); group.add(props);
@@ -426,7 +457,7 @@ export function buildCity({ quality = 'high' } = {}) {
   const api = {
     group, colliders, interactables, mats, chunks, lamps, trees, signMeshes,
     spawn: { x: -14, z: 4, heading: Math.PI / 2 },
-    recolorTrees,
+    recolorTrees, billboards: boards, refreshBillboards,
     carsReady: Promise.resolve().then(() => {
       const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.5 }), cars.length);
       const c = new THREE.Color();
@@ -437,6 +468,7 @@ export function buildCity({ quality = 'high' } = {}) {
     /** env: { night:0..1, season, snow:0..1 } */
     setEnvironment({ night, season, snow = 0 }) {
       for (const id of facadeIds) mats[id].emissiveIntensity = id === 'store' ? 0.15 + night * 0.55 : night * 0.9;
+      for (const b of boards) b.mat.emissiveIntensity = 0.18 + night * 0.7;
       lampHeadMat.emissiveIntensity = night * 3; glowMat.opacity = night * 0.55;
       const white = new THREE.Color('#ffffff');
       groundTex.needsUpdate = false;

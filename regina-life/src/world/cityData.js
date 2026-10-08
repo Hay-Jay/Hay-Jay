@@ -39,24 +39,27 @@ export const DISTRICTS = [
 ];
 
 export const POIS = [
-  { id: 'lofts',   name: 'Wheat City Lofts (Home)', cat: 'home',     x: -30, z: 12,  enter: 'apartment' },
-  { id: 'market',  name: 'Prairie Corner Market',   cat: 'shop',     x: 30,  z: 12,  enter: 'market' },
-  { id: 'threads', name: 'Prairie Threads',         cat: 'shop',     x: 29,  z: -12, enter: 'threads' },
-  { id: 'leg',     name: 'Legislative Building',    cat: 'landmark', x: ALBERT_X, z: 1235 },
-  { id: 'bridge',  name: 'Albert Street Memorial Bridge', cat: 'landmark', x: ALBERT_X, z: 985 },
-  { id: 'scarth',  name: 'Downtown Core',           cat: 'landmark', x: 0, z: 0 },
-  { id: 'stadium', name: 'Mosaic Stadium',          cat: 'landmark', ...LL(50.4528, -104.6395) },
-  { id: 'uofr',    name: 'University of Regina',    cat: 'school',   ...LL(50.4165, -104.5890) },
-  { id: 'airport', name: 'Regina International Airport', cat: 'transport', ...LL(50.4319, -104.6658) },
-  { id: 'harbour', name: 'Harbour Landing',         cat: 'district', ...LL(50.4010, -104.6700) },
-  { id: 'cathedral', name: 'Cathedral Village',     cat: 'district', ...LL(50.4375, -104.6395) },
-  { id: 'northcentral', name: 'North Central',      cat: 'district', ...LL(50.4640, -104.6165) },
-  { id: 'rochdale', name: 'Rochdale Blvd',          cat: 'district', ...LL(50.4830, -104.6600) },
-  { id: 'east',    name: 'East Regina',             cat: 'district', ...LL(50.4440, -104.5500) },
-  { id: 'south',   name: 'South Regina',            cat: 'district', ...LL(50.4090, -104.6200) },
+  { id: 'lofts',   name: 'Wheat City Lofts (Home)', cat: 'home',     x: -30, z: 9.4,  enter: 'apartment', emoji: '🏠', state: 'open', blurb: 'Your rented Unit 204. Sleep, shower, cook, watch TV and change outfits.' },
+  { id: 'market',  name: 'Prairie Corner Market',   cat: 'shop',     x: 30,  z: 9.4,  enter: 'market',    emoji: '🧺', state: 'open', blurb: 'Groceries, a bakery and a deli. Also hiring shelf stockers.' },
+  { id: 'threads', name: 'Prairie Threads',         cat: 'shop',     x: 29,  z: -9.4, enter: 'threads',   emoji: '🛍️', state: 'open', blurb: 'Clothing, toques and accessories — try before you buy. Also hiring.' },
+  { id: 'fitness', name: 'Prairie Fitness',         cat: 'gym',      x: 138, z: 9.4,  enter: 'gym',       emoji: '🏋️', state: 'open', blurb: 'Treadmills, weights and a yoga mat. Build your Fitness skill.' },
+  { id: 'leg',     name: 'Legislative Building',    cat: 'landmark', x: ALBERT_X, z: 1235, emoji: '🏛️', state: 'visit', blurb: 'The domed seat of Saskatchewan\'s government, on the shore of Wascana Centre.' },
+  { id: 'bridge',  name: 'Albert Street Memorial Bridge', cat: 'landmark', x: ALBERT_X, z: 985, emoji: '🌉', state: 'visit', blurb: 'Albert Street crossing Wascana Lake — the best view of the water.' },
+  { id: 'wascana', name: 'Wascana Lake',            cat: 'landmark', x: 400, z: 985, emoji: '🦆', state: 'visit', blurb: 'The heart of one of North America\'s largest urban parks.' },
+  { id: 'scarth',  name: 'Scarth Street Mall',      cat: 'landmark', x: -110, z: -60, emoji: '🎷', state: 'visit', blurb: 'Downtown\'s pedestrian heart. Buskers, patios and big-city energy. (Position stylised.)' },
+  { id: 'victoriapark', name: 'Victoria Park',      cat: 'landmark', x: -110, z: 60, emoji: '🌳', state: 'visit', blurb: 'A downtown green square. (Position stylised.)' },
+  { id: 'stadium', name: 'Mosaic Stadium',          cat: 'landmark', ...LL(50.4528, -104.6395), emoji: '🏟️', state: 'visit', blurb: 'Home of Rider Nation. Green and white forever.' },
+  { id: 'uofr',    name: 'University of Regina',    cat: 'school',   ...LL(50.4165, -104.5890), emoji: '🎓', state: 'visit', blurb: 'Campus on the south-east side. Classes and clubs arrive in a later update.' },
+  { id: 'airport', name: 'Regina International Airport', cat: 'transport', ...LL(50.4319, -104.6658), emoji: '✈️', state: 'visit', blurb: 'Gateway to the Prairies on the south-west edge of the city.' },
+  { id: 'harbour', name: 'Harbour Landing',         cat: 'district', ...LL(50.4010, -104.6700), emoji: '🛒', state: 'visit', blurb: 'South-west suburb with big-box shopping.' },
+  { id: 'cathedral', name: 'Cathedral Village',     cat: 'district', ...LL(50.4375, -104.6395), emoji: '☕', state: 'visit', blurb: 'Heritage homes and cafés west of downtown.' },
+  { id: 'northcentral', name: 'North Central',      cat: 'district', ...LL(50.4640, -104.6165), emoji: '🏘️', state: 'visit', blurb: 'Close-knit inner-city neighbourhood.' },
+  { id: 'rochdale', name: 'Rochdale Blvd',          cat: 'district', ...LL(50.4830, -104.6600), emoji: '🏡', state: 'visit', blurb: 'Newer north-west suburbs.' },
+  { id: 'east',    name: 'East Regina',             cat: 'district', ...LL(50.4440, -104.5500), emoji: '🌾', state: 'visit', blurb: 'Eastern edge where the city meets the fields.' },
+  { id: 'south',   name: 'South Regina',            cat: 'district', ...LL(50.4090, -104.6200), emoji: '🌤️', state: 'visit', blurb: 'Residential south with parks and schools.' },
 ];
 export const poiById = Object.fromEntries(POIS.map((p) => [p.id, p]));
-export const CAT_ICON = { home: '🏠', shop: '🛍️', landmark: '🏛️', school: '🎓', transport: '✈️', district: '📍' };
+export const CAT_ICON = { home: '🏠', shop: '🛍️', landmark: '🏛️', school: '🎓', transport: '✈️', district: '📍', gym: '🏋️' };
 
 /** Wascana Lake outline (stylised ribbon following the real east–west orientation). */
 export function lakePolygon() {

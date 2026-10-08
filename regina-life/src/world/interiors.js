@@ -274,7 +274,7 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     };
     drawTv();
     interactables.push({ id: 'tv', x: -0.4, z: 0.3, radius: 2.0, label: () => (tvOn ? 'Change channel / Off' : 'Watch TV'), run: (ctx) => {
-      if (!tvOn) { tvOn = true; ctx.audio?.blip('tick'); ctx.ui.toast('TV on. Relaxing…', 'info'); ctx.store.state.needs.mood = Math.min(100, ctx.store.state.needs.mood + 4); ctx.store.commit('needs'); }
+      if (!tvOn) { tvOn = true; ctx.audio?.blip('tick'); ctx.ui.activity('tv'); }
       else ctx.ui.menu('Television', 'What would you like to do?', [{ label: 'Next channel', run: () => { tvShow++; } }, { label: 'Turn off', run: () => { tvOn = false; drawTv(); } }, { label: 'Cancel' }]);
     } });
     interactables.push({ id: 'sofa', x: -0.4, z: 2.6, radius: 1.5, label: 'Sit on sofa', run: (ctx) => ctx.player.sitAt({ x: -0.4, z: 3.55, yaw: 0, y: 0.18 }) });
@@ -296,7 +296,14 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     interactables.push({ id: 'wardrobe', x: 0.9, z: -3.9, radius: 1.6, label: 'Open wardrobe', run: (ctx) => ctx.ui.openWardrobe() });
     // bookshelf + plant + frames
     box(0.4, 2.0, 1.8, '#6b4f36', -4.25, 0, 1.2, { collide: true }); for (let r = 0; r < 5; r++) for (let k = 0; k < 7; k++) box(0.22, 0.28, 0.07, ['#a3312f', '#223458', '#3e5b43', '#d8cdb4', '#8e6bd8'][(r + k) % 5], -4.18, 0.1 + r * 0.38, 0.5 + k * 0.2);
-    add(new THREE.CylinderGeometry(0.2, 0.15, 0.4, 12), mat('#8a5a36'), -4.0, 0.2, 4.4); add(new THREE.IcosahedronGeometry(0.4, 1), mat('#3f7a3a', { roughness: 1 }), -4.0, 0.85, 4.4);
+    // shower cubicle
+    box(1.7, 0.05, 1.7, '#cfe3ea', -3.5, 0, 3.8, { mo: { roughness: 0.3 } });
+    box(0.05, 2.2, 1.7, '#bfe6ff', -2.65, 0, 3.8, { mo: { transparent: true, opacity: 0.25, roughness: 0.05 } });
+    box(1.7, 2.2, 0.05, '#bfe6ff', -3.5, 0, 2.95, { mo: { transparent: true, opacity: 0.25, roughness: 0.05 } });
+    box(0.06, 2.3, 0.06, '#9aa3ad', -4.3, 0, 4.6, { mo: { metalness: 0.9, roughness: 0.2 } }); add(new THREE.CylinderGeometry(0.12, 0.12, 0.03, 14), mat('#c8ced6', { metalness: 0.9, roughness: 0.2 }), -4.2, 2.2, 4.5);
+    colliders.add(-4.35, 2.9, -2.6, 4.65, 2.2);
+    interactables.push({ id: 'shower', x: -2.2, z: 3.8, radius: 1.5, label: 'Take a shower', run: (ctx) => ctx.ui.activity('shower') });
+    interactables.push({ id: 'books', x: -3.3, z: 1.3, radius: 1.5, label: 'Read a book', run: (ctx) => ctx.ui.activity('read') });
     label('SASKATCHEWAN · LIVING SKIES', 1.6, 0.9, 4.46, 1.7, 1.2, -Math.PI / 2, { bg: '#25456a', accent: '#ffb347' });
     // light switch
     let lightsOn = true;
@@ -307,6 +314,41 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     exitDoor(3.2, 4.9);
     animated.push((dt) => { tvT += dt * 0.5; if (tvOn) { tg.save(); drawTv(); tg.restore(); } });
     group.userData.tvOff = () => { tvOn = false; drawTv(); };
+  }
+
+
+  /* ======================= GYM ======================= */
+  if (kind === 'gym') {
+    const W = 14, D = 12; shell(W, D, { floor: concreteTexture('#8a909b'), wall: '#4a5466', ceil: '#2a2f38', trim: '#3bd6c6' });
+    bounds = { x0: -W / 2 + 0.5, x1: W / 2 - 0.5, z0: -D / 2 + 0.5, z1: D / 2 - 0.5 };
+    spawn = { x: 0, z: 3.6, yaw: Math.PI }; exit = { x: 0, z: 5.2 };
+    ceilingLight(-4, -2.5, 2.4, 0.3); ceilingLight(0, -2.5, 2.4, 0.3); ceilingLight(4, -2.5, 2.4, 0.3); ceilingLight(-3, 2.5, 2.4, 0.3); ceilingLight(3, 2.5, 2.4, 0.3);
+    point(-4, 2.9, -2, 26, '#d8f4ff', 18); point(4, 2.9, -2, 26, '#d8f4ff', 18); point(0, 2.9, 3, 22, '#fff0dc', 16); point(-4, 2.9, 3, 14, '#d8f4ff', 12);
+    windowPane(-3.2, 1.8, 5.88, 3.6, 1.5); windowPane(3.2, 1.8, 5.88, 3.6, 1.5);
+    label('PRAIRIE FITNESS', 6, 0.9, 0, 2.6, -5.88, 0, { bg: '#0f1b22', accent: '#3bd6c6' });
+    // mirror wall
+    box(9, 1.6, 0.05, '#dfeaf2', 0, 0.55, -5.82, { mo: { metalness: 0.95, roughness: 0.04 } });
+    // treadmills
+    const tread = (x) => { box(0.9, 0.18, 1.8, '#17191d', x, 0, -3.8, { collide: true }); box(0.7, 0.04, 1.6, '#2c2f35', x, 0.18, -3.8); box(0.06, 1.1, 0.06, '#9aa3ad', x - 0.4, 0.2, -4.6); box(0.06, 1.1, 0.06, '#9aa3ad', x + 0.4, 0.2, -4.6); box(0.8, 0.4, 0.08, '#101114', x, 1.1, -4.65); add(new THREE.PlaneGeometry(0.7, 0.3), new THREE.MeshBasicMaterial({ color: '#4ae0d0' }), x, 1.3, -4.6, { cast: false }); blob(x, -3.8, 1, 1.8, 0.35); };
+    [-3.5, -1.5, 0.5].forEach(tread);
+    interactables.push({ id: 'treadmill', x: -1.5, z: -2.5, radius: 3.2, label: 'Run on the treadmill', run: (ctx) => ctx.ui.activity('treadmill') });
+    // weights
+    box(1.7, 0.4, 0.5, '#202226', 5, 0, -1, { collide: true }); box(0.1, 1.3, 0.1, '#9aa3ad', 4.3, 0, -1, { collide: true }); box(0.1, 1.3, 0.1, '#9aa3ad', 5.7, 0, -1);
+    box(2.0, 0.06, 0.06, '#c9ccd2', 5, 1.2, -1, { mo: { metalness: 0.9, roughness: 0.2 } }); for (const s of [-1, 1]) add(new THREE.CylinderGeometry(0.28, 0.28, 0.1, 18).rotateZ(Math.PI / 2), mat('#15161a'), 5 + s * 0.95, 1.2, -1);
+    blob(5, -1, 2, 1, 0.4);
+    interactables.push({ id: 'weights', x: 5, z: 0.4, radius: 2.0, label: 'Lift weights', run: (ctx) => ctx.ui.activity('weights') });
+    // dumbbell rack
+    box(0.5, 0.9, 3.2, '#2c2f35', -6.3, 0, 0.6, { collide: true }); for (let k = 0; k < 8; k++) { box(0.28, 0.16, 0.16, '#6e7480', -6.3, 0.95, -0.6 + k * 0.4); }
+    // yoga mat
+    add(new THREE.PlaneGeometry(0.9, 1.9).rotateX(-Math.PI / 2), mat('#8e6bd8', { roughness: 0.9 }), -3.5, 0.025, 1.2, { cast: false });
+    interactables.push({ id: 'yoga', x: -3.5, z: 1.2, radius: 1.5, label: 'Stretch on the mat', run: (ctx) => ctx.ui.activity('yoga') });
+    // water cooler + lockers
+    box(0.4, 1.0, 0.4, '#e9eef2', 5.6, 0, 3.8, { collide: true }); add(new THREE.CylinderGeometry(0.17, 0.17, 0.45, 14), mat('#7ac8ff', { transparent: true, opacity: 0.6, roughness: 0.1 }), 5.6, 1.25, 3.8);
+    interactables.push({ id: 'water', x: 5.0, z: 3.6, radius: 1.5, label: 'Drink some water', run: (ctx) => ctx.ui.activity('water') });
+    for (let k = 0; k < 6; k++) box(0.5, 1.8, 0.45, ['#3bd6c6', '#2a74d6'][k % 2], -6.6, 0, 3.2 + k * 0.55 - 1.2, { collide: false });
+    colliders.add(-6.9, 1.6, -6.2, 4.6, 1.8);
+    exitDoor(0, 5.2);
+    box(2.0, 2.6, 0.08, '#202327', 0, 0, 5.93, { mo: { metalness: 0.3 } });
   }
 
   const interior = {

@@ -118,6 +118,7 @@ export class Phone {
         <div class="widgets"><div class="wg wg-weather" data-open="weather"></div><div class="wg wg-bank" data-open="bank"></div></div>
         <div class="icons">${grid.map((id) => this.iconHtml(id)).join('')}</div>
       </div><div class="page p2">
+        <div class="icons">${['life', 'news', 'ads'].map((id) => this.iconHtml(id)).join('')}</div>
         <div class="wg wide wg-today" data-open="calendar"></div>
         <div class="wg wide wg-job" data-open="jobs"></div>
         <div class="wg wide wg-needs" data-open="inventory"></div>
@@ -155,7 +156,7 @@ export class Phone {
     const j = s.job.active, app = s.job.application;
     H.querySelector('.wg-job').innerHTML = j ? `<small>Career</small><b>${esc(this.ctx.jobTitle())}</b><span>${s.job.shift ? `Shift ${s.job.shift.tasksDone}/${s.job.shift.tasksTotal} tasks` : 'Off shift · head to work'}</span>` : app ? `<small>Career</small><b>Application ${app.status === 'offered' ? 'offer received!' : 'pending…'}</b><span>Open Jobs to respond</span>` : `<small>Career</small><b>Looking for work?</b><span>Browse openings in Jobs</span>`;
     const n = s.needs;
-    H.querySelector('.wg-needs').innerHTML = `<small>You</small><div class="needs">${[['⚡', n.energy], ['🍽️', n.hunger], ['🙂', n.mood]].map(([i, v]) => `<div><span>${i}</span><div class="bar"><i style="width:${v}%"></i></div></div>`).join('')}</div>`;
+    H.querySelector('.wg-needs').innerHTML = `<small>You</small><div class="needs">${[['⚡', n.energy], ['🍽️', n.hunger], ['🚿', n.hygiene ?? 0], ['🎉', n.fun ?? 0], ['🙂', n.mood]].map(([i, v]) => `<div><span>${i}</span><div class="bar"><i style="width:${v}%"></i></div></div>`).join('')}</div>`;
   }
 
   /* ---------------- apps ---------------- */

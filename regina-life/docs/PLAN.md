@@ -19,8 +19,8 @@ game, point me at it and the modules here (rules, phone, character, interiors) c
 ## 2. Known gaps / bugs / honest limitations (after Milestone 1)
 
 **Not built yet (by design — see roadmap)**: vehicles/driving/traffic, public transit, ride-hailing, other careers,
-player businesses, billboards, stocks/investments, real estate, multiplayer, accounts, server, moderation, social app,
-food delivery, events, news, marketplace, police/EMS, seasonal festivals, voice calls.
+player businesses, stocks/investments, real estate, multiplayer, accounts, server, social app, food delivery,
+marketplace, police/EMS, seasonal festivals, voice calls, radio, build/buy furniture mode, relationships.
 
 **Technical debt / risks**
 * **Single-player economy is client-side.** The ledger is server-portable but currently runs in the browser; local
@@ -41,7 +41,8 @@ food delivery, events, news, marketplace, police/EMS, seasonal festivals, voice 
 
 | # | Milestone | Highlights |
 | --- | --- | --- |
-| **1** ✅ | Vertical slice | this repo state — city slice, character, camera, phone (12 apps), 3 interiors, jobs, needs, time/weather, map, mobile |
+| **1** ✅ | Vertical slice | city slice, character, camera, phone (12 apps), 3 interiors, jobs, needs, time/weather, map, mobile |
+| **2** ✅ | City hub & Sims-style life | overhead home screen with pins + news ticker, life events with choices, hygiene/fun needs, skills, activities, gym, Life/News/Ads apps, 12 billboards |
 | 2 | Wheels & world | drivable cars (dealership, insurance, fuel, repair, garage), traffic + signals obeying, bus network with real route data, Ride app (NPC drivers), bikes, more districts via OSM import (roads, footprints, parks), LOD + streaming |
 | 3 | Living economy | supply/demand market sim, grocery/electronics/furniture/car shops, more jobs (delivery, rideshare, office, trades), rent/bills/mortgage/insurance/tax, stocks & fictional companies, real estate, furniture editing |
 | 4 | Backend & accounts | Node/Postgres (or Cloudflare D1/Durable Objects) authoritative ledger + inventory, auth, persistent characters, anti-cheat, rate limits, audit log, weather proxy |
@@ -58,3 +59,10 @@ auto-charging; confirmation on every purchase; parental/age gating before any pa
 ## 5. Sources & licences
 No third-party assets. Map coordinates are approximate public lat/lon values. Weather: Open-Meteo (free, no key,
 CC BY 4.0 attribution shown in Settings → About). Street names in the downtown grid are stylised.
+
+## 6. Design notes from city-life web games
+A review of an existing city-life web game (a Lagos-themed one) showed what makes the genre sticky, and these ideas
+shaped Milestone 2: an overhead *home map* with emoji pins as the front door; a strong **local voice** (slang, humour, specific
+places); frequent **short scenario events with choices**; **billboards** as a visible, purchasable part of the world;
+and a visible **news/ticker** that makes the city feel alive. Nothing is copied — all text, art, names and mechanics here
+are original and Regina-specific. Still to borrow in spirit: friends via @usernames, radio, intercity travel, politics (mayor elections).

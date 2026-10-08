@@ -27,6 +27,8 @@ const tag = mobile ? 'm-' : '';
 const shot = async (name) => { await page.screenshot({ path: join(OUT, `${tag}${name}.png`) }); console.log('  shot', name); };
 const step = async (name, fn) => { try { await fn(); console.log('PASS', name); } catch (e) { errors.push(`STEP ${name}: ${e.message}`); console.log('FAIL', name, e.message); } };
 const wait = (ms) => page.waitForTimeout(ms);
+// Software WebGL renders at a few fps, so wait until the game loop has actually picked an interaction target before pressing E.
+const pressE = async (re) => { await page.waitForFunction((src) => new RegExp(src, 'i').test(window.__regina.getTarget()?.label || ''), re, { timeout: 30000 }); await page.keyboard.press('e'); };
 
 await page.goto('http://127.0.0.1:5199/', { waitUntil: 'load' });
 await step('loads to title', async () => { await page.waitForSelector('#title.on', { timeout: 90000 }); await wait(800); await shot('01-title'); });
@@ -36,7 +38,7 @@ await step('creator customisation', async () => {
   await page.click('.panel.char [data-tab="face"]'); await page.click('.panel.char [data-k="facialHair"][data-v="full"]'); await page.click('.panel.char [data-k="skin"][data-v="5"]'); await wait(500); await shot('03-creator-face');
   await page.click('.panel.char [data-tab="outfit"]'); await wait(200); await page.fill('[data-name]', 'Riley'); await page.click('.panel.char [data-rand]'); await wait(300); await page.click('.panel.char [data-done]');
 });
-await step('gameplay starts', async () => { await page.waitForFunction(() => window.__regina?.mode === 'play'); await page.evaluate(() => { __regina.store.state.flags = { daniCall: true, offerCall: true }; }); await wait(1500); await shot('04-play'); });
+await step('gameplay starts', async () => { await page.waitForFunction(() => window.__regina?.mode === 'play'); await page.evaluate(() => { __regina.store.state.flags = { daniCall: true, offerCall: true, disableEvents: true }; }); await wait(1500); await shot('04-play'); });
 await step('daylight + movement + camera', async () => {
   await page.evaluate(() => __regina.setTime('2026-07-15T18:30:00Z')); await wait(1500); await shot('04b-day');
   const p0 = await page.evaluate(() => ({ x: __regina.player.pos.x, z: __regina.player.pos.z }));
@@ -77,30 +79,69 @@ await step('buy groceries', async () => {
 });
 await step('job loop: apply → hire → shift → paid', async () => {
   await page.evaluate(async () => { const G = __regina.G, s = __regina.store; G.applyForJob(s, 'retail'); s.state.job.application.offerAt = 0; G.tickJobs(s); G.acceptOffer(s); });
-  await page.evaluate(() => { __regina.player.pos.x = 3.6; __regina.player.pos.z = 5.4; }); await wait(400);
-  await page.keyboard.press('e'); await page.waitForSelector('.panel.menu'); await page.click('.panel.menu .btn.primary'); await wait(300);
+  await page.evaluate(() => { __regina.player.pos.x = 3.6; __regina.player.pos.z = 5.4; }); await wait(300);
+  await pressE('clock in|talk|staff'); await page.waitForSelector('.panel.menu'); await page.click('.panel.menu .btn.primary'); await wait(300);
   const total = await page.evaluate(() => __regina.store.state.job.shift.tasksTotal);
   for (let i = 0; i < total; i++) {
-    await page.evaluate(() => { __regina.player.pos.x = 4.2; __regina.player.pos.z = -5.9; }); await wait(300); await page.keyboard.press('e'); await wait(200);
+    await page.evaluate(() => { __regina.player.pos.x = 4.2; __regina.player.pos.z = -5.9; }); await wait(300); await pressE('pick up'); await wait(200);
     if (i === 0) await shot('16-carrying');
     const pos = await page.evaluate(() => __regina.stationTarget());
     if (!pos) throw new Error('no station target helper');
-    await page.evaluate((p) => { __regina.player.pos.x = p.x; __regina.player.pos.z = p.z; }, pos); await wait(300); await page.keyboard.press('e'); await wait(250);
+    await page.evaluate((p) => { __regina.player.pos.x = p.x; __regina.player.pos.z = p.z; }, pos); await wait(300); await pressE('stock'); await wait(250);
   }
   await page.evaluate(() => { __regina.player.pos.x = 3.6; __regina.player.pos.z = 5.4; }); await wait(300);
   const bal0 = await page.evaluate(() => __regina.store.state.bank.balance);
-  await page.keyboard.press('e'); await wait(400);
+  await pressE('clock out'); await wait(400);
   const done = await page.evaluate(() => __regina.store.state.job.shift);
   // anti-exploit: instant finish must be refused
   if (!done) throw new Error('instant pay was allowed (shift cleared)');
   await page.evaluate(() => { __regina.store.state.job.shift.startedAt -= 120000; }); // simulate time passing
-  await page.keyboard.press('e'); await wait(400);
+  await pressE('clock out'); await wait(400);
   const bal1 = await page.evaluate(() => __regina.store.state.bank.balance); if (bal1 <= bal0) throw new Error('not paid');
   await shot('17-paid');
 });
 await step('exit market', async () => { await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600); });
 await step('apartment interior', async () => { await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1300); await shot('18-apartment'); await page.evaluate(() => { __regina.player.pos.x = -2; __regina.player.pos.z = -2.6; }); await wait(900); await shot('18b-apartment-bed'); await page.evaluate(() => __regina.exitInterior()); await wait(900); });
 await step('threads interior', async () => { await page.evaluate(() => __regina.enterInterior('threads')); await page.waitForFunction(() => __regina.inInterior === 'threads'); await wait(1300); await shot('19-threads'); await page.evaluate(() => __regina.exitInterior()); await wait(900); });
+await step('home screen (hub)', async () => {
+  // covered earlier by the title step; here we just make sure the hub API exists
+  const ok = await page.evaluate(() => !!__regina.hub && typeof __regina.news === 'function'); if (!ok) throw new Error('hub missing');
+});
+await step('life event card + validated choice', async () => {
+  await page.evaluate(async () => { const m = await import('/src/core/events.js'); __regina.tp(0, 6); __regina.showEvent(m.EVENT_BY_ID.busker); });
+  await page.waitForSelector('.panel.event'); await shot('20a-event');
+  const b0 = await page.evaluate(() => __regina.store.state.bank.balance);
+  await page.click('.panel.event [data-i="0"]'); await page.waitForSelector('.panel.event [data-ok]'); await shot('20b-event-result');
+  const b1 = await page.evaluate(() => __regina.store.state.bank.balance); if (b1 !== b0 - 300) throw new Error(`tip not charged ${b0} -> ${b1}`);
+  await page.click('.panel.event [data-ok]'); await page.waitForFunction(() => !document.querySelector('.panel.event'));
+});
+await step('news + life + ads apps', async () => {
+  await page.evaluate(() => { __regina.phone.open(); });
+  for (const a of ['news', 'life', 'ads']) { await page.evaluate((x) => __regina.phone.openApp(x), a); await wait(800); await shot('app-' + a); await page.evaluate(() => __regina.phone.closeApp(true)); }
+  await page.evaluate(() => __regina.phone.close());
+});
+await step('book a billboard and see it update', async () => {
+  const r = await page.evaluate(async () => { const m = await import('/src/core/ads.js'); const b0 = __regina.store.ledger.balance; const res = m.buyAd(__regina.store, 'downtown-north', 1, 'Best bannock in Regina!', 'sunset'); __regina.ctx.refreshBillboards(); return { res, spent: b0 - __regina.store.ledger.balance }; });
+  if (!r.res.ok || r.spent !== 35000) throw new Error('booking failed ' + JSON.stringify(r));
+  await page.evaluate(() => { __regina.tp(-30, -574); __regina.rig.yaw = 0; __regina.rig.pitch = 0.1; }); await wait(1500);
+  const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Billboard/.test(t || '')) throw new Error('no billboard prompt: ' + t);
+  await shot('21-billboard'); await page.keyboard.press('e'); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
+});
+await step('gym: treadmill trains fitness', async () => {
+  await page.evaluate(() => __regina.enterInterior('gym')); await page.waitForFunction(() => __regina.inInterior === 'gym'); await wait(1300); await shot('23-gym');
+  await page.evaluate(() => { __regina.store.state.needs.energy = 90; __regina.player.pos.x = -1.5; __regina.player.pos.z = -2.2; }); await wait(500);
+  const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/treadmill/i.test(t || '')) throw new Error('no treadmill prompt: ' + t);
+  await page.keyboard.press('e'); await page.waitForSelector('.prog-panel'); await shot('24-activity'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
+  const f = await page.evaluate(() => __regina.store.state.skills.fitness); if (!(f >= 10)) throw new Error('fitness not trained: ' + f);
+  await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
+});
+await step('apartment shower restores hygiene', async () => {
+  await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1000);
+  await page.evaluate(() => { __regina.store.state.needs.hygiene = 5; __regina.player.pos.x = -2.2; __regina.player.pos.z = 3.8; }); await wait(500);
+  await page.keyboard.press('e'); await page.waitForSelector('.prog-panel'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
+  const h = await page.evaluate(() => __regina.store.state.needs.hygiene); if (h < 90) throw new Error('hygiene ' + h);
+  await shot('25-apartment-shower'); await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
+});
 await step('night + snow rendering', async () => { await page.evaluate(() => { __regina.tp(0, 6); __regina.setWeather({ kind: 'snow', temp: -18, text: 'Snow', cloud: 90 }); __regina.store.state.settings.timeMode = 'fast'; }); await wait(1500); await shot('20-weather'); });
 await step('fps sanity', async () => { const q = await page.evaluate(() => __regina.qLevel()); console.log('  quality level', q); });
 
