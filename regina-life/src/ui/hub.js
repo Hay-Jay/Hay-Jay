@@ -101,17 +101,17 @@ export class Hub {
     const f = this.fitted[this.level] ?? v;
     // the camera holds still once framed: pins are laid out from fixed anchors, so they never shuffle or drift
     const wantPos = this._v.copy(DIR).multiplyScalar(f.dist).add(f.target), k = this.snapNext ? 1 : 1 - Math.exp(-dt * 2.2);
-    this.pos.lerp(wantPos, k); this.look.lerp(f.target, k); this.fov += (v.fov - this.fov) * k; this.snapNext = false;
+    const snap = this.snapNext; this.pos.lerp(wantPos, k); this.look.lerp(f.target, k); this.fov += (v.fov - this.fov) * k; this.snapNext = false;
     camera.position.copy(this.pos); camera.lookAt(this.look);
     // scale the clip planes with distance so far views keep enough depth precision (otherwise the lake z-fights the park)
     const d = this.pos.distanceTo(this.look), near = Math.max(3, d * 0.12), far = d * 4 + 6000;
     if (Math.abs(camera.near - near) > near * 0.02) { camera.near = near; camera.far = far; camera.updateProjectionMatrix(); }
     if (Math.abs(camera.fov - this.fov) > 0.01) { camera.fov = this.fov; camera.updateProjectionMatrix(); }
     camera.updateMatrixWorld();
-    this._layoutPins(dt, camera, w, h);
+    this._layoutPins(dt, camera, w, h, snap);
   }
 
-  _layoutPins(dt, camera, w, h) {
+  _layoutPins(dt, camera, w, h, snap = false) {
     const list = [...this.pins.values()]; if (!list.length) return;
     const safe = this.safe ?? this._measure(w, h), labels = this._labelH(w), y = this.level === 'close' ? VIEW.close.pinY : VIEW.far.pinY;
     const rects = list.map((q) => {
@@ -123,7 +123,7 @@ export class Hub {
     const sig = `${labels}|${safe.x0},${safe.y0},${safe.x1},${safe.y1}|${safe.fixed.map((f) => [f.x, f.y, f.w, f.h].join()).join(';')}|` + list.map((q) => `${q.ax.toFixed(1)},${q.ay.toFixed(1)}`).join(';');
     if (sig !== this._sig || !this._spread) { spreadRects(rects, safe, { fixed: safe.fixed }); this._spread = rects.map((r) => ({ x: r.x, y: r.y })); this._sig = sig; }
     else this._spread.forEach((r, i) => { rects[i].x = r.x; rects[i].y = r.y; });
-    const k = dt > 0 && list[0].x !== null ? 1 - Math.exp(-dt * 16) : 1;
+    const k = !snap && dt > 0 && list[0].x !== null ? 1 - Math.exp(-dt * 16) : 1;
     list.forEach((q, i) => {
       const r = rects[i];
       if (q.x === null) { q.x = r.x; q.y = r.y; } else { q.x += (r.x - q.x) * k; q.y += (r.y - q.y) * k; }

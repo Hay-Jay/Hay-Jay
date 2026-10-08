@@ -46,7 +46,8 @@ const auditPins = () => page.evaluate(() => {
   pins.forEach((a, i) => { pins.slice(i + 1).forEach((b) => hit(a, b) && bad.push(`${a.id} overlaps ${b.id}`)); blockers.forEach((b, k) => hit(a, b) && bad.push(`${a.id} under ${k < blockers.length - 1 ? 'header' : 'card'}`)); if (a.x0 < 0 || a.y0 < 0 || a.x1 > innerWidth || a.y1 > innerHeight) bad.push(`${a.id} off-screen`); });
   return { n: pins.length, bad };
 });
-const settleHub = async () => { await page.evaluate(() => { __regina.hub.snapNext = true; }); await wait(2500); };
+// software WebGL can spend seconds on one frame (e.g. right after a resize), so wait until the hub has really consumed the snap + refit instead of sleeping
+const settleHub = async () => { await page.evaluate(() => { __regina.hub.snapNext = true; }); await page.waitForFunction(() => !__regina.hub.snapNext && !__regina.hub.dirty, null, { timeout: 90000 }); await wait(300); };
 await step('home map: pins do not overlap or hide', async () => {
   await settleHub(); let r = await auditPins(); if (r.n !== 7 || r.bad.length) throw new Error('close view: ' + JSON.stringify(r));
   await page.click('#hub-zoom'); await wait(400); await settleHub(); r = await auditPins(); await shot('01b-home-map-far'); if (r.n !== 13 || r.bad.length) throw new Error('far view: ' + JSON.stringify(r));

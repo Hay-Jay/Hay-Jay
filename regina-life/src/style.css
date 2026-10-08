@@ -358,6 +358,7 @@ button.chip{cursor:pointer;pointer-events:auto}button.chip:hover{background:#fff
 #title.hub .title-foot{color:#fff;text-shadow:0 1px 4px #000;bottom:calc(6px + var(--safe-b));pointer-events:none}
 @media (max-width:640px){.hub-top{gap:6px}.brandpill{flex-wrap:nowrap;gap:8px;padding:6px 14px 6px 8px}.brandpill b{font-size:19px}.brandpill .dotchip{display:none}.wx-chip{font-size:12px;white-space:nowrap}.hub-chips{flex-wrap:nowrap;gap:6px}.hub-chips .chip{padding:7px 12px;white-space:nowrap}.chip.ticker{min-width:0;flex:1}#hub-ads{display:none}}
 @media (max-height:520px) and (orientation:landscape){.hub-top{left:12px;transform:none;align-items:flex-start;width:auto;max-width:calc(100vw - 380px);top:calc(8px + var(--safe-t))}.hub-top .chip.ticker,#hub-ads,#title.hub .title-foot{display:none}.hub-chips{width:auto}.hub-card{left:auto;right:12px;transform:none;width:min(44vw,340px);bottom:calc(8px + var(--safe-b));padding:12px;max-height:calc(100vh - 16px);overflow:auto}}
+@media (max-height:560px){.hub-card .hc-welcome,.hub-card .title-note{display:none}}
 @media (max-height:640px){.hc-badges{display:none}.hub-card{bottom:calc(24px + var(--safe-b))}}
 
 .subh{margin:14px 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
