@@ -5,6 +5,9 @@ import { buildCharacter } from '../player/character.js';
 import { DEFAULT_LOOK, FOOD, CLOTHES, STORE_STOCK, MARKET_STOCK } from '../data/catalog.js';
 import { JOBS } from '../data/jobs.js';
 import { mulberry32 } from '../core/rng.js';
+import { furnitureModel } from './furnitureModels.js';
+import { FURNITURE, WALLS, FLOORS, isPoster } from '../data/furniture.js';
+import { itemDef, footprint } from '../core/home.js';
 
 const H = 3.3; // ceiling height
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...o });
@@ -21,6 +24,7 @@ export function buildInterior(kind, { texCache = {} } = {}) {
   const interactables = [];
   const animated = [];
   const lights = [];
+  const ceilMeshes = [];
   const windows = [];
   const disposables = [];
 
@@ -48,11 +52,11 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     const tm = mat(trim, { roughness: 0.6 });
     box(W, 0.12, 0.05, tm, 0, 0, -hd + 0.03); box(W, 0.12, 0.05, tm, 0, 0, hd - 0.03); box(0.05, 0.12, D, tm, -hw + 0.03, 0, 0); box(0.05, 0.12, D, tm, hw - 0.03, 0, 0);
     // thin wall colliders (player radius handles distance); bounds clamp keeps them in
-    return { hw, hd };
+    return { hw, hd, wm, fm: f.material };
   };
   const ceilingLight = (x, z, w = 1.6, d = 0.4) => {
     const m = new THREE.MeshStandardMaterial({ color: '#fff', emissive: new THREE.Color('#fff6e0'), emissiveIntensity: 1.4 });
-    disposables.push(m); add(new THREE.BoxGeometry(w, 0.06, d), m, x, H - 0.04, z, { cast: false }); lights.push(m);
+    disposables.push(m); ceilMeshes.push(add(new THREE.BoxGeometry(w, 0.06, d), m, x, H - 0.04, z, { cast: false })); lights.push(m);
   };
   const point = (x, y, z, intensity = 14, color = '#fff2d8', dist = 14) => {
     const p = new THREE.PointLight(color, intensity, dist, 1.7); p.position.set(x, y, z); group.add(p); lights.push(p); return p;
@@ -127,7 +131,7 @@ export function buildInterior(kind, { texCache = {} } = {}) {
   });
   const exitDoor = (x, z, yawOut) => interactables.push({ id: 'exit', x, z, radius: 1.8, label: 'Leave', run: (ctx) => ctx.ui.exitInterior() });
 
-  let spawn, bounds, exit;
+  let spawn, bounds, exit, apt = null, decor = null;
 
   /* ======================= MARKET ======================= */
   if (kind === 'market') {
@@ -242,7 +246,8 @@ export function buildInterior(kind, { texCache = {} } = {}) {
 
   /* ======================= APARTMENT ======================= */
   if (kind === 'apartment') {
-    const W = 9, D = 11; shell(W, D, { floor: woodTexture('#b08a62'), wall: '#e9e3d6', trim: '#ffffff' });
+    const W = 9, D = 11; const shl = shell(W, D, { floor: woodTexture('#b08a62'), wall: '#e9e3d6', trim: '#ffffff' }); apt = shl;
+    decor = new THREE.Group(); group.add(decor);
     bounds = { x0: -W / 2 + 0.45, x1: W / 2 - 0.45, z0: -D / 2 + 0.45, z1: D / 2 - 0.45 };
     spawn = { x: 3.2, z: 4.4, yaw: Math.PI }; exit = { x: 3.2, z: 4.9 };
     ceilingLight(0, -1.5, 1.2, 1.2); ceilingLight(0, 2.5, 1.2, 1.2);
@@ -290,7 +295,12 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     colliders.add(2.4, 3.2, 4.2, 4.0, 0.8);
     box(0.7, 0.42, 0.04, '#111214', 3.3, 0.95, 3.8); add(new THREE.PlaneGeometry(0.64, 0.36), new THREE.MeshBasicMaterial({ color: '#4aa8ff' }), 3.3, 1.16, 3.78, { cast: false }).rotation.y = Math.PI; box(0.04, 0.2, 0.04, '#111', 3.3, 0.79, 3.82);
     box(0.5, 0.02, 0.18, '#2a2c30', 3.3, 0.8, 3.45);
-    interactables.push({ id: 'computer', x: 3.3, z: 2.9, radius: 1.6, label: 'Use computer (Jobs & Market)', run: (ctx) => ctx.ui.openApp('jobs') });
+    interactables.push({ id: 'computer', x: 3.3, z: 2.9, radius: 1.6, label: 'Use computer', run: (ctx) => ctx.ui.menu('Computer', 'What would you like to do?', [
+      { label: '💼 Browse jobs', run: () => ctx.ui.openApp('jobs') }, { label: '📰 Read the news', run: () => ctx.ui.openApp('news') },
+      { label: '🛋️ Furniture shop', run: () => ctx.ui.furnitureShop() }, { label: '🎨 Redecorate (build mode)', primary: true, run: () => ctx.ui.build() }, { label: 'Close' }]) });
+    // stereo (radio) on the little shelf by the TV
+    box(0.6, 0.35, 0.35, '#2b2e33', 1.3, 0.0, -0.55, { collide: true }); box(0.5, 0.04, 0.02, '#4ae0d0', 1.3, 0.26, -0.37, { mo: { emissive: new THREE.Color('#4ae0d0'), emissiveIntensity: 0.8 } });
+    interactables.push({ id: 'stereo', x: 1.3, z: 0.4, radius: 1.5, label: 'Radio', run: (ctx) => ctx.ui.radioMenu() });
     // wardrobe
     box(1.5, 2.3, 0.65, '#a98e6f', 0.9, 0, -4.95, { collide: true }); box(0.03, 2.1, 0.03, '#2b2118', 0.9, 0.1, -4.62); blob(0.9, -4.95, 1.5, 0.7, 0.3);
     interactables.push({ id: 'wardrobe', x: 0.9, z: -3.9, radius: 1.6, label: 'Open wardrobe', run: (ctx) => ctx.ui.openWardrobe() });
@@ -351,8 +361,53 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     box(2.0, 2.6, 0.08, '#202327', 0, 0, 5.93, { mo: { metalness: 0.3 } });
   }
 
+  /* ======================= CITY HALL ======================= */
+  if (kind === 'cityhall') {
+    const W = 14, D = 12; shell(W, D, { floor: tileTexture('#dcd9cf', '#c6c2b6'), wall: '#e8e4da', ceil: '#f4f2ec', trim: '#c9a64e' });
+    bounds = { x0: -W / 2 + 0.5, x1: W / 2 - 0.5, z0: -D / 2 + 0.5, z1: D / 2 - 0.5 };
+    spawn = { x: 0, z: 4.0, yaw: Math.PI }; exit = { x: 0, z: 5.2 };
+    ceilingLight(-4, -2, 2, 0.4); ceilingLight(4, -2, 2, 0.4); ceilingLight(-4, 2.5, 2, 0.4); ceilingLight(4, 2.5, 2, 0.4);
+    point(-4, 2.9, -1.5, 15, '#fff2d8', 16); point(4, 2.9, -1.5, 15, '#fff2d8', 16); point(0, 2.9, 3, 12, '#fff2d8', 14);
+    windowPane(-3.2, 1.8, 5.88, 3.4, 1.5); windowPane(3.2, 1.8, 5.88, 3.4, 1.5);
+    label('REGINA CITY HALL', 6.4, 0.9, 0, 2.55, -5.88, 0, { bg: '#1a2a44', accent: '#c9a64e' });
+    // council desk + mayor
+    box(6, 0.95, 0.9, '#6b4f36', 0, 0, -3.6, { collide: true }); box(6.2, 0.06, 1.0, '#8a6a48', 0, 0.95, -3.6); blob(0, -3.6, 6, 1, 0.35);
+    npc(0, -4.7, 0, { skin: 3, hair: 'short', hairColor: 7, top: 'jacket_black', bottom: 'chino_tan', shoes: 'dress_black', facialHair: 'stubble', expression: 'smile' });
+    for (const s of [-1, 1]) { add(new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8), mat('#c9ccd2'), s * 2.6, 1.1, -5.3); box(0.9, 0.55, 0.03, s < 0 ? '#c8102e' : '#1f6f4a', s * 2.6 + 0.45, 1.5, -5.3); }
+    interactables.push({ id: 'mayor', x: 0, z: -2.6, radius: 2.2, label: 'Talk to the mayor', run: (ctx) => ctx.ui.mayorTalk() });
+    // ballot booths
+    for (const z of [-1.8, 0, 1.8]) { box(1.2, 1.9, 0.08, '#3a4a68', 5.6, 0, z - 0.55, { collide: true }); box(1.2, 1.9, 0.08, '#3a4a68', 5.6, 0, z + 0.55, { collide: true }); box(0.1, 1.9, 1.1, '#3a4a68', 6.15, 0, z, { collide: true }); box(0.9, 0.06, 0.7, '#e8e1d0', 5.7, 1.0, z); blob(5.6, z, 1.4, 1.4, 0.3); }
+    box(0.7, 1.0, 0.6, '#1f4f9a', 3.9, 0, 2.9, { collide: true }); box(0.4, 0.03, 0.04, '#0a0f1c', 3.9, 1.02, 2.9);
+    interactables.push({ id: 'ballot', x: 4.1, z: 1.9, radius: 2.4, label: 'Vote / campaign (Town Hall app)', run: (ctx) => ctx.ui.openApp('townhall') });
+    // notice board + canvass table
+    box(0.12, 1.6, 3.2, '#8a6a48', -6.5, 0.6, 0, { collide: true }); label('NOTICES', 2.2, 0.45, -6.4, 2.45, 0, Math.PI / 2, { bg: '#3d2a1d', accent: '#c9a64e' });
+    for (let k = 0; k < 6; k++) box(0.02, 0.5, 0.4, ['#f4efe4', '#ffe58a', '#bfe3ff'][k % 3], -6.42, 0.95 + (k % 2) * 0.55, -1.2 + k * 0.5);
+    interactables.push({ id: 'notice', x: -5.4, z: 0, radius: 2.0, label: 'Read the notice board', run: (ctx) => ctx.ui.noticeBoard() });
+    box(1.8, 0.8, 0.8, '#8a6a48', -4.2, 0, 3.4, { collide: true }); for (let k = 0; k < 4; k++) box(0.4, 0.05, 0.3, ['#c8102e', '#1f6f4a', '#f2c200', '#1f4f9a'][k], -4.7 + k * 0.32, 0.8, 3.4);
+    interactables.push({ id: 'canvass', x: -4.2, z: 2.4, radius: 1.8, label: 'Hand out flyers for your candidate', run: (ctx) => ctx.ui.activity('canvass') });
+    exitDoor(0, 5.2); box(2.0, 2.6, 0.08, '#3a2a1c', 0, 0, 5.93, { mo: { metalness: 0.2 } });
+  }
+
+  /* ---------- apartment: decorating (furniture, paint, flooring) ---------- */
+  const floorTex = {};
+  const setHome = (home) => {
+    if (!apt || !decor) return;
+    apt.wm.color.set((WALLS[home.wall] ?? WALLS.cream)[1]);
+    const fk = FLOORS[home.floor] ? home.floor : 'oak', fl = FLOORS[fk];
+    if (!floorTex[fk]) { const t = fl[1] === 'tile' ? tileTexture(fl[2], '#7b808a') : woodTexture(fl[2]); t.repeat.set(3, 11 / 3); floorTex[fk] = t; disposables.push(t); }
+    if (apt.fm.map !== floorTex[fk]) { apt.fm.map = floorTex[fk]; apt.fm.needsUpdate = true; }
+    while (decor.children.length) { const c = decor.children.pop(); c.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.(); }); }
+    colliders.removeTag('furn');
+    for (const it of home.placed || []) {
+      const mdl = furnitureModel(it.type); mdl.position.set(it.x, 0, it.z); mdl.rotation.y = (it.rot * Math.PI) / 2; decor.add(mdl);
+      const def = itemDef(it.type); if (def?.solid) { const f = footprint(it.type, it.rot); colliders.add(it.x - f.w / 2, it.z - f.d / 2, it.x + f.w / 2, it.z + f.d / 2, def.h, 'furn'); }
+    }
+  };
+
   const interior = {
-    kind, group, colliders, interactables, bounds, spawn, exit,
+    kind, group, setHome,
+    /** Overhead (build-mode) view: hide ceiling fixtures that would otherwise show as white blocks. */
+    setOverhead(on) { ceilMeshes.forEach((c) => (c.visible = !on)); }, colliders, interactables, bounds, spawn, exit,
     lights, task, stations,
     update(dt, env, ctx) { for (const f of animated) f(dt, env, ctx); const d = env?.night ?? 0; windows.forEach((m) => m.color.set(d > 0.6 ? '#10182e' : d > 0.2 ? '#e8a46a' : '#bfe3ff')); },
     resetTask() { task.carrying = false; task.target = -1; arrow.visible = ring.visible = false; },

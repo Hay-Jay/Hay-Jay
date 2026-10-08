@@ -142,6 +142,62 @@ await step('apartment shower restores hygiene', async () => {
   const h = await page.evaluate(() => __regina.store.state.needs.hygiene); if (h < 90) throw new Error('hygiene ' + h);
   await shot('25-apartment-shower'); await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
 });
+const openApp = async (id) => { await page.evaluate((x) => __regina.phone.openApp(x), id); await wait(700); };
+await step('friends by @username (NPC residents)', async () => {
+  await page.evaluate(() => { __regina.store.state.needs.energy = 90; }); await openApp('social');
+  await page.click('[data-tab="find"]'); await page.fill('#soq', '@kaya'); await wait(300);
+  await page.click('[data-add="kaya"]'); await wait(400); await shot('30-social-find');
+  await page.click('[data-tab="friends"]'); await page.click('[data-f="kaya"]'); await wait(400); await shot('31-friend');
+  const l0 = await page.evaluate(() => __regina.store.state.friends.kaya.level);
+  await page.click('[data-h="walk"]'); await wait(400);
+  const l1 = await page.evaluate(() => __regina.store.state.friends.kaya.level); if (!(l1 > l0)) throw new Error(`friendship did not grow ${l0} -> ${l1}`);
+  await page.evaluate(() => __regina.phone.closeApp(true)); await page.evaluate(() => __regina.phone.close());
+});
+await step('town hall: vote + campaign', async () => {
+  await openApp('townhall'); await wait(300); await shot('32-townhall');
+  await page.click('[data-vote]'); await wait(400);
+  const v = await page.evaluate(() => __regina.store.state.politics.vote); if (!v) throw new Error('vote not recorded');
+  const b0 = await page.evaluate(() => __regina.store.state.bank.balance); await page.click('[data-don="1000"]'); await wait(300);
+  const b1 = await page.evaluate(() => __regina.store.state.bank.balance); if (b1 !== b0 - 1000) throw new Error('donation not charged'); await shot('33-townhall-voted');
+  await page.evaluate(() => { __regina.phone.closeApp(true); __regina.phone.close(); });
+});
+await step('city hall interior: flyers for your candidate', async () => {
+  await page.evaluate(() => __regina.enterInterior('cityhall')); await page.waitForFunction(() => __regina.inInterior === 'cityhall'); await wait(1300); await shot('34-cityhall');
+  const p0 = await page.evaluate(() => __regina.store.state.politics.points);
+  await page.evaluate(() => { __regina.player.pos.x = -4.2; __regina.player.pos.z = 2.4; }); await pressE('flyers'); await page.waitForSelector('.prog-panel'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
+  const p1 = await page.evaluate(() => __regina.store.state.politics.points); if (!(p1 > p0)) throw new Error('flyers did not raise campaign strength');
+  await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
+});
+await step('intercity trip with scenario + souvenir', async () => {
+  await openApp('trips'); await wait(300); await shot('35-trips');
+  const b0 = await page.evaluate(() => __regina.store.state.bank.balance);
+  await page.click('[data-go="moosejaw|bus"]'); await page.waitForSelector('.prog-panel'); await page.waitForSelector('.panel.event', { timeout: 40000 }); await shot('36-trip-event');
+  await page.click('.panel.event [data-i="2"]'); await page.waitForSelector('.panel.event [data-ok]'); await page.click('.panel.event [data-ok]'); await page.waitForFunction(() => !document.querySelector('.panel.event'));
+  const r = await page.evaluate(() => ({ b: __regina.store.state.bank.balance, trips: __regina.store.state.trips.length, sou: __regina.store.state.souvenirs })); if (r.b !== b0 - 1400 || r.trips !== 1 || !r.sou.includes('moosejaw')) throw new Error('trip not recorded ' + JSON.stringify(r));
+});
+await step('radio plays (generative) and stops', async () => {
+  await openApp('radio'); await page.click('[data-st="lofi"]'); await wait(1500);
+  const st = await page.evaluate(() => ({ s: __regina.radio.station, t: __regina.radio.nowTitle, ctx: __regina.radio.audio.ctx?.state })); if (st.s !== 'lofi') throw new Error('radio did not start ' + JSON.stringify(st));
+  await shot('37-radio'); await page.click('[data-stop]'); await wait(300);
+  if (await page.evaluate(() => __regina.radio.playing)) throw new Error('radio did not stop'); await page.evaluate(() => { __regina.phone.closeApp(true); __regina.phone.close(); });
+});
+await step('build mode: buy, place, paint', async () => {
+  await page.evaluate(async () => { const H = await import('/src/core/home.js'); __regina.store.state.bank.balance = 500000; H.buyFurniture(__regina.store, 'armchair'); H.buyFurniture(__regina.store, 'plant'); H.buyFurniture(__regina.store, 'rug_round'); __regina.store.state.souvenirs.push('banff'); });
+  await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1200);
+  await page.evaluate(() => __regina.build.start()); await wait(1800); await shot('38-build-empty');
+  const pxAt = (x, z) => page.evaluate(([x, z]) => { const v = new (window.__regina.camera.position.constructor)(x, 0, z).project(window.__regina.camera); const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height }; }, [x, z]);
+  for (const [type, x, z] of [['armchair', 0.5, 1.0], ['plant', -3.5, -0.4], ['poster_banff', -0.7, -3.2]]) {
+    await page.click(`#b-items [data-type="${type}"]`); await wait(200); const p = await pxAt(x, z); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(400);
+  }
+  const placed = await page.evaluate(() => __regina.store.state.home.placed.map((i) => i.type)); if (placed.length !== 3) throw new Error('expected 3 placed, got ' + placed.join(','));
+  // blocked placement is refused (on top of the bed)
+  await page.click('#b-items [data-type="rug_round"]'); const pb = await pxAt(-3.2, -3.9); await page.mouse.click(pb.x, pb.y); await wait(300);
+  await page.evaluate(async () => { const H = await import('/src/core/home.js'); H.setStyle(__regina.store, 'wall', 'sage'); H.setStyle(__regina.store, 'floor', 'walnut'); }); await wait(600);
+  await shot('39-build-furnished');
+  await page.evaluate(() => __regina.build.stop()); await wait(1500); await shot('40-home-furnished');
+  if (await page.evaluate(() => __regina.store.state.home.wall) !== 'sage') throw new Error('paint not saved');
+  await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
+});
 await step('night + snow rendering', async () => { await page.evaluate(() => { __regina.tp(0, 6); __regina.setWeather({ kind: 'snow', temp: -18, text: 'Snow', cloud: 90 }); __regina.store.state.settings.timeMode = 'fast'; }); await wait(1500); await shot('20-weather'); });
 await step('fps sanity', async () => { const q = await page.evaluate(() => __regina.qLevel()); console.log('  quality level', q); });
 

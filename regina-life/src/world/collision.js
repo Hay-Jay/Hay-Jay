@@ -12,6 +12,11 @@ export class CollisionGrid {
       }
     return r;
   }
+  /** Remove every rect added with this tag (used to rebuild dynamic furniture colliders). */
+  removeTag(tag) {
+    this.rects = this.rects.filter((r) => r.tag !== tag);
+    for (const [k, a] of this.map) { const f = a.filter((r) => r.tag !== tag); if (f.length) this.map.set(k, f); else this.map.delete(k); }
+  }
   query(x0, z0, x1, z1) {
     const c = this.cell, out = new Set();
     for (let ix = Math.floor(x0 / c); ix <= Math.floor(x1 / c); ix++)

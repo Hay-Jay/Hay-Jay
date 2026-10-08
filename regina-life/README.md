@@ -3,7 +3,7 @@
 A browser-based open-world life simulation set in **Regina, Saskatchewan** — live, work, shop, travel and build a life
 in a stylised 3D city that follows the **real Regina clock, sun and weather**.
 
-> **Status: Milestone 2 ("City hub & Sims-style life")** on top of the Milestone 1 vertical slice. See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
+> **Status: Milestone 3 ("Social life, politics & home")** on top of Milestones 1–2. See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
 
 ## Run it
 
@@ -63,6 +63,22 @@ generated procedurally — no third-party art assets, so there are no asset lice
   in Prairie Dollars only, with text moderation and *simulated* reach numbers. Unbooked boards read "YOUR AD HERE".
 * **Prairie News app** — real weather/sunrise/sunset plus fictional seasonal headlines and personal updates.
 * Fixed: the lake wasn't rendering (face culled) and roads could vanish at low camera angles.
+
+## What's new in Milestone 3
+
+* **Friends by @username** — 12 Regina residents with handles, bios and likes. Search `@tobi.rgn`, add them, text them, hang out
+  (coffee, walks, gym, movies), give gifts, and watch the friendship grow (and fade if ignored). Everyone is clearly labelled an
+  **NPC resident**; real player friends use the same lookup once multiplayer exists.
+* **Relationships** — ask a datable friend on a date at Good-friend level, take them to dinner, or break up (it hurts).
+* **Mayor elections (fictional)** — 3-day terms with a 3-candidate slate. Vote once, donate or hand out flyers at the new
+  enterable **Regina City Hall**; the simulated result installs a policy that really changes prices and pay
+  (cheaper groceries/clothing/billboards, +10% wages, faster fitness gains).
+* **Intercity travel** — Moose Jaw, Saskatoon, Winnipeg, Calgary, Banff, Vancouver by coach or flight: fare + energy cost, a
+  scenario with choices, and a souvenir **poster** you can hang at home.
+* **Radio** — four stations in the phone and on the apartment stereo: lo-fi, country and jazz are *generated live* with WebAudio
+  (no audio files or licences); *Prairie Talk* reads the news aloud. Listening raises Fun.
+* **Build mode** — buy furniture from the computer, then Redecorate from an overhead view: place, move, rotate, store,
+  sell; repaint walls and change flooring. All placements are validated (room bounds, fixtures, overlaps, limits).
 
 ## Economy & anti-exploit (important)
 

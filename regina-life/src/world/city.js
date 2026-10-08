@@ -133,6 +133,9 @@ export function buildCity({ quality = 'high' } = {}) {
     const gy = reserve({ x0: 122, z0: 12, x1: 154, z1: 36 });
     const gb = building({ ...gy, floors: 2, style: 'glass', color: '#d6e8ff', roofColor: '#2f3438', storefront: true });
     doorOn({ ...gy, ...gb }, 'n', 'Enter Prairie Fitness', 'gym', 'door_gym', { sign: { text: 'PRAIRIE FITNESS', sub: 'Open 24 hours' }, accent: '#3bd6c6' });
+    const ch = reserve({ x0: -46, z0: -40, x1: -14, z1: -12 });
+    const chb = building({ ...ch, floors: 3, style: 'concrete', color: '#f2eee4', roofColor: '#3a4a68', storefront: true });
+    doorOn({ ...ch, ...chb }, 's', 'Enter Regina City Hall', 'cityhall', 'door_cityhall', { sign: { text: 'REGINA CITY HALL', sub: 'Council · Elections' }, accent: '#c9a64e' });
     const th = reserve({ x0: 14, z0: -40, x1: 46, z1: -12 });
     const t = building({ ...th, floors: 2, style: 'concrete', color: '#ededed', roofColor: '#34373b', storefront: true });
     doorOn({ ...th, ...t }, 's', 'Enter Prairie Threads', 'threads', 'door_threads', { sign: { text: 'PRAIRIE THREADS', sub: 'Clothing · Accessories' }, accent: '#8e6bd8' });

@@ -16,6 +16,13 @@ export class CameraRig {
   }
   snapBehind(playerYaw) { this.yaw = playerYaw + Math.PI; }
   update(dt, input, player, { speedNorm = 0, sensitivity = 1 } = {}) {
+    if (this.mode === 'build') {           // overhead "dollhouse" view for the home editor
+      input.consumeLook(); input.consumeZoom();
+      const th = Math.tan(THREE.MathUtils.degToRad(23)), hgt = Math.max(13.5, 5.0 / (th * this.camera.aspect));
+      this.pos.lerp(new THREE.Vector3(0, hgt, 2 + hgt * 0.06), 1 - Math.exp(-dt * 6)); this.camera.position.copy(this.pos); this.camera.lookAt(0, 0, 0.2);
+      this.fov += (46 - this.fov) * (1 - Math.exp(-dt * 5)); if (Math.abs(this.camera.fov - this.fov) > 0.01) { this.camera.fov = this.fov; this.camera.updateProjectionMatrix(); }
+      return;
+    }
     const l = input.consumeLook(), z = input.consumeZoom();
     this.yaw -= l.dx * 0.0046 * sensitivity; this.pitch += l.dy * 0.0036 * sensitivity;
     this.pitch = THREE.MathUtils.clamp(this.pitch, -0.25, 1.25);

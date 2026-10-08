@@ -42,6 +42,7 @@ export const POIS = [
   { id: 'lofts',   name: 'Wheat City Lofts (Home)', cat: 'home',     x: -30, z: 9.4,  enter: 'apartment', emoji: '🏠', state: 'open', blurb: 'Your rented Unit 204. Sleep, shower, cook, watch TV and change outfits.' },
   { id: 'market',  name: 'Prairie Corner Market',   cat: 'shop',     x: 30,  z: 9.4,  enter: 'market',    emoji: '🧺', state: 'open', blurb: 'Groceries, a bakery and a deli. Also hiring shelf stockers.' },
   { id: 'threads', name: 'Prairie Threads',         cat: 'shop',     x: 29,  z: -9.4, enter: 'threads',   emoji: '🛍️', state: 'open', blurb: 'Clothing, toques and accessories — try before you buy. Also hiring.' },
+  { id: 'cityhall', name: 'Regina City Hall',      cat: 'landmark', x: -30, z: -9.4, enter: 'cityhall', emoji: '🗳️', state: 'open', blurb: 'Meet the mayor, vote in the (fictional) election and read the council notices.' },
   { id: 'fitness', name: 'Prairie Fitness',         cat: 'gym',      x: 138, z: 9.4,  enter: 'gym',       emoji: '🏋️', state: 'open', blurb: 'Treadmills, weights and a yoga mat. Build your Fitness skill.' },
   { id: 'leg',     name: 'Legislative Building',    cat: 'landmark', x: ALBERT_X, z: 1235, emoji: '🏛️', state: 'visit', blurb: 'The domed seat of Saskatchewan\'s government, on the shore of Wascana Centre.' },
   { id: 'bridge',  name: 'Albert Street Memorial Bridge', cat: 'landmark', x: ALBERT_X, z: 985, emoji: '🌉', state: 'visit', blurb: 'Albert Street crossing Wascana Lake — the best view of the water.' },

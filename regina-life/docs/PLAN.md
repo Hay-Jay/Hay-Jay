@@ -20,7 +20,7 @@ game, point me at it and the modules here (rules, phone, character, interiors) c
 
 **Not built yet (by design — see roadmap)**: vehicles/driving/traffic, public transit, ride-hailing, other careers,
 player businesses, stocks/investments, real estate, multiplayer, accounts, server, social app, food delivery,
-marketplace, police/EMS, seasonal festivals, voice calls, radio, build/buy furniture mode, relationships.
+marketplace, police/EMS, seasonal festivals, voice calls, running for office yourself, real-player friends, 3D versions of the destination cities.
 
 **Technical debt / risks**
 * **Single-player economy is client-side.** The ledger is server-portable but currently runs in the browser; local
@@ -42,6 +42,7 @@ marketplace, police/EMS, seasonal festivals, voice calls, radio, build/buy furni
 | # | Milestone | Highlights |
 | --- | --- | --- |
 | **1** ✅ | Vertical slice | city slice, character, camera, phone (12 apps), 3 interiors, jobs, needs, time/weather, map, mobile |
+| **3** ✅ | Social life, politics & home | friends by @username (NPC), dating, mayor elections with real policy effects, City Hall, intercity trips + souvenirs, generative radio, furniture build mode + paint |
 | **2** ✅ | City hub & Sims-style life | overhead home screen with pins + news ticker, life events with choices, hygiene/fun needs, skills, activities, gym, Life/News/Ads apps, 12 billboards |
 | 2 | Wheels & world | drivable cars (dealership, insurance, fuel, repair, garage), traffic + signals obeying, bus network with real route data, Ride app (NPC drivers), bikes, more districts via OSM import (roads, footprints, parks), LOD + streaming |
 | 3 | Living economy | supply/demand market sim, grocery/electronics/furniture/car shops, more jobs (delivery, rideshare, office, trades), rent/bills/mortgage/insurance/tax, stocks & fictional companies, real estate, furniture editing |
@@ -65,4 +66,4 @@ A review of an existing city-life web game (a Lagos-themed one) showed what make
 shaped Milestone 2: an overhead *home map* with emoji pins as the front door; a strong **local voice** (slang, humour, specific
 places); frequent **short scenario events with choices**; **billboards** as a visible, purchasable part of the world;
 and a visible **news/ticker** that makes the city feel alive. Nothing is copied — all text, art, names and mechanics here
-are original and Regina-specific. Still to borrow in spirit: friends via @usernames, radio, intercity travel, politics (mayor elections).
+are original and Regina-specific. Milestone 3 borrowed the rest in spirit: friends via @usernames (NPC for now), radio, intercity travel and elections.

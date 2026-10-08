@@ -24,6 +24,13 @@ import { Hub } from './ui/hub.js';
 import { rollEvent, resolveEvent, choiceAvailable, EVENT_BY_ID } from './core/events.js';
 import { generateNews } from './core/news.js';
 import { expireAds } from './core/ads.js';
+import * as SOC from './core/social.js';
+import * as POL from './core/politics.js';
+import { travel } from './core/travel.js';
+import { Radio } from './ui/radio.js';
+import { STATIONS } from './data/radio.js';
+import { BuildMode } from './ui/build.js';
+import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
 
 const $ = (id) => document.getElementById(id);
 const frame = () => new Promise((r) => requestAnimationFrame(() => r()));
@@ -158,9 +165,24 @@ async function boot() {
     onPanel: () => {},
     rebuildPlayerLook: rebuildPlayer,
   };
+  const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio;
+  ctx.startTrip = (destId, mode) => {
+    const r = travel(store, destId, mode); if (!r.ok) { toast(r.error, 'warn'); audio.blip('error'); return; }
+    audio.blip('cash'); phone.close();
+    panels.progress(`${mode === 'flight' ? '✈️ Flying to' : '🚌 Riding to'} ${r.dest.name}…`, 3.5, () => {
+      const back = () => toast(`Back in Regina${r.first ? ` · 🎁 ${r.dest.souvenir}` : ''}`, 'good');
+      if (!r.event) return back();
+      panels.event(r.event, { can: (i) => choiceAvailable(store, r.event, i), pick: (i) => { const x = resolveEvent(store, r.event.id, i); if (x.ok) audio.blip('ok'); return x; }, onClose: back });
+    }, { stop: false });
+  };
   phone = new Phone($('phone'), ctx);
   panels = new Panels($('panels'), { ...ctx, player: { gesture: (g) => player.gesture(g) } });
   panels.ctx.rebuildPlayer = rebuildPlayer;
+
+  /* ---------- build mode ---------- */
+  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast,
+    onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); },
+    onStop: () => { interior?.setOverhead(false); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good'); } });
 
   /* ---------- interiors ---------- */
   const interiors = {};
@@ -171,10 +193,18 @@ async function boot() {
       toast, menu: (t, tx, b) => panels.menu(t, tx, b), shop: (t, ids, w) => panels.shop(t, ids, w), clothingShop: () => panels.clothingShop(),
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
       exitInterior: () => exitInterior(),
+      furnitureShop: () => panels.furnitureShop(),
+      build: () => { if (inInterior !== 'apartment') return; phone.close(); build.start(); },
+      radioMenu: () => panels.menu('📻 Radio', radio.playing ? `Now playing: ${radio.nowTitle}` : 'Pick a station. The music is generated live in your browser.', [...STATIONS.map((st) => ({ label: `${st.emoji} ${st.name} · ${st.freq}`, run: () => radio.play(st.id) })), { label: '⏹ Turn off', run: () => radio.stop() }]),
+      mayorTalk: () => {
+        const p = POL.ensurePolitics(store), m = CANDIDATE_BY_ID[p.mayor.id], pol = POLICIES[p.mayor.policy], h = Math.max(0, Math.floor(POL.timeLeft(p, Date.now()) / 3.6e6));
+        panels.menu(`${m.emoji} Mayor ${m.name}`, `“${m.slogan}” — Current policy: ${pol.name}: ${pol.effect}. Next election in about ${h} hours.`, [{ label: 'Open Town Hall app', primary: true, run: () => { phone.open(); phone.openApp('townhall'); } }, { label: 'Leave' }]);
+      },
+      noticeBoard: () => { const p = POL.ensurePolitics(store), pol = POLICIES[p.mayor.policy]; panels.menu('📌 City notices', `• ${pol.icon} ${pol.name}: ${pol.effect}.\n• Election term ${p.term} is under way — vote in the Town Hall app.\n• ${ctx.news()[2]?.title ?? 'Council meets Tuesday.'}`, [{ label: 'Close' }]); },
       activity: (id) => {
-        const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
+        const bad = G.activityBlocked(store, id) || (id === 'canvass' && !POL.ensurePolitics(store).vote ? 'Vote first (Town Hall app), then you can hand out flyers.' : null); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
         const a = G.ACTIVITIES[id]; player.gesture('use', a.secs);
-        panels.progress(a.label, a.secs, () => { const r = G.doActivity(store, id); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
+        panels.progress(a.label, a.secs, () => { const r = G.doActivity(store, id); if (r.ok) { audio.blip('ok'); if (id === 'canvass') POL.canvass(store); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
@@ -183,7 +213,7 @@ async function boot() {
       },
     },
   };
-  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', water: 'Hydrated 💧' })[id] || 'Done';
+  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
   async function enterInterior(kind, door) {
     if (fading || inInterior) return; fading = true; lastDoor = door;
     await fadeTo(true, 380);
@@ -192,9 +222,10 @@ async function boot() {
     setIndoor(true);
     player.teleport(interior.spawn.x, interior.spawn.z, interior.spawn.yaw); player.bounds = interior.bounds; player.grid = interior.colliders;
     if (!S().job.shift) interior.resetTask();
+    if (kind === 'apartment') interior.setHome(S().home);
     rig.grid = interior.colliders; rig.indoor = true; rig.bounds = interior.bounds; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(interior.spawn.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
-    toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204', gym: 'Prairie Fitness' })[kind], 'info');
+    toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' })[kind], 'info');
   }
   async function exitInterior() {
     if (fading || !inInterior) return; fading = true; await fadeTo(true, 380);
@@ -217,7 +248,7 @@ async function boot() {
 
   /* ---------- map ---------- */
   function openFullMap() {
-    if (creator) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
+    if (creator || build.active) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
     fullMap ||= new MapView(fullCanvas, { mode: 'full', getState: mapState, onSelect: (p) => { mapSel = p; renderMapCard(); } });
     fullMap.resize(); fullMap.focus(player.pos.x, player.pos.z, 0.16); fullMap.selected = S().destination?.id ?? null; mapSel = null; $('map-card').hidden = true;
   }
@@ -285,7 +316,7 @@ async function boot() {
   $('prompt').addEventListener('click', interact);
   $('t-interact').addEventListener('pointerdown', (e) => { e.preventDefault(); interact(); });
   $('t-run').addEventListener('pointerdown', (e) => { e.preventDefault(); input.runToggle = !input.runToggle; $('t-run').classList.toggle('on', input.runToggle); });
-  const togglePhone = () => { if (creator || camMode) return; phone.toggle(); };
+  const togglePhone = () => { if (creator || camMode || build.active) return; phone.toggle(); };
   input.on('phone', togglePhone); $('b-phone').onclick = togglePhone;
   input.on('map', () => (mapOpen ? closeMap() : openFullMap())); $('b-map').onclick = () => (mapOpen ? closeMap() : openFullMap());
   const openOutfit = () => { if (creator || camMode) return; if (!inInterior) { toast('Change outfits at home or in a clothing store.', 'info'); return; } panels.wardrobe(); };
@@ -372,7 +403,7 @@ async function boot() {
     hudNeeds.querySelectorAll('.bar').forEach((b, i) => { b.firstChild.style.width = vals[i] + '%'; b.classList.toggle('low', vals[i] < 20); });
     const c = clock(); hudClock.innerHTML = `${c.label} ${c.ampm} <small>${weather.icon} ${weather.temp}°${weather.live ? '' : ' · sim'}</small>`;
     // place
-    let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts', gym: 'Prairie Fitness' }[inInterior] : 'Regina';
+    let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' }[inInterior] : 'Regina';
     if (!inInterior) { let bd = 1e9; for (const d of DISTRICTS) { const k = Math.hypot(player.pos.x - d.x, player.pos.z - d.z) - d.r; if (k < bd && k < 0) { bd = k; place = d.name; } } }
     hudPlace.textContent = place;
     // destination
@@ -403,6 +434,7 @@ async function boot() {
     if (topic === 'phone' || topic === 'reset') { const on = S().phone.flashlight; flash.intensity = on ? 90 : 0; }
     if (topic === 'bank' || topic === 'inventory') renderMapCard();
     if (topic === 'ads') city.refreshBillboards(S().ads, Date.now());
+    if (topic === 'home' && interior?.kind === 'apartment') interior.setHome(S().home);
   });
 
   /* ---------- resize ---------- */
@@ -444,7 +476,8 @@ async function boot() {
     const ev = rollEvent(store, { where, temp: weather.temp, night: env?.night ?? 0, season: env?.season ?? 'summer' });
     if (ev) showEvent(ev);
   };
-  setInterval(() => { if (expireAds(store)) ctx.refreshBillboards(); }, 60000);
+  setInterval(() => { if (expireAds(store)) ctx.refreshBillboards(); POL.tallyIfDue(store); }, 60000);
+  POL.ensurePolitics(store); POL.tallyIfDue(store);
   const speedBtn = $('b-speed'); const paintSpeed = () => { const f = S().settings.timeMode === 'fast'; speedBtn.textContent = f ? '⏩' : '▶'; speedBtn.title = f ? 'Time: fast (1 min = 1 hour)' : 'Time: live Regina clock'; };
   speedBtn.onclick = () => { S().settings.timeMode = S().settings.timeMode === 'fast' ? 'live' : 'fast'; timeBase = Date.now(); lastEnvAt = 0; store.commit('settings'); paintSpeed(); toast(S().settings.timeMode === 'fast' ? '⏩ Fast time: 1 minute = 1 hour, needs change faster' : '▶ Live Regina time', 'info'); };
   paintSpeed();
@@ -454,6 +487,7 @@ async function boot() {
     if (gameMode !== 'play') return;
     G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1); G.tickJobs(store);
     maybeEvent();
+    SOC.decaySocial(store, 1); if (Math.random() < 0.015) SOC.maybePing(store); if (radio.playing) S().needs.fun = Math.min(100, (S().needs.fun ?? 50) + 0.04);
     const s = S(), f = (s.flags ||= {});
     if (s.job.application?.status === 'offered' && !f.offerCall) { f.offerCall = true; phone.incomingCall(JOBS[s.job.application.id].contact, 'Good news — we would like to offer you the job! Open the Jobs app to accept.'); }
     if (!s.job.active && !s.job.application && !f.daniCall && s.created && Date.now() - s.created > 150000) { f.daniCall = true; phone.incomingCall('dani'); }
@@ -484,7 +518,7 @@ async function boot() {
         else if (fps > 57) { highT++; lowT = 0; if (highT >= 6 && qLevel < (isTouch ? 1 : 3)) { setQuality(qLevel + 1); highT = 0; } } else { lowT = 0; highT = 0; }
       }
     }
-    input.enabled = gameMode === 'play' && !panels.open && !mapOpen && !fading && !creator;
+    input.enabled = gameMode === 'play' && !panels.open && !mapOpen && !fading && !creator && !build.active;
     const slow = S().needs.hunger < 8 || S().needs.energy < 8 ? 0.75 : 1;
     updateEnv();
 
@@ -510,7 +544,7 @@ async function boot() {
     const dst = S().destination; beacon.visible = !!dst && !inInterior && gameMode === 'play';
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
     // interaction prompt
-    if (gameMode === 'play' && !panels.open && !mapOpen && !camMode && !creator) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
+    if (gameMode === 'play' && !panels.open && !mapOpen && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
     // minimap + hud
     if (gameMode === 'play' && !camMode) { mapView.draw(); updateHud(dt); }
     if (mapOpen) fullMap.draw();
@@ -525,6 +559,7 @@ async function boot() {
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
+    radio, build, SOC, POL,
     hub, startAt: (id) => { hub.select(id); }, showEvent, news: () => ctx.news(),
     tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,
     skipTitle: () => { $('btn-continue').style.display === 'none' ? newLife() : $('btn-continue').click(); },
