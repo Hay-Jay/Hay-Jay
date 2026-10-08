@@ -20,6 +20,10 @@ import { Panels } from './ui/panels.js';
 import { MapView } from './ui/map.js';
 import { Audio } from './ui/audio.js';
 import { ICON } from './ui/icons.js';
+import { Hub } from './ui/hub.js';
+import { rollEvent, resolveEvent, choiceAvailable, EVENT_BY_ID } from './core/events.js';
+import { generateNews } from './core/news.js';
+import { expireAds } from './core/ads.js';
 
 const $ = (id) => document.getElementById(id);
 const frame = () => new Promise((r) => requestAnimationFrame(() => r()));
@@ -127,6 +131,8 @@ async function boot() {
     jobTitle: () => (S().job.active ? JOBS[S().job.active.id].title : ''),
     flushPending: () => G.flushPending(store),
     callLine: (id) => ({ dani: 'Hey you! Have you checked the Jobs app? The Market is hiring — and bring me back a coffee, eh?', mom: "Hi sweetheart, just checking you're eating and dressing warm!", market: 'Prairie Corner Market — your shift is ready whenever you are.', threads: 'Prairie Threads here — we love your style!', bank: 'This is Wascana Credit Union. Never share your PIN. Goodbye.' }[id] || 'Hello?'),
+    news: () => generateNews({ date: virtualNow(), clock: clock(), weather, season: seasonOf(clock().month), state: S() }),
+    adsFocus: null, refreshBillboards: () => city.refreshBillboards(S().ads, Date.now()),
     openMap: () => openFullMap(), startCamera: () => startCamera(),
     resetGame: async () => { await fadeTo(true); store.reset(); location.reload(); },
     quickCab(poi) {
@@ -165,6 +171,11 @@ async function boot() {
       toast, menu: (t, tx, b) => panels.menu(t, tx, b), shop: (t, ids, w) => panels.shop(t, ids, w), clothingShop: () => panels.clothingShop(),
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
       exitInterior: () => exitInterior(),
+      activity: (id) => {
+        const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
+        const a = G.ACTIVITIES[id]; player.gesture('use', a.secs);
+        panels.progress(a.label, a.secs, () => { const r = G.doActivity(store, id); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
+      },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
         fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store); await fadeTo(false, 700); fading = false;
@@ -172,6 +183,7 @@ async function boot() {
       },
     },
   };
+  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', water: 'Hydrated 💧' })[id] || 'Done';
   async function enterInterior(kind, door) {
     if (fading || inInterior) return; fading = true; lastDoor = door;
     await fadeTo(true, 380);
@@ -180,9 +192,9 @@ async function boot() {
     setIndoor(true);
     player.teleport(interior.spawn.x, interior.spawn.z, interior.spawn.yaw); player.bounds = interior.bounds; player.grid = interior.colliders;
     if (!S().job.shift) interior.resetTask();
-    rig.grid = interior.colliders; rig.indoor = true; rig.bounds = interior.bounds; rig.targetDist = 3.4; rig.pitch = 0.62; rig.snapBehind(interior.spawn.yaw); rig.snap(player);
+    rig.grid = interior.colliders; rig.indoor = true; rig.bounds = interior.bounds; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(interior.spawn.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
-    toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204' })[kind], 'info');
+    toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204', gym: 'Prairie Fitness' })[kind], 'info');
   }
   async function exitInterior() {
     if (fading || !inInterior) return; fading = true; await fadeTo(true, 380);
@@ -266,6 +278,7 @@ async function boot() {
     if (target.npc) { const n = target.npc; const msg = ped.greet(n, { px: player.pos.x, pz: player.pos.z, temp: weather.temp, night: env?.night > 0.6 }); player.gesture('wave', 1.4); toast(`🗣️ “${msg}”`, 'info'); S().needs.mood = Math.min(100, S().needs.mood + 1.5); return; }
     const it = target.it;
     if (it.kind === 'door') { enterInterior(it.enter, it); return; }
+    if (it.kind === 'billboard') { ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return; }
     audio.blip('tick'); it.run(ictx);
   };
   input.on('interact', interact);
@@ -281,13 +294,27 @@ async function boot() {
   input.on('escape', () => { if (panels.open) panels.close(); else if (mapOpen) closeMap(); else if (camMode) stopCamera(); else if (phone.isOpen) phone.close(); });
 
   /* ---------- new game / title ---------- */
+  let pendingStart = null, hub;
+  const placeAt = (poi) => {
+    if (!poi || poi.id === 'downtown') { player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading); return; }
+    const open = poi.state === 'open';
+    player.teleport(poi.x, poi.z + (open ? 0 : 8), open ? 0 : Math.PI); city.colliders.resolve(player.pos, 0.5); player.syncRoot();
+  };
+  const enterHubMode = (on) => {
+    camera.near = on ? 50 : 0.25; camera.far = on ? 60000 : 4200; camera.updateProjectionMatrix();
+    atmo.fogOverride = on ? { near: 60000, far: 90000 } : null;
+    player.char.root.visible = !on; ped.setVisible(!on); ped.limit = on ? 0 : QUALITY[qLevel].npc;
+    if (on) city.setViewDistance(42000); else { applySettings(); }
+    lastEnvAt = 0; updateEnv(true);
+  };
   const startPlay = () => {
-    gameMode = 'play'; creator = false; camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
+    hub?.hide(); gameMode = 'play'; creator = false; camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
     $('title').classList.remove('on'); $('hud').classList.remove('hidden'); S().started = true; store.commit('started');
     input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player);
     setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000);
   };
   const newLife = () => {
+    hub.hide(); enterHubMode(false);
     store.reset(); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
     creator = true; gameMode = 'creator'; $('title').classList.remove('on'); rig.mode = 'creator'; rig.yaw = player.yaw + 0.5; rig.snap(player);
     const off = () => camera.setViewOffset(innerWidth, innerHeight, innerWidth * (innerWidth > 760 ? 0.17 : 0), innerWidth > 760 ? 0 : innerHeight * 0.18, innerWidth, innerHeight);
@@ -296,27 +323,56 @@ async function boot() {
       const f = S().flags ||= {}; f.welcomed = true;
       G.receiveMessage(store, 'dani', `Welcome to Regina, ${S().player.name}! 🌾 Grab groceries at the Market across Victoria Ave and check the Jobs app on your phone (press P).`, 20000);
       G.receiveMessage(store, 'mom', 'Settled in? Remember to eat and stay warm. Love you!', 55000);
-      startPlay(); toast(`Welcome to Regina, ${S().player.name}!`, 'good');
+      startPlay(); if (pendingStart) { placeAt(pendingStart); rig.snapBehind(player.yaw); rig.snap(player); pendingStart = null; } toast(`Welcome to Regina, ${S().player.name}!`, 'good');
     } });
   };
+  const hasLife = () => store.hasSave() && S().started;
   $('btn-new').onclick = () => {
-    if (store.hasSave() && S().started) panels.menu('Start a new life?', 'This will erase your current progress on this device.', [{ label: 'Keep my save' }, { label: 'Erase & start over', danger: true, run: newLife }]);
+    pendingStart = hubChoice;
+    if (hasLife()) panels.menu('Start a new life?', 'This will erase your current progress on this device.', [{ label: 'Keep my save' }, { label: 'Erase & start over', danger: true, run: newLife }]);
     else newLife();
   };
-  $('btn-continue').onclick = () => { audio.blip('ok'); player.teleport(S().pos?.x ?? city.spawn.x, S().pos?.z ?? city.spawn.z, S().pos?.yaw ?? city.spawn.heading); startPlay(); toast(`Welcome back, ${S().player.name}.`, 'good'); };
+  $('btn-continue').onclick = async () => {
+    audio.blip('ok');
+    if (!hasLife()) { pendingStart = hubChoice; newLife(); return; }
+    fading = true; await fadeTo(true, 320); enterHubMode(false);
+    if (hubChoice) placeAt(hubChoice); else player.teleport(S().pos?.x ?? city.spawn.x, S().pos?.z ?? city.spawn.z, S().pos?.yaw ?? city.spawn.heading);
+    startPlay(); await fadeTo(false, 320); fading = false; toast(`Welcome back, ${S().player.name}.`, 'good');
+  };
+  let hubChoice = null;
+  hub = new Hub({
+    pinsEl: $('hub-pins'), cardEl: $('hub-card'),
+    onSelect: (info, id) => {
+      hubChoice = info ? (id === 'downtown' ? { id: 'downtown' } : poiById[id]) : null;
+      $('hc-place').innerHTML = info ? `<span class="tagline ${info.open ? '' : 'soon'}">${info.open ? '● Open now' : 'Visit & explore'}</span><h3>${info.emoji} ${esc(info.name)}</h3><p>${esc(info.blurb)}</p>` : '';
+      $('btn-continue').style.display = hasLife() || info ? ''  : 'none';
+      $('btn-continue').textContent = info ? (hasLife() ? 'Play here' : 'Start here') : 'Continue';
+      $('hc-welcome').style.display = info ? 'none' : '';
+    },
+    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; },
+  });
+  $('hub-zoom').onclick = () => hub.setLevel(hub.level === 'close' ? 'far' : 'close');
+  const hubRefresh = () => {
+    const c = clock(); $('hub-wx').textContent = `${weather.icon} ${weather.temp}°${weather.live ? '' : ' (sim)'} · ${c.label} ${c.ampm}`;
+    const free = city.billboards.filter((b) => !(S().ads[b.id]?.until > Date.now())).length; $('hub-ads').textContent = `📢 ${free} billboards to book`;
+    $('hc-welcome').textContent = hasLife() ? `Welcome back, ${S().player.name}! Pick a spot to start there — or press Continue.` : 'Pick a spot on the map to start there — or just press play.';
+  };
+  let tickI = 0;
+  const hubTicker = () => { const n = ctx.news(); const it = n[tickI++ % n.length]; const el = $('hub-ticker'); el.textContent = `${it.icon} ${it.title}`; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; };
+  setInterval(() => { if (gameMode === 'title') { hubTicker(); hubRefresh(); } }, 5000);
 
   /* ---------- HUD ---------- */
   const hudMoney = $('hud-money'), hudNeeds = $('hud-needs'), hudClock = $('hud-clock'), hudPlace = $('hud-place'), hudDest = $('hud-dest'), hudJob = $('hud-job'), promptEl = $('prompt');
-  hudNeeds.innerHTML = ['⚡', '🍽️', '🙂'].map((i) => `<div><span>${i}</span><div class="bar"><i></i></div></div>`).join('');
+  hudNeeds.innerHTML = ['⚡', '🍽️', '🚿', '🎉', '🙂'].map((i) => `<div><span>${i}</span><div class="bar"><i></i></div></div>`).join('');
   let hudT = 1, lastPrompt = '';
   const updateHud = (dt) => {
     hudT += dt; if (hudT < 0.2) return; hudT = 0; const s = S();
     hudMoney.textContent = fmtMoney(s.bank.balance);
-    const vals = [s.needs.energy, s.needs.hunger, s.needs.mood];
+    const vals = [s.needs.energy, s.needs.hunger, s.needs.hygiene ?? 0, s.needs.fun ?? 0, s.needs.mood];
     hudNeeds.querySelectorAll('.bar').forEach((b, i) => { b.firstChild.style.width = vals[i] + '%'; b.classList.toggle('low', vals[i] < 20); });
     const c = clock(); hudClock.innerHTML = `${c.label} ${c.ampm} <small>${weather.icon} ${weather.temp}°${weather.live ? '' : ' · sim'}</small>`;
     // place
-    let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts' }[inInterior] : 'Regina';
+    let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts', gym: 'Prairie Fitness' }[inInterior] : 'Regina';
     if (!inInterior) { let bd = 1e9; for (const d of DISTRICTS) { const k = Math.hypot(player.pos.x - d.x, player.pos.z - d.z) - d.r; if (k < bd && k < 0) { bd = k; place = d.name; } } }
     hudPlace.textContent = place;
     // destination
@@ -346,6 +402,7 @@ async function boot() {
     if (topic === 'look') rebuildPlayer();
     if (topic === 'phone' || topic === 'reset') { const on = S().phone.flashlight; flash.intensity = on ? 90 : 0; }
     if (topic === 'bank' || topic === 'inventory') renderMapCard();
+    if (topic === 'ads') city.refreshBillboards(S().ads, Date.now());
   });
 
   /* ---------- resize ---------- */
@@ -368,15 +425,35 @@ async function boot() {
   await progress(100, 'Ready');
   await new Promise((r) => setTimeout(r, 300));
   $('loading').classList.remove('on');
-  gameMode = 'title'; $('title').classList.add('on');
-  $('btn-continue').style.display = store.hasSave() && S().started ? '' : 'none';
-  $('title-note').textContent = store.hasSave() && S().started ? `Saved life: ${S().player.name} · ${fmtMoney(S().bank.balance)}` : 'Your progress saves automatically on this device.';
+  gameMode = 'title'; $('title').classList.add('on'); city.refreshBillboards(S().ads, Date.now());
+  $('btn-continue').style.display = hasLife() ? '' : 'none'; hub.show(); enterHubMode(true); hubTicker(); hubRefresh();
+  $('title-note').textContent = hasLife() ? `Saved life: ${S().player.name} · ${fmtMoney(S().bank.balance)}` : 'Your progress saves automatically on this device.';
   phone.applyWallpaper(); phone.setView(S().phone.unlocked ? 'home' : 'lock'); phone.refreshHome(); phone.renderStatus();
+
+  /* ---------- random life events (Prairie scenarios with choices) ---------- */
+  const showEvent = (ev) => {
+    audio.blip('notify');
+    panels.event(ev, { can: (i) => choiceAvailable(store, ev, i), pick: (i) => { const r = resolveEvent(store, ev.id, i); if (r.ok) audio.blip(r.summary?.startsWith('−') ? 'tick' : 'ok'); return r; } });
+  };
+  const maybeEvent = () => {
+    if (panels.open || phone.isOpen || mapOpen || camMode || creator || fading || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
+    const sh = S().job.shift; let where = null, p = 0.03;
+    if (inInterior === 'apartment') where = 'home'; else if (!inInterior) where = 'street';
+    if (sh && inInterior && JOBS[sh.id].place === inInterior) { where = 'shift:' + sh.id; p = 0.09; }
+    if (!where || Math.random() > p) return;
+    const ev = rollEvent(store, { where, temp: weather.temp, night: env?.night ?? 0, season: env?.season ?? 'summer' });
+    if (ev) showEvent(ev);
+  };
+  setInterval(() => { if (expireAds(store)) ctx.refreshBillboards(); }, 60000);
+  const speedBtn = $('b-speed'); const paintSpeed = () => { const f = S().settings.timeMode === 'fast'; speedBtn.textContent = f ? '⏩' : '▶'; speedBtn.title = f ? 'Time: fast (1 min = 1 hour)' : 'Time: live Regina clock'; };
+  speedBtn.onclick = () => { S().settings.timeMode = S().settings.timeMode === 'fast' ? 'live' : 'fast'; timeBase = Date.now(); lastEnvAt = 0; store.commit('settings'); paintSpeed(); toast(S().settings.timeMode === 'fast' ? '⏩ Fast time: 1 minute = 1 hour, needs change faster' : '▶ Live Regina time', 'info'); };
+  paintSpeed();
 
   /* ---------- scripted life events ---------- */
   setInterval(() => {
     if (gameMode !== 'play') return;
-    G.tickNeeds(store, 1); G.tickJobs(store);
+    G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1); G.tickJobs(store);
+    maybeEvent();
     const s = S(), f = (s.flags ||= {});
     if (s.job.application?.status === 'offered' && !f.offerCall) { f.offerCall = true; phone.incomingCall(JOBS[s.job.application.id].contact, 'Good news — we would like to offer you the job! Open the Jobs app to accept.'); }
     if (!s.job.active && !s.job.application && !f.daniCall && s.created && Date.now() - s.created > 150000) { f.daniCall = true; phone.incomingCall('dani'); }
@@ -412,9 +489,7 @@ async function boot() {
     updateEnv();
 
     if (gameMode === 'title' || gameMode === 'loading') {
-      titleT += dt; const a = titleT * 0.08, R = 62;
-      camera.position.set(city.spawn.x + Math.cos(a) * R, 16 + Math.sin(titleT * 0.2) * 3, city.spawn.z + Math.sin(a) * R); camera.lookAt(city.spawn.x, 9, city.spawn.z);
-      player.char.update(dt); ped.update(dt, player.pos);
+      titleT += dt; hub.update(dt, camera, innerWidth, innerHeight);
     } else {
       player.update(dt, input, rig.yaw, player.grid ?? city.colliders, slow);
       if (!inInterior) ped.update(dt, player.pos);
@@ -450,6 +525,7 @@ async function boot() {
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
+    hub, startAt: (id) => { hub.select(id); }, showEvent, news: () => ctx.news(),
     tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,
     skipTitle: () => { $('btn-continue').style.display === 'none' ? newLife() : $('btn-continue').click(); },
   };

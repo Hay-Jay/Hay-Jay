@@ -13,6 +13,9 @@ export const ICON = {
   calendar: S('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'),
   inventory: S('<path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'),
   settings: S('<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
+  life: S('<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'),
+  news: S('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/>'),
+  ads: S('<rect x="3" y="4" width="18" height="11" rx="1.5"/><path d="M8 15v5M16 15v5M7 9h10"/>'),
   send: S('<path d="M4 12l16-8-6 16-3-7-7-1z"/>'),
   back: S('<path d="M15 5l-7 7 7 7"/>'),
   plus: S('<path d="M12 5v14M5 12h14"/>'),
@@ -34,5 +37,5 @@ export const ICON = {
 export const APP_STYLE = {
   messages: ['#5bf17a', '#16b24b'], phone: ['#5bf17a', '#16b24b'], contacts: ['#a5adb8', '#6b7480'], maps: ['#5fd0ff', '#2f7cf6'],
   bank: ['#43d6a5', '#0b8f6e'], jobs: ['#ffb347', '#ef6c1a'], camera: ['#8d949e', '#4a5059'], photos: ['#ffd36b', '#ff6b8a'],
-  weather: ['#6bc1ff', '#2c6fd6'], calendar: ['#ffffff', '#e8e8ee'], inventory: ['#b88cff', '#6a3de8'], settings: ['#9aa1ab', '#5b626d'],
+  weather: ['#6bc1ff', '#2c6fd6'], calendar: ['#ffffff', '#e8e8ee'], inventory: ['#b88cff', '#6a3de8'], life: ['#ff7aa8', '#e8365f'], news: ['#ffd36b', '#ff8a3d'], ads: ['#5de0c8', '#1a8f86'], settings: ['#9aa1ab', '#5b626d'],
 };

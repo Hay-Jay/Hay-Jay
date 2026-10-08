@@ -7,6 +7,10 @@ import { MapView } from './map.js';
 import { fmtMoney } from '../core/ledger.js';
 import { sunTimes, hoursLabel, reginaParts, TZ } from '../core/time.js';
 import { WALLPAPERS } from './wallpapers.js';
+import { SKILLS, skillLevel, moodWord } from '../core/game.js';
+import { BILLBOARDS, BOARD_BY_ID, DAY_PRICE, DURATIONS, THEMES } from '../data/billboards.js';
+import { adPrice, adReach, buyAd, activeAd, moderate, MAX_AD_CHARS } from '../core/ads.js';
+import { drawBillboard } from '../world/textures.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nav = (title, { back = false, right = '' } = {}) => `<div class="nav">${back ? `<button class="nav-back" data-act="back">${ICON.back}<span>Back</span></button>` : '<span></span>'}<h2>${title}</h2><span class="nav-right">${right}</span></div>`;
@@ -329,5 +333,89 @@ const settingsApp = app('settings', 'Settings', (body, ctx) => {
   return { update(topic) { if (topic !== 'phone-quiet') render(); } };
 });
 
-export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp];
+
+/* ================= LIFE (needs · skills · milestones) ================= */
+const MILESTONES = [
+  ['💼', 'Get a job', (s) => !!s.job.active || (s.job.active === null && false)],
+  ['💵', 'Earn your first paycheque', (s) => s.bank.history.some((h) => h.memo?.startsWith('Payroll'))],
+  ['🏅', 'Get promoted', (s) => (s.job.active?.level ?? 0) >= 1],
+  ['👕', 'Own 6 clothing items', (s) => s.wardrobe.length >= 6],
+  ['💪', 'Reach Fitness level 3', (s) => skillLevel(s.skills?.fitness || 0) >= 3],
+  ['🍳', 'Reach Cooking level 2', (s) => skillLevel(s.skills?.cooking || 0) >= 2],
+  ['🗣️', 'Reach Charisma level 3', (s) => skillLevel(s.skills?.charisma || 0) >= 3],
+  ['📸', 'Take 3 photos', (s) => s.photos.length >= 3],
+  ['📢', 'Run a billboard ad', (s) => s.bank.history.some((h) => h.category === 'advertising')],
+  ['💰', 'Save $5,000', (s) => s.bank.balance >= 500000],
+];
+const lifeApp = app('life', 'Life', (body, ctx) => {
+  const { store } = ctx;
+  const render = () => {
+    const s = store.state, n = s.needs, word = moodWord(n), face = { Thriving: '🤩', Content: '🙂', Meh: '😐', Struggling: '😟', Miserable: '😩' }[word];
+    const bar = (icon, label, v) => `<div class="need"><span>${icon}</span><div class="grow"><small>${label}</small><div class="bar ${v < 20 ? 'low' : ''}"><i style="width:${Math.round(v)}%"></i></div></div><b>${Math.round(v)}</b></div>`;
+    const done = MILESTONES.filter(([, , f]) => f(s)).length;
+    body.innerHTML = `${nav('Life')}<div class="scroll"><div class="card lifehead"><div class="face">${face}</div><div><h3>${esc(s.player.name)}</h3><p>${word} · ${esc(ctx.jobTitle() || 'Between jobs')}</p></div></div>
+      <div class="card">${bar('⚡', 'Energy', n.energy)}${bar('🍽️', 'Hunger', n.hunger)}${bar('🚿', 'Hygiene', n.hygiene ?? 0)}${bar('🎉', 'Fun', n.fun ?? 0)}${bar('🙂', 'Mood', n.mood)}</div>
+      <h4 class="sec">Skills</h4><div class="list">${Object.entries(SKILLS).map(([k, d]) => { const xp = s.skills?.[k] || 0, lv = skillLevel(xp), lo = 10 * lv * (lv + 1), hi = 10 * (lv + 1) * (lv + 2); return `<div class="row"><div class="avatar sm emoji">${d.icon}</div><div class="grow"><b>${d.name} · Lv ${lv}</b><p>${d.blurb}</p><div class="progress thin"><i style="width:${lv >= 10 ? 100 : ((xp - lo) / (hi - lo)) * 100}%"></i></div></div></div>`; }).join('')}</div>
+      <h4 class="sec">Milestones · ${done}/${MILESTONES.length}</h4><div class="list">${MILESTONES.map(([ic, t, f]) => { const ok = f(s); return `<div class="row ${ok ? '' : 'dim'}"><div class="avatar sm emoji">${ok ? '✅' : ic}</div><div class="grow"><b>${t}</b></div></div>`; }).join('')}</div>
+      <p class="fine pad">Tip: take a shower, eat, work out and have fun to keep your mood up. Neglected needs drag your mood down.</p></div>`;
+  };
+  render(); return { update() { render(); } };
+});
+
+/* ================= NEWS ================= */
+const newsApp = app('news', 'Prairie News', (body, ctx) => {
+  const render = () => {
+    const items = ctx.news(), [top, ...rest] = items;
+    body.innerHTML = `${nav('Prairie News')}<div class="scroll"><div class="card hero ${top.tag === 'ALERT' ? 'alert' : ''}"><small>${top.tag}</small><div class="hi">${top.icon}</div><h3>${esc(top.title)}</h3><p>${esc(top.body)}</p></div>
+      <div class="list">${rest.map((n) => `<div class="row"><div class="avatar sm emoji">${n.icon}</div><div class="grow"><b>${esc(n.title)}</b><p class="wrap">${esc(n.body)}</p></div><small>${n.tag}</small></div>`).join('')}</div>
+      <p class="fine pad">Weather, date and daylight are real for Regina (when live). All other headlines are fictional.</p></div>`;
+  };
+  render(); return { update() { render(); } };
+});
+
+/* ================= ADS (billboards) ================= */
+const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
+  const { store } = ctx; let sel = ctx.adsFocus || null; ctx.adsFocus = null;
+  let form = { text: '', theme: 'prairie', days: 1, err: '' };
+  const left = (t) => { const h = Math.max(0, (t - store.now()) / 3.6e6); return h >= 24 ? `${Math.round(h / 24)}d ${Math.round(h % 24)}h left` : `${Math.max(1, Math.round(h))}h left`; };
+  const list = () => {
+    const s = store.state, now = store.now(), mine = BILLBOARDS.filter((b) => activeAd(s, b.id, now));
+    body.innerHTML = `${nav('Ads')}<div class="scroll">
+      ${mine.length ? `<h4 class="sec">Your campaigns</h4><div class="list">${mine.map((b) => { const a = s.ads[b.id]; return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:linear-gradient(135deg,${THEMES[a.theme][0]},${THEMES[a.theme][1]})">📢</div><div class="grow"><b>“${esc(a.text)}”</b><p>${esc(b.name)} · ${left(a.until)}</p></div></button>`; }).join('')}</div>` : ''}
+      <h4 class="sec">Billboards in Regina</h4><div class="list">${BILLBOARDS.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${b.tier === 'mega' ? 'linear-gradient(135deg,#6a2cff,#ff2d95)' : 'linear-gradient(135deg,#0b8f86,#2a74d6)'}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${b.tier === 'mega' ? 'MEGA SCREEN' : 'Standard'} · ${fmtMoney(DAY_PRICE[b.tier])}/day</p></div><small class="${a ? 'red' : 'green'}">${a ? 'Booked' : 'Available'}</small></button>`; }).join('')}</div>
+      <p class="fine pad">Billboards are paid in Prairie Dollars only. No real money is involved. Reach numbers are simulated.</p></div>`;
+  };
+  const detail = () => {
+    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), price = adPrice(sel, form.days);
+    body.innerHTML = `${nav(esc(b.name), { back: true })}<div class="scroll"><canvas class="bbprev" width="480" height="${Math.round(480 * (b.tier === 'mega' ? 0.5 : 0.5))}"></canvas>
+      ${a ? `<div class="card"><b>Booked</b><p>“${esc(a.text)}” — ${left(a.until)}</p><small>Your ad is on display at this location.</small></div>
+      <button class="btn wide" data-act="go">Navigate there</button>`
+      : `<div class="form"><label>Your message <small>(<span id="cnt">${form.text.length}</span>/${MAX_AD_CHARS})</small><input id="adtext" maxlength="${MAX_AD_CHARS}" value="${esc(form.text)}" placeholder="e.g. Best bannock in Regina!" autocomplete="off"></label>
+        <label>Colours</label><div class="swatches">${Object.entries(THEMES).map(([k, [c1, c2]]) => `<button class="sw ${form.theme === k ? 'on' : ''}" data-theme="${k}" style="background:linear-gradient(135deg,${c1},${c2})" aria-label="${k}"></button>`).join('')}</div>
+        <label>Duration</label><div class="seg tight">${Object.keys(DURATIONS).map((d) => `<button class="${form.days == d ? 'on' : ''}" data-days="${d}">${d} day${d == 1 ? '' : 's'}<small>${fmtMoney(adPrice(sel, +d))}</small></button>`).join('')}</div>
+        <p class="meta">👁️ Simulated reach: <b>${adReach(sel, form.days).toLocaleString()}</b> views · Balance ${fmtMoney(s.bank.balance)}</p><p class="err">${esc(form.err)}</p>
+        <button class="btn primary wide" data-act="book" ${price > s.bank.balance ? 'disabled' : ''}>Book for ${fmtMoney(price)}</button></div>
+      <button class="btn wide" data-act="go">Navigate there</button>`}</div>`;
+    previewDraw();
+  };
+  const previewDraw = () => { const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], a = activeAd(store.state, sel, store.now()); const t = form.text.trim().length >= 3 ? form.text.trim() : ''; cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, a || (t ? { text: t, theme: form.theme } : null), { tier: b.tier, priceLabel: `${fmtMoney(DAY_PRICE[b.tier])} / day` }, THEMES); };
+  body.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-b]'); if (b) { sel = b.dataset.b; form.err = ''; detail(); return; }
+    const th = e.target.closest('[data-theme]'); if (th) { form.theme = th.dataset.theme; detail(); return; }
+    const dy = e.target.closest('[data-days]'); if (dy) { form.days = +dy.dataset.days; detail(); return; }
+    const a = e.target.closest('[data-act]')?.dataset.act;
+    if (a === 'back') { sel = null; list(); }
+    if (a === 'go') { const bb = BOARD_BY_ID[sel]; ctx.setDestination({ id: 'bb_' + bb.id, name: `Billboard · ${bb.name}`, x: bb.x + Math.sin(bb.yaw) * 10, z: bb.z + Math.cos(bb.yaw) * 10 }); phone.openApp('maps'); }
+    if (a === 'book') {
+      const m = moderate(form.text); if (!m.ok) { form.err = m.error; ctx.audio?.blip('error'); detail(); return; }
+      const r = buyAd(store, sel, form.days, m.text, form.theme); if (!r.ok) { form.err = r.error; ctx.audio?.blip('error'); detail(); return; }
+      ctx.audio?.blip('cash'); ctx.toast('Billboard booked! Go see it.', 'good'); ctx.refreshBillboards(); form = { text: '', theme: 'prairie', days: 1, err: '' }; detail();
+    }
+  });
+  body.addEventListener('input', (e) => { if (e.target.id === 'adtext') { form.text = e.target.value; body.querySelector('#cnt').textContent = form.text.length; previewDraw(); } });
+  sel ? detail() : list();
+  return { update(topic) { if (document.activeElement?.id === 'adtext') return; sel ? detail() : list(); } };
+});
+
+export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp];
 export const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));

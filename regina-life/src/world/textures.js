@@ -122,3 +122,28 @@ export const tileTexture = (a = '#d9d6cc', b = '#c4c0b4') => tex(mk(128, 128, (g
   for (let y = 0; y < 2; y++) for (let x = 0; x < 2; x++) { g.fillStyle = (x + y) % 2 ? a : b; g.fillRect(x * 64, y * 64, 64, 64); }
   g.strokeStyle = 'rgba(0,0,0,.12)'; g.strokeRect(0.5, 0.5, 127, 127);
 }));
+
+/** Draw a billboard face. ad = { text, theme } or null (house "your ad here" panel). */
+export function drawBillboard(canvas, ad, { tier = 'standard', priceLabel = '' } = {}, themes) {
+  const g = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+  const [c1, c2] = ad ? themes[ad.theme] ?? themes.prairie : tier === 'mega' ? ['#6a2cff', '#ff2d95'] : ['#0b8f86', '#2a74d6'];
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, c1); gr.addColorStop(1, c2);
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = 'rgba(255,255,255,.08)'; for (let i = -h; i < w; i += 36) { g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.lineTo(i + h + 14, 0); g.lineTo(i + 14, h); g.fill(); }
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 8;
+  if (ad) {
+    const words = ad.text.split(' '), lines = []; let cur = '';
+    g.font = '800 54px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif';
+    for (const wd of words) { const t = cur ? cur + ' ' + wd : wd; if (g.measureText(t).width > w * 0.86 && cur) { lines.push(cur); cur = wd; } else cur = t; }
+    lines.push(cur);
+    const size = lines.length > 2 ? 44 : 56; g.font = `800 ${size}px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif`;
+    const lh = size * 1.15, y0 = h / 2 - ((lines.length - 1) * lh) / 2 - 6;
+    lines.forEach((l, i) => g.fillText(l, w / 2, y0 + i * lh));
+    g.shadowBlur = 0; g.font = '600 18px system-ui,sans-serif'; g.globalAlpha = 0.8; g.fillText('Advertisement · virtual', w / 2, h - 22); g.globalAlpha = 1;
+  } else {
+    g.font = '800 66px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif'; g.fillText('YOUR AD HERE', w / 2, h * 0.38);
+    g.shadowBlur = 0; g.font = '700 30px system-ui,sans-serif'; g.fillStyle = '#ffe58a'; g.fillText(priceLabel, w / 2, h * 0.62);
+    g.font = '600 20px system-ui,sans-serif'; g.fillStyle = '#fff'; g.globalAlpha = 0.85; g.fillText('Book it in the Ads app on your phone', w / 2, h * 0.82); g.globalAlpha = 1;
+    if (tier === 'mega') { g.fillStyle = '#ffd24a'; g.fillRect(w / 2 - 70, 16, 140, 28); g.fillStyle = '#2a1700'; g.font = '800 16px system-ui'; g.fillText('MEGA SCREEN', w / 2, 31); }
+  }
+}

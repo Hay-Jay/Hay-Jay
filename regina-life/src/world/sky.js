@@ -110,6 +110,7 @@ export class Atmosphere {
     const fogCol = hor.clone(); this.fog.color.copy(fogCol); this.scene.background = fogCol;
     this.baseFog = { near: kind === 'fog' ? 5 : 150, far: kind === 'fog' ? 200 : (kind === 'rain' || kind === 'snow' ? 700 : 1500) };
     this.fog.near = this.baseFog.near; this.fog.far = this.baseFog.far * (this.viewScale ?? 1);
+    if (this.fogOverride) { this.fog.near = this.fogOverride.near; this.fog.far = this.fogOverride.far; }
     // clouds
     for (const c of this.clouds) { c.material.color.copy(lerpC(C('#ffffff'), greyCol, grey)).lerp(C('#1b2030'), night * 0.8); c.material.opacity = 0.9; }
     const show = Math.round(this.clouds.length * Math.max(0.12, cloud)); this.clouds.forEach((c, i) => (c.visible = i < show));

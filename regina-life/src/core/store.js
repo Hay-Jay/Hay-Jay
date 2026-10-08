@@ -11,7 +11,8 @@ export function freshState(now = Date.now()) {
     wardrobe: [...STARTER_WARDROBE],
     bank: { balance: 250000, history: [] },
     inventory: {},
-    needs: { energy: 88, hunger: 76, mood: 70 },
+    needs: { energy: 88, hunger: 76, mood: 70, hygiene: 82, fun: 66 },
+    skills: { cooking: 0, fitness: 0, charisma: 0 }, ads: {}, flags: {}, eventLog: [],
     job: { active: null, application: null, shift: null },
     phone: { wallpaper: 0, battery: 86, airplane: false, dnd: false, wifi: true, bluetooth: true, brightness: 1, volume: 0.6, flashlight: false, unlocked: false },
     messages: {}, unread: {}, notifications: [], photos: [], calls: [],
@@ -41,7 +42,7 @@ export class Store {
       const d = freshState(this.now());
       return { ...d, ...s, player: { ...d.player, ...s.player, look: { ...d.player.look, ...s.player?.look } },
         phone: { ...d.phone, ...s.phone }, needs: { ...d.needs, ...s.needs }, settings: { ...d.settings, ...s.settings },
-        job: { ...d.job, ...s.job }, bank: { ...d.bank, ...s.bank } };
+        job: { ...d.job, ...s.job }, bank: { ...d.bank, ...s.bank }, skills: { ...d.skills, ...s.skills } };
     } catch { return null; }
   }
   hasSave() { try { return !!this.storage?.getItem(SAVE_KEY); } catch { return false; } }

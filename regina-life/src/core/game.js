@@ -163,11 +163,32 @@ export function finishShift(store) {
 export function abandonShift(store) { store.state.job.shift = null; store.commit('jobs'); }
 
 /* ---------- needs ---------- */
+export const SKILLS = {
+  cooking:  { name: 'Cooking',  icon: '🍳', blurb: 'Better meals fill you up more.' },
+  fitness:  { name: 'Fitness',  icon: '💪', blurb: 'You tire more slowly.' },
+  charisma: { name: 'Charisma', icon: '🗣️', blurb: 'Locals warm to you; better event outcomes.' },
+};
+/** Level from XP: 0,20,60,120,200,300… (triangular), max 10. */
+export const skillLevel = (xp) => Math.min(10, Math.floor((Math.sqrt(1 + (8 * xp) / 20) - 1) / 2));
+export function addSkill(store, name, xp) {
+  const s = store.state; if (!SKILLS[name] || !(xp > 0)) return null;
+  s.skills ||= {}; const before = skillLevel(s.skills[name] || 0);
+  s.skills[name] = Math.min(10000, (s.skills[name] || 0) + xp);
+  const after = skillLevel(s.skills[name]);
+  if (after > before) notify(store, { app: 'life', title: `${SKILLS[name].icon} ${SKILLS[name].name} level ${after}!`, body: SKILLS[name].blurb });
+  store.commit('skills'); return after > before ? after : null;
+}
+export const moodWord = (n) => { const avg = (n.energy + n.hunger + n.hygiene + n.fun + n.mood) / 5; return avg > 80 ? 'Thriving' : avg > 62 ? 'Content' : avg > 42 ? 'Meh' : avg > 25 ? 'Struggling' : 'Miserable'; };
+
 export function tickNeeds(store, dtSec) {
-  const n = store.state.needs;
+  const n = store.state.needs, fit = skillLevel(store.state.skills?.fitness || 0);
+  n.hygiene ??= 80; n.fun ??= 65;
   n.hunger = clamp(n.hunger - dtSec * 0.045);
-  n.energy = clamp(n.energy - dtSec * 0.028);
-  if (n.hunger < 15 || n.energy < 15) n.mood = clamp(n.mood - dtSec * 0.05);
+  n.energy = clamp(n.energy - dtSec * 0.028 * (1 - Math.min(0.4, fit * 0.04)));
+  n.hygiene = clamp(n.hygiene - dtSec * 0.03);
+  n.fun = clamp(n.fun - dtSec * 0.035);
+  const low = [n.hunger, n.energy, n.hygiene, n.fun].filter((v) => v < 15).length;
+  if (low) n.mood = clamp(n.mood - dtSec * 0.05 * low);
   else n.mood = clamp(n.mood + dtSec * 0.005, 0, 100);
   const p = store.state.phone;
   p.battery = clamp(p.battery - dtSec * (p.flashlight ? 0.02 : 0.004), 1, 100);
@@ -175,7 +196,7 @@ export function tickNeeds(store, dtSec) {
 export function sleep(store) {
   const n = store.state.needs;
   if (n.energy > 85) return { ok: false, error: "You're not tired right now." };
-  n.energy = 100; n.hunger = clamp(n.hunger - 10); n.mood = clamp(n.mood + 8);
+  n.energy = 100; n.hunger = clamp(n.hunger - 10); n.mood = clamp(n.mood + 8); n.hygiene = clamp((n.hygiene ?? 70) - 8);
   store.commit('needs');
   return { ok: true };
 }
@@ -191,7 +212,30 @@ export function cook(store, recipeId) {
   if (!r) return { ok: false, error: 'Unknown recipe' };
   for (const [id, n] of Object.entries(r.needs)) if ((s.inventory[id] || 0) < n) return { ok: false, error: `Missing ingredients: ${FOOD[id].name}` };
   for (const [id, n] of Object.entries(r.needs)) { s.inventory[id] -= n; if (!s.inventory[id]) delete s.inventory[id]; }
-  s.needs.hunger = clamp(s.needs.hunger + r.hunger); s.needs.energy = clamp(s.needs.energy + r.energy); s.needs.mood = clamp(s.needs.mood + r.mood);
-  store.commit('needs');
+  const bonus = 1 + skillLevel(s.skills?.cooking || 0) * 0.06;
+  s.needs.hunger = clamp(s.needs.hunger + Math.round(r.hunger * bonus)); s.needs.energy = clamp(s.needs.energy + r.energy); s.needs.mood = clamp(s.needs.mood + r.mood);
+  s.needs.fun = clamp((s.needs.fun ?? 60) + 6);
+  store.commit('needs'); addSkill(store, 'cooking', 8);
   return { ok: true, recipe: r };
+}
+
+/* ---------- activities (Sims-style: do a thing, change needs, grow skills) ---------- */
+export const ACTIVITIES = {
+  shower:  { label: 'Taking a shower…',  secs: 3, needs: { hygiene: 100, mood: 4 } },
+  tv:      { label: 'Watching TV…',      secs: 4, needs: { fun: 22, energy: -2 } },
+  read:    { label: 'Reading…',          secs: 4, needs: { fun: 14, mood: 3 }, skill: ['charisma', 3] },
+  treadmill:{ label: 'Running on the treadmill…', secs: 5, needs: { energy: -12, hunger: -5, hygiene: -10, fun: 10, mood: 4 }, skill: ['fitness', 10], minEnergy: 20 },
+  weights: { label: 'Lifting weights…',  secs: 5, needs: { energy: -14, hunger: -6, hygiene: -9, fun: 8 }, skill: ['fitness', 12], minEnergy: 25 },
+  yoga:    { label: 'Stretching on the mat…', secs: 4, needs: { energy: -4, hygiene: -3, fun: 8, mood: 8 }, skill: ['fitness', 5] },
+  water:   { label: 'Having a drink of water…', secs: 2, needs: { energy: 3, hunger: 1 } },
+};
+/** Pre-check so the UI can refuse before starting a progress bar. */
+export function activityBlocked(store, id) { const a = ACTIVITIES[id]; if (!a) return 'Unknown activity'; if (a.minEnergy && store.state.needs.energy < a.minEnergy) return "You're too tired for that. Rest or grab a coffee."; return null; }
+/** Apply an activity's effects (called when its progress bar completes). Validates energy so you can't train while exhausted. */
+export function doActivity(store, id) {
+  const a = ACTIVITIES[id], n = store.state.needs; if (!a) return { ok: false, error: 'Unknown activity' };
+  if (a.minEnergy && n.energy < a.minEnergy) return { ok: false, error: "You're too tired for that. Rest or grab a coffee." };
+  for (const [k, v] of Object.entries(a.needs)) n[k] = clamp((n[k] ?? 50) + v);
+  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (1 + 0));
+  store.commit('needs'); return { ok: true, activity: a };
 }

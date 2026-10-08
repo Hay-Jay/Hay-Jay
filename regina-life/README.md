@@ -3,7 +3,7 @@
 A browser-based open-world life simulation set in **Regina, Saskatchewan** — live, work, shop, travel and build a life
 in a stylised 3D city that follows the **real Regina clock, sun and weather**.
 
-> **Status: Milestone 1** — a playable vertical slice. See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
+> **Status: Milestone 2 ("City hub & Sims-style life")** on top of the Milestone 1 vertical slice. See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
 
 ## Run it
 
@@ -48,6 +48,21 @@ generated procedurally — no third-party art assets, so there are no asset lice
 * **Real time & weather** — `America/Regina` clock, computed sunrise/sunset, day/night, stars, moon, seasons, rain/snow.
   Live weather from Open-Meteo; if unreachable the game uses a **clearly labelled "SIMULATED"** fallback.
 * **Map** — minimap, full-city map with pan/zoom, POI selection, navigation beacon, and a Quick Cab fast-travel stand-in.
+
+## What's new in Milestone 2
+
+* **Home screen** — a tilted overhead city view with tappable emoji pins (pick where your life starts), a live news
+  ticker, weather chip, and a *Downtown ⇄ All Regina* zoom. Pins marked with a green dot are enterable now.
+* **Life events** — short Prairie scenarios with choices (stuck in a snowbank, Rider Pride, refund-without-receipt on shift,
+  wind-chill warnings…). Choices cost money/energy, grow skills, and are validated by the rules engine.
+* **Sims-style systems** — five needs (energy, hunger, hygiene, fun, mood), skills (Cooking, Fitness, Charisma) with
+  levels and real effects, activities with progress bars (shower, TV, reading, treadmill, weights, yoga), a **Life** app
+  with mood and milestones, and a ▶/⏩ time-speed button.
+* **Prairie Fitness** — a new enterable gym (treadmills, weights, yoga mat, water cooler).
+* **Billboards & Ads app** — 12 billboards across the city. Book one for 1/3/7 days with your own text and colours, paid
+  in Prairie Dollars only, with text moderation and *simulated* reach numbers. Unbooked boards read "YOUR AD HERE".
+* **Prairie News app** — real weather/sunrise/sunset plus fictional seasonal headlines and personal updates.
+* Fixed: the lake wasn't rendering (face culled) and roads could vanish at low camera angles.
 
 ## Economy & anti-exploit (important)
 

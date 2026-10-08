@@ -7,6 +7,8 @@
   <meta name="description" content="REGINA LIFE — an open-world life simulation set in Regina, Saskatchewan.">
   <title>Regina Life</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1020'/%3E%3Cpath d='M12 46V28l10-8 10 8v18M32 46V18l10-8 10 8v28' fill='none' stroke='%23ffb347' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
@@ -23,17 +25,25 @@
     </div>
   </div>
 
-  <div id="title" class="screen">
-    <div class="title-in">
-      <div class="logo big"><span>REGINA</span><b>LIFE</b></div>
-      <p class="tag">Live, work and wander through Regina, Saskatchewan.</p>
-      <div class="title-btns">
-        <button class="btn primary xl" id="btn-continue">Continue</button>
-        <button class="btn xl" id="btn-new">New Life</button>
-      </div>
-      <p class="title-note" id="title-note"></p>
+  <div id="title" class="screen hub">
+    <div class="hub-top">
+      <div class="brandpill"><svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0b1020"/><path d="M12 46V28l10-8 10 8v18M32 46V18l10-8 10 8v28" fill="none" stroke="#ffb347" stroke-width="4" stroke-linejoin="round"/></svg><b>Regina Life</b><span class="dotchip"><i></i>Single-player</span><span class="wx-chip" id="hub-wx"></span></div>
+      <div class="hub-chips"><button class="chip" id="hub-zoom">🗺️ All Regina</button><span class="chip ticker" id="hub-ticker">📰 Loading the news…</span><span class="chip" id="hub-ads"></span></div>
     </div>
-    <footer class="title-foot">Prairie Dollars are fictional · No real money is used · Milestone 1 build</footer>
+    <div id="hub-pins"></div>
+    <div class="hub-card" id="hub-card">
+      <div class="hc-place" id="hc-place"></div>
+      <div class="hc-main">
+        <p class="hc-welcome" id="hc-welcome">Pick a spot on the map to start there — or just press play.</p>
+        <div class="hc-btns">
+          <button class="btn go xl" id="btn-continue">Continue</button>
+          <button class="btn alt xl" id="btn-new">New Life</button>
+        </div>
+        <p class="title-note" id="title-note"></p>
+        <div class="hc-badges"><span>✔ Free to play</span><span>🍁 Set in Regina, SK</span><span>💱 Fictional currency</span></div>
+      </div>
+    </div>
+    <footer class="title-foot">Prairie Dollars are fictional · No real money is used · Live Regina time &amp; weather</footer>
   </div>
 
   <div id="hud" class="hidden">
@@ -53,6 +63,7 @@
     <div class="hint" id="hud-hint">WASD move · Shift run · Drag look · E interact · P phone · M map · C outfit · V photo</div>
     <div class="hud-btns">
       <button id="b-phone" class="hbtn" aria-label="Phone"><span class="ico"></span><b class="badge" hidden></b></button>
+      <button id="b-speed" class="hbtn" aria-label="Time speed" title="Time speed">▶</button>
       <button id="b-map" class="hbtn" aria-label="Map"></button>
       <button id="b-wardrobe" class="hbtn" aria-label="Outfit"></button>
     </div>

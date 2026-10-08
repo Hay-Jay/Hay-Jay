@@ -25,6 +25,30 @@ export class Panels {
     p.addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (!b) return; const btn = buttons[+b.dataset.i]; this.close(); btn.run?.(); });
   }
 
+  /** Timed activity with a progress bar (input is blocked while a panel is open). */
+  progress(label, secs, onDone) {
+    const p = this._show(`<h3>${esc(label)}</h3><div class="prog"><i></i></div><div class="pbtns"><button class="btn" data-stop>Stop</button></div>`, 'menu prog-panel', { dismissable: false });
+    const bar = p.querySelector('.prog i'); let done = false; const t0 = performance.now();
+    const tick = () => { if (done || this.cur?.stopped) return; const k = Math.min(1, (performance.now() - t0) / (secs * 1000)); bar.style.width = k * 100 + '%'; if (k >= 1) { done = true; this.close(); onDone?.(); } else requestAnimationFrame(tick); };
+    p.querySelector('[data-stop]').onclick = () => { done = true; this.close(); };
+    requestAnimationFrame(tick);
+  }
+
+  /** Life event card: shows title/text/choices; resolves via ctx callbacks. */
+  event(ev, { can, pick }) {
+    const render = (result) => {
+      p.innerHTML = result
+        ? `<div class="ev-ic">${ev.icon}</div><h3>${esc(ev.title)}</h3><p class="pm">${esc(result.result)}</p>${result.summary ? `<p class="ev-sum">${esc(result.summary)}</p>` : ''}<div class="pbtns"><button class="btn primary" data-ok>Continue</button></div>`
+        : `<div class="ev-ic">${ev.icon}</div><h3>${esc(ev.title)}</h3><p class="pm">${esc(ev.text)}</p><div class="pbtns col">${ev.choices.map((c, i) => { const a = can(i); return `<button class="btn ${i === 0 ? 'primary' : ''}" data-i="${i}" ${a.ok ? '' : 'disabled'} title="${a.ok ? '' : esc(a.why)}">${esc(c.label)}${a.ok ? '' : ` <small>(${esc(a.why)})</small>`}</button>`; }).join('')}</div>`;
+    };
+    const p = this._show('', 'menu event', { dismissable: false }); render();
+    p.addEventListener('click', (e) => {
+      if (e.target.closest('[data-ok]')) return this.close();
+      const b = e.target.closest('[data-i]'); if (!b) return;
+      const r = pick(+b.dataset.i); if (!r.ok) { this.ctx.toast(r.error, 'warn'); return; } render(r);
+    });
+  }
+
   /** Grocery-style shop. */
   shop(title, ids, where) {
     const { store, G } = this.ctx;
