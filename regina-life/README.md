@@ -67,3 +67,10 @@ src/player   character rig, controller, camera, input
 src/ui       phone, apps, panels (shops/creator), map, audio, icons
 tests        vitest   ·   scripts/smoke.mjs   Playwright end-to-end
 ```
+
+## Publishing as a website
+
+`.github/workflows/deploy-regina-life.yml` builds and deploys the game to **GitHub Pages** on every push to `main`
+(it runs the tests first). One-time setup: repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+The site then lives at `https://<your-username>.github.io/Hay-Jay/`. The build uses relative paths, so it also works on
+any static host (Netlify, Cloudflare Pages, Vercel): build command `npm run build`, publish directory `dist`.
