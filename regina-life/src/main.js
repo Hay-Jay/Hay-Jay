@@ -253,7 +253,7 @@ async function boot() {
   /* ---------- map ---------- */
   function openFullMap() {
     if (creator || build.active) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
-    fullMap ||= new MapView(fullCanvas, { mode: 'full', getState: mapState, onSelect: (p) => { mapSel = p; renderMapCard(); } });
+    fullMap ||= new MapView(fullCanvas, { mode: 'full', getState: mapState, onSelect: (p) => { mapSel = p; renderMapCard(); }, overlays: () => [$('map-close'), document.querySelector('.map-zoom')] });
     fullMap.resize(); fullMap.focus(player.pos.x, player.pos.z, 0.3); fullMap.selected = S().destination?.id ?? null; mapSel = null; $('map-card').hidden = true;
   }
   function closeMap() { mapOpen = false; $('map-full').classList.remove('on'); }

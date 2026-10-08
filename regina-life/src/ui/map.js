@@ -12,7 +12,8 @@ const shortName = (n) => n.replace(/ \(Home\)/, '');
  * Places are emoji badges; crowded places merge into a numbered cluster you tap to zoom into; labels never overlap.
  */
 export class MapView {
-  constructor(canvas, { mode = 'full', onSelect = null, getState } = {}) {
+  constructor(canvas, { mode = 'full', onSelect = null, getState, overlays = null } = {}) {
+    this.overlays = overlays; this._ko = []; this._koKey = '';
     this.c = canvas; this.g = canvas.getContext('2d'); this.mode = mode; this.onSelect = onSelect; this.getState = getState;
     this.cx = 0; this.cz = 300; this.scale = mode === 'mini' ? 0.55 : 0.12; this.selected = null; this.follow = mode === 'mini';
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -27,7 +28,7 @@ export class MapView {
   }
   _bind() {
     const c = this.c;
-    c.addEventListener('pointerdown', (e) => { c.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); this.moved = 0; this.follow = false; this._fly = null; });
+    c.addEventListener('pointerdown', (e) => { c.setPointerCapture(e.pointerId); this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); this.moved = this.pointers.size > 1 ? Infinity : 0; this.follow = false; this._fly = null; }); // a second finger makes it a pinch: neither lift may count as a tap
     c.addEventListener('pointermove', (e) => {
       const p = this.pointers.get(e.pointerId); if (!p) return;
       const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
@@ -62,6 +63,15 @@ export class MapView {
     const scale = Math.max(Math.max(this.scale * 1.7, Math.min(want, this.scale * 6)), Number.isFinite(dmin) ? 30 / dmin : 0);
     this._fly = { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, scale: Math.min(2.2, scale) };
     this.follow = false;
+  }
+  /** Boxes (canvas px) of HTML controls drawn over the map, so pins and labels stay out from under them. Cached per canvas size. */
+  _keepOut() {
+    const key = this.w + 'x' + this.h; if (key === this._koKey) return this._ko;
+    this._koKey = key; this._ko = [];
+    if (!this.overlays) return this._ko;
+    const c = this.c.getBoundingClientRect();
+    for (const el of this.overlays()) { if (!el) continue; const b = el.getBoundingClientRect(); if (b.width) this._ko.push({ x0: b.left - c.left - 4, y0: b.top - c.top - 4, x1: b.right - c.left + 4, y1: b.bottom - c.top + 4 }); }
+    return this._ko;
   }
   toScreen(x, z) { return [(x - this.cx) * this.scale + this.w / 2, (z - this.cz) * this.scale + this.h / 2]; }
   focus(x, z, scale) { this.cx = x; this.cz = z; if (scale) this.scale = scale; this.follow = false; this._fly = null; }
@@ -159,9 +169,10 @@ export class MapView {
       else { const it = grp.items[0], sel = this.selected === it.poi.id || st.dest?.id === it.poi.id; badges.push({ it, ax: it.sx, ay: it.sy, r: sel ? 15 : 12, sel }); }
     }
     const rects = badges.map((q) => ({ x: q.ax, y: q.ay, w: q.r * 2 + 4, h: q.r * 2 + 4 }));
-    spreadRects(rects, { x0: 2, y0: this.mode === 'full' ? 50 : 2, x1: W - 2, y1: H - 2 }, { fixed: [{ x: px, y: py, w: 34, h: 34 }] });
+    const ko = this.mode === 'full' ? this._keepOut() : [], topPad = this.mode === 'full' ? Math.max(54, ...ko.filter((r) => r.y0 < 30).map((r) => r.y1 + 2)) : 2;
+    spreadRects(rects, { x0: 2, y0: topPad, x1: W - 2, y1: H - 2 }, { fixed: [{ x: px, y: py, w: 34, h: 34 }, ...ko.map((r) => ({ x: (r.x0 + r.x1) / 2, y: (r.y0 + r.y1) / 2, w: r.x1 - r.x0, h: r.y1 - r.y0 }))] });
     badges.forEach((q, i) => { q.x = rects[i].x; q.y = rects[i].y; });
-    const blockers = [{ x0: px - 18, y0: py - 18, x1: px + 18, y1: py + 18 }], labels = [];
+    const blockers = [{ x0: px - 18, y0: py - 18, x1: px + 18, y1: py + 18 }, ...ko], labels = [];
     const box = (x, y, r) => ({ x0: x - r, y0: y - r, x1: x + r, y1: y + r });
     // leaders from any badge that stepped aside back to its real spot
     g.strokeStyle = 'rgba(255,255,255,.75)'; g.fillStyle = '#fff'; g.lineWidth = 1.5;
@@ -178,11 +189,15 @@ export class MapView {
       const it = q.it, p = it.poi;
       this._badge(g, q.x, q.y, p.emoji ?? '📍', { r: q.r, ring: q.sel ? THEME.dest : '#0b1020', open: p.state === 'open' });
       blockers.push(box(q.x, q.y, q.r + 2)); this._hits.push({ x: q.x, y: q.y, r: q.r, poi: p });
-      const text = shortName(p.name); g.font = '600 11px system-ui'; labels.push({ id: 'p:' + p.id, kind: 'poi', text, w: g.measureText(text).width + 12, h: 17, prio: it.prio, ax: q.x, ay: q.y, ar: q.r });
+      const text = shortName(p.name); g.font = '600 11px system-ui';
+      const full = g.measureText(text).width + 12, lab = { id: 'p:' + p.id, kind: 'poi', text, w: full, h: 17, prio: it.prio, ax: q.x, ay: q.y, ar: q.r, alts: [] };
+      let k = -1; for (let i = 1; i < text.length - 1; i++) if (text[i] === ' ' && (k < 0 || Math.abs(i - text.length / 2) < Math.abs(k - text.length / 2))) k = i;
+      if (k > 0) { const lines = [text.slice(0, k), text.slice(k + 1)], w = Math.max(...lines.map((t) => g.measureText(t).width)) + 12; if (w < full - 8) lab.alts.push({ w, h: 30, lines }); } // narrow spot: try a two-line label
+      labels.push(lab);
     }
     // district names: only the ones without a place pin of the same name (those are labelled by the pin), and only when zoomed out
     if (s < 0.45) for (const dd of DISTRICTS) {
-      if (poiById[dd.id]) continue;
+      if (poiById[dd.id] && !dd.label) continue; // a pin of the same name labels it (a district with its own label anchor, like Wascana Centre vs the lake pin, is a different place)
       const [x, y] = P(dd.label?.x ?? dd.x, dd.label?.z ?? dd.z), text = dd.name.toUpperCase();
       g.font = '700 11px system-ui'; labels.push({ id: 'd:' + dd.id, kind: 'district', text, w: g.measureText(text).width, h: 14, prio: 12, ax: x, ay: y, ar: 0, sides: ['center'] });
     }
@@ -203,8 +218,10 @@ export class MapView {
     for (const pl of placed) {
       const l = byId.get(pl.id);
       if (l.kind === 'poi') {
-        g.font = '600 11px system-ui'; g.fillStyle = 'rgba(13,17,24,.82)'; g.beginPath(); g.roundRect ? g.roundRect(pl.x, pl.y, l.w, l.h, 8) : g.rect(pl.x, pl.y, l.w, l.h); g.fill();
-        g.fillStyle = '#e8eefc'; g.textAlign = 'left'; g.fillText(l.text, pl.x + 6, pl.y + l.h / 2 + 0.5);
+        g.font = '600 11px system-ui'; g.fillStyle = 'rgba(13,17,24,.82)'; g.beginPath(); g.roundRect ? g.roundRect(pl.x, pl.y, pl.w, pl.h, 8) : g.rect(pl.x, pl.y, pl.w, pl.h); g.fill();
+        g.fillStyle = '#e8eefc'; g.textAlign = 'left';
+        const lines = pl.alt >= 0 ? l.alts[pl.alt].lines : [l.text];
+        lines.forEach((t, i) => g.fillText(t, pl.x + 6, pl.y + pl.h / (lines.length * 2) + (i * pl.h) / lines.length + 0.5));
       } else if (l.kind === 'district') {
         g.font = '700 11px system-ui'; g.textAlign = 'center'; g.fillStyle = THEME.label; g.globalAlpha = 0.8; g.fillText(l.text, pl.x + l.w / 2, pl.y + l.h / 2); g.globalAlpha = 1;
       } else {

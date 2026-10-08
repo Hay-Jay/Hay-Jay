@@ -41,6 +41,8 @@ const auditPins = () => page.evaluate(() => {
   });
   const blockers = [...document.querySelectorAll('.hub-top .brandpill, .hub-top .chip, .hub-card')].filter((e) => e.offsetParent !== null).map((e) => box(e.getBoundingClientRect()));
   const bad = [];
+  // a pin the player cannot tap (something opaque on top of it) is as bad as an overlap
+  [...document.querySelectorAll('.pin')].filter((p) => p.style.display !== 'none').forEach((p) => { const r = p.querySelector('.pe').getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (t?.closest('.pin') !== p) bad.push(`${p.dataset.pin} is not tappable`); });
   pins.forEach((a, i) => { pins.slice(i + 1).forEach((b) => hit(a, b) && bad.push(`${a.id} overlaps ${b.id}`)); blockers.forEach((b, k) => hit(a, b) && bad.push(`${a.id} under ${k < blockers.length - 1 ? 'header' : 'card'}`)); if (a.x0 < 0 || a.y0 < 0 || a.x1 > innerWidth || a.y1 > innerHeight) bad.push(`${a.id} off-screen`); });
   return { n: pins.length, bad };
 });
@@ -52,6 +54,14 @@ await step('home map: pins do not overlap or hide', async () => {
   await page.click('#hub-zoom'); await wait(400); await settleHub(); r = await auditPins(); if (r.n !== 7 || r.bad.length) throw new Error('back to close view: ' + JSON.stringify(r));
   await page.$eval('.pin[data-pin="market"]', (e) => e.click()); await wait(400); await settleHub(); r = await auditPins(); await shot('01c-home-map-selected'); if (r.bad.length) throw new Error('close view with a place selected: ' + JSON.stringify(r));
   await page.$eval('.pin[data-pin="market"]', (e) => e.click()); await wait(300); // deselect
+});
+await step('home map: landscape phone keeps every pin visible and tappable', async () => {
+  const vp = page.viewportSize();
+  await page.setViewportSize({ width: 740, height: 360 }); await wait(500); await settleHub();
+  let r = await auditPins(); await shot('01d-home-map-landscape'); if (r.n !== 7 || r.bad.length) throw new Error('landscape close view: ' + JSON.stringify(r));
+  await page.click('#hub-zoom'); await wait(400); await settleHub(); r = await auditPins(); if (r.n !== 13 || r.bad.length) throw new Error('landscape far view: ' + JSON.stringify(r));
+  await page.click('#hub-zoom'); await wait(400);
+  await page.setViewportSize(vp); await wait(500); await settleHub();
 });
 await step('new life → creator', async () => { await page.click('#btn-new'); await page.waitForSelector('.panel.char', { timeout: 5000 }); await wait(1200); await shot('02-creator'); });
 await step('creator customisation', async () => {
@@ -90,10 +100,13 @@ await step('full map: badges never overlap, clusters zoom in', async () => {
   const hits = () => page.evaluate(() => __regina.fullMap()._hits.map((h) => ({ x: h.x, y: h.y, r: h.r, n: h.group?.items.length ?? 1, name: h.poi?.name })));
   const clash = (hs) => { for (let i = 0; i < hs.length; i++) for (let j = i + 1; j < hs.length; j++) if (Math.hypot(hs[i].x - hs[j].x, hs[i].y - hs[j].y) < hs[i].r + hs[j].r - 1) return `${hs[i].name ?? 'cluster'} / ${hs[j].name ?? 'cluster'}`; return null; };
   let hs = await hits(); if (!hs.length) throw new Error('no places drawn'); const c = clash(hs); if (c) throw new Error('overlapping badges at default zoom: ' + c);
+  const over = await page.evaluate(() => { const c = document.getElementById('map-canvas').getBoundingClientRect(); return [document.getElementById('map-close'), document.querySelector('.map-zoom')].map((e) => { const b = e.getBoundingClientRect(); return { x0: b.left - c.left, y0: b.top - c.top, x1: b.right - c.left, y1: b.bottom - c.top }; }); });
+  const under = (list) => list.filter((h) => over.some((o) => h.x + h.r > o.x0 && h.x - h.r < o.x1 && h.y + h.r > o.y0 && h.y - h.r < o.y1)).map((h) => h.name ?? 'cluster');
+  const u1 = under(hs); if (u1.length) throw new Error('badges under the map controls at default zoom: ' + u1.join(', '));
   const cl = hs.find((h) => h.n > 1); if (!cl) throw new Error('expected a cluster of the downtown places at the default zoom');
   const box = await page.$eval('#map-canvas', (e) => { const r = e.getBoundingClientRect(); return [r.left, r.top]; });
   await page.mouse.click(box[0] + cl.x, box[1] + cl.y); await page.waitForFunction(() => !__regina.fullMap()._fly, null, { timeout: 30000 }); await wait(400); await shot('12b-map-zoomed');
-  hs = await hits(); const c2 = clash(hs); if (c2) throw new Error('overlapping badges after tapping a cluster: ' + c2); if (hs.filter((h) => h.n === 1).length < cl.n) throw new Error(`cluster of ${cl.n} did not split into places`);
+  hs = await hits(); const u2 = under(hs); if (u2.length) throw new Error('badges under the map controls after zooming: ' + u2.join(', ')); const c2 = clash(hs); if (c2) throw new Error('overlapping badges after tapping a cluster: ' + c2); if (hs.filter((h) => h.n === 1).length < cl.n) throw new Error(`cluster of ${cl.n} did not split into places`);
   await page.keyboard.press('m');
 });
 await step('enter market via door', async () => {

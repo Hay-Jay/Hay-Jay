@@ -60,13 +60,16 @@ export class Hub {
   /** Names under the pins only where there is room for them: wide screens in the close-up (the far view is an overview; names show on hover/tap). */
   _labelH(w) { return w >= 900 && this.level === 'close' ? LABEL_H : 0; }
 
-  /** The screen area pins may occupy: below the header chips, above the card. */
+  /** The screen area pins may occupy: below the header chips, beside or above the card (which grows when a place is selected). */
   _measure(w, h) {
     const top = this.topEl?.getBoundingClientRect(), card = this.cardEl.getBoundingClientRect();
+    const side = card.width > 0 && card.width < w * 0.7 && card.left > w * 0.35; // landscape phones park the card at the side
     // the card grows when a place is selected; reserve that room up front so selecting a pin never reflows the map
-    const cardTop = card.top ? card.top - (this.cardEl.classList.contains('sel') ? 0 : SEL_EXTRA) : h;
-    const safe = { x0: 6, x1: w - 6, y0: (top?.bottom ?? 0) + 8, y1: Math.min(h, cardTop) - 8 };
-    if (safe.y1 - safe.y0 < 150) { safe.y0 = Math.min(safe.y0, 70); safe.y1 = h - 8; } // tiny landscape screens: better to overlap the card than squash everything
+    const cardTop = card.top ? card.top - (side || this.cardEl.classList.contains('sel') ? 0 : SEL_EXTRA) : h;
+    const safe = { x0: 6, x1: side ? card.left - 8 : w - 6, y0: (top?.bottom ?? 0) + 8, y1: side ? h - 8 : Math.min(h, cardTop) - 8, fixed: [] };
+    if (!side && safe.y1 - safe.y0 < 150) { // squashed window: use the full height but make the card a wall the pins must go around
+      safe.y1 = h - 8; if (card.width && h > cardTop) safe.fixed.push({ x: (card.left + card.right) / 2, y: (cardTop + h) / 2, w: card.width, h: h - cardTop });
+    }
     return safe;
   }
   /** Find a camera target and distance that puts every pin's real spot inside the safe area. */
@@ -117,8 +120,8 @@ export class Hub {
       return { x: q.ax, y: q.ay - LIFT - R + labels / 2, w: labels ? Math.max(PIN, q.lw + 8) : PIN, h: PIN + labels };
     });
     // the camera holds still once framed, so the anchors rarely change: only re-solve the layout when they (or the safe area) do
-    const sig = `${labels}|${safe.x0},${safe.y0},${safe.x1},${safe.y1}|` + list.map((q) => `${q.ax.toFixed(1)},${q.ay.toFixed(1)}`).join(';');
-    if (sig !== this._sig || !this._spread) { spreadRects(rects, safe); this._spread = rects.map((r) => ({ x: r.x, y: r.y })); this._sig = sig; }
+    const sig = `${labels}|${safe.x0},${safe.y0},${safe.x1},${safe.y1}|${safe.fixed.map((f) => [f.x, f.y, f.w, f.h].join()).join(';')}|` + list.map((q) => `${q.ax.toFixed(1)},${q.ay.toFixed(1)}`).join(';');
+    if (sig !== this._sig || !this._spread) { spreadRects(rects, safe, { fixed: safe.fixed }); this._spread = rects.map((r) => ({ x: r.x, y: r.y })); this._sig = sig; }
     else this._spread.forEach((r, i) => { rects[i].x = r.x; rects[i].y = r.y; });
     const k = dt > 0 && list[0].x !== null ? 1 - Math.exp(-dt * 16) : 1;
     list.forEach((q, i) => {

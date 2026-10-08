@@ -60,23 +60,28 @@ export function clusterPoints(pts, radius) {
 const hit = (a, b, pad) => a.x0 < b.x1 + pad && a.x1 > b.x0 - pad && a.y0 < b.y1 + pad && a.y1 > b.y0 - pad;
 
 /**
- * Place text labels without collisions. labels = [{ id, w, h, prio, ax, ay, ar?, sides? }]: the label hangs off the
- * anchor point (ax,ay) with radius `ar`, trying each of `sides` (right, left, above, below, center) in order.
- * `blockers` are rects {x0,y0,x1,y1} that are already taken (pins). Higher `prio` is placed first; a label that
- * fits nowhere is dropped rather than drawn on top of something. Returns [{ id, x, y, side }] (x,y = top-left).
+ * Place text labels without collisions. labels = [{ id, w, h, prio, ax, ay, ar?, sides?, alts? }]: the label hangs off the
+ * anchor point (ax,ay) with radius `ar`, trying each of `sides` (right, left, above, below, center) in order. If it fits on
+ * none, each smaller variant in `alts` ([{w,h}], e.g. a wrapped or shortened version) is tried the same way. `blockers` are rects
+ * {x0,y0,x1,y1} that are already taken (pins). Higher `prio` is placed first; a label that fits nowhere is dropped rather than
+ * drawn on top of something. Returns [{ id, x, y, w, h, side, alt }] (x,y = top-left; alt = index into `alts`, or -1 for the full label).
  */
 export function placeLabels(labels, bounds, blockers = [], pad = 2) {
   const taken = blockers.slice(), placed = [];
   const order = labels.map((l, i) => [l, i]).sort((a, b) => b[0].prio - a[0].prio || a[1] - b[1]);
   for (const [l] of order) {
-    const r = l.ar ?? 0, gap = 4;
-    for (const side of l.sides ?? ['right', 'left', 'above', 'below']) {
-      const x = side === 'right' ? l.ax + r + gap : side === 'left' ? l.ax - r - gap - l.w : l.ax - l.w / 2;
-      const y = side === 'above' ? l.ay - r - gap - l.h : side === 'below' ? l.ay + r + gap : l.ay - l.h / 2;
-      const box = { x0: x, y0: y, x1: x + l.w, y1: y + l.h };
-      if (box.x0 < bounds.x0 || box.y0 < bounds.y0 || box.x1 > bounds.x1 || box.y1 > bounds.y1) continue;
-      if (taken.some((t) => hit(box, t, pad))) continue;
-      taken.push(box); placed.push({ id: l.id, x, y, side }); break;
+    const r = l.ar ?? 0, gap = 4, variants = [{ w: l.w, h: l.h, alt: -1 }, ...(l.alts ?? []).map((a, i) => ({ w: a.w, h: a.h, alt: i }))];
+    let done = false;
+    for (const v of variants) {
+      for (const side of l.sides ?? ['right', 'left', 'above', 'below']) {
+        const x = side === 'right' ? l.ax + r + gap : side === 'left' ? l.ax - r - gap - v.w : l.ax - v.w / 2;
+        const y = side === 'above' ? l.ay - r - gap - v.h : side === 'below' ? l.ay + r + gap : l.ay - v.h / 2;
+        const box = { x0: x, y0: y, x1: x + v.w, y1: y + v.h };
+        if (box.x0 < bounds.x0 || box.y0 < bounds.y0 || box.x1 > bounds.x1 || box.y1 > bounds.y1) continue;
+        if (taken.some((t) => hit(box, t, pad))) continue;
+        taken.push(box); placed.push({ id: l.id, x, y, w: v.w, h: v.h, side, alt: v.alt }); done = true; break;
+      }
+      if (done) break;
     }
   }
   return placed;
