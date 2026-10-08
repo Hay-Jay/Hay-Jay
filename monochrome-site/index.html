@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>MONOCHROME® — Wear the Unknown</title>
+<meta name="description" content="MONOCHROME® is a black, white and chrome clothing brand. Shop tops, bottoms and objects, style the chrome avatar in the Fit Studio, and follow the next drop.">
+<link rel="canonical" href="https://monochrome.com.ng/">
+<link rel="icon" href="assets/emblem.webp" type="image/webp">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MONOCHROME® — Wear the Unknown">
+<meta property="og:description" content="Black, white and chrome. Shop the latest pieces and style your look in the Fit Studio.">
+<meta property="og:url" content="https://monochrome.com.ng/">
+<meta property="og:image" content="https://monochrome.com.ng/assets/emblem.webp">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"MONOCHROME","url":"https://monochrome.com.ng/","logo":"https://monochrome.com.ng/assets/emblem.webp","sameAs":["https://www.instagram.com/monochrome.ca/"]}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Monochrome — home">
+    <img class="emblem" src="assets/emblem.webp" alt="" width="32" height="34">
+    <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="140" height="13">
+  </a>
+  <nav class="links" aria-label="Primary">
+    <a href="#about">About</a>
+    <a href="#fit">Fit Studio</a>
+    <a href="#shop">Shop</a>
+    <a href="#events">Events</a>
+    <a href="#connect">Contact</a>
+  </nav>
+  <a class="pill bag" data-store="/cart">Bag ↗</a>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <span class="eyebrow">MONOCHROME® / BLACK · WHITE · CHROME</span>
+      <h1>WEAR THE<br><span class="outline">UNKNOWN.</span></h1>
+      <p>Clothing and objects built in two tones and one finish. Style the chrome avatar, check what is in stock, then go straight to the store.</p>
+      <div class="actions">
+        <a class="btn solid" href="#shop">Shop the drop</a>
+        <a class="btn ghost" href="#fit">Enter Fit Studio ↓</a>
+      </div>
+    </div>
+    <div class="portal" aria-hidden="true">
+      <div class="ring"></div><div class="ring r2"></div>
+      <img src="assets/emblem.webp" alt="" width="299" height="322">
+    </div>
+    <div class="marquee" aria-hidden="true">
+      <div class="track">
+        <span>MONOCHROME®</span><span>WEAR THE UNKNOWN</span><span>BLACK / WHITE / CHROME</span><span>NEW DROPS</span>
+        <span>MONOCHROME®</span><span>WEAR THE UNKNOWN</span><span>BLACK / WHITE / CHROME</span><span>NEW DROPS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="sec-head"><span class="eyebrow">01 / THE BRAND</span><h2>NO COLOUR.<br>NO NOISE.</h2></div>
+    <div class="about-grid">
+      <p class="lead">Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
+      <ul class="pillars">
+        <li><b>01</b><span>Two tones</span><small>A strict palette so every piece mixes with every other piece.</small></li>
+        <li><b>02</b><span>Made in small runs</span><small>Limited drops, so what you wear is not on everyone else.</small></li>
+        <li><b>03</b><span>Chrome finish</span><small>Hardware, objects and details that catch the light.</small></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FIT STUDIO -->
+  <section class="section fit" id="fit">
+    <div class="sec-head"><span class="eyebrow">02 / FIT STUDIO</span><h2>BUILD YOUR<br>MONOCHROME.</h2></div>
+    <div class="fit-grid">
+      <div class="avatar-wrap" id="avatarWrap" aria-label="Chrome avatar preview. Drag left or right to rotate.">
+        <div class="avatar" id="avatar" aria-hidden="true">
+          <div class="chrome head"></div><div class="face"></div><div class="chrome neck"></div>
+          <div class="chrome torso"></div><div class="chrome arm l"></div><div class="chrome arm r"></div>
+          <div class="chrome hip"></div><div class="chrome leg l"></div><div class="chrome leg r"></div>
+          <div class="overlay top-o" id="topOverlay"></div>
+          <div class="overlay bottom-o" id="bottomOverlay"></div>
+          <div class="accessory" id="accessory"></div>
+        </div>
+        <div class="drag-hint">DRAG TO ROTATE ↔</div>
+      </div>
+      <div class="controls">
+        <div id="slots"></div>
+        <div class="total"><span>FULL LOOK</span><strong id="total">—</strong></div>
+        <div class="fit-actions">
+          <button id="random" type="button">✦ Randomize</button>
+          <button id="shopLook" type="button" class="add">Shop look ↗</button>
+        </div>
+        <div class="challenge">
+          <div class="challenge-top">
+            <div><span class="eyebrow">GAME MODE</span><strong>Style Challenge</strong></div>
+            <div class="timer" id="timer" aria-live="off">00:45</div>
+          </div>
+          <p>Build a look before time runs out.</p>
+          <button id="start" type="button">Start challenge</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SHOP -->
+  <section class="section store" id="shop">
+    <div class="sec-head split">
+      <div><span class="eyebrow">03 / THE STORE</span><h2>IN STOCK<br>NOW.</h2></div>
+      <p>Live from the Monochrome store. Tap any piece to open the real product page and check out.</p>
+    </div>
+    <div class="filters" role="tablist" aria-label="Filter products">
+      <button class="filter on" data-filter="all" type="button">All</button>
+      <button class="filter" data-filter="top" type="button">Tops</button>
+      <button class="filter" data-filter="bottom" type="button">Bottoms</button>
+      <button class="filter" data-filter="accessory" type="button">Objects</button>
+    </div>
+    <div class="products" id="products" aria-live="polite"></div>
+    <div class="center"><a class="btn solid" data-store="/collections/all">View complete store ↗</a></div>
+  </section>
+
+  <!-- EVENTS -->
+  <section class="section events" id="events">
+    <div class="sec-head"><span class="eyebrow">04 / ARCHIVE</span><h2>LIVE.<br>IN CHROME.</h2></div>
+    <a class="event" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">
+      <span class="eyebrow">EVENT</span>
+      <strong>Monochrome Fashion Show 2025</strong>
+      <span>Black · White · Chrome</span>
+      <b>View event ↗</b>
+    </a>
+  </section>
+
+  <!-- CONNECT -->
+  <section class="section connect" id="connect">
+    <div class="sec-head"><span class="eyebrow">05 / CONNECT</span><h2>STAY IN<br>ORBIT.</h2></div>
+    <div class="connect-grid">
+      <form class="news" id="news" action="mailto:info.mccanada@gmail.com" method="post" enctype="text/plain">
+        <label for="email" class="eyebrow">GET DROP ALERTS</label>
+        <div class="row">
+          <input id="email" name="email" type="email" required placeholder="you@email.com" autocomplete="email">
+          <button class="btn solid" type="submit">Notify me</button>
+        </div>
+        <small>Opens your email app to send us your address.</small>
+      </form>
+      <a class="social" href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener"><div><span>INSTAGRAM</span><strong>@monochrome.ca</strong></div><b>↗</b></a>
+      <a class="social" href="mailto:info.mccanada@gmail.com"><div><span>EMAIL</span><strong>Contact us</strong></div><b>↗</b></a>
+      <a class="social" data-store="/"><div><span>STORE</span><strong>monochrome.com.ng</strong></div><b>↗</b></a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <img class="emblem" src="assets/emblem.webp" alt="" width="72" height="77">
+  <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="360" height="32">
+  <p>© <span id="year">2026</span> MONOCHROME®. All rights reserved.</p>
+</footer>
+
+<nav class="dock" aria-label="Quick links">
+  <a href="#fit">Fit</a><a href="#shop">Shop all</a><a data-store="/cart">Bag</a>
+</nav>
+
+<script src="main.js"></script>
+</body>
+</html>
