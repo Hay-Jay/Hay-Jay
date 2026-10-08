@@ -86,3 +86,19 @@ to refute every high/medium finding. 21 of 24 verified findings survived and wer
 Still open (reported by the completeness critic, not yet reviewed in depth): money-path rounding audit across every new flow; election
 lifecycle over long absences/clock changes; multi-tab save overwrites; screen-reader/keyboard coverage and 44 px touch targets for the new UI;
 a few low-severity items (talk-station volume is fixed per utterance; Town Hall copy tweaks).
+
+## 8. Map tidy-up (post-milestone 3)
+Playtesting showed the maps were a mess: home-screen pins stacked on each other and hid under the header/card, the full and phone
+maps drew overlapping labels and identical orange dots, and the home screen was murky at night. Fixes, all in `src/ui`:
+* **`maplayout.js`** (pure, unit-tested in `tests/maplayout.test.js`): `spreadRects` gives every pin its own space (nearest free slot,
+  deterministic, always finds room when any exists); `clusterPoints` merges crowded places; `placeLabels` drops a label rather than
+  draw it over something; `clipSegment` for street names.
+* **Home screen (`hub.js`)**: the camera auto-frames so every pin sits between the header and the card (and leaves room for the taller
+  "selected" card, so selecting never reflows); pins that had to step aside keep a thin leader line to the real spot; names show under
+  pins in the close-up on wide screens and on hover/tap elsewhere; no ambient sway, so nothing shuffles. The scene is lifted so it is
+  readable at night, and the ground widens in the all-Regina view so the map never floats in a void. Narrow screens get a two-row header.
+* **Full map + phone Maps (`map.js`)**: emoji badges (with an "open now" dot), numbered clusters that fly in when tapped until the places
+  separate, collision-free labels with the long names flipping sides near the edge, rotated street names, district names only where
+  no pin already carries the name, faint stylised arterials, and badges that step aside from the player marker.
+* **Regression tests**: the smoke suite now measures real DOM boxes on the home map (no pin/pin, pin/header, pin/card overlap, close and far,
+  with and without a selection) and checks the full map's badges never overlap and that a cluster tap splits into places.

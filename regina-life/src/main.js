@@ -253,8 +253,8 @@ async function boot() {
   /* ---------- map ---------- */
   function openFullMap() {
     if (creator || build.active) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
-    fullMap ||= new MapView(fullCanvas, { mode: 'full', getState: mapState, onSelect: (p) => { mapSel = p; renderMapCard(); } });
-    fullMap.resize(); fullMap.focus(player.pos.x, player.pos.z, 0.16); fullMap.selected = S().destination?.id ?? null; mapSel = null; $('map-card').hidden = true;
+    fullMap ||= new MapView(fullCanvas, { mode: 'full', getState: mapState, onSelect: (p) => { mapSel = p; renderMapCard(); }, overlays: () => [$('map-close'), document.querySelector('.map-zoom')] });
+    fullMap.resize(); fullMap.focus(player.pos.x, player.pos.z, 0.3); fullMap.selected = S().destination?.id ?? null; mapSel = null; $('map-card').hidden = true;
   }
   function closeMap() { mapOpen = false; $('map-full').classList.remove('on'); }
   function renderMapCard() {
@@ -335,9 +335,12 @@ async function boot() {
     const open = poi.state === 'open';
     player.teleport(poi.x, poi.z + (open ? 0 : 8), open ? 0 : Math.PI); city.colliders.resolve(player.pos, 0.5); player.syncRoot();
   };
+  // the all-Regina view looks out past the edge of the 26 km ground plane; widen it there so the map never floats in a void
+  const hubGround = (wide) => city.group.getObjectByName('ground')?.scale.setScalar(wide ? 4 : 1);
   const enterHubMode = (on) => {
+    if (!on) hubGround(false);
     camera.near = on ? 50 : 0.25; camera.far = on ? 60000 : 4200; camera.updateProjectionMatrix();
-    atmo.fogOverride = on ? { near: 60000, far: 90000 } : null;
+    atmo.fogOverride = on ? { near: 60000, far: 90000 } : null; atmo.hubLift = on;
     player.char.root.visible = !on; ped.setVisible(!on); ped.limit = on ? 0 : QUALITY[qLevel].npc;
     if (on) city.setViewDistance(42000); else { applySettings(); }
     lastEnvAt = 0; updateEnv(true);
@@ -384,7 +387,7 @@ async function boot() {
       $('btn-continue').textContent = info ? (hasLife() ? 'Play here' : 'Start here') : 'Continue';
       $('hc-welcome').style.display = info ? 'none' : '';
     },
-    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; },
+    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; hubGround(l === 'far'); },
   });
   $('hub-zoom').onclick = () => hub.setLevel(hub.level === 'close' ? 'far' : 'close');
   const hubRefresh = () => {
@@ -563,7 +566,7 @@ async function boot() {
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
-    radio, build, SOC, POL,
+    radio, build, SOC, POL, fullMap: () => fullMap,
     hub, startAt: (id) => { hub.select(id); }, showEvent, news: () => ctx.news(),
     tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,
     skipTitle: () => { $('btn-continue').style.display === 'none' ? newLife() : $('btn-continue').click(); },

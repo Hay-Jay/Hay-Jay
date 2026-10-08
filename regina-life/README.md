@@ -47,7 +47,7 @@ generated procedurally — no third-party art assets, so there are no asset lice
 * **Life systems** — energy/hunger/mood, groceries, cooking, jobs with real shift tasks, wages, XP and promotions.
 * **Real time & weather** — `America/Regina` clock, computed sunrise/sunset, day/night, stars, moon, seasons, rain/snow.
   Live weather from Open-Meteo; if unreachable the game uses a **clearly labelled "SIMULATED"** fallback.
-* **Map** — minimap, full-city map with pan/zoom, POI selection, navigation beacon, and a Quick Cab fast-travel stand-in.
+* **Map** — minimap, full-city map with pan/zoom, emoji place badges that cluster when crowded (tap to zoom in), collision-free labels, POI selection, navigation beacon, and a Quick Cab fast-travel stand-in.
 
 ## What's new in Milestone 2
 

@@ -337,12 +337,16 @@ button.chip{cursor:pointer;pointer-events:auto}button.chip:hover{background:#fff
 .chip.ticker{background:var(--green);color:#fff;flex:1;min-width:200px;max-width:520px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;animation:tickfade .6s}
 @keyframes tickfade{from{transform:translateY(6px)}to{transform:none}}
 #hub-pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.pin{position:absolute;left:0;top:0;background:none;border:none;padding:0;display:flex;flex-direction:column;align-items:center;will-change:transform}
+.pin{position:absolute;left:0;top:0;width:42px;height:42px;background:none;border:none;padding:0;will-change:transform}
 .pin .pe{width:42px;height:42px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:23px;box-shadow:0 5px 14px rgba(0,0,0,.35);transition:transform .18s;position:relative}
 .pin.open .pe::after{content:"";position:absolute;right:-1px;top:-1px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #fff}
-.pin::after{content:"";width:3px;height:10px;background:rgba(255,255,255,.9);border-radius:2px;margin-top:-1px;box-shadow:0 2px 4px rgba(0,0,0,.3)}
-.pin .pl{position:absolute;top:100%;margin-top:6px;white-space:nowrap;background:rgba(10,20,32,.82);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;opacity:0;transition:opacity .15s;transform:translateY(-4px);pointer-events:none}
-.pin:hover .pe,.pin.sel .pe{transform:scale(1.22)}.pin:hover .pl,.pin.sel .pl{opacity:1}.pin.sel{z-index:3}
+.pin .pl{position:absolute;top:100%;left:50%;margin-top:6px;white-space:nowrap;background:rgba(10,20,32,.82);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;opacity:0;transition:opacity .15s;transform:translate(-50%,-4px);pointer-events:none}
+.pin:hover .pe,.pin.sel .pe{transform:scale(1.22)}.pin.sel{z-index:3}.pin:hover{z-index:4}
+@media (hover:hover){.pin:hover .pl{opacity:1;transform:translate(-50%,0)}}
+@media (min-width:900px){#hub-pins[data-level=close] .pin .pl{opacity:1;transform:translate(-50%,0)}}
+.leaders{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.leaders line{stroke:rgba(255,255,255,.85);stroke-width:1.6;stroke-linecap:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.leaders circle{fill:#fff;stroke:rgba(10,20,32,.55);stroke-width:1.5}
 .hub-card{position:absolute;bottom:calc(30px + var(--safe-b));left:50%;transform:translateX(-50%);width:min(92vw,460px);background:rgba(255,255,255,.95);color:#12202a;border-radius:26px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center}
 .hc-place{display:none;text-align:left;border-bottom:1px solid rgba(0,0,0,.08);margin:-2px 0 12px;padding-bottom:12px}
 .hub-card.sel .hc-place{display:block}.hc-place h3{margin:0 0 3px;font-size:17px}.hc-place p{margin:0;color:#4a5a66;font-size:13px;line-height:1.4}.hc-place .tagline{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;margin-bottom:5px;background:#e2f7ec;color:#13734a}.hc-place .tagline.soon{background:#eef0f3;color:#58626b}
@@ -352,6 +356,9 @@ button.chip{cursor:pointer;pointer-events:auto}button.chip:hover{background:#fff
 #title.hub .title-note{color:#6a7a86;margin:10px 0 8px}
 .hc-badges{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}.hc-badges span{font-size:11px;font-weight:700;color:#4a5a66;background:#f0f3f5;border-radius:999px;padding:4px 10px}
 #title.hub .title-foot{color:#fff;text-shadow:0 1px 4px #000;bottom:calc(6px + var(--safe-b));pointer-events:none}
+@media (max-width:640px){.hub-top{gap:6px}.brandpill{flex-wrap:nowrap;gap:8px;padding:6px 14px 6px 8px}.brandpill b{font-size:19px}.brandpill .dotchip{display:none}.wx-chip{font-size:12px;white-space:nowrap}.hub-chips{flex-wrap:nowrap;gap:6px}.hub-chips .chip{padding:7px 12px;white-space:nowrap}.chip.ticker{min-width:0;flex:1}#hub-ads{display:none}}
+@media (max-height:520px) and (orientation:landscape){.hub-top{left:12px;transform:none;align-items:flex-start;width:auto;max-width:calc(100vw - 380px);top:calc(8px + var(--safe-t))}.hub-top .chip.ticker,#hub-ads,#title.hub .title-foot{display:none}.hub-chips{width:auto}.hub-card{left:auto;right:12px;transform:none;width:min(44vw,340px);bottom:calc(8px + var(--safe-b));padding:12px;max-height:calc(100vh - 16px);overflow:auto}}
+@media (max-height:560px){.hub-card .hc-welcome,.hub-card .title-note{display:none}}
 @media (max-height:640px){.hc-badges{display:none}.hub-card{bottom:calc(24px + var(--safe-b))}}
 
 .subh{margin:14px 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
