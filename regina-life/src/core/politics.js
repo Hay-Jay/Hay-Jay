@@ -5,11 +5,12 @@
  */
 import { CANDIDATES, CANDIDATE_BY_ID, POLICIES } from '../data/policies.js';
 import { mulberry32 } from './rng.js';
-import { notify } from './game.js';
-export { activePolicyId, activePolicy, policyMult } from './policy.js';
+import { notify, doActivity } from './game.js';
+import { MAX_CAMPAIGN_POINTS, CANVASS_COOLDOWN_MS } from './policy.js';
+import { own } from './util.js';
+export { activePolicyId, activePolicy, policyMult, MAX_CAMPAIGN_POINTS } from './policy.js';
 
 export const TERM_MS = 3 * 86_400_000;
-export const MAX_CAMPAIGN_POINTS = 6;           // per term
 export const VOTE_BONUS = 0.04;                  // your own vote's share swing
 const DONATIONS = { 1000: 0.4, 5000: 2.2 };      // cents → campaign points
 
@@ -28,7 +29,7 @@ export const timeLeft = (p, now) => Math.max(0, p.start + TERM_MS - now);
 
 export function vote(store, candidateId, now = store.now()) {
   const p = ensurePolitics(store, now), slate = slateFor(p.term);
-  if (!slate.some((c) => c.id === candidateId)) return { ok: false, error: 'That candidate is not on the ballot' };
+  if (typeof candidateId !== 'string' || !slate.some((c) => c.id === candidateId)) return { ok: false, error: 'That candidate is not on the ballot' };
   if (p.vote) return { ok: false, error: 'You have already voted this term' };
   if (timeLeft(p, now) <= 0) return { ok: false, error: 'Voting has closed' };
   p.vote = candidateId; store.commit('politics'); return { ok: true };
@@ -37,16 +38,16 @@ export function vote(store, candidateId, now = store.now()) {
 export function donate(store, cents, now = store.now()) {
   const p = ensurePolitics(store, now);
   if (!p.vote) return { ok: false, error: 'Vote first, then you can back a campaign' };
-  if (!(cents in DONATIONS)) return { ok: false, error: 'Choose a listed donation' };
-  if (p.points >= MAX_CAMPAIGN_POINTS) return { ok: false, error: 'Campaign is already at full strength' };
+  if (!own(DONATIONS, String(cents))) return { ok: false, error: 'Choose a listed donation' };
+  if (p.points >= MAX_CAMPAIGN_POINTS - DONATIONS[cents] * 0.5) return { ok: false, error: 'Your campaign is already about as strong as it can get' };
   const r = store.ledger.debit(cents, `Campaign donation: ${CANDIDATE_BY_ID[p.vote].name}`, { category: 'purchase' }); if (!r.ok) return r;
   p.points = Math.min(MAX_CAMPAIGN_POINTS, p.points + DONATIONS[cents]); store.commit('politics'); return { ok: true, points: p.points };
 }
-/** Free canvassing: door-knock for your candidate (call after the activity completes). */
-export function canvass(store) {
-  const p = ensurePolitics(store); if (!p.vote) return { ok: false, error: 'Vote first' };
-  if (p.points >= MAX_CAMPAIGN_POINTS) return { ok: false, error: 'Campaign is already at full strength' };
-  p.points = Math.min(MAX_CAMPAIGN_POINTS, p.points + 0.6); store.commit('politics'); return { ok: true, points: p.points };
+/** Hand out flyers: a real action — energy cost, cooldown and vote requirement are enforced here, in the rules (not in the UI). */
+export function canvass(store, now = store.now()) {
+  const r = doActivity(store, 'canvass'); if (!r.ok) return r;
+  const p = ensurePolitics(store, now); p.points = Math.min(MAX_CAMPAIGN_POINTS, p.points + 0.6); p.lastCanvass = now;
+  store.commit('politics'); return { ok: true, points: p.points };
 }
 /** Simulated electorate shares for a term (sum 1). */
 export function simulate(term, voteId, points) {

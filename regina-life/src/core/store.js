@@ -1,5 +1,6 @@
 import { DEFAULT_LOOK, STARTER_WARDROBE } from '../data/catalog.js';
 import { Ledger } from './ledger.js';
+import { sanitize } from './sanitize.js';
 
 export const SAVE_KEY = 'reginalife.save.v1';
 export const SAVE_VERSION = 1;
@@ -13,7 +14,7 @@ export function freshState(now = Date.now()) {
     inventory: {},
     needs: { energy: 88, hunger: 76, mood: 70, hygiene: 82, fun: 66 },
     skills: { cooking: 0, fitness: 0, charisma: 0 }, ads: {}, flags: {}, eventLog: [],
-    friends: {}, partner: null, politics: null, trips: [], souvenirs: [],
+    friends: {}, partner: null, politics: null, trips: [], souvenirs: [], pendingEvent: null,
     home: { owned: {}, placed: [], wall: 'cream', floor: 'oak' }, radio: { station: null, volume: 0.7 },
     job: { active: null, application: null, shift: null },
     phone: { wallpaper: 0, battery: 86, airplane: false, dnd: false, wifi: true, bluetooth: true, brightness: 1, volume: 0.6, flashlight: false, unlocked: false },
@@ -42,9 +43,9 @@ export class Store {
       if (!s || s.v !== SAVE_VERSION) return null;
       // merge onto defaults so newly added fields never crash older saves
       const d = freshState(this.now());
-      return { ...d, ...s, player: { ...d.player, ...s.player, look: { ...d.player.look, ...s.player?.look } },
+      return sanitize({ ...d, ...s, player: { ...d.player, ...s.player, look: { ...d.player.look, ...s.player?.look } },
         phone: { ...d.phone, ...s.phone }, needs: { ...d.needs, ...s.needs }, settings: { ...d.settings, ...s.settings },
-        job: { ...d.job, ...s.job }, bank: { ...d.bank, ...s.bank }, skills: { ...d.skills, ...s.skills }, home: { ...d.home, ...s.home }, radio: { ...d.radio, ...s.radio } };
+        job: { ...d.job, ...s.job }, bank: { ...d.bank, ...s.bank }, skills: { ...d.skills, ...s.skills }, home: { ...d.home, ...s.home }, radio: { ...d.radio, ...s.radio } }, this.now());
     } catch { return null; }
   }
   hasSave() { try { return !!this.storage?.getItem(SAVE_KEY); } catch { return false; } }

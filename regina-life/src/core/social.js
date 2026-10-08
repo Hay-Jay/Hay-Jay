@@ -2,10 +2,15 @@
 import { RES_BY_ID, findResident, searchResidents } from '../data/residents.js';
 import { addSkill, notify, receiveMessage } from './game.js';
 import { fmtMoney } from './ledger.js';
+import { own } from './util.js';
 
 const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
 export const MAX_FRIENDS = 12;
-export const relName = (v) => (v >= 80 ? 'Best friend' : v >= 50 ? 'Good friend' : v >= 20 ? 'Friend' : 'Acquaintance');
+/** One shared threshold: you can ask someone on a date once you are Good friends. */
+export const DATE_LEVEL = 60;
+export const relName = (v) => (v >= 85 ? 'Best friend' : v >= DATE_LEVEL ? 'Good friend' : v >= 25 ? 'Friend' : 'Acquaintance');
+const fr = (s, id) => (own(s.friends, id) ? s.friends[id] : null);
+const resOf = (id) => (own(RES_BY_ID, id) ? RES_BY_ID[id] : null);
 export const HANGOUTS = {
   coffee: { label: 'Grab a coffee', icon: '☕', cost: 600, rel: 6, needs: { fun: 10, mood: 6, energy: 6 }, say: 'You sip double-doubles and watch the snow fall sideways.' },
   walk:   { label: 'Walk around Wascana', icon: '🦆', cost: 0, rel: 5, needs: { fun: 8, mood: 6, energy: -5 }, say: 'You circle the lake, arguing about which goose is the leader.' },
@@ -20,7 +25,7 @@ export const friendIds = (s) => Object.keys(s.friends || {});
 export { searchResidents };
 export function addFriend(store, key, now = store.now()) {
   const s = store.state, res = findResident(key); if (!res) return { ok: false, error: 'No resident with that @username' };
-  const f = ensure(s); if (f[res.id]) return { ok: false, error: `You and ${res.name} are already friends` };
+  const f = ensure(s); if (own(f, res.id)) return { ok: false, error: `You and ${res.name} are already friends` };
   if (Object.keys(f).length >= MAX_FRIENDS) return { ok: false, error: 'Your friends list is full' };
   f[res.id] = { level: 8, since: now, last: now, lastHang: 0, lastGift: 0, lastChat: 0, status: null };
   receiveMessage(store, res.id, `Hi! It's ${res.name.split(' ')[0]}. ${res.lines[0]}`, 1200);
@@ -34,8 +39,8 @@ function gain(store, id, amount, now) {
   return f.level;
 }
 export function hangoutBlocked(store, id, kind, now = store.now()) {
-  const s = store.state, f = s.friends?.[id], h = HANGOUTS[kind];
-  if (!f) return 'Not your friend yet'; if (!h) return 'Unknown activity';
+  const s = store.state, f = fr(s, id), h = own(HANGOUTS, kind) ? HANGOUTS[kind] : null;
+  if (!f || !resOf(id)) return 'Not your friend yet'; if (!h) return 'Unknown activity';
   if (h.datingOnly && f.status !== 'dating') return 'Only for people you are dating';
   if (now - f.lastHang < HANGOUT_COOLDOWN_MS) return `Give ${RES_BY_ID[id].name.split(' ')[0]} a minute — you just hung out.`;
   if (h.minEnergy && s.needs.energy < h.minEnergy) return "You're too tired for that.";
@@ -53,8 +58,8 @@ export function hangout(store, id, kind, now = store.now()) {
   store.commit('needs'); return { ok: true, level, say: h.say };
 }
 export function giftBlocked(store, id, itemId, now = store.now()) {
-  const s = store.state, f = s.friends?.[id]; if (!f) return 'Not your friend yet';
-  if (!(s.inventory[itemId] > 0)) return "You don't have that.";
+  const s = store.state, f = fr(s, id); if (!f || !resOf(id)) return 'Not your friend yet';
+  if (!own(s.inventory, itemId) || !(s.inventory[itemId] > 0)) return "You don't have that.";
   if (now - f.lastGift < GIFT_COOLDOWN_MS) return 'You already gave a gift recently.';
   return null;
 }
@@ -68,19 +73,19 @@ export function gift(store, id, itemId, now = store.now()) {
 }
 /** Texting a friend slowly builds the bond (rate-limited so spamming does nothing). */
 export function chat(store, id, now = store.now()) {
-  const f = store.state.friends?.[id]; if (!f || now - f.lastChat < 30_000) return false;
+  const f = fr(store.state, id); if (!f || now - f.lastChat < 30_000) return false;
   f.lastChat = now; gain(store, id, 1, now); return true;
 }
 export function askOut(store, id, now = store.now()) {
-  const s = store.state, f = s.friends?.[id], res = RES_BY_ID[id]; if (!f) return { ok: false, error: 'Not your friend yet' };
+  const s = store.state, f = fr(s, id), res = resOf(id); if (!f || !res) return { ok: false, error: 'Not your friend yet' };
   if (!res.datable) return { ok: false, error: `${res.name.split(' ')[0]} says they value your friendship too much to complicate it.` };
   if (s.partner) return { ok: false, error: s.partner === id ? 'You are already together.' : 'You are already seeing someone.' };
-  if (f.level < 60) return { ok: false, error: `Not yet — you need to be Good friends first (${Math.round(f.level)}/60).` };
+  if (f.level < DATE_LEVEL) return { ok: false, error: `Not yet — you need to be Good friends first (${Math.floor(f.level)}/${DATE_LEVEL}).` };
   f.status = 'dating'; s.partner = id; gain(store, id, 6, now);
   receiveMessage(store, id, `${res.emoji} Yes. I'd love that. 💛`, 1000); store.commit('friends'); return { ok: true };
 }
 export function breakUp(store, id) {
-  const s = store.state, f = s.friends?.[id]; if (!f || s.partner !== id) return { ok: false, error: 'You are not together' };
+  const s = store.state, f = fr(s, id); if (!f || s.partner !== id) return { ok: false, error: 'You are not together' };
   f.status = null; s.partner = null; f.level = clamp(f.level - 25); s.needs.mood = clamp(s.needs.mood - 15);
   store.commit('friends'); return { ok: true };
 }

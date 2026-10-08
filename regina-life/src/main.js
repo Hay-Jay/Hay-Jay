@@ -26,6 +26,8 @@ import { generateNews } from './core/news.js';
 import { expireAds } from './core/ads.js';
 import * as SOC from './core/social.js';
 import * as POL from './core/politics.js';
+import * as H from './core/home.js';
+import { policyMult } from './core/policy.js';
 import { travel } from './core/travel.js';
 import { Radio } from './ui/radio.js';
 import { STATIONS } from './data/radio.js';
@@ -139,7 +141,9 @@ async function boot() {
     flushPending: () => G.flushPending(store),
     callLine: (id) => ({ dani: 'Hey you! Have you checked the Jobs app? The Market is hiring — and bring me back a coffee, eh?', mom: "Hi sweetheart, just checking you're eating and dressing warm!", market: 'Prairie Corner Market — your shift is ready whenever you are.', threads: 'Prairie Threads here — we love your style!', bank: 'This is Wascana Credit Union. Never share your PIN. Goodbye.' }[id] || 'Hello?'),
     news: () => generateNews({ date: virtualNow(), clock: clock(), weather, season: seasonOf(clock().month), state: S() }),
-    adsFocus: null, refreshBillboards: () => city.refreshBillboards(S().ads, Date.now()),
+    adsFocus: null, refreshBillboards: () => city.refreshBillboards(S().ads, Date.now(), policyMult(S(), 'ads')),
+    confirm: (title, text, yes, run) => panels.menu(title, text, [{ label: yes, primary: true, run }, { label: 'Cancel' }]),
+    isBuilding: () => build.active,
     openMap: () => openFullMap(), startCamera: () => startCamera(),
     resetGame: async () => { await fadeTo(true); store.reset(); location.reload(); },
     quickCab(poi) {
@@ -165,7 +169,7 @@ async function boot() {
     onPanel: () => {},
     rebuildPlayerLook: rebuildPlayer,
   };
-  const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio;
+  const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio; radio.volume = S().radio?.volume ?? 0.7; radio.onVolume = (v) => { S().radio.volume = v; store.commit('phone-quiet'); };
   ctx.startTrip = (destId, mode) => {
     const r = travel(store, destId, mode); if (!r.ok) { toast(r.error, 'warn'); audio.blip('error'); return; }
     audio.blip('cash'); phone.close();
@@ -180,9 +184,9 @@ async function boot() {
   panels.ctx.rebuildPlayer = rebuildPlayer;
 
   /* ---------- build mode ---------- */
-  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast,
+  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f) => { rig.buildInset = f; },
     onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); },
-    onStop: () => { interior?.setOverhead(false); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good'); } });
+    onStop: () => { interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good'); } });
 
   /* ---------- interiors ---------- */
   const interiors = {};
@@ -202,9 +206,9 @@ async function boot() {
       },
       noticeBoard: () => { const p = POL.ensurePolitics(store), pol = POLICIES[p.mayor.policy]; panels.menu('📌 City notices', `• ${pol.icon} ${pol.name}: ${pol.effect}.\n• Election term ${p.term} is under way — vote in the Town Hall app.\n• ${ctx.news()[2]?.title ?? 'Council meets Tuesday.'}`, [{ label: 'Close' }]); },
       activity: (id) => {
-        const bad = G.activityBlocked(store, id) || (id === 'canvass' && !POL.ensurePolitics(store).vote ? 'Vote first (Town Hall app), then you can hand out flyers.' : null); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
+        const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
         const a = G.ACTIVITIES[id]; player.gesture('use', a.secs);
-        panels.progress(a.label, a.secs, () => { const r = G.doActivity(store, id); if (r.ok) { audio.blip('ok'); if (id === 'canvass') POL.canvass(store); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
+        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
@@ -222,7 +226,7 @@ async function boot() {
     setIndoor(true);
     player.teleport(interior.spawn.x, interior.spawn.z, interior.spawn.yaw); player.bounds = interior.bounds; player.grid = interior.colliders;
     if (!S().job.shift) interior.resetTask();
-    if (kind === 'apartment') interior.setHome(S().home);
+    if (kind === 'apartment') { const n = H.repairHome(store); interior.setHome(S().home); if (n) toast(`Some furniture was blocking the way — ${n} piece${n > 1 ? 's' : ''} moved to storage.`, 'info'); }
     rig.grid = interior.colliders; rig.indoor = true; rig.bounds = interior.bounds; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(interior.spawn.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
     toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' })[kind], 'info');
@@ -272,7 +276,7 @@ async function boot() {
   let filter = '', selfie = false;
   $('cam-filters').innerHTML = FILTERS.map(([k, n]) => `<button data-f="${k}" class="${k === '' ? 'on' : ''}">${n}</button>`).join('');
   $('cam-filters').onclick = (e) => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; document.body.className = document.body.className.replace(/filter-\w+/g, '').trim(); if (filter) document.body.classList.add('filter-' + filter); $('cam-filters').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); };
-  function startCamera() { if (creator || camMode) return; camMode = true; phone.close(); closeMap(); $('camui').hidden = false; document.body.classList.add('hud-hidden'); updateThumb(); toast('Photo mode · drag to frame, scroll to zoom', 'info'); }
+  function startCamera() { if (creator || camMode || build.active) return; camMode = true; phone.close(); closeMap(); $('camui').hidden = false; document.body.classList.add('hud-hidden'); updateThumb(); toast('Photo mode · drag to frame, scroll to zoom', 'info'); }
   function stopCamera() { camMode = false; selfie = false; rig.mode = 'follow'; $('camui').hidden = true; document.body.classList.remove('hud-hidden'); document.body.className = document.body.className.replace(/filter-\w+/g, '').trim(); filter = ''; $('cam-filters').querySelectorAll('button').forEach((x, i) => x.classList.toggle('on', i === 0)); }
   function updateThumb() { const p = S().photos[0]; $('cam-thumb').style.backgroundImage = p ? `url(${p.data})` : 'none'; }
   $('cam-close').onclick = stopCamera;
@@ -346,7 +350,7 @@ async function boot() {
   };
   const newLife = () => {
     hub.hide(); enterHubMode(false);
-    store.reset(); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
+    store.reset(); POL.ensurePolitics(store); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
     creator = true; gameMode = 'creator'; $('title').classList.remove('on'); rig.mode = 'creator'; rig.yaw = player.yaw + 0.5; rig.snap(player);
     const off = () => camera.setViewOffset(innerWidth, innerHeight, innerWidth * (innerWidth > 760 ? 0.17 : 0), innerWidth > 760 ? 0 : innerHeight * 0.18, innerWidth, innerHeight);
     off();
@@ -433,7 +437,7 @@ async function boot() {
     if (topic === 'look') rebuildPlayer();
     if (topic === 'phone' || topic === 'reset') { const on = S().phone.flashlight; flash.intensity = on ? 90 : 0; }
     if (topic === 'bank' || topic === 'inventory') renderMapCard();
-    if (topic === 'ads') city.refreshBillboards(S().ads, Date.now());
+    if (topic === 'ads' || topic === 'politics') ctx.refreshBillboards();
     if (topic === 'home' && interior?.kind === 'apartment') interior.setHome(S().home);
   });
 
@@ -468,7 +472,7 @@ async function boot() {
     panels.event(ev, { can: (i) => choiceAvailable(store, ev, i), pick: (i) => { const r = resolveEvent(store, ev.id, i); if (r.ok) audio.blip(r.summary?.startsWith('−') ? 'tick' : 'ok'); return r; } });
   };
   const maybeEvent = () => {
-    if (panels.open || phone.isOpen || mapOpen || camMode || creator || fading || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
+    if (panels.open || phone.isOpen || mapOpen || camMode || creator || fading || build.active || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
     const sh = S().job.shift; let where = null, p = 0.03;
     if (inInterior === 'apartment') where = 'home'; else if (!inInterior) where = 'street';
     if (sh && inInterior && JOBS[sh.id].place === inInterior) { where = 'shift:' + sh.id; p = 0.09; }

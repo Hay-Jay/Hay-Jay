@@ -29,7 +29,20 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const walkEta = (m) => { const s = m / 3.1; return s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`; };
 const fmtDist = (m) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
 
-function app(id, name, mount) { return { id, name, mount }; }
+/** Re-rendering an app keeps the scroll position unless the screen changed (its title differs). */
+function scrollSafe(el) {
+  return new Proxy(el, {
+    get(t, k) { const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; },
+    set(t, k, v) {
+      if (k !== 'innerHTML') { t[k] = v; return true; }
+      const sc = t.querySelector('.scroll'), y = sc ? sc.scrollTop : 0, title = t.querySelector('.nav h2')?.textContent;
+      t.innerHTML = v;
+      const n = t.querySelector('.scroll'); if (n && y && t.querySelector('.nav h2')?.textContent === title) n.scrollTop = y;
+      return true;
+    },
+  });
+}
+function app(id, name, mount) { return { id, name, mount: (body, ctx, phone) => mount(scrollSafe(body), ctx, phone) }; }
 
 /* ================= MESSAGES ================= */
 const messages = app('messages', 'Messages', (body, ctx) => {
@@ -192,15 +205,15 @@ const jobsApp = app('jobs', 'Jobs', (body, ctx, phone) => {
     if (tab === 'mine' && j) {
       const def = JOBS[j.id], lvl = def.levels[j.level], next = def.levels[j.level + 1], sh = s.job.shift;
       const pct = next ? Math.min(100, ((j.xp - lvl.xpNeeded) / (next.xpNeeded - lvl.xpNeeded)) * 100) : 100;
-      inner = `<div class="card job-card"><small>${esc(def.employer)}</small><h3>${esc(def.title)}</h3><p class="lvl">${esc(lvl.name)} · ${fmtMoney(lvl.wage)} / shift</p>
+      inner = `<div class="card job-card"><small>${esc(def.employer)}</small><h3>${esc(def.title)}</h3><p class="lvl">${esc(lvl.name)} · ${fmtMoney(G.wageFor(store, lvl))} / shift</p>
         <div class="progress"><i style="width:${pct}%"></i></div><small>${next ? `${j.xp}/${next.xpNeeded} XP to ${esc(next.name)}` : 'Top level reached'} · ${j.shifts} shifts completed</small></div>
         ${sh ? `<div class="card shift"><b>Shift in progress</b><p>${sh.tasksDone} / ${sh.tasksTotal} tasks done</p><div class="progress"><i style="width:${(sh.tasksDone / sh.tasksTotal) * 100}%"></i></div><small>${sh.tasksDone >= sh.tasksTotal ? 'Return to the counter to clock out.' : 'Carry stock from the back to the highlighted shelf.'}</small></div>`
-        : `<div class="card"><b>Next shift</b><p>${lvl.tasks} tasks · pay ${fmtMoney(lvl.wage)}</p><small>Go to ${esc(def.employer)}, then talk to staff at the counter to clock in. Pay is deposited only after the work is done.</small></div>`}
+        : `<div class="card"><b>Next shift</b><p>${lvl.tasks} tasks · pay ${fmtMoney(G.wageFor(store, lvl))}</p><small>Go to ${esc(def.employer)}, then talk to staff at the counter to clock in. Pay is deposited only after the work is done.</small></div>`}
         <div class="mc-btns"><button class="btn primary" data-act="nav">Navigate to work</button><button class="btn danger" data-act="quit">Quit job</button></div>`;
     } else {
-      inner = (ap ? `<div class="card ${ap.status === 'offered' ? 'offer' : ''}"><small>Application</small><h3>${esc(JOBS[ap.id].title)}</h3><p>${ap.status === 'pending' ? 'Under review… the employer will contact you shortly.' : `Offer: ${fmtMoney(JOBS[ap.id].levels[0].wage)} per shift`}</p>${ap.status === 'offered' ? '<div class="mc-btns"><button class="btn primary" data-act="accept">Accept offer</button><button class="btn" data-act="decline">Decline</button></div>' : ''}</div>` : '')
+      inner = (ap ? `<div class="card ${ap.status === 'offered' ? 'offer' : ''}"><small>Application</small><h3>${esc(JOBS[ap.id].title)}</h3><p>${ap.status === 'pending' ? 'Under review… the employer will contact you shortly.' : `Offer: ${fmtMoney(G.wageFor(store, JOBS[ap.id].levels[0]))} per shift`}</p>${ap.status === 'offered' ? '<div class="mc-btns"><button class="btn primary" data-act="accept">Accept offer</button><button class="btn" data-act="decline">Decline</button></div>' : ''}</div>` : '')
         + Object.values(JOBS).map((d) => `<div class="card job"><div class="jt"><div class="avatar" style="background:${CONTACTS[d.contact].color}">${d.employer[0]}</div><div><h3>${esc(d.title)}</h3><small>${esc(d.employer)}</small></div></div><p>${esc(d.blurb)}</p>
-          <div class="chips">${d.levels.map((l) => `<span>${esc(l.name)} ${fmtMoney(l.wage)}</span>`).join('')}</div>
+          <div class="chips">${d.levels.map((l) => `<span>${esc(l.name)} ${fmtMoney(G.wageFor(store, l))}</span>`).join('')}</div>
           <button class="btn primary wide" data-apply="${d.id}" ${j || ap ? 'disabled' : ''}>${j ? 'Already employed' : ap ? 'Application in progress' : 'Apply'}</button></div>`).join('')
         + '<p class="fine pad">More careers (delivery, rideshare, office, trades…) arrive in later milestones.</p>';
     }
@@ -391,23 +404,23 @@ const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
     const s = store.state, now = store.now(), mine = BILLBOARDS.filter((b) => activeAd(s, b.id, now));
     body.innerHTML = `${nav('Ads')}<div class="scroll">
       ${mine.length ? `<h4 class="sec">Your campaigns</h4><div class="list">${mine.map((b) => { const a = s.ads[b.id]; return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:linear-gradient(135deg,${THEMES[a.theme][0]},${THEMES[a.theme][1]})">📢</div><div class="grow"><b>“${esc(a.text)}”</b><p>${esc(b.name)} · ${left(a.until)}</p></div></button>`; }).join('')}</div>` : ''}
-      <h4 class="sec">Billboards in Regina</h4><div class="list">${BILLBOARDS.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${b.tier === 'mega' ? 'linear-gradient(135deg,#6a2cff,#ff2d95)' : 'linear-gradient(135deg,#0b8f86,#2a74d6)'}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${b.tier === 'mega' ? 'MEGA SCREEN' : 'Standard'} · ${fmtMoney(DAY_PRICE[b.tier])}/day</p></div><small class="${a ? 'red' : 'green'}">${a ? 'Booked' : 'Available'}</small></button>`; }).join('')}</div>
+      <h4 class="sec">Billboards in Regina</h4><div class="list">${BILLBOARDS.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${b.tier === 'mega' ? 'linear-gradient(135deg,#6a2cff,#ff2d95)' : 'linear-gradient(135deg,#0b8f86,#2a74d6)'}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${b.tier === 'mega' ? 'MEGA SCREEN' : 'Standard'} · ${fmtMoney(adPrice(b.id, 1, s))}/day</p></div><small class="${a ? 'red' : 'green'}">${a ? 'Booked' : 'Available'}</small></button>`; }).join('')}</div>
       <p class="fine pad">Billboards are paid in Prairie Dollars only. No real money is involved. Reach numbers are simulated.</p></div>`;
   };
   const detail = () => {
-    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), price = adPrice(sel, form.days);
+    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), price = adPrice(sel, form.days, s);
     body.innerHTML = `${nav(esc(b.name), { back: true })}<div class="scroll"><canvas class="bbprev" width="480" height="${Math.round(480 * (b.tier === 'mega' ? 0.5 : 0.5))}"></canvas>
       ${a ? `<div class="card"><b>Booked</b><p>“${esc(a.text)}” — ${left(a.until)}</p><small>Your ad is on display at this location.</small></div>
       <button class="btn wide" data-act="go">Navigate there</button>`
       : `<div class="form"><label>Your message <small>(<span id="cnt">${form.text.length}</span>/${MAX_AD_CHARS})</small><input id="adtext" maxlength="${MAX_AD_CHARS}" value="${esc(form.text)}" placeholder="e.g. Best bannock in Regina!" autocomplete="off"></label>
         <label>Colours</label><div class="swatches">${Object.entries(THEMES).map(([k, [c1, c2]]) => `<button class="sw ${form.theme === k ? 'on' : ''}" data-theme="${k}" style="background:linear-gradient(135deg,${c1},${c2})" aria-label="${k}"></button>`).join('')}</div>
-        <label>Duration</label><div class="seg tight">${Object.keys(DURATIONS).map((d) => `<button class="${form.days == d ? 'on' : ''}" data-days="${d}">${d} day${d == 1 ? '' : 's'}<small>${fmtMoney(adPrice(sel, +d))}</small></button>`).join('')}</div>
+        <label>Duration</label><div class="seg tight">${Object.keys(DURATIONS).map((d) => `<button class="${form.days == d ? 'on' : ''}" data-days="${d}">${d} day${d == 1 ? '' : 's'}<small>${fmtMoney(adPrice(sel, +d, s))}</small></button>`).join('')}</div>
         <p class="meta">👁️ Simulated reach: <b>${adReach(sel, form.days).toLocaleString()}</b> views · Balance ${fmtMoney(s.bank.balance)}</p><p class="err">${esc(form.err)}</p>
         <button class="btn primary wide" data-act="book" ${price > s.bank.balance ? 'disabled' : ''}>Book for ${fmtMoney(price)}</button></div>
       <button class="btn wide" data-act="go">Navigate there</button>`}</div>`;
     previewDraw();
   };
-  const previewDraw = () => { const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], a = activeAd(store.state, sel, store.now()); const t = form.text.trim().length >= 3 ? form.text.trim() : ''; cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, a || (t ? { text: t, theme: form.theme } : null), { tier: b.tier, priceLabel: `${fmtMoney(DAY_PRICE[b.tier])} / day` }, THEMES); };
+  const previewDraw = () => { const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], a = activeAd(store.state, sel, store.now()); const t = form.text.trim().length >= 3 ? form.text.trim() : ''; cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, a || (t ? { text: t, theme: form.theme } : null), { tier: b.tier, priceLabel: `${fmtMoney(adPrice(sel, 1, store.state))} / day` }, THEMES); };
   body.addEventListener('click', (e) => {
     const b = e.target.closest('[data-b]'); if (b) { sel = b.dataset.b; form.err = ''; detail(); return; }
     const th = e.target.closest('[data-theme]'); if (th) { form.theme = th.dataset.theme; detail(); return; }
@@ -483,7 +496,7 @@ const townhallApp = app('townhall', 'Town Hall', (body, ctx) => {
       <p class="fine pad">The election, candidates, parties and slogans are entirely fictional and unrelated to real politics.</p></div>`;
   };
   body.addEventListener('click', (e) => {
-    const v = e.target.closest('[data-vote]'); if (v) { const r = POL.vote(store, v.dataset.vote); msg = r.ok ? '' : r.error; if (r.ok) { ctx.audio?.blip('ok'); ctx.toast('🗳️ Vote cast!', 'good'); } render(); return; }
+    const v = e.target.closest('[data-vote]'); if (v) { const c = CANDIDATE_BY_ID[v.dataset.vote]; ctx.confirm(`Vote for ${c.name}?`, `${c.party} — ${POLICIES[c.policy].effect}. You can only vote once per term and cannot change it.`, 'Cast my vote', () => { const r = POL.vote(store, v.dataset.vote); msg = r.ok ? '' : r.error; if (r.ok) { ctx.audio?.blip('ok'); ctx.toast('🗳️ Vote cast!', 'good'); } render(); }); return; }
     const d = e.target.closest('[data-don]'); if (d) { const r = POL.donate(store, +d.dataset.don); msg = r.ok ? '' : r.error; if (r.ok) ctx.audio?.blip('cash'); render(); }
   });
   render(); return { update() { render(); } };

@@ -1,7 +1,7 @@
 /** Tiny WebAudio synth for UI sounds (no asset downloads). Lazily created on first user gesture. */
 export class Audio {
   constructor(getVolume) { this.ctx = null; this.getVolume = getVolume; this.ring = null; }
-  _c() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; } } if (this.ctx.state === 'suspended') this.ctx.resume?.(); return this.ctx; }
+  _c() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch { return null; } } if (this.ctx.state !== 'running' && this.ctx.state !== 'closed') { try { this.ctx.resume?.()?.catch?.(() => {}); } catch {} } return this.ctx; }
   tone(freq, dur = 0.12, { type = 'sine', gain = 0.14, delay = 0, slide = 0 } = {}) {
     const c = this._c(); if (!c) return; const v = this.getVolume(); if (v <= 0) return;
     const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();

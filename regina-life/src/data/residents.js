@@ -40,7 +40,7 @@ export function residentReply(res, text, level = 0) {
   if (has('hi', 'hey', 'hello', 'yo ')) return level >= 50 ? `${res.emoji} Hey you! Was literally about to text.` : `${res.emoji} Hey! Good to hear from you.`;
   if (has('coffee', 'cafe', 'café')) return 'Coffee? Always. Use the Social app and pick a spot.';
   if (has('gym', 'workout', 'run')) return 'A workout sounds good. Tap "Hang out" and pick the gym.';
-  if (has('date', 'dinner', 'love')) return level >= 60 ? 'Okay, now you are making me blush. 😊' : 'Aww. Let\'s hang out a bit more first, eh?';
+  if (has('date', 'dinner', 'love')) return !res.datable ? 'You are a great friend — let\'s keep it that way. 😊' : level >= 60 ? 'Okay, now you are making me blush. 😊' : 'Aww. Let\'s hang out a bit more first, eh?';
   if (has('thanks', 'thank you')) return 'Anytime. That\'s what friends are for.';
   let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   return `${res.emoji} ${res.lines[h % res.lines.length]}`;

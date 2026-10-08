@@ -365,8 +365,8 @@ export function buildCity({ quality = 'high' } = {}) {
       interactables.push({ id: 'bb_' + b.id, kind: 'billboard', boardId: b.id, x: b.x + fx * 10, z: b.z + fz * 10, radius: 9, label: `Billboard · ${b.name}` });
     }
   }
-  const refreshBillboards = (ads = {}, now = Date.now()) => {
-    for (const b of boards) { const a = ads[b.id]; drawBillboard(b.cv, a && a.until > now ? a : null, { tier: b.tier, priceLabel: b.priceLabel }, THEMES); b.tex.needsUpdate = true; }
+  const refreshBillboards = (ads = {}, now = Date.now(), priceMult = 1) => {
+    for (const b of boards) { const a = ads[b.id]; drawBillboard(b.cv, a && a.until > now ? a : null, { tier: b.tier, priceLabel: `$${(Math.round(DAY_PRICE[b.tier] * priceMult) / 100).toFixed(0)} / day` }, THEMES); b.tex.needsUpdate = true; }
   };
   refreshBillboards();
 

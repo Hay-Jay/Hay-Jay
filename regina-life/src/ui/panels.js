@@ -57,8 +57,8 @@ export class Panels {
     const render = () => {
       const bal = store.state.bank.balance;
       p.innerHTML = `<div class="ph"><h3>${esc(title)}</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
-        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0; return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(f.price)}</span><button class="btn small primary" data-buy="${id}" ${f.price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own}</em>` : ''}</div>`; }).join('')}</div>
-        <p class="fine">Prices are set by the store — purchases are validated by the in-game ledger.</p>`;
+        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0, price = G.priceFor(store, id); return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(price)}${price !== f.price ? ` <s>${fmtMoney(f.price)}</s>` : ''}</span><button class="btn small primary" data-buy="${id}" ${price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own}</em>` : ''}</div>`; }).join('')}</div>
+        <p class="fine">Prices are set by the store${G.priceFor(store, ids[0]) !== FOOD[ids[0]].price ? ' and adjusted by the mayor\'s policy' : ''} — purchases are validated by the in-game ledger.</p>`;
     };
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
@@ -79,7 +79,7 @@ export class Panels {
       const items = Object.values(CLOTHES).filter((c) => c.slot === tab && c.price > 0);
       p.innerHTML = `<div class="ph"><h3>Prairie Threads</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
         <div class="tabs">${SLOTS.map((t) => `<button class="${t === tab ? 'on' : ''}" data-tab="${t}">${{ top: 'Tops', bottom: 'Bottoms', shoes: 'Shoes', head: 'Headwear', face: 'Eyewear', neck: 'Scarves' }[t]}</button>`).join('')}</div>
-        <div class="items">${items.map((c) => { const own = s.wardrobe.includes(c.id), worn = s.player.look[SLOT_KEY[c.slot]] === c.id; return `<div class="item"><div class="swatch big" style="background:${c.color}"></div><b>${esc(c.name)}</b><div class="buy"><span>${own ? 'Owned' : fmtMoney(c.price)}</span>${own ? `<button class="btn small ${worn ? 'on' : ''}" data-wear="${c.id}">${worn ? 'Worn' : 'Wear'}</button>` : `<button class="btn small" data-try="${c.id}">Try on</button><button class="btn small primary" data-buy="${c.id}" ${c.price > bal ? 'disabled' : ''}>Buy</button>`}</div></div>`; }).join('') || '<p class="empty">Nothing in this category</p>'}</div>
+        <div class="items">${items.map((c) => { const own = s.wardrobe.includes(c.id), worn = s.player.look[SLOT_KEY[c.slot]] === c.id; return `<div class="item"><div class="swatch big" style="background:${c.color}"></div><b>${esc(c.name)}</b><div class="buy"><span>${own ? 'Owned' : fmtMoney(G.priceFor(store, c.id))}</span>${own ? `<button class="btn small ${worn ? 'on' : ''}" data-wear="${c.id}">${worn ? 'Worn' : 'Wear'}</button>` : `<button class="btn small" data-try="${c.id}">Try on</button><button class="btn small primary" data-buy="${c.id}" ${G.priceFor(store, c.id) > bal ? 'disabled' : ''}>Buy</button>`}</div></div>`; }).join('') || '<p class="empty">Nothing in this category</p>'}</div>
         <p class="fine">Try on is a preview — nothing is charged until you buy. Look in the mirror to see your outfit.</p>`;
     };
     const p = this._show('', 'shop wide', { onClose: restore, side: true }); render();

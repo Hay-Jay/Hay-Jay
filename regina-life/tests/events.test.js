@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '../src/core/store.js';
 import * as G from '../src/core/game.js';
-import { EVENTS, eligible, rollEvent, resolveEvent, EVENT_BY_ID, EVENT_COOLDOWN_MS } from '../src/core/events.js';
+import { EVENTS, eligible, rollEvent, resolveEvent as _resolve, issueEvent, EVENT_BY_ID, EVENT_COOLDOWN_MS } from '../src/core/events.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 let t, store;
 beforeEach(() => { t = 1_700_000_000_000; store = new Store(mem(), () => t); });
+/** Resolve an event as if the game had issued it (the rules refuse events that were never issued). */
+const resolveEvent = (st, id, i) => { issueEvent(st, id, t); return _resolve(st, id, i); };
 
 describe('event data', () => {
   it('every event is well-formed', () => {

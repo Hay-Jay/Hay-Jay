@@ -12,13 +12,13 @@ export class Radio {
   play(id) {
     const st = STATION_BY_ID[id]; if (!st) return false; this.stop(true);
     this.station = id; this.track = Math.floor(Math.random() * 20); this.nowTitle = trackTitle(id, this.track); this.bar = 0;
-    if (id === 'talk') { this.nowTitle = this.speechOk ? 'Headlines' : 'Speech not available in this browser'; this.speechT = 0; this.timer = setInterval(() => this._talkTick(), 1000); }
+    if (id === 'talk') { this.nowTitle = this.speechOk ? 'Headlines' : 'Speech not available in this browser'; this.speechT = 0; this.timer = setInterval(() => this._talkTick(), 1000); this._speak(); } // first headline inside the user's click so browsers allow it
     else {
       const c = this._ctx(); if (!c) { this.station = null; return false; }
       this.master = c.createGain(); this.master.gain.value = 0; this.master.connect(c.destination);
       const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = id === 'lofi' ? 3800 : 9000; this.master.disconnect(); this.master.connect(lp); lp.connect(c.destination); this.lp = lp;
       if (!this.noiseBuf) { const len = c.sampleRate; this.noiseBuf = c.createBuffer(1, len, c.sampleRate); const d = this.noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; }
-      this.nextBar = c.currentTime + 0.1; this.timer = setInterval(() => this._schedule(), 120);
+      this.nextBar = c.currentTime + 0.1; this.timer = setInterval(() => this._schedule(), 120); this._schedule();
     }
     this.onChange?.(); return true;
   }
@@ -28,12 +28,12 @@ export class Radio {
     if (this.speechOk) try { speechSynthesis.cancel(); } catch {}
     this.station = null; if (!silent) this.onChange?.();
   }
-  setVolume(v) { this.volume = v; }
+  setVolume(v) { this.volume = v; this.onVolume?.(v); }
   _level() { return Math.max(0, Math.min(1, this.audio.getVolume() * this.volume)); }
-  _talkTick() {
-    if (!this.speechOk || !this.station) return; this.speechT++;
-    if (this.speechT % 14 !== 1 || speechSynthesis.speaking) return;
-    const news = this.getNews?.() ?? [], it = news[Math.floor(this.speechT / 14) % Math.max(1, news.length)]; if (!it) return;
+  _talkTick() { if (!this.speechOk || !this.station) return; this.speechT++; if (this.speechT % 14 === 0) this._speak(); }
+  _speak() {
+    if (!this.speechOk || !this.station || speechSynthesis.speaking) return;
+    const news = this.getNews?.() ?? [], it = news[(this.headline = (this.headline ?? -1) + 1) % Math.max(1, news.length)]; if (!it) return;
     const u = new SpeechSynthesisUtterance(`${it.title}. ${it.body}`); u.volume = this._level(); u.rate = 1; u.pitch = 0.95; u.lang = 'en-CA';
     this.nowTitle = it.title; this.onChange?.(); try { speechSynthesis.speak(u); } catch {}
   }
@@ -44,8 +44,8 @@ export class Radio {
     if (filter) { const f = c.createBiquadFilter(); f.type = filter.type; f.frequency.value = filter.f; f.Q.value = filter.q ?? 1; o.connect(f); src = f; }
     this._env(c, src, t, a, dur, peak); o.start(t); o.stop(t + a + dur + 0.05);
   }
-  _noise(c, t, dur, { f = 6000, type = 'highpass', peak = 0.05 } = {}) {
-    const s = c.createBufferSource(); s.buffer = this.noiseBuf; const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = f; s.connect(fl); this._env(c, fl, t, 0.002, dur, peak); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
+  _noise(c, t, dur, { f = 6000, type = 'highpass', peak = 0.05, loop = false } = {}) {
+    const s = c.createBufferSource(); s.buffer = this.noiseBuf; s.loop = loop; const fl = c.createBiquadFilter(); fl.type = type; fl.frequency.value = f; s.connect(fl); this._env(c, fl, t, 0.002, dur, peak); s.start(t, Math.random() * 0.5); s.stop(t + dur + 0.05);
   }
   _kick(c, t) { const o = c.createOscillator(); o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.12); this._env(c, o, t, 0.003, 0.2, 0.28); o.start(t); o.stop(t + 0.25); }
   _event(c, st, t, ev, beat) {
@@ -68,10 +68,11 @@ export class Radio {
     const c = this.audio.ctx; if (!c || !this.station || !this.master) return;
     this.master.gain.setTargetAtTime(this._level() * 0.9, c.currentTime, 0.1);
     const st = STATION_BY_ID[this.station], beat = 60 / st.bpm;
+    if (this.nextBar < c.currentTime) this.nextBar = c.currentTime + 0.05; // after a stall, skip the missed bars instead of playing them all at once
     while (this.nextBar < c.currentTime + 0.5) {
       const plan = barPlan(st.id, this.bar, this.rnd);
       for (const ev of plan) { let off = ev[0]; if (st.id === 'jazz' && off % 1 === 0.5) off += beat * 0.1 / beat; const swing = st.id === 'lofi' && ev[1] === 'hat' && (ev[0] * 2) % 2 === 1 ? 0.06 : 0; this._event(c, st, this.nextBar + off * beat + swing, ev, beat); }
-      if (st.id === 'lofi' && this.bar % 2 === 0) this._noise(c, this.nextBar, beat * 8, { f: 1800, type: 'highpass', peak: 0.006 }); // vinyl hiss
+      if (st.id === 'lofi' && this.bar % 2 === 0) this._noise(c, this.nextBar, beat * 8, { f: 1800, type: 'highpass', peak: 0.006, loop: true }); // vinyl hiss
       this.nextBar += beat * 4; this.bar++;
       if (this.bar % 16 === 0) { this.track++; this.nowTitle = trackTitle(st.id, this.track); this.onChange?.(); }
     }

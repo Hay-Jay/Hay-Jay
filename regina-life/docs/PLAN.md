@@ -67,3 +67,22 @@ shaped Milestone 2: an overhead *home map* with emoji pins as the front door; a 
 places); frequent **short scenario events with choices**; **billboards** as a visible, purchasable part of the world;
 and a visible **news/ticker** that makes the city feel alive. Nothing is copied — all text, art, names and mechanics here
 are original and Regina-specific. Milestone 3 borrowed the rest in spirit: friends via @usernames (NPC for now), radio, intercity travel and elections.
+
+## 7. Review log — milestone 3 adversarial review
+Seven independent reviewers (rules, economy, build mode, UI, audio, integration, saves) examined the milestone; skeptics then tried
+to refute every high/medium finding. 21 of 24 verified findings survived and were fixed, with regression tests in `tests/review.test.js`:
+* **Events are single-use tokens** — only events the game issued can be resolved, once (closed a console-level infinite-reward replay).
+* **Furniture can't soft-lock you** — placements are rejected if they cut off any fixture (flood-fill with the player's real radius);
+  legacy sealed apartments self-repair on entry. Kitchen keep-out zone corrected.
+* **Saves are sanitised on load** — unknown furniture/friends/policies are dropped, numbers clamped, collision boxes bounded
+  (a crafted coordinate used to freeze the tab). Old milestone-1/2 saves load cleanly.
+* **Prices shown = prices charged** — shops, jobs and the Ads app now use the mayor-adjusted amounts from the rules.
+* Prototype-key lookups (`constructor`, `__proto__`) can no longer bypass validation; residents are only reachable once befriended;
+  campaigning is a cooldown-limited, energy-costing rule; one dating threshold everywhere.
+* Build mode: Esc/typing no longer exit or edit the room; right-click stores one piece; forgiving tap targets; camera fits the room above the build bar.
+* UI: scroll position survives refreshes, no taps eaten by background updates, toasts and panels render above the phone, vote needs confirmation.
+* Audio: iOS `interrupted` resume, no catch-up note bursts after stalls, looping vinyl hiss, first spoken headline inside the click.
+
+Still open (reported by the completeness critic, not yet reviewed in depth): money-path rounding audit across every new flow; election
+lifecycle over long absences/clock changes; multi-tab save overwrites; screen-reader/keyboard coverage and 44 px touch targets for the new UI;
+a few low-severity items (talk-station volume is fixed per utterance; Town Hall copy tweaks).

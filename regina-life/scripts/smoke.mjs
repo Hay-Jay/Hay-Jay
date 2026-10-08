@@ -74,8 +74,9 @@ await step('buy groceries', async () => {
   await page.evaluate(() => { __regina.player.pos.x = -2.9; __regina.player.pos.z = 1.35; }); await wait(400);
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Browse/.test(t || '')) throw new Error('no shelf prompt: ' + t);
   await page.keyboard.press('e'); await page.waitForSelector('.panel.shop'); await shot('15-shop');
+  const shown = await page.$eval('[data-buy]', (el) => Math.round(parseFloat(el.parentElement.querySelector('span').textContent.replace(/[^0-9.]/g, ' ').trim().split(' ')[0]) * 100));
   const b0 = await page.evaluate(() => __regina.store.state.bank.balance); await page.click('[data-buy]'); await wait(200);
-  const b1 = await page.evaluate(() => __regina.store.state.bank.balance); if (b1 >= b0) throw new Error('balance did not drop'); await page.click('.panel .x');
+  const b1 = await page.evaluate(() => __regina.store.state.bank.balance); if (b1 >= b0) throw new Error('balance did not drop'); if (b0 - b1 !== shown) throw new Error(`shelf showed ${shown} but charged ${b0 - b1}`); await page.click('.panel .x');
 });
 await step('job loop: apply → hire → shift → paid', async () => {
   await page.evaluate(async () => { const G = __regina.G, s = __regina.store; G.applyForJob(s, 'retail'); s.state.job.application.offerAt = 0; G.tickJobs(s); G.acceptOffer(s); });
@@ -108,7 +109,7 @@ await step('home screen (hub)', async () => {
   const ok = await page.evaluate(() => !!__regina.hub && typeof __regina.news === 'function'); if (!ok) throw new Error('hub missing');
 });
 await step('life event card + validated choice', async () => {
-  await page.evaluate(async () => { const m = await import('/src/core/events.js'); __regina.tp(0, 6); __regina.showEvent(m.EVENT_BY_ID.busker); });
+  await page.evaluate(async () => { const m = await import('/src/core/events.js'); __regina.tp(0, 6); m.issueEvent(__regina.store, 'busker'); __regina.showEvent(m.EVENT_BY_ID.busker); });
   await page.waitForSelector('.panel.event'); await shot('20a-event');
   const b0 = await page.evaluate(() => __regina.store.state.bank.balance);
   await page.click('.panel.event [data-i="0"]'); await page.waitForSelector('.panel.event [data-ok]'); await shot('20b-event-result');
@@ -155,7 +156,7 @@ await step('friends by @username (NPC residents)', async () => {
 });
 await step('town hall: vote + campaign', async () => {
   await openApp('townhall'); await wait(300); await shot('32-townhall');
-  await page.click('[data-vote]'); await wait(400);
+  await page.click('[data-vote]'); await page.waitForSelector('.panel.menu'); await shot('32b-vote-confirm'); await page.click('.panel.menu .btn.primary'); await wait(400);
   const v = await page.evaluate(() => __regina.store.state.politics.vote); if (!v) throw new Error('vote not recorded');
   const b0 = await page.evaluate(() => __regina.store.state.bank.balance); await page.click('[data-don="1000"]'); await wait(300);
   const b1 = await page.evaluate(() => __regina.store.state.bank.balance); if (b1 !== b0 - 1000) throw new Error('donation not charged'); await shot('33-townhall-voted');
@@ -189,6 +190,8 @@ await step('build mode: buy, place, paint', async () => {
   for (const [type, x, z] of [['armchair', 0.5, 1.0], ['plant', -3.5, -0.4], ['poster_banff', -0.7, -3.2]]) {
     await page.click(`#b-items [data-type="${type}"]`); await wait(200); const p = await pxAt(x, z); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(400);
   }
+  await page.click('#b-shop'); await page.waitForSelector('.panel.shop'); await page.keyboard.press('Escape'); await wait(300);
+  if (!(await page.evaluate(() => __regina.build.active))) throw new Error('Esc on the shop panel also exited build mode');
   const placed = await page.evaluate(() => __regina.store.state.home.placed.map((i) => i.type)); if (placed.length !== 3) throw new Error('expected 3 placed, got ' + placed.join(','));
   // blocked placement is refused (on top of the bed)
   await page.click('#b-items [data-type="rug_round"]'); const pb = await pxAt(-3.2, -3.9); await page.mouse.click(pb.x, pb.y); await wait(300);

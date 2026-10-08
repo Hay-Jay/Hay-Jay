@@ -7,6 +7,7 @@
  */
 import { addSkill, skillLevel, notify } from './game.js';
 import { fmtMoney } from './ledger.js';
+import { own } from './util.js';
 
 const clamp = (v) => Math.max(0, Math.min(100, v));
 
@@ -157,6 +158,9 @@ export const EVENTS = [
 ];
 export const EVENT_BY_ID = Object.fromEntries(EVENTS.map((e) => [e.id, e]));
 export const EVENT_COOLDOWN_MS = 70_000;
+export const PENDING_TTL_MS = 15 * 60_000;
+/** Events are single-use tokens: only an event the game ISSUED (rollEvent / travel) can be resolved, once, within the TTL. */
+export function issueEvent(store, eventId, now = store.now()) { if (!own(EVENT_BY_ID, eventId)) return false; store.state.pendingEvent = { id: eventId, at: now }; return true; }
 
 const hasItem = (s, id) => (s.inventory[id] || 0) > 0;
 export function choiceAvailable(store, ev, i) {
@@ -176,16 +180,19 @@ export function rollEvent(store, c, rnd = Math.random, now = store.now()) {
   const pool = eligible(c).filter((e) => !recent.has(e.id));
   if (!pool.length) return null;
   const ev = pool[Math.floor(rnd() * pool.length)];
-  f.eventAt = now; return ev;
+  f.eventAt = now; issueEvent(store, ev.id, now); return ev;
 }
 /** Apply a choice. Everything is re-validated here, never trusted from the UI. */
-export function resolveEvent(store, eventId, i) {
-  const ev = EVENT_BY_ID[eventId], s = store.state; if (!ev) return { ok: false, error: 'Unknown event' };
+export function resolveEvent(store, eventId, i, now = store.now()) {
+  const s = store.state, ev = own(EVENT_BY_ID, eventId) ? EVENT_BY_ID[eventId] : null; if (!ev) return { ok: false, error: 'Unknown event' };
+  const pend = s.pendingEvent; if (!pend || pend.id !== eventId || !(now - pend.at <= PENDING_TTL_MS)) return { ok: false, error: 'That moment has passed.' };
+  if (!Number.isInteger(i)) return { ok: false, error: 'Invalid choice' };
   const av = choiceAvailable(store, ev, i); if (!av.ok) return { ok: false, error: av.why };
+  s.pendingEvent = null; // consume BEFORE applying effects so it can never be replayed
   const ch = ev.choices[i], fx = ch.fx || {};
   if (fx.money) {
     const r = fx.money < 0 ? store.ledger.debit(-fx.money, `${ev.title}`, { category: 'purchase' }) : store.ledger.credit(fx.money, `${ev.title}: tip`, { category: 'income' });
-    if (!r.ok) return { ok: false, error: r.error };
+    if (!r.ok) { s.pendingEvent = pend; return { ok: false, error: r.error }; }
   }
   for (const k of ['energy', 'hunger', 'hygiene', 'fun', 'mood']) if (fx[k]) s.needs[k] = clamp((s.needs[k] ?? 50) + fx[k]);
   if (fx.jobXp && s.job.active) s.job.active.xp += fx.jobXp;

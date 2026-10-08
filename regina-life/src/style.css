@@ -101,7 +101,7 @@ body.touch-mode .prompt{bottom:calc(210px + var(--safe-b))}
 .hud-hidden #hud>*:not(.camui){visibility:hidden}
 
 /* ---------- panels (shops / menus / char) ---------- */
-#panels{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(4,8,18,.45);backdrop-filter:blur(3px);touch-action:auto}
+#panels{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;background:rgba(4,8,18,.45);backdrop-filter:blur(3px);touch-action:auto}
 #panels.on{display:flex}
 .panel{width:min(560px,94vw);max-height:min(82vh,720px);overflow:auto;background:linear-gradient(180deg,rgba(24,32,54,.96),rgba(12,17,32,.97));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.55);animation:panelin .28s cubic-bezier(.2,.9,.3,1);touch-action:pan-y}
 @keyframes panelin{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
@@ -373,3 +373,9 @@ button.chip{cursor:pointer;pointer-events:auto}button.chip:hover{background:#fff
 body.building .hud-tl,body.building .hud-tc,body.building .hud-tr,body.building .hud-btns,body.building .touch,body.building #prompt,body.building .hint{display:none!important}
 .pm{white-space:pre-line}
 .scroll.center-col>*{flex-shrink:0}
+
+/* ---- review fixes ---- */
+#toasts{position:fixed;top:calc(70px + var(--safe-t));left:50%;transform:translateX(-50%);z-index:95;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(92vw,420px);pointer-events:none}
+.buy{flex-wrap:wrap}.buy s{opacity:.55;font-size:11px;margin-left:4px}
+.row.cand p{display:block;-webkit-line-clamp:unset;overflow:visible}
+body.building #banner{display:none!important}

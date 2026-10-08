@@ -5,7 +5,7 @@ import * as S from '../src/core/social.js';
 import * as P from '../src/core/politics.js';
 import { travel, tripBlocked } from '../src/core/travel.js';
 import * as H from '../src/core/home.js';
-import { resolveEvent, EVENTS } from '../src/core/events.js';
+import { resolveEvent as _resolve, issueEvent, EVENTS } from '../src/core/events.js';
 import { RESIDENTS, findResident, searchResidents, residentReply } from '../src/data/residents.js';
 import { CONTACTS, contactIds, npcReply } from '../src/data/contacts.js';
 import { DESTINATIONS } from '../src/data/destinations.js';
@@ -15,6 +15,7 @@ import { adPrice } from '../src/core/ads.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 let t, store; beforeEach(() => { t = 1_700_000_000_000; store = new Store(mem(), () => t); });
+const resolveEvent = (st, id, i) => { issueEvent(st, id, t); return _resolve(st, id, i); };
 
 describe('residents & friends (all NPCs)', () => {
   it('looks up by @handle, id or name fragment', () => {
