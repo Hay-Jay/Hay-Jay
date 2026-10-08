@@ -1,0 +1,22 @@
+{
+  "name": "regina-life",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "REGINA LIFE – browser-based open-world life simulation set in Regina, Saskatchewan (Milestone 1).",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.0",
+    "vite": "^8.3.3",
+    "vitest": "^5.0.3"
+  }
+}

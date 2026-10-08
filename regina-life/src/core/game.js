@@ -1,0 +1,197 @@
+/** Game-rule operations (shopping, wardrobe, jobs, needs, messaging). Pure over a Store → unit-testable. */
+import { FOOD, CLOTHES, ITEM_NAME, ITEM_PRICE, SLOT_KEY } from '../data/catalog.js';
+import { JOBS, XP_PER_TASK, MIN_SECONDS_PER_TASK } from '../data/jobs.js';
+import { CONTACTS, npcReply } from '../data/contacts.js';
+import { fmtMoney } from './ledger.js';
+
+const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+let _id = 0;
+const uid = (p) => `${p}_${Date.now().toString(36)}_${(_id++).toString(36)}`;
+
+export function notify(store, { app, title, body, silent = false }) {
+  const s = store.state;
+  const n = { id: uid('n'), app, title, body, t: store.now() };
+  s.notifications.unshift(n);
+  if (s.notifications.length > 40) s.notifications.length = 40;
+  store.commit(silent ? 'notify-silent' : 'notify');
+  return n;
+}
+
+/* ---------- shopping ---------- */
+export function buyItem(store, itemId, qty = 1, where = 'Store') {
+  const price = ITEM_PRICE(itemId);          // price comes from the catalog, never from the caller
+  if (price == null) return { ok: false, error: 'Unknown item' };
+  if (!Number.isInteger(qty) || qty < 1 || qty > 20) return { ok: false, error: 'Invalid quantity' };
+  const isClothing = !!CLOTHES[itemId];
+  if (isClothing && store.state.wardrobe.includes(itemId)) return { ok: false, error: 'Already owned' };
+  if (isClothing) qty = 1;
+  const r = store.ledger.debit(price * qty, `${where}: ${ITEM_NAME(itemId)}${qty > 1 ? ` ×${qty}` : ''}`, { category: isClothing ? 'clothing' : 'groceries' });
+  if (!r.ok) return r;
+  if (isClothing) store.state.wardrobe.push(itemId);
+  else store.state.inventory[itemId] = (store.state.inventory[itemId] || 0) + qty;
+  store.commit('inventory');
+  return { ok: true, tx: r.tx };
+}
+
+export function consume(store, itemId) {
+  const s = store.state, f = FOOD[itemId];
+  if (!f || !(s.inventory[itemId] > 0)) return { ok: false, error: 'You do not have that' };
+  s.inventory[itemId]--; if (!s.inventory[itemId]) delete s.inventory[itemId];
+  s.needs.hunger = clamp(s.needs.hunger + f.hunger);
+  s.needs.energy = clamp(s.needs.energy + f.energy);
+  s.needs.mood = clamp(s.needs.mood + 3);
+  store.commit('needs');
+  return { ok: true, food: f };
+}
+
+export function equip(store, itemId) {
+  const c = CLOTHES[itemId], s = store.state;
+  if (!c) return { ok: false, error: 'Unknown item' };
+  if (!s.wardrobe.includes(itemId)) return { ok: false, error: 'You do not own this' };
+  s.player.look[SLOT_KEY[c.slot]] = itemId;
+  store.commit('look');
+  return { ok: true };
+}
+
+/* ---------- transfers ---------- */
+export function transferTo(store, contactId, cents) {
+  const c = CONTACTS[contactId];
+  if (!c || c.kind !== 'person') return { ok: false, error: 'You can only send money to people' };
+  const r = store.ledger.debit(cents, `Sent to ${c.name}`, { category: 'transfer' });
+  if (r.ok) { receiveMessage(store, contactId, `Got your ${fmtMoney(cents)} — thank you! 💸`, 1500); store.commit('bank'); }
+  return r;
+}
+
+/* ---------- messaging ---------- */
+export function sendMessage(store, contactId, text, { reply = true } = {}) {
+  text = String(text || '').trim().slice(0, 300);
+  if (!text || !CONTACTS[contactId]) return false;
+  const s = store.state;
+  (s.messages[contactId] ||= []).push({ from: 'me', text, t: store.now() });
+  store.commit('messages');
+  if (reply && !s.phone.airplane && CONTACTS[contactId].kind === 'person') receiveMessage(store, contactId, npcReply(contactId, text), 1800 + Math.random() * 1500);
+  else if (reply && !s.phone.airplane) receiveMessage(store, contactId, npcReply(contactId, text), 1500);
+  return true;
+}
+export function receiveMessage(store, contactId, text, delayMs = 0) {
+  const push = () => {
+    const s = store.state;
+    if (s.phone.airplane) { (s.pending ||= []).push({ contactId, text }); store.commit('messages'); return; } // delivered when airplane mode ends
+    (s.messages[contactId] ||= []).push({ from: contactId, text, t: store.now() });
+    s.unread[contactId] = (s.unread[contactId] || 0) + 1;
+    notify(store, { app: 'messages', title: CONTACTS[contactId].name, body: text });
+  };
+  if (delayMs > 0) setTimeout(push, delayMs); else push();
+}
+/** Deliver messages that arrived while airplane mode was on. */
+export function flushPending(store) {
+  const s = store.state, q = s.pending || []; s.pending = [];
+  for (const m of q) receiveMessage(store, m.contactId, m.text, 0);
+}
+export const unreadTotal = (s) => Object.values(s.unread).reduce((a, b) => a + b, 0);
+
+/* ---------- jobs ---------- */
+export const currentLevel = (job) => JOBS[job.id].levels[job.level];
+
+export function applyForJob(store, jobId) {
+  const s = store.state, def = JOBS[jobId];
+  if (!def) return { ok: false, error: 'Unknown job' };
+  if (s.job.active) return { ok: false, error: 'You already have a job. Quit first.' };
+  if (s.job.application && s.job.application.status === 'pending') return { ok: false, error: 'You already have a pending application' };
+  s.job.application = { id: jobId, at: store.now(), offerAt: store.now() + def.applyDelay * 1000, status: 'pending' };
+  receiveMessage(store, def.contact, `Thanks for applying for ${def.title}! We're reviewing your application.`, 800);
+  store.commit('jobs');
+  return { ok: true };
+}
+/** Called every second from the game loop. Moves pending applications to offers. */
+export function tickJobs(store) {
+  const a = store.state.job.application;
+  if (a && a.status === 'pending' && store.now() >= a.offerAt) {
+    a.status = 'offered';
+    const def = JOBS[a.id];
+    receiveMessage(store, def.contact, `Good news — we'd like to offer you the ${def.title} role at ${fmtMoney(def.levels[0].wage)} per shift. Accept in the Jobs app!`);
+    store.commit('jobs');
+  }
+}
+export function acceptOffer(store) {
+  const s = store.state, a = s.job.application;
+  if (!a || a.status !== 'offered') return { ok: false, error: 'No offer to accept' };
+  s.job.active = { id: a.id, level: 0, xp: 0, shifts: 0, since: store.now() };
+  s.job.application = null;
+  store.commit('jobs');
+  return { ok: true };
+}
+export function declineOffer(store) { store.state.job.application = null; store.commit('jobs'); }
+export function quitJob(store) { store.state.job.active = null; store.state.job.shift = null; store.commit('jobs'); return { ok: true }; }
+
+export function startShift(store) {
+  const s = store.state, j = s.job.active;
+  if (!j) return { ok: false, error: 'You do not have a job' };
+  if (s.job.shift) return { ok: false, error: 'Shift already in progress' };
+  if (s.needs.energy < 15) return { ok: false, error: 'You are too tired to work. Get some sleep or a coffee.' };
+  s.job.shift = { id: j.id, startedAt: store.now(), tasksDone: 0, tasksTotal: currentLevel(j).tasks };
+  store.commit('jobs');
+  return { ok: true, shift: s.job.shift };
+}
+export function completeTask(store) {
+  const sh = store.state.job.shift;
+  if (!sh) return { ok: false };
+  if (sh.tasksDone < sh.tasksTotal) sh.tasksDone++;
+  store.state.needs.energy = clamp(store.state.needs.energy - 2);
+  store.commit('jobs');
+  return { ok: true, done: sh.tasksDone, total: sh.tasksTotal };
+}
+/** Pays out only if every task was done AND the shift lasted long enough. Validated here, not in UI. */
+export function finishShift(store) {
+  const s = store.state, sh = s.job.shift, j = s.job.active;
+  if (!sh || !j) return { ok: false, error: 'No shift in progress' };
+  if (sh.tasksDone < sh.tasksTotal) return { ok: false, error: 'Tasks remaining' };
+  const elapsed = (store.now() - sh.startedAt) / 1000;
+  if (elapsed < sh.tasksTotal * MIN_SECONDS_PER_TASK) return { ok: false, error: 'Shift finished suspiciously fast — payout withheld' };
+  const lvl = currentLevel(j);
+  const pay = store.ledger.credit(lvl.wage, `Payroll: ${JOBS[j.id].employer}`, { category: 'income', ref: `shift:${sh.startedAt}` });
+  if (!pay.ok) return pay;
+  j.xp += XP_PER_TASK * sh.tasksTotal; j.shifts++;
+  s.job.shift = null;
+  let promoted = null;
+  const next = JOBS[j.id].levels[j.level + 1];
+  if (next && j.xp >= next.xpNeeded) { j.level++; promoted = next.name; receiveMessage(store, JOBS[j.id].contact, `Congratulations! You've been promoted to ${promoted}. 🎉`, 1200); }
+  s.needs.mood = clamp(s.needs.mood + 6);
+  store.commit('jobs');
+  return { ok: true, pay: lvl.wage, promoted };
+}
+export function abandonShift(store) { store.state.job.shift = null; store.commit('jobs'); }
+
+/* ---------- needs ---------- */
+export function tickNeeds(store, dtSec) {
+  const n = store.state.needs;
+  n.hunger = clamp(n.hunger - dtSec * 0.045);
+  n.energy = clamp(n.energy - dtSec * 0.028);
+  if (n.hunger < 15 || n.energy < 15) n.mood = clamp(n.mood - dtSec * 0.05);
+  else n.mood = clamp(n.mood + dtSec * 0.005, 0, 100);
+  const p = store.state.phone;
+  p.battery = clamp(p.battery - dtSec * (p.flashlight ? 0.02 : 0.004), 1, 100);
+}
+export function sleep(store) {
+  const n = store.state.needs;
+  if (n.energy > 85) return { ok: false, error: "You're not tired right now." };
+  n.energy = 100; n.hunger = clamp(n.hunger - 10); n.mood = clamp(n.mood + 8);
+  store.commit('needs');
+  return { ok: true };
+}
+
+/* ---------- cooking ---------- */
+export const RECIPES = [
+  { id: 'apple_toast',  name: 'Apple Toast',    icon: '🍞', needs: { bread: 1, apple: 1 },    hunger: 42, energy: 6, mood: 6 },
+  { id: 'deli_plate',   name: 'Deli Plate',     icon: '🥪', needs: { sandwich: 1, chips: 1 }, hunger: 55, energy: 8, mood: 8 },
+  { id: 'bannock_milk', name: 'Bannock & Milk', icon: '🫓', needs: { bannock: 1, milk: 1 },   hunger: 48, energy: 9, mood: 9 },
+];
+export function cook(store, recipeId) {
+  const r = RECIPES.find((x) => x.id === recipeId), s = store.state;
+  if (!r) return { ok: false, error: 'Unknown recipe' };
+  for (const [id, n] of Object.entries(r.needs)) if ((s.inventory[id] || 0) < n) return { ok: false, error: `Missing ingredients: ${FOOD[id].name}` };
+  for (const [id, n] of Object.entries(r.needs)) { s.inventory[id] -= n; if (!s.inventory[id]) delete s.inventory[id]; }
+  s.needs.hunger = clamp(s.needs.hunger + r.hunger); s.needs.energy = clamp(s.needs.energy + r.energy); s.needs.mood = clamp(s.needs.mood + r.mood);
+  store.commit('needs');
+  return { ok: true, recipe: r };
+}

@@ -1,0 +1,69 @@
+# REGINA LIFE
+
+A browser-based open-world life simulation set in **Regina, Saskatchewan** — live, work, shop, travel and build a life
+in a stylised 3D city that follows the **real Regina clock, sun and weather**.
+
+> **Status: Milestone 1** — a playable vertical slice. See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
+
+## Run it
+
+```bash
+cd regina-life
+npm install
+npm run dev        # http://localhost:5173  (also reachable from your phone on the same Wi-Fi)
+npm test           # unit tests for the economy, jobs, time/sun, weather, geo
+npm run build      # production build → dist/
+npm run smoke      # end-to-end test in headless Chromium (needs a built Chromium; see scripts/smoke.mjs)
+```
+
+Stack: **Vite + Three.js**, vanilla ES modules, no framework. Everything (textures, geometry, characters, sounds) is
+generated procedurally — no third-party art assets, so there are no asset licences to track.
+
+## Controls
+
+| Action | Desktop | Touch |
+| --- | --- | --- |
+| Move / run | `WASD` or arrows / `Shift` | left joystick (push to the edge or tap **Run**) |
+| Look / zoom | drag / wheel | drag right side / pinch |
+| Interact | `E` (or click the prompt) | big **E** button |
+| Phone · Map · Outfit · Photo mode | `P` · `M` · `C` · `V` | HUD buttons |
+
+## What's in Milestone 1
+
+* **City** — a ~1.6 km stylised downtown + Wascana Centre corridor (grid, signals, crosswalks, lamps, parked cars, park,
+  lake, Albert St Memorial Bridge, Legislative Building) and **massing for 9 more neighbourhoods placed from real
+  latitude/longitude** (Cathedral, North Central, Rochdale, Mosaic Stadium, East, South, U of R, Harbour Landing, Airport).
+  Geometry is merged per 320 m chunk and material, chunk-culled by distance, with instanced props and adaptive quality.
+* **Character** — articulated procedural humanoid: face shapes, skin tones, hair styles/colours, facial hair, expressions
+  with blinking, body builds, height, clothing/footwear/headwear/eyewear/scarves, layered idle/walk/run/sit/carry/wave
+  animation blending. **No numbers or logos on clothing.** Creator, wardrobe, clothing store with try-on.
+* **Camera** — damped third-person orbit, over-the-shoulder offset, occlusion avoidance, speed FOV, auto-recentre,
+  touch gestures, selfie and photo modes.
+* **Phone** — iPhone-inspired (original icons/branding): lock screen, home screen with live widgets, app-open
+  transitions, notification centre, control centre, banners, incoming/outgoing calls, 12 working apps:
+  Messages, Phone, Contacts, Maps, Bank, Jobs, Camera, Photos, Weather, Calendar, Inventory, Settings.
+* **Enterable buildings** — *Prairie Corner Market* (shop + job), *Prairie Threads* (clothing + job),
+  *Wheat City Lofts Unit 204* (your home: bed, TV, sofa, kitchen, fridge, computer, wardrobe, light switch).
+* **Life systems** — energy/hunger/mood, groceries, cooking, jobs with real shift tasks, wages, XP and promotions.
+* **Real time & weather** — `America/Regina` clock, computed sunrise/sunset, day/night, stars, moon, seasons, rain/snow.
+  Live weather from Open-Meteo; if unreachable the game uses a **clearly labelled "SIMULATED"** fallback.
+* **Map** — minimap, full-city map with pan/zoom, POI selection, navigation beacon, and a Quick Cab fast-travel stand-in.
+
+## Economy & anti-exploit (important)
+
+Money only moves through `src/core/ledger.js`: integer cents, positive/limited amounts, no overdrafts, idempotency keys,
+rate limiting. Prices come from the catalog (never from the UI), and shift pay requires every task done **and** a
+minimum elapsed time. The ledger is dependency-free so the *same file* can run on an authoritative server.
+**Until the backend milestone this still runs in the browser, so a determined player can edit local storage — Milestone 1
+is single-player.** Prairie Dollars are fictional; no real money is processed anywhere.
+
+## Layout
+
+```
+src/core     pure game rules (ledger, store, jobs/shopping/needs, time+sun, weather) — unit tested, server-portable
+src/data     catalogs: items & clothing, jobs, NPC contacts
+src/world    city generation, landmarks, interiors, sky/weather rendering, pedestrians, collision
+src/player   character rig, controller, camera, input
+src/ui       phone, apps, panels (shops/creator), map, audio, icons
+tests        vitest   ·   scripts/smoke.mjs   Playwright end-to-end
+```
