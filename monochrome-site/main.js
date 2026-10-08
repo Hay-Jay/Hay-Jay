@@ -109,7 +109,8 @@
       n: p.title, p: p.price, pMax: p.priceMax, t: p.category, avail: p.available, sizes: p.sizes,
       u: `${STORE_URL}/products/${p.handle}`,
       i: main ? sized(main, 600) : '',
-      i2: ok[1] ? sized(ok[1], 600) : ''
+      i2: ok[1] ? sized(ok[1], 600) : '',
+      d: p, h: p.handle
     };
   }).sort((a, b) => b.avail - a.avail);
   const groups = () => ['top', 'bottom', 'accessory'].map(t => items.filter(x => x.t === t && x.avail && x.i));
@@ -171,7 +172,7 @@
     const data = items.filter(x => filter === 'all' || x.t === filter);
     const price = x => (x.pMax > x.p ? 'From ' : '') + fmt(x.p);
     $('#products').innerHTML = data.length ? data.map(x => `
-      <a class="card${x.avail ? '' : ' sold'}" href="${esc(x.u)}" target="_blank" rel="noopener">
+      <a class="card${x.avail ? '' : ' sold'}" data-h="${esc(x.h)}" href="${esc(x.u)}" target="_blank" rel="noopener">
         <div class="pic">
           <img data-img loading="lazy" decoding="async" src="${esc(safeUrl(x.i))}" alt="${esc(x.n)}">
           ${x.i2 ? `<img class="alt" loading="lazy" decoding="async" src="${esc(safeUrl(x.i2))}" alt="">` : ''}
@@ -184,6 +185,83 @@
     $$('.filter').forEach(x => x.classList.remove('on')); b.classList.add('on');
     filter = b.dataset.filter; drawStore();
   }));
+
+  // ---- Product view ---------------------------------------------------
+  const pdp = $('#pdp');
+  let cur = null, sel = [], shot = 0, lastFocus = null;
+
+  const variantFor = () => cur.variants.find(v => v.options.length === sel.length && v.options.every((o, i) => o === sel[i]));
+  const hasChoice = () => cur.options.length && !(cur.options.length === 1 && cur.options[0].values.length === 1 && /default/i.test(cur.options[0].values[0]));
+
+  function showShot(i) {
+    const n = cur.images.length; if (!n) return;
+    shot = (i + n) % n;
+    $('#pdpImg').src = safeUrl(sized(cur.images[shot].src, 1000));
+    $('#pdpCount').textContent = `${shot + 1} / ${n}`;
+    $$('#pdpThumbs button').forEach((b, k) => b.classList.toggle('on', k === shot));
+  }
+
+  function drawOpts() {
+    const v = variantFor();
+    $('#pdpOpts').innerHTML = hasChoice() ? cur.options.map((o, oi) => o.values.length < 2 ? '' : `
+      <div class="opt"><span class="opt-name">${esc(o.name)}</span><div class="chips">${o.values.map(val => {
+        // a chip is available when some in-stock variant has this value together with the other current choices
+        const ok = cur.variants.some(x => x.available && x.options[oi] === val && x.options.every((ov, k) => k === oi || ov === sel[k]));
+        return `<button type="button" class="chip${sel[oi] === val ? ' on' : ''}" data-o="${oi}" data-v="${esc(val)}"${ok ? '' : ' disabled'} aria-pressed="${sel[oi] === val}">${esc(val)}</button>`;
+      }).join('')}</div></div>`).join('') : '';
+    const buy = $('#pdpBuy'), can = v && v.available;
+    buy.href = v ? `${STORE_URL}/cart/${v.id}:1` : `${STORE_URL}/products/${cur.handle}`;
+    buy.textContent = can ? 'Add to bag ↗' : 'Sold out';
+    buy.setAttribute('aria-disabled', can ? 'false' : 'true');
+    $('#pdpPrice').textContent = fmt(v ? v.price : cur.price);
+  }
+
+  function openPdp(h) {
+    cur = DATA.products.find(p => p.handle === h); if (!cur) return;
+    const first = cur.variants.find(v => v.available) || cur.variants[0];
+    sel = first ? first.options.slice() : [];
+    lastFocus = document.activeElement;
+    $('#pdpType').textContent = (cur.type || cur.category).toUpperCase();
+    $('#pdpTitle').textContent = cur.title;
+    $('#pdpDesc').textContent = cur.description;
+    $('#pdpPage').href = `${STORE_URL}/products/${cur.handle}`;
+    $('#pdpThumbs').innerHTML = cur.images.map((im, k) => `<button type="button" aria-label="Photo ${k + 1}"><img loading="lazy" src="${esc(safeUrl(sized(im.src, 160)))}" alt=""></button>`).join('');
+    showShot(0); drawOpts();
+    pdp.hidden = false; document.documentElement.style.overflow = 'hidden';
+    requestAnimationFrame(() => { pdp.classList.add('open'); $('.pdp-x').focus(); });
+  }
+  function closePdp() {
+    pdp.classList.remove('open'); document.documentElement.style.overflow = '';
+    setTimeout(() => { pdp.hidden = true; }, reduceMotion ? 0 : 300);
+    if (lastFocus) lastFocus.focus();
+  }
+
+  $('#products').addEventListener('click', e => {
+    const c = e.target.closest('.card'); if (!c || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+    e.preventDefault(); openPdp(c.dataset.h);
+  });
+  pdp.addEventListener('click', e => {
+    if (e.target.closest('[data-close]')) return closePdp();
+    const chip = e.target.closest('.chip'); if (chip) { sel[+chip.dataset.o] = chip.dataset.v; drawOpts(); return; }
+    const th = e.target.closest('#pdpThumbs button'); if (th) showShot([...th.parentNode.children].indexOf(th));
+  });
+  document.addEventListener('keydown', e => {
+    if (pdp.hidden) return;
+    if (e.key === 'Escape') return closePdp();
+    if (e.key === 'ArrowRight') showShot(shot + 1);
+    if (e.key === 'ArrowLeft') showShot(shot - 1);
+    if (e.key === 'Tab') { // keep focus inside the dialog
+      const f = $$('button:not(:disabled),a[href]', pdp).filter(x => x.offsetParent && x.getAttribute('aria-disabled') !== 'true');
+      if (!f.length) return;
+      const a = f[0], z = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+      else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+    }
+  });
+  let sx0 = null; const main = $('.pdp-main');
+  main.addEventListener('pointerdown', e => { sx0 = e.clientX; });
+  main.addEventListener('pointerup', e => { if (sx0 != null && Math.abs(e.clientX - sx0) > 40) showShot(shot + (e.clientX < sx0 ? 1 : -1)); sx0 = null; });
+  main.addEventListener('pointercancel', () => { sx0 = null; });
 
   drawStore(); renderFit();
 })();

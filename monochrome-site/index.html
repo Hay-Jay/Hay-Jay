@@ -185,6 +185,28 @@
   <p>© <span id="year">2026</span> MONOCHROME®. All rights reserved.</p>
 </footer>
 
+
+<div class="pdp" id="pdp" role="dialog" aria-modal="true" aria-labelledby="pdpTitle" hidden>
+  <div class="pdp-back" data-close></div>
+  <div class="pdp-panel">
+    <button class="pdp-x" type="button" data-close aria-label="Close product">✕</button>
+    <div class="pdp-gallery">
+      <div class="pdp-main"><img id="pdpImg" alt=""><span class="pdp-count" id="pdpCount"></span></div>
+      <div class="pdp-thumbs" id="pdpThumbs"></div>
+    </div>
+    <div class="pdp-info">
+      <span class="eyebrow" id="pdpType"></span>
+      <h3 id="pdpTitle"></h3>
+      <p class="pdp-price" id="pdpPrice"></p>
+      <p class="pdp-desc" id="pdpDesc"></p>
+      <div id="pdpOpts"></div>
+      <a class="btn solid pdp-buy" id="pdpBuy" target="_blank" rel="noopener">Add to bag ↗</a>
+      <a class="pdp-link" id="pdpPage" target="_blank" rel="noopener">View on the store ↗</a>
+      <small>Prices in CAD. Checkout happens on the Monochrome store.</small>
+    </div>
+  </div>
+</div>
+
 <nav class="dock" aria-label="Quick links">
   <a href="#fit">Fit</a><a href="#shop">Shop all</a><a data-store="/cart">Bag</a>
 </nav>

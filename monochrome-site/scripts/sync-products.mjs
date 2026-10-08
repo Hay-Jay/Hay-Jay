@@ -48,6 +48,8 @@ const products = all.map(p => {
     priceMax: Math.max(...prices),
     available: p.variants.some(v => v.available),
     sizes: sizeOpt ? sizeOpt.values : [],
+    options: p.options.map(o => ({ name: o.name, values: o.values })),
+    variants: p.variants.map(v => ({ id: v.id, options: [v.option1, v.option2, v.option3].filter(x => x != null), price: Number(v.price), available: v.available })),
     images: p.images.map(i => ({ src: i.src, w: i.width, h: i.height })),
     publishedAt: p.published_at
   };
