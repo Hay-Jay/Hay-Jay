@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="color-scheme" content="dark">
+<title>MONOCHROME® — Wear the Unknown</title>
+<meta name="description" content="MONOCHROME® is a black, white and chrome clothing brand. Browse the archive of tops, bottoms, rings and chains, inspect any object and check out on the store.">
+<link rel="canonical" href="https://monochrome.com.ng/">
+<link rel="icon" href="assets/emblem.webp" type="image/webp">
+<link rel="apple-touch-icon" href="assets/emblem.webp">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MONOCHROME® — Wear the Unknown">
+<meta property="og:description" content="Black, white and chrome. An archive of clothing and objects.">
+<meta property="og:url" content="https://monochrome.com.ng/">
+<meta property="og:image" content="https://monochrome.com.ng/assets/emblem.webp">
+<meta name="twitter:card" content="summary">
+<script>document.documentElement.classList.add("js","booting")</script>
+<link rel="preload" href="assets/fonts/martian-mono-300-800.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/big-shoulders-display-700-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"MONOCHROME","url":"https://monochrome.com.ng/","logo":"https://monochrome.com.ng/assets/emblem.webp","sameAs":["https://www.instagram.com/monochrome.ca/"]}
+</script>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-ne" viewBox="0 0 12 12"><path d="M3 2h7v7M10 2 2 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol>
+  <symbol id="i-r" viewBox="0 0 12 12"><path d="M1 6h10M7 2l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol>
+  <symbol id="i-l" viewBox="0 0 12 12"><path d="M11 6H1M5 2 1 6l4 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol>
+  <symbol id="i-x" viewBox="0 0 12 12"><path d="m2 2 8 8M10 2l-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 12 12"><path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol>
+  <symbol id="i-ret" viewBox="0 0 12 12"><path d="M10 2v5H2M5 4 2 7l3 3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></symbol>
+  <symbol id="i-chk" viewBox="0 0 12 12"><path d="m2 6.5 3 3 5-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></symbol>
+  <symbol id="i-dn" viewBox="0 0 12 12"><path d="M6 1v10M2 7l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></symbol>
+</svg>
+
+<!-- BOOT SEQUENCE -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot-in">
+    <img class="boot-emblem" src="assets/emblem.webp" alt="" width="64" height="69">
+    <pre class="boot-log" id="bootLog">MONOCHROME OS v1.0 — loading archive… 23 objects</pre>
+    <div class="boot-bar"><i id="bootFill"></i></div>
+    <p class="boot-skip">PRESS ANY KEY OR TAP TO SKIP<span class="caret">_</span></p>
+  </div>
+</div>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- FIXED HUD: top bar -->
+<header class="bar-t" id="barTop">
+  <a class="brand" href="#top" aria-label="Monochrome OS, back to top">
+    <img class="emblem" src="assets/emblem.webp" alt="" width="26" height="28">
+    <span class="brand-t"><b>MONOCHROME</b><i>OS v1.0</i></span>
+  </a>
+  <nav class="links" aria-label="Primary">
+    <a href="#latest"><i>01</i>Latest</a>
+    <a href="#archive"><i>02</i>Archive</a>
+    <a href="#manifest"><i>03</i>Manifest</a>
+    <a href="#events"><i>04</i>Events</a>
+    <a href="#help"><i>05</i>Help</a>
+    <a href="#contact"><i>06</i>Contact</a>
+  </nav>
+  <div class="clocks" aria-label="Local times" role="timer">
+    <span class="clk"><i>REG</i><b id="clkReg">--:--:--</b></span>
+    <span class="clk"><i>LOS</i><b id="clkLos">--:--:--</b></span>
+  </div>
+  <button class="key cmd-open" type="button" id="cmdOpen" aria-haspopup="dialog" aria-controls="cmdk"><span class="cmd-t">Command</span><span class="cmd-s">Cmd</span><kbd>/</kbd></button>
+  <a class="key bag" data-store="/cart">Bag<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+</header>
+
+<!-- FIXED HUD: left ruler -->
+<aside class="ruler" id="ruler" aria-hidden="true">
+  <div class="ruler-ticks"></div>
+  <div class="ruler-mark" id="rulerMark"><span id="rulerY">0000</span></div>
+</aside>
+
+<!-- FIXED HUD: bottom status bar -->
+<div class="bar-b" id="barBot" role="group" aria-label="System status">
+  <span class="sb sb-sys"><span class="led in" aria-hidden="true"></span>SYS OK</span>
+  <span class="sb sb-sec"><span class="sb-k">SEC</span> <b id="sbSec">00</b><span id="sbSecName">TERMINAL</span></span>
+  <span class="sb sb-xy">Y <b id="sbY">0000</b></span>
+  <span class="sb sb-pct">SCRL <span><b id="sbPct">000</b>%</span></span>
+  <span class="sb sb-ptr">PTR <b id="sbPtr">0000,0000</b></span>
+  <span class="sb sb-obj">OBJ <span><b id="sbVis">23</b>/<b id="sbAll">23</b></span></span>
+  <button class="key sb-cmd" type="button" id="cmdOpen2" aria-haspopup="dialog" aria-controls="cmdk"><span class="cmd-t">Command</span><span class="cmd-s">Cmd</span><kbd>/</kbd></button>
+</div>
+
+<div class="xhair" id="xhair" aria-hidden="true"><i class="xh-v"></i><i class="xh-h"></i></div>
+
+<main id="main">
+
+  <!-- 00 / TERMINAL -->
+  <section class="hero" id="top" aria-labelledby="h1" data-sec="00" data-name="Terminal">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="hero-in">
+      <div class="hero-copy">
+        <p class="hud-label"><span class="led in" aria-hidden="true"></span>Session open · File MC/ARCHIVE/00 · Class: public</p>
+        <h1 id="h1" aria-label="Wear the unknown."><span class="ln" aria-hidden="true"><span>WEAR</span></span><span class="ln" aria-hidden="true"><span>THE</span></span><span class="ln chrome" aria-hidden="true"><span>UNKNOWN</span></span></h1>
+        <p class="hero-lede">Clothing and objects built in two tones and one finish. Browse the archive, inspect any object, then check out on the store.</p>
+        <div class="term" id="term" role="group" aria-label="Archive status">
+          <p data-type="> mount /archive"><span class="v">OK</span></p>
+          <p data-type="> clock"><span class="v"><span id="tReg">--:--:--</span> <span class="sep">/</span> <span id="tLos">--:--:--</span></span></p>
+          <p data-type="> objects"><span class="v"><b data-count id="tObj">23</b></span></p>
+          <p data-type="> in stock"><span class="v"><b data-count id="tStock">22</b></span></p>
+          <p data-type="> ships to"><span class="v"><b data-count id="tZones">29</b> zones</span></p>
+          <p class="term-prompt">&gt; <span class="caret">_</span></p>
+        </div>
+        <div class="hero-keys">
+          <a class="key solid" href="#archive">Enter archive<svg class="ic" aria-hidden="true"><use href="#i-dn"/></svg></a>
+          <button class="key" type="button" data-cmd>Command / search<kbd>/</kbd></button>
+        </div>
+      </div>
+
+      <div class="viewport brk" id="viewport">
+        <div class="vp-head"><span>SCAN-01 // OBJ: RING / TORUS</span><span class="rec"><i aria-hidden="true"></i>LIVE</span></div>
+        <div class="radar" id="radar" role="img" aria-label="Animated radar scan: a wireframe ring turning to chrome around the Monochrome emblem. Each blip marks one object in the archive.">
+          <div class="r-ring r1" aria-hidden="true"></div>
+          <div class="r-ring r2" aria-hidden="true"></div>
+          <div class="r-ring r3" aria-hidden="true"></div>
+          <div class="r-cross" aria-hidden="true"></div>
+          <svg class="r-ticks" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false">
+            <circle r="97" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="0.5 7.9"/>
+            <circle r="95.5" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="0.8 48.5"/>
+            <circle r="86" fill="none" stroke="currentColor" stroke-width=".4" stroke-dasharray="1.2 2.4" opacity=".7"/>
+          </svg>
+          <svg class="r-dial" viewBox="-100 -100 200 200" aria-hidden="true" focusable="false">
+            <circle r="78" fill="none" stroke="currentColor" stroke-width=".5" stroke-dasharray="14 5 2 5"/>
+            <text x="0" y="-81" text-anchor="middle">000</text>
+            <text x="82" y="1.4" text-anchor="middle" transform="rotate(90 82 0) translate(0 0)">090</text>
+          </svg>
+          <div class="sweep" id="sweep" aria-hidden="true"></div>
+          <img class="r-emblem" id="emblemFallback" src="assets/emblem.webp" alt="" width="299" height="322">
+          <canvas class="gl" id="gl" aria-hidden="true"></canvas>
+          <div class="blips" id="blips" aria-hidden="true"></div>
+          <div class="blip-tip" id="blipTip" aria-hidden="true"></div>
+        </div>
+        <div class="vp-foot">
+          <span>WIRE &gt; CHROME <b id="vpScan">---</b></span>
+          <span class="vp-bar" aria-hidden="true"><i id="vpBar"></i></span>
+          <span>AZ <b id="vpAz">000</b>°</span>
+        </div>
+      </div>
+    </div>
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track" id="tickerTrack"></div>
+    </div>
+  </section>
+
+  <!-- 01 / LATEST ENTRIES -->
+  <section class="section latest" id="latest" aria-labelledby="h-latest" data-sec="01" data-name="Latest">
+    <header class="sec-head">
+      <div class="sec-tag"><span>[01]</span><span>LATEST ENTRIES</span><span class="sec-fill"></span><span data-t="log">SORT: LOGGED DESC</span></div>
+      <h2 id="h-latest"><span>JUST</span> <span>LOGGED.</span></h2>
+      <p class="sec-note">The newest objects entered into the archive. Hover or focus a row to preview, press it to inspect.</p>
+    </header>
+    <div class="log">
+      <ol class="log-list" id="logList"></ol>
+      <aside class="log-prev brk" id="logPrev" aria-label="Preview of the highlighted entry">
+        <div class="lp-pic" id="lpPic"><img id="lpImg" alt="" decoding="async"><i class="lp-x" aria-hidden="true"></i><span class="lp-xy" aria-hidden="true" id="lpXy">X000 Y000</span></div>
+        <dl class="lp-spec">
+          <div><dt>ID</dt><dd id="lpId">—</dd></div>
+          <div><dt>Name</dt><dd id="lpName">—</dd></div>
+          <div><dt>Type</dt><dd id="lpType">—</dd></div>
+          <div><dt>Stock</dt><dd id="lpStock">—</dd></div>
+          <div><dt>Price</dt><dd id="lpPrice">—</dd></div>
+        </dl>
+        <button class="key solid wide" type="button" id="lpOpen">Inspect<svg class="ic" aria-hidden="true"><use href="#i-ret"/></svg></button>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 02 / ARCHIVE -->
+  <section class="section store" id="archive" aria-labelledby="h-archive" data-sec="02" data-name="Archive">
+    <header class="sec-head">
+      <div class="sec-tag"><span>[02]</span><span>THE ARCHIVE</span><span class="sec-fill"></span><span id="shopCount2">23 OBJECTS</span></div>
+      <h2 id="h-archive"><span>EVERY</span> <span>OBJECT.</span></h2>
+      <p class="sec-note">The full store, indexed. Pick a size on any datasheet, inspect it, or tick compare on up to three objects. All prices are in Canadian dollars (CAD).</p>
+    </header>
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="Filter by category">
+        <button class="fkey on" data-filter="all" type="button" aria-pressed="true">All<i>00</i></button>
+        <button class="fkey" data-filter="top" type="button" aria-pressed="false">Tops<i>00</i></button>
+        <button class="fkey" data-filter="bottom" type="button" aria-pressed="false">Bottoms<i>00</i></button>
+        <button class="fkey" data-filter="accessory" type="button" aria-pressed="false">Objects<i>00</i></button>
+        <button class="fkey" data-filter="gift" type="button" aria-pressed="false">Gift cards<i>00</i></button>
+      </div>
+      <div class="sortwrap">
+        <label for="sort">Sort</label>
+        <div class="sel"><select id="sort">
+          <option value="featured">Featured</option>
+          <option value="new">Newest</option>
+          <option value="low">Price: low to high</option>
+          <option value="high">Price: high to low</option>
+        </select><svg class="ic" aria-hidden="true"><use href="#i-dn"/></svg></div>
+      </div>
+    </div>
+    <p class="count" id="count" aria-live="polite"></p>
+    <div class="products" id="products"><noscript><p class="empty">JavaScript is needed to browse the archive. <a href="https://monochrome.com.ng/collections/all" style="text-decoration:underline">Open the store</a> instead.</p></noscript></div>
+    <div class="center"><a class="key" data-store="/collections/all">View complete store<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a></div>
+  </section>
+
+  <!-- 03 / MANIFEST -->
+  <section class="section manifest" id="manifest" aria-labelledby="h-manifest" data-sec="03" data-name="Manifest">
+    <header class="sec-head">
+      <div class="sec-tag"><span>[03]</span><span>SYSTEM MANIFEST</span><span class="sec-fill"></span><span>README.TXT</span></div>
+      <h2 id="h-manifest"><span>NO COLOUR.</span> <span>NO NOISE.</span></h2>
+    </header>
+    <div class="man-grid">
+      <div class="readme brk">
+        <p class="readme-bar"><span>README.TXT</span><span>1/1</span></p>
+        <p class="lead">Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
+        <p>Designed in Regina, Saskatchewan. Shipped from the store to the world, Nigeria included.</p>
+      </div>
+      <ul class="mods">
+        <li class="mod brk"><span class="mod-n">MOD.01</span><h3>Two tones</h3><p>A strict palette so every piece mixes with every other piece.</p>
+          <div class="viz viz-tones" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></li>
+        <li class="mod brk"><span class="mod-n">MOD.02</span><h3>Made in small runs</h3><p>Limited drops, so what you wear is not on everyone else.</p>
+          <div class="viz viz-runs" aria-hidden="true"></div></li>
+        <li class="mod brk"><span class="mod-n">MOD.03</span><h3>Chrome finish</h3><p>Hardware, objects and details that catch the light.</p>
+          <div class="viz viz-chrome" aria-hidden="true"><i></i></div></li>
+      </ul>
+    </div>
+    <dl class="stats">
+      <div><dt>Objects logged</dt><dd><b data-count id="sObj">23</b></dd></div>
+      <div><dt>In stock</dt><dd><b data-count id="sStock">22</b></dd></div>
+      <div><dt>Delivery zones</dt><dd><b data-count id="sZones">29</b></dd></div>
+      <div><dt>Tones</dt><dd><b data-count>2</b></dd></div>
+      <div><dt>Finish</dt><dd><b data-count>1</b></dd></div>
+    </dl>
+  </section>
+
+  <!-- 04 / EVENT LOG -->
+  <section class="section events" id="events" aria-labelledby="h-events" data-sec="04" data-name="Event log">
+    <header class="sec-head">
+      <div class="sec-tag"><span>[04]</span><span>EVENT LOG</span><span class="sec-fill"></span><span>REF EVT-2025</span></div>
+      <h2 id="h-events"><span>LIVE.</span> <span>IN CHROME.</span></h2>
+    </header>
+    <a class="event brk" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">
+      <span class="ev-year" aria-hidden="true">2025</span>
+      <span class="ev-body">
+        <span class="ev-k">LOG ENTRY // EVENT</span>
+        <strong>Monochrome Fashion Show 2025</strong>
+        <span class="ev-s">Black · White · Chrome</span>
+      </span>
+      <span class="key solid ev-go">View event<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></span>
+    </a>
+  </section>
+
+  <!-- 05 / HELP + ROUTES -->
+  <section class="section help" id="help" aria-labelledby="h-help" data-sec="05" data-name="Help">
+    <header class="sec-head">
+      <div class="sec-tag"><span>[05]</span><span>HELP.TXT</span><span class="sec-fill"></span><span>FAQ + ROUTES</span></div>
+      <h2 id="h-help"><span>QUESTIONS.</span> <span>ANSWERED.</span></h2>
+    </header>
+    <div class="help-grid">
+      <div class="faq-list">
+        <details><summary><span>Where do I buy?</span></summary><p>Every piece is sold through the Monochrome store. Inspect any object here, pick your size and press Add to bag. Checkout happens on the store.</p></details>
+        <details><summary><span>How does sizing work?</span></summary><p>Fits are true to size with a relaxed cut on tops. If you are between sizes, go up. Each product page lists its measurements; message us if you want a recommendation.</p></details>
+        <details><summary><span>Shipping and delivery</span></summary><p>Orders ship from the store after checkout. Delivery time and cost are calculated at checkout based on your address. You will get a tracking update by email once your order leaves.</p></details>
+        <details><summary><span>Returns and exchanges</span></summary><p>If something does not fit, contact us soon after your order arrives with your order number. Items should be unworn and in original condition. Final terms are shown in the store policies.</p></details>
+        <details><summary><span>Are drops limited?</span></summary><p>Yes. Pieces are made in small runs and some do not return. Join the drop alerts below to hear about new releases first.</p></details>
+        <details><summary><span>Custom orders and collaborations</span></summary><p>Interested in custom pieces, a collab or a bulk order? Email us with the details and we will get back to you.</p></details>
+      </div>
+      <div class="routes brk" id="routes" aria-labelledby="h-routes">
+        <p class="rt-bar"><span id="h-routes">DELIVERY ROUTES</span><span id="rtCount">29 ZONES</span></p>
+        <p class="rt-origin">ORIGIN <b>REGINA, SK, CA</b> &gt; DESTINATION <b>WORLDWIDE</b></p>
+        <label class="rt-find" for="rtIn"><span>CHECK YOUR COUNTRY</span>
+          <span class="rt-field"><i aria-hidden="true">&gt;</i><input id="rtIn" type="text" autocomplete="off" spellcheck="false" placeholder="nigeria, ng, canada…" aria-describedby="rtOut"></span></label>
+        <p class="rt-out" id="rtOut" role="status" aria-live="polite"></p>
+        <ul class="rt-grid" id="rtGrid"></ul>
+        <p class="rt-note">Delivery time and cost are calculated at checkout from your address.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 / CONTACT -->
+  <section class="section connect" id="contact" aria-labelledby="h-contact" data-sec="06" data-name="Contact">
+    <header class="sec-head">
+      <div class="sec-tag"><span>[06]</span><span>OPEN CHANNEL</span><span class="sec-fill"></span><span>TX / RX</span></div>
+      <h2 id="h-contact"><span>STAY IN</span> <span>ORBIT.</span></h2>
+    </header>
+    <div class="connect-grid">
+      <form class="news brk" id="news" method="post" target="_blank" rel="noopener">
+        <input type="hidden" name="form_type" value="customer">
+        <input type="hidden" name="utf8" value="✓">
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <label for="email" class="news-k">SUBSCRIBE // DROP ALERTS</label>
+        <div class="prompt">
+          <span class="prompt-p" aria-hidden="true">&gt;</span>
+          <input id="email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
+          <button class="key solid" type="submit">Transmit<svg class="ic" aria-hidden="true"><use href="#i-ret"/></svg></button>
+        </div>
+        <small id="newsNote">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
+      </form>
+      <a class="chan brk" href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener"><span>INSTAGRAM</span><strong>@monochrome.ca</strong><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+      <a class="chan brk" href="mailto:info.mccanada@gmail.com"><span>EMAIL</span><strong>info.mccanada@gmail.com</strong><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+      <a class="chan brk" data-store="/"><span>STORE</span><strong>monochrome.com.ng</strong><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-mark">
+    <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="700" height="63">
+  </div>
+  <div class="foot-row">
+    <nav class="foot-links" aria-label="Footer"><a href="#archive">Archive</a><a href="#latest">Latest</a><a href="#help">FAQ</a><a data-store="/policies/shipping-policy">Shipping</a><a data-store="/policies/refund-policy">Returns</a><a data-store="/policies/privacy-policy">Privacy</a></nav>
+    <p class="foot-end">END OF ARCHIVE · SESSION <b id="uptime">00:00:00</b> · <a href="#top">Back to top</a></p>
+  </div>
+  <p class="foot-c">© <span id="year">2026</span> MONOCHROME®. All rights reserved. Prices in CAD.</p>
+</footer>
+
+<!-- INSPECT DRAWER -->
+<div class="inspect" id="inspect" role="dialog" aria-modal="true" aria-labelledby="inspTitle" hidden>
+  <div class="insp-back" data-close></div>
+  <div class="insp-panel">
+    <header class="insp-bar">
+      <span class="insp-k">INSPECT // <b id="inspId">MC-000</b></span>
+      <span class="insp-pos" id="inspPos" aria-live="polite">00/00</span>
+      <span class="insp-nav">
+        <button type="button" id="inspPrev" aria-label="Previous object"><svg class="ic" aria-hidden="true"><use href="#i-l"/></svg></button>
+        <button type="button" id="inspNext" aria-label="Next object"><svg class="ic" aria-hidden="true"><use href="#i-r"/></svg></button>
+        <button type="button" id="inspX" data-close aria-label="Close inspect panel"><span>ESC</span><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+      </span>
+    </header>
+    <div class="insp-body" id="inspBody">
+      <section class="insp-gal" aria-label="Photos">
+        <figure class="insp-fig brk" id="inspFig">
+          <img id="inspImg" alt="" decoding="async">
+          <span class="xh-c" aria-hidden="true"></span>
+          <button type="button" class="fr-nav fr-prev" id="frPrev" aria-label="Previous photo"><svg class="ic" aria-hidden="true"><use href="#i-l"/></svg></button>
+          <button type="button" class="fr-nav fr-next" id="frNext" aria-label="Next photo"><svg class="ic" aria-hidden="true"><use href="#i-r"/></svg></button>
+          <figcaption class="insp-cap"><span id="inspFrameNo">FRAME 01/01</span><button type="button" id="inspRaw" aria-pressed="false">Signal: filtered</button></figcaption>
+        </figure>
+        <ol class="frames" id="inspFrames" aria-label="Frames"></ol>
+      </section>
+      <section class="insp-spec" aria-label="Specification">
+        <p class="insp-sub" id="inspSub">TOP / HOODIES</p>
+        <h2 id="inspTitle"></h2>
+        <table class="spec">
+          <caption class="sr">Specification</caption>
+          <tbody id="specBody"></tbody>
+        </table>
+        <p class="insp-desc" id="inspDesc"></p>
+        <div class="insp-buy">
+          <a class="buy" id="inspBuy" target="_blank" rel="noopener"><span class="buy-t">Add to bag</span><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          <div class="insp-sec">
+            <button class="key" type="button" id="inspCmp" aria-pressed="false">+ Compare</button>
+            <a class="key" id="inspPage" target="_blank" rel="noopener">View on store<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          </div>
+          <small>Prices in CAD. Checkout happens on the Monochrome store.<span class="kh"> Keys: ← → frames · [ ] objects · esc close</span></small>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE TRAY + PANEL -->
+<div class="cmp-tray" id="cmpTray" hidden>
+  <span class="cmp-k">COMPARE <b id="cmpN">0</b>/3</span>
+  <span class="cmp-chips" id="cmpChips"></span>
+  <button class="key solid" type="button" id="cmpOpen">Open compare</button>
+  <button class="key" type="button" id="cmpClear">Clear</button>
+</div>
+<div class="cmp" id="cmp" role="dialog" aria-modal="true" aria-labelledby="cmpTitle" hidden>
+  <div class="cmp-back" data-close></div>
+  <div class="cmp-panel">
+    <header class="insp-bar">
+      <span class="insp-k" id="cmpTitle">COMPARE // <b id="cmpCount">0</b> OBJECTS</span>
+      <span class="insp-nav"><button type="button" data-close aria-label="Close compare panel"><span>ESC</span><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+    </header>
+    <div class="cmp-scroll" tabindex="0" role="region" aria-label="Comparison table"><table class="cmp-table" id="cmpTable"></table></div>
+  </div>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+  <div class="cmdk-back" data-close></div>
+  <div class="cmdk-box brk">
+    <div class="cmdk-in">
+      <span class="cmdk-p" aria-hidden="true">&gt;</span>
+      <input id="cmdkIn" type="text" role="combobox" aria-expanded="true" aria-controls="cmdkList" aria-autocomplete="list" aria-label="Search objects or jump to a section" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type to filter objects…">
+      <button type="button" class="cmdk-x" data-close aria-label="Close command palette"><span>ESC</span></button>
+    </div>
+    <ul id="cmdkList" role="listbox" aria-label="Results"></ul>
+    <p class="cmdk-foot"><span>↑↓ move</span><span>enter run</span><span>esc close</span><span id="cmdkCount" aria-live="polite">0 results</span></p>
+  </div>
+</div>
+
+<div class="scan-lines" aria-hidden="true"></div>
+
+<script src="config.js"></script>
+<script src="data/products.js"></script>
+<script src="main.js"></script>
+<script type="module" src="hero3d.js"></script>
+</body>
+</html>
