@@ -16,12 +16,16 @@
 <meta property="og:url" content="https://monochrome.com.ng/">
 <meta property="og:image" content="https://monochrome.com.ng/assets/emblem.webp">
 <meta name="twitter:card" content="summary">
+<script>document.documentElement.classList.add("js")</script>
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"MONOCHROME","url":"https://monochrome.com.ng/","logo":"https://monochrome.com.ng/assets/emblem.webp","sameAs":["https://www.instagram.com/monochrome.ca/"]}
 </script>
 </head>
 <body>
+<div class="loader" id="loader" aria-hidden="true"><img src="assets/emblem.webp" alt="" width="96" height="103"><span id="loadPct">0</span></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="nav" id="nav">
@@ -46,7 +50,7 @@
     <div class="grid-bg" aria-hidden="true"></div>
     <div class="hero-copy">
       <span class="eyebrow">MONOCHROME® / BLACK · WHITE · CHROME</span>
-      <h1>WEAR THE<br><span class="outline">UNKNOWN.</span></h1>
+      <h1 aria-label="Wear the unknown."><span class="ln"><span>WEAR</span></span><span class="ln"><span>THE</span></span><span class="ln"><span class="outline">UNKNOWN.</span></span></h1>
       <p>Clothing and objects built in two tones and one finish. Style the chrome avatar, check what is in stock, then go straight to the store.</p>
       <div class="actions">
         <a class="btn solid" href="#shop">Shop the drop</a>
@@ -183,5 +187,6 @@
 </nav>
 
 <script src="main.js"></script>
+<script type="module" src="hero3d.js"></script>
 </body>
 </html>

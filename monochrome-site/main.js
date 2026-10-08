@@ -42,6 +42,46 @@
   const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 }) : null;
   $$('.section > *, .foot > *').forEach(el => { el.classList.add('reveal'); io ? io.observe(el) : el.classList.add('in'); });
 
+  // ---- Motion layer ---------------------------------------------------
+  const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Loader: counts up while the page settles, then lifts. Never blocks for more than ~1.4s.
+  const pct = $('#loadPct'); let shown = 0, done = false;
+  const finish = () => { if (done) return; done = true; if (pct) pct.textContent = 100; setTimeout(() => document.documentElement.classList.add('ready'), 150); };
+  const tick = setInterval(() => { shown = Math.min(shown + 7 + Math.random() * 9, 96); if (pct) pct.textContent = Math.round(shown); }, 70);
+  const ready = () => { clearInterval(tick); finish(); };
+  if (document.readyState === 'complete') ready(); else addEventListener('load', ready);
+  setTimeout(ready, 1400);
+
+  // Scroll progress bar
+  const bar = $('#progress');
+  const onScroll = () => { const h = document.documentElement.scrollHeight - innerHeight; bar.style.transform = `scaleX(${h > 0 ? scrollY / h : 0})`; };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  if (fine && !reduceMotion) {
+    // Cursor: lerped dot that swells over anything clickable
+    const cur = $('#cursor'); let cx = 0, cy = 0, tx = 0, ty = 0;
+    addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); cur.classList.toggle('big', !!e.target.closest('a,button,summary,.avatar-wrap')); }, { passive: true });
+    document.addEventListener('mouseleave', () => cur.classList.remove('on'));
+    (function loop() { cx += (tx - cx) * .22; cy += (ty - cy) * .22; cur.style.transform = `translate(${cx - cur.offsetWidth / 2}px,${cy - cur.offsetHeight / 2}px)`; requestAnimationFrame(loop); })();
+
+    // Magnetic buttons
+    $$('.btn,.pill').forEach(el => {
+      el.addEventListener('pointermove', e => { const r = el.getBoundingClientRect(); el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .22}px,${(e.clientY - r.top - r.height / 2) * .35}px)`; });
+      el.addEventListener('pointerleave', () => { el.style.transform = ''; });
+    });
+
+    // 3D tilt on product cards (delegated, since the grid re-renders)
+    const grid = $('#products');
+    grid.addEventListener('pointermove', e => {
+      const c = e.target.closest('.card'); if (!c) return; const r = c.getBoundingClientRect();
+      c.style.setProperty('--ry', ((e.clientX - r.left) / r.width - .5) * 12 + 'deg');
+      c.style.setProperty('--rx', (.5 - (e.clientY - r.top) / r.height) * 12 + 'deg');
+    });
+    grid.addEventListener('pointerout', e => { const c = e.target.closest('.card'); if (c) { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); } });
+  }
+
   // ---- Store state ----------------------------------------------------
   let items = FALLBACK.slice();
   const groups = () => ['top', 'bottom', 'accessory'].map(t => {
