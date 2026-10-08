@@ -19,7 +19,7 @@ export function freshState(now = Date.now()) {
     job: { active: null, application: null, shift: null },
     phone: { wallpaper: 0, battery: 86, airplane: false, dnd: false, wifi: true, bluetooth: true, brightness: 1, volume: 0.6, flashlight: false, unlocked: false },
     messages: {}, unread: {}, notifications: [], photos: [], calls: [],
-    destination: null, calendar: [],
+    destination: null, calendar: [], daily: { last: '', streak: 0 },
     settings: { quality: 'auto', timeMode: 'live' },
     pos: null,
   };

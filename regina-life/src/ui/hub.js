@@ -19,9 +19,9 @@ const PIN = 46, R = PIN / 2 - 2, LIFT = 12, LABEL_H = 24, SEL_EXTRA = 90; // pin
  * leader line down to the real spot. The camera is auto-framed so every pin fits between the header and the card.
  */
 export class Hub {
-  constructor({ pinsEl, cardEl, onSelect, onZoom }) {
-    this.pinsEl = pinsEl; this.cardEl = cardEl; this.onSelect = onSelect; this.onZoom = onZoom;
-    this.topEl = pinsEl.parentElement?.querySelector('.hub-top') ?? null;
+  constructor({ pinsEl, cardEl, onSelect, onZoom, topEls = null, extra = null, selExtra = SEL_EXTRA }) {
+    this.selExtra = selExtra; this.pinsEl = pinsEl; this.cardEl = cardEl; this.onSelect = onSelect; this.onZoom = onZoom; this.extra = extra;
+    this.topEls = topEls ?? [pinsEl.parentElement?.querySelector('.hub-top')].filter(Boolean);
     this.level = 'close'; this.active = false; this.selected = null; this.t = 0;
     this.pos = new THREE.Vector3(); this.look = new THREE.Vector3(); this.fov = VIEW.close.fov; this.snapNext = true;
     this._v = new THREE.Vector3(); this.pins = new Map();
@@ -36,9 +36,10 @@ export class Hub {
   select(id) { this.selected = id; this.pinsEl.querySelectorAll('.pin').forEach((p) => p.classList.toggle('sel', p.dataset.pin === id)); this.renderCard(); this.onSelect?.(id ? this.info() : null, id); } // no refit: the pin area already leaves room for the taller 'selected' card
   render() {
     const ids = this.level === 'close' ? CLOSE : FAR;
-    const mk = (id, emoji, name, open) => `<button class="pin ${open ? 'open' : ''}" data-pin="${id}" aria-label="${name}"><span class="pe">${emoji}</span><span class="pl">${name}</span></button>`;
+    const mk = (id, emoji, name, open, cls = '') => `<button class="pin ${open ? 'open' : ''} ${cls}" data-pin="${id}" aria-label="${name}"><span class="pe">${emoji}</span><span class="pl">${name}</span></button>`;
     const items = ids.map((id) => { const p = poiById[id]; return { id, html: mk(id, p.emoji, p.name.replace(/ \(Home\)/, ''), p.state === 'open'), p, name: p.name.replace(/ \(Home\)/, '') }; });
     if (this.level === 'far') items.push({ id: 'downtown', html: mk('downtown', '🏙️', 'Downtown Regina', true), p: { x: 0, z: 0 }, name: 'Downtown Regina' });
+    for (const e of this.extra?.() ?? []) items.push({ id: e.id, html: mk(e.id, e.emoji, e.name, false, e.id), p: { x: e.x, z: e.z }, name: e.name, extra: e });
     this.pinsEl.dataset.level = this.level;
     this.pinsEl.innerHTML = `<svg class="leaders" aria-hidden="true">${items.map((i) => `<g data-l="${i.id}"><line/><circle r="4"/></g>`).join('')}</svg>` + items.map((i) => i.html).join('');
     this.pins = new Map(items.map((i) => {
@@ -53,6 +54,7 @@ export class Hub {
   }
   info() {
     const id = this.selected; if (!id) return null;
+    const ex = this.extra?.().find((e) => e.id === id); if (ex) return { name: ex.name, emoji: ex.emoji, blurb: ex.blurb ?? '', open: false, extra: ex };
     if (id === 'downtown') return { name: 'Downtown Regina', emoji: '🏙️', blurb: 'Scarth Street, Victoria Ave and your neighbourhood. Zoom in to pick a building.', open: true, downtown: true };
     const p = poiById[id]; return { name: p.name, emoji: p.emoji, blurb: p.blurb, open: p.state === 'open' };
   }
@@ -62,11 +64,11 @@ export class Hub {
 
   /** The screen area pins may occupy: below the header chips, beside or above the card (which grows when a place is selected). */
   _measure(w, h) {
-    const top = this.topEl?.getBoundingClientRect(), card = this.cardEl.getBoundingClientRect();
+    const topBottom = Math.max(0, ...this.topEls.filter((e) => e && !e.hidden && e.offsetParent !== null).map((e) => e.getBoundingClientRect().bottom)), card = this.cardEl.getBoundingClientRect();
     const side = card.width > 0 && card.width < w * 0.7 && card.left > w * 0.35; // landscape phones park the card at the side
     // the card grows when a place is selected; reserve that room up front so selecting a pin never reflows the map
-    const cardTop = card.top ? card.top - (side || this.cardEl.classList.contains('sel') ? 0 : SEL_EXTRA) : h;
-    const safe = { x0: 6, x1: side ? card.left - 8 : w - 6, y0: (top?.bottom ?? 0) + 8, y1: side ? h - 8 : Math.min(h, cardTop) - 8, fixed: [] };
+    const cardTop = card.top ? card.top - (side || this.cardEl.classList.contains('sel') ? 0 : this.selExtra) : h;
+    const safe = { x0: 6, x1: side ? card.left - 8 : w - 6, y0: topBottom + 8, y1: side ? h - 8 : Math.min(h, cardTop) - 8, fixed: [] };
     if (!side && safe.y1 - safe.y0 < 150) { // squashed window: use the full height but make the card a wall the pins must go around
       safe.y1 = h - 8; if (card.width && h > cardTop) safe.fixed.push({ x: (card.left + card.right) / 2, y: (cardTop + h) / 2, w: card.width, h: h - cardTop });
     }

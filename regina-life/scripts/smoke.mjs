@@ -35,14 +35,15 @@ await step('loads to title', async () => { await page.waitForSelector('#title.on
 // Home-screen map: every pin readable. Measures the real DOM boxes (pin circle + visible name) against each other, the header and the card.
 const auditPins = () => page.evaluate(() => {
   const box = (r) => ({ x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }), hit = (a, b) => a.x0 < b.x1 - 1 && a.x1 > b.x0 + 1 && a.y0 < b.y1 - 1 && a.y1 > b.y0 + 1;
-  const pins = [...document.querySelectorAll('.pin')].filter((p) => p.style.display !== 'none').map((p) => {
+  const live = [...document.querySelectorAll('.pin')].filter((p) => p.style.display !== 'none' && p.offsetParent !== null);
+  const pins = live.map((p) => {
     const e = box(p.querySelector('.pe').getBoundingClientRect()), l = p.querySelector('.pl'), lr = getComputedStyle(l).opacity > 0.5 ? box(l.getBoundingClientRect()) : null;
     return { id: p.dataset.pin, x0: e.x0, y0: e.y0, x1: lr ? Math.max(e.x1, lr.x1) : e.x1, y1: lr ? lr.y1 : e.y1 };
   });
-  const blockers = [...document.querySelectorAll('.hub-top .brandpill, .hub-top .chip, .hub-card')].filter((e) => e.offsetParent !== null).map((e) => box(e.getBoundingClientRect()));
+  const blockers = [...document.querySelectorAll('.hub-top .brandpill, .hub-top .chip, .hub-card, #topbar, #chiprow button, #navbar')].filter((e) => e.offsetParent !== null).map((e) => box(e.getBoundingClientRect()));
   const bad = [];
   // a pin the player cannot tap (something opaque on top of it) is as bad as an overlap
-  [...document.querySelectorAll('.pin')].filter((p) => p.style.display !== 'none').forEach((p) => { const r = p.querySelector('.pe').getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (t?.closest('.pin') !== p) bad.push(`${p.dataset.pin} is not tappable`); });
+  live.forEach((p) => { const r = p.querySelector('.pe').getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (t?.closest('.pin') !== p) bad.push(`${p.dataset.pin} is not tappable`); });
   pins.forEach((a, i) => { pins.slice(i + 1).forEach((b) => hit(a, b) && bad.push(`${a.id} overlaps ${b.id}`)); blockers.forEach((b, k) => hit(a, b) && bad.push(`${a.id} under ${k < blockers.length - 1 ? 'header' : 'card'}`)); if (a.x0 < 0 || a.y0 < 0 || a.x1 > innerWidth || a.y1 > innerHeight) bad.push(`${a.id} off-screen`); });
   return { n: pins.length, bad };
 });
@@ -97,8 +98,28 @@ await step('incoming call UI', async () => { await page.evaluate(() => __regina.
 await step('control + notification centre', async () => {
   await page.evaluate(() => { if (__regina.phone.call) __regina.phone.endCall(true); }); await wait(300); if (!(await page.evaluate(() => __regina.phone.isOpen))) await page.keyboard.press('p'); await wait(800); await page.click('.sb-right'); await wait(600); await shot('10-control'); await page.click('.sb-right'); await page.click('.sb-left'); await wait(600); await shot('11-notifs'); await page.click('.sb-left'); });
 await step('close phone', async () => { await page.keyboard.press('p'); await wait(600); });
-await step('full map: badges never overlap, clusters zoom in', async () => {
-  await page.keyboard.press('m'); await wait(800); await shot('12-map');
+await step('map tab: bright overview, place card, walk there', async () => {
+  await page.keyboard.press('m'); await page.waitForFunction(() => __regina.mapOverview, null, { timeout: 60000 });
+  await page.evaluate(() => { __regina.ovHub.snapNext = true; }); await page.waitForFunction(() => !__regina.ovHub.snapNext && !__regina.ovHub.dirty, null, { timeout: 90000 }); await wait(500);
+  const nav = await page.$eval('#navbar [data-tab="map"]', (b) => b.classList.contains('on')); if (!nav) throw new Error('Map tab is not highlighted');
+  let r = await auditPins(); await shot('12-map'); if (r.n < 7 || r.bad.length) throw new Error('overview: ' + JSON.stringify(r));
+  await page.$eval('.ovmap .pin[data-pin="market"]', (e) => e.click()); await wait(600); await page.waitForFunction(() => document.getElementById('ov-card').classList.contains('sel'), null, { timeout: 20000 });
+  await page.evaluate(() => { __regina.ovHub.snapNext = true; }); await page.waitForFunction(() => !__regina.ovHub.snapNext && !__regina.ovHub.dirty, null, { timeout: 90000 }); await wait(500);
+  r = await auditPins(); await shot('12a-map-place'); if (r.bad.length) throw new Error('overview with a place card: ' + JSON.stringify(r));
+  const txt = await page.$eval('#ov-place', (e) => e.innerText); if (!/Prairie Corner Market/.test(txt) || !/Walk/.test(txt) || !/Cab/.test(txt)) throw new Error('place card content: ' + txt);
+  await page.click('#ov-place [data-go="walk"]'); await wait(500);
+  const st = await page.evaluate(() => ({ ov: __regina.mapOverview, dest: __regina.store.state.destination?.id })); if (st.ov || st.dest !== 'market') throw new Error('walk should close the map and set the destination: ' + JSON.stringify(st));
+  await page.evaluate(() => { __regina.store.state.destination = null; });
+});
+await step('wallet: daily reward can be claimed once', async () => {
+  const bal = () => page.evaluate(() => __regina.store.state.bank.balance); const b0 = await bal();
+  await page.click('#tb-plus'); await page.waitForSelector('.panel button.primary', { timeout: 10000 }); await shot('12c-wallet');
+  await page.click('.panel button.primary'); await wait(400); const b1 = await bal(); if (b1 <= b0) throw new Error(`reward not credited: ${b0} -> ${b1}`);
+  await page.click('#tb-plus'); await wait(500); const again = await page.$$eval('.panel button.primary', (b) => b.map((x) => x.textContent)); if (again.some((t) => /Claim/.test(t))) throw new Error('reward offered twice');
+  await page.keyboard.press('Escape'); await wait(300);
+});
+await step('full 2D map: badges never overlap, clusters zoom in', async () => {
+  await page.evaluate(() => __regina.openMap2D()); await wait(800); await shot('12d-map2d');
   const hits = () => page.evaluate(() => __regina.fullMap()._hits.map((h) => ({ x: h.x, y: h.y, r: h.r, n: h.group?.items.length ?? 1, name: h.poi?.name })));
   const clash = (hs) => { for (let i = 0; i < hs.length; i++) for (let j = i + 1; j < hs.length; j++) if (Math.hypot(hs[i].x - hs[j].x, hs[i].y - hs[j].y) < hs[i].r + hs[j].r - 1) return `${hs[i].name ?? 'cluster'} / ${hs[j].name ?? 'cluster'}`; return null; };
   let hs = await hits(); if (!hs.length) throw new Error('no places drawn'); const c = clash(hs); if (c) throw new Error('overlapping badges at default zoom: ' + c);
@@ -109,7 +130,7 @@ await step('full map: badges never overlap, clusters zoom in', async () => {
   const box = await page.$eval('#map-canvas', (e) => { const r = e.getBoundingClientRect(); return [r.left, r.top]; });
   await page.mouse.click(box[0] + cl.x, box[1] + cl.y); await page.waitForFunction(() => !__regina.fullMap()._fly, null, { timeout: 30000 }); await wait(400); await shot('12b-map-zoomed');
   hs = await hits(); const u2 = under(hs); if (u2.length) throw new Error('badges under the map controls after zooming: ' + u2.join(', ')); const c2 = clash(hs); if (c2) throw new Error('overlapping badges after tapping a cluster: ' + c2); if (hs.filter((h) => h.n === 1).length < cl.n) throw new Error(`cluster of ${cl.n} did not split into places`);
-  await page.keyboard.press('m');
+  await page.evaluate(() => __regina.closeMap2D());
 });
 await step('enter market via door', async () => {
   await page.evaluate(() => __regina.tp(30, 9.8)); await wait(1200);
@@ -246,6 +267,19 @@ await step('build mode: buy, place, paint', async () => {
   await page.evaluate(() => __regina.build.stop()); await wait(1500); await shot('40-home-furnished');
   if (await page.evaluate(() => __regina.store.state.home.wall) !== 'sage') throw new Error('paint not saved');
   await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
+});
+await step('home tab: live dollhouse view, edit chip, back outside', async () => {
+  await page.click('#navbar [data-tab="home"]'); await page.waitForFunction(() => __regina.inInterior === 'apartment' && __regina.homeView, null, { timeout: 60000 }); await wait(2500);
+  const on = await page.$eval('#navbar [data-tab="home"]', (b) => b.classList.contains('on')); if (!on) throw new Error('Home tab is not highlighted');
+  const chips = await page.$$eval('#chiprow [data-chip]', (b) => b.map((x) => x.dataset.chip)); if (!['edit', 'paint', 'out'].every((c) => chips.includes(c))) throw new Error('home chips: ' + chips);
+  await shot('40b-home-tab');
+  // the player can still walk around the dollhouse
+  const p0 = await page.evaluate(() => ({ x: __regina.player.pos.x, z: __regina.player.pos.z })); await page.keyboard.down('w'); await page.waitForFunction((p) => Math.hypot(__regina.player.pos.x - p.x, __regina.player.pos.z - p.z) > 0.8, p0, { timeout: 40000 }); await page.keyboard.up('w');
+  const moved = await page.evaluate((p) => __regina.player.pos.z - p.z, p0); if (moved > -0.3) throw new Error('W should walk up the screen (north) in the dollhouse view, dz=' + moved);
+  await page.click('#chiprow [data-chip="edit"]'); await page.waitForFunction(() => __regina.build.active, null, { timeout: 20000 }); await wait(800); await page.evaluate(() => __regina.build.stop()); await wait(800);
+  if (!(await page.evaluate(() => __regina.homeView))) throw new Error('finishing an edit should return to the dollhouse view');
+  await page.click('#chiprow [data-chip="out"]'); await page.waitForFunction(() => __regina.inInterior === null, null, { timeout: 60000 }); await wait(800);
+  if (await page.evaluate(() => __regina.homeView)) throw new Error('home view should end when you go outside');
 });
 await step('night + snow rendering', async () => { await page.evaluate(() => { __regina.tp(0, 6); __regina.setWeather({ kind: 'snow', temp: -18, text: 'Snow', cloud: 90 }); __regina.store.state.settings.timeMode = 'fast'; }); await wait(1500); await shot('20-weather'); });
 await step('fps sanity', async () => { const q = await page.evaluate(() => __regina.qLevel()); console.log('  quality level', q); });

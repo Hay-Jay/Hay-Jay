@@ -14,6 +14,7 @@ import { MAX_CAMPAIGN_POINTS } from './policy.js';
 import { own, clampNum } from './util.js';
 import { itemDef, footprint } from './home.js';
 import { EVENT_BY_ID } from './events.js';
+import { validDaily } from './daily.js';
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const arr = (v) => (Array.isArray(v) ? v : []);
@@ -24,6 +25,8 @@ export function sanitize(s, now = Date.now()) {
   s.bank = isObj(s.bank) ? s.bank : { balance: 0, history: [] };
   s.bank.balance = Number.isFinite(s.bank.balance) ? Math.min(MAX_BALANCE, Math.max(0, Math.round(s.bank.balance))) : 0;
   s.bank.history = arr(s.bank.history).filter((h) => isObj(h) && Number.isFinite(h.amount)).slice(0, 200);
+  // daily reward streak
+  if (!validDaily(s.daily)) s.daily = { last: '', streak: 0 };
   // needs & skills
   s.needs = isObj(s.needs) ? s.needs : {};
   for (const k of ['energy', 'hunger', 'mood', 'hygiene', 'fun']) s.needs[k] = clampNum(s.needs[k], 0, 100, 60);

@@ -336,14 +336,14 @@ button.row:active{background:rgba(255,255,255,.06)}
 button.chip{cursor:pointer;pointer-events:auto}button.chip:hover{background:#fff}
 .chip.ticker{background:var(--green);color:#fff;flex:1;min-width:200px;max-width:520px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;animation:tickfade .6s}
 @keyframes tickfade{from{transform:translateY(6px)}to{transform:none}}
-#hub-pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pinlayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .pin{position:absolute;left:0;top:0;width:42px;height:42px;background:none;border:none;padding:0;will-change:transform}
 .pin .pe{width:42px;height:42px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:23px;box-shadow:0 5px 14px rgba(0,0,0,.35);transition:transform .18s;position:relative}
 .pin.open .pe::after{content:"";position:absolute;right:-1px;top:-1px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #fff}
 .pin .pl{position:absolute;top:100%;left:50%;margin-top:6px;white-space:nowrap;background:rgba(10,20,32,.82);color:#fff;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;opacity:0;transition:opacity .15s;transform:translate(-50%,-4px);pointer-events:none}
 .pin:hover .pe,.pin.sel .pe{transform:scale(1.22)}.pin.sel{z-index:3}.pin:hover{z-index:4}
 @media (hover:hover){.pin:hover .pl{opacity:1;transform:translate(-50%,0)}}
-@media (min-width:900px){#hub-pins[data-level=close] .pin .pl{opacity:1;transform:translate(-50%,0)}}
+@media (min-width:900px){.pinlayer[data-level=close] .pin .pl{opacity:1;transform:translate(-50%,0)}}
 .leaders{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .leaders line{stroke:rgba(255,255,255,.85);stroke-width:1.6;stroke-linecap:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
 .leaders circle{fill:#fff;stroke:rgba(10,20,32,.55);stroke-width:1.5}

@@ -30,7 +30,7 @@
       <div class="brandpill"><svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0b1020"/><path d="M12 46V28l10-8 10 8v18M32 46V18l10-8 10 8v28" fill="none" stroke="#ffb347" stroke-width="4" stroke-linejoin="round"/></svg><b>Regina Life</b><span class="dotchip"><i></i>Single-player</span><span class="wx-chip" id="hub-wx"></span></div>
       <div class="hub-chips"><button class="chip" id="hub-zoom">🗺️ All Regina</button><span class="chip ticker" id="hub-ticker">📰 Loading the news…</span><span class="chip" id="hub-ads"></span></div>
     </div>
-    <div id="hub-pins"></div>
+    <div id="hub-pins" class="pinlayer"></div>
     <div class="hub-card" id="hub-card">
       <div class="hc-place" id="hc-place"></div>
       <div class="hc-main">
@@ -70,6 +70,26 @@
       <div class="joy" id="joy"><div class="joy-base"><div class="joy-knob"></div></div></div>
       <div class="tbtns"><button id="t-interact" class="tb big" aria-label="Interact">E</button><button id="t-run" class="tb" aria-label="Toggle run">Run</button></div>
     </div>
+  </div>
+
+  <div id="ovmap" class="ovmap" hidden>
+    <div id="ov-pins" class="pinlayer"></div>
+    <div class="hub-card ov-card" id="ov-card">
+      <div class="hc-place" id="ov-place"></div>
+      <p class="ov-hint" id="ov-hint">Tap a place to see what you can do there.</p>
+    </div>
+  </div>
+
+  <div id="shell" class="shell" hidden>
+    <header class="topbar" id="topbar">
+      <span class="tb-item tb-clock" id="tb-clock"></span>
+      <span class="tb-item tb-mood" id="tb-mood"></span>
+      <i class="tb-sep" aria-hidden="true"></i>
+      <span class="tb-item tb-money" id="tb-money" aria-label="Balance">$0.00</span>
+      <button type="button" class="tb-plus" id="tb-plus" aria-label="Wallet and daily reward">+</button>
+    </header>
+    <div class="chiprow" id="chiprow" hidden></div>
+    <nav class="navbar" id="navbar" aria-label="Main"></nav>
   </div>
 
   <div id="camui" class="camui" hidden>
