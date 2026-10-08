@@ -5,6 +5,9 @@ import * as G from '../src/core/game.js';
 import { reginaClock, sunPosition, sunTimes, seasonOf } from '../src/core/time.js';
 import { project } from '../src/core/geo.js';
 import { npcReply } from '../src/data/contacts.js';
+import { FOOD } from '../src/data/catalog.js';
+import { JOBS } from '../src/data/jobs.js';
+import { STARTING_BALANCE } from '../src/data/economy.js';
 
 const memStorage = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 let clockMs, store;
@@ -42,7 +45,7 @@ describe('Shopping & wardrobe', () => {
     const b = store.state.bank.balance;
     expect(G.buyItem(store, 'bread', 2).ok).toBe(true);
     expect(store.state.inventory.bread).toBe(2);
-    expect(store.state.bank.balance).toBe(b - 449 * 2);
+    expect(store.state.bank.balance).toBe(b - FOOD.bread.price * 2);
   });
   it('rejects unknown items / bad quantity / insufficient funds', () => {
     expect(G.buyItem(store, 'gold_bar', 1).ok).toBe(false);
@@ -85,7 +88,7 @@ describe('Jobs', () => {
     expect(store.ledger.balance).toBe(bal);
     clockMs += 60_000;
     const r = G.finishShift(store);
-    expect(r.ok).toBe(true); expect(store.ledger.balance).toBe(bal + 9500);
+    expect(r.ok).toBe(true); expect(store.ledger.balance).toBe(bal + JOBS.retail.levels[0].wage);
     expect(store.state.job.active.xp).toBe(40);
   });
   it('cannot double-collect a shift', () => {
@@ -94,7 +97,7 @@ describe('Jobs', () => {
     expect(G.finishShift(store).ok).toBe(false);
   });
   it('promotes after enough XP', () => {
-    hire(); store.state.job.active.xp = 70;
+    hire(); store.state.job.active.xp = JOBS.retail.levels[1].xpNeeded - 30;
     G.startShift(store); for (let i = 0; i < 4; i++) G.completeTask(store); clockMs += 60_000;
     expect(G.finishShift(store).promoted).toBe('Senior Associate');
   });
@@ -112,7 +115,7 @@ describe('Messaging & transfers', () => {
   it('transfers only to people, validated', () => {
     expect(G.transferTo(store, 'market', 1000).ok).toBe(false);
     expect(G.transferTo(store, 'dani', 5000).ok).toBe(true);
-    expect(store.ledger.balance).toBe(245000);
+    expect(store.ledger.balance).toBe(STARTING_BALANCE - 5000);
     expect(G.transferTo(store, 'dani', 99999999).ok).toBe(false);
   });
 });

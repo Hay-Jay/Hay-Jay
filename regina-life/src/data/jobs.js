@@ -1,13 +1,19 @@
-/** Career definitions. Wage is paid per completed shift — and only after the tasks were genuinely done. */
+import { HOURS_PER_TASK } from './economy.js';
+/**
+ * Career definitions. A shift is paid only after its tasks were genuinely done. Pay per shift = hourly wage x paid hours,
+ * where one task = one paid hour (a 4-task shift is a 4-hour half-day). Hourly wages are 2026 Regina gross rates, in cents;
+ * the game has no payroll deductions, so the shift pay is also the deposit. See docs/ECONOMY.md.
+ */
+const lv = (name, hourly, tasks, xpNeeded) => ({ name, hourly, hours: tasks * HOURS_PER_TASK, wage: hourly * tasks * HOURS_PER_TASK, xpNeeded, tasks });
 export const JOBS = {
   retail: {
     id: 'retail', title: 'Retail Associate', employer: 'Prairie Corner Market', contact: 'market',
     blurb: 'Stock shelves and keep the aisles tidy. Carry boxes from the back room to the right shelves.',
     place: 'market', taskVerb: 'Stock shelf', applyDelay: 25,
     levels: [
-      { name: 'Associate',        wage: 9500,  xpNeeded: 0,   tasks: 4 },
-      { name: 'Senior Associate', wage: 12500, xpNeeded: 100, tasks: 5 },
-      { name: 'Shift Lead',       wage: 16500, xpNeeded: 260, tasks: 6 },
+      lv('Associate',        1650, 4, 0),
+      lv('Senior Associate', 1850, 5, 400),
+      lv('Shift Lead',       2100, 6, 1200),
     ],
   },
   stylist: {
@@ -15,9 +21,9 @@ export const JOBS = {
     blurb: 'Refold displays and restock racks. Keep the floor looking sharp for customers.',
     place: 'threads', taskVerb: 'Restock rack', applyDelay: 25,
     levels: [
-      { name: 'Floor Stylist',  wage: 10500, xpNeeded: 0,   tasks: 4 },
-      { name: 'Lead Stylist',   wage: 14000, xpNeeded: 120, tasks: 5 },
-      { name: 'Store Manager',  wage: 19500, xpNeeded: 300, tasks: 6 },
+      lv('Floor Stylist',  1700, 4, 0),
+      lv('Lead Stylist',   1950, 5, 450),
+      lv('Store Manager',  2450, 6, 1400),
     ],
   },
 };

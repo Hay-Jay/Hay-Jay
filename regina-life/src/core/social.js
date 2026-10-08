@@ -11,12 +11,13 @@ export const DATE_LEVEL = 60;
 export const relName = (v) => (v >= 85 ? 'Best friend' : v >= DATE_LEVEL ? 'Good friend' : v >= 25 ? 'Friend' : 'Acquaintance');
 const fr = (s, id) => (own(s.friends, id) ? s.friends[id] : null);
 const resOf = (id) => (own(RES_BY_ID, id) ? RES_BY_ID[id] : null);
+/** cost = your treat for two, in 2026 Regina prices (a café round, two cinema tickets, a mid-range dinner with tip). */
 export const HANGOUTS = {
-  coffee: { label: 'Grab a coffee', icon: '☕', cost: 600, rel: 6, needs: { fun: 10, mood: 6, energy: 6 }, say: 'You sip double-doubles and watch the snow fall sideways.' },
+  coffee: { label: 'Grab a coffee', icon: '☕', cost: 1000, rel: 6, needs: { fun: 10, mood: 6, energy: 6 }, say: 'You sip double-doubles and watch the snow fall sideways.' },
   walk:   { label: 'Walk around Wascana', icon: '🦆', cost: 0, rel: 5, needs: { fun: 8, mood: 6, energy: -5 }, say: 'You circle the lake, arguing about which goose is the leader.' },
   gym:    { label: 'Work out together', icon: '🏋️', cost: 0, rel: 5, needs: { fun: 6, energy: -10, hygiene: -8 }, skill: ['fitness', 8], minEnergy: 25, say: 'Spotting each other. Mostly talking. A little lifting.' },
-  movie:  { label: 'Catch a movie', icon: '🎬', cost: 1800, rel: 8, needs: { fun: 22, mood: 8 }, say: 'Popcorn, trailers, and one very loud person two rows back.' },
-  dinner: { label: 'Date-night dinner', icon: '🕯️', cost: 4500, rel: 10, needs: { fun: 16, mood: 14, hunger: 30 }, datingOnly: true, say: 'Candlelight, a window table and way too many appetizers.' },
+  movie:  { label: 'Catch a movie', icon: '🎬', cost: 3800, rel: 8, needs: { fun: 22, mood: 8 }, say: 'Popcorn, trailers, and one very loud person two rows back.' },
+  dinner: { label: 'Date-night dinner', icon: '🕯️', cost: 9000, rel: 10, needs: { fun: 16, mood: 14, hunger: 30 }, datingOnly: true, say: 'Candlelight, a window table and way too many appetizers.' },
 };
 export const HANGOUT_COOLDOWN_MS = 45_000, GIFT_COOLDOWN_MS = 120_000, PING_COOLDOWN_MS = 240_000;
 const ensure = (s) => { s.friends ||= {}; return s.friends; };

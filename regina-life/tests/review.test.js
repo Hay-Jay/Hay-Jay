@@ -34,7 +34,7 @@ describe('finding 1: events cannot be replayed or forged', () => {
   it('rollEvent and travel issue their own events; prototype keys are not events', () => {
     const ev = rollEvent(store, { where: 'street', temp: 10, night: 0.2, season: 'spring' }, () => 0, t); expect(store.state.pendingEvent.id).toBe(ev.id);
     expect(resolveEvent(store, ev.id, 0, t).ok).toBe(true);
-    const r = travel(store, 'banff', 'flight', t, () => 0); expect(r.ok).toBe(true); expect(store.state.pendingEvent.id).toBe('trip_banff'); expect(resolveEvent(store, 'trip_banff', 2, t).ok).toBe(true);
+    store.state.bank.balance = 1e6; const r = travel(store, 'banff', 'flight', t, () => 0); expect(r.ok).toBe(true); expect(store.state.pendingEvent.id).toBe('trip_banff'); expect(resolveEvent(store, 'trip_banff', 2, t).ok).toBe(true);
     expect(issueEvent(store, 'constructor', t)).toBe(false); expect(resolveEvent(store, '__proto__', 0, t).ok).toBe(false);
   });
 });
@@ -96,7 +96,7 @@ describe('finding 4: UI price/wage sources match what the rules charge', () => {
     P.ensurePolitics(store, t); store.state.politics.mayor.policy = 'fair_wages';
     G.applyForJob(store, 'retail'); store.state.job.application.offerAt = 0; G.tickJobs(store); G.acceptOffer(store); G.startShift(store); for (let i = 0; i < 4; i++) G.completeTask(store);
     const lvl = G.currentLevel(store.state.job.active), shown = G.wageFor(store, lvl); const real = store.now; store.now = () => t + 600000; const bal = store.ledger.balance; const r = G.finishShift(store); store.now = real;
-    expect(shown).toBe(10450); expect(r.pay).toBe(shown); expect(store.ledger.balance).toBe(bal + shown);
+    expect(shown).toBe(Math.round(lvl.wage * 1.1)); expect(r.pay).toBe(shown); expect(store.ledger.balance).toBe(bal + shown);
     store.state.politics.mayor.policy = 'cheap_groceries'; const price = G.priceFor(store, 'milk'), b1 = store.ledger.balance; G.buyItem(store, 'milk'); expect(b1 - store.ledger.balance).toBe(price);
   });
 });

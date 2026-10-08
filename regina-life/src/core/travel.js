@@ -6,6 +6,9 @@ import { fmtMoney } from './ledger.js';
 import { addSkill, notify } from './game.js';
 
 const clamp = (v) => Math.max(0, Math.min(100, v));
+/** Quick Cab fast-travel fare (cents): $4.50 flag drop + $2.50 per km — the 2026 Regina taxi / ride-share range. The map's cab button should call this. */
+export const CAB_BASE = 450, CAB_PER_M = 0.25;
+export const cabFare = (metres) => CAB_BASE + (Number.isFinite(metres) && metres > 0 ? Math.round(metres * CAB_PER_M) : 0);
 export function tripBlocked(store, destId, mode, now = store.now()) {
   const s = store.state, d = own(DESTINATION_BY_ID, destId) ? DESTINATION_BY_ID[destId] : null, m = own(d?.modes, mode) ? d.modes[mode] : null;
   if (!d || !m) return 'That trip is not available';
