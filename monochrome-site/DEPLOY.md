@@ -32,7 +32,8 @@ Netlify works the same way (publish directory `monochrome-site`; `netlify.toml` 
 It runs from the default branch, so it starts once this work is merged to `main`.
 
 ## Things to check in Shopify
-- **Shipping:** the store ships to a fixed list of countries and Nigeria is not on it. Add Nigeria under **Settings → Shipping and delivery** (and Markets) if you want to sell there.
+- **Shipping:** Nigeria was added to the "International" zone (General profile) and the "EVERYWHERE" zone (CUSTOM STUFF profile) on the store, using the same Canada Post live rates as the other international countries. Place a test checkout with a Nigerian address and confirm shipping options appear before you announce it.
+- **Nigeria market:** a `NIGERIA` market (currency NGN) exists in **Settings → Markets** but is still a draft. Decide whether to activate it. It needs a payment provider that accepts Naira.
 - **Newsletter:** the drop-alert form adds the visitor as a customer tagged `newsletter`. Send one test signup with your own email and
   confirm it appears in **Customers**. If you use Shopify Email or Klaviyo, point them at that tag.
 - **Currency:** prices show in CAD, the store's base currency.
