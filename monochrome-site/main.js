@@ -82,6 +82,30 @@
     grid.addEventListener('pointerout', e => { const c = e.target.closest('.card'); if (c) { c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); } });
   }
 
+  // Big marquee drifts with scroll, in the direction you scroll
+  const bwTrack = $$('#bigword span');
+  let drift = 0, lastScroll = scrollY;
+  if (bwTrack.length && !reduceMotion) {
+    (function d() { drift += (scrollY - lastScroll) * .6 + .25; lastScroll = scrollY; const w = bwTrack[2].offsetLeft - bwTrack[0].offsetLeft || 2400; const x = -(((drift % w) + w) % w); bwTrack.forEach(el => { el.style.transform = `translateX(${x}px)`; }); requestAnimationFrame(d); })();
+  }
+
+  // Hero spotlight follows the pointer
+  const hero = $('.hero');
+  if (hero && fine) hero.addEventListener('pointermove', e => { const r = hero.getBoundingClientRect(); hero.style.setProperty('--mx', e.clientX - r.left + 'px'); hero.style.setProperty('--my', e.clientY - r.top + 'px'); });
+
+  // Eyebrow labels decode themselves as they appear
+  const GLYPHS = '01<>/\\|+*#%$@';
+  const scramble = el => {
+    if (reduceMotion || el.dataset.done) return; el.dataset.done = 1;
+    const txt = el.textContent; let f = 0;
+    const id = setInterval(() => {
+      el.textContent = [...txt].map((ch, i) => ch === ' ' || i < f / 2 ? ch : GLYPHS[Math.random() * GLYPHS.length | 0]).join('');
+      if (++f > txt.length * 2) { clearInterval(id); el.textContent = txt; }
+    }, 28);
+  };
+  const eio = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { scramble(e.target); eio.unobserve(e.target); } }), { threshold: 1 }) : null;
+  $$('.eyebrow').forEach(el => eio && eio.observe(el));
+
   // ---- Store state ----------------------------------------------------
   let items = FALLBACK.slice();
   const groups = () => ['top', 'bottom', 'accessory'].map(t => {

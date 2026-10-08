@@ -1,4 +1,5 @@
-// Liquid-chrome hero: a morphing mercury blob, an orbiting ring and a star (the emblem, rebuilt in 3D).
+// Liquid-chrome companion: one fixed WebGL canvas. A morphing mercury blob, an orbiting ring and a star (the emblem, rebuilt in 3D)
+// that glides to a new spot as each section scrolls into view.
 // Falls back silently to the CSS emblem if WebGL is unavailable.
 import * as THREE from './assets/vendor/three.module.min.js';
 
@@ -122,34 +123,58 @@ vec3 objectTangent=vec3(tangent.xyz);
   rig.add(blob, orbit, dust);
   scene.add(rig);
 
-  portal.appendChild(canvas);
+  document.body.prepend(canvas);
+
+  // Where the object sits for each section: [x, y, scale, opacity] with x/y in -1..1 of the viewport. Desktop / phone.
+  const STOPS = {
+    top:    { d: [.5, -.02, 1, 1],     m: [0, -.5, .8, 1] },
+    about:  { d: [.62, .42, .42, .8],  m: [.85, .55, .4, .35] },
+    fit:    { d: [0, 0, .001, 0],      m: [0, 0, .001, 0] },
+    shop:   { d: [.62, .5, .4, .85],   m: [.85, .6, .38, .35] },
+    events: { d: [.62, .45, .42, .8],  m: [.85, .5, .4, .35] },
+    faq:    { d: [.68, 0, .8, .85],    m: [.85, .55, .4, .35] },
+    connect:{ d: [.58, .42, .5, .9],   m: [.82, .5, .45, .4] }
+  };
+  const sections = Object.keys(STOPS).map(k => ({ k, el: document.getElementById(k) })).filter(x => x.el);
+  const cur = { x: .5, y: 0, s: 1, o: 1 };
+  const pick = () => {
+    const mid = innerHeight * .5;
+    let hit = sections[0];
+    for (const x of sections) { const r = x.el.getBoundingClientRect(); if (r.top <= mid) hit = x; }
+    return STOPS[hit.k][innerWidth < 820 ? 'm' : 'd'];
+  };
+
   const resize = () => {
-    const w = portal.clientWidth, h = portal.clientHeight;
-    if (!w || !h) return;
+    const w = innerWidth, h = innerHeight;
+    renderer.setPixelRatio(Math.min(devicePixelRatio, w < 820 ? 1.5 : 2));
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.position.z = w / h < .9 ? 11 : 8.5;
     camera.updateProjectionMatrix();
   };
-  new ResizeObserver(resize).observe(portal);
-  resize();
+  addEventListener('resize', resize); resize();
 
   const mouse = new THREE.Vector2(), target = new THREE.Vector2();
   addEventListener('pointermove', e => { target.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight * 2 - 1)); }, { passive: true });
 
-  let visible = true, t0 = performance.now(), last = t0, time = 0;
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) { last = performance.now(); loop(); } }).observe(portal);
-
-  function frame(now) {
+  let time = 0, last = performance.now(), lastY = scrollY, spin = 0;
+  function frame(now, still) {
     const dt = Math.min((now - last) / 1000, .05); last = now;
     if (!reduce) time += dt;
+    const k = reduce || still ? 1 : 1 - Math.pow(.0009, dt); // frame-rate independent easing
+    const [tx, ty, ts, to] = pick();
+    cur.x += (tx - cur.x) * k; cur.y += (ty - cur.y) * k; cur.s += (ts - cur.s) * k; cur.o += (to - cur.o) * k;
+    const halfH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z, halfW = halfH * camera.aspect;
+    rig.position.set(cur.x * halfW, cur.y * halfH, 0);
+    rig.scale.setScalar(Math.max(cur.s, .001));
+    canvas.style.opacity = cur.o.toFixed(3);
+
     mouse.lerp(target, .06);
-    const sy = Math.min(scrollY / innerHeight, 1.2);
-    rig.rotation.y = time * .12 + mouse.x * .5;
-    rig.rotation.x = -mouse.y * .3 + sy * .5;
-    rig.position.y = sy * .9;
-    rig.scale.setScalar(1 - sy * .25);
-    blob.rotation.y = -time * .08;
+    const dy = scrollY - lastY; lastY = scrollY;
+    spin += (dy * .004 - spin) * .08;                // scrolling whips the object round
+    rig.rotation.y += (reduce ? 0 : dt * .12 + spin);
+    rig.rotation.x += ((-mouse.y * .3) - rig.rotation.x) * .05;
+    blob.rotation.y = -time * .08 + mouse.x * .4;
     orbit.rotation.z = -.55 + time * .05;
     const a = time * .55;
     star.position.set(Math.cos(a) * R, Math.sin(a) * R, 0);
@@ -159,12 +184,12 @@ vec3 objectTangent=vec3(tangent.xyz);
     renderer.render(scene, camera);
   }
   function loop() {
-    if (!visible || document.hidden || reduce) return;
+    if (document.hidden || reduce) return;
     requestAnimationFrame(now => { frame(now); loop(); });
   }
   document.addEventListener('visibilitychange', () => { last = performance.now(); loop(); });
-  addEventListener('pointermove', () => { if (reduce) frame(performance.now()); }, { passive: true });
-  frame(performance.now());
+  if (reduce) ['scroll', 'resize', 'pointermove'].forEach(t => addEventListener(t, () => frame(performance.now(), true), { passive: true }));
+  frame(performance.now(), true);
   portal.classList.add('has-gl');
   loop();
 }
