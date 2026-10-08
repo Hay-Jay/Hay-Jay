@@ -1,0 +1,105 @@
+  <!-- 01 COVER ----------------------------------------------------------- -->
+  <section class="spread ink cover" id="top" data-tone="ink" aria-label="Cover">
+    <h1 class="mast" aria-label="Monochrome"><span class="m1" aria-hidden="true">Mono</span><span class="m2" aria-hidden="true">chrome</span><sup aria-hidden="true">®</sup></h1>
+
+    <div class="cv-num" aria-hidden="true">01</div>
+
+    <div class="cv-top mono" aria-hidden="true">
+      <span>Issue 01</span>
+      <img src="{{asset:assets/emblem.webp}}" alt="" width="29" height="31">
+      <span class="ital">The Unknown</span>
+    </div>
+
+    <figure class="cv-photo xp" id="coverPhoto">
+      <a class="ph-link" href="{{cover_href}}" aria-label="Open {{cover_name}}">{{cover_img}}</a>
+    </figure>
+    <p class="cv-cap mono">Cover — <a href="{{cover_href}}">{{cover_name}}</a>, {{cover_price}} CAD. <span class="hint-fine">Hover the photograph to expose it.</span><span class="hint-touch">Press and hold the photograph to expose it.</span></p>
+
+    <aside class="cv-lines" aria-label="In this issue">
+      <p class="mono cv-kick">In this issue</p>
+      <ul>
+        <li><a href="{{href:shop/?c=top}}"><b>Tops &amp; jerseys</b><span class="mono">p.02</span></a></li>
+        <li><a href="{{href:shop/?c=bottom}}"><b>Cargo, cut &amp; chained</b><span class="mono">p.02</span></a></li>
+        <li><a href="{{href:shop/?c=accessory}}"><b>Rings &amp; chains</b><span class="mono">p.02</span></a></li>
+        <li><a href="{{href:lookbook/}}"><b>The lookbook</b><span class="mono">p.03</span></a></li>
+        <li><a href="{{href:about/}}"><b>The formula</b><span class="mono">p.04</span></a></li>
+      </ul>
+    </aside>
+
+    <aside class="cv-side" aria-hidden="true">
+      <span class="cv-strap mono">Wear the unknown</span>
+      <div class="cv-code"><i></i><span class="mono">CAD 5.99 – 59</span></div>
+    </aside>
+
+    <div class="cv-scroll mono" aria-hidden="true"><span>Turn the page</span><i></i></div>
+    {{ticker_cover}}
+  </section>
+
+  <!-- 02 SELECTED PLATES ------------------------------------------------- -->
+  <section class="spread paper picks" id="plates" data-tone="paper" aria-labelledby="picksH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">02</div>
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — Selected plates — Prices in CAD</div>
+    <div class="pk-head">
+      <p class="mono kicker rv">Selected plates — p.02</p>
+      <h2 class="display sm rv-lines" id="picksH"><span class="ln"><span>Selected </span></span><span class="ln"><span class="ital">plates<i class="stop">.</i></span></span></h2>
+      <p class="pk-sub rv">Five frames from the index. Open a plate for every photograph, the sizes, and the colour it was shot in.</p>
+    </div>
+    <div class="sheet-wrap strip">
+      <div class="strip-row">
+{{pick_frames}}
+      </div>
+    </div>
+    <p class="pk-end"><a class="mono link-line" href="{{href:shop/}}">The complete index, {{pieces}} pieces<span class="arr" aria-hidden="true"></span></a></p>
+  </section>
+
+  <!-- 03 EDITOR'S NOTE (teaser for /about/) ---------------------------------- -->
+  <section class="spread ink teaser" id="note" data-tone="ink" aria-labelledby="noteH">
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — Editor’s note — Issue 01</div>
+    <p class="mono kicker rv">Editor’s note — p.04</p>
+    <h2 class="pull rv" id="noteH"><span class="w">W</span>ear the <em>unknown<i class="stop">.</i></em></h2>
+    <div class="tz-body">
+      <p class="drop rv">Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
+      <p class="rv">Made in small runs, so what you wear is not on everyone else. Hardware, objects and details that catch the light. <a class="mono link-line" href="{{href:about/}}">Read the formula<span class="arr" aria-hidden="true"></span></a></p>
+    </div>
+    <ul class="stats" aria-label="This issue in numbers">
+      <li><b class="num" data-to="{{pieces}}">{{pieces}}</b><span class="mono">Pieces in this issue</span></li>
+      <li><b class="num" data-to="2" data-pad="2">02</b><span class="mono">Tones. Black and white</span></li>
+      <li><b class="num" data-to="{{countries}}">{{countries}}</b><span class="mono">Countries on the delivery list</span></li>
+      <li><b class="num" data-to="0" data-pad="2">00</b><span class="mono">Colours. We checked</span></li>
+    </ul>
+  </section>
+
+  <!-- 04 DISTRIBUTION (teaser for /shipping/) --------------------------------- -->
+  <section class="spread paper dist" id="distribution" data-tone="paper" aria-labelledby="distH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">05</div>
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — Distribution — Prices in CAD</div>
+    <p class="mono kicker rv">Distribution — p.05</p>
+    <h2 class="display sm rv-lines" id="distH"><span class="ln"><span>Delivering to</span></span><span class="ln"><span class="ital">{{countries}} countries<i class="stop">.</i></span></span></h2>
+    <div class="dist-cells">
+      <a class="dist-cell dc-ng" href="{{href:shipping/}}"><span class="mono">Featured</span><b>Nigeria</b><i class="mono">Rate calculated at checkout</i></a>
+      <a class="dist-cell dc-ca" href="{{href:shipping/}}"><span class="mono">Home market</span><b>Canada</b><i class="mono">Free standard shipping</i></a>
+      <p class="dist-copy rv">Shipping across Africa, North America, Europe, Asia, Oceania and the Middle East. Rates are calculated at checkout from your address, so you see yours before you pay. <a class="mono link-line" href="{{href:shipping/}}">See the full list and the returns notes<span class="arr" aria-hidden="true"></span></a></p>
+    </div>
+    {{ticker_ship}}
+  </section>
+
+  <!-- 05 SUBSCRIBE ---------------------------------------------------------------- -->
+  <section class="spread ink subscribe" id="subscribe" data-tone="ink" aria-labelledby="subH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">06</div>
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — Subscribe to the next issue</div>
+    <div class="sub-head">
+      <p class="mono kicker rv">Subscribe — p.07</p>
+      <h2 class="display sm rv-lines" id="subH"><span class="ln"><span>Next</span></span><span class="ln"><span class="ital">issue<i class="stop">.</i></span></span></h2>
+    </div>
+    <form class="news" method="post" action="{{news_action}}" target="_blank" rel="noopener">
+      <input type="hidden" name="form_type" value="customer">
+      <input type="hidden" name="utf8" value="✓">
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <label for="email-home" class="mono">Get drop alerts, first</label>
+      <div class="news-row">
+        <input id="email-home" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
+        <button class="send" type="submit">Notify me<span class="arr" aria-hidden="true"></span></button>
+      </div>
+      <small class="mono news-note">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
+    </form>
+  </section>

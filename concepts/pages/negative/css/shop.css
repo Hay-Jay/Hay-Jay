@@ -1,0 +1,130 @@
+/* SHOP — "The Index": a typographic table of contents (hover for the plate) and a contact sheet, same 23 pieces. */
+.index { padding: clamp(84px, 12vh, 150px) var(--gut) clamp(60px, 10vh, 120px); overflow: clip; }
+.idx-head { display: grid; gap: 24px; position: relative; z-index: 1; }
+.idx-sub { max-width: 34em; font: italic 400 clamp(1.1rem, 1.7vw, 1.5rem)/1.4 var(--serif); }
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; margin-top: 8vh; padding: 14px 0; border-top: 1px solid var(--fg); border-bottom: 1px solid var(--rule); }
+.filters { display: flex; flex-wrap: wrap; gap: 6px 4px; }
+.filter, .view { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 15px 15px; min-height: 44px; border: 1px solid var(--rule); transition: background .2s, color .2s, border-color .2s; }
+.filter sup { font-size: 9px; margin-left: 4px; vertical-align: top; opacity: .7; }
+.filter:hover, .view:hover { border-color: var(--fg); }
+.filter.on, .view.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.tb-r { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.findwrap { display: flex; }
+.findwrap input, .sortwrap select { appearance: none; -webkit-appearance: none; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--fg); background: transparent; border: 1px solid var(--rule); min-height: 44px; border-radius: 0; }
+.findwrap input { padding: 14px 12px; width: 11.5rem; }
+.findwrap input::placeholder { color: var(--dim); opacity: 1; }
+.findwrap input::-webkit-search-cancel-button { appearance: none; -webkit-appearance: none; }
+.findwrap input:hover, .findwrap input:focus, .sortwrap select:hover { border-color: var(--fg); }
+.sortwrap { display: flex; align-items: center; gap: 10px; }
+.sortwrap select { padding: 14px 34px 14px 12px; cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%); background-position: calc(100% - 17px) 55%, calc(100% - 12px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.sortwrap select option { background: #000; color: #fff; text-transform: none; }
+.views { display: flex; }
+.view + .view { border-left: 0; }
+.count { margin: 14px 0 0; color: var(--dim); }
+.empty-state { padding: 6vh 0 4vh; color: var(--fg); font: italic 400 clamp(1.3rem, 3vw, 2.2rem)/1.3 var(--serif); }
+.empty-state[hidden] { display: none; }
+.empty-state .mono { color: var(--dim); margin-bottom: 8px; font-style: normal; }
+.empty-state .link-line { font-style: normal; }
+.idx-end { margin-top: 7vh; }
+.trow[hidden], .frame[hidden] { display: none !important; }
+
+/* one view at a time; with no script the contact sheet (real photographs) is the page */
+html[data-view=index] .sheet-wrap, html[data-view=sheet] .toc, html:not([data-view]) .toc { display: none; }
+/* deep link ?c=top is applied before first paint */
+html[data-c=top] [data-cat]:not([data-cat=top]), html[data-c=bottom] [data-cat]:not([data-cat=bottom]),
+html[data-c=accessory] [data-cat]:not([data-cat=accessory]), html[data-c=gift] [data-cat]:not([data-cat=gift]) { display: none; }
+html:not(.js) .toolbar, html:not(.js) .count { display: none; }
+
+/* the table of contents */
+.toc { margin-top: 4vh; border-top: 1px solid var(--fg); }
+.trow { position: relative; border-bottom: 1px solid var(--rule); transition: opacity .3s; animation: rowin .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 38ms); }
+.trow-a { position: relative; display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) auto; grid-template-areas: "no name name" ". meta price"; column-gap: 12px; row-gap: 6px; align-items: baseline; padding: 14px 0 16px; text-decoration: none; overflow: hidden; }
+.trow-a::before { content: ""; position: absolute; inset: 0 calc(var(--gut) * -1); background: var(--fg); transform: scaleY(0); transform-origin: 50% 100%; transition: transform .4s var(--ease); }
+.trow-a > * { position: relative; }
+.t-no { grid-area: no; color: var(--dim); font-variant-numeric: tabular-nums; transition: color .2s; }
+.t-name { grid-area: name; font: 500 clamp(2.1rem, 9vw, 3.4rem)/.96 var(--serif); letter-spacing: -.035em; text-transform: uppercase; overflow-wrap: anywhere; transition: color .25s, transform .5s var(--ease); font-variation-settings: 'opsz' 30; }
+.t-name em { font: italic 400 .3em/1 var(--serif); letter-spacing: 0; text-transform: none; vertical-align: top; margin-left: .35em; position: relative; top: .2em; }
+.t-meta { grid-area: meta; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 18px; color: var(--dim); transition: color .2s; }
+.t-price { white-space: nowrap; grid-area: price; justify-self: end; font-variant-numeric: tabular-nums; color: var(--fg); transition: color .2s; }
+.t-price small { color: var(--dim); font-size: 10px; letter-spacing: .12em; margin-left: 3px; }
+.t-sz { letter-spacing: .14em; }
+.t-sold { text-decoration: line-through; text-decoration-thickness: 1px; opacity: .55; }
+.trow.sold .t-name { opacity: .5; }
+.trow.sold .t-meta .t-st { color: var(--fg); border: 1px solid currentColor; padding: 2px 6px; text-decoration: none; }
+.trow.hot .trow-a::before { transform: scaleY(1); }
+.trow.hot .t-name, .trow.hot .t-price, .trow.hot .t-meta, .trow.hot .t-no, .trow.hot .t-price small { color: var(--bg); }
+.trow.sold.hot .t-name { opacity: .8; }
+.trow.sold.hot .t-meta .t-st, .trow.sold.hot .t-price { color: var(--bg); border-color: var(--bg); opacity: 1; }
+.toc.hov .trow:not(.hot) { opacity: .26; }
+
+/* touch: a tap expands an inline plate */
+.t-more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease); }
+.t-more-in { min-height: 0; overflow: hidden; }
+.trow.open .t-more { grid-template-rows: 1fr; }
+.t-more-box { display: grid; grid-template-columns: minmax(0, 52%) minmax(0, 1fr); gap: 16px; padding: 4px 0 22px 2.6rem; align-items: end; }
+.t-more-box .xp { aspect-ratio: 4 / 5; }
+.t-more-box .xp .ph { position: absolute; inset: 0; }
+.t-more-box .xp.zoom .ph { inset: auto; left: -27%; top: -27%; }
+.t-more-box dl { margin: 0; display: grid; gap: 10px; color: var(--dim); }
+.t-more-box dd { margin: 0; color: var(--fg); }
+.t-open { display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 8px; padding: 12px 14px; background: var(--fg); color: var(--bg); text-decoration: none; text-align: center; }
+
+/* pointer plate: floats in the space to the right of the title being read */
+.plate { position: fixed; z-index: 45; left: 0; top: 0; width: clamp(200px, 21vw, 330px); pointer-events: none; opacity: 0; transition: opacity .25s; will-change: transform; display: none; }
+.plate.on { opacity: 1; }
+@media (hover: hover) and (pointer: fine) { .plate { display: block; } }
+.plate-in { aspect-ratio: 4 / 5; overflow: hidden; background: #111; border: 1px solid #fff; clip-path: inset(0 0 100% 0); transition: clip-path .5s var(--ease); position: relative; }
+.plate.on .plate-in { clip-path: inset(0 0 0 0); }
+.plate.zoom img { position: absolute; left: -27%; top: -27%; width: 154%; height: 154%; }
+.plate img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.35) brightness(.95) blur(18px); transform: scale(1.18); transition: filter .7s var(--ease), transform .9s var(--ease); }
+.plate.sharp img { filter: grayscale(1) contrast(1.35) brightness(.95) blur(0); transform: scale(1); }
+.plate-cap { position: absolute; left: 0; top: 100%; margin-top: 8px; color: #fff; background: #000; padding: 4px 7px; white-space: nowrap; }
+
+/* contact sheet */
+.sheet-wrap { margin-top: 5vh; }
+.sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(8px, 1.2vw, 16px); padding: 14px 0; }
+.frame { animation: rowin .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+.frame.feat { grid-column: span 2; }
+.frame .xp .ph { object-position: var(--op, 50% 50%); }
+
+@media (min-width: 700px) {
+  .sheet { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .frame.feat { grid-row: span 2; }
+  .frame.feat .xp { aspect-ratio: auto; flex: 1; min-height: 0; }
+  .frame.feat .cap { flex: none; }
+  .frame.feat b { font-size: clamp(1.3rem, 2.4vw, 2.2rem); }
+  .t-more-box { grid-template-columns: minmax(0, 34%) minmax(0, 1fr); }
+}
+@media (min-width: 900px) {
+  .index { padding-left: calc(var(--gut) + 22px); }
+  .toc { margin-top: 4vh; }
+  .trow-a { grid-template-columns: 3.4rem minmax(0, 1fr) 9.4rem 9.2rem; grid-template-areas: "no name meta price"; column-gap: clamp(12px, 2vw, 32px); align-items: center; padding: 10px 0 12px; }
+  .t-name { font-size: clamp(2.6rem, 4.7vw, 5.6rem); line-height: .94; letter-spacing: -.04em; }
+  .t-meta { grid-area: meta; flex-direction: column; align-items: flex-start; justify-content: center; gap: 5px; }
+  .t-price { grid-area: price; text-align: right; font-size: 15px; }
+  .sheet { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1200px) { .sheet-wrap { padding-bottom: 40px; } }
+@media (min-width: 1500px) { .sheet { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (max-width: 699px) {
+  .filter, .view, .sortwrap select, .findwrap input { font-size: 12px; }
+  .filter sup { font-size: 10px; }
+  .t-price small { font-size: 11px; }
+  .frame.feat .cap { grid-template-columns: auto minmax(0, 1fr); gap: 3px 10px; }
+  .frame.feat .cap .pr, .frame.feat .cap .sz, .frame.feat .cap .st { grid-column: 2; }
+  /* filters read as one swipeable row, search, sort + view as a second */
+  .toolbar { margin-top: 5vh; gap: 8px; padding: 10px 0; }
+  .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: calc(100% + var(--gut) * 2); margin: 0 calc(var(--gut) * -1); padding: 0 var(--gut); }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter { flex: none; }
+  .tb-r { width: 100%; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+  .findwrap { flex: 1 1 100%; }
+  .findwrap input { width: 100%; }
+  .sortwrap { flex: 1 1 0; min-width: 0; }
+  .sortwrap > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .sortwrap select { width: 100%; min-width: 0; text-overflow: ellipsis; }
+  .views { flex: none; }
+  .v-x { display: none; }
+}
+@media (max-width: 899px), (pointer: coarse) { .t-open { min-height: 44px; } }

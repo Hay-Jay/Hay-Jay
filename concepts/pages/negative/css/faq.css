@@ -1,0 +1,32 @@
+/* FAQ — "Letters": a Q&A in a magazine's interview format. Questions in italics, answers in roman, one open at a time on desktop. */
+.faq-spread { padding: clamp(100px, 16vh, 180px) var(--gut) clamp(70px, 12vh, 150px); overflow: clip; display: grid; gap: 7vh; align-content: start; }
+.fq-head .display { font-size: clamp(3rem, 12vw, 6.6rem); }
+.fq-deck { max-width: 24em; margin-top: 4vh; font: italic 400 clamp(1.15rem, 1.9vw, 1.5rem)/1.35 var(--serif); color: var(--dim); }
+.faq-list { border-top: 1px solid var(--fg); }
+.faq-list details { border-bottom: 1px solid var(--rule); }
+.faq-list summary { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr) 1.4rem; align-items: baseline; gap: 10px; padding: 20px 0; cursor: pointer; list-style: none; min-height: 44px; }
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary b { font: italic 500 clamp(1.4rem, 3.6vw, 2.5rem)/1.08 var(--serif); letter-spacing: -.03em; transition: transform .4s var(--ease); font-variation-settings: 'opsz' 14; }
+.faq-list summary:hover b, .faq-list summary:focus-visible b { transform: translateX(8px); }
+.faq-list summary .mono { color: var(--dim); }
+.faq-list details[open] summary b { font-style: normal; font-variation-settings: 'opsz' 30; }
+.pm { position: relative; width: 14px; height: 14px; align-self: center; }
+.pm::before, .pm::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: currentColor; transition: transform .35s var(--ease); }
+.pm::after { transform: rotate(90deg); }
+details[open] .pm::after { transform: rotate(0); }
+.ans { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); gap: 10px; padding: 0 0 28px; animation: fadein .5s var(--ease); }
+.ans .a-lbl { color: var(--dim); padding-top: .5em; }
+.ans p { max-width: 36em; font: 400 clamp(1.05rem, 1.5vw, 1.25rem)/1.55 var(--serif); color: color-mix(in srgb, var(--fg) 86%, var(--bg)); }
+.ans a { text-underline-offset: 4px; color: var(--fg); }
+@keyframes fadein { from { opacity: 0; transform: translateY(-6px); } }
+.fq-foot { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+.fq-foot .mono { color: var(--dim); }
+.fq-foot a { font: italic 400 clamp(2.4rem, 7vw, 5rem)/.9 var(--serif); letter-spacing: -.04em; text-decoration: none; font-variation-settings: 'opsz' 14; }
+.fq-foot a:hover, .fq-foot a:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .1em; }
+@media (min-width: 1000px) {
+  .faq-spread { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(32px, 5vw, 90px); padding-left: calc(var(--gut) + 22px); }
+  .fq-head { position: sticky; top: calc(var(--bar) + 28px); align-self: start; }
+  .fq-head .display { font-size: clamp(3.4rem, 6.2vw, 7.4rem); }
+  .fq-foot { grid-column: 2; }
+}
+@media (max-width: 699px) { .faq-list summary { grid-template-columns: 2.9rem minmax(0, 1fr) 1.2rem; } .ans { grid-template-columns: 2.9rem minmax(0, 1fr); } }

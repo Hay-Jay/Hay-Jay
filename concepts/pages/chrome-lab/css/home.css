@@ -1,0 +1,100 @@
+/* HOME — mercury-blob hero, floating glass cards, short teasers. The fixed canvas (hero mode) travels behind all of it. */
+main{position:relative;z-index:1}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--nav) + 18px) var(--pad) 26px;max-width:var(--max);margin:0 auto}
+.hero-top{display:flex;justify-content:space-between;gap:16px;color:var(--mute)}
+.hero-scroll{display:none;align-items:center;gap:8px}
+@media(min-width:760px){.hero-scroll{display:inline-flex}}
+.hero-main{display:flex;flex-direction:column;gap:clamp(18px,3vh,34px)}
+.hero-h{display:flex;flex-direction:column;align-items:flex-start;gap:0;transform:skewY(var(--sk,0deg));transform-origin:0 100%;will-change:transform}
+.hl1{font-size:clamp(34px,8.4vw,120px);letter-spacing:-.03em}
+.hl2{font-size:clamp(38px,12.6vw,188px);margin-top:-.02em}
+.hero-foot{display:grid;gap:18px;align-items:end}
+.hero-p{max-width:40ch;color:var(--soft);font-size:15px}
+.spec{display:flex;gap:0;border-radius:12px;width:fit-content}
+.spec div{padding:12px 22px;border-right:1px solid var(--line)}
+.spec div:last-child{border-right:0}
+.spec dt{color:var(--mute);font-size:10px}
+.spec dd{font:700 20px/1.1 var(--f-d);font-stretch:112%;letter-spacing:-.02em;margin-top:5px}
+@media(min-width:900px){
+  .hero-foot{grid-template-columns:minmax(0,1fr) auto auto;gap:36px}
+  .hero-p{grid-column:1}
+}
+@media(max-width:899px){.hero{padding-top:calc(var(--nav) + 10px)}.spec{width:100%}.spec div{flex:1;padding:10px 14px}}
+/* the still emblem only shows when there is no WebGL (or while it is not available) */
+.hero-emblem{position:absolute;right:8%;top:20%;width:min(34vw,360px);display:none;animation:pulse 5s ease-in-out infinite;pointer-events:none}
+html.no-gl .hero-emblem{display:block}
+@keyframes pulse{50%{transform:scale(1.06);filter:brightness(1.35)}}
+
+/* shared section rhythm */
+.featured,.brand-t,.world-t,.signal{position:relative;padding:clamp(70px,12vh,150px) 0}
+
+/* 01 FEATURED: four floating glass cards */
+.featured{padding-bottom:clamp(90px,14vh,170px)}
+.sec-side{display:grid;gap:18px;justify-items:start}
+.fstrip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fstrip li:nth-child(even){margin-top:clamp(18px,5vw,56px)}
+.fstrip li:nth-child(odd){margin-bottom:clamp(18px,5vw,56px)}
+@media(min-width:900px){
+  .fstrip{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,1.6vw,26px);align-items:start}
+  .fstrip li:nth-child(odd){margin-bottom:0}
+  .fstrip li:nth-child(even){margin-top:clamp(36px,5vw,76px)}
+  .fstrip li:nth-child(3){margin-top:clamp(12px,2vw,28px)}
+}
+.fstrip li{animation:floaty 8s ease-in-out infinite}
+.fstrip li:nth-child(2){animation-delay:-2.2s}.fstrip li:nth-child(3){animation-delay:-4.1s}.fstrip li:nth-child(4){animation-delay:-5.6s}
+@keyframes floaty{50%{translate:0 -10px}}
+.fstrip .card{background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.015) 55%),rgba(9,9,11,.7);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 40px 70px -34px #000}
+.fstrip .pic{margin:8px;border-radius:10px;aspect-ratio:4/5}
+.fstrip .info{padding:8px 16px 18px}
+.fstrip .info b{font-size:14px}
+
+/* 02 THE FORMULA (teaser) */
+.brand-grid{display:grid;gap:clamp(28px,5vw,64px);align-items:center}
+@media(min-width:960px){.brand-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}}
+.brand-copy{display:grid;gap:clamp(18px,3vh,30px);justify-items:start}
+.brand-copy .lead{max-width:22em}
+.mini-spec{display:grid;gap:12px}
+.mini-spec li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(14px,2.4vw,28px);padding:clamp(16px,2vw,24px) clamp(16px,2.4vw,28px)}
+.sp-n{font-size:clamp(34px,5vw,64px);letter-spacing:-.04em}
+.mini-spec h3{font:800 clamp(16px,1.6vw,20px)/1.1 var(--f-d);font-stretch:112%;text-transform:uppercase;letter-spacing:.01em}
+.mini-spec p{color:var(--mute);font-size:14px;margin-top:6px;max-width:42ch}
+.sw{display:flex;gap:0;border:1px solid var(--line2);border-radius:6px;overflow:hidden;height:44px}
+.sw i{display:block;width:44px;height:100%}
+.sw i+i{border-left:1px solid var(--line)}
+.sw .tick{width:22px;background:repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 4px)}
+.sw .mirror{width:88px;background:var(--chrome-g)}
+@media(max-width:560px){.mini-spec li{grid-template-columns:auto 1fr}.sw{display:none}}
+
+/* 03 WORLDWIDE (teaser) */
+.world-t .eyebrow{margin-bottom:14px}
+.world-row{display:grid;gap:26px;justify-items:start;margin-top:clamp(22px,4vw,44px)}
+.world-t .sec-p{max-width:50ch;font-size:16px;color:var(--soft);padding:2px 0}
+.world-chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip-d{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:8px 18px 8px 14px;border:1px solid var(--line2);border-radius:999px;background:rgba(9,9,11,.72);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);font:500 13px/1.2 var(--f-m);letter-spacing:.03em;color:#fff}
+.chip-d b{font:600 11px var(--f-m);letter-spacing:.1em;color:#050506;background:#fff;border-radius:6px;padding:4px 6px}
+.chip-d em{font-style:normal;color:var(--mute);font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-left:1px solid var(--line2);padding-left:10px}
+.chip-d.home{box-shadow:0 0 0 1px rgba(255,255,255,.25),0 0 26px -6px rgba(255,255,255,.55)}
+.chip-d.more{color:var(--soft)}
+.chip-d.more b{background:none;color:#fff;padding:0;border:0;font-size:13px}
+@media(max-width:560px){.chip-d em{display:none}}
+
+/* 04 SIGNAL */
+.signal-grid{display:grid;gap:clamp(24px,4vw,56px);align-items:end}
+@media(min-width:960px){.signal-grid{grid-template-columns:minmax(0,1fr) minmax(0,.9fr)}}
+.signal-form{display:grid;gap:18px}
+.news{padding:clamp(18px,2.4vw,30px);display:grid;gap:14px;border-radius:14px}
+.news label{color:var(--mute)}
+.news .row{display:flex;gap:10px;flex-wrap:wrap}
+.news input[type=email]{flex:1 1 240px;min-height:52px;padding:0 20px;border-radius:999px;border:1px solid var(--line2);background:rgba(0,0,0,.45);color:#fff;font:500 14px var(--f-m);outline-offset:3px}
+.news input::placeholder{color:var(--mute)}
+.news small{color:var(--mute);font-size:12px}
+.signal-links a{display:inline-flex;align-items:center;gap:8px;min-height:44px;color:var(--soft);font:500 11px var(--f-m);letter-spacing:.14em;text-transform:uppercase}
+.signal-links a:hover{color:#fff}
+
+/* FINALE: nothing but the scene. The blob has re-formed into the emblem behind this block. */
+.finale{display:none}
+html:not(.no-gl) .finale{display:flex;flex-direction:row;justify-content:space-between;align-items:flex-end;gap:24px;position:relative;z-index:1;min-height:max(64svh,440px);padding:0 var(--pad) clamp(18px,3svh,32px);pointer-events:none}
+.fin-t{color:var(--soft);letter-spacing:.3em;text-shadow:0 0 18px #000,0 0 4px #000}
+@media(max-width:699px){.fin-t{display:none}}

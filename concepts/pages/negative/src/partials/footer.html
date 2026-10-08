@@ -1,0 +1,33 @@
+<footer class="spread ink foot" id="contents" data-tone="ink">
+  {{foot_ticker}}
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <img class="emblem" src="{{asset:assets/emblem.webp}}" alt="" width="72" height="77" loading="lazy">
+      <img class="word" src="{{asset:assets/wordmark.webp}}" alt="Monochrome" width="360" height="32" loading="lazy">
+    </div>
+    <div class="foot-col mono">
+      <p class="foot-h">Colophon</p>
+      <p>MONOCHROME® is a black, white and chrome clothing brand. Issue 01, The Unknown. Photographs from the Monochrome archive. Set in Bodoni Moda and DM Mono.</p>
+      <p class="foot-cad">Prices in CAD</p>
+    </div>
+    <nav class="foot-col mono" aria-label="Footer">
+      <p class="foot-h">Contents</p>
+      {{nav_foot}}
+    </nav>
+    <nav class="foot-col mono" aria-label="Store policies">
+      <p class="foot-h">The store</p>
+      <a data-store="/cart" href="{{store_cart}}">Bag</a>
+      <a data-store="/policies/shipping-policy" href="{{store_url}}/policies/shipping-policy">Shipping policy</a>
+      <a data-store="/policies/refund-policy" href="{{store_url}}/policies/refund-policy">Refund policy</a>
+      <a data-store="/policies/privacy-policy" href="{{store_url}}/policies/privacy-policy">Privacy policy</a>
+      <a data-store="/policies/terms-of-service" href="{{store_url}}/policies/terms-of-service">Terms of service</a>
+    </nav>
+    <div class="foot-col mono">
+      <p class="foot-h">Contact</p>
+      <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca</a>
+      <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
+    </div>
+  </div>
+  <div class="foot-giant" aria-hidden="true">Monochrome</div>
+  <p class="foot-legal mono"><span>© <span data-year>{{year}}</span> MONOCHROME®. All rights reserved. Prices in CAD.</span><span class="folio">p.{{page_folio}}</span></p>
+</footer>

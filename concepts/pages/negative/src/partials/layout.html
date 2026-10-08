@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+{{head_extra}}
+<meta name="theme-color" content="#070707">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<link rel="canonical" href="{{canonical}}">
+{{robots}}
+<link rel="icon" href="{{asset:assets/emblem.webp}}" type="image/webp">
+<link rel="apple-touch-icon" href="{{asset:assets/emblem.webp}}">
+<link rel="manifest" href="{{asset:site.webmanifest}}">
+<meta property="og:site_name" content="MONOCHROME®">
+<meta property="og:type" content="{{og_type}}">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:image" content="{{og_image}}">
+<meta name="twitter:card" content="{{twitter_card}}">
+<meta name="twitter:title" content="{{title}}">
+<meta name="twitter:description" content="{{description}}">
+<link rel="preload" href="{{asset:assets/fonts/BodoniModa-normal-400-900-latin.woff2}}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{asset:assets/fonts/DMMono-normal-400-latin.woff2}}" as="font" type="font/woff2" crossorigin>
+<script>window.MC = {root:'{{root}}', idx:'{{idx}}'};(function(){var d=document.documentElement;d.classList.add('js');try{if(localStorage.getItem('mc-neg')==='1')d.classList.add('neg')}catch(e){}window.__mcRv=setTimeout(function(){d.classList.add('rv-fail')},4000);addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation&&navigation.activation.navigationType==='traverse'){d.classList.add('vt-back');e.viewTransition.finished.then(function(){d.classList.remove('vt-back')},function(){d.classList.remove('vt-back')})}}catch(x){}})})()</script>
+<link rel="stylesheet" href="{{asset:css/base.css}}">
+<link rel="stylesheet" href="{{css_href}}">
+{{jsonld}}
+</head>
+<body class="{{body_class}}">
+<a class="skip" href="#main">Skip to content</a>
+{{> header}}
+{{> menu}}
+<main id="main">
+{{body}}
+</main>
+{{> footer}}
+<script src="{{asset:config.js}}"></script>
+<script src="{{asset:js/core.js}}" defer></script>
+{{page_js}}
+</body>
+</html>

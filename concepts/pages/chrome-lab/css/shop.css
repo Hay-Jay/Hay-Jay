@@ -1,0 +1,44 @@
+/* SHOP — a refined index: big chrome title, sticky glass toolbar, hairline cards. No WebGL here: the grid is the show. */
+main{position:relative;z-index:1}
+.shop-head{padding:calc(var(--nav) + clamp(30px,6vh,70px)) 0 clamp(26px,5vw,56px)}
+.sh-grid{display:grid;gap:clamp(22px,4vw,48px);align-items:end}
+@media(min-width:960px){.sh-grid{grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr)}}
+.sh-side{display:grid;gap:22px}
+.sh-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;background:rgba(9,9,11,.5);overflow:hidden}
+.sh-stats div{padding:12px 16px;border-right:1px solid var(--line)}
+.sh-stats div:last-child{border-right:0}
+.sh-stats dt{color:var(--mute);font-size:10px}
+.sh-stats dd{font:700 22px/1.1 var(--f-d);font-stretch:112%;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+
+.shop{padding:0 0 clamp(60px,10vh,120px)}
+.toolbar{display:flex;flex-direction:column;gap:12px;padding:12px;margin-bottom:18px;border-radius:14px;z-index:40}
+.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.filters::-webkit-scrollbar{display:none}
+.filter{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:999px;font:500 11px/1 var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:background .2s,color .2s,border-color .2s}
+.filter sup{font:500 9px/1 var(--f-m);letter-spacing:.04em;color:var(--dim);vertical-align:baseline;position:relative;top:-.45em}
+.filter:hover{border-color:var(--line2);color:#fff}
+.filter.on{background:#fff;color:#050506;border-color:#fff}
+.filter.on sup{color:#555}
+.sortwrap{display:flex;align-items:center;gap:10px;color:var(--mute)}
+select{appearance:none;-webkit-appearance:none;min-height:44px;padding:0 40px 0 16px;border:1px solid var(--line);border-radius:999px;background:#0a0a0c url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1.5 6 6.5l5-5' fill='none' stroke='white' stroke-width='1.6'/></svg>") no-repeat right 16px center;color:#fff;font:500 12px var(--f-m);letter-spacing:.06em;cursor:pointer}
+select:hover{border-color:var(--line2)}
+@media(min-width:900px){
+  .toolbar{flex-direction:row;align-items:center;justify-content:space-between;padding:10px 14px;position:sticky;top:64px}
+  .filters{overflow:visible}
+}
+.count{color:var(--mute);margin:0 2px 16px}
+.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;grid-auto-flow:dense}
+@media(min-width:760px){.products{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
+@media(min-width:1100px){.products{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
+.products .card .info b{font-size:13px}
+.empty{text-align:center;color:var(--mute);padding:60px 0;display:grid;gap:20px;justify-items:center}
+.empty[hidden]{display:none}
+.empty p{font:500 12px var(--f-m);letter-spacing:.1em;text-transform:uppercase}
+
+/* category filter from the URL, applied before JS runs (no flash); core of the filter is this attribute */
+html[data-f="top"] .products .card:not([data-cat="top"]),
+html[data-f="bottom"] .products .card:not([data-cat="bottom"]),
+html[data-f="accessory"] .products .card:not([data-cat="accessory"]),
+html[data-f="gift"] .products .card:not([data-cat="gift"]){display:none}
+html[data-f] .products .card.feat{grid-column:auto}
+html[data-f] .products .card.feat .pic{aspect-ratio:4/5}

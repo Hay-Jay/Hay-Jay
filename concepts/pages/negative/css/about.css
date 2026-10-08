@@ -1,0 +1,54 @@
+/* ABOUT — "The Formula": a long-form feature. Drop cap, two-column essay with marginalia, a pull quote that spans both columns. */
+.ab-open { padding: clamp(100px, 17vh, 190px) var(--gut) clamp(60px, 9vh, 110px); overflow: clip; }
+.ab-eq { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .22em; margin-top: 9vh; font: 900 clamp(2.5rem, 9.2vw, 9.5rem)/.98 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+.ab-eq i { font-style: italic; font-weight: 400; opacity: .55; }
+.chr { background: var(--chrome); background-size: 240% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; animation: sheen 9s linear infinite; padding-right: .04em; }
+.ab-deck { max-width: 26em; margin-top: 5vh; font: italic 400 clamp(1.3rem, 2.4vw, 2.1rem)/1.3 var(--serif); }
+
+.ab-essay { display: grid; gap: 40px var(--gut); padding: clamp(40px, 7vh, 90px) var(--gut) clamp(80px, 12vh, 150px); overflow: clip; border-top: 1px solid var(--fg); margin: 0 var(--gut); padding-inline: 0; }
+.ab-text { font-size: clamp(1.05rem, 1.3vw, 1.28rem); line-height: 1.55; max-width: 40em; order: 1; }
+.ab-text p { margin: 0 0 1.1em; }
+.ab-text .drop::first-letter { float: left; font: 900 5.4em/.76 var(--serif); padding: .06em .09em 0 0; letter-spacing: -.04em; font-variation-settings: 'opsz' 22; }
+.lead-in { font: 700 .86em/1 var(--serif); letter-spacing: .08em; text-transform: uppercase; }
+.ab-h { display: flex; align-items: baseline; gap: 12px; margin: 1.7em 0 .5em; font: 500 clamp(1.5rem, 2.3vw, 2.1rem)/1.05 var(--serif); letter-spacing: -.02em; text-transform: uppercase; break-after: avoid; font-variation-settings: 'opsz' 30; }
+.ab-h .mono { color: var(--dim); }
+.ab-a { text-underline-offset: 4px; }
+.ab-pull { margin: 1.4em 0 1.2em; padding: .9em 0; border-block: 1px solid var(--fg); font: italic 400 clamp(1.8rem, 3.4vw, 3.2rem)/1.05 var(--serif); letter-spacing: -.03em; font-variation-settings: 'opsz' 14; column-span: all; }
+.ab-fig { margin: 1.6em 0; break-inside: avoid; }
+.ab-fig .xp { display: block; aspect-ratio: 4 / 5; text-decoration: none; }
+.ab-fig-b .xp { aspect-ratio: 1 / 1; }
+.ab-fig .ph { position: absolute; inset: 0; }
+.ab-fig figcaption { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--dim); }
+.ab-fig-c { order: 3; margin: 0; }
+.ab-margin { order: 2; display: grid; gap: 6px; align-content: start; color: var(--dim); border-top: 1px solid var(--fg); padding-top: 12px; }
+.ab-margin p { color: var(--fg); }
+.ab-mh { color: var(--dim) !important; margin-top: 14px; }
+.ab-margin ul { border-top: 1px solid var(--rule); }
+.ab-margin li { border-bottom: 1px solid var(--rule); }
+.ab-margin li a { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; text-decoration: none; color: var(--fg); }
+.ab-margin li a:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.ab-margin b { font: 500 1.4rem/1 var(--serif); font-variation-settings: 'opsz' 30; }
+
+.ab-three { padding: clamp(80px, 12vh, 150px) var(--gut); overflow: clip; }
+.three { display: grid; gap: 0; border-top: 1px solid var(--fg); margin-top: 4vh; }
+.three li { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "n w" ". p"; column-gap: 14px; row-gap: 8px; padding: 22px 0 28px; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.three .mono { grid-area: n; color: var(--dim); }
+.three b { grid-area: w; font: 500 clamp(3.4rem, 15vw, 10rem)/.86 var(--serif); letter-spacing: -.05em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+.three p { grid-area: p; max-width: 28ch; color: var(--dim); font: italic 400 clamp(1.05rem, 1.6vw, 1.3rem)/1.4 var(--serif); }
+.ab-big { margin-top: 9vh; font: 400 clamp(3rem, 11.4vw, 12rem)/.86 var(--serif); letter-spacing: -.045em; white-space: nowrap; font-variation-settings: 'opsz' 22; }
+.ab-big em { font-variation-settings: 'opsz' 14; }
+.ab-next { padding: clamp(40px, 8vh, 90px) var(--gut) clamp(60px, 10vh, 120px); }
+@media (max-width: 699px) { .ab-big { font-size: 9.3vw; } }
+@media (min-width: 700px) {
+  .three { grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--fg); }
+  .three li { grid-template-columns: 1fr; grid-template-areas: "n" "w" "p"; padding: 22px 20px 30px; border-bottom: 0; border-left: 1px solid var(--rule); row-gap: 14px; }
+  .three li:first-child { border-left: 0; padding-left: 0; }
+}
+@media (min-width: 1000px) {
+  .ab-essay { grid-template-columns: 11rem minmax(0, 1fr) minmax(0, 19rem); }
+  .ab-margin { order: 0; position: sticky; top: calc(var(--bar) + 28px); align-self: start; }
+  .ab-text { order: 0; column-count: 2; column-gap: clamp(28px, 3.4vw, 56px); max-width: none; }
+  .ab-fig-c { order: 0; position: sticky; top: calc(var(--bar) + 28px); align-self: start; }
+  .ab-fig-a { margin-top: 0; }
+}
+@media (min-width: 900px) { .ab-open, .ab-three, .ab-next { padding-left: calc(var(--gut) + 22px); } .ab-essay { margin-left: calc(var(--gut) + 22px); } }

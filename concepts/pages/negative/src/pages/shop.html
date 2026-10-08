@@ -1,0 +1,45 @@
+  <!-- THE INDEX ------------------------------------------------------------ -->
+  <section class="spread paper index" id="index" data-tone="paper" aria-labelledby="indexH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">02</div>
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — The index — Prices in CAD</div>
+    <div class="idx-head">
+      <p class="mono kicker rv">Contents <span>({{total}})</span> — p.02</p>
+      <h1 class="display rv-lines" id="indexH"><span class="ln"><span>The </span></span><span class="ln"><span class="ital">Index<i class="stop">.</i></span></span></h1>
+      <p class="idx-sub rv">Every piece in this issue, indexed. <span class="hint-fine">Hover a title for the plate, click to open the piece.</span><span class="hint-touch">Tap a title for the plate, then open the piece.</span> All prices are in Canadian dollars (CAD).</p>
+    </div>
+
+    <div class="toolbar" role="group" aria-label="Filter and sort the index">
+      <div class="filters" id="filters">
+        {{filters}}
+      </div>
+      <div class="tb-r">
+        <label class="findwrap mono"><span class="sr-only">Search the index</span><input id="q" type="search" placeholder="Search" autocomplete="off" spellcheck="false" aria-controls="toc sheet"></label>
+        <label class="sortwrap mono"><span>Sort</span>
+          <select id="sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option></select>
+        </label>
+        <div class="views" role="group" aria-label="View as">
+          <button class="view" data-view="index" type="button" aria-pressed="false">Index</button>
+          <button class="view" data-view="sheet" type="button" aria-pressed="false"><span class="v-x">Contact </span>Sheet</button>
+        </div>
+      </div>
+    </div>
+    <p class="count mono" id="count" role="status" aria-live="polite">{{total}} pieces — {{in_stock}} in stock</p>
+    <div class="empty-state" id="empty" hidden>
+      <p class="mono">Nothing in this section right now.</p>
+      <p>Check back for the next issue, or <button class="link-line mono" type="button" id="emptyReset">show the whole index</button>.</p>
+    </div>
+
+    <ol class="toc" id="toc">
+{{shop_rows}}
+    </ol>
+    <div class="sheet-wrap" id="sheetWrap">
+      <div class="sheet" id="sheet">
+{{shop_frames}}
+      </div>
+    </div>
+
+    <p class="idx-end"><a class="mono link-line" data-store="/collections/all" href="{{store_url}}/collections/all">View the complete store<span class="arr" aria-hidden="true"></span></a></p>
+  </section>
+
+  <!-- floating plate that follows the pointer over index titles (desktop) -->
+  <div class="plate" id="plate" aria-hidden="true"><div class="plate-in"><img alt="" id="plateImg" width="560" height="700"></div><span class="plate-cap mono" id="plateCap"></span></div>

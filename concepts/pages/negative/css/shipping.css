@@ -1,0 +1,82 @@
+/* SHIPPING — "Distribution": a printed table of countries (Nigeria and Canada picked out), returns notes as marginalia. */
+.dst-open { padding: clamp(100px, 16vh, 180px) var(--gut) clamp(40px, 7vh, 80px); overflow: clip; }
+.dst-h { font-size: clamp(2.6rem, 10.2vw, 11rem); }
+.dst-deck { max-width: 28em; margin-top: 5vh; font: italic 400 clamp(1.2rem, 2.2vw, 1.9rem)/1.3 var(--serif); }
+.dst-hl { display: grid; gap: 12px; margin-top: 8vh; }
+.hl { display: flex; flex-direction: column; justify-content: space-between; gap: 22px; min-height: 250px; padding: 18px 18px 22px; border: 1px solid var(--fg); }
+.hl b { font: 500 clamp(3.4rem, 11vw, 10rem)/.86 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+.hl .mono { color: var(--dim); }
+.hl p { max-width: 30ch; font: italic 400 1.2rem/1.35 var(--serif); }
+.hl p strong { font-weight: 600; }
+.hl-ng { background: var(--fg); color: var(--bg); }
+.hl-ng .mono { color: color-mix(in srgb, var(--bg) 64%, var(--fg)); }
+
+.dst-table { padding: clamp(30px, 6vh, 70px) var(--gut) clamp(70px, 10vh, 120px); overflow: clip; }
+.dst-grid { display: grid; gap: 48px; }
+.tbl-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font: 500 clamp(1.6rem, 3.4vw, 2.8rem)/1.05 var(--serif); letter-spacing: -.03em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
+.tbl-h .mono { color: var(--dim); font-size: 11px; }
+.tbl-h em { text-transform: none; font-weight: 400; }
+.tbl-sub { margin-top: 10px; color: var(--dim); max-width: 70ch; }
+.tbl-wrap { margin-top: 22px; }
+.tbl { width: 100%; border-collapse: collapse; border-top: 3px double var(--fg); }
+.tbl thead th { text-align: left; font-weight: 400; color: var(--dim); padding: 10px 10px 10px 0; border-bottom: 1px solid var(--fg); }
+.tbl td, .tbl th { padding: 10px 10px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.tbl tbody th { text-align: left; font: 500 clamp(1.15rem, 1.7vw, 1.6rem)/1.1 var(--serif); letter-spacing: -.02em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
+.tbl tbody th em { font: italic 400 .62em/1 var(--serif); text-transform: none; letter-spacing: 0; margin-left: .7em; opacity: .85; }
+.tbl .c-no, .tbl .c-code { color: var(--dim); font-variant-numeric: tabular-nums; }
+.tbl tr.nigeria, .tbl tr.canada { background: var(--fg); color: var(--bg); }
+.tbl tr.nigeria > *, .tbl tr.canada > * { border-bottom-color: var(--bg); color: var(--bg); padding-left: 10px; }
+.tbl tr.nigeria .c-no, .tbl tr.canada .c-no { padding-left: 8px; }
+.tbl tr.nigeria .c-no, .tbl tr.canada .c-no, .tbl tr.nigeria .c-code, .tbl tr.canada .c-code { color: color-mix(in srgb, var(--bg) 70%, var(--fg)); }
+.tbl-foot { margin-top: 18px; color: var(--dim); }
+
+.dst-aside { align-self: start; border-top: 1px solid var(--fg); padding-top: 14px; }
+.dst-aside h2 { margin-top: 8px; font: 500 clamp(1.6rem, 2.6vw, 2.3rem)/1.05 var(--serif); letter-spacing: -.03em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
+.mg-k { color: var(--dim); }
+.mg-notes { margin-top: 18px; display: grid; gap: 0; }
+.mg-notes li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 6px; padding: 12px 0; border-top: 1px solid var(--rule); }
+.mg-notes .mono { color: var(--dim); padding-top: .3em; }
+.mg-notes p { font: italic 400 1.08rem/1.45 var(--serif); }
+.mg-notes a { text-underline-offset: 4px; }
+.mg-links { margin-top: 18px; display: grid; gap: 4px; }
+.mg-links .link-line { margin-right: 14px; }
+
+.dst-steps { padding: clamp(70px, 11vh, 140px) var(--gut); overflow: clip; }
+.steps { display: grid; border-top: 1px solid var(--fg); margin-top: 4vh; }
+.steps li { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "n w" ". p"; column-gap: 14px; row-gap: 8px; padding: 22px 0 28px; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.steps .mono { grid-area: n; color: var(--dim); }
+.steps b { grid-area: w; font: 500 clamp(2.8rem, 10vw, 7rem)/.9 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+.steps p { grid-area: p; max-width: 30ch; color: var(--dim); font: italic 400 clamp(1.05rem, 1.5vw, 1.25rem)/1.4 var(--serif); }
+
+.dst-sizing { padding: clamp(80px, 12vh, 150px) var(--gut) clamp(70px, 11vh, 130px); overflow: clip; }
+.sz-list { margin-top: 8vh; border-top: 1px solid var(--fg); }
+.sz-list > div { display: grid; gap: 6px; padding: 16px 0 18px; border-bottom: 1px solid var(--rule); }
+.sz-list dt { color: var(--dim); }
+.sz-list dd { font: italic 400 clamp(1.15rem, 2vw, 1.6rem)/1.3 var(--serif); max-width: 30em; }
+.sz-foot { margin-top: 5vh; max-width: 30em; font: 400 1.15rem/1.5 var(--serif); }
+
+@media (min-width: 700px) {
+  .dst-hl { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: repeat(3, 1fr); }
+  .steps li { grid-template-columns: 1fr; grid-template-areas: "n" "w" "p"; padding: 22px 20px 30px; border-bottom: 0; border-left: 1px solid var(--rule); row-gap: 14px; }
+  .steps li:first-child { border-left: 0; padding-left: 0; }
+  .sz-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gut); }
+}
+@media (min-width: 1000px) {
+  .dst-grid { grid-template-columns: minmax(0, 1fr) minmax(260px, 22rem); gap: clamp(36px, 5vw, 90px); }
+  .dst-aside { position: sticky; top: calc(var(--bar) + 24px); }
+}
+@media (min-width: 900px) { .dst-open, .dst-table, .dst-steps, .dst-sizing { padding-left: calc(var(--gut) + 22px); } }
+
+/* phones: each table row becomes a two-line entry */
+@media (max-width: 699px) {
+  .tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .tbl, .tbl tbody { display: block; }
+  .tbl tr { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) auto; grid-template-areas: "no name code" "no reg rate"; column-gap: 8px; row-gap: 2px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+  .tbl td, .tbl th { padding: 0; border: 0; }
+  .tbl .c-no { grid-area: no; } .tbl .c-name { grid-area: name; } .tbl .c-code { grid-area: code; text-align: right; } .tbl .c-reg { grid-area: reg; color: var(--dim); } .tbl .c-rate { grid-area: rate; text-align: right; }
+  .tbl tr.nigeria, .tbl tr.canada { padding-inline: 8px; }
+  .tbl tr.nigeria > *, .tbl tr.canada > * { padding-left: 0; }
+  .tbl tr.nigeria .c-reg, .tbl tr.canada .c-reg { color: color-mix(in srgb, var(--bg) 70%, var(--fg)); }
+  .tbl-h .mono { font-size: 12px; }
+}

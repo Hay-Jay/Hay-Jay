@@ -1,0 +1,23 @@
+  <!-- LOOKBOOK: the film strip, as its own page ------------------------------------------ -->
+  <section class="spread ink lookbook" id="lookbook" data-tone="ink" aria-label="Lookbook">
+    <div class="lb-pin" id="lbPin">
+      <div class="lb-run mono" aria-hidden="true"><span>Monochrome® — Issue 01</span><span>Lookbook</span><span>p.03</span></div>
+      <div class="lb-track" id="lbTrack" role="region" aria-label="Lookbook photographs, scroll sideways" tabindex="0">
+        <div class="lb-intro">
+          <h1 aria-label="Lookbook"><span aria-hidden="true">Look</span><span class="ital" aria-hidden="true">book</span></h1>
+          <p class="mono">{{lb_count}} frames from the issue. <span class="lb-how">Swipe sideways.</span> Open a frame to see the piece.</p>
+        </div>
+{{lb_figs}}
+        <div class="lb-out"><span class="mono">End of the lookbook</span><a href="{{href:shop/}}">The<br>index<span class="arr" aria-hidden="true"></span></a></div>
+      </div>
+      <div class="lb-meter mono">
+        <span id="lbNo" aria-hidden="true">Fig. 01 / {{lb_count_pad}}</span>
+        <span class="lb-rail" aria-hidden="true"><i id="lbBar"></i></span>
+        <span class="lb-ctrl">
+          <button type="button" id="lbPrev" aria-label="Previous frame" hidden>&larr;</button>
+          <button type="button" id="lbNext" aria-label="Next frame" hidden>&rarr;</button>
+        </span>
+        <span id="lbHint" aria-hidden="true">Swipe</span>
+      </div>
+    </div>
+  </section>
