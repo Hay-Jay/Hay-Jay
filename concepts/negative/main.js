@@ -17,7 +17,7 @@
   // Shopify's CDN resizes on request.
   const sized = (src, w) => !/^https?:/.test(src) ? src : `${src}${src.includes('?') ? '&' : '?'}width=${w}`;
   const isHeic = src => /\.heic(\?|$)/i.test(src);
-  const safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, STORE_URL).href)); } catch { return ''; } };
+  const safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, document.baseURI).href)); } catch { return ''; } };
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const noHover = () => matchMedia('(hover: none)').matches;
@@ -34,11 +34,14 @@
   $('#year').textContent = new Date().getFullYear();
 
   // ---- Product model -------------------------------------------------------
+  // some first frames are close-ups that are half black fabric; pick a stronger lead photograph for index plates
+  const HERO = { 'monochrome-sweatshirt': 4 };
   const items = DATA.products.map(p => {
     const imgs = p.images.map(i => i.src);
     const ok = imgs.filter(s => !isHeic(s));
     const list = ok.length ? ok : imgs;
     return {
+      hero: Math.min(HERO[p.handle] || 0, Math.max(0, list.length - 1)),
       n: p.title, p: p.price, pMax: p.priceMax, t: p.category, avail: p.available, sizes: (p.sizes || []).map(s => String(s).toUpperCase()),
       u: `${STORE_URL}/products/${p.handle}`, h: p.handle, d: p, imgs: list,
       isNew: (p.collections || []).includes('new-arrivals'),
@@ -50,6 +53,7 @@
   const priceText = x => (x.pMax > x.p ? 'From ' : '') + fmt(x.p);
   const sizeText = x => x.sizes.length ? x.sizes.slice(0, 7).join(' ') : (x.t === 'gift' ? 'Choose amount' : 'One size');
   const photo = (x, i, w) => sized(x.imgs[Math.min(i, x.imgs.length - 1)] || '', w);
+  const lead = (x, w) => photo(x, x.hero, w);
 
   // images that fail to load simply hide, never leaving a broken icon
   document.addEventListener('error', e => {
@@ -266,6 +270,8 @@
 
   // ---- The index: table of contents + contact sheet ---------------------------------
   let filter = 'all', sort = 'featured', view = 'toc';
+  // a photography-first brand should not open on 23 rows of bare type on a phone: lead with the contact sheet there
+  const startView = matchMedia('(hover: none), (max-width: 699px)').matches ? 'sheet' : 'toc';
   const SORTS = {
     featured: (a, b) => b.avail - a.avail || b.rank - a.rank || b.p - a.p,
     new: (a, b) => b.avail - a.avail || b.pub - a.pub,
@@ -281,6 +287,8 @@
   $$('.filter').forEach(b => { const f = b.dataset.filter; $('sup', b).textContent = f === 'all' ? items.length : items.filter(x => x.t === f).length; });
   $('#idxTotal').textContent = `(${items.length})`;
 
+  // each grease-pencil cross is drawn a little differently, deterministically per plate number
+  const greaseVars = n => `--ga:${46 + (n * 7) % 9}deg;--gb:${-(50 + (n * 5) % 11)}deg;--gy:${(n * 3) % 7 - 3}px;--gc:${(n * 11) % 17 - 8}deg`;
   function drawIndex() {
     const data = items.filter(x => filter === 'all' || x.t === filter).sort(SORTS[sort]);
     const n = data.length, noun = NOUN[filter][n === 1 ? 0 : 1];
@@ -304,9 +312,9 @@
       </li>`).join('');
     const feat = filter === 'all' && (sort === 'featured' || sort === 'new') && n >= 8;
     sheet.innerHTML = data.map((x, i) => `
-      <a class="frame frame-new${feat && i === 0 ? ' feat' : ''}${x.avail ? '' : ' sold'}${x.isNew ? ' isnew' : ''}" style="--i:${Math.min(i, 14)}" data-h="${esc(x.h)}" href="${esc(x.u)}" target="_blank" rel="noopener">
+      <a class="frame frame-new${feat && i === 0 ? ' feat' : ''}${x.avail ? '' : ' sold'}${x.isNew ? ' isnew' : ''}" style="--i:${Math.min(i, 14)};${greaseVars(x.no)}" data-h="${esc(x.h)}" href="${esc(x.u)}" target="_blank" rel="noopener">
         <div class="film" aria-hidden="true"><span>MC-01 / ${pad(x.no)}</span><span>${pad(x.no)}A</span></div>
-        <div class="xp${zoomy(x) ? ' zoom' : ''}"><img class="ph" loading="lazy" decoding="async" draggable="false" src="${esc(safeUrl(photo(x, 0, feat && i === 0 ? 1000 : 720)))}" alt="${esc(x.n)}"></div>
+        <div class="xp${zoomy(x) ? ' zoom' : ''}"><img class="ph" loading="lazy" decoding="async" draggable="false" src="${esc(safeUrl(lead(x, feat && i === 0 ? 1400 : 720)))}" alt="${esc(x.n)}">${x.avail ? '' : '<span class="grease" aria-hidden="true"><i></i></span>'}</div>
         <div class="cap">
           <span class="no mono">${pad(x.no)}</span><b>${esc(x.n)}</b>
           <span class="pr">${priceText(x)} <small>CAD</small></span>
@@ -336,9 +344,9 @@
   // ---- Pointer plate over index titles ------------------------------------------------
   const plate = $('#plate'), plateImg = $('#plateImg'), plateCap = $('#plateCap');
   const zoomy = x => x.t === 'accessory' && /ring/i.test(x.h);
-  const P = { x: 0, y: 0, tx: 0, ty: 0, rot: 0, on: false, raf: 0, h: null };
+  const P = { x: 0, y: 0, tx: 0, ty: 0, rot: 0, on: false, raf: 0, h: null, rowFor: null, minX: 0, rowL: 0, kb: false };
   function plateHide() {
-    P.on = false; P.h = null; plate.classList.remove('on', 'sharp');
+    P.on = false; P.h = null; P.rowFor = null; plate.classList.remove('on', 'sharp');
     $$('.trow.hot', toc).forEach(r => r.classList.remove('hot'));
     toc.classList.remove('hov');
   }
@@ -350,18 +358,25 @@
       P.h = h;
       plate.classList.remove('sharp');
       plateImg.onload = () => { if (P.h === h) requestAnimationFrame(() => plate.classList.add('sharp')); };
-      plateImg.src = safeUrl(photo(it, 0, 640));
+      plateImg.src = safeUrl(lead(it, 640));
       plateImg.alt = ''; plate.classList.toggle('zoom', zoomy(it));
-      plateCap.textContent = `No. ${row.querySelector('.t-no').textContent} — ${CAT[it.t] || ''} — ${priceText(it)} CAD`;
+      plateCap.textContent = `No. ${row.querySelector('.t-no').textContent} — ${CAT[it.t] || ''} — ${priceText(it)} CAD${it.avail ? '' : ' — Sold out'}`;
       if (plateImg.complete && plateImg.naturalWidth) requestAnimationFrame(() => plate.classList.add('sharp'));
     }
+    // keep the plate off the title being read: it floats in the space to the right of the row's text
+    const nameEl = row.querySelector('.t-name'), rowEl = row.querySelector('.trow-a');
+    if (nameEl && rowEl && P.rowFor !== row) {
+      P.rowFor = row;
+      const rg = document.createRange(); rg.selectNodeContents(nameEl);
+      P.minX = rg.getBoundingClientRect().right + 30; P.rowL = rowEl.getBoundingClientRect().left;
+    }
     P.tx = x; P.ty = y;
-    if (!P.on) { P.x = x; P.y = y; P.on = true; plate.classList.add('on'); if (!P.raf) P.raf = requestAnimationFrame(plateTick); }
+    if (!P.on) { P.x = Math.min(Math.max(x + 34, P.minX), innerWidth - plate.offsetWidth - 14); P.y = y; P.on = true; plate.classList.add('on'); if (!P.raf) P.raf = requestAnimationFrame(plateTick); }
   }
   function plateTick() {
     const w = plate.offsetWidth, hgt = plate.offsetHeight;
-    let ax = P.tx + 34, ay = P.ty - hgt * 0.5;
-    if (ax + w > innerWidth - 14) ax = P.tx - w - 34;
+    let ax = Math.max(P.tx + 34, P.minX + (P.tx - P.rowL) * 0.06), ay = P.ty - hgt * 0.5;
+    ax = Math.min(ax, innerWidth - w - 14);
     ay = clamp(ay, 58, innerHeight - hgt - 40);
     const px = P.x;
     P.x += (ax - P.x) * 0.13; P.y += (ay - P.y) * 0.13;
@@ -372,16 +387,16 @@
   if (fine) {
     toc.addEventListener('pointermove', e => {
       const row = e.target.closest('.trow'); if (!row || !row.dataset.h) { plateHide(); return; }
-      plateShow(row, e.clientX, e.clientY);
+      P.kb = false; plateShow(row, e.clientX, e.clientY);
     });
     toc.addEventListener('pointerleave', plateHide);
-    addEventListener('scroll', () => { if (P.on) { const el = document.elementFromPoint(lastPt.x, lastPt.y); const row = el && el.closest && el.closest('.trow'); if (row) plateShow(row, lastPt.x, lastPt.y); else plateHide(); } }, { passive: true });
+    addEventListener('scroll', () => { if (P.on && !P.kb) { const el = document.elementFromPoint(lastPt.x, lastPt.y); const row = el && el.closest && el.closest('.trow'); if (row) plateShow(row, lastPt.x, lastPt.y); else plateHide(); } }, { passive: true });
     // keyboard focus shows the plate beside the row
-    toc.addEventListener('focusin', e => { const a = e.target.closest('.trow-a'); if (!a) return; const r = a.getBoundingClientRect(); plateShow(a.parentNode, clamp(r.left + r.width * 0.66, 100, innerWidth - 100), clamp(r.top + r.height / 2, 120, innerHeight - 120)); });
+    toc.addEventListener('focusin', e => { const a = e.target.closest('.trow-a'); if (!a) return; P.kb = true; const r = a.getBoundingClientRect(); plateShow(a.parentNode, clamp(r.left + r.width * 0.66, 100, innerWidth - 100), clamp(r.top + r.height / 2, 120, innerHeight - 120)); });
     toc.addEventListener('focusout', e => { if (!toc.contains(e.relatedTarget)) plateHide(); });
     // warm the cache once the index is near
     if ('IntersectionObserver' in window) {
-      const wio = new IntersectionObserver(es => { if (es[0].isIntersecting) { wio.disconnect(); const warm = () => items.forEach(x => { const i = new Image(); i.src = safeUrl(photo(x, 0, 640)); }); if (window.requestIdleCallback) requestIdleCallback(warm, { timeout: 800 }); else setTimeout(warm, 300); } }, { rootMargin: '800px 0px' });
+      const wio = new IntersectionObserver(es => { if (es[0].isIntersecting) { wio.disconnect(); const warm = () => items.forEach(x => { const i = new Image(); i.src = safeUrl(lead(x, 640)); }); if (window.requestIdleCallback) requestIdleCallback(warm, { timeout: 800 }); else setTimeout(warm, 300); } }, { rootMargin: '800px 0px' });
       wio.observe(toc);
     }
   }
@@ -394,7 +409,7 @@
     $$('.trow.open', toc).forEach(r => { if (r !== row) { r.classList.remove('open'); $('.trow-a', r).setAttribute('aria-expanded', 'false'); } });
     if (!$('.t-more', row)) {
       row.insertAdjacentHTML('beforeend', `<div class="t-more"><div class="t-more-in"><div class="t-more-box">
-        <div class="xp${zoomy(it) ? ' zoom' : ''}"><img class="ph" loading="lazy" decoding="async" draggable="false" src="${esc(safeUrl(photo(it, 0, 700)))}" alt="${esc(it.n)}"></div>
+        <div class="xp${zoomy(it) ? ' zoom' : ''}"><img class="ph" loading="lazy" decoding="async" draggable="false" src="${esc(safeUrl(lead(it, 700)))}" alt="${esc(it.n)}"></div>
         <dl class="mono"><div><dt>Section</dt><dd>${CAT[it.t] || ''}</dd></div><div><dt>Price</dt><dd>${priceText(it)} CAD</dd></div><div><dt>Sizes</dt><dd>${esc(sizeText(it))}</dd></div>
         <a class="t-open mono" href="${esc(it.u)}" data-h="${esc(it.h)}">Open the piece</a></dl></div></div></div>`);
     }
@@ -429,7 +444,8 @@
     </a>`).join('')}
     <div class="lb-out"><span class="mono">End of the lookbook</span><a href="#index">The<br>index<span class="arr" aria-hidden="true"></span></a></div>`;
   const lbFigs = $$('.lb-fig', lbTrack);
-  const lb = { pinned: false, travel: 0, p: 0 };
+  const lb = { pinned: false, travel: 0, run: 0, p: 0 };
+  const LB_PACE = 0.56; // page scroll needed per pixel of strip travel
   const lbNo = $('#lbNo'), lbBar = $('#lbBar'), lbHint = $('#lbHint');
   const setNo = k => { const t = `Fig. ${pad(k + 1)} / ${pad(LOOKS.length)}`; if (lbNo.textContent !== t) lbNo.textContent = t; };
   function lbModeCheck() {
@@ -447,14 +463,15 @@
     if (!lb.pinned) { lbUpdate(); return; }
     const last = lbTrack.lastElementChild;
     lb.travel = Math.max(0, last.offsetLeft + last.offsetWidth + parseFloat(getComputedStyle(lbTrack).paddingLeft) + 8 - innerWidth);
-    lbSec.style.height = (lbPin.offsetHeight || innerHeight) + lb.travel + 'px';
+    lb.run = lb.travel * LB_PACE;
+    lbSec.style.height = (lbPin.offsetHeight || innerHeight) + lb.run + 'px';
     lbUpdate();
   }
   function lbUpdate() {
     let view0 = 0, w = innerWidth;
     if (lb.pinned) {
       const top = lbSec.getBoundingClientRect().top;
-      const p = lb.travel > 0 ? clamp(-top / lb.travel, 0, 1) : 0;
+      const p = lb.run > 0 ? clamp(-top / lb.run, 0, 1) : 0;
       lb.p = p; view0 = p * lb.travel;
       lbTrack.style.transform = `translate3d(${(-view0).toFixed(1)}px,0,0)`;
     } else {
@@ -480,8 +497,8 @@
     if (!lb.pinned) return; const f = e.target.closest('.lb-fig'); if (!f) return;
     lbPin.scrollLeft = 0;
     const p = clamp((f._cx - innerWidth / 2) / (lb.travel || 1), 0, 1);
-    const secTop = scrollY + lbSec.getBoundingClientRect().top + (lb.p * lb.travel);
-    scrollTo({ top: secTop + p * lb.travel, behavior: 'auto' });
+    const secTop = scrollY + lbSec.getBoundingClientRect().top + (lb.p * lb.run);
+    scrollTo({ top: secTop + p * lb.run, behavior: 'auto' });
   });
   const lbMq = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
   (lbMq.addEventListener ? lbMq.addEventListener('change', lbModeCheck) : lbMq.addListener(lbModeCheck));
@@ -626,5 +643,5 @@
   });
 
   drawIndex();
-  setView('toc');
+  setView(startView);
 })();

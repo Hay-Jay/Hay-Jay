@@ -4,18 +4,20 @@
 // If WebGL is unavailable the CSS emblem inside the radar stays as the fallback.
 import * as THREE from './assets/vendor/three.module.min.js';
 
+const tick = () => new Promise(r => setTimeout(r, 0));   // yield to the page between heavy steps so timers and typing keep running
 const canvas = document.getElementById('gl');
 const viewport = document.getElementById('viewport');
-if (canvas && viewport) boot().catch(() => { /* keep the CSS emblem fallback */ });
+if (canvas && viewport) boot().catch(() => viewport.classList.add('gl-off'));   // keep the CSS emblem fallback
 
 async function boot() {
   // Probe on a throwaway canvas so unsupported browsers fall back quietly to the CSS emblem.
   const probe = document.createElement('canvas');
   const pg = probe.getContext('webgl2') || probe.getContext('webgl');
-  if (!pg) return;
+  if (!pg) { viewport.classList.add('gl-off'); return; }
   const lose = pg.getExtension('WEBGL_lose_context'); if (lose) lose.loseContext();
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const dpr = window.devicePixelRatio || 1;
+  await tick();
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: dpr < 2, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(dpr, 1.5));            // capped: this canvas never needs to be sharper than 1.5x
   renderer.setClearColor(0x000000, 0);
@@ -23,7 +25,7 @@ async function boot() {
 
   // Chrome without an environment map: a painted "matcap" of a black studio with hard white soft-boxes.
   // One texture lookup per pixel keeps this cheap enough for software renderers and phones.
-  function chromeMatcap(size = 256) {
+  function chromeMatcap(size = 192) {
     const c = document.createElement('canvas'); c.width = c.height = size;
     const ctx = c.getContext('2d'); const img = ctx.createImageData(size, size);
     const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -52,6 +54,7 @@ async function boot() {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
   }
 
+  await tick();
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, .1, 60);
   camera.position.set(0, 1.5, 10.4);
@@ -83,6 +86,7 @@ async function boot() {
   ring(1.78, .035, 52, 22, 96, 6, -.22, true);   // thin outer orbit
   ring(.86, .05, 108, 8, 56, 6, .5, true);       // inner gyro
 
+  await tick();
   // The emblem sits at the centre (luminance becomes alpha so the black square disappears and rings can pass in front of it).
   const emblemGroup = new THREE.Group(); scene.add(emblemGroup);
   try {
@@ -175,14 +179,17 @@ async function boot() {
   const start = () => { if (running || reduce) return; running = true; last = lastDraw = performance.now(); raf = requestAnimationFrame(loop); };
   const stop = () => { running = false; cancelAnimationFrame(raf); };
 
+  await tick();
   draw(performance.now(), reduce);
   viewport.classList.add('gl-on');
   if (reduce) return;
 
   let inView = true;
-  const sync = () => (inView && !document.hidden ? start() : stop());
+  const modal = () => document.documentElement.classList.contains('modal');
+  const sync = () => (inView && !document.hidden && !modal() ? start() : stop());
+  new MutationObserver(sync).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   new IntersectionObserver(es => { inView = es[es.length - 1].isIntersecting; sync(); }, { threshold: 0 }).observe(viewport);
   document.addEventListener('visibilitychange', sync);
-  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); stop(); viewport.classList.remove('gl-on'); });
+  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); stop(); viewport.classList.remove('gl-on'); viewport.classList.add('gl-off'); });
   sync();
 }

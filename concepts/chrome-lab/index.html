@@ -19,7 +19,8 @@
 <meta name="twitter:card" content="summary">
 <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/jetbrains-mono-var-latin.woff2" as="font" type="font/woff2" crossorigin>
-<script>document.documentElement.classList.add("js")</script>
+<script>document.documentElement.classList.add("js");setTimeout(function(){document.documentElement.classList.add("ready")},8000)</script>
+<noscript><style>.loader{display:none!important}</style></noscript>
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"MONOCHROME","url":"https://monochrome.com.ng/","logo":"https://monochrome.com.ng/assets/emblem.webp","sameAs":["https://www.instagram.com/monochrome.ca/"]}
@@ -30,6 +31,7 @@
 <!-- icon sprite -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <symbol id="i-ne" viewBox="0 0 24 24"><path d="M7 17 17 7M8.5 7H17v8.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V4M5.5 10.5 12 4l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
   <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16M5.5 13.5 12 20l6.5-6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M20 12H4M10.5 5.5 4 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M4 12h16M13.5 5.5 20 12l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></symbol>
@@ -63,7 +65,7 @@
     <a href="#connect">Contact</a>
   </nav>
   <div class="nav-r">
-    <a class="pill bag glass" data-store="/cart">Bag <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+    <a class="pill bag glass" href="https://monochrome.com.ng/cart" data-store="/cart">Bag <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
     <button class="pill menu-btn glass" id="menuBtn" type="button" aria-expanded="false" aria-controls="links"><span>Menu</span></button>
   </div>
 </header>
@@ -166,7 +168,7 @@
       </div>
       <p class="count mono" id="count" aria-live="polite"></p>
       <div class="products" id="products"></div>
-      <div class="center"><a class="btn ghost glass" data-store="/collections/all">View complete store <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a></div>
+      <div class="center"><a class="btn ghost glass" href="https://monochrome.com.ng/collections/all" data-store="/collections/all">View complete store <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a></div>
     </div>
   </section>
 
@@ -183,7 +185,7 @@
             <div><dt>Pricing</dt><dd>Canadian dollars (CAD)</dd></div>
             <div><dt>Delivery rates</dt><dd>Calculated at checkout</dd></div>
           </dl>
-          <a class="btn ghost glass" data-store="/policies/shipping-policy">Shipping policy <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          <a class="btn ghost glass" href="https://monochrome.com.ng/policies/shipping-policy" data-store="/policies/shipping-policy">Shipping policy <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
         </div>
         <div class="dest glass">
           <div class="dest-h"><span class="mono">DESTINATIONS</span><span class="mono" id="destCount">29</span></div>
@@ -236,20 +238,28 @@
         </form>
         <a class="tile glass" href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener"><div><span class="mono">INSTAGRAM</span><strong>@monochrome.ca</strong></div><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
         <a class="tile glass" href="mailto:info.mccanada@gmail.com"><div><span class="mono">EMAIL</span><strong>info.mccanada@gmail.com</strong></div><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
-        <a class="tile glass" data-store="/"><div><span class="mono">STORE</span><strong>monochrome.com.ng</strong></div><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+        <a class="tile glass" href="https://monochrome.com.ng/" data-store="/"><div><span class="mono">STORE</span><strong>monochrome.com.ng</strong></div><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
         <a class="tile glass" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener"><div><span class="mono">ARCHIVE / EVENT</span><strong>Monochrome Fashion Show 2025</strong></div><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
       </div>
     </div>
   </section>
 </main>
 
+<!-- FINALE: unveiled chrome moment (3D mode only). The blob re-forms into the emblem behind it. -->
+<div class="finale" id="finale" aria-hidden="true">
+  <span class="mono fin-t">WEAR THE UNKNOWN</span>
+  <span class="mono fin-t">END OF TRANSMISSION</span>
+</div>
+
 <footer class="foot">
-  <div class="foot-mark" aria-hidden="true"><img class="word" src="assets/wordmark-a.webp" alt="" width="700" height="63"></div>
+<div class="foot-in">
+  <div class="foot-mark" aria-hidden="true"><span class="chrome">MONOCHROME<sup>®</sup></span></div>
   <div class="foot-row">
-    <div class="foot-brand"><img class="emblem" src="assets/emblem-a.webp" alt="" width="48" height="52"><span class="mono">WEAR THE UNKNOWN</span></div>
-    <nav class="foot-links" aria-label="Footer"><a href="#browse">Shop</a><a href="#gallery">Gallery</a><a href="#faq">FAQ</a><a data-store="/policies/shipping-policy">Shipping</a><a data-store="/policies/refund-policy">Returns</a><a data-store="/policies/privacy-policy">Privacy</a></nav>
+    <div class="foot-brand"><img class="emblem" src="assets/emblem-a.webp" alt="" width="48" height="52"><img class="fword" src="assets/wordmark-a.webp" alt="Monochrome" width="120" height="11"><span class="mono">WEAR THE UNKNOWN</span></div>
+    <nav class="foot-links" aria-label="Footer"><a href="#top">Top <svg class="ic" aria-hidden="true"><use href="#i-up"/></svg></a><a href="#browse">Shop</a><a href="#gallery">Gallery</a><a href="#faq">FAQ</a><a href="https://monochrome.com.ng/policies/shipping-policy" data-store="/policies/shipping-policy">Shipping</a><a href="https://monochrome.com.ng/policies/refund-policy" data-store="/policies/refund-policy">Returns</a><a href="https://monochrome.com.ng/policies/privacy-policy" data-store="/policies/privacy-policy">Privacy</a></nav>
     <p class="mono">© <span id="year">2026</span> MONOCHROME®. All rights reserved.</p>
   </div>
+</div>
 </footer>
 
 <div class="pdp" id="pdp" role="dialog" aria-modal="true" aria-labelledby="pdpTitle" hidden>
@@ -271,7 +281,10 @@
       <p class="pdp-price" id="pdpPrice"></p>
       <p class="pdp-desc" id="pdpDesc"></p>
       <div id="pdpOpts"></div>
-      <a class="btn solid pdp-buy" id="pdpBuy" target="_blank" rel="noopener">Add to bag</a>
+      <div class="pdp-bar">
+        <p class="pdp-bar-price" id="pdpBarPrice" aria-hidden="true"></p>
+        <a class="btn solid pdp-buy" id="pdpBuy" target="_blank" rel="noopener">Add to bag</a>
+      </div>
       <a class="pdp-link mono" id="pdpPage" target="_blank" rel="noopener">View on the store <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
       <small class="mono">PRICES IN CAD. CHECKOUT HAPPENS ON THE MONOCHROME STORE.</small>
     </div>

@@ -17,11 +17,13 @@
   const fmt = v => new Intl.NumberFormat(LOCALE, { style: 'currency', currency: CURRENCY }).format(v);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const pad2 = n => String(n).padStart(2, '0');
+  // Words with a hyphen ("T-SHIRT", "LONG-SLEEVE") never break at the hyphen.
+  const nb = t => esc(t).split(' ').map(w => w.includes('-') ? `<span class="nb">${w}</span>` : w).join(' ');
   const DATA = window.MONOCHROME_DATA || { products: [], collections: [], store: {} };
   // Shopify's CDN resizes on request (HEIC uploads come back as PNG).
   const sized = (src, w) => !/^https?:/.test(src) ? src : `${src}${src.includes('?') ? '&' : '?'}width=${w}`;
   const isHeic = src => /\.heic(\?|$)/i.test(src);
-  const safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, STORE_URL).href)); } catch { return ''; } };
+  const safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, document.baseURI).href)); } catch { return ''; } };
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
 
@@ -68,7 +70,7 @@
       u: `${STORE_URL}/products/${p.handle}`,
       i: main ? sized(main, 640) : '',
       i2: altIm ? sized(altIm.src, 640) : '',
-      tex: main ? sized(main, 800) : '',
+      src: main, tex: main ? sized(main, 800) : '',
       iw: mainIm ? mainIm.w : 1, ih: mainIm ? mainIm.h : 1,
       isNew: p.collections.includes('new-arrivals'),
       rank: p.collections.includes('new-arrivals') ? 2 : p.collections.length ? 1 : 0,
@@ -81,17 +83,24 @@
   const priceText = x => (x.pMax > x.p ? 'From ' : '') + fmt(x.p);
   const CAT = { top: 'Tops', bottom: 'Bottoms', accessory: 'Objects', gift: 'Gift card' };
 
-  // Chrome-lab gallery selection: newest and front-page pieces first, no more than three rings,
-  // never the same category twice in a row where we can avoid it, gift card as the last frame.
+  // Chrome-lab gallery: a curated running order, not a recency sort. It opens on dark model shots, alternates clothes with
+  // chrome close-ups, keeps to three rings, leaves out the pale ring-on-card photo (it stays in the archive) and ends on the gift card.
+  // Anything not named here (new drops after a product sync) follows in front-page / newest order.
+  const ORDER = ['monochrome-sweatshirt', 'royal-black', 'black-monochrome-jersey', 'monochrome-pants-chain', 'acid-washed-monochrome-hoodie',
+    'black-signet-ring', 'monochrome-acid-washed-black', 'monochrome-cargo-skirt', 'custom-monochrome-jersey', 'silver-signet-ring',
+    'long-sleeve-monochrome-t-shirt', 'monochrome-cargo-shorts-black', 'monochrome-sleeveless-crop-top', 'white-monochrome-jersey',
+    'monochrome-acid-washed-grey', 'monochrome-cross-necklace'];
+  const OFF_MOOD = ['black-trinity-ring'];
   const gallery = (() => {
-    const pool = items.filter(x => x.avail && x.i && x.t !== 'gift').sort((a, b) => b.rank - a.rank || b.pub - a.pub || b.p - a.p);
-    let rings = 0;
-    const pick = pool.filter(x => { if (/ring/i.test(x.type + ' ' + x.h)) { if (++rings > 3) return false; } return true; }).slice(0, GL_MAX - 1);
-    const out = []; let last = '';
-    while (pick.length) { let k = pick.findIndex(x => x.t !== last); if (k < 0) k = 0; const [x] = pick.splice(k, 1); out.push(x); last = x.t; }
+    const ok = x => x.avail && x.i && x.t !== 'gift' && !OFF_MOOD.includes(x.h);
+    const isRing = x => /ring/i.test(x.type + ' ' + x.h);
+    const out = []; let rings = 0;
+    const take = x => { if (!x || !ok(x) || out.includes(x)) return; if (isRing(x) && ++rings > 3) return; out.push(x); };
+    ORDER.forEach(h => take(byHandle(h)));
+    items.filter(ok).sort((a, b) => b.rank - a.rank || b.pub - a.pub || b.p - a.p).forEach(x => { if (out.length < GL_MAX - 1) take(x); });
     const gift = items.find(x => x.t === 'gift' && x.avail && x.i);
     if (gift) out.push(gift);
-    return out;
+    return out.slice(0, GL_MAX);
   })();
   root.style.setProperty('--n', gallery.length);
 
@@ -159,7 +168,7 @@
   let cur = null, sel = [], shot = 0, lastFocus = null;
   const variantFor = () => cur.variants.find(v => v.options.length === sel.length && v.options.every((o, i) => o === sel[i]));
   const hasChoice = () => cur.options.length && !(cur.options.length === 1 && cur.options[0].values.length === 1 && /default/i.test(cur.options[0].values[0]));
-  const bg = () => $$('main,header.nav,footer,.hud,.cursor,.progress');
+  const bg = () => $$('main,header.nav,.finale,footer,.hud,.cursor,.progress');
 
   function showShot(i) {
     const n = cur.images.length; if (!n) return;
@@ -168,7 +177,19 @@
     $('#pdpImg').alt = `${cur.title}, photo ${shot + 1} of ${n}`;
     $('#pdpCount').textContent = `${pad2(shot + 1)} / ${pad2(n)}`;
     $$('#pdpThumbs button').forEach((b, k) => { b.classList.toggle('on', k === shot); b.setAttribute('aria-current', k === shot ? 'true' : 'false'); });
+    const tb = $$('#pdpThumbs button')[shot], strip = $('#pdpThumbs');
+    if (tb && strip.scrollWidth > strip.clientWidth) {
+      const a = tb.getBoundingClientRect(), b = strip.getBoundingClientRect();
+      if (a.left < b.left + 8 || a.right > b.right - 8) strip.scrollTo({ left: strip.scrollLeft + (a.left - b.left) - (b.width - a.width) / 2, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+    thumbFade();
   }
+  function thumbFade() {
+    const t = $('#pdpThumbs');
+    t.classList.toggle('more-r', t.scrollWidth - t.clientWidth - t.scrollLeft > 6);
+    t.classList.toggle('more-l', t.scrollLeft > 6);
+  }
+  $('#pdpThumbs').addEventListener('scroll', thumbFade, { passive: true });
   function drawOpts() {
     const v = variantFor();
     $('#pdpOpts').innerHTML = hasChoice() ? cur.options.map((o, oi) => o.values.length < 2 ? '' : `
@@ -177,11 +198,12 @@
         return `<button type="button" class="chip${sel[oi] === val ? ' on' : ''}" data-o="${oi}" data-v="${esc(val)}"${ok ? '' : ' disabled'} aria-pressed="${sel[oi] === val}">${esc(val)}</button>`;
       }).join('')}</div></div>`).join('') : '';
     const buy = $('#pdpBuy'), can = !!(v && v.available);
-    buy.href = v ? `${STORE_URL}/cart/${v.id}:1` : `${STORE_URL}/products/${cur.handle}`;
+    if (can) { buy.href = `${STORE_URL}/cart/${v.id}:1`; buy.removeAttribute('role'); }
+    else { buy.removeAttribute('href'); buy.setAttribute('role', 'button'); }
     buy.innerHTML = can ? 'Add to bag <svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg>' : 'Sold out';
     buy.setAttribute('aria-disabled', can ? 'false' : 'true');
     buy.tabIndex = can ? 0 : -1;
-    $('#pdpPrice').textContent = fmt(v ? v.price : cur.price);
+    $('#pdpPrice').textContent = $('#pdpBarPrice').textContent = fmt(v ? v.price : cur.price);
   }
   function openPdp(h) {
     cur = DATA.products.find(p => p.handle === h); if (!cur) return;
@@ -189,15 +211,15 @@
     sel = first ? first.options.slice() : [];
     lastFocus = document.activeElement;
     $('#pdpType').textContent = ((cur.type || CAT[cur.category] || cur.category) + ' / CAD').toUpperCase();
-    $('#pdpTitle').textContent = cur.title;
+    $('#pdpTitle').innerHTML = nb(cur.title);
     $('#pdpDesc').textContent = cur.description;
     $('#pdpPage').href = `${STORE_URL}/products/${cur.handle}`;
     $('#pdpThumbs').innerHTML = cur.images.length > 1 ? cur.images.map((im, k) => `<button type="button" aria-label="Photo ${k + 1}"><img loading="lazy" src="${esc(safeUrl(sized(im.src, 160)))}" alt=""></button>`).join('') : '';
     $('.pdp-main').classList.toggle('single', cur.images.length < 2);
-    showShot(0); drawOpts();
-    pdp.hidden = false; root.style.overflow = 'hidden'; MC.pdpOpen = true; $('#cursor').classList.remove('big', 'sm');
+    pdp.hidden = false; showShot(0); drawOpts(); root.style.overflow = 'hidden'; MC.pdpOpen = true; $('#cursor').classList.remove('big', 'sm');
     bg().forEach(el => el.setAttribute('inert', ''));
-    requestAnimationFrame(() => { pdp.classList.add('open'); $('.pdp-x').focus(); });
+    $('.pdp-panel').scrollTop = 0; $('#pdpThumbs').scrollLeft = 0;
+    requestAnimationFrame(() => { pdp.classList.add('open'); $('.pdp-x').focus(); thumbFade(); });
   }
   function closePdp() {
     pdp.classList.remove('open'); root.style.overflow = ''; MC.pdpOpen = false; $('#cursor').classList.remove('big', 'sm');
@@ -250,7 +272,7 @@
     cap.id.textContent = `LAB-${pad2(i + 1)}`;
     cap.cat.textContent = (x.type || CAT[x.t] || x.t).toUpperCase();
     cap.pos.textContent = `${pad2(i + 1)} / ${pad2(gallery.length)}`;
-    cap.title.textContent = x.n;
+    cap.title.innerHTML = `<span>${nb(x.n)}</span>`;
     cap.price.textContent = priceText(x) + (x.avail ? '' : ' / SOLD OUT');
     cap.sizes.textContent = x.sizes.length ? x.sizes.slice(0, 7).join(' ') : (x.t === 'gift' ? 'E-GIFT CARD' : 'ONE SIZE');
     cap.open.dataset.h = x.h;
@@ -264,7 +286,7 @@
   // ---- Bridge to the WebGL scene ---------------------------------------
   const MC = window.MC = {
     STORE_URL, fmt, sized, safeUrl, canGL, glMode: wantGallery, reduce: reduceMotion,
-    gallery: gallery.map(x => ({ h: x.h, n: x.n, tex: x.tex, w: x.iw, ht: x.ih, t: x.t, avail: x.avail, zoom: /ring/i.test(x.type + ' ' + x.h) && x.iw >= 4500 ? 2 : 1 })),
+    gallery: gallery.map(x => ({ h: x.h, n: x.n, src: x.src, tex: x.tex, w: x.iw, ht: x.ih, t: x.t, avail: x.avail, zoom: /ring/i.test(x.type + ' ' + x.h) && x.iw >= 4500 ? 2 : 1 })),
     openPdp, pdpOpen: false, hoverIdx: -1, focusIdx: 0,
     state: { depth: 0, vel: 0, g: 0, camZ: 0 },
     gl: null, glState: 'pending',
@@ -329,6 +351,15 @@
     requestAnimationFrame(ui);
   }
   requestAnimationFrame(ui);
+
+  // The chrome-type glint only runs on headings that are on screen, and pauses while the page is scrolling
+  // (animating background-clip:text repaints on the main thread, which is what a scrolling frame cannot afford).
+  let scrT = 0;
+  addEventListener('scroll', () => { if (!root.classList.contains('scrolling')) root.classList.add('scrolling'); clearTimeout(scrT); scrT = setTimeout(() => root.classList.remove('scrolling'), 160); }, { passive: true });
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    const gio = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('lit', e.isIntersecting)), { threshold: .2 });
+    $$('.hero-h, .chrome-h, .foot-mark').forEach(el => gio.observe(el));
+  }
 
   // glass sheen follows the pointer; product cards tilt a little
   if (fine && !reduceMotion) {

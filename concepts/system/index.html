@@ -69,7 +69,7 @@
     <span class="clk"><i>REG</i><b id="clkReg">--:--:--</b></span>
     <span class="clk"><i>LOS</i><b id="clkLos">--:--:--</b></span>
   </div>
-  <button class="key cmd-open" type="button" id="cmdOpen" aria-haspopup="dialog" aria-controls="cmdk"><span class="cmd-t">Command</span><span class="cmd-s">Cmd</span><kbd>/</kbd></button>
+  <button class="key cmd-open" type="button" id="cmdOpen" aria-haspopup="dialog" aria-controls="cmdk"><span class="cmd-t">Command</span><span class="cmd-s">Menu</span><kbd>/</kbd></button>
   <a class="key bag" data-store="/cart">Bag<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
 </header>
 
@@ -87,7 +87,7 @@
   <span class="sb sb-pct">SCRL <span><b id="sbPct">000</b>%</span></span>
   <span class="sb sb-ptr">PTR <b id="sbPtr">0000,0000</b></span>
   <span class="sb sb-obj">OBJ <span><b id="sbVis">23</b>/<b id="sbAll">23</b></span></span>
-  <button class="key sb-cmd" type="button" id="cmdOpen2" aria-haspopup="dialog" aria-controls="cmdk"><span class="cmd-t">Command</span><span class="cmd-s">Cmd</span><kbd>/</kbd></button>
+  <button class="key sb-cmd" type="button" id="cmdOpen2" aria-haspopup="dialog" aria-controls="cmdk"><span class="cmd-t">Command</span><span class="cmd-s">Menu</span><kbd>/</kbd></button>
 </div>
 
 <div class="xhair" id="xhair" aria-hidden="true"><i class="xh-v"></i><i class="xh-h"></i></div>
@@ -112,12 +112,12 @@
         </div>
         <div class="hero-keys">
           <a class="key solid" href="#archive">Enter archive<svg class="ic" aria-hidden="true"><use href="#i-dn"/></svg></a>
-          <button class="key" type="button" data-cmd>Command / search<kbd>/</kbd></button>
+          <button class="key" type="button" data-cmd><span class="cmd-t">Command / search</span><span class="cmd-s">Menu / search</span><kbd>/</kbd></button>
         </div>
       </div>
 
       <div class="viewport brk" id="viewport">
-        <div class="vp-head"><span>SCAN-01 // OBJ: RING / TORUS</span><span class="rec"><i aria-hidden="true"></i>LIVE</span></div>
+        <div class="vp-head"><span><span class="t-gl">SCAN-01 // OBJ: RING / TORUS</span><span class="t-css">SCAN-01 // EMBLEM</span></span><span class="rec"><i aria-hidden="true"></i>LIVE</span></div>
         <div class="radar" id="radar" role="img" aria-label="Animated radar scan: a wireframe ring turning to chrome around the Monochrome emblem. Each blip marks one object in the archive.">
           <div class="r-ring r1" aria-hidden="true"></div>
           <div class="r-ring r2" aria-hidden="true"></div>
@@ -140,7 +140,7 @@
           <div class="blip-tip" id="blipTip" aria-hidden="true"></div>
         </div>
         <div class="vp-foot">
-          <span>WIRE &gt; CHROME <b id="vpScan">---</b></span>
+          <span><span class="t-gl">WIRE &gt; CHROME <b id="vpScan">---</b></span><span class="t-css">SWEEP 9.0S</span></span>
           <span class="vp-bar" aria-hidden="true"><i id="vpBar"></i></span>
           <span>AZ <b id="vpAz">000</b>°</span>
         </div>
@@ -214,23 +214,27 @@
       <div class="readme brk">
         <p class="readme-bar"><span>README.TXT</span><span>1/1</span></p>
         <p class="lead">Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
-        <p>Designed in Regina, Saskatchewan. Shipped from the store to the world, Nigeria included.</p>
+        <p class="rd-p">Designed in Regina, Saskatchewan. Shipped from the store to the world, Nigeria included.</p>
+        <p class="readme-eof" aria-hidden="true"><span>EOF</span><span>2 PARAGRAPHS</span><span>0 COLOURS</span><span class="caret">_</span></p>
       </div>
       <ul class="mods">
         <li class="mod brk"><span class="mod-n">MOD.01</span><h3>Two tones</h3><p>A strict palette so every piece mixes with every other piece.</p>
-          <div class="viz viz-tones" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></li>
+          <div class="viz viz-tones" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <p class="mod-ro" aria-hidden="true"><span class="ro-k">CONTRAST</span><i class="ro-bar" style="--v:1"></i><b class="ro-v"><span data-count data-to="100">100</span>%</b></p></li>
         <li class="mod brk"><span class="mod-n">MOD.02</span><h3>Made in small runs</h3><p>Limited drops, so what you wear is not on everyone else.</p>
-          <div class="viz viz-runs" aria-hidden="true"></div></li>
+          <div class="viz viz-runs"></div>
+          <p class="mod-ro" aria-hidden="true"><span class="ro-k">RUN SIZE</span><i class="ro-bar" style="--v:.3"></i><b class="ro-v">SMALL</b></p></li>
         <li class="mod brk"><span class="mod-n">MOD.03</span><h3>Chrome finish</h3><p>Hardware, objects and details that catch the light.</p>
-          <div class="viz viz-chrome" aria-hidden="true"><i></i></div></li>
+          <div class="viz viz-chrome" aria-hidden="true"><i></i></div>
+          <p class="mod-ro" aria-hidden="true"><span class="ro-k">REFLECT</span><i class="ro-bar" style="--v:1"></i><b class="ro-v"><span data-count data-to="100">100</span>%</b></p></li>
       </ul>
     </div>
     <dl class="stats">
-      <div><dt>Objects logged</dt><dd><b data-count id="sObj">23</b></dd></div>
-      <div><dt>In stock</dt><dd><b data-count id="sStock">22</b></dd></div>
-      <div><dt>Delivery zones</dt><dd><b data-count id="sZones">29</b></dd></div>
-      <div><dt>Tones</dt><dd><b data-count>2</b></dd></div>
-      <div><dt>Finish</dt><dd><b data-count>1</b></dd></div>
+      <div><dt>Objects logged</dt><dd><b data-count id="sObj">23</b></dd><dd class="tk" aria-hidden="true"><i class="ticks" data-ticks="23" data-lit="23"></i></dd></div>
+      <div><dt>In stock</dt><dd><b data-count id="sStock">22</b></dd><dd class="tk" aria-hidden="true"><i class="ticks" id="tkStock" data-ticks="23" data-lit="22"></i></dd></div>
+      <div><dt>Delivery zones</dt><dd><b data-count id="sZones">29</b></dd><dd class="tk" aria-hidden="true"><i class="ticks" id="tkZones" data-ticks="29" data-lit="29"></i></dd></div>
+      <div><dt>Tones</dt><dd><b data-count>2</b></dd><dd class="tk" aria-hidden="true"><i class="ticks" data-ticks="2" data-lit="2"></i></dd></div>
+      <div><dt>Finish</dt><dd><b data-count>1</b></dd><dd class="tk" aria-hidden="true"><i class="ticks" data-ticks="1" data-lit="1"></i></dd></div>
     </dl>
   </section>
 
@@ -240,15 +244,16 @@
       <div class="sec-tag"><span>[04]</span><span>EVENT LOG</span><span class="sec-fill"></span><span>REF EVT-2025</span></div>
       <h2 id="h-events"><span>LIVE.</span> <span>IN CHROME.</span></h2>
     </header>
-    <a class="event brk" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">
+    <a class="event brk" id="event" data-year="2025" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">
       <span class="ev-year" aria-hidden="true">2025</span>
       <span class="ev-body">
-        <span class="ev-k">LOG ENTRY // EVENT</span>
+        <span class="ev-k">LOG ENTRY // EVENT <span class="ev-st" id="evStamp"><i class="led out" aria-hidden="true"></i>ARCHIVED</span></span>
         <strong>Monochrome Fashion Show 2025</strong>
         <span class="ev-s">Black · White · Chrome</span>
       </span>
       <span class="key solid ev-go">View event<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></span>
     </a>
+    <div class="tline" id="tline" role="img" aria-label="Archive timeline from 2024 to today, with the 2025 fashion show marked."></div>
   </section>
 
   <!-- 05 / HELP + ROUTES -->
@@ -258,13 +263,15 @@
       <h2 id="h-help"><span>QUESTIONS.</span> <span>ANSWERED.</span></h2>
     </header>
     <div class="help-grid">
-      <div class="faq-list">
-        <details><summary><span>Where do I buy?</span></summary><p>Every piece is sold through the Monochrome store. Inspect any object here, pick your size and press Add to bag. Checkout happens on the store.</p></details>
-        <details><summary><span>How does sizing work?</span></summary><p>Fits are true to size with a relaxed cut on tops. If you are between sizes, go up. Each product page lists its measurements; message us if you want a recommendation.</p></details>
-        <details><summary><span>Shipping and delivery</span></summary><p>Orders ship from the store after checkout. Delivery time and cost are calculated at checkout based on your address. You will get a tracking update by email once your order leaves.</p></details>
-        <details><summary><span>Returns and exchanges</span></summary><p>If something does not fit, contact us soon after your order arrives with your order number. Items should be unworn and in original condition. Final terms are shown in the store policies.</p></details>
-        <details><summary><span>Are drops limited?</span></summary><p>Yes. Pieces are made in small runs and some do not return. Join the drop alerts below to hear about new releases first.</p></details>
-        <details><summary><span>Custom orders and collaborations</span></summary><p>Interested in custom pieces, a collab or a bulk order? Email us with the details and we will get back to you.</p></details>
+      <div class="faq-list" role="group" aria-label="Frequently asked questions">
+        <p class="cli-bar" aria-hidden="true"><span>&gt; HELP --FAQ</span><span>06 ENTRIES</span></p>
+        <details><summary><span class="q-n" aria-hidden="true">Q01</span><span class="q-t">Where do I buy?</span><span class="q-s" aria-hidden="true"></span></summary><p>Every piece is sold through the Monochrome store. Inspect any object here, pick your size and press Add to bag. Checkout happens on the store.</p></details>
+        <details><summary><span class="q-n" aria-hidden="true">Q02</span><span class="q-t">How does sizing work?</span><span class="q-s" aria-hidden="true"></span></summary><p>Fits are true to size with a relaxed cut on tops. If you are between sizes, go up. Each product page lists its measurements; message us if you want a recommendation.</p></details>
+        <details><summary><span class="q-n" aria-hidden="true">Q03</span><span class="q-t">Shipping and delivery</span><span class="q-s" aria-hidden="true"></span></summary><p>Orders ship from the store after checkout. Delivery time and cost are calculated at checkout based on your address. You will get a tracking update by email once your order leaves.</p></details>
+        <details><summary><span class="q-n" aria-hidden="true">Q04</span><span class="q-t">Returns and exchanges</span><span class="q-s" aria-hidden="true"></span></summary><p>If something does not fit, contact us soon after your order arrives with your order number. Items should be unworn and in original condition. Final terms are shown in the store policies.</p></details>
+        <details><summary><span class="q-n" aria-hidden="true">Q05</span><span class="q-t">Are drops limited?</span><span class="q-s" aria-hidden="true"></span></summary><p>Yes. Pieces are made in small runs and some do not return. Join the drop alerts below to hear about new releases first.</p></details>
+        <details><summary><span class="q-n" aria-hidden="true">Q06</span><span class="q-t">Custom orders and collaborations</span><span class="q-s" aria-hidden="true"></span></summary><p>Interested in custom pieces, a collab or a bulk order? Email us with the details and we will get back to you.</p></details>
+      <p class="cli-foot"><span aria-hidden="true">&gt; </span>Not listed? <a href="mailto:info.mccanada@gmail.com">Email a human</a><span class="caret" aria-hidden="true">_</span></p>
       </div>
       <div class="routes brk" id="routes" aria-labelledby="h-routes">
         <p class="rt-bar"><span id="h-routes">DELIVERY ROUTES</span><span id="rtCount">29 ZONES</span></p>
@@ -289,6 +296,7 @@
         <input type="hidden" name="form_type" value="customer">
         <input type="hidden" name="utf8" value="✓">
         <input type="hidden" name="contact[tags]" value="newsletter">
+        <p class="news-st" aria-hidden="true"><span class="led in"></span>CHANNEL 01 // OPEN<span class="sig"><i></i><i></i><i></i><i></i><i></i></span></p>
         <label for="email" class="news-k">SUBSCRIBE // DROP ALERTS</label>
         <div class="prompt">
           <span class="prompt-p" aria-hidden="true">&gt;</span>
@@ -306,13 +314,16 @@
 
 <footer class="foot">
   <div class="foot-mark">
-    <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="700" height="63">
+    <p class="foot-word" role="img" aria-label="MONOCHROME®"><span aria-hidden="true">MONOCHROME<sup>®</sup></span></p>
   </div>
   <div class="foot-row">
     <nav class="foot-links" aria-label="Footer"><a href="#archive">Archive</a><a href="#latest">Latest</a><a href="#help">FAQ</a><a data-store="/policies/shipping-policy">Shipping</a><a data-store="/policies/refund-policy">Returns</a><a data-store="/policies/privacy-policy">Privacy</a></nav>
-    <p class="foot-end">END OF ARCHIVE · SESSION <b id="uptime">00:00:00</b> · <a href="#top">Back to top</a></p>
+    <p class="foot-end"><span>END OF ARCHIVE</span><span>SESSION <b id="uptime">00:00:00</b></span><a href="#top">Back to top</a></p>
   </div>
-  <p class="foot-c">© <span id="year">2026</span> MONOCHROME®. All rights reserved. Prices in CAD.</p>
+  <div class="foot-base">
+    <p class="foot-c">© <span id="year">2026</span> MONOCHROME®. All rights reserved. Prices in CAD.</p>
+    <img class="stamp" src="assets/wordmark.webp" alt="Monochrome logotype" width="700" height="63" loading="lazy">
+  </div>
 </footer>
 
 <!-- INSPECT DRAWER -->
@@ -320,7 +331,7 @@
   <div class="insp-back" data-close></div>
   <div class="insp-panel">
     <header class="insp-bar">
-      <span class="insp-k">INSPECT // <b id="inspId">MC-000</b></span>
+      <span class="insp-k"><span class="pre">INSPECT // </span><b id="inspId">MC-000</b></span>
       <span class="insp-pos" id="inspPos" aria-live="polite">00/00</span>
       <span class="insp-nav">
         <button type="button" id="inspPrev" aria-label="Previous object"><svg class="ic" aria-hidden="true"><use href="#i-l"/></svg></button>
@@ -331,11 +342,12 @@
     <div class="insp-body" id="inspBody">
       <section class="insp-gal" aria-label="Photos">
         <figure class="insp-fig brk" id="inspFig">
+          <span class="fig-bg" id="figBg" aria-hidden="true"></span>
           <img id="inspImg" alt="" decoding="async">
           <span class="xh-c" aria-hidden="true"></span>
           <button type="button" class="fr-nav fr-prev" id="frPrev" aria-label="Previous photo"><svg class="ic" aria-hidden="true"><use href="#i-l"/></svg></button>
           <button type="button" class="fr-nav fr-next" id="frNext" aria-label="Next photo"><svg class="ic" aria-hidden="true"><use href="#i-r"/></svg></button>
-          <figcaption class="insp-cap"><span id="inspFrameNo">FRAME 01/01</span><button type="button" id="inspRaw" aria-pressed="false">Signal: filtered</button></figcaption>
+          <figcaption class="insp-cap"><span id="inspFrameNo">FRAME 01/01</span><button type="button" id="inspRaw" aria-pressed="true">Signal: raw</button></figcaption>
         </figure>
         <ol class="frames" id="inspFrames" aria-label="Frames"></ol>
       </section>
@@ -348,7 +360,8 @@
         </table>
         <p class="insp-desc" id="inspDesc"></p>
         <div class="insp-buy">
-          <a class="buy" id="inspBuy" target="_blank" rel="noopener"><span class="buy-t">Add to bag</span><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          <a class="buy" id="inspBuy" target="_blank" rel="noopener"><span class="buy-t">Add to bag</span><span class="buy-p"><b id="buyPrice">$0.00</b><small>CAD</small></span><svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
+          <button class="buy" id="inspSold" type="button" disabled aria-disabled="true" hidden><span class="buy-t">Sold out</span><span class="buy-p"><b id="soldPrice">$0.00</b><small>CAD</small></span></button>
           <div class="insp-sec">
             <button class="key" type="button" id="inspCmp" aria-pressed="false">+ Compare</button>
             <a class="key" id="inspPage" target="_blank" rel="noopener">View on store<svg class="ic" aria-hidden="true"><use href="#i-ne"/></svg></a>
@@ -375,6 +388,7 @@
       <span class="insp-nav"><button type="button" data-close aria-label="Close compare panel"><span>ESC</span><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></span>
     </header>
     <div class="cmp-scroll" tabindex="0" role="region" aria-label="Comparison table"><table class="cmp-table" id="cmpTable"></table></div>
+    <div class="cmp-foot"><button class="key wide" type="button" data-close>Close compare<svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>
   </div>
 </div>
 
@@ -397,6 +411,5 @@
 <script src="config.js"></script>
 <script src="data/products.js"></script>
 <script src="main.js"></script>
-<script type="module" src="hero3d.js"></script>
 </body>
 </html>

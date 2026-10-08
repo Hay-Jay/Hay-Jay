@@ -20,12 +20,16 @@
   const pad = (n, l = 2) => String(n).padStart(l, '0');
   const sized = (src, w) => !/^https?:/.test(src) ? src : `${src}${src.includes('?') ? '&' : '?'}width=${w}`;
   const isHeic = src => /\.heic(\?|$)/i.test(src);
-  const safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, STORE_URL).href)); } catch { return ''; } };
+  const safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, document.baseURI).href)); } catch { return ''; } };
   const icon = id => `<svg class="ic" aria-hidden="true"><use href="#i-${id}"/></svg>`;
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
   const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch { /* storage blocked */ } } };
   const sess = { get(k) { try { return sessionStorage.getItem(k); } catch { return null; } }, set(k, v) { try { sessionStorage.setItem(k, v); } catch { /* storage blocked */ } } };
+
+  // Scroll lock for dialogs: hide the page scrollbar but keep the layout from jumping sideways.
+  function lockScroll() { const w = innerWidth - root.clientWidth; root.style.overflow = 'hidden'; if (w > 0) root.style.paddingRight = w + 'px'; }
+  function unlockScroll() { root.style.overflow = ''; root.style.paddingRight = ''; }
 
   // Stepped, terminal-style typing. Final text is always set exactly.
   function typeInto(el, text, cps = 70) {
@@ -35,12 +39,16 @@
     let i = 0; const step = Math.max(1, Math.round(cps / 30));
     el._tt = setInterval(() => { i += step; if (i >= text.length) { clearInterval(el._tt); el.textContent = text; } else el.textContent = text.slice(0, i); }, 33);
   }
-  // Stepped integer count-up that always lands on the exact value.
-  function countUp(el, to, steps = 14) {
+  // Stepped integer count-up that always lands on the exact value. Time-based, so a busy main thread cannot stretch it.
+  function countUp(el, to, steps = 14, dur = 640) {
     clearInterval(el._cu);
     if (reduceMotion) { el.textContent = to; return; }
-    let k = 0; el.textContent = 0;
-    el._cu = setInterval(() => { k++; if (k >= steps) { clearInterval(el._cu); el.textContent = to; } else el.textContent = Math.round(to * (k / steps) * (k / steps)); }, 46);
+    const t0 = performance.now(); el.textContent = 0;
+    el._cu = setInterval(() => {
+      const p = (performance.now() - t0) / dur;
+      if (p >= 1) { clearInterval(el._cu); el.textContent = to; }
+      else { const k = Math.floor(p * steps) / steps; el.textContent = Math.round(to * k * k); }
+    }, 46);
   }
   // Broken / unsupported images fall back to the emblem.
   document.addEventListener('error', e => {
@@ -68,7 +76,7 @@
     return {
       h: p.handle, id: idOf.get(p.handle), n: p.title, p: p.price, pMax: p.priceMax, t: p.category,
       type: (p.type || '').trim(), avail: p.available, stock, avN, total,
-      i: main ? sized(main, 640) : '', i2: ok[1] ? sized(ok[1], 640) : '', iL: main ? sized(main, 760) : '',
+      i: main ? sized(main, 640) : '', i2: ok[1] ? sized(ok[1], 640) : '', iL: main ? sized(main, 760) : '', iS: main ? sized(main, 120) : '',
       isNew: p.collections.includes('new-arrivals'),
       rank: p.collections.includes('new-arrivals') ? 2 : p.collections.length ? 1 : 0,
       pub: Date.parse(p.publishedAt) || 0, d: p
@@ -95,9 +103,13 @@
     return i;
   };
   const optLabel = name => /denomination/i.test(name) ? 'Value' : name;
+  // Photos that carry the brand wordmark (or are wide product-on-card shots) are shown whole on a dimmed backdrop instead of cropped to 4:5.
+  const FIT_WHOLE = new Set(['monochrome-sweatshirt', 'monochrome-gift-cards']);
+  const FIT_POS = { 'black-trinity-ring': '28% 56%' };   // keeps the ring in frame and most of the card lettering out of it
   const valAvail = (p, oi, val) => p.variants.some(v => v.available && v.options[oi] === val);
 
   // ---- Boot sequence -----------------------------------------------------
+  // Time-based (not tick-based) so a busy main thread cannot stretch it: ~0.9s on the first visit, a 0.3s flash on repeats.
   const boot = $('#boot');
   let bootDone = false;
   const readyFns = [];
@@ -105,6 +117,7 @@
   function finishBoot() {
     if (bootDone) return; bootDone = true;
     sess.set('mc-booted', '1');
+    try { performance.mark('mc-boot-done'); } catch { /* optional */ }
     root.classList.add('ready');
     syncRadar();
     readyFns.splice(0).forEach(fn => { try { fn(); } catch (e) { /* keep going */ } });
@@ -112,44 +125,56 @@
     if (reduceMotion || !boot) return end();
     boot.classList.add('out');
     boot.addEventListener('animationend', end, { once: true });
-    setTimeout(end, 700);
+    setTimeout(end, 520);
   }
   function runBoot() {
     if (reduceMotion || !boot) { root.classList.remove('booting'); bootDone = true; root.classList.add('ready'); return; }
     const seen = sess.get('mc-booted') === '1';
     const log = $('#bootLog'), fill = $('#bootFill');
-    const row = (k, v) => `> ${k} ${'.'.repeat(Math.max(2, 38 - k.length - v.length - 3))} ${v}`;
-    const lines = [
-      `MONOCHROME OS v1.0 — loading archive… ${N} objects`,
-      '(c) 2003-2026 MONOCHROME CORP.',
-      '',
-      row('POST', 'OK'),
-      row('MOUNT /ARCHIVE', `${N} OBJECTS`),
-      row('CHROME SHADER', 'OK'),
-      row('DELIVERY ROUTES', `${ZONES.length} ZONES`),
-      row('CLOCK SYNC', 'REG / LOS'),
-      '> READY'
-    ];
-    const total = lines.join('\n').length;
-    let li = 0, ci = 0, out = '', shown = 0, wait = 0;
-    const speed = seen ? 14 : 5;
+    // on phones the headline breaks after the dash so no line ever wraps by accident
+    const narrow = innerWidth <= 420, rowW = innerWidth <= 340 ? 30 : 38;
+    const row = (k, v) => `> ${k} ${'.'.repeat(Math.max(2, rowW - k.length - v.length - 3))} ${v}`;
+    const head = narrow ? `MONOCHROME OS v1.0 —\nloading archive… ${N} objects` : `MONOCHROME OS v1.0 — loading archive… ${N} objects`;
+    const lines = seen
+      ? [head, '> READY']
+      : [
+        head,
+        '(c) 2026 MONOCHROME® · BUILD 2003',
+        '',
+        row('POST', 'OK'),
+        row('MOUNT /ARCHIVE', `${N} OBJECTS`),
+        row('CHROME SHADER', 'OK'),
+        row('DELIVERY ROUTES', `${ZONES.length} ZONES`),
+        row('CLOCK SYNC', 'REG / LOS'),
+        '> READY'
+      ];
+    const text = lines.join('\n');
+    // characters cost 1, line breaks cost 5 (a short pause at the end of every line)
+    const cum = []; let acc = 0;
+    for (const ch of text) { acc += ch === '\n' ? 5 : 1; cum.push(acc); }
+    const DUR = seen ? 300 : 900, t0 = performance.now();
     const id = setInterval(() => {
       if (bootDone) return clearInterval(id);
-      if (wait > 0) { wait--; return; }
-      if (li >= lines.length) { clearInterval(id); fill.style.width = '100%'; setTimeout(finishBoot, 260); return; }
-      const line = lines[li];
-      const take = Math.min(speed, line.length - ci);
-      ci += take; shown += take;
-      log.textContent = out + line.slice(0, ci) + '█';
-      if (ci >= line.length) { out += line + '\n'; li++; ci = 0; shown++; wait = line ? 2 : 0; log.textContent = out; }
-      fill.style.width = Math.min(100, (shown / total) * 100) + '%';
+      const p = Math.min(1, (performance.now() - t0) / DUR), target = p * acc;
+      let n = 0; while (n < cum.length && cum[n] <= target) n++;
+      log.textContent = text.slice(0, n) + (p < 1 ? '█' : '');
+      fill.style.width = (p * 100) + '%';
+      if (p >= 1) { clearInterval(id); setTimeout(finishBoot, 140); }
     }, 16);
     const skip = () => { clearInterval(id); finishBoot(); };
     addEventListener('keydown', skip, { once: true });
     boot.addEventListener('pointerdown', skip, { once: true });
-    setTimeout(finishBoot, 7000);
+    // the boot screen sits on top of a scrollable page: keep wheel / touch from moving the page underneath it
+    ['wheel', 'touchmove'].forEach(ev => boot.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+    setTimeout(finishBoot, 3500);   // last-resort failsafe
   }
   runBoot();
+
+  // The 3D scene is loaded only after the boot screen has gone, so its parse and setup never compete with the boot.
+  onReady(() => {
+    const go = () => import('./hero3d.js').catch(() => { const v = $('#viewport'); if (v) v.classList.add('gl-off'); });
+    if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 900 }); else setTimeout(go, 250);
+  });
 
   // ---- HUD: clocks, uptime, scroll + pointer readouts ---------------------
   const mkFmt = tz => { try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }); } catch { return null; } };
@@ -211,10 +236,11 @@
   setTo('tObj', N); setTo('tStock', IN_STOCK); setTo('tZones', ZONES.length);
   setTo('sObj', N); setTo('sStock', IN_STOCK); setTo('sZones', ZONES.length);
   $$('[data-count]').forEach(el => { if (!el.dataset.to) el.dataset.to = el.textContent.trim(); });
-  onReady(() => { $$('.term [data-count]').forEach((el, i) => setTimeout(() => countUp(el, +el.dataset.to), 1000 + i * 320)); });
+  // the numbers start counting as each terminal row finishes typing in (rows are clipped until then, so no jump from the final value)
+  onReady(() => { if (reduceMotion) return; $$('.term [data-count]').forEach((el, i) => { el.textContent = 0; setTimeout(() => countUp(el, +el.dataset.to), 1700 + i * 320); }); });
   if ('IntersectionObserver' in window) {
     const cio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { countUp(e.target, +e.target.dataset.to); cio.unobserve(e.target); } }), { threshold: .6 });
-    $$('.stats [data-count]').forEach(el => cio.observe(el));
+    $$('.stats [data-count], .mod [data-count]').forEach(el => cio.observe(el));
   }
   $('#sbAll').textContent = N; $('#sbVis').textContent = N;
   $('#cmdkIn').placeholder = `type to filter ${N} objects…`;
@@ -254,8 +280,9 @@
       tip.textContent = `${x.id} · ${x.n} · ${priceText(x)}`;
       tip.classList.add('on');
       const w = tip.offsetWidth, rw = radar.clientWidth;
-      let l = b.offsetLeft + 14, t = b.offsetTop - 30;
-      if (l + w > rw) l = b.offsetLeft - w - 14; if (l < 0) l = 0; if (t < 0) t = b.offsetTop + 16;
+      const cx = b.offsetLeft + b.offsetWidth / 2, cy = b.offsetTop + b.offsetHeight / 2;
+      let l = cx + 14, t = cy - 30;
+      if (l + w > rw) l = cx - w - 14; if (l < 0) l = 0; if (t < 0) t = cy + 16;
       tip.style.transform = `translate(${l}px,${t}px)`;
     });
     host.addEventListener('pointerout', e => { if (e.target.closest('.blip')) tip.classList.remove('on'); });
@@ -268,6 +295,40 @@
     } catch { /* animation API unavailable */ }
   }
   buildBlips();
+
+  // Without WebGL the radar still works: the azimuth readout follows the CSS sweep so nothing on screen is frozen.
+  (() => {
+    const vp = $('#viewport'), az = $('#vpAz'); if (!vp || !az) return;
+    setInterval(() => { if (document.hidden || !vp.classList.contains('gl-off')) return; az.textContent = pad(Math.floor(((performance.now() / 1000) % SWEEP_S) / SWEEP_S * 360), 3); }, 250);
+  })();
+
+  // Manifest readouts: tick meters (lit tick = one unit; hollow = unavailable, like the stock LED) and bar meters that fill in steps when scrolled into view
+  (() => {
+    $('#tkStock').dataset.lit = IN_STOCK; $('#tkStock').dataset.ticks = N; $('#tkZones').dataset.ticks = ZONES.length; $('#tkZones').dataset.lit = ZONES.length;
+    $$('.ticks').forEach(el => { const n = +el.dataset.ticks, lit = +el.dataset.lit; el.innerHTML = Array.from({ length: n }, (_, k) => `<u${k < lit ? ' class="on"' : ''} style="--k:${k}"></u>`).join(''); });
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      const mio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('live'); mio.unobserve(e.target); } }), { threshold: .5 });
+      $$('.ticks, .ro-bar').forEach(el => mio.observe(el));
+    }
+  })();
+
+  // Event log: the entry's status and a timeline of the archive (first logged object to today) with the event window marked
+  (() => {
+    const host = $('#tline'), ev = $('#event'); if (!host || !ev) return;
+    const now = new Date(), year = +ev.dataset.year, firstPub = Math.min(...items.map(x => x.pub).filter(Boolean));
+    const y0 = new Date(firstPub).getUTCFullYear(), y1 = now.getUTCFullYear() + 1;
+    const t0 = Date.UTC(y0, 0, 1), t1 = Date.UTC(y1, 0, 1), span = t1 - t0, pc = t => Math.max(0, Math.min(100, (t - t0) / span * 100));
+    const st = year < now.getUTCFullYear() ? 'ARCHIVED' : year === now.getUTCFullYear() ? 'THIS YEAR' : 'UPCOMING';
+    $('#evStamp').innerHTML = `<i class="led ${st === 'ARCHIVED' ? 'out' : 'in'}" aria-hidden="true"></i>${st}`;
+    let ticks = '', years = '';
+    for (let y = y0; y < y1; y++) { years += `<span class="tl-y" style="left:${pc(Date.UTC(y, 0, 1)).toFixed(2)}%">${y}</span>`; for (let m = 0; m < 12; m++) ticks += `<i${m === 0 ? ' class="y"' : m % 3 === 0 ? ' class="q"' : ''}></i>`; }
+    const ex = pc(Date.UTC(year, 0, 1)), ew = pc(Date.UTC(year + 1, 0, 1)) - ex, nx = pc(now.getTime()), fx = pc(firstPub);
+    const iso = t => new Date(t).toISOString().slice(0, 10);
+    host.innerHTML = `<div class="tl-ticks">${ticks}</div>${years}
+      <span class="tl-ev" style="left:${ex.toFixed(2)}%;width:${ew.toFixed(2)}%"><b>EVT-${year}</b><span>FASHION SHOW</span></span>
+      <span class="tl-pt tl-first" style="left:${fx.toFixed(2)}%"><i></i><b>LOG START <em>${iso(firstPub)}</em></b></span>
+      <span class="tl-pt tl-now${nx > 66 ? ' flip' : ''}" style="left:${nx.toFixed(2)}%"><i></i><b>NOW <em>${iso(now.getTime())}</em></b></span>`;
+  })();
 
   // Section tags type themselves in as they scroll into view
   if ('IntersectionObserver' in window && !reduceMotion) {
@@ -337,8 +398,9 @@
     return `
     <article class="card${x.avail ? '' : ' sold'}" data-h="${esc(x.h)}" style="--i:${n % 4}">
       <div class="c-head"><span class="c-id">${x.id}</span><span class="c-cat">${esc(catLine(x))}</span><span class="c-idx">${pad(n + 1)}/${pad(total)}</span></div>
-      <div class="pic brk" data-open>
-        <img data-img class="m" loading="lazy" decoding="async" width="640" height="800" src="${esc(safeUrl(x.i))}" alt="${esc(x.n)}">
+      <div class="pic brk${FIT_WHOLE.has(x.h) ? ' whole' : ''}" data-open${FIT_WHOLE.has(x.h) ? ` style="--bgi:url('${esc(safeUrl(x.iS))}')"` : ''}>
+        ${FIT_WHOLE.has(x.h) ? '<span class="bgb" aria-hidden="true"></span>' : ''}
+        <img data-img class="m" loading="lazy" decoding="async" width="640" height="800" src="${esc(safeUrl(x.i))}" alt="${esc(x.n)}"${FIT_POS[x.h] ? ` style="object-position:${FIT_POS[x.h]}"` : ''}>
         ${x.i2 ? `<img data-img class="a" loading="lazy" decoding="async" width="640" height="800" src="${esc(safeUrl(x.i2))}" alt="">` : ''}
         <span class="xh" aria-hidden="true"><i class="xh-v"></i><i class="xh-h"></i><i class="xh-o"></i><b class="xy">X000 Y000</b></span>
         <span class="scanbar" aria-hidden="true"></span>${tag}
@@ -346,7 +408,7 @@
       <h3 class="c-title"><a href="${esc(STORE_URL)}/products/${esc(x.h)}" data-open>${esc(x.n)}</a></h3>
       <div class="c-row"><span class="stock">${led(x.stock)}${STOCK[x.stock][0]}</span><span class="price">${priceHTML(x)}</span></div>
       ${capsHTML(x)}
-      <div class="c-foot"><button type="button" class="key" data-act="inspect">Inspect${icon('ret')}</button><button type="button" class="key" data-act="cmp" aria-pressed="${cmp.includes(x.h)}" aria-label="Compare ${esc(x.n)}">+ Cmp</button></div>
+      <div class="c-foot"><button type="button" class="key" data-act="inspect">Inspect${icon('ret')}</button><button type="button" class="key" data-act="cmp" aria-pressed="${cmp.includes(x.h)}" aria-label="Compare ${esc(x.n)}">${cmp.includes(x.h) ? '− Cmp' : '+ Cmp'}</button></div>
     </article>`;
   }
   const countFlash = txt => { const c = $('#count'); c.innerHTML = txt; };
@@ -410,7 +472,7 @@
     $('#cmpChips').innerHTML = cmp.map(h => `<span>${byHandle[h].id}</span>`).join('');
     $('#cmpOpen').disabled = cmp.length < 2;
     $('#cmpOpen').textContent = cmp.length < 2 ? 'Pick 2+' : 'Open compare';
-    $$('#products [data-act="cmp"]').forEach(b => b.setAttribute('aria-pressed', cmp.includes(b.closest('.card').dataset.h)));
+    $$('#products [data-act="cmp"]').forEach(b => { const on = cmp.includes(b.closest('.card').dataset.h); b.setAttribute('aria-pressed', on); b.textContent = on ? '− Cmp' : '+ Cmp'; });
     const ib = $('#inspCmp'); if (cur) { const on = cmp.includes(cur.h); ib.setAttribute('aria-pressed', on); ib.textContent = on ? '− In compare' : '+ Compare'; }
     if (!$('#cmp').hidden) drawCmp();
   }
@@ -436,14 +498,14 @@
   function openCmp() {
     if (cmp.length < 2) return;
     cmpFrom = document.activeElement;
-    drawCmp(); const el = $('#cmp'); el.classList.remove('closing'); el.hidden = false; root.style.overflow = 'hidden'; refreshInert();
+    drawCmp(); const el = $('#cmp'); el.classList.remove('closing'); el.hidden = false; lockScroll(); refreshInert();
     requestAnimationFrame(() => { el.classList.add('open'); $('.cmp-panel [data-close]').focus(); });
   }
   function closeCmp(restore = true) {
     const el = $('#cmp'); if (el.hidden || el.classList.contains('closing')) return;
     el.classList.remove('open'); el.classList.add('closing'); refreshInert();
     setTimeout(() => { el.hidden = true; el.classList.remove('closing'); refreshInert(); }, reduceMotion ? 0 : 340);
-    if ($('#inspect').hidden || $('#inspect').classList.contains('closing')) root.style.overflow = '';
+    if ($('#inspect').hidden || $('#inspect').classList.contains('closing')) unlockScroll();
     if (restore && cmpFrom && document.contains(cmpFrom)) cmpFrom.focus();
   }
   $('#cmpOpen').addEventListener('click', openCmp);
@@ -467,12 +529,23 @@
     img.dataset.img = ''; img.classList.remove('fallback');
     img.alt = `${cur.n}, photo ${shot + 1} of ${n}`;
     img.src = safeUrl(sized(imgs[shot].src, 1100));
+    $('#figBg').style.backgroundImage = `url("${safeUrl(sized(imgs[shot].src, 120))}")`;
     if (animate && !reduceMotion) { img.classList.remove('swap'); void img.offsetWidth; img.classList.add('swap'); }
     $('#inspFrameNo').textContent = `FRAME ${pad(shot + 1)}/${pad(n)}`;
     $('#inspFig').classList.toggle('single', n < 2);
     $$('#inspFrames button').forEach((b, k) => { b.setAttribute('aria-current', k === shot); });
     const on = $$('#inspFrames button')[shot]; if (on && on.scrollIntoView) { const fr = $('#inspFrames'); fr.scrollLeft = on.offsetLeft - fr.clientWidth / 2 + on.offsetWidth / 2; }
   }
+  // Fill the frame when the photo is close to its shape; otherwise show it whole over a blurred, dimmed copy of itself.
+  function fitShot() {
+    const img = $('#inspImg'), fig = $('#inspFig');
+    const nw = img.naturalWidth, nh = img.naturalHeight, fw = fig.clientWidth, fh = fig.clientHeight;
+    if (!nw || !nh || !fw || !fh || img.classList.contains('fallback')) return;
+    const m = (nw / nh) / (fw / fh);
+    img.classList.toggle('cover', m > 0.74 && m < 1.36);
+  }
+  $('#inspImg').addEventListener('load', fitShot);
+  if ('ResizeObserver' in window) new ResizeObserver(fitShot).observe($('#inspFig'));
   function drawSpec() {
     const x = cur, p = x.d, v = variantFor();
     const state = !v ? x.stock : v.available ? 'in' : 'out';
@@ -489,19 +562,31 @@
       rows.push([optLabel(o.name), `<div class="caps" role="group" aria-label="${esc(optLabel(o.name))}">${chips}</div>`]);
     });
     if (!p.options.some(o => !isDefaultOpt(o))) rows.push(['Size', 'One size']);
-    rows.push(['Stock', `<span class="st">${led(state)}${STOCK[state][0]}<small class="inl">${x.avN}/${x.total} variants</small></span>`]);
     rows.push(['Price', `<span class="big">${esc(fmt(v ? v.price : x.p))}<small>CAD</small></span>`]);
+    rows.push(['Stock', `<span class="st">${led(state)}${STOCK[state][0]}<small class="inl">${x.avN}/${x.total} variants</small></span>`]);
     rows.push(['Logged', dateText(x)]);
     rows.push(['Ships to', `${ZONES.length} zones${ZONES.includes('NG') ? ' <small class="inl">/ incl. NG</small>' : ''}`]);
     $('#specBody').innerHTML = rows.map(([k, val, cls]) => `<tr${cls ? ` class="${cls}"` : ''}><th scope="row">${esc(k)}</th><td>${val}</td></tr>`).join('');
-    const buy = $('#inspBuy'), can = v && v.available;
+    const buy = $('#inspBuy'), sold = $('#inspSold'), can = !!(v && v.available), price = fmt(v ? v.price : x.p);
+    buy.hidden = !can; sold.hidden = can;
     if (can) buy.href = `${STORE_URL}/cart/${v.id}:1`; else buy.removeAttribute('href');
-    $('.buy-t', buy).textContent = can ? 'Add to bag' : 'Sold out';
-    buy.setAttribute('aria-disabled', can ? 'false' : 'true');
-    if (!can) buy.setAttribute('role', 'link');
-    else buy.removeAttribute('role');
+    $('#buyPrice').textContent = price; $('#soldPrice').textContent = price;
   }
-  function setHash(id) { try { history.replaceState(null, '', id ? '#' + id.toLowerCase() : location.pathname + location.search); } catch { /* ignore */ } }
+  function setHash(id) { try { history.replaceState(history.state, '', id ? '#' + id.toLowerCase() : location.pathname + location.search); } catch { /* ignore */ } }
+  // Browser Back closes the drawer instead of leaving the site: opening pushes one history entry, closing pops it.
+  let histPushed = false;
+  function pushInspect(id) { try { history.pushState({ mcInspect: 1 }, '', '#' + id.toLowerCase()); histPushed = true; } catch { /* ignore */ } }
+  addEventListener('popstate', () => {
+    const open = !insp.hidden && !insp.classList.contains('closing');
+    const m = /^#(mc-\d+)$/i.exec(location.hash), x = m && byId[m[1].toLowerCase()];
+    if (open && !x) { histPushed = false; closeInspect(); }
+    else if (open && x && x !== cur) openInspect(x.h, { noPush: true });
+  });
+  const setRaw = (raw, save) => {
+    $('#inspFig').classList.toggle('raw', raw);
+    const b = $('#inspRaw'); b.setAttribute('aria-pressed', raw); b.textContent = raw ? 'Signal: raw' : 'Signal: filtered';
+    if (save) store.set('mc-raw', raw ? '1' : '0');
+  };
 
   function openInspect(h, opts = {}) {
     const x = byHandle[h]; if (!x) return;
@@ -523,11 +608,12 @@
     if (txt) typeInto(d, txt, 520); else { clearInterval(d._tt); d.textContent = 'No notes on file.'; }
     $('#inspPage').href = `${STORE_URL}/products/${p.handle}`;
     $('#inspFrames').innerHTML = p.images.map((im, k) => `<li><button type="button" aria-label="Frame ${k + 1} of ${p.images.length}"><img data-img loading="lazy" decoding="async" src="${esc(safeUrl(sized(im.src, 140)))}" alt=""><span>${pad(k + 1)}</span></button></li>`).join('');
-    $('#inspFig').classList.remove('raw'); $('#inspRaw').setAttribute('aria-pressed', 'false'); $('#inspRaw').textContent = 'Signal: filtered';
+    setRaw(store.get('mc-raw') !== '0');     // the product view defaults to the true-colour photo; the grid stays grayscale
     showShot(0, insp.hidden === false); drawSpec(); renderCmp();
-    setHash(x.id);
+    const wasOpen = !insp.hidden && !insp.classList.contains('closing');
+    if (wasOpen || opts.noPush) { setHash(x.id); if (opts.noPush && !wasOpen) histPushed = !!opts.pushed; } else pushInspect(x.id);
     if (insp.hidden || insp.classList.contains('closing')) {
-      insp.classList.remove('closing'); insp.hidden = false; root.style.overflow = 'hidden'; refreshInert();
+      insp.classList.remove('closing'); insp.hidden = false; lockScroll(); refreshInert();
       requestAnimationFrame(() => { insp.classList.add('open'); $('#inspX').focus(); });
     }
     $('#inspBody').scrollTop = 0; $('.insp-spec').scrollTop = 0;
@@ -535,9 +621,10 @@
   function closeInspect(restore = true) {
     if (insp.hidden || insp.classList.contains('closing')) return;
     insp.classList.remove('open'); insp.classList.add('closing'); refreshInert(); clearInterval($('#inspDesc')._tt);
-    if ($('#cmp').hidden) root.style.overflow = '';
+    if ($('#cmp').hidden) unlockScroll();
     setTimeout(() => { insp.hidden = true; insp.classList.remove('closing'); refreshInert(); }, reduceMotion ? 0 : 360);
-    if (/^#mc-\d+$/i.test(location.hash)) setHash('');
+    if (histPushed) { histPushed = false; try { history.back(); } catch { /* ignore */ } }
+    else if (/^#mc-\d+$/i.test(location.hash)) setHash('');
     if (restore && lastFocus && document.contains(lastFocus) && lastFocus.offsetParent !== null) lastFocus.focus();
     cur = null;
   }
@@ -545,17 +632,19 @@
   $('#inspPrev').addEventListener('click', () => stepObj(-1));
   $('#inspNext').addEventListener('click', () => stepObj(1));
   $('#inspCmp').addEventListener('click', () => cur && toggleCmp(cur.h));
-  $('#inspRaw').addEventListener('click', e => {
-    const raw = $('#inspFig').classList.toggle('raw');
-    e.currentTarget.setAttribute('aria-pressed', raw); e.currentTarget.textContent = raw ? 'Signal: raw' : 'Signal: filtered';
-  });
+  $('#inspRaw').addEventListener('click', () => setRaw(!$('#inspFig').classList.contains('raw'), true));
   insp.addEventListener('click', e => {
     if (e.target.closest('[data-close]')) return closeInspect();
     if (e.target.closest('#frPrev')) return showShot(shot - 1);
     if (e.target.closest('#frNext')) return showShot(shot + 1);
-    const chip = e.target.closest('.chip'); if (chip) { sel[+chip.dataset.o] = chip.dataset.v; if (!variantFor()) { const f = cur.d.variants.find(v => v.options[+chip.dataset.o] === chip.dataset.v && v.available) || cur.d.variants.find(v => v.options[+chip.dataset.o] === chip.dataset.v); if (f) sel = f.options.slice(); } drawSpec(); return; }
+    const chip = e.target.closest('.chip'); if (chip) {
+      const oi = chip.dataset.o, val = chip.dataset.v;
+      sel[+oi] = val; if (!variantFor()) { const f = cur.d.variants.find(v => v.options[+oi] === val && v.available) || cur.d.variants.find(v => v.options[+oi] === val); if (f) sel = f.options.slice(); }
+      drawSpec();
+      const again = $(`#specBody .chip[data-o="${oi}"][data-v="${CSS.escape(val)}"]`); if (again) again.focus();   // the table is redrawn: keep keyboard focus on the same key
+      return;
+    }
     const th = e.target.closest('#inspFrames button'); if (th) { showShot($$('#inspFrames button').indexOf(th)); return; }
-    const buy = e.target.closest('#inspBuy'); if (buy && buy.getAttribute('aria-disabled') === 'true') e.preventDefault();
   });
   let sx0 = null; const fig = $('#inspFig');
   fig.addEventListener('pointerdown', e => { sx0 = e.clientX; });
@@ -645,8 +734,8 @@
     if (it.kind === 'OBJ') { closeCmd(false); openInspect(it.x.h, { from: cFrom }); return; }
     if (it.link) { closeCmd(); window.open(it.link, it.link.startsWith('mailto:') ? '_self' : '_blank', 'noopener'); return; }
     closeCmd(false);
-    if (insp && !insp.hidden) closeInspect(false);
-    if (it.kind === 'GO') setTimeout(() => goTo(it.hash), 30); else it.run();
+    const wasInsp = insp && !insp.hidden; if (wasInsp) closeInspect(false);
+    if (it.kind === 'GO') setTimeout(() => goTo(it.hash), wasInsp ? 220 : 30); else if (wasInsp) setTimeout(it.run, 220); else it.run();
   }
   cIn.addEventListener('input', renderCmd);
   cList.addEventListener('mousemove', e => { const o = e.target.closest('[role="option"]'); if (o && +o.dataset.i !== cIdx) selectCmd(+o.dataset.i, false); });
@@ -672,13 +761,14 @@
     const insp_ = isOpen($('#inspect')), cmp_ = isOpen($('#cmp')), cmdk_ = isOpen($('#cmdk')), any = insp_ || cmp_ || cmdk_;
     ['#main', '.bar-t', '.bar-b', '.foot', '#cmpTray'].forEach(sel => { const el = $(sel); if (el) el.inert = any; });
     $('#inspect').inert = cmdk_; $('#cmp').inert = cmdk_;
+    root.classList.toggle('modal', any);   // the 3D scene pauses while a dialog covers it
   }
 
   // ---- Global keys ---------------------------------------------------------
   const typing = t => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
   document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); cmdk.hidden ? openCmd() : closeCmd(); return; }
-    if (!cmdk.hidden) { if (e.key === 'Escape') { e.preventDefault(); closeCmd(); } return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); isOpen(cmdk) ? closeCmd() : openCmd(); return; }
+    if (isOpen(cmdk)) { if (e.key === 'Escape') { e.preventDefault(); closeCmd(); } return; }
     if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing(e.target) && insp.hidden && $('#cmp').hidden) { e.preventDefault(); openCmd(); return; }
     if (!$('#cmp').hidden) {
       if (e.key === 'Escape') { e.preventDefault(); closeCmp(); }
@@ -709,7 +799,7 @@
     const nameOf = c => { try { return (dn && dn.of(c)) || c; } catch { return c; } };
     const zs = ZONES.map(c => ({ c, n: nameOf(c) })).sort((a, b) => a.n.localeCompare(b.n));
     $('#rtCount').textContent = `${zs.length} ZONES`;
-    $('#rtGrid').innerHTML = zs.map(z => `<li><button type="button" class="rt" data-c="${z.c}" aria-pressed="false" aria-label="${esc(z.n)}"><b>${z.c}</b><span>${esc(z.n)}</span></button></li>`).join('');
+    $('#rtGrid').innerHTML = zs.map(z => `<li><button type="button" class="rt" data-c="${z.c}" aria-pressed="false" aria-label="${esc(z.n)}" title="${esc(z.n)}"><b>${z.c}</b><span>${esc(z.n)}</span></button></li>`).join('');
     const out = $('#rtOut');
     const show = z => {
       $$('.rt').forEach(b => b.setAttribute('aria-pressed', !!z && b.dataset.c === z.c));
@@ -728,8 +818,8 @@
 
   // ---- Boot-up render + deep link -------------------------------------------
   drawStore(); renderCmp(); onScroll();
-  const deep = () => { const m = /^#(mc-\d+)$/i.exec(location.hash); if (m && byId[m[1].toLowerCase()]) openInspect(byId[m[1].toLowerCase()].h); };
+  const deep = fromNav => { const m = /^#(mc-\d+)$/i.exec(location.hash); if (m && byId[m[1].toLowerCase()]) openInspect(byId[m[1].toLowerCase()].h, fromNav ? { noPush: true, pushed: true } : { noPush: true }); };
   onReady(() => setTimeout(deep, 380));
-  addEventListener('hashchange', () => { if (bootDone) deep(); });
+  addEventListener('hashchange', () => { if (bootDone && insp.hidden) deep(true); });
   window.__mc = { items, openInspect, goTo };
 })();

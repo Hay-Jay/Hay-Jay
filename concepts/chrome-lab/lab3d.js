@@ -3,7 +3,9 @@
 //   formula   : the blob buds into droplets that orbit, then gather into the emblem ring and star
 //   gallery   : the camera dives through the ring into a chrome tunnel of product-photo planes (curved, rippling with
 //               scroll velocity, tilting toward the pointer, clickable) with a mirror floor
-//   after     : a new blob re-pools at the tunnel exit and rides along behind the glass panels
+//   after     : a new blob re-pools at the tunnel exit; the ring returns face-on behind Worldwide; the blob re-forms into the
+//               emblem (blob + tilted ring + orbiting star) for an unveiled finale above the footer
+// The tunnel settles: when scrolling pauses inside it the page eases to the nearest piece, so you always rest on a photo.
 // Everything is driven by the smoothed scroll position, so scrolling back up plays the whole thing in reverse.
 // If WebGL or the module fails, main.js falls back to a plain DOM grid. Reduced motion: still hero blob only.
 import * as THREE from './assets/vendor/three.module.min.js';
@@ -16,11 +18,12 @@ async function boot() {
   const reduce = MC.reduce;
   const $ = id => document.getElementById(id);
   const stage = $('glStage'), veil = $('veil');
-  const secs = { formula: $('formula'), gallery: $('gallery'), browse: $('browse'), routes: $('routes'), faq: $('faq'), connect: $('connect') };
+  const secs = { formula: $('formula'), gallery: $('gallery'), browse: $('browse'), routes: $('routes'), faq: $('faq'), connect: $('connect'), finale: $('finale') };
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const mobileGPU = Math.min(innerWidth, innerHeight) < 700;
+  const GP = .06;                       // share of the runway spent diving through the ring before the first piece
 
   // ------------------------------------------------------------------ renderer
   const canvas = document.createElement('canvas');
@@ -30,7 +33,19 @@ async function boot() {
   renderer.setClearColor(0x030304, 1);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
-  let dprCap = mobileGPU ? 1.5 : 2;
+  // iOS reclaims GL contexts under memory pressure. Give the browser a moment to hand it back; if it does not, drop to the DOM gallery.
+  let lost = false, dead = false, lostT = 0;
+  canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); lost = true; clearTimeout(lostT); lostT = setTimeout(giveUp, 2500); });
+  canvas.addEventListener('webglcontextrestored', () => {
+    clearTimeout(lostT); lost = false; last = performance.now();
+    scene.environment = new THREE.PMREMGenerator(renderer).fromScene(env, .02).texture;   // render targets do not survive a lost context
+    loop();
+  });
+  function giveUp() { dead = true; cancelAnimationFrame(raf); canvas.remove(); veil.style.opacity = 0; MC.glFailed(); }
+  const dprMax = mobileGPU ? 1.5 : 2;
+  let dprCap = dprMax;
+  const root = document.documentElement;
+  const rad = THREE.MathUtils.degToRad;
 
   // Studio lighting baked into an environment map: black room, hard white soft-boxes. That contrast is what reads as chrome.
   const env = new THREE.Scene();
@@ -151,7 +166,7 @@ vec3 objectTangent=vec3(tangent.xyz);
   // ------------------------------------------------------------------ tunnel: path, hoops, floor, glow, dust
   const items = MC.gallery, N = GALLERY ? items.length : 0;
   const DZ = 7;                         // world units between pieces
-  const L = DZ * N + 12;                // length of the gallery travel (12 extra so the camera clears the last piece)
+  const L = DZ * N + 9;                 // length of the gallery travel (9 extra: the camera clears the last piece and no more)
   const FLOOR = -2.55;
   const pathAmp = z => sstep(-2, -26, z);
   const pathX = z => 2.1 * pathAmp(z) * Math.sin(z * .15);
@@ -268,7 +283,7 @@ vec3 objectTangent=vec3(tangent.xyz);
       col += exp(-pow((d-pos)*6.5,2.))*.11*(.5+uFocus);
       col *= mix(.8, 1., smoothstep(0., .22, min(e.x*uAspect, e.y)));
       float far = 1. - smoothstep(24., 52., vDepth);
-      float near = smoothstep(.9, 3.4, vDepth);
+      float near = smoothstep(2.6, 5.8, vDepth);       // a passing plane has dissolved before it can cover the screen
       float a = far*near*uOp;
       if(uReflect>.5){ a *= exp(-vFloorD*.62)*.42; }
       gl_FragColor = vec4(col, a);
@@ -299,52 +314,89 @@ vec3 objectTangent=vec3(tangent.xyz);
       const mesh = mk(0), refl = mk(1);
       mesh.userData.i = i;
       meshes.push(mesh);
-      planes.push({ mesh, refl, u, i, hover: 0, focus: 0, loaded: 0, state: 'idle', w: 1, h: 1, x: 0, y: 0, z: -DZ * (i + .5) - 8, side: i % 2 ? -1 : 1, fy: Math.sin(i * 2.1) * .16, aspect: 1 });
+      planes.push({ mesh, refl, u, i, hover: 0, focus: 0, loaded: 0, state: 'idle', hi: 0, tex: null, texHi: null, baseW: 800, hiW: 800, w: 1, h: 1, ox: 0, oy: 0, z: -DZ * (i + .5) - 8, pos: new THREE.Vector3(), rx0: 0, ry0: 0, side: i % 2 ? -1 : 1, fy: Math.sin(i * 2.1) * .16, aspect: 1 });
     });
   }
 
-  // texture streaming: nearest pieces first, three at a time
+  // texture streaming, two tiers. Every piece loads a light texture (nearest first, three at a time) so the tunnel is never empty;
+  // the piece in focus and its neighbours then upgrade to a texture sized for the screen (device pixels x zoom), and pieces that
+  // fall three or more steps behind give the big one back. That keeps chrome jewellery sharp without holding 17 large textures.
   let active = 0;
+  const texSetup = tex => { tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso; tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; return tex; };
+  function evict(p) { if (p.texHi) { p.texHi.dispose(); p.texHi = null; } p.hi = 0; if (p.tex) p.u.uTex.value = p.tex; }
+  function load(p, big) {
+    active++;
+    if (big) p.hi = 1; else p.state = 'loading';
+    const url = MC.safeUrl(MC.sized(items[p.i].src, big ? p.hiW : p.baseW));
+    const fin = ok => { active--; if (!big) p.state = ok ? 'ready' : 'failed'; else if (!ok) p.hi = 3; pump(); };
+    loader.load(url, tex => {
+      texSetup(tex);
+      if (!big) { p.tex = tex; p.u.uTex.value = p.texHi || tex; p.u.uTexAspect.value = clamp(tex.image.width / tex.image.height, .3, 3); }
+      else if (p.hi === 1) { p.texHi = tex; p.hi = 2; p.u.uTex.value = tex; }
+      else tex.dispose();                                            // evicted while it was downloading
+      fin(true);
+    }, undefined, () => fin(false));
+  }
   function pump() {
-    if (!GALLERY) return;
+    if (!GALLERY || dead) return;
+    const near = scrollY > M.gt - M.H * 1.5;                         // do not spend bandwidth on big textures while the tunnel is far away
     while (active < 3) {
-      let best = null, bd = 1e9;
-      for (const p of planes) if (p.state === 'idle') { const d = Math.abs(p.i - MC.focusIdx); if (d < bd) { bd = d; best = p; } }
+      let best = null, bs = 1e9, big = false;
+      for (const p of planes) {
+        const d = Math.abs(p.i - MC.focusIdx);
+        if (p.state === 'idle') { if (d < bs) { bs = d; best = p; big = false; } }
+        else if (near && p.state === 'ready' && p.hi === 0 && d <= 1 && p.hiW > p.baseW * 1.2 && d + .75 < bs) { bs = d + .75; best = p; big = true; }
+      }
       if (!best) return;
-      best.state = 'loading'; active++;
-      const done = ok => { active--; best.state = ok ? 'ready' : 'failed'; pump(); };
-      loader.load(MC.safeUrl(items[best.i].tex), tex => {
-        tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso; tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter;
-        best.u.uTex.value = tex; best.u.uTexAspect.value = clamp(tex.image.width / tex.image.height, .3, 3); done(true);
-      }, undefined, () => done(false));
+      load(best, big);
     }
   }
+  function trimTextures(fi) { for (const p of planes) if (p.hi === 2 && Math.abs(p.i - fi) >= 3) evict(p); }
 
   // ------------------------------------------------------------------ layout + metrics
-  const M = { H: 1, W: 1, f0: 0, fh: 1, gt: 0, R: 1, bt: 0, bh: 1, rt: 0, ft: 0, ct: 0, doc: 1 };
+  const M = { H: 1, W: 1, f0: 0, fh: 1, gt: 0, R: 1, bt: 0, bh: 1, rt: 0, ft: 0, ct: 0, fin: 0, doc: 1 };
   let Z0 = 8.5, D = 8, portrait = false, aspect = 1, keys = [];
   const topOf = el => el ? el.getBoundingClientRect().top + scrollY : 0;
 
+  const _F = new THREE.Vector3(), _R = new THREE.Vector3(), _U = new THREE.Vector3(), _C = new THREE.Vector3(), _T = new THREE.Vector3(), _Y = new THREE.Vector3(0, 1, 0);
   function layoutGallery() {
     if (!GALLERY) return;
-    const visH = 2 * D * Math.tan(THREE.MathUtils.degToRad(FOV / 2)), visW = visH * aspect;
+    const visH = 2 * D * Math.tan(rad(FOV / 2)), visW = visH * aspect;
     const maxW = visW * (portrait ? .78 : .34), maxH = visH * (portrait ? .34 : .5);
+    const gutter = (portrait ? 14 : 24) / M.W * visW;               // keep at least this much air between a focused piece and the screen edge
+    const dpr = Math.min(devicePixelRatio || 1, dprMax);
     planes.forEach(p => {
-      const a = clamp(items[p.i].w / items[p.i].ht, .55, 1.9);
+      const it = items[p.i], zoom = it.zoom || 1;
+      const a = clamp(it.w / it.ht, .55, 1.9);
       let w = maxW, h = w / a; if (h > maxH) { h = maxH; w = h * a; }
       p.w = w; p.h = h; p.aspect = w / h; p.u.uAspect.value = p.aspect; p.z = -DZ * (p.i + .5) - D;
-      p.ox = p.side * (portrait ? visW * .075 : visW * .245);
-      p.oy = portrait ? visH * .1 : visH * .045;
       p.mesh.scale.set(w, h, 1); p.refl.scale.set(w, h, 1);
       p.u.uCurve.value = .12 * w * (portrait ? .7 : 1.2);
+      // lateral/vertical offset is measured in the CAMERA's frame at the moment this piece is in focus (not along the path at the
+      // plane's own z), so the tunnel's weave can never push a focused piece off screen. The clamp guarantees the gutter on any aspect.
+      const lim = Math.max(0, visW / 2 - gutter - w / 2 * 1.07);
+      p.ox = clamp(p.side * (portrait ? visW * .075 : visW * .245), -lim, lim);
+      p.oy = portrait ? visH * .1 : visH * .045;
+      const cf = p.z + D;
+      _C.set(pathX(cf), pathY(cf), cf); _T.set(pathX(cf - 10), pathY(cf - 10), cf - 10);
+      _F.subVectors(_T, _C).normalize(); _R.crossVectors(_F, _Y).normalize(); _U.crossVectors(_R, _F);
+      p.pos.copy(_C).addScaledVector(_F, D).addScaledVector(_R, p.ox).addScaledVector(_U, p.oy + p.fy);
+      const dx = _C.x - p.pos.x, dy = _C.y - p.pos.y, dz = _C.z - p.pos.z;
+      p.ry0 = Math.atan2(dx, dz) * .9 - p.side * .1;                 // turn toward the camera, a touch less than fully
+      p.rx0 = -Math.atan2(dy, Math.hypot(dx, dz)) * .4;
+      // texture sizes: light for the stream, big for the focus (device pixels across the plane x zoom, over the share of the texture shown)
+      p.baseW = (mobileGPU ? 700 : 800) * (zoom > 1 ? 1.5 : 1);
+      const tAsp = clamp(it.w / it.ht, .3, 3), r = p.aspect / tAsp, sx = r > 1 ? 1 : r;
+      const need = (w / visW * M.W) * dpr * zoom / sx * 1.12;
+      p.hiW = Math.min(1600, it.w, Math.ceil(need / 100) * 100);
     });
   }
 
   function K(at, o) { return { at, ...o }; }
   function buildKeys() {
-    const H = M.H, mob = M.W < 760;
-    const HX = portrait ? 0 : .56, HY = portrait ? .34 : .24, HS = portrait ? .78 * clamp(H / 844, .62, 1) : .9;
-    const SX = portrait ? 0 : .54;
+    const H = M.H, P = portrait;
+    const HX = P ? 0 : .56, HY = P ? .34 + clamp((760 - H) / 760, 0, .3) * .5 : .24, HS = P ? .78 * clamp(H / 844, .62, 1) : .9;
+    const SX = P ? 0 : .54;
     const base = { blob: 1, drops: 0, dropR: 0, pull: 0, ring: 0, star: 0, face: 0, sx: HX, sy: HY, sc: HS, tun: 0, dim: 0 };
     const k = [];
     const add = (at, o) => { const prev = k.length ? k[k.length - 1] : base; const at2 = k.length ? Math.max(at, prev.at + 2) : at; k.push({ ...prev, ...o, at: at2 }); };
@@ -354,23 +406,30 @@ vec3 objectTangent=vec3(tangent.xyz);
       add(H * 1.5, { blob: 0, dim: .7 });
       keys = k; return;
     }
-    const { f0, fh, gt, R: Rn, bt, bh } = M, ge = gt + Rn, gp = .085;
-    add(f0, { sc: HS * 1.05, sy: HY - (portrait ? 0 : .06) });
-    add(f0 + .32 * fh, { blob: .72, drops: 1, dropR: .3, sx: SX, sy: portrait ? .62 : .05, sc: portrait ? .55 : 1, dim: portrait ? .35 : 0 });
-    add(f0 + .62 * fh, { blob: .12, drops: 1, dropR: 1, ring: 0, sx: SX, sy: portrait ? .62 : .05, sc: portrait ? .55 : 1, dim: portrait ? .35 : 0 });
+    const { f0, fh, gt, R: Rn, bt, bh, rt, ft, ct, fin } = M, ge = gt + Rn;
+    add(f0, { sc: HS * 1.05, sy: HY - (P ? 0 : .06) });
+    add(f0 + .32 * fh, { blob: .72, drops: 1, dropR: .3, sx: SX, sy: P ? .62 : .05, sc: P ? .55 : 1, dim: P ? .35 : 0 });
+    add(f0 + .62 * fh, { blob: .12, drops: 1, dropR: 1, ring: 0, sx: SX, sy: P ? .62 : .05, sc: P ? .55 : 1, dim: P ? .35 : 0 });
     add(Math.max(gt - .3 * H, f0 + .75 * fh), { blob: 0, drops: 1, dropR: 1.05, pull: .85, ring: 1, star: 1, face: .3, sx: SX * .45, sy: 0, sc: .95, dim: 0 });
-    add(gt, { blob: 0, drops: 0, dropR: 1, pull: 1, ring: 1, star: 1, face: 1, sx: 0, sy: 0, sc: portrait ? .6 : .95, dim: 0 });
-    add(gt + gp * Rn * .55, { tun: 0 });
-    add(gt + gp * Rn * .98, { tun: 1 });
-    add(gt + gp * Rn * 1.03, { ring: 1, star: 1 });
-    add(gt + gp * Rn * 1.1, { ring: 0, star: 0 });
-    add(ge, { blob: 0, sx: portrait ? .6 : .55, sy: portrait ? .78 : .1, sc: portrait ? .4 : .8, face: 0, dim: 0, tun: 1 });
-    add(ge + .55 * H, { blob: .6, sx: portrait ? .6 : .58, sy: portrait ? .78 : .12, sc: portrait ? .4 : .85, dim: .5, tun: .55 });
-    add(bt + .5 * bh, { blob: .55, sy: portrait ? .78 : -.12, dim: portrait ? .72 : .66, tun: .22 });
-    add(M.rt, { blob: 0, ring: 1, star: 1, face: 0, drops: 0, sx: portrait ? .6 : .6, sy: portrait ? .78 : .1, sc: portrait ? .4 : .75, dim: .7, tun: .16 });
-    add(M.ft, { sy: portrait ? .78 : -.1, sc: portrait ? .4 : .85, dim: .7, tun: .12 });
-    add(M.ct, { ring: 0, star: 0, blob: .9, sx: portrait ? .6 : .55, sy: portrait ? .78 : 0, sc: portrait ? .42 : 1, dim: .66, tun: .1 });
-    add(Math.max(M.doc - H, M.ct + 10), { blob: 1, sx: portrait ? .6 : 0, sy: portrait ? .78 : .15, sc: portrait ? .5 : 1.3, dim: .45, tun: .1 });
+    add(gt, { blob: 0, drops: 0, dropR: 1, pull: 1, ring: 1, star: 1, face: 1, sx: 0, sy: 0, sc: P ? .6 : .95, dim: 0 });
+    add(gt + GP * Rn * .55, { tun: 0 });
+    add(gt + GP * Rn * .98, { tun: 1 });
+    add(gt + GP * Rn * 1.03, { ring: 1, star: 1 });
+    add(gt + GP * Rn * 1.1, { ring: 0, star: 0 });
+    // --- tunnel exit: the blob re-pools at the right while the tunnel falls away. The page below is lit, not veiled.
+    add(ge, { blob: 0, sx: P ? .6 : .55, sy: P ? .78 : .1, sc: P ? .4 : .8, face: 0, dim: 0, tun: 1 });
+    add(ge + .22 * H, { blob: .4, sx: P ? .6 : .56, sy: P ? .78 : .11, sc: P ? .4 : .82, dim: .1, tun: .8 });
+    add(ge + .6 * H, { blob: .6, sx: P ? .6 : .58, sy: P ? .78 : .12, sc: P ? .4 : .85, dim: P ? .4 : .3, tun: .45 });
+    add(bt + .5 * bh, { blob: .5, sy: P ? .78 : -.12, dim: P ? .45 : .32, tun: .2 });
+    // --- worldwide: the ring comes back face-on, large and bright, behind the heading
+    add(rt - .5 * H, { blob: 0, ring: 1, star: 1, face: 1, drops: 0, sx: P ? .25 : .28, sy: P ? .74 : .04, sc: P ? .44 : 1.12, dim: P ? .5 : .26, tun: .1 });
+    add(rt + .15 * H, { sx: P ? .25 : .3, sy: P ? .74 : .02 });
+    add(ft, { sx: P ? .25 : .42, sy: P ? .74 : -.04, sc: P ? .44 : .95, dim: P ? .52 : .32 });
+    // --- signal: the ring lets go, the blob comes back top right, out of the way of the form
+    add(ct - .35 * H, { ring: 0, star: 0, blob: .9, face: 0, sx: P ? .6 : .62, sy: P ? .78 : .45, sc: P ? .4 : .62, dim: P ? .5 : .32 });
+    // --- finale: blob + tilted ring + orbiting star re-form into the emblem, centred and unveiled
+    add(fin - .15 * H, { ring: 1, star: 1, blob: 1, face: 0, sx: 0, sy: P ? .3 : .2, sc: P ? .6 : 1.0, dim: .06, tun: .1 });
+    add(Math.max(M.doc - H, fin + 10), { sy: P ? .34 : .24, sc: P ? .62 : 1.02, dim: 0 });
     keys = k;
   }
   const S = { blob: 1, drops: 0, dropR: 0, pull: 0, ring: 0, star: 0, face: 0, sx: 0, sy: 0, sc: 1, tun: 0, dim: 0 };
@@ -392,6 +451,7 @@ vec3 objectTangent=vec3(tangent.xyz);
     M.bt = topOf(secs.browse); M.bh = secs.browse.offsetHeight;
     M.rt = topOf(secs.routes); M.ft = topOf(secs.faq); M.ct = topOf(secs.connect);
     M.doc = document.documentElement.scrollHeight;
+    M.fin = secs.finale && secs.finale.offsetParent ? topOf(secs.finale) : Math.max(0, M.doc - M.H);
     layoutGallery(); buildKeys();
   }
 
@@ -405,7 +465,7 @@ vec3 objectTangent=vec3(tangent.xyz);
   }
 
   // ------------------------------------------------------------------ camera path along the gallery
-  const gp = .085;
+  const gp = GP;
   function camZof(s) {
     const { gt, R: Rn, H } = M, ge = gt + Rn;
     if (!GALLERY || s <= gt) return Z0;
@@ -433,7 +493,7 @@ vec3 objectTangent=vec3(tangent.xyz);
   function pick(ndc) {
     ray.setFromCamera(ndc, camera);
     const hit = ray.intersectObjects(meshes, false);
-    for (const h of hit) { const p = planes[h.object.userData.i]; if (h.distance > 1.6 && h.distance < 30 && p.u.uOp.value > .3) return h.object.userData.i; }
+    for (const h of hit) { const p = planes[h.object.userData.i]; if (h.distance > 4 && h.distance < 30 && p.u.uOp.value > .3) return h.object.userData.i; /* nearer than 4 the plane has already dissolved */ }
     return -1;
   }
   if (GALLERY) {
@@ -446,11 +506,51 @@ vec3 objectTangent=vec3(tangent.xyz);
     });
   }
 
+  // scroll position (px) at which piece i is in focus, and the scroll distance between two pieces
+  const itemY = i => M.gt + M.R * (GP + (1 - GP) * (DZ * (i + .5)) / L);
+  const spacingPx = () => M.R * (1 - GP) * DZ / L;
+  let settledIdx = -1;
   // jump the page so piece i is in focus (rail buttons, keyboard focus on the accessible list)
   function scrollToItem(i, instant) {
-    const { gt, R: Rn } = M;
-    const top = gt + Rn * (gp + (1 - gp) * (DZ * (i + .5)) / L);
-    scrollTo({ top, behavior: instant || reduce ? 'instant' : 'smooth' });
+    settledIdx = i;
+    if (!instant && !reduce) { snapY = itemY(i); snapFrom = scrollY; snapT = performance.now(); }
+    scrollTo({ top: itemY(i), behavior: instant || reduce ? 'instant' : 'smooth' });
+  }
+
+  // SETTLE. Without this you rest between two pieces: the caption has already flipped but the old photo is still a smear in front of
+  // you. When scrolling pauses inside the tunnel the page eases to a piece. A small deliberate nudge goes to the NEXT piece in that
+  // direction (so one wheel notch or an arrow key still advances), a bigger move goes to the nearest. Past the first or last piece it
+  // lets go, so the tunnel is never a trap. Never fights a finger, a held scrollbar, an open product view or reduced motion.
+  let settleT = 0, mouseDown = false, touchDown = false, snapY = null, snapFrom = 0, snapT = 0, glideAt = -1;
+  function settle() {
+    if (!GALLERY || reduce || dead || MC.pdpOpen || mouseDown || touchDown || document.hidden) return;
+    // our own glide is still on its way (a slow frame can stall the scroll events for a while): never re-decide mid-glide. Any wheel,
+    // key, touch or pointer press clears snapY, so if it is still set the user has not taken over. Re-issue the glide if it stalled.
+    if (snapY !== null) {
+      const lo = Math.min(snapFrom, snapY) - 40, hi = Math.max(snapFrom, snapY) + 40;        // outside that span someone else scrolled (anchor link, jump)
+      if (Math.abs(scrollY - snapY) <= 3 || performance.now() - snapT > 6000 || scrollY < lo || scrollY > hi) snapY = null;
+      else {
+        if (performance.now() - snapT > 1400 && scrollY === glideAt) scrollTo({ top: snapY, behavior: 'smooth' });
+        glideAt = scrollY; clearTimeout(settleT); settleT = setTimeout(settle, 160); return;
+      }
+    }
+    const sp = spacingPx(), f = (scrollY - itemY(0)) / sp;           // f = continuous piece index under the camera
+    if (f < -.35 || f > N - 1 + .35) { settledIdx = -1; return; }
+    let t = Math.round(f);
+    if (settledIdx >= 0) { const d = f - settledIdx; if (Math.abs(d) > .06 && Math.abs(d) < .5) t = settledIdx + Math.sign(d); }
+    if (t < 0 || t > N - 1) { settledIdx = -1; return; }              // nudged past the end: leave the tunnel
+    settledIdx = t;
+    const y = itemY(t);
+    if (Math.abs(y - scrollY) > 3) { snapY = y; snapFrom = scrollY; snapT = performance.now(); scrollTo({ top: y, behavior: 'smooth' }); }
+  }
+  if (GALLERY && !reduce) {
+    const arm = () => { clearTimeout(settleT); settleT = setTimeout(settle, 170); };
+    addEventListener('scroll', arm, { passive: true });
+    ['wheel', 'keydown', 'touchstart', 'pointerdown', 'click'].forEach(t => addEventListener(t, () => { snapY = null; }, { passive: true }));   // the user has taken over
+    addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') mouseDown = true; });
+    addEventListener('pointerup', e => { if (e.pointerType === 'mouse') { mouseDown = false; arm(); } });
+    addEventListener('touchstart', e => { touchDown = e.touches.length > 0; }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(t => addEventListener(t, e => { touchDown = e.touches.length > 0; if (!touchDown) arm(); }, { passive: true }));
   }
 
   // ------------------------------------------------------------------ frame loop
@@ -459,6 +559,7 @@ vec3 objectTangent=vec3(tangent.xyz);
   const halfAtD = () => Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * Z0;
 
   function renderFrame(now, still) {
+    if (lost || dead) return;
     const dtR = (now - last) / 1000, dt = Math.min(dtR, .05), dtS = Math.min(dtR, .12); last = now;
     if (!reduce) time += dt;
     // smoothed scroll: the scene glides behind the page
@@ -545,19 +646,13 @@ vec3 objectTangent=vec3(tangent.xyz);
       itemsGroup.visible = S.tun > .01;
       const u = -camZ;                                // metres travelled down the tunnel
       const fi = clamp(Math.round(u / DZ - .5), 0, N - 1);
-      if (inGallery && fi !== lastFocus) { lastFocus = fi; MC.setFocus(fi); }
+      if (inGallery && fi !== lastFocus) { lastFocus = fi; MC.setFocus(fi); trimTextures(fi); pump(); }
       if (itemsGroup.visible) {
         for (const p of planes) {
-          const zf = p.z + D;                         // where the camera is when this piece is in focus
-          const cxF = pathX(zf), cyF = pathY(zf);
-          const px = pathX(p.z) + p.ox, py = pathY(p.z) + p.oy + p.fy + Math.sin(time * .6 + p.i) * .05;
-          p.mesh.position.set(px, py, p.z); p.refl.position.copy(p.mesh.position);
+          p.mesh.position.set(p.pos.x, p.pos.y + Math.sin(time * .6 + p.i) * .05, p.pos.z); p.refl.position.copy(p.mesh.position);
           const near = 1 - clamp(Math.abs(p.z + D - camZ) / 14, 0, 1);
-          const baseYaw = Math.atan2(cxF - px, D) * .9 - p.side * .1;
-          const baseRotX = Math.atan2(cyF - py, D) * .4;
           const w = .35 + near * .65;
-          const ry = baseYaw + ptrS.x * .26 * w, rx = baseRotX - ptrS.y * .16 * w;
-          p.mesh.rotation.set(rx, ry, 0); p.refl.rotation.copy(p.mesh.rotation);
+          p.mesh.rotation.set(p.rx0 - ptrS.y * .16 * w, p.ry0 + ptrS.x * .26 * w, 0); p.refl.rotation.copy(p.mesh.rotation);
         }
       }
       for (const p of planes) {
@@ -576,10 +671,11 @@ vec3 objectTangent=vec3(tangent.xyz);
 
       // DOM hooks
       const g = clamp((ss - gt) / Rn, 0, 1);
-      const capo = sstep(gp + .015, gp + .05, g) * (1 - sstep(DZ * (N - .5) + 1, DZ * (N - .5) + 9, u));
+      const uEnd = DZ * (N - .5);                      // metres travelled when the last piece is in focus
+      const capo = sstep(.2, 3, u) * (1 - sstep(uEnd + 5, uEnd + 11, u));     // fully in by the first piece, fades only once we are past the last
       if (Math.abs(g - lastG) > .0004) { stage.style.setProperty('--g', g.toFixed(4)); lastG = g; }
       if (Math.abs(capo - lastCapo) > .02 || (capo === 0) !== (lastCapo === 0)) { stage.style.setProperty('--capo', capo.toFixed(2)); lastCapo = capo; }
-      const ui = 1 - sstep(DZ * (N - .5) + 1, DZ * (N - .5) + 9, u);
+      const ui = 1 - sstep(uEnd + 5, uEnd + 11, u);
       if (Math.abs(ui - lastUi) > .02) { stage.style.setProperty('--ui', ui.toFixed(2)); lastUi = ui; }
       MC.state.g = g;
     }
@@ -592,19 +688,23 @@ vec3 objectTangent=vec3(tangent.xyz);
   }
   const fine = () => matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-  // adaptive resolution: if the GPU struggles, drop the pixel ratio a step instead of dropping frames
-  let acc = 0, cnt = 0;
+  // adaptive resolution: if the GPU struggles, drop the pixel ratio a step instead of dropping frames; if it then runs comfortably for a
+  // while (the first seconds are slow while shaders compile and textures upload), climb back up. At most two climbs, so it cannot oscillate.
+  // On the lowest rungs the grain layer and the glint animation are switched off as well (the .lowfx class).
+  let acc = 0, cnt = 0, good = 0, climbs = 0;
+  const applyDpr = () => { renderer.setPixelRatio(Math.min(devicePixelRatio, dprCap)); renderer.setSize(innerWidth, innerHeight, false); root.classList.toggle('lowfx', dprCap <= 1.25 && dprMax > 1.25); };
   function perf(dt) {
     acc += dt; cnt++;
-    if (cnt >= 90) {
-      const avg = acc / cnt; acc = 0; cnt = 0;
-      if (avg > .032 && dprCap > 1) { dprCap = Math.max(1, dprCap - .25); renderer.setPixelRatio(Math.min(devicePixelRatio, dprCap)); renderer.setSize(innerWidth, innerHeight, false); }
-    }
+    if (cnt < 90) return;
+    const avg = acc / cnt; acc = 0; cnt = 0;
+    if (avg > .032 && dprCap > 1) { dprCap = Math.max(1, dprCap - .25); good = 0; applyDpr(); }
+    else if (avg < .02 && dprCap < dprMax && climbs < 2) { if (++good >= 4) { good = 0; climbs++; dprCap = Math.min(dprMax, dprCap + .25); applyDpr(); } }
+    else good = 0;
   }
   let raf = 0, lastNow = 0;
   function tick(now) {
     raf = 0;
-    if (document.hidden || reduce) return;
+    if (document.hidden || reduce || lost || dead) return;
     // while the product view is open the scene sits behind frosted glass: render every third frame
     if (!(MC.pdpOpen && frameNo % 3)) renderFrame(now); else { frameNo++; last = now; }
     if (lastNow) perf((now - lastNow) / 1000);
@@ -625,7 +725,7 @@ vec3 objectTangent=vec3(tangent.xyz);
 
   // handed to main.js
   MC.glReady({
-    focusItem: (i, instant) => scrollToItem(i, instant),
+    focusItem: (i, instant) => scrollToItem(i, instant), itemY, spacingPx, settle, N, DZ, L, GP,
     scene, camera, renderer, S, planes, M, camZof,
     jump(y) { scrollTo({ top: y, behavior: 'instant' }); snap = true; }
   });

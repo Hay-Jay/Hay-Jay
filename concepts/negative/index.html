@@ -76,6 +76,7 @@
 
     <figure class="cv-photo xp" id="coverPhoto">
       <!-- filled by main.js -->
+      <noscript><img class="ph" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1500" alt="Model in the White Monochrome Jersey, photograph"></noscript>
     </figure>
     <p class="cv-cap mono" id="coverCap"></p>
 
@@ -105,7 +106,7 @@
 
     <div class="note-head">
       <p class="mono kicker rv">Editor’s note</p>
-      <h2 class="display rv-lines" id="noteH"><span class="ln"><span>No colour.</span></span><span class="ln"><span class="ital">No noise.</span></span></h2>
+      <h2 class="display rv-lines" id="noteH"><span class="ln"><span>No colour.</span></span><span class="ln"><span class="ital">No noise<i class="stop">.</i></span></span></h2>
     </div>
 
     <div class="note-body">
@@ -120,7 +121,7 @@
       </figure>
     </div>
 
-    <blockquote class="pull rv"><span class="w">W</span>ear the <em>unknown.</em></blockquote>
+    <blockquote class="pull rv"><span class="w">W</span>ear the <em>unknown<i class="stop">.</i></em></blockquote>
 
     <ul class="stats" id="stats" aria-label="This issue in numbers">
       <li><b class="num" data-to="23">23</b><span class="mono">Pieces in this issue</span></li>
@@ -149,7 +150,7 @@
     <div class="folio-v mono" aria-hidden="true">Monochrome® — The index — Prices in CAD</div>
     <div class="idx-head">
       <p class="mono kicker rv">Contents <span id="idxTotal"></span></p>
-      <h2 class="display rv-lines" id="indexH"><span class="ln"><span>The</span></span><span class="ln"><span class="ital">Index.</span></span></h2>
+      <h2 class="display rv-lines" id="indexH"><span class="ln"><span>The</span></span><span class="ln"><span class="ital">Index<i class="stop">.</i></span></span></h2>
       <p class="idx-sub rv">Every piece in this issue, indexed. <span class="hint-fine">Hover a title for the plate, click to open the piece.</span><span class="hint-touch">Tap a title for the plate, then open the piece.</span> All prices are in Canadian dollars (CAD).</p>
     </div>
 
@@ -167,7 +168,7 @@
         </label>
         <div class="views" role="group" aria-label="View as">
           <button class="view on" data-view="toc" type="button" aria-pressed="true">Index</button>
-          <button class="view" data-view="sheet" type="button" aria-pressed="false">Contact sheet</button>
+          <button class="view" data-view="sheet" type="button" aria-pressed="false"><span class="v-x">Contact </span>Sheet</button>
         </div>
       </div>
     </div>
@@ -188,7 +189,7 @@
     <div class="folio-v mono" aria-hidden="true">Monochrome® — Questions, answered</div>
     <div class="faq-head">
       <p class="mono kicker rv">Letters &amp; help</p>
-      <h2 class="display rv-lines" id="faqH"><span class="ln"><span>Questions,</span></span><span class="ln"><span class="ital">answered.</span></span></h2>
+      <h2 class="display rv-lines" id="faqH"><span class="ln"><span>Questions,</span></span><span class="ln"><span class="ital">answered<i class="stop">.</i></span></span></h2>
     </div>
     <div class="faq-list">
       <details><summary><span class="mono">Q.01</span><b>Where do I buy?</b><i class="pm" aria-hidden="true"></i></summary><p>Every piece is sold through the Monochrome store. Open any piece on this page, pick your size and use Add to bag. Checkout happens on the store.</p></details>
@@ -207,7 +208,7 @@
     <div class="folio-v mono" aria-hidden="true">Monochrome® — Subscribe to the next issue</div>
     <div class="cn-head">
       <p class="mono kicker rv">Subscribe</p>
-      <h2 class="display rv-lines" id="connectH"><span class="ln"><span>Next</span></span><span class="ln"><span class="ital">issue.</span></span></h2>
+      <h2 class="display rv-lines" id="connectH"><span class="ln"><span>Next</span></span><span class="ln"><span class="ital">issue<i class="stop">.</i></span></span></h2>
     </div>
     <div class="cn-body">
       <form class="news" id="news" method="post" target="_blank" rel="noopener">
@@ -278,8 +279,10 @@
     <p class="pdp-price" id="pdpPrice"></p>
     <p class="pdp-desc" id="pdpDesc"></p>
     <div id="pdpOpts"></div>
-    <a class="buy" id="pdpBuy" target="_blank" rel="noopener"><span id="pdpBuyT">Add to bag</span><i class="arr" aria-hidden="true"></i></a>
-    <a class="mono pdp-alert" id="pdpAlert" href="#connect" hidden>Get drop alerts for the next issue</a>
+    <div class="pdp-buy">
+      <a class="buy" id="pdpBuy" target="_blank" rel="noopener"><span id="pdpBuyT">Add to bag</span><i class="arr" aria-hidden="true"></i></a>
+      <a class="mono pdp-alert" id="pdpAlert" href="#connect" hidden>Get drop alerts for the next issue</a>
+    </div>
     <dl class="pdp-credits mono" id="pdpCredits"></dl>
     <a class="mono link-line pdp-page" id="pdpPage" target="_blank" rel="noopener">View on the store<span class="arr" aria-hidden="true"></span></a>
     <p class="mono pdp-note">Prices in CAD. Checkout happens on the Monochrome store.</p>
