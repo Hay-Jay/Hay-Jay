@@ -53,6 +53,7 @@ html.can3d:not(.gl-on) .gl-sub-links a{display:inline-flex}
 .gl-skip:hover{color:#fff;border-color:var(--line2)}
 .gl-on .gl-list{display:block}
 .gl-on .gl-list li{position:static}
+.gl-on .gl-list .pic,.gl-on .gl-list .sizes,.gl-on .gl-list .idx{display:none}
 .gl-on .gl-list a{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;pointer-events:none}
 .gl-on .gl-list a:focus-visible{width:auto;height:auto;clip:auto;overflow:visible;left:50%;top:calc(var(--nav) + 12px);transform:translateX(-50%);padding:14px 20px;background:#050506;border:1px solid #fff;border-radius:12px;display:flex;gap:16px;align-items:baseline;z-index:5;pointer-events:auto;box-shadow:0 0 0 4px rgba(0,0,0,.8)}
 .gl-a b{font:800 14px var(--f-d);font-stretch:112%;text-transform:uppercase}

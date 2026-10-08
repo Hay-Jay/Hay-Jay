@@ -16,6 +16,7 @@
   --ease:cubic-bezier(.2,.8,.2,1);
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{background:var(--bg);scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.55 var(--f-d);font-stretch:100%;overflow-x:clip;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;min-height:100vh}
 body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(60% 42% at 82% -4%,rgba(255,255,255,.07),transparent 70%),radial-gradient(46% 38% at -4% 104%,rgba(255,255,255,.05),transparent 70%)}
@@ -196,6 +197,7 @@ html:not(.js) .nav{flex-wrap:wrap}
 .card .price{font:500 13px var(--f-m);letter-spacing:-.01em}
 .card .sizes{display:flex;gap:4px;flex-wrap:wrap}
 .card .sizes i{font:500 9px var(--f-m);letter-spacing:.08em;font-style:normal;text-transform:uppercase;color:var(--mute);border:1px solid var(--line);border-radius:4px;padding:2px 5px}
+.card[hidden],.products[hidden]{display:none}
 .card.feat{grid-column:span 2}
 .card.feat .pic{aspect-ratio:16/10}
 .card.feat .info b{font-size:clamp(16px,1.6vw,22px)}
