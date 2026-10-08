@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#050505">
 <title>MONOCHROME® — Wear the Unknown</title>
-<meta name="description" content="MONOCHROME® is a black, white and chrome clothing brand. Shop tops, bottoms and objects, style the chrome avatar in the Fit Studio, and follow the next drop.">
+<meta name="description" content="MONOCHROME® is a black, white and chrome clothing brand. Shop tops, bottoms, rings and chains, and follow the next drop.">
 <link rel="canonical" href="https://monochrome.com.ng/">
 <link rel="icon" href="assets/emblem.webp" type="image/webp">
 <link rel="apple-touch-icon" href="assets/emblem.webp">
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:title" content="MONOCHROME® — Wear the Unknown">
-<meta property="og:description" content="Black, white and chrome. Shop the latest pieces and style your look in the Fit Studio.">
+<meta property="og:description" content="Black, white and chrome. Shop the latest pieces from Monochrome.">
 <meta property="og:url" content="https://monochrome.com.ng/">
 <meta property="og:image" content="https://monochrome.com.ng/assets/emblem.webp">
 <meta name="twitter:card" content="summary">
@@ -35,7 +35,7 @@
   </a>
   <nav class="links" aria-label="Primary">
     <a href="#about">About</a>
-    <a href="#fit">Fit Studio</a>
+    <a href="#drop">The Drop</a>
     <a href="#shop">Shop</a>
     <a href="#events">Events</a>
     <a href="#faq">FAQ</a>
@@ -51,10 +51,10 @@
     <div class="hero-copy">
       <span class="eyebrow">MONOCHROME® / BLACK · WHITE · CHROME</span>
       <h1 aria-label="Wear the unknown."><span class="ln"><span>WEAR</span></span><span class="ln"><span>THE</span></span><span class="ln"><span class="outline">UNKNOWN.</span></span></h1>
-      <p>Clothing and objects built in two tones and one finish. Style the chrome avatar, check what is in stock, then go straight to the store.</p>
+      <p>Clothing and objects built in two tones and one finish. See the latest drop, shop what is in stock, and check out on the store.</p>
       <div class="actions">
-        <a class="btn solid" href="#shop">Shop the drop</a>
-        <a class="btn ghost" href="#fit">Enter Fit Studio ↓</a>
+        <a class="btn solid" href="#shop">Shop all</a>
+        <a class="btn ghost" href="#drop">See the drop ↓</a>
       </div>
     </div>
     <div class="portal" aria-hidden="true">
@@ -82,37 +82,18 @@
     </div>
   </section>
 
-  <!-- FIT STUDIO -->
-  <section class="section fit" id="fit">
-    <div class="sec-head"><span class="eyebrow">02 / FIT STUDIO</span><h2>BUILD YOUR<br>MONOCHROME.</h2></div>
-    <div class="fit-grid">
-      <div class="avatar-wrap" id="avatarWrap" aria-label="Chrome avatar preview. Drag left or right to rotate.">
-        <div class="avatar" id="avatar" aria-hidden="true">
-          <div class="chrome head"></div><div class="face"></div><div class="chrome neck"></div>
-          <div class="chrome torso"></div><div class="chrome arm l"></div><div class="chrome arm r"></div>
-          <div class="chrome hip"></div><div class="chrome leg l"></div><div class="chrome leg r"></div>
-          <div class="overlay top-o" id="topOverlay"></div>
-          <div class="overlay bottom-o" id="bottomOverlay"></div>
-          <div class="accessory" id="accessory"></div>
-        </div>
-        <div class="drag-hint">DRAG TO ROTATE ↔</div>
-      </div>
-      <div class="controls">
-        <div id="slots"></div>
-        <div class="total"><span>FULL LOOK</span><strong id="total">—</strong></div>
-        <div class="fit-actions">
-          <button id="random" type="button">✦ Randomize</button>
-          <button id="shopLook" type="button" class="add">Shop look ↗</button>
-        </div>
-        <div class="challenge">
-          <div class="challenge-top">
-            <div><span class="eyebrow">GAME MODE</span><strong>Style Challenge</strong></div>
-            <div class="timer" id="timer" aria-live="off">00:45</div>
-          </div>
-          <p>Build a look before time runs out.</p>
-          <button id="start" type="button">Start challenge</button>
-        </div>
-      </div>
+  <!-- THE DROP -->
+  <section class="section drop" id="drop">
+    <div class="sec-head split">
+      <div><span class="eyebrow">02 / THE DROP</span><h2>FRESH<br>OFF THE LINE.</h2></div>
+      <p>New arrivals and the pieces people reach for first. Drag, scroll or use the arrows.</p>
+    </div>
+    <div class="rail-wrap">
+      <div class="rail" id="rail" tabindex="0" aria-label="Featured pieces"></div>
+    </div>
+    <div class="rail-ctl">
+      <div class="rail-bar" aria-hidden="true"><i id="railBar"></i></div>
+      <div class="rail-btns"><button id="railPrev" type="button" aria-label="Previous piece">←</button><button id="railNext" type="button" aria-label="Next piece">→</button></div>
     </div>
   </section>
 
@@ -122,13 +103,18 @@
       <div><span class="eyebrow">03 / THE STORE</span><h2>IN STOCK<br>NOW.</h2></div>
       <p>Every piece from the Monochrome store. Tap one to see sizes and check out. Prices are in Canadian dollars.</p>
     </div>
-    <div class="filters" role="tablist" aria-label="Filter products">
-      <button class="filter on" data-filter="all" type="button">All</button>
-      <button class="filter" data-filter="top" type="button">Tops</button>
-      <button class="filter" data-filter="bottom" type="button">Bottoms</button>
-      <button class="filter" data-filter="accessory" type="button">Objects</button>
-      <button class="filter" data-filter="gift" type="button">Gift cards</button>
+    <div class="toolbar">
+      <div class="filters" role="tablist" aria-label="Filter products">
+        <button class="filter on" data-filter="all" type="button">All</button>
+        <button class="filter" data-filter="top" type="button">Tops</button>
+        <button class="filter" data-filter="bottom" type="button">Bottoms</button>
+        <button class="filter" data-filter="accessory" type="button">Objects</button>
+        <button class="filter" data-filter="gift" type="button">Gift cards</button>
+      </div>
+      <div class="sortwrap"><label for="sort" class="eyebrow">SORT</label>
+        <select id="sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></div>
     </div>
+    <p class="count" id="count" aria-live="polite"></p>
     <div class="products" id="products" aria-live="polite"></div>
     <div class="center"><a class="btn solid" data-store="/collections/all">View complete store ↗</a></div>
   </section>
@@ -184,7 +170,7 @@
 <footer class="foot">
   <img class="emblem" src="assets/emblem.webp" alt="" width="72" height="77">
   <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="360" height="32">
-  <nav class="foot-links" aria-label="Footer"><a href="#shop">Shop</a><a href="#fit">Fit Studio</a><a href="#faq">FAQ</a><a data-store="/policies/shipping-policy">Shipping</a><a data-store="/policies/refund-policy">Returns</a><a data-store="/policies/privacy-policy">Privacy</a></nav>
+  <nav class="foot-links" aria-label="Footer"><a href="#shop">Shop</a><a href="#drop">The Drop</a><a href="#faq">FAQ</a><a data-store="/policies/shipping-policy">Shipping</a><a data-store="/policies/refund-policy">Returns</a><a data-store="/policies/privacy-policy">Privacy</a></nav>
   <p>© <span id="year">2026</span> MONOCHROME®. All rights reserved.</p>
 </footer>
 
@@ -211,7 +197,7 @@
 </div>
 
 <nav class="dock" aria-label="Quick links">
-  <a href="#fit">Fit</a><a href="#shop">Shop all</a><a data-store="/cart">Bag</a>
+  <a href="#drop">Drop</a><a href="#shop">Shop all</a><a data-store="/cart">Bag</a>
 </nav>
 
 <script src="config.js"></script>

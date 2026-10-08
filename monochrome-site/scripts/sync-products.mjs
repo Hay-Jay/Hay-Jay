@@ -39,6 +39,13 @@ for (let page = 1; ; page++) {
 }
 const [{ collections }, meta] = await Promise.all([get('/collections.json?limit=250'), get('/meta.json')]);
 
+// Which collections each product belongs to (drives "new" and featured picks on the site).
+const membership = new Map();
+for (const c of collections) {
+  const { products } = await get(`/collections/${c.handle}/products.json?limit=250`).catch(() => ({ products: [] }));
+  for (const p of products) membership.set(p.handle, [...(membership.get(p.handle) || []), c.handle]);
+}
+
 const products = all.map(p => {
   const prices = p.variants.map(v => Number(v.price)).filter(Number.isFinite);
   const sizeOpt = p.options.find(o => /size/i.test(o.name));
@@ -55,6 +62,7 @@ const products = all.map(p => {
     options: p.options.map(o => ({ name: o.name, values: o.values })),
     variants: p.variants.map(v => ({ id: v.id, options: [v.option1, v.option2, v.option3].filter(x => x != null), price: Number(v.price), available: v.available })),
     images: p.images.map(i => ({ src: i.src, w: i.width, h: i.height })),
+    collections: membership.get(p.handle) || [],
     publishedAt: p.published_at
   };
 });

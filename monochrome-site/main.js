@@ -59,7 +59,7 @@
   if (fine && !reduceMotion) {
     // Cursor: lerped dot that swells over anything clickable
     const cur = $('#cursor'); let cx = 0, cy = 0, tx = 0, ty = 0;
-    addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); cur.classList.toggle('big', !!e.target.closest('a,button,summary,.avatar-wrap')); }, { passive: true });
+    addEventListener('pointermove', e => { tx = e.clientX; ty = e.clientY; cur.classList.add('on'); cur.classList.toggle('big', !!e.target.closest('a,button,summary,.rail')); }, { passive: true });
     document.addEventListener('mouseleave', () => cur.classList.remove('on'));
     (function loop() { cx += (tx - cx) * .22; cy += (ty - cy) * .22; cur.style.transform = `translate(${cx - cur.offsetWidth / 2}px,${cy - cur.offsetHeight / 2}px)`; requestAnimationFrame(loop); })();
 
@@ -113,81 +113,78 @@
       u: `${STORE_URL}/products/${p.handle}`,
       i: main ? sized(main, 600) : '',
       i2: ok[1] ? sized(ok[1], 600) : '',
+      i3: main ? sized(main, 800) : '',
+      isNew: p.collections.includes('new-arrivals'),
+      rank: p.collections.includes('new-arrivals') ? 2 : p.collections.length ? 1 : 0,
+      pub: Date.parse(p.publishedAt) || 0,
       d: p, h: p.handle
     };
   }).sort((a, b) => b.avail - a.avail);
-  const groups = () => ['top', 'bottom', 'accessory'].map(t => items.filter(x => x.t === t && x.avail && x.i));
 
-  // ---- Fit Studio -----------------------------------------------------
-  let idx = [0, 0, 0], rot = -5, dragging = false, sx = 0, startRot = 0, challengeTimer = null;
-  const selected = () => groups().map((g, i) => g[idx[i] % g.length]);
-
-  function renderFit() {
-    const s = selected();
-    $('#topOverlay').style.backgroundImage = `linear-gradient(#0003,#0003),url("${s[0].i}")`;
-    $('#bottomOverlay').style.backgroundImage = `linear-gradient(#0004,#0004),url("${s[1].i}")`;
-    $('#accessory').style.backgroundImage = `url("${s[2].i}")`;
-    $('#total').textContent = fmt(s.reduce((a, x) => a + x.p, 0));
-    $('#slots').innerHTML = ['Top', 'Bottom', 'Object'].map((label, i) => `
-      <div class="slot">
-        <div class="slot-top"><span>${label.toUpperCase()}</span><span>LIVE PIECE</span></div>
-        <div class="slot-row">
-          <button class="arrow" type="button" data-step="${i}:-1" aria-label="Previous ${label.toLowerCase()}">←</button>
-          <a class="selected" href="${esc(s[i].u)}" target="_blank" rel="noopener">
-            <img data-img src="${esc(safeUrl(s[i].i))}" alt="">
-            <span><b>${esc(s[i].n)}</b><small>${fmt(s[i].p)}</small></span>
-          </a>
-          <button class="arrow" type="button" data-step="${i}:1" aria-label="Next ${label.toLowerCase()}">→</button>
-        </div>
-      </div>`).join('');
-  }
-
-  $('#slots').addEventListener('click', e => {
-    const b = e.target.closest('[data-step]'); if (!b) return;
-    const [i, d] = b.dataset.step.split(':').map(Number), len = groups()[i].length;
-    idx[i] = (idx[i] + d + len) % len; renderFit();
-  });
-  const randomize = () => { idx = groups().map(g => Math.floor(Math.random() * g.length)); renderFit(); };
-  $('#random').onclick = randomize;
-  $('#shopLook').onclick = () => window.open(selected()[0].u, '_blank', 'noopener');
-
-  const wrap = $('#avatarWrap'), av = $('#avatar');
-  wrap.addEventListener('pointerdown', e => { dragging = true; sx = e.clientX; startRot = rot; wrap.setPointerCapture(e.pointerId); });
-  wrap.addEventListener('pointermove', e => {
-    if (!dragging) return;
-    rot = Math.max(-32, Math.min(32, startRot + (e.clientX - sx) * .12));
-    av.style.transform = `${matchMedia('(min-width:820px)').matches ? 'scale(1.22) ' : ''}rotateY(${rot}deg)`;
-  });
-  ['pointerup', 'pointercancel'].forEach(t => wrap.addEventListener(t, () => { dragging = false; }));
-
-  $('#start').onclick = () => {
-    clearInterval(challengeTimer);
-    let t = 45; const el = $('#timer'); el.textContent = '00:45'; randomize();
-    challengeTimer = setInterval(() => {
-      t--; el.textContent = '00:' + String(Math.max(t, 0)).padStart(2, '0');
-      if (t <= 0) clearInterval(challengeTimer);
-    }, 1000);
+  // ---- Shop grid ------------------------------------------------------
+  let filter = 'all', sort = 'featured';
+  const SORTS = {
+    featured: (a, b) => b.avail - a.avail || b.rank - a.rank || b.p - a.p,
+    new: (a, b) => b.avail - a.avail || b.pub - a.pub,
+    low: (a, b) => b.avail - a.avail || a.p - b.p,
+    high: (a, b) => b.avail - a.avail || b.p - a.p
   };
+  const LABEL = { all: 'pieces', top: 'tops', bottom: 'bottoms', accessory: 'objects', gift: 'gift cards' };
+  const priceText = x => (x.pMax > x.p ? 'From ' : '') + fmt(x.p);
+  const cardIo = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); cardIo.unobserve(e.target); } }), { threshold: .08 }) : null;
 
-  // ---- Store grid -----------------------------------------------------
-  let filter = 'all';
   function drawStore() {
-    const data = items.filter(x => filter === 'all' || x.t === filter);
-    const price = x => (x.pMax > x.p ? 'From ' : '') + fmt(x.p);
-    $('#products').innerHTML = data.length ? data.map(x => `
-      <a class="card${x.avail ? '' : ' sold'}" data-h="${esc(x.h)}" href="${esc(x.u)}" target="_blank" rel="noopener">
+    const data = items.filter(x => filter === 'all' || x.t === filter).sort(SORTS[sort]);
+    const bigFirst = filter === 'all' && (sort === 'featured' || sort === 'new') && data.length >= 8 && data[0].avail;
+    $('#count').textContent = `${data.length} ${data.length === 1 ? LABEL[filter].replace(/s$/, '') : LABEL[filter]}`;
+    $('#products').innerHTML = data.length ? data.map((x, n) => `
+      <a class="card${bigFirst && n === 0 ? ' feat' : ''}${x.avail ? '' : ' sold'}" style="--d:${n % 4}" data-h="${esc(x.h)}" href="${esc(x.u)}" target="_blank" rel="noopener">
         <div class="pic">
           <img data-img loading="lazy" decoding="async" src="${esc(safeUrl(x.i))}" alt="${esc(x.n)}">
           ${x.i2 ? `<img class="alt" loading="lazy" decoding="async" src="${esc(safeUrl(x.i2))}" alt="">` : ''}
-          ${x.avail ? '' : '<span class="badge">SOLD OUT</span>'}
         </div>
-        <div class="meta"><b>${esc(x.n)}</b><span><em>${price(x)}</em><em class="stock">${x.sizes.length ? esc(x.sizes[0] + '–' + x.sizes[x.sizes.length - 1]) : (x.avail ? 'IN STOCK' : '')}</em></span></div>
+        <span class="idx">${String(n + 1).padStart(2, '0')}</span>
+        ${x.avail ? (x.isNew ? '<span class="tag">NEW</span>' : '') : '<span class="tag">SOLD OUT</span>'}
+        <span class="price">${priceText(x)}</span>
+        <div class="info"><b>${esc(x.n)}</b>${x.sizes.length ? `<span class="sizes">${x.sizes.slice(0, 7).map(s => `<i>${esc(s)}</i>`).join('')}</span>` : ''}</div>
       </a>`).join('') : '<p class="empty">Nothing in this category right now. Check back soon.</p>';
+    $$('#products .card').forEach(c => cardIo ? cardIo.observe(c) : c.classList.add('in'));
   }
   $$('.filter').forEach(b => b.addEventListener('click', () => {
     $$('.filter').forEach(x => x.classList.remove('on')); b.classList.add('on');
     filter = b.dataset.filter; drawStore();
   }));
+  $('#sort').addEventListener('change', e => { sort = e.target.value; drawStore(); });
+
+  // ---- The Drop (featured rail) --------------------------------------
+  const rail = $('#rail');
+  function drawRail() {
+    const feat = items.filter(x => x.avail && x.i && x.t !== 'gift').sort((a, b) => b.rank - a.rank || b.pub - a.pub || b.p - a.p).slice(0, 8);
+    rail.innerHTML = feat.map((x, n) => `
+      <a class="rcard" data-h="${esc(x.h)}" href="${esc(x.u)}" target="_blank" rel="noopener" draggable="false">
+        <div class="rpic"><img data-img draggable="false" src="${esc(safeUrl(x.i3 || x.i))}" alt="${esc(x.n)}"></div>
+        <span class="rnum">${String(n + 1).padStart(2, '0')}</span>
+        <div class="rmeta"><b>${esc(x.n)}</b><span>${priceText(x)}${x.isNew ? ' · NEW' : ''}<i class="go" aria-hidden="true">→</i></span></div>
+      </a>`).join('');
+    railTick();
+  }
+  function railTick() {
+    const max = rail.scrollWidth - rail.clientWidth, mid = rail.getBoundingClientRect().left + rail.clientWidth / 2;
+    $('#railBar').style.setProperty('--p', Math.max(.12, max > 0 ? rail.scrollLeft / max : 1));
+    if (reduceMotion) return;
+    $$('.rcard', rail).forEach(c => { const r = c.getBoundingClientRect(); c.style.setProperty('--px', `${-((r.left + r.width / 2 - mid) / r.width) * 38}px`); });
+  }
+  rail.addEventListener('scroll', () => requestAnimationFrame(railTick), { passive: true });
+  addEventListener('resize', railTick);
+  const step = d => rail.scrollBy({ left: d * (rail.querySelector('.rcard')?.offsetWidth + 14 || 300), behavior: reduceMotion ? 'auto' : 'smooth' });
+  $('#railPrev').onclick = () => step(-1); $('#railNext').onclick = () => step(1);
+  rail.addEventListener('keydown', e => { if (e.key === 'ArrowRight') step(1); if (e.key === 'ArrowLeft') step(-1); });
+  // mouse drag (touch uses native scrolling)
+  let dx0 = null, sl0 = 0, moved = false;
+  rail.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') return; dx0 = e.clientX; sl0 = rail.scrollLeft; moved = false; });
+  addEventListener('pointermove', e => { if (dx0 == null) return; const d = e.clientX - dx0; if (Math.abs(d) > 5) { moved = true; rail.classList.add('drag'); } if (moved) rail.scrollLeft = sl0 - d; });
+  addEventListener('pointerup', () => { if (dx0 == null) return; dx0 = null; rail.classList.remove('drag'); setTimeout(() => { moved = false; }, 0); });
+  rail.addEventListener('click', e => { if (moved) { e.preventDefault(); e.stopPropagation(); return; } const c = e.target.closest('.rcard'); if (!c || e.metaKey || e.ctrlKey || e.shiftKey) return; e.preventDefault(); openPdp(c.dataset.h); }, true);
 
   // ---- Product view ---------------------------------------------------
   const pdp = $('#pdp');
@@ -266,5 +263,5 @@
   main.addEventListener('pointerup', e => { if (sx0 != null && Math.abs(e.clientX - sx0) > 40) showShot(shot + (e.clientX < sx0 ? 1 : -1)); sx0 = null; });
   main.addEventListener('pointercancel', () => { sx0 = null; });
 
-  drawStore(); renderFit();
+  drawStore(); drawRail();
 })();
