@@ -2,10 +2,14 @@
 // Refreshes data/products.js from the Shopify storefront.
 // Usage: node scripts/sync-products.mjs   (Node 18+). Run it before each deploy, or on a schedule.
 import { writeFile, mkdir } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const STORE = process.env.STORE_URL || 'https://monochrome.com.ng';
+// The store address comes from config.js (override with STORE_URL=...).
+const here = dirname(fileURLToPath(import.meta.url));
+const cfg = await readFile(join(here, '..', 'config.js'), 'utf8').catch(() => '');
+const STORE = (process.env.STORE_URL || cfg.match(/storeUrl:\s*"([^"]+)"/)?.[1] || 'https://monochrome.com.ng').replace(/\/$/, '');
 const out = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'products.js');
 
 // Shopify Markets localises prices by visitor, so pin the request to the store's home market (Canada, CAD).

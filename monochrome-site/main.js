@@ -3,7 +3,7 @@
 
   // ---- Config ---------------------------------------------------------
   // Product data comes from data/products.js (a snapshot of the Shopify store, refreshed by scripts/sync-products.mjs).
-  const STORE_URL = 'https://monochrome.com.ng'; // Shopify storefront (cart, checkout, product pages)
+  const STORE_URL = ((window.MONOCHROME_CONFIG || {}).storeUrl || 'https://monochrome.com.ng').replace(/\/$/, ''); // Shopify storefront (set in config.js)
   const CURRENCY = 'CAD';                         // must match the store's currency
   const LOCALE = 'en-CA';
   const EMBLEM = 'assets/emblem.webp';
@@ -21,6 +21,9 @@
 
   // Point every data-store link at the storefront.
   $$('[data-store]').forEach(a => { a.href = STORE_URL + a.dataset.store; if (a.classList.contains('btn') || a.classList.contains('social')) { a.target = '_blank'; a.rel = 'noopener'; } });
+  // Drop-alert form posts straight to the Shopify store's customer form (same fields as a Shopify theme's newsletter box).
+  const news = $('#news');
+  if (news) { news.action = `${STORE_URL}/contact#contact_form`; news.addEventListener('submit', () => { $('#newsNote').textContent = 'Opening the store in a new tab to finish your signup.'; }); }
   $('#year').textContent = new Date().getFullYear();
 
   // Broken / unsupported images (e.g. .heic) fall back to the emblem.

@@ -163,13 +163,16 @@
   <section class="section connect" id="connect">
     <div class="sec-head"><span class="eyebrow">06 / CONNECT</span><h2>STAY IN<br>ORBIT.</h2></div>
     <div class="connect-grid">
-      <form class="news" id="news" action="mailto:info.mccanada@gmail.com" method="post" enctype="text/plain">
+      <form class="news" id="news" method="post" target="_blank" rel="noopener">
+        <input type="hidden" name="form_type" value="customer">
+        <input type="hidden" name="utf8" value="✓">
+        <input type="hidden" name="contact[tags]" value="newsletter">
         <label for="email" class="eyebrow">GET DROP ALERTS</label>
         <div class="row">
-          <input id="email" name="email" type="email" required placeholder="you@email.com" autocomplete="email">
+          <input id="email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
           <button class="btn solid" type="submit">Notify me</button>
         </div>
-        <small>Opens your email app to send us your address.</small>
+        <small id="newsNote">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
       </form>
       <a class="social" href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener"><div><span>INSTAGRAM</span><strong>@monochrome.ca</strong></div><b>↗</b></a>
       <a class="social" href="mailto:info.mccanada@gmail.com"><div><span>EMAIL</span><strong>Contact us</strong></div><b>↗</b></a>
@@ -211,6 +214,7 @@
   <a href="#fit">Fit</a><a href="#shop">Shop all</a><a data-store="/cart">Bag</a>
 </nav>
 
+<script src="config.js"></script>
 <script src="data/products.js"></script>
 <script src="main.js"></script>
 <script type="module" src="hero3d.js"></script>

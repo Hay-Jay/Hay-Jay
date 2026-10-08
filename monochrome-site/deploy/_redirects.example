@@ -1,0 +1,12 @@
+# Copy this file to the site root as `_redirects` ONLY AFTER the Shopify store has moved to shop.monochrome.com.ng.
+# Netlify and Cloudflare Pages both read it. Old store links keep working by forwarding to the new store address.
+/products/*      https://shop.monochrome.com.ng/products/:splat      301
+/collections/*   https://shop.monochrome.com.ng/collections/:splat   301
+/cart            https://shop.monochrome.com.ng/cart                 301
+/cart/*          https://shop.monochrome.com.ng/cart/:splat          301
+/checkout        https://shop.monochrome.com.ng/checkout             301
+/account         https://shop.monochrome.com.ng/account              301
+/account/*       https://shop.monochrome.com.ng/account/:splat       301
+/pages/*         https://shop.monochrome.com.ng/pages/:splat         301
+/policies/*      https://shop.monochrome.com.ng/policies/:splat      301
+/products.json   https://shop.monochrome.com.ng/products.json        301
