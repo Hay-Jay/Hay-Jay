@@ -152,10 +152,26 @@ h2{font-size:clamp(44px,12vw,92px);line-height:.9;letter-spacing:-.06em;margin-t
 .social span{display:block;color:#8f8f96;font-size:10px;letter-spacing:.16em}
 .social strong{font-size:18px}
 
+/* FAQ */
+.faq-list{display:grid;gap:10px;max-width:860px!important;margin-left:0!important}
+.faq details{border:1px solid var(--line);border-radius:16px;background:var(--panel);transition:border-color .2s}
+.faq details[open]{border-color:var(--line2)}
+.faq summary{list-style:none;cursor:pointer;padding:18px 20px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:13px;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-weight:400;font-size:20px;line-height:1;color:var(--muted)}
+.faq details[open] summary::after{content:"–"}
+.faq details p{margin:0;padding:0 20px 20px;color:var(--soft);max-width:680px}
+
+/* SCROLL REVEAL (only when JS is running) */
+.js .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.js .reveal.in{opacity:1;transform:none}
+
 /* FOOTER + DOCK */
 .foot{padding:56px var(--pad) 110px;text-align:center;border-top:1px solid var(--line)}
 .foot .emblem{width:72px;margin:0 auto 18px;mix-blend-mode:screen}
 .foot .word{width:min(360px,90vw);margin:0 auto}
+.foot-links{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 24px;margin-top:28px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.foot-links a:hover{color:#fff}
 .foot p{color:#66666d;font-size:12px;margin:22px 0 0}
 .dock{position:fixed;z-index:40;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;height:56px;border:1px solid #313137;border-radius:18px;background:#0a0a0cee;display:grid;grid-template-columns:1fr 1fr 1fr;backdrop-filter:blur(14px);padding:5px}
 .dock a{display:grid;place-items:center;border-radius:13px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
@@ -189,5 +205,6 @@ h2{font-size:clamp(44px,12vw,92px);line-height:.9;letter-spacing:-.06em;margin-t
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .ring,.portal img,.track{animation:none}
+  .js .reveal{opacity:1;transform:none;transition:none}
   .btn,.card{transition:none}
 }

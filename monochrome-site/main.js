@@ -37,6 +37,11 @@
     }
   }, true);
 
+  // Fade sections in as they scroll into view.
+  document.documentElement.classList.add('js');
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 }) : null;
+  $$('.section > *, .foot > *').forEach(el => { el.classList.add('reveal'); io ? io.observe(el) : el.classList.add('in'); });
+
   // ---- Store state ----------------------------------------------------
   let items = FALLBACK.slice();
   const groups = () => ['top', 'bottom', 'accessory'].map(t => {

@@ -4,6 +4,7 @@ Static site for MONOCHROME® (no build step). Open `index.html` or serve the fol
 
 - `index.html` / `styles.css` / `main.js` — the site
 - `assets/` — emblem and wordmark
+- `404.html`, `robots.txt`, `sitemap.xml`, `site.webmanifest`, `netlify.toml` — error page, SEO, installable-app manifest and host config
 
 ## Config (top of `main.js`)
 - `STORE_URL` — the Shopify storefront used for product pages, cart and checkout
