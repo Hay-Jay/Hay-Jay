@@ -563,13 +563,17 @@ html.ready .viewport{animation:flickin .7s steps(7) both .2s}
   :root{--rail:30px}
   .ruler{display:block}
 }
-@media (max-width:1180px){
+@media (max-width:1360px){
   .clocks{display:none}
+}
+@media (max-width:1180px){
   .products{grid-template-columns:repeat(3,minmax(0,1fr))}
   .row{grid-template-columns:26px 58px minmax(0,1fr) 58px 78px 14px}
   .row .ct,.row .dt{display:none}
   .links a i{display:none}
-  .clocks{gap:12px}
+}
+@media (max-width:1060px){
+  .brand-t i{display:none}
 }
 @media (max-width:1000px){
   .hero-in{grid-template-columns:1fr;gap:28px}
@@ -655,6 +659,7 @@ html.ready .viewport{animation:flickin .7s steps(7) both .2s}
 }
 @media (max-width:420px){
   .brand-t i{display:none}
+  .sb-xy{display:none}
   .hud-label{font-size:10px}
   .hero-keys .key{flex:1 1 100%}
   .viewport{padding:8px 8px 10px}
