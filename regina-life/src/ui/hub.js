@@ -116,7 +116,10 @@ export class Hub {
       q.front = s.z < 1; q.ax = ((s.x + 1) / 2) * w; q.ay = ((1 - s.y) / 2) * h;
       return { x: q.ax, y: q.ay - LIFT - R + labels / 2, w: labels ? Math.max(PIN, q.lw + 8) : PIN, h: PIN + labels };
     });
-    spreadRects(rects, safe);
+    // the camera holds still once framed, so the anchors rarely change: only re-solve the layout when they (or the safe area) do
+    const sig = `${labels}|${safe.x0},${safe.y0},${safe.x1},${safe.y1}|` + list.map((q) => `${q.ax.toFixed(1)},${q.ay.toFixed(1)}`).join(';');
+    if (sig !== this._sig || !this._spread) { spreadRects(rects, safe); this._spread = rects.map((r) => ({ x: r.x, y: r.y })); this._sig = sig; }
+    else this._spread.forEach((r, i) => { rects[i].x = r.x; rects[i].y = r.y; });
     const k = dt > 0 && list[0].x !== null ? 1 - Math.exp(-dt * 16) : 1;
     list.forEach((q, i) => {
       const r = rects[i];

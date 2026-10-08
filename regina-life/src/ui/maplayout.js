@@ -12,7 +12,7 @@ export const overlaps = (a, b, gap = 0) => Math.abs(a.x - b.x) < (a.w + b.w) / 2
  * spot), always inside `bounds` {x0,y0,x1,y1}. `fixed` rects (e.g. the player marker) are obstacles that never move. Mutates and returns the rects; each gets `ox/oy` = its requested spot.
  * Deterministic and always finds room when any exists, so a slowly moving scene never flickers or stacks pins.
  */
-export function spreadRects(rects, bounds, { gap = 4, step = 6, fixed = [] } = {}) {
+export function spreadRects(rects, bounds, { gap = 4, step = 6, fixed = [], maxRadius = 520 } = {}) {
   const clamp = (r, x, y) => [Math.min(bounds.x1 - r.w / 2, Math.max(bounds.x0 + r.w / 2, x)), Math.min(bounds.y1 - r.h / 2, Math.max(bounds.y0 + r.h / 2, y))];
   const fits = (r, x, y) => x - r.w / 2 >= bounds.x0 && x + r.w / 2 <= bounds.x1 && y - r.h / 2 >= bounds.y0 && y + r.h / 2 <= bounds.y1;
   for (const r of rects) { r.ox = r.x; r.oy = r.y; [r.x, r.y] = clamp(r, r.x, r.y); r.cx = r.x; r.cy = r.y; }
@@ -24,7 +24,7 @@ export function spreadRects(rects, bounds, { gap = 4, step = 6, fixed = [] } = {
     const r = rects[i];
     if (!free(r, r.cx, r.cy)) {
       let found = null;
-      const maxR = Math.hypot(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
+      const maxR = Math.min(maxRadius, Math.hypot(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0));
       for (let rho = step; rho <= maxR && !found; rho += step) {
         const n = Math.max(8, Math.round((2 * Math.PI * rho) / step));
         for (let m = 0; m < n && !found; m++) {
