@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="REGINA LIFE — an open-world life simulation set in Regina, Saskatchewan.">
+  <title>Regina Life</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1020'/%3E%3Cpath d='M12 46V28l10-8 10 8v18M32 46V18l10-8 10 8v28' fill='none' stroke='%23ffb347' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <canvas id="game" aria-label="Regina Life 3D view"></canvas>
+
+  <div id="loading" class="screen on">
+    <div class="load-bg"></div>
+    <div class="load-in">
+      <div class="logo"><span>REGINA</span><b>LIFE</b></div>
+      <p class="tag">Living skies. Real city. Your story.</p>
+      <div class="bar-l"><i id="loadbar"></i></div>
+      <p id="loadtxt" class="load-txt">Warming up the prairie…</p>
+      <p id="loadtip" class="load-tip"></p>
+    </div>
+  </div>
+
+  <div id="title" class="screen">
+    <div class="title-in">
+      <div class="logo big"><span>REGINA</span><b>LIFE</b></div>
+      <p class="tag">Live, work and wander through Regina, Saskatchewan.</p>
+      <div class="title-btns">
+        <button class="btn primary xl" id="btn-continue">Continue</button>
+        <button class="btn xl" id="btn-new">New Life</button>
+      </div>
+      <p class="title-note" id="title-note"></p>
+    </div>
+    <footer class="title-foot">Prairie Dollars are fictional · No real money is used · Milestone 1 build</footer>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div class="hud-tl">
+      <div class="pill money" id="hud-money">$0.00</div>
+      <div class="needs" id="hud-needs"></div>
+    </div>
+    <div class="hud-tc"><div id="hud-dest" class="dest" hidden></div><div id="hud-job" class="jobchip" hidden></div></div>
+    <div class="hud-tr">
+      <div class="clockchip" id="hud-clock"></div>
+      <canvas id="minimap" width="170" height="170" aria-label="Minimap"></canvas>
+      <div class="place" id="hud-place"></div>
+    </div>
+    <div id="prompt" class="prompt" hidden><kbd>E</kbd><span></span></div>
+    <div id="toasts"></div>
+    <div id="banner" class="hbanner" hidden></div>
+    <div class="hint" id="hud-hint">WASD move · Shift run · Drag look · E interact · P phone · M map · C outfit · V photo</div>
+    <div class="hud-btns">
+      <button id="b-phone" class="hbtn" aria-label="Phone"><span class="ico"></span><b class="badge" hidden></b></button>
+      <button id="b-map" class="hbtn" aria-label="Map"></button>
+      <button id="b-wardrobe" class="hbtn" aria-label="Outfit"></button>
+    </div>
+    <div class="touch" id="touch">
+      <div class="joy" id="joy"><div class="joy-base"><div class="joy-knob"></div></div></div>
+      <div class="tbtns"><button id="t-interact" class="tb big" aria-label="Interact">E</button><button id="t-run" class="tb" aria-label="Toggle run">Run</button></div>
+    </div>
+  </div>
+
+  <div id="camui" class="camui" hidden>
+    <div class="cam-top"><button id="cam-close">✕</button><div class="cam-filters" id="cam-filters"></div><button id="cam-flip" aria-label="Selfie">⟲</button></div>
+    <div class="cam-grid"></div>
+    <div class="cam-bottom"><button id="cam-thumb" class="cam-thumb" aria-label="Last photo"></button><button id="cam-shutter" class="shutter" aria-label="Take photo"></button><button id="cam-hud" class="cam-thumb" aria-label="Toggle UI">UI</button></div>
+    <div class="flash" id="flash"></div>
+  </div>
+
+  <div id="map-full" class="screen map-full">
+    <canvas id="map-canvas"></canvas>
+    <div class="map-top"><h2>Regina</h2><button class="x" id="map-close" aria-label="Close map">✕</button></div>
+    <div id="map-card" class="map-card2" hidden></div>
+    <div class="map-zoom"><button id="mz-in" aria-label="Zoom in">+</button><button id="mz-out" aria-label="Zoom out">−</button><button id="mz-me" aria-label="Centre on me">◎</button></div>
+  </div>
+
+  <div id="panels"></div>
+  <div id="phone" class="phone"></div>
+  <div id="fade"></div>
+  <div id="rotate-hint" hidden>Rotate your device for the best view</div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
