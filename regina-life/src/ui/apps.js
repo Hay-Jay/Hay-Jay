@@ -154,7 +154,7 @@ const mapsApp = app('maps', 'Maps', (body, ctx, phone) => {
     q = inp.value.toLowerCase().trim();
     if (!q) { res.hidden = true; return; }
     const hits = POIS.filter((p) => p.name.toLowerCase().includes(q)).slice(0, 5);
-    res.hidden = false; res.innerHTML = hits.length ? hits.map((p) => `<button data-poi="${p.id}">${CAT_ICON[p.cat]} ${esc(p.name)}<small>${fmtDist(dist(ctx.player(), p))}</small></button>`).join('') : '<p class="empty">No matches</p>';
+    res.hidden = false; res.innerHTML = hits.length ? hits.map((p) => `<button data-poi="${p.id}">${p.emoji ?? CAT_ICON[p.cat]} ${esc(p.name)}<small>${fmtDist(dist(ctx.player(), p))}</small></button>`).join('') : '<p class="empty">No matches</p>';
   });
   const loop = () => { mv.draw(); raf = requestAnimationFrame(loop); }; loop();
   if (selPoi) renderCard();

@@ -25,8 +25,8 @@ export const avenueName = (j) => AVE[j] ?? `Ave ${j}`;
 /** Lat/lon landmarks (approximate public coordinates). */
 const LL = (lat, lon) => project(lat, lon);
 export const DISTRICTS = [
-  { id: 'downtown',     name: 'Downtown Regina',          ...{ x: 0, z: 0 },       r: 700, color: '#6c8cff', detail: 'playable' },
-  { id: 'wascana',      name: 'Wascana Centre',           ...{ x: 160, z: 1150 },  r: 700, color: '#46c07a', detail: 'playable' },
+  { id: 'downtown',     name: 'Downtown Regina',          ...{ x: 0, z: 0 },       r: 700, color: '#6c8cff', detail: 'playable', label: { x: 0, z: grid.z0 - 40 } },
+  { id: 'wascana',      name: 'Wascana Centre',           ...{ x: 160, z: 1150 },  r: 700, color: '#46c07a', detail: 'playable', label: { x: -900, z: 1400 } },
   { id: 'cathedral',    name: 'Cathedral',                ...LL(50.4375, -104.6395), r: 420, color: '#d98c5f', detail: 'massing' },
   { id: 'northcentral', name: 'North Central',            ...LL(50.4640, -104.6165), r: 420, color: '#c9a64e', detail: 'massing' },
   { id: 'rochdale',     name: 'Rochdale / Northwest',     ...LL(50.4830, -104.6600), r: 520, color: '#b684e0', detail: 'massing' },
@@ -80,7 +80,7 @@ export function mapRoads() {
   for (let i = GRID.i0; i <= GRID.i1; i++) roads.push({ name: streetName(i), kind: i === 1 ? 'arterial' : 'street', pts: [[i * PITCH, grid.z0], [i * PITCH, i === 1 ? 1500 : grid.z1]] });
   for (let j = GRID.j0; j <= GRID.j1; j++) roads.push({ name: avenueName(j), kind: j === 0 ? 'arterial' : 'street', pts: [[grid.x0, j * PITCH], [grid.x1, j * PITCH]] });
   // Outer arterials linking districts (stylised)
-  const arterial = (name, pts) => roads.push({ name, kind: 'arterial', pts });
+  const arterial = (name, pts) => roads.push({ name, kind: 'arterial', outer: true, pts });
   arterial('Victoria Ave (East)', [[grid.x1, 0], [4400, 0], [5200, -120]]);
   arterial('Victoria Ave (West)', [[grid.x0, 0], [-2500, 0], [-3800, -60]]);
   arterial('Albert St (North)', [[ALBERT_X, grid.z0], [ALBERT_X, -2600]]);

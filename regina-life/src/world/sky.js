@@ -121,6 +121,9 @@ export class Atmosphere {
     const snow = season === 'winter' ? 1 : (kind === 'snow' ? 0.6 : 0);
     this.env = { night, sunAlt: alt, season, snow, cloud, kind, phase: night > 0.85 ? 'night' : night > 0.15 ? 'twilight' : 'day', temp: weather?.temp };
     this.exposureBase = 0.9 + night * 0.15;
+    if (this.hubLift) { // home-screen map: keep it readable whatever the hour
+      this.hemi.intensity = Math.max(this.hemi.intensity, 1.4); this.fill.intensity = Math.max(this.fill.intensity, 0.5); this.exposureBase = Math.max(this.exposureBase, 1.12);
+    }
     return this.env;
   }
 
