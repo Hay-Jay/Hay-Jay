@@ -58,7 +58,6 @@
       <div class="place" id="hud-place"></div>
     </div>
     <div id="prompt" class="prompt" hidden><kbd>E</kbd><span></span></div>
-    <div id="toasts"></div>
     <div id="banner" class="hbanner" hidden></div>
     <div class="hint" id="hud-hint">WASD move · Shift run · Drag look · E interact · P phone · M map · C outfit · V photo</div>
     <div class="hud-btns">
@@ -87,8 +86,15 @@
     <div class="map-zoom"><button id="mz-in" aria-label="Zoom in">+</button><button id="mz-out" aria-label="Zoom out">−</button><button id="mz-me" aria-label="Centre on me">◎</button></div>
   </div>
 
+  <div id="build" class="buildbar" hidden>
+    <div class="b-head"><b>🎨 Redecorate</b><span id="b-hint">Tap a piece below</span><button id="b-done" class="btn primary small">Done</button></div>
+    <div class="b-items" id="b-items"></div>
+    <div class="b-actions"><button id="b-rot" class="btn small">↻ Rotate (R)</button><button id="b-del" class="btn small">🗑 Store (Del)</button><button id="b-shop" class="btn small">🛋️ Shop</button><button id="b-style" class="btn small">🎨 Paint</button></div>
+  </div>
+
   <div id="panels"></div>
   <div id="phone" class="phone"></div>
+  <div id="toasts" aria-live="polite"></div>
   <div id="fade"></div>
   <div id="rotate-hint" hidden>Rotate your device for the best view</div>
 

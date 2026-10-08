@@ -7,6 +7,7 @@
  */
 import { addSkill, skillLevel, notify } from './game.js';
 import { fmtMoney } from './ledger.js';
+import { own } from './util.js';
 
 const clamp = (v) => Math.max(0, Math.min(100, v));
 
@@ -111,9 +112,55 @@ export const EVENTS = [
       { label: 'Run a quick display', fx: { energy: -5, jobXp: 12, skill: { fitness: 2, charisma: 3 } }, result: 'Sold out by lunch.' },
       { label: 'Carry on as normal', fx: { jobXp: 3 }, result: 'Your manager looks at the empty shelf, then at you.' },
     ] },
+  // ---- intercity trips (where = 'trip:<destination>') ----
+  { id: 'trip_moosejaw', where: ['trip:moosejaw'], icon: '♨️', title: 'Moose Jaw',
+    text: 'You step off the coach into a town of murals, tunnels and a very large moose. Where to first?',
+    choices: [
+      { label: 'Tunnel tour ($12)', cost: 1200, fx: { money: -1200, fun: 20, mood: 6, skill: { charisma: 3 } }, result: 'Prohibition-era stories and a guide with excellent timing.' },
+      { label: 'Soak in the hot springs ($18)', cost: 1800, fx: { money: -1800, energy: 14, hygiene: 20, mood: 12 }, result: 'Steam, stars and zero thoughts.' },
+      { label: 'Pose with the giant moose', fx: { fun: 8, mood: 6 }, result: 'It towers over you. You look very small. It is perfect.' },
+    ] },
+  { id: 'trip_saskatoon', where: ['trip:saskatoon'], icon: '🌉', title: 'Saskatoon',
+    text: 'The river is sparkling and a bakery sign promises berry pie. Your move.',
+    choices: [
+      { label: 'Berry pie by the river ($9)', cost: 900, fx: { money: -900, hunger: 28, mood: 9 }, result: 'Purple fingers. Zero regrets.' },
+      { label: 'Walk the riverbank trail', fx: { fun: 10, energy: -4, skill: { fitness: 5 } }, result: 'Bridges, joggers and a pelican doing its own thing.' },
+      { label: 'Chat up a local at the café', fx: { fun: 6, skill: { charisma: 5 } }, result: '"Regina? We love you guys. Mostly."' },
+    ] },
+  { id: 'trip_winnipeg', where: ['trip:winnipeg'], icon: '🍂', title: 'Winnipeg',
+    text: 'The Forks is buzzing, with food stalls and river trails in every direction.',
+    choices: [
+      { label: 'Graze the market stalls ($10)', cost: 1000, fx: { money: -1000, hunger: 18, fun: 14 }, result: 'You eat things you cannot pronounce. Delicious.' },
+      { label: 'Run the river trail', fx: { energy: -6, mood: 7, skill: { fitness: 6 } }, result: 'Cold air, warm lungs, glorious.' },
+      { label: 'People-watch with a coffee ($4)', cost: 400, fx: { money: -400, mood: 8, energy: 6 }, result: 'Everyone seems to have somewhere to be. You do not.' },
+    ] },
+  { id: 'trip_calgary', where: ['trip:calgary'], icon: '🤠', title: 'Calgary',
+    text: 'There are cowboy hats on the streets and a chinook wind is warming the whole sky.',
+    choices: [
+      { label: 'Line-dance lesson', fx: { fun: 18, energy: -6, skill: { charisma: 6 } }, result: 'You trip twice and nail the third. Applause.' },
+      { label: 'Chase your hat down the street', fx: { fun: 8, mood: 5 }, result: 'A stranger catches it. "Welcome to Calgary, partner."' },
+      { label: 'Skyline walk at sunset', fx: { mood: 12, fun: 8 }, result: 'Glass towers lit pink. Fair enough, Calgary.' },
+    ] },
+  { id: 'trip_banff', where: ['trip:banff'], icon: '🏔️', title: 'Banff',
+    text: 'A lake the colour of a swimming-pool dream sits under a wall of mountains. You are speechless.',
+    choices: [
+      { label: 'Sunrise photos by the lake', fx: { mood: 16, fun: 14, skill: { charisma: 2 } }, result: 'The light does half the work. You get the other half.' },
+      { label: 'Hot chocolate by the fire ($7)', cost: 700, fx: { money: -700, mood: 10, energy: 8 }, result: 'Marshmallows, mountains, mittens.' },
+      { label: 'Hike the shoreline trail', fx: { energy: -10, mood: 10, skill: { fitness: 8 } }, result: 'Your legs hate you. Your heart is thrilled.' },
+    ] },
+  { id: 'trip_vancouver', where: ['trip:vancouver'], icon: '🌧️', title: 'Vancouver',
+    text: 'It is drizzling, of course. The sea smells like salt and ambition.',
+    choices: [
+      { label: 'Walk the seawall', fx: { energy: -6, mood: 10, skill: { fitness: 5 } }, result: 'Mountains on one side, ocean on the other. Greedy city.' },
+      { label: 'Ramen on a rainy night ($14)', cost: 1400, fx: { money: -1400, hunger: 30, mood: 12 }, result: 'Steam on your glasses. Life is good.' },
+      { label: 'Watch the ferries come in', fx: { fun: 8, mood: 8 }, result: 'Everyone else is in a hurry. You are not.' },
+    ] },
 ];
 export const EVENT_BY_ID = Object.fromEntries(EVENTS.map((e) => [e.id, e]));
 export const EVENT_COOLDOWN_MS = 70_000;
+export const PENDING_TTL_MS = 15 * 60_000;
+/** Events are single-use tokens: only an event the game ISSUED (rollEvent / travel) can be resolved, once, within the TTL. */
+export function issueEvent(store, eventId, now = store.now()) { if (!own(EVENT_BY_ID, eventId)) return false; store.state.pendingEvent = { id: eventId, at: now }; return true; }
 
 const hasItem = (s, id) => (s.inventory[id] || 0) > 0;
 export function choiceAvailable(store, ev, i) {
@@ -133,16 +180,19 @@ export function rollEvent(store, c, rnd = Math.random, now = store.now()) {
   const pool = eligible(c).filter((e) => !recent.has(e.id));
   if (!pool.length) return null;
   const ev = pool[Math.floor(rnd() * pool.length)];
-  f.eventAt = now; return ev;
+  f.eventAt = now; issueEvent(store, ev.id, now); return ev;
 }
 /** Apply a choice. Everything is re-validated here, never trusted from the UI. */
-export function resolveEvent(store, eventId, i) {
-  const ev = EVENT_BY_ID[eventId], s = store.state; if (!ev) return { ok: false, error: 'Unknown event' };
+export function resolveEvent(store, eventId, i, now = store.now()) {
+  const s = store.state, ev = own(EVENT_BY_ID, eventId) ? EVENT_BY_ID[eventId] : null; if (!ev) return { ok: false, error: 'Unknown event' };
+  const pend = s.pendingEvent; if (!pend || pend.id !== eventId || !(now - pend.at <= PENDING_TTL_MS)) return { ok: false, error: 'That moment has passed.' };
+  if (!Number.isInteger(i)) return { ok: false, error: 'Invalid choice' };
   const av = choiceAvailable(store, ev, i); if (!av.ok) return { ok: false, error: av.why };
+  s.pendingEvent = null; // consume BEFORE applying effects so it can never be replayed
   const ch = ev.choices[i], fx = ch.fx || {};
   if (fx.money) {
     const r = fx.money < 0 ? store.ledger.debit(-fx.money, `${ev.title}`, { category: 'purchase' }) : store.ledger.credit(fx.money, `${ev.title}: tip`, { category: 'income' });
-    if (!r.ok) return { ok: false, error: r.error };
+    if (!r.ok) { s.pendingEvent = pend; return { ok: false, error: r.error }; }
   }
   for (const k of ['energy', 'hunger', 'hygiene', 'fun', 'mood']) if (fx[k]) s.needs[k] = clamp((s.needs[k] ?? 50) + fx[k]);
   if (fx.jobXp && s.job.active) s.job.active.xp += fx.jobXp;

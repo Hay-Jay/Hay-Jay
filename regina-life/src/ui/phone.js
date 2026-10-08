@@ -118,7 +118,7 @@ export class Phone {
         <div class="widgets"><div class="wg wg-weather" data-open="weather"></div><div class="wg wg-bank" data-open="bank"></div></div>
         <div class="icons">${grid.map((id) => this.iconHtml(id)).join('')}</div>
       </div><div class="page p2">
-        <div class="icons">${['life', 'news', 'ads'].map((id) => this.iconHtml(id)).join('')}</div>
+        <div class="icons">${['social', 'life', 'news', 'ads', 'townhall', 'trips', 'radio'].map((id) => this.iconHtml(id)).join('')}</div>
         <div class="wg wide wg-today" data-open="calendar"></div>
         <div class="wg wide wg-job" data-open="jobs"></div>
         <div class="wg wide wg-needs" data-open="inventory"></div>
@@ -235,6 +235,9 @@ export class Phone {
     this.$('.sb-left').addEventListener('click', () => (this.$('.notif').classList.contains('open') ? this.closeSheets() : this.openSheet('notif')));
     this.$('.sb-right').addEventListener('click', () => (this.$('.ctrl').classList.contains('open') ? this.closeSheets() : this.openSheet('ctrl')));
     this.$('.home-ind').addEventListener('click', () => { if (this.root.querySelector('.sheet.open')) this.closeSheets(); else if (this.view === 'app') this.closeApp(); else if (this.view === 'home') this.close(); });
+    // never rebuild an app's DOM between pointerdown and pointerup (that swallows the tap): defer store-driven updates
+    const release = () => { this._down = false; if (this._pending) { this._pending = false; this.appInst?.update?.('deferred'); } };
+    sr.addEventListener('pointerdown', () => { this._down = true; }, true); sr.addEventListener('pointerup', () => setTimeout(release, 0), true); sr.addEventListener('pointercancel', release, true);
     let start = null;
     sr.addEventListener('pointerdown', (e) => { if (e.target.closest('input,textarea,button.tile,.slider,.pages,.sheet-scroll,.msg-scroll')) { start = null; if (!e.target.closest('.pages')) return; } start = { x: e.clientX, y: e.clientY, t: performance.now(), top: e.clientY - sr.getBoundingClientRect().top < 56 * (sr.getBoundingClientRect().height / sr.offsetHeight), id: e.pointerId }; });
     sr.addEventListener('pointerup', (e) => {
@@ -261,7 +264,7 @@ export class Phone {
     if (this.isOpen) {
       if (this.view === 'lock') this.refreshLock();
       else if (this.view === 'home') this.refreshHome();
-      else if (this.view === 'app') this.appInst?.update?.(topic);
+      else if (this.view === 'app') { if (this._down) this._pending = true; else this.appInst?.update?.(topic); }
     }
     if (topic === 'jobs' || topic === 'bank' || topic === 'needs') this.refreshBadges();
   }
@@ -279,7 +282,7 @@ export class Phone {
 
   /* ---------------- calls ---------------- */
   incomingCall(contactId, openingLine) {
-    if (this.state.phone.airplane) { this.recordCall(contactId, 'in', true); this.ctx.G.notify(this.ctx.store, { app: 'phone', title: 'Missed call', body: CONTACTS[contactId].name }); return; }
+    if (this.state.phone.airplane || this.ctx.isBuilding?.()) { this.recordCall(contactId, 'in', true); this.ctx.G.notify(this.ctx.store, { app: 'phone', title: 'Missed call', body: CONTACTS[contactId].name }); return; }
     if (this.call) return;
     this.call = { id: contactId, state: 'ringing', dir: 'in', line: openingLine, t0: 0 };
     this._autoOpened = !this.isOpen; this.open(); if (this.view === 'app') this.closeApp(true); this.setView(this.state.phone.unlocked ? 'home' : 'lock');

@@ -5,6 +5,7 @@
  */
 import { BOARD_BY_ID, DAY_PRICE, DURATIONS, THEMES } from '../data/billboards.js';
 import { notify } from './game.js';
+import { policyMult } from './policy.js';
 
 export const MAX_AD_CHARS = 40;
 const DAY_MS = 86_400_000;
@@ -19,7 +20,7 @@ export function moderate(text) {
   if (hit) return { ok: false, error: 'That text is not allowed on billboards (no links, contact handles, gambling or offensive words).' };
   return { ok: true, text: t };
 }
-export const adPrice = (boardId, days) => { const b = BOARD_BY_ID[boardId]; if (!b || !DURATIONS[days]) return null; return Math.round(DAY_PRICE[b.tier] * days * DURATIONS[days]); };
+export const adPrice = (boardId, days, state = null) => { const b = BOARD_BY_ID[boardId]; if (!b || !DURATIONS[days]) return null; return Math.round(DAY_PRICE[b.tier] * days * DURATIONS[days] * (state ? policyMult(state, 'ads') : 1)); };
 /** Simulated reach (clearly labelled as such in the UI). */
 export const adReach = (boardId, days) => { const b = BOARD_BY_ID[boardId]; return b ? Math.round(b.traffic * days) : 0; };
 export function activeAd(s, boardId, now) { const a = s.ads?.[boardId]; return a && a.until > now ? a : null; }
@@ -31,7 +32,7 @@ export function expireAds(store, now = store.now()) {
 export function buyAd(store, boardId, days, text, theme = 'prairie', now = store.now()) {
   const s = store.state, b = BOARD_BY_ID[boardId];
   if (!b) return { ok: false, error: 'Unknown billboard' };
-  const price = adPrice(boardId, days); if (price == null) return { ok: false, error: 'Choose 1, 3 or 7 days' };
+  const price = adPrice(boardId, days, s); if (price == null) return { ok: false, error: 'Choose 1, 3 or 7 days' };
   if (!THEMES[theme]) return { ok: false, error: 'Unknown colour theme' };
   const m = moderate(text); if (!m.ok) return m;
   if (activeAd(s, boardId, now)) return { ok: false, error: 'This billboard is already booked.' };

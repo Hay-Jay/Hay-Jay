@@ -11,6 +11,15 @@ import { SKILLS, skillLevel, moodWord } from '../core/game.js';
 import { BILLBOARDS, BOARD_BY_ID, DAY_PRICE, DURATIONS, THEMES } from '../data/billboards.js';
 import { adPrice, adReach, buyAd, activeAd, moderate, MAX_AD_CHARS } from '../core/ads.js';
 import { drawBillboard } from '../world/textures.js';
+import * as SOC from '../core/social.js';
+import * as POL from '../core/politics.js';
+import { RESIDENTS, RES_BY_ID } from '../data/residents.js';
+import { POLICIES, CANDIDATE_BY_ID } from '../data/policies.js';
+import { DESTINATIONS, DESTINATION_BY_ID } from '../data/destinations.js';
+import { tripBlocked } from '../core/travel.js';
+import { STATIONS } from '../data/radio.js';
+import { contactIds } from '../data/contacts.js';
+import { ownedTypes } from '../core/home.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nav = (title, { back = false, right = '' } = {}) => `<div class="nav">${back ? `<button class="nav-back" data-act="back">${ICON.back}<span>Back</span></button>` : '<span></span>'}<h2>${title}</h2><span class="nav-right">${right}</span></div>`;
@@ -20,14 +29,27 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const walkEta = (m) => { const s = m / 3.1; return s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`; };
 const fmtDist = (m) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
 
-function app(id, name, mount) { return { id, name, mount }; }
+/** Re-rendering an app keeps the scroll position unless the screen changed (its title differs). */
+function scrollSafe(el) {
+  return new Proxy(el, {
+    get(t, k) { const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; },
+    set(t, k, v) {
+      if (k !== 'innerHTML') { t[k] = v; return true; }
+      const sc = t.querySelector('.scroll'), y = sc ? sc.scrollTop : 0, title = t.querySelector('.nav h2')?.textContent;
+      t.innerHTML = v;
+      const n = t.querySelector('.scroll'); if (n && y && t.querySelector('.nav h2')?.textContent === title) n.scrollTop = y;
+      return true;
+    },
+  });
+}
+function app(id, name, mount) { return { id, name, mount: (body, ctx, phone) => mount(scrollSafe(body), ctx, phone) }; }
 
 /* ================= MESSAGES ================= */
 const messages = app('messages', 'Messages', (body, ctx) => {
   const { store, G } = ctx; let thread = null, typing = null;
   const listView = () => {
     const s = store.state;
-    const rows = CONTACT_ORDER.map((id) => { const c = CONTACTS[id], m = s.messages[id] || [], last = m[m.length - 1], un = s.unread[id] || 0; return { id, c, last, un }; })
+    const rows = contactIds(s).map((id) => { const c = CONTACTS[id], m = s.messages[id] || [], last = m[m.length - 1], un = s.unread[id] || 0; return { id, c, last, un }; })
       .sort((a, b) => (b.last?.t || 0) - (a.last?.t || 0));
     body.innerHTML = `${nav('Messages')}<div class="scroll"><div class="list">${rows.map(({ id, c, last, un }) => `<button class="row" data-th="${id}">${avatar(c)}<div class="grow"><b>${esc(c.name)}</b><p class="${un ? 'unread' : ''}">${last ? esc((last.from === 'me' ? 'You: ' : '') + last.text) : 'No messages yet'}</p></div><small>${last ? timeAgo(last.t, store.now()) : ''}</small>${un ? `<span class="dot">${un}</span>` : ''}</button>`).join('')}</div>
       <p class="fine pad">Chats are with in-game <b>NPCs</b>. Messaging real players arrives with the multiplayer server.</p></div>`;
@@ -48,7 +70,7 @@ const messages = app('messages', 'Messages', (body, ctx) => {
   });
   body.addEventListener('submit', (e) => {
     e.preventDefault(); const inp = body.querySelector('.composer input'); const v = inp.value.trim(); if (!v) return; inp.value = '';
-    typing = thread; G.sendMessage(store, thread, v); refreshThread(); ctx.audio?.blip('tick');
+    typing = thread; G.sendMessage(store, thread, v); SOC.chat(store, thread); refreshThread(); ctx.audio?.blip('tick');
     setTimeout(() => { typing = null; refreshThread(); }, 1900);
   });
   listView();
@@ -62,7 +84,7 @@ const phoneApp = app('phone', 'Phone', (body, ctx, phone) => {
     const s = store.state, calls = s.calls || [];
     body.innerHTML = `${nav('Phone')}<div class="seg">${['recents', 'contacts'].map((t) => `<button class="${tab === t ? 'on' : ''}" data-tab="${t}">${t[0].toUpperCase() + t.slice(1)}</button>`).join('')}</div><div class="scroll"><div class="list">${tab === 'recents'
       ? (calls.length ? calls.map((c) => `<div class="row">${avatar(CONTACTS[c.id])}<div class="grow"><b class="${c.missed ? 'red' : ''}">${esc(CONTACTS[c.id].name)}</b><p>${c.dir === 'in' ? (c.missed ? 'Missed call' : 'Incoming') : 'Outgoing'}${c.dur ? ` · ${Math.floor(c.dur / 60)}:${String(c.dur % 60).padStart(2, '0')}` : ''}</p></div><small>${timeAgo(c.t, store.now())}</small><button class="icon-btn green" data-call="${c.id}" aria-label="Call">${ICON.phone}</button></div>`).join('') : '<p class="empty">No recent calls</p>')
-      : CONTACT_ORDER.map((id) => `<div class="row">${avatar(CONTACTS[id])}<div class="grow"><b>${esc(CONTACTS[id].name)}</b><p>${esc(CONTACTS[id].sub)}</p></div><button class="icon-btn green" data-call="${id}" aria-label="Call ${esc(CONTACTS[id].name)}">${ICON.phone}</button></div>`).join('')}</div>
+      : contactIds(store.state).map((id) => `<div class="row">${avatar(CONTACTS[id])}<div class="grow"><b>${esc(CONTACTS[id].name)}</b><p>${esc(CONTACTS[id].sub)}</p></div><button class="icon-btn green" data-call="${id}" aria-label="Call ${esc(CONTACTS[id].name)}">${ICON.phone}</button></div>`).join('')}</div>
       <p class="fine pad">Calls are simulated NPC calls. Voice chat with real players comes with multiplayer.</p></div>`;
     (store.state.calls || []).forEach((c) => (c.seen = true));
   };
@@ -87,7 +109,7 @@ const contactsApp = app('contacts', 'Contacts', (body, ctx, phone) => {
       return;
     }
     const saved = s.saved.map((id) => poiById[id]).filter(Boolean);
-    body.innerHTML = `${nav('Contacts')}<div class="scroll"><div class="list">${CONTACT_ORDER.map((id) => `<button class="row" data-c="${id}">${avatar(CONTACTS[id])}<div class="grow"><b>${esc(CONTACTS[id].name)}</b><p>${esc(CONTACTS[id].sub)}</p></div></button>`).join('')}</div>
+    body.innerHTML = `${nav('Contacts')}<div class="scroll"><div class="list">${contactIds(s).map((id) => `<button class="row" data-c="${id}">${avatar(CONTACTS[id])}<div class="grow"><b>${esc(CONTACTS[id].name)}</b><p>${esc(CONTACTS[id].sub)}</p></div></button>`).join('')}</div>
       <h4 class="sec">Saved Places</h4><div class="list">${saved.length ? saved.map((p) => `<button class="row" data-place="${p.id}"><div class="avatar" style="background:#e0a02f">${CAT_ICON[p.cat]}</div><div class="grow"><b>${esc(p.name)}</b><p>${fmtDist(dist(ctx.player(), p))} away</p></div></button>`).join('') : '<p class="empty">Star places in Maps to save them here</p>'}</div></div>`;
   };
   body.addEventListener('click', (e) => {
@@ -146,7 +168,7 @@ const bankApp = app('bank', 'Wascana CU', (body, ctx) => {
   const render = () => {
     const s = store.state, h = s.bank.history;
     if (view === 'send') {
-      body.innerHTML = `${nav('Send Money', { back: true })}<div class="scroll"><form class="form" id="sendf"><label>To<select name="to">${CONTACT_ORDER.filter((id) => CONTACTS[id].kind === 'person').map((id) => `<option value="${id}">${esc(CONTACTS[id].name)}</option>`).join('')}</select></label>
+      body.innerHTML = `${nav('Send Money', { back: true })}<div class="scroll"><form class="form" id="sendf"><label>To<select name="to">${contactIds(store.state).filter((id) => CONTACTS[id].kind === 'person').map((id) => `<option value="${id}">${esc(CONTACTS[id].name)}</option>`).join('')}</select></label>
         <label>Amount (Prairie Dollars)<input name="amt" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00" required></label><p class="err">${esc(msg)}</p><button class="btn primary wide">Send</button></form>
         <p class="fine pad">Transfers are checked by the in-game ledger: positive amounts only, no overdrafts, rate-limited. Balance: ${fmtMoney(s.bank.balance)}</p></div>`;
       return;
@@ -183,15 +205,15 @@ const jobsApp = app('jobs', 'Jobs', (body, ctx, phone) => {
     if (tab === 'mine' && j) {
       const def = JOBS[j.id], lvl = def.levels[j.level], next = def.levels[j.level + 1], sh = s.job.shift;
       const pct = next ? Math.min(100, ((j.xp - lvl.xpNeeded) / (next.xpNeeded - lvl.xpNeeded)) * 100) : 100;
-      inner = `<div class="card job-card"><small>${esc(def.employer)}</small><h3>${esc(def.title)}</h3><p class="lvl">${esc(lvl.name)} · ${fmtMoney(lvl.wage)} / shift</p>
+      inner = `<div class="card job-card"><small>${esc(def.employer)}</small><h3>${esc(def.title)}</h3><p class="lvl">${esc(lvl.name)} · ${fmtMoney(G.wageFor(store, lvl))} / shift</p>
         <div class="progress"><i style="width:${pct}%"></i></div><small>${next ? `${j.xp}/${next.xpNeeded} XP to ${esc(next.name)}` : 'Top level reached'} · ${j.shifts} shifts completed</small></div>
         ${sh ? `<div class="card shift"><b>Shift in progress</b><p>${sh.tasksDone} / ${sh.tasksTotal} tasks done</p><div class="progress"><i style="width:${(sh.tasksDone / sh.tasksTotal) * 100}%"></i></div><small>${sh.tasksDone >= sh.tasksTotal ? 'Return to the counter to clock out.' : 'Carry stock from the back to the highlighted shelf.'}</small></div>`
-        : `<div class="card"><b>Next shift</b><p>${lvl.tasks} tasks · pay ${fmtMoney(lvl.wage)}</p><small>Go to ${esc(def.employer)}, then talk to staff at the counter to clock in. Pay is deposited only after the work is done.</small></div>`}
+        : `<div class="card"><b>Next shift</b><p>${lvl.tasks} tasks · pay ${fmtMoney(G.wageFor(store, lvl))}</p><small>Go to ${esc(def.employer)}, then talk to staff at the counter to clock in. Pay is deposited only after the work is done.</small></div>`}
         <div class="mc-btns"><button class="btn primary" data-act="nav">Navigate to work</button><button class="btn danger" data-act="quit">Quit job</button></div>`;
     } else {
-      inner = (ap ? `<div class="card ${ap.status === 'offered' ? 'offer' : ''}"><small>Application</small><h3>${esc(JOBS[ap.id].title)}</h3><p>${ap.status === 'pending' ? 'Under review… the employer will contact you shortly.' : `Offer: ${fmtMoney(JOBS[ap.id].levels[0].wage)} per shift`}</p>${ap.status === 'offered' ? '<div class="mc-btns"><button class="btn primary" data-act="accept">Accept offer</button><button class="btn" data-act="decline">Decline</button></div>' : ''}</div>` : '')
+      inner = (ap ? `<div class="card ${ap.status === 'offered' ? 'offer' : ''}"><small>Application</small><h3>${esc(JOBS[ap.id].title)}</h3><p>${ap.status === 'pending' ? 'Under review… the employer will contact you shortly.' : `Offer: ${fmtMoney(G.wageFor(store, JOBS[ap.id].levels[0]))} per shift`}</p>${ap.status === 'offered' ? '<div class="mc-btns"><button class="btn primary" data-act="accept">Accept offer</button><button class="btn" data-act="decline">Decline</button></div>' : ''}</div>` : '')
         + Object.values(JOBS).map((d) => `<div class="card job"><div class="jt"><div class="avatar" style="background:${CONTACTS[d.contact].color}">${d.employer[0]}</div><div><h3>${esc(d.title)}</h3><small>${esc(d.employer)}</small></div></div><p>${esc(d.blurb)}</p>
-          <div class="chips">${d.levels.map((l) => `<span>${esc(l.name)} ${fmtMoney(l.wage)}</span>`).join('')}</div>
+          <div class="chips">${d.levels.map((l) => `<span>${esc(l.name)} ${fmtMoney(G.wageFor(store, l))}</span>`).join('')}</div>
           <button class="btn primary wide" data-apply="${d.id}" ${j || ap ? 'disabled' : ''}>${j ? 'Already employed' : ap ? 'Application in progress' : 'Apply'}</button></div>`).join('')
         + '<p class="fine pad">More careers (delivery, rideshare, office, trades…) arrive in later milestones.</p>';
     }
@@ -382,23 +404,23 @@ const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
     const s = store.state, now = store.now(), mine = BILLBOARDS.filter((b) => activeAd(s, b.id, now));
     body.innerHTML = `${nav('Ads')}<div class="scroll">
       ${mine.length ? `<h4 class="sec">Your campaigns</h4><div class="list">${mine.map((b) => { const a = s.ads[b.id]; return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:linear-gradient(135deg,${THEMES[a.theme][0]},${THEMES[a.theme][1]})">📢</div><div class="grow"><b>“${esc(a.text)}”</b><p>${esc(b.name)} · ${left(a.until)}</p></div></button>`; }).join('')}</div>` : ''}
-      <h4 class="sec">Billboards in Regina</h4><div class="list">${BILLBOARDS.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${b.tier === 'mega' ? 'linear-gradient(135deg,#6a2cff,#ff2d95)' : 'linear-gradient(135deg,#0b8f86,#2a74d6)'}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${b.tier === 'mega' ? 'MEGA SCREEN' : 'Standard'} · ${fmtMoney(DAY_PRICE[b.tier])}/day</p></div><small class="${a ? 'red' : 'green'}">${a ? 'Booked' : 'Available'}</small></button>`; }).join('')}</div>
+      <h4 class="sec">Billboards in Regina</h4><div class="list">${BILLBOARDS.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${b.tier === 'mega' ? 'linear-gradient(135deg,#6a2cff,#ff2d95)' : 'linear-gradient(135deg,#0b8f86,#2a74d6)'}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${b.tier === 'mega' ? 'MEGA SCREEN' : 'Standard'} · ${fmtMoney(adPrice(b.id, 1, s))}/day</p></div><small class="${a ? 'red' : 'green'}">${a ? 'Booked' : 'Available'}</small></button>`; }).join('')}</div>
       <p class="fine pad">Billboards are paid in Prairie Dollars only. No real money is involved. Reach numbers are simulated.</p></div>`;
   };
   const detail = () => {
-    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), price = adPrice(sel, form.days);
+    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), price = adPrice(sel, form.days, s);
     body.innerHTML = `${nav(esc(b.name), { back: true })}<div class="scroll"><canvas class="bbprev" width="480" height="${Math.round(480 * (b.tier === 'mega' ? 0.5 : 0.5))}"></canvas>
       ${a ? `<div class="card"><b>Booked</b><p>“${esc(a.text)}” — ${left(a.until)}</p><small>Your ad is on display at this location.</small></div>
       <button class="btn wide" data-act="go">Navigate there</button>`
       : `<div class="form"><label>Your message <small>(<span id="cnt">${form.text.length}</span>/${MAX_AD_CHARS})</small><input id="adtext" maxlength="${MAX_AD_CHARS}" value="${esc(form.text)}" placeholder="e.g. Best bannock in Regina!" autocomplete="off"></label>
         <label>Colours</label><div class="swatches">${Object.entries(THEMES).map(([k, [c1, c2]]) => `<button class="sw ${form.theme === k ? 'on' : ''}" data-theme="${k}" style="background:linear-gradient(135deg,${c1},${c2})" aria-label="${k}"></button>`).join('')}</div>
-        <label>Duration</label><div class="seg tight">${Object.keys(DURATIONS).map((d) => `<button class="${form.days == d ? 'on' : ''}" data-days="${d}">${d} day${d == 1 ? '' : 's'}<small>${fmtMoney(adPrice(sel, +d))}</small></button>`).join('')}</div>
+        <label>Duration</label><div class="seg tight">${Object.keys(DURATIONS).map((d) => `<button class="${form.days == d ? 'on' : ''}" data-days="${d}">${d} day${d == 1 ? '' : 's'}<small>${fmtMoney(adPrice(sel, +d, s))}</small></button>`).join('')}</div>
         <p class="meta">👁️ Simulated reach: <b>${adReach(sel, form.days).toLocaleString()}</b> views · Balance ${fmtMoney(s.bank.balance)}</p><p class="err">${esc(form.err)}</p>
         <button class="btn primary wide" data-act="book" ${price > s.bank.balance ? 'disabled' : ''}>Book for ${fmtMoney(price)}</button></div>
       <button class="btn wide" data-act="go">Navigate there</button>`}</div>`;
     previewDraw();
   };
-  const previewDraw = () => { const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], a = activeAd(store.state, sel, store.now()); const t = form.text.trim().length >= 3 ? form.text.trim() : ''; cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, a || (t ? { text: t, theme: form.theme } : null), { tier: b.tier, priceLabel: `${fmtMoney(DAY_PRICE[b.tier])} / day` }, THEMES); };
+  const previewDraw = () => { const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], a = activeAd(store.state, sel, store.now()); const t = form.text.trim().length >= 3 ? form.text.trim() : ''; cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, a || (t ? { text: t, theme: form.theme } : null), { tier: b.tier, priceLabel: `${fmtMoney(adPrice(sel, 1, store.state))} / day` }, THEMES); };
   body.addEventListener('click', (e) => {
     const b = e.target.closest('[data-b]'); if (b) { sel = b.dataset.b; form.err = ''; detail(); return; }
     const th = e.target.closest('[data-theme]'); if (th) { form.theme = th.dataset.theme; detail(); return; }
@@ -417,5 +439,105 @@ const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
   return { update(topic) { if (document.activeElement?.id === 'adtext') return; sel ? detail() : list(); } };
 });
 
-export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp];
+
+/* ================= SOCIAL (friends by @username — NPC residents) ================= */
+const socialApp = app('social', 'Social', (body, ctx, phone) => {
+  const { store } = ctx; let tab = 'friends', sel = null, q = '', msg = '';
+  const bar = (v) => `<div class="progress thin"><i style="width:${Math.round(v)}%"></i></div>`;
+  const resAv = (r, big) => `<div class="avatar ${big ? 'big' : ''}" style="background:${r.color}">${r.emoji}</div>`;
+  const list = () => {
+    const s = store.state, ids = SOC.friendIds(s);
+    body.innerHTML = `${nav('Social')}<div class="seg"><button class="${tab === 'friends' ? 'on' : ''}" data-tab="friends">Friends ${ids.length}</button><button class="${tab === 'find' ? 'on' : ''}" data-tab="find">Find @username</button></div><div class="scroll">${tab === 'friends'
+      ? (ids.length ? `<div class="list">${ids.map((id) => { const r = RES_BY_ID[id], f = s.friends[id]; return `<button class="row" data-f="${id}">${resAv(r)}<div class="grow"><b>${esc(r.name)} ${s.partner === id ? '💛' : ''}</b><p>${esc(r.handle)} · ${SOC.relName(f.level)}</p>${bar(f.level)}</div></button>`; }).join('')}</div>` : '<p class="empty big">No friends yet.<br>Search an @username in “Find”.</p>')
+      : `<div class="form"><label>Search by @username or name<input id="soq" value="${esc(q)}" placeholder="@tobi.rgn" autocomplete="off"></label><p class="err">${esc(msg)}</p></div><div class="list">${(q ? SOC.searchResidents(q) : RESIDENTS).filter((r) => !s.friends[r.id]).map((r) => `<div class="row">${resAv(r)}<div class="grow"><b>${esc(r.name)}</b><p>${esc(r.handle)} · ${esc(r.job)}</p></div><button class="btn small primary" data-add="${r.id}">Add</button></div>`).join('') || '<p class="empty">No matches</p>'}</div>
+        <p class="fine pad">Everyone here is an <b>NPC resident</b>. Friends with real players (by @username) arrive with the multiplayer server.</p>`}</div>`;
+  };
+  const detail = () => {
+    const s = store.state, r = RES_BY_ID[sel], f = s.friends[sel]; if (!f) { sel = null; return list(); }
+    const dating = s.partner === sel;
+    body.innerHTML = `${nav('Friend', { back: true })}<div class="scroll center-col">${resAv(r, true)}<h1>${esc(r.name)} ${dating ? '💛' : ''}</h1><p class="muted">${esc(r.handle)} · NPC resident</p><p class="bio">${esc(r.bio)}</p>
+      <div class="card wide0"><small>${esc(r.job)} · ${SOC.relName(f.level)}${dating ? ' · Dating' : ''}</small>${bar(f.level)}<small>${Math.round(f.level)}/100 · Likes ${r.likes.map((l) => FOOD[l]?.icon ?? '').join(' ')}</small></div>
+      <div class="actions3"><button data-do="msg">${ICON.messages}<span>message</span></button><button data-do="call">${ICON.phone}<span>call</span></button></div>
+      <h4 class="sec">Hang out</h4><div class="list wide0">${Object.entries(SOC.HANGOUTS).filter(([, h]) => !h.datingOnly || dating).map(([k, h]) => { const bad = SOC.hangoutBlocked(store, sel, k); return `<button class="row" data-h="${k}" ${bad ? 'data-bad="' + esc(bad) + '"' : ''}><div class="avatar sm emoji">${h.icon}</div><div class="grow"><b>${h.label}</b><p>${h.cost ? fmtMoney(h.cost) : 'Free'} · +${h.rel} friendship</p></div></button>`; }).join('')}</div>
+      <h4 class="sec">Gift</h4><div class="list wide0">${Object.entries(s.inventory).length ? Object.entries(s.inventory).map(([id, n]) => `<button class="row" data-g="${id}"><div class="avatar sm emoji">${FOOD[id].icon}</div><div class="grow"><b>${FOOD[id].name} ×${n}</b><p>${r.likes.includes(id) ? '❤️ Their favourite!' : 'A nice gesture'}</p></div></button>`).join('') : '<p class="empty">Buy something at the Market to give as a gift</p>'}</div>
+      <div class="mc-btns wide0">${dating ? '<button class="btn danger" data-do="breakup">Break up</button>' : r.datable ? '<button class="btn primary" data-do="ask">💛 Ask on a date</button>' : ''}</div>
+      <p class="err">${esc(msg)}</p></div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-tab]'); if (t) { tab = t.dataset.tab; msg = ''; list(); return; }
+    const f = e.target.closest('[data-f]'); if (f) { sel = f.dataset.f; msg = ''; detail(); return; }
+    const ad = e.target.closest('[data-add]'); if (ad) { const r = SOC.addFriend(store, ad.dataset.add); if (r.ok) { ctx.audio?.blip('ok'); ctx.toast(`Added ${r.res.name}`, 'good'); } else ctx.toast(r.error, 'warn'); return; }
+    if (e.target.closest('[data-act="back"]')) { sel = null; list(); return; }
+    const h = e.target.closest('[data-h]'); if (h) { const r = SOC.hangout(store, sel, h.dataset.h); if (r.ok) { ctx.audio?.blip('ok'); ctx.toast(`${r.say} (+friendship)`, 'good'); } else { ctx.audio?.blip('error'); msg = r.error; ctx.toast(r.error, 'warn'); } detail(); return; }
+    const g = e.target.closest('[data-g]'); if (g) { const r = SOC.gift(store, sel, g.dataset.g); if (r.ok) { ctx.audio?.blip('ok'); ctx.toast(r.loved ? '❤️ They loved it!' : 'They appreciated it.', 'good'); } else { msg = r.error; ctx.toast(r.error, 'warn'); } detail(); return; }
+    const d = e.target.closest('[data-do]')?.dataset.do;
+    if (d === 'msg') phone.openApp('messages'); if (d === 'call') phone.startCall(sel);
+    if (d === 'ask') { const r = SOC.askOut(store, sel); msg = r.ok ? '' : r.error; if (r.ok) { ctx.audio?.blip('ok'); ctx.toast('💛 You are now dating!', 'good'); } detail(); }
+    if (d === 'breakup') { SOC.breakUp(store, sel); detail(); }
+  });
+  body.addEventListener('input', (e) => { if (e.target.id === 'soq') { q = e.target.value; const pos = e.target.selectionStart; list(); const el = body.querySelector('#soq'); el.focus(); el.setSelectionRange(pos, pos); } });
+  list();
+  return { update(topic) { if (document.activeElement?.id === 'soq') return; sel ? detail() : list(); } };
+});
+
+/* ================= TOWN HALL (fictional mayoral election) ================= */
+const townhallApp = app('townhall', 'Town Hall', (body, ctx) => {
+  const { store } = ctx; let msg = '';
+  const left = (ms) => { const h = ms / 3.6e6; return h >= 24 ? `${Math.floor(h / 24)}d ${Math.floor(h % 24)}h` : `${Math.max(0, Math.floor(h))}h ${Math.floor((h % 1) * 60)}m`; };
+  const render = () => {
+    POL.tallyIfDue(store); const s = store.state, p = POL.ensurePolitics(store), now = store.now(), slate = POL.slateFor(p.term), poll = POL.simulate(p.term, p.vote, p.points), mayor = CANDIDATE_BY_ID[p.mayor.id], pol = POLICIES[p.mayor.policy];
+    const share = (id) => Math.round(poll.find((x) => x.id === id).share * 100);
+    body.innerHTML = `${nav('Town Hall')}<div class="scroll"><div class="card hero gold"><small>CURRENT MAYOR</small><div class="hi">${mayor.emoji}</div><h3>${esc(mayor.name)}</h3><p>${esc(mayor.party)} · ${pol.icon} ${esc(pol.name)}</p><b class="effect">${esc(pol.effect)}</b></div>
+      <h4 class="sec">Election · term ${p.term} · ${left(POL.timeLeft(p, now))} left</h4>
+      <div class="list">${slate.map((c) => { const pc = POLICIES[c.policy], mine = p.vote === c.id; return `<div class="row cand ${mine ? 'mine' : ''}"><div class="avatar" style="background:#2a3a5e">${c.emoji}</div><div class="grow"><b>${esc(c.name)}</b><p>${esc(c.party)} · “${esc(c.slogan)}”</p><p class="pol">${pc.icon} ${esc(pc.effect)}</p><div class="progress thin"><i style="width:${share(c.id)}%"></i></div></div><div class="col"><b>${share(c.id)}%</b>${p.vote ? (mine ? '<small class="green">Your vote</small>' : '') : `<button class="btn small primary" data-vote="${c.id}">Vote</button>`}</div></div>`; }).join('')}</div>
+      ${p.vote ? `<div class="card"><b>Back your candidate</b><p>Campaign strength: ${p.points.toFixed(1)} / ${POL.MAX_CAMPAIGN_POINTS}</p><div class="progress"><i style="width:${(p.points / POL.MAX_CAMPAIGN_POINTS) * 100}%"></i></div><div class="mc-btns"><button class="btn" data-don="1000">Donate $10</button><button class="btn" data-don="5000">Donate $50</button></div><small>Or hand out flyers at City Hall for free. Results are simulated when the term ends.</small></div>` : '<p class="fine pad">Cast one vote per term. Winners enact a policy that changes real prices and pay in the game.</p>'}
+      <p class="err">${esc(msg)}</p>
+      ${p.history.length ? `<h4 class="sec">Past results</h4><div class="list">${p.history.map((h) => { const w = CANDIDATE_BY_ID[h.winner]; return `<div class="row"><div class="avatar sm emoji">${w.emoji}</div><div class="grow"><b>Term ${h.term}: ${esc(w.name)}</b><p>${h.shares.map((x) => `${CANDIDATE_BY_ID[x.id].name.split(' ').pop()} ${Math.round(x.share * 100)}%`).join(' · ')}</p></div>${h.youVoted === h.winner ? '<small class="green">Your pick</small>' : ''}</div>`; }).join('')}</div>` : ''}
+      <p class="fine pad">The election, candidates, parties and slogans are entirely fictional and unrelated to real politics.</p></div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const v = e.target.closest('[data-vote]'); if (v) { const c = CANDIDATE_BY_ID[v.dataset.vote]; ctx.confirm(`Vote for ${c.name}?`, `${c.party} — ${POLICIES[c.policy].effect}. You can only vote once per term and cannot change it.`, 'Cast my vote', () => { const r = POL.vote(store, v.dataset.vote); msg = r.ok ? '' : r.error; if (r.ok) { ctx.audio?.blip('ok'); ctx.toast('🗳️ Vote cast!', 'good'); } render(); }); return; }
+    const d = e.target.closest('[data-don]'); if (d) { const r = POL.donate(store, +d.dataset.don); msg = r.ok ? '' : r.error; if (r.ok) ctx.audio?.blip('cash'); render(); }
+  });
+  render(); return { update() { render(); } };
+});
+
+/* ================= TRIPS (intercity travel) ================= */
+const tripsApp = app('trips', 'Travel', (body, ctx) => {
+  const { store } = ctx;
+  const dur = (m) => (m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}` : `${m} min`);
+  const render = () => {
+    const s = store.state, trips = s.trips || [], sou = s.souvenirs || [];
+    body.innerHTML = `${nav('Travel')}<div class="scroll"><p class="fine pad">Leave Regina for a short trip: it costs a fare and energy, gives you a scenario, and a souvenir poster for your home the first time.</p>
+      ${DESTINATIONS.map((d) => `<div class="card dest"><div class="jt"><div class="avatar" style="background:#1d3b5e">${d.emoji}</div><div><h3>${d.name}</h3><small>${sou.includes(d.id) ? '🎁 Visited' : 'New!'}</small></div></div><p>${esc(d.blurb)}</p><div class="mc-btns">${Object.entries(d.modes).map(([mode, m]) => { const bad = tripBlocked(store, d.id, mode); return `<button class="btn ${bad ? '' : 'primary'}" data-go="${d.id}|${mode}" ${bad ? 'data-bad="' + esc(bad) + '"' : ''}>${mode === 'flight' ? '✈️ Fly' : '🚌 Coach'} · ${fmtMoney(m.fare)} · ${dur(m.mins)}</button>`; }).join('')}</div></div>`).join('')}
+      ${trips.length ? `<h4 class="sec">Trip log</h4><div class="list">${trips.slice(0, 8).map((t) => `<div class="row"><div class="avatar sm emoji">${DESTINATION_BY_ID[t.dest].emoji}</div><div class="grow"><b>${DESTINATION_BY_ID[t.dest].name}</b><p>${t.mode === 'flight' ? 'Flight' : 'Coach'} · ${fmtMoney(t.fare)}</p></div></div>`).join('')}</div>` : ''}</div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const g = e.target.closest('[data-go]'); if (!g) return; const [d, m] = g.dataset.go.split('|');
+    if (g.dataset.bad) { ctx.toast(g.dataset.bad, 'warn'); ctx.audio?.blip('error'); return; }
+    ctx.startTrip(d, m);
+  });
+  render(); return { update() { render(); } };
+});
+
+/* ================= RADIO ================= */
+const radioApp = app('radio', 'Radio', (body, ctx) => {
+  const radio = ctx.radio;
+  const render = () => {
+    const cur = radio.station, st = STATIONS.find((s) => s.id === cur);
+    body.innerHTML = `${nav('Radio')}<div class="scroll"><div class="card radio-now ${cur ? 'on' : ''}"><div class="eq">${'<i></i>'.repeat(6)}</div><small>${cur ? `${st.freq} FM · ${esc(st.name)}` : 'Off'}</small><h3>${cur ? esc(radio.nowTitle || '…') : 'Pick a station'}</h3>${cur ? '<button class="btn" data-stop>⏹ Turn off</button>' : ''}</div>
+      <label class="slider">${ICON.volume}<input type="range" id="rvol" min="0" max="1" step="0.05" value="${radio.volume}" aria-label="Radio volume"></label>
+      <div class="list">${STATIONS.map((s) => `<button class="row ${cur === s.id ? 'curr' : ''}" data-st="${s.id}"><div class="avatar sm emoji">${s.emoji}</div><div class="grow"><b>${esc(s.name)} · ${s.freq}</b><p>${esc(s.genre)} — ${esc(s.blurb)}</p></div><small>${cur === s.id ? '▶' : ''}</small></button>`).join('')}</div>
+      <p class="fine pad">Music is generated live in your browser. Listening raises your Fun. Playing needs sound on your device; the volume follows your phone volume.${radio.speechOk ? '' : ' (Spoken news is not supported in this browser.)'}</p></div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const s = e.target.closest('[data-st]'); if (s) { radio.play(s.dataset.st); render(); return; }
+    if (e.target.closest('[data-stop]')) { radio.stop(); render(); }
+  });
+  body.addEventListener('input', (e) => { if (e.target.id === 'rvol') radio.setVolume(+e.target.value); });
+  const prev = radio.onChange; radio.onChange = () => { prev?.(); if (document.activeElement?.id !== 'rvol') render(); };
+  render(); return { update() {}, destroy() { radio.onChange = prev; } };
+});
+
+export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp];
 export const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));

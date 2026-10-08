@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { POIS, poiById, DISTRICTS } from '../world/cityData.js';
 
-const CLOSE = ['lofts', 'market', 'threads', 'fitness', 'scarth', 'victoriapark'];
+const CLOSE = ['lofts', 'market', 'threads', 'fitness', 'cityhall', 'scarth', 'victoriapark'];
 const FAR = ['leg', 'bridge', 'wascana', 'stadium', 'uofr', 'airport', 'harbour', 'cathedral', 'northcentral', 'rochdale', 'east', 'south'];
 const VIEW = {
   close: { target: new THREE.Vector3(20, 0, 5), dist: 440, fov: 34 },

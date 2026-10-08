@@ -1,3 +1,5 @@
+import { RESIDENTS, RES_BY_ID, residentReply } from './residents.js';
+
 /** NPC contacts. Clearly NPCs: real multiplayer messaging arrives with the server milestone. */
 export const CONTACTS = {
   dani:    { id: 'dani',    name: 'Dani',                  sub: 'Roommate · NPC',          color: '#ff7a59', kind: 'person' },
@@ -7,9 +9,14 @@ export const CONTACTS = {
   bank:    { id: 'bank',    name: 'Wascana Credit Union',  sub: 'Bank · automated NPC',    color: '#2d7ff9', kind: 'business' },
 };
 export const CONTACT_ORDER = ['dani', 'mom', 'market', 'threads', 'bank'];
+// Residents are addressable like any contact (for messages / calls / transfers) once befriended.
+for (const r of RESIDENTS) CONTACTS[r.id] = { id: r.id, name: r.name, sub: `${r.handle} · NPC resident`, color: r.color, kind: 'person', resident: true };
+/** Core contacts + the residents the player has befriended (in the order they were added). */
+export const contactIds = (state) => [...CONTACT_ORDER, ...Object.keys(state.friends || {})];
 
 /** Tiny keyword responder so NPC chats feel alive and are fully deterministic/testable. */
-export function npcReply(contactId, text) {
+export function npcReply(contactId, text, level = 0) {
+  if (RES_BY_ID[contactId]) return residentReply(RES_BY_ID[contactId], text, level);
   const t = text.toLowerCase();
   const has = (...w) => w.some((x) => t.includes(x));
   if (contactId === 'dani') {

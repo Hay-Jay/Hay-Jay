@@ -3,6 +3,8 @@ import { FOOD, CLOTHES, ITEM_NAME, ITEM_PRICE, SLOT_KEY } from '../data/catalog.
 import { JOBS, XP_PER_TASK, MIN_SECONDS_PER_TASK } from '../data/jobs.js';
 import { CONTACTS, npcReply } from '../data/contacts.js';
 import { fmtMoney } from './ledger.js';
+import { policyMult, MAX_CAMPAIGN_POINTS, CANVASS_COOLDOWN_MS } from './policy.js';
+import { own } from './util.js';
 
 const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
 let _id = 0;
@@ -18,8 +20,13 @@ export function notify(store, { app, title, body, silent = false }) {
 }
 
 /* ---------- shopping ---------- */
+/** Catalog price after the mayor's policy (never trusted from the UI). */
+export function priceFor(store, itemId) {
+  const base = ITEM_PRICE(itemId); if (base == null) return null;
+  return Math.round(base * policyMult(store.state, CLOTHES[itemId] ? 'clothing' : 'groceries'));
+}
 export function buyItem(store, itemId, qty = 1, where = 'Store') {
-  const price = ITEM_PRICE(itemId);          // price comes from the catalog, never from the caller
+  const price = priceFor(store, itemId);          // price comes from the catalog, never from the caller
   if (price == null) return { ok: false, error: 'Unknown item' };
   if (!Number.isInteger(qty) || qty < 1 || qty > 20) return { ok: false, error: 'Invalid quantity' };
   const isClothing = !!CLOTHES[itemId];
@@ -55,21 +62,23 @@ export function equip(store, itemId) {
 
 /* ---------- transfers ---------- */
 export function transferTo(store, contactId, cents) {
-  const c = CONTACTS[contactId];
-  if (!c || c.kind !== 'person') return { ok: false, error: 'You can only send money to people' };
+  const c = canContact(store.state, contactId) ? CONTACTS[contactId] : null;
+  if (!c || c.kind !== 'person') return { ok: false, error: 'You can only send money to people you know' };
   const r = store.ledger.debit(cents, `Sent to ${c.name}`, { category: 'transfer' });
   if (r.ok) { receiveMessage(store, contactId, `Got your ${fmtMoney(cents)} — thank you! 💸`, 1500); store.commit('bank'); }
   return r;
 }
 
 /* ---------- messaging ---------- */
+/** Core contacts are always reachable; resident NPCs only once befriended. */
+export const canContact = (s, id) => own(CONTACTS, id) && (!CONTACTS[id].resident || own(s.friends, id));
 export function sendMessage(store, contactId, text, { reply = true } = {}) {
   text = String(text || '').trim().slice(0, 300);
-  if (!text || !CONTACTS[contactId]) return false;
+  if (!text || !canContact(store.state, contactId)) return false;
   const s = store.state;
   (s.messages[contactId] ||= []).push({ from: 'me', text, t: store.now() });
   store.commit('messages');
-  if (reply && !s.phone.airplane && CONTACTS[contactId].kind === 'person') receiveMessage(store, contactId, npcReply(contactId, text), 1800 + Math.random() * 1500);
+  if (reply && !s.phone.airplane && CONTACTS[contactId].kind === 'person') receiveMessage(store, contactId, npcReply(contactId, text, s.friends?.[contactId]?.level ?? 0), 1800 + Math.random() * 1500);
   else if (reply && !s.phone.airplane) receiveMessage(store, contactId, npcReply(contactId, text), 1500);
   return true;
 }
@@ -92,6 +101,8 @@ export const unreadTotal = (s) => Object.values(s.unread).reduce((a, b) => a + b
 
 /* ---------- jobs ---------- */
 export const currentLevel = (job) => JOBS[job.id].levels[job.level];
+/** Shift pay for a job level after the mayor's wage policy — the single source for both the UI and the payout. */
+export const wageFor = (store, lvl) => Math.round(lvl.wage * policyMult(store.state, 'wages'));
 
 export function applyForJob(store, jobId) {
   const s = store.state, def = JOBS[jobId];
@@ -109,7 +120,7 @@ export function tickJobs(store) {
   if (a && a.status === 'pending' && store.now() >= a.offerAt) {
     a.status = 'offered';
     const def = JOBS[a.id];
-    receiveMessage(store, def.contact, `Good news — we'd like to offer you the ${def.title} role at ${fmtMoney(def.levels[0].wage)} per shift. Accept in the Jobs app!`);
+    receiveMessage(store, def.contact, `Good news — we'd like to offer you the ${def.title} role at ${fmtMoney(wageFor(store, def.levels[0]))} per shift. Accept in the Jobs app!`);
     store.commit('jobs');
   }
 }
@@ -148,8 +159,8 @@ export function finishShift(store) {
   if (sh.tasksDone < sh.tasksTotal) return { ok: false, error: 'Tasks remaining' };
   const elapsed = (store.now() - sh.startedAt) / 1000;
   if (elapsed < sh.tasksTotal * MIN_SECONDS_PER_TASK) return { ok: false, error: 'Shift finished suspiciously fast — payout withheld' };
-  const lvl = currentLevel(j);
-  const pay = store.ledger.credit(lvl.wage, `Payroll: ${JOBS[j.id].employer}`, { category: 'income', ref: `shift:${sh.startedAt}` });
+  const lvl = currentLevel(j), wage = wageFor(store, lvl);
+  const pay = store.ledger.credit(wage, `Payroll: ${JOBS[j.id].employer}`, { category: 'income', ref: `shift:${sh.startedAt}` });
   if (!pay.ok) return pay;
   j.xp += XP_PER_TASK * sh.tasksTotal; j.shifts++;
   s.job.shift = null;
@@ -158,7 +169,7 @@ export function finishShift(store) {
   if (next && j.xp >= next.xpNeeded) { j.level++; promoted = next.name; receiveMessage(store, JOBS[j.id].contact, `Congratulations! You've been promoted to ${promoted}. 🎉`, 1200); }
   s.needs.mood = clamp(s.needs.mood + 6);
   store.commit('jobs');
-  return { ok: true, pay: lvl.wage, promoted };
+  return { ok: true, pay: wage, promoted };
 }
 export function abandonShift(store) { store.state.job.shift = null; store.commit('jobs'); }
 
@@ -227,15 +238,17 @@ export const ACTIVITIES = {
   treadmill:{ label: 'Running on the treadmill…', secs: 5, needs: { energy: -12, hunger: -5, hygiene: -10, fun: 10, mood: 4 }, skill: ['fitness', 10], minEnergy: 20 },
   weights: { label: 'Lifting weights…',  secs: 5, needs: { energy: -14, hunger: -6, hygiene: -9, fun: 8 }, skill: ['fitness', 12], minEnergy: 25 },
   yoga:    { label: 'Stretching on the mat…', secs: 4, needs: { energy: -4, hygiene: -3, fun: 8, mood: 8 }, skill: ['fitness', 5] },
+  canvass: { label: 'Handing out flyers…', secs: 6, needs: { energy: -8, hygiene: -4, fun: 4, mood: 2 }, skill: ['charisma', 6], minEnergy: 20,
+    requires: (store) => { const p = store.state.politics; if (!p?.vote) return 'Vote first (Town Hall app), then you can hand out flyers.'; if (p.points >= MAX_CAMPAIGN_POINTS) return 'Your campaign is already at full strength.'; if (store.now() - (p.lastCanvass || 0) < CANVASS_COOLDOWN_MS) return 'Give people a breather — try again in a moment.'; return null; } },
   water:   { label: 'Having a drink of water…', secs: 2, needs: { energy: 3, hunger: 1 } },
 };
 /** Pre-check so the UI can refuse before starting a progress bar. */
-export function activityBlocked(store, id) { const a = ACTIVITIES[id]; if (!a) return 'Unknown activity'; if (a.minEnergy && store.state.needs.energy < a.minEnergy) return "You're too tired for that. Rest or grab a coffee."; return null; }
+export function activityBlocked(store, id) { const a = own(ACTIVITIES, id) ? ACTIVITIES[id] : null; if (!a) return 'Unknown activity'; if (a.minEnergy && store.state.needs.energy < a.minEnergy) return "You're too tired for that. Rest or grab a coffee."; return a.requires?.(store) ?? null; }
 /** Apply an activity's effects (called when its progress bar completes). Validates energy so you can't train while exhausted. */
 export function doActivity(store, id) {
-  const a = ACTIVITIES[id], n = store.state.needs; if (!a) return { ok: false, error: 'Unknown activity' };
-  if (a.minEnergy && n.energy < a.minEnergy) return { ok: false, error: "You're too tired for that. Rest or grab a coffee." };
+  const a = own(ACTIVITIES, id) ? ACTIVITIES[id] : null, n = store.state.needs; if (!a) return { ok: false, error: 'Unknown activity' };
+  const bad = activityBlocked(store, id); if (bad) return { ok: false, error: bad };
   for (const [k, v] of Object.entries(a.needs)) n[k] = clamp((n[k] ?? 50) + v);
-  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (1 + 0));
+  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (a.skill[0] === 'fitness' ? policyMult(store.state, 'fitness') : 1));
   store.commit('needs'); return { ok: true, activity: a };
 }

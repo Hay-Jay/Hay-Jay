@@ -14,8 +14,20 @@ export class CameraRig {
     this.shoulder = 0.42; this.fov = 62; this.idle = 0; this.orbitSpin = 0;
     this._v = new THREE.Vector3();
   }
+  /** Leave the overhead view: restore the normal projection. */
+  endBuild() { this._vo = null; this.camera.clearViewOffset(); }
   snapBehind(playerYaw) { this.yaw = playerYaw + Math.PI; }
   update(dt, input, player, { speedNorm = 0, sensitivity = 1 } = {}) {
+    if (this.mode === 'build') {           // overhead "dollhouse" view for the home editor
+      input.consumeLook(); input.consumeZoom();
+      // fit the whole room (11 × 9 m) into the part of the screen the build bar does not cover
+      const th = Math.tan(THREE.MathUtils.degToRad(23)), f = THREE.MathUtils.clamp(1 - (this.buildInset || 0), 0.4, 1), hgt = Math.max(5.9 / (th * f), 5.0 / (th * this.camera.aspect));
+      this.pos.lerp(new THREE.Vector3(0, hgt, 2 + hgt * 0.06), 1 - Math.exp(-dt * 6)); this.camera.position.copy(this.pos); this.camera.lookAt(0, 0, 0.2);
+      const W = innerWidth, H = innerHeight, y = Math.round(((1 - f) * H) / 2), key = `${W}x${H}:${y}`;
+      if (this._vo !== key) { this._vo = key; this.camera.setViewOffset(W, H, 0, y, W, H); }
+      this.fov += (46 - this.fov) * (1 - Math.exp(-dt * 5)); if (Math.abs(this.camera.fov - this.fov) > 0.01) { this.camera.fov = this.fov; this.camera.updateProjectionMatrix(); }
+      return;
+    }
     const l = input.consumeLook(), z = input.consumeZoom();
     this.yaw -= l.dx * 0.0046 * sensitivity; this.pitch += l.dy * 0.0036 * sensitivity;
     this.pitch = THREE.MathUtils.clamp(this.pitch, -0.25, 1.25);

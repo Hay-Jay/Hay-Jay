@@ -2,6 +2,8 @@ import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HA
 import { RECIPES } from '../core/game.js';
 import { fmtMoney } from '../core/ledger.js';
 import { ICON } from './icons.js';
+import { FURNITURE, WALLS, FLOORS, WALL_PRICE, FLOOR_PRICE, SELL_RATIO } from '../data/furniture.js';
+import { buyFurniture, sellFurniture, setStyle, ownedCount, placedCount, availableToPlace } from '../core/home.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -26,22 +28,22 @@ export class Panels {
   }
 
   /** Timed activity with a progress bar (input is blocked while a panel is open). */
-  progress(label, secs, onDone) {
-    const p = this._show(`<h3>${esc(label)}</h3><div class="prog"><i></i></div><div class="pbtns"><button class="btn" data-stop>Stop</button></div>`, 'menu prog-panel', { dismissable: false });
+  progress(label, secs, onDone, { stop = true } = {}) {
+    const p = this._show(`<h3>${esc(label)}</h3><div class="prog"><i></i></div>${stop ? '<div class="pbtns"><button class="btn" data-stop>Stop</button></div>' : ''}`, 'menu prog-panel', { dismissable: false });
     const bar = p.querySelector('.prog i'); let done = false; const t0 = performance.now();
     const tick = () => { if (done || this.cur?.stopped) return; const k = Math.min(1, (performance.now() - t0) / (secs * 1000)); bar.style.width = k * 100 + '%'; if (k >= 1) { done = true; this.close(); onDone?.(); } else requestAnimationFrame(tick); };
-    p.querySelector('[data-stop]').onclick = () => { done = true; this.close(); };
+    const sb = p.querySelector('[data-stop]'); if (sb) sb.onclick = () => { done = true; this.close(); };
     requestAnimationFrame(tick);
   }
 
   /** Life event card: shows title/text/choices; resolves via ctx callbacks. */
-  event(ev, { can, pick }) {
+  event(ev, { can, pick, onClose }) {
     const render = (result) => {
       p.innerHTML = result
         ? `<div class="ev-ic">${ev.icon}</div><h3>${esc(ev.title)}</h3><p class="pm">${esc(result.result)}</p>${result.summary ? `<p class="ev-sum">${esc(result.summary)}</p>` : ''}<div class="pbtns"><button class="btn primary" data-ok>Continue</button></div>`
         : `<div class="ev-ic">${ev.icon}</div><h3>${esc(ev.title)}</h3><p class="pm">${esc(ev.text)}</p><div class="pbtns col">${ev.choices.map((c, i) => { const a = can(i); return `<button class="btn ${i === 0 ? 'primary' : ''}" data-i="${i}" ${a.ok ? '' : 'disabled'} title="${a.ok ? '' : esc(a.why)}">${esc(c.label)}${a.ok ? '' : ` <small>(${esc(a.why)})</small>`}</button>`; }).join('')}</div>`;
     };
-    const p = this._show('', 'menu event', { dismissable: false }); render();
+    const p = this._show('', 'menu event', { dismissable: false, onClose }); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-ok]')) return this.close();
       const b = e.target.closest('[data-i]'); if (!b) return;
@@ -55,8 +57,8 @@ export class Panels {
     const render = () => {
       const bal = store.state.bank.balance;
       p.innerHTML = `<div class="ph"><h3>${esc(title)}</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
-        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0; return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(f.price)}</span><button class="btn small primary" data-buy="${id}" ${f.price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own}</em>` : ''}</div>`; }).join('')}</div>
-        <p class="fine">Prices are set by the store — purchases are validated by the in-game ledger.</p>`;
+        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0, price = G.priceFor(store, id); return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(price)}${price !== f.price ? ` <s>${fmtMoney(f.price)}</s>` : ''}</span><button class="btn small primary" data-buy="${id}" ${price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own}</em>` : ''}</div>`; }).join('')}</div>
+        <p class="fine">Prices are set by the store${G.priceFor(store, ids[0]) !== FOOD[ids[0]].price ? ' and adjusted by the mayor\'s policy' : ''} — purchases are validated by the in-game ledger.</p>`;
     };
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
@@ -77,7 +79,7 @@ export class Panels {
       const items = Object.values(CLOTHES).filter((c) => c.slot === tab && c.price > 0);
       p.innerHTML = `<div class="ph"><h3>Prairie Threads</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
         <div class="tabs">${SLOTS.map((t) => `<button class="${t === tab ? 'on' : ''}" data-tab="${t}">${{ top: 'Tops', bottom: 'Bottoms', shoes: 'Shoes', head: 'Headwear', face: 'Eyewear', neck: 'Scarves' }[t]}</button>`).join('')}</div>
-        <div class="items">${items.map((c) => { const own = s.wardrobe.includes(c.id), worn = s.player.look[SLOT_KEY[c.slot]] === c.id; return `<div class="item"><div class="swatch big" style="background:${c.color}"></div><b>${esc(c.name)}</b><div class="buy"><span>${own ? 'Owned' : fmtMoney(c.price)}</span>${own ? `<button class="btn small ${worn ? 'on' : ''}" data-wear="${c.id}">${worn ? 'Worn' : 'Wear'}</button>` : `<button class="btn small" data-try="${c.id}">Try on</button><button class="btn small primary" data-buy="${c.id}" ${c.price > bal ? 'disabled' : ''}>Buy</button>`}</div></div>`; }).join('') || '<p class="empty">Nothing in this category</p>'}</div>
+        <div class="items">${items.map((c) => { const own = s.wardrobe.includes(c.id), worn = s.player.look[SLOT_KEY[c.slot]] === c.id; return `<div class="item"><div class="swatch big" style="background:${c.color}"></div><b>${esc(c.name)}</b><div class="buy"><span>${own ? 'Owned' : fmtMoney(G.priceFor(store, c.id))}</span>${own ? `<button class="btn small ${worn ? 'on' : ''}" data-wear="${c.id}">${worn ? 'Worn' : 'Wear'}</button>` : `<button class="btn small" data-try="${c.id}">Try on</button><button class="btn small primary" data-buy="${c.id}" ${G.priceFor(store, c.id) > bal ? 'disabled' : ''}>Buy</button>`}</div></div>`; }).join('') || '<p class="empty">Nothing in this category</p>'}</div>
         <p class="fine">Try on is a preview — nothing is charged until you buy. Look in the mirror to see your outfit.</p>`;
     };
     const p = this._show('', 'shop wide', { onClose: restore, side: true }); render();
@@ -133,6 +135,45 @@ export class Panels {
       if (e.target.closest('[data-done]')) { const nm = p.querySelector('[data-name]').value.trim() || 'Alex'; store.state.player.name = nm.slice(0, 16); this.close(); }
     });
     p.addEventListener('input', (e) => { if (e.target.dataset.h !== undefined) { look.height = +e.target.value; cancelAnimationFrame(rafH); rafH = requestAnimationFrame(() => this.ctx.rebuildPlayer()); } });
+  }
+
+  /** Furniture catalogue: buy (and sell unplaced pieces). */
+  furnitureShop(onChange) {
+    const { store } = this.ctx; let cat = 'All';
+    const cats = ['All', ...new Set(Object.values(FURNITURE).map((f) => f.cat))];
+    const render = () => {
+      const s = store.state, bal = s.bank.balance, items = Object.values(FURNITURE).filter((f) => cat === 'All' || f.cat === cat);
+      p.innerHTML = `<div class="ph"><h3>🛋️ Furniture shop</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
+        <div class="tabs">${cats.map((c) => `<button class="${c === cat ? 'on' : ''}" data-cat="${c}">${c}</button>`).join('')}</div>
+        <div class="items">${items.map((f) => { const own = ownedCount(s, f.id), free = availableToPlace(s, f.id); return `<div class="item"><div class="swatch big" style="background:${f.color}"></div><b>${f.name}</b><small>${f.w}×${f.d} m${own ? ` · own ${own} (${free} in storage)` : ''}</small><div class="buy"><span>${fmtMoney(f.price)}</span>${free > 0 ? `<button class="btn small" data-sell="${f.id}" title="Sell for ${fmtMoney(Math.floor(f.price * SELL_RATIO))}">Sell</button>` : ''}<button class="btn small primary" data-buy="${f.id}" ${f.price > bal ? 'disabled' : ''}>Buy</button></div></div>`; }).join('')}</div>
+        <p class="fine">Buy here, then place it with Redecorate on your computer. Selling returns ${Math.round(SELL_RATIO * 100)}% of the price. Souvenir posters from trips are free.</p>`;
+    };
+    const p = this._show('', 'shop wide'); render();
+    p.addEventListener('click', (e) => {
+      if (e.target.closest('[data-x]')) return this.close();
+      const c = e.target.closest('[data-cat]'); if (c) { cat = c.dataset.cat; render(); return; }
+      const b = e.target.closest('[data-buy]'); const sl = e.target.closest('[data-sell]');
+      if (b) { const r = buyFurniture(store, b.dataset.buy); if (r.ok) { this.ctx.audio?.blip('cash'); this.ctx.toast(`Bought ${FURNITURE[b.dataset.buy].name}`, 'good'); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); } render(); onChange?.(); }
+      if (sl) { const r = sellFurniture(store, sl.dataset.sell); this.ctx.toast(r.ok ? `Sold for ${fmtMoney(r.refund)}` : r.error, r.ok ? 'good' : 'warn'); render(); onChange?.(); }
+    });
+  }
+  /** Wall colour + flooring. */
+  styleMenu(onChange) {
+    const { store } = this.ctx;
+    const render = () => {
+      const h = store.state.home, ownedW = h.walls || ['cream'], ownedF = h.floors || ['oak'];
+      p.innerHTML = `<div class="ph"><h3>🎨 Paint & flooring</h3><span class="pill">${fmtMoney(store.state.bank.balance)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
+        <h4 class="subh">Walls · ${fmtMoney(WALL_PRICE)} first time</h4><div class="swatches">${Object.entries(WALLS).map(([k, [n, c]]) => `<button class="sw ${h.wall === k ? 'on' : ''}" data-wall="${k}" style="background:${c}" title="${n}${ownedW.includes(k) ? '' : ' · ' + fmtMoney(WALL_PRICE)}" aria-label="${n}"></button>`).join('')}</div>
+        <h4 class="subh">Floors · ${fmtMoney(FLOOR_PRICE)} first time</h4><div class="swatches">${Object.entries(FLOORS).map(([k, [n, , c]]) => `<button class="sw ${h.floor === k ? 'on' : ''}" data-floor="${k}" style="background:${c}" title="${n}${ownedF.includes(k) ? '' : ' · ' + fmtMoney(FLOOR_PRICE)}" aria-label="${n}"></button>`).join('')}</div>
+        <p class="fine">Styles you've bought can be switched freely.</p>`;
+    };
+    const p = this._show('', 'shop'); render();
+    p.addEventListener('click', (e) => {
+      if (e.target.closest('[data-x]')) return this.close();
+      const w = e.target.closest('[data-wall]'), f = e.target.closest('[data-floor]');
+      const r = w ? setStyle(store, 'wall', w.dataset.wall) : f ? setStyle(store, 'floor', f.dataset.floor) : null; if (!r) return;
+      if (r.ok) { this.ctx.audio?.blip('ok'); onChange?.(); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); } render();
+    });
   }
 
   /** Fridge: eat stored food. */

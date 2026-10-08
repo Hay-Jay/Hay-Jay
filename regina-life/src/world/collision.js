@@ -3,6 +3,8 @@ export class CollisionGrid {
   constructor(cell = 48) { this.cell = cell; this.map = new Map(); this.rects = []; }
   _k(ix, iz) { return ix * 73856093 ^ iz * 19349663; }
   add(x0, z0, x1, z1, h = 10, tag = null) {
+    // Reject garbage: non-finite or absurd bounds would otherwise spin the cell loops (a tampered save could freeze the tab).
+    if (![x0, z0, x1, z1].every((v) => Number.isFinite(v) && Math.abs(v) < 1e6) || x1 < x0 || z1 < z0 || (x1 - x0) / this.cell > 4000 || (z1 - z0) / this.cell > 4000) return null;
     const r = { x0, z0, x1, z1, h, tag };
     this.rects.push(r);
     const c = this.cell;
@@ -12,7 +14,13 @@ export class CollisionGrid {
       }
     return r;
   }
+  /** Remove every rect added with this tag (used to rebuild dynamic furniture colliders). */
+  removeTag(tag) {
+    this.rects = this.rects.filter((r) => r.tag !== tag);
+    for (const [k, a] of this.map) { const f = a.filter((r) => r.tag !== tag); if (f.length) this.map.set(k, f); else this.map.delete(k); }
+  }
   query(x0, z0, x1, z1) {
+    if (![x0, z0, x1, z1].every(Number.isFinite)) return new Set();
     const c = this.cell, out = new Set();
     for (let ix = Math.floor(x0 / c); ix <= Math.floor(x1 / c); ix++)
       for (let iz = Math.floor(z0 / c); iz <= Math.floor(z1 / c); iz++) {
