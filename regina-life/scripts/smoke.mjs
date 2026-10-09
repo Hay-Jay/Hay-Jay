@@ -273,9 +273,9 @@ await step('home tab: live dollhouse view, edit chip, back outside', async () =>
   const on = await page.$eval('#navbar [data-tab="home"]', (b) => b.classList.contains('on')); if (!on) throw new Error('Home tab is not highlighted');
   const chips = await page.$$eval('#chiprow [data-chip]', (b) => b.map((x) => x.dataset.chip)); if (!['edit', 'paint', 'out'].every((c) => chips.includes(c))) throw new Error('home chips: ' + chips);
   await shot('40b-home-tab');
-  // the player can still walk around the dollhouse
-  const p0 = await page.evaluate(() => ({ x: __regina.player.pos.x, z: __regina.player.pos.z })); await page.keyboard.down('w'); await page.waitForFunction((p) => Math.hypot(__regina.player.pos.x - p.x, __regina.player.pos.z - p.z) > 0.8, p0, { timeout: 40000 }); await page.keyboard.up('w');
-  const moved = await page.evaluate((p) => __regina.player.pos.z - p.z, p0); if (moved > -0.3) throw new Error('W should walk up the screen (north) in the dollhouse view, dz=' + moved);
+  // the player can still walk around the dollhouse; screen-left is world -x (A), and the entrance is hemmed in by the desk to the north
+  const p0 = await page.evaluate(() => ({ x: __regina.player.pos.x, z: __regina.player.pos.z })); await page.keyboard.down('a'); await page.waitForFunction((p) => Math.hypot(__regina.player.pos.x - p.x, __regina.player.pos.z - p.z) > 0.8, p0, { timeout: 40000 }); await page.keyboard.up('a');
+  const moved = await page.evaluate((p) => __regina.player.pos.x - p.x, p0); if (moved > -0.3) throw new Error('A should walk left (-x) in the dollhouse view, dx=' + moved);
   await page.click('#chiprow [data-chip="edit"]'); await page.waitForFunction(() => __regina.build.active, null, { timeout: 20000 }); await wait(800); await page.evaluate(() => __regina.build.stop()); await wait(800);
   if (!(await page.evaluate(() => __regina.homeView))) throw new Error('finishing an edit should return to the dollhouse view');
   await page.click('#chiprow [data-chip="out"]'); await page.waitForFunction(() => __regina.inInterior === null, null, { timeout: 60000 }); await wait(800);

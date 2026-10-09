@@ -29,7 +29,7 @@ import * as SOC from './core/social.js';
 import * as POL from './core/politics.js';
 import * as H from './core/home.js';
 import { policyMult } from './core/policy.js';
-import { travel } from './core/travel.js';
+import { travel, cabFare } from './core/travel.js';
 import { Radio } from './ui/radio.js';
 import { STATIONS } from './data/radio.js';
 import { BuildMode } from './ui/build.js';
@@ -130,7 +130,6 @@ async function boot() {
     while ($('toasts').children.length > 3) $('toasts').firstChild.remove();
   };
   const fadeTo = async (on, ms = 450) => { const f = $('fade'); f.style.transitionDuration = ms + 'ms'; f.classList.toggle('on', on); await new Promise((r) => setTimeout(r, ms)); };
-  const cabFare = (d) => 450 + Math.round(d * 0.35);
   const setDestination = (poi) => {
     S().destination = poi ? { id: poi.id, name: poi.name, x: poi.x, z: poi.z } : null; store.commit('destination');
     if (poi) toast(`Navigating to ${poi.name}`, 'info');
