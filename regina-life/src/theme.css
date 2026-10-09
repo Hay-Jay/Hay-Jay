@@ -115,3 +115,5 @@ body.shell-on #toasts{top:calc(104px + var(--safe-t))}
 body.building .ovmap{display:none}
 
 body.map-ov #hud{display:none!important}
+
+body.home-view #hud .hud-tr{display:none!important}

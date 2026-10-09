@@ -191,7 +191,7 @@ async function boot() {
   const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f) => { rig.buildInset = f; },
     onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); },
     onStop: () => {
-      if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; rig.buildInset = 0; toast('Home saved', 'good'); return; } // back to the live dollhouse view
+      if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
       interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good');
     } });
 
@@ -337,13 +337,20 @@ async function boot() {
   const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet() });
   const syncTab = () => { if (!panels.open) buyOpen = false; shell.setTab(mapOverview || mapOpen ? 'map' : phone.isOpen ? 'phone' : panels.open && buyOpen ? 'buy' : homeView ? 'home' : null); };
   /** Home view: a live, tilted dollhouse of your apartment. You can still walk around and use things; Edit / Buy change the room. */
+  // the dollhouse sits on a little lawn under a clear sky, so the home screen reads as a toy diorama rather than a dark room
+  const homeStage = new THREE.Group(); homeStage.visible = false; scene.add(homeStage);
+  { const disc = new THREE.Mesh(new THREE.CircleGeometry(11.5, 56).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#9ed48a', roughness: 1 })); disc.position.y = -0.07; disc.receiveShadow = true; homeStage.add(disc);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(11.5, 12.6, 56).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 })); ring.position.y = -0.065; homeStage.add(ring); }
+  /** Keep the whole room between the top bar/chips and the tab bar. */
+  const homeInsets = () => { rig.buildInset = Math.min(0.2, 92 / innerHeight); rig.buildTop = Math.min(0.24, 118 / innerHeight); };
+  addEventListener('resize', () => { if (homeView && !build.active) homeInsets(); });
   function setHomeView(on) {
-    if (on === homeView) return; homeView = on;
+    if (on === homeView) return; homeView = on; homeStage.visible = on; atmo.homeLift = on; if (inInterior) { scene.background = new THREE.Color(on ? '#cfe6f3' : '#181a20'); lastEnvAt = 0; updateEnv(true); }
     if (on) {
-      rig.mode = 'build'; rig.buildInset = 0; rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true);
+      rig.mode = 'build'; homeInsets(); rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true); document.body.classList.add('home-view');
       shell.setChips([{ id: 'edit', icon: '✏️', label: 'Edit room' }, { id: 'paint', icon: '🎨', label: 'Paint & floors' }, { id: 'out', icon: '🚪', label: 'Go outside' }], (c) => { if (c === 'edit') build.start(); else if (c === 'paint') panels.styleMenu(() => build.refresh()); else exitInterior(); });
     } else {
-      interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.fov = 62; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); shell.setChips([]);
+      document.body.classList.remove('home-view'); interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.fov = 62; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); shell.setChips([]);
     }
     syncTab();
   }

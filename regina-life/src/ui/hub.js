@@ -65,7 +65,7 @@ export class Hub {
   /** The screen area pins may occupy: below the header chips, beside or above the card (which grows when a place is selected). */
   _measure(w, h) {
     const topBottom = Math.max(0, ...this.topEls.filter((e) => e && !e.hidden && e.offsetParent !== null).map((e) => e.getBoundingClientRect().bottom)), card = this.cardEl.getBoundingClientRect();
-    const side = card.width > 0 && card.width < w * 0.7 && card.left > w * 0.35; // landscape phones park the card at the side
+    const side = card.width > 0 && card.right > w - 40 && card.left > w * 0.45; // landscape phones park the card flush against the right edge
     // the card grows when a place is selected; reserve that room up front so selecting a pin never reflows the map
     const cardTop = card.top ? card.top - (side || this.cardEl.classList.contains('sel') ? 0 : this.selExtra) : h;
     const safe = { x0: 6, x1: side ? card.left - 8 : w - 6, y0: topBottom + 8, y1: side ? h - 8 : Math.min(h, cardTop) - 8, fixed: [] };

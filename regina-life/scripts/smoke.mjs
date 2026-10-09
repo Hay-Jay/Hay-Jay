@@ -40,11 +40,11 @@ const auditPins = () => page.evaluate(() => {
     const e = box(p.querySelector('.pe').getBoundingClientRect()), l = p.querySelector('.pl'), lr = getComputedStyle(l).opacity > 0.5 ? box(l.getBoundingClientRect()) : null;
     return { id: p.dataset.pin, x0: e.x0, y0: e.y0, x1: lr ? Math.max(e.x1, lr.x1) : e.x1, y1: lr ? lr.y1 : e.y1 };
   });
-  const blockers = [...document.querySelectorAll('.hub-top .brandpill, .hub-top .chip, .hub-card, #topbar, #chiprow button, #navbar')].filter((e) => e.offsetParent !== null).map((e) => box(e.getBoundingClientRect()));
+  const blockers = [...document.querySelectorAll('.hub-top .brandpill, .hub-top .chip, .hub-card, #topbar, #chiprow button, #navbar')].filter((e) => e.offsetParent !== null).map((e) => ({ ...box(e.getBoundingClientRect()), name: e.id || e.className.split(' ')[0] || e.tagName }));
   const bad = [];
   // a pin the player cannot tap (something opaque on top of it) is as bad as an overlap
   live.forEach((p) => { const r = p.querySelector('.pe').getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (t?.closest('.pin') !== p) bad.push(`${p.dataset.pin} is not tappable`); });
-  pins.forEach((a, i) => { pins.slice(i + 1).forEach((b) => hit(a, b) && bad.push(`${a.id} overlaps ${b.id}`)); blockers.forEach((b, k) => hit(a, b) && bad.push(`${a.id} under ${k < blockers.length - 1 ? 'header' : 'card'}`)); if (a.x0 < 0 || a.y0 < 0 || a.x1 > innerWidth || a.y1 > innerHeight) bad.push(`${a.id} off-screen`); });
+  pins.forEach((a, i) => { pins.slice(i + 1).forEach((b) => hit(a, b) && bad.push(`${a.id} overlaps ${b.id}`)); blockers.forEach((b) => hit(a, b) && bad.push(`${a.id} under ${b.name}`)); if (a.x0 < 0 || a.y0 < 0 || a.x1 > innerWidth || a.y1 > innerHeight) bad.push(`${a.id} off-screen`); });
   return { n: pins.length, bad };
 });
 // software WebGL can spend seconds on one frame (e.g. right after a resize), so wait until the hub has really consumed the snap + refit instead of sleeping
