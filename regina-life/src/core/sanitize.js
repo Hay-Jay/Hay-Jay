@@ -5,7 +5,7 @@
 import { FOOD, CLOTHES, STARTER_WARDROBE } from '../data/catalog.js';
 import { RES_BY_ID } from '../data/residents.js';
 import { DESTINATION_BY_ID } from '../data/destinations.js';
-import { FURNITURE, WALLS, FLOORS, MAX_PLACED, ROOM } from '../data/furniture.js';
+import { FURNITURE, WALLS, FLOORS, MAX_PLACED, MAX_OWNED_EACH, ROOM, isPoster } from '../data/furniture.js';
 import { CANDIDATE_BY_ID, POLICIES } from '../data/policies.js';
 import { BOARD_BY_ID, THEMES } from '../data/billboards.js';
 import { STATION_BY_ID } from '../data/radio.js';
@@ -55,13 +55,14 @@ export function sanitize(s, now = Date.now()) {
   s.souvenirs = [...new Set(arr(s.souvenirs).filter((d) => typeof d === 'string' && own(DESTINATION_BY_ID, d)))];
   // home
   const h = isObj(s.home) ? s.home : {};
-  const owned = {}; if (isObj(h.owned)) for (const [k, v] of Object.entries(h.owned)) if (own(FURNITURE, k) && Number.isInteger(v) && v > 0) owned[k] = Math.min(v, 99);
-  const seen = new Set(), placed = [];
+  const owned = {}; if (isObj(h.owned)) for (const [k, v] of Object.entries(h.owned)) if (own(FURNITURE, k) && Number.isInteger(v) && v > 0) owned[k] = Math.min(v, MAX_OWNED_EACH);
+  const seen = new Set(), placed = [], used = {}, have = (t) => (isPoster(t) ? (s.souvenirs.includes(t.slice(7)) ? 1 : 0) : owned[t] || 0); // you can only place what you own
   for (const it of arr(h.placed)) {
     if (!isObj(it) || typeof it.id !== 'string' || seen.has(it.id) || !itemDef(it.type) || !Number.isInteger(it.rot) || it.rot < 0 || it.rot > 3 || !Number.isFinite(it.x) || !Number.isFinite(it.z)) continue;
+    if ((used[it.type] || 0) >= have(it.type)) continue;
     const f = footprint(it.type, it.rot);
     if (it.x - f.w / 2 < ROOM.x0 - 1e-6 || it.x + f.w / 2 > ROOM.x1 + 1e-6 || it.z - f.d / 2 < ROOM.z0 - 1e-6 || it.z + f.d / 2 > ROOM.z1 + 1e-6) continue;
-    seen.add(it.id); placed.push({ id: it.id, type: it.type, x: it.x, z: it.z, rot: it.rot }); if (placed.length >= MAX_PLACED) break;
+    seen.add(it.id); used[it.type] = (used[it.type] || 0) + 1; placed.push({ id: it.id, type: it.type, x: it.x, z: it.z, rot: it.rot }); if (placed.length >= MAX_PLACED) break;
   }
   const wall = typeof h.wall === 'string' && own(WALLS, h.wall) ? h.wall : 'cream', floor = typeof h.floor === 'string' && own(FLOORS, h.floor) ? h.floor : 'oak';
   s.home = { owned, placed, wall, floor,

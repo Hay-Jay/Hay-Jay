@@ -1,5 +1,5 @@
 /** Home decorating: buying, placing and removing furniture; paint & flooring. Validated rules (no trusting the editor UI). */
-import { FURNITURE, POSTER_SIZE, isPoster, WALLS, FLOORS, WALL_PRICE, FLOOR_PRICE, SELL_RATIO, MAX_PLACED, ROOM, KEEPOUT, FIXTURES, KEY_POINTS } from '../data/furniture.js';
+import { FURNITURE, POSTER_SIZE, isPoster, WALLS, FLOORS, wallPrice, floorPrice, sellPrice, MAX_PLACED, MAX_OWNED_EACH, ROOM, KEEPOUT, FIXTURES, KEY_POINTS, HOME_FX, HOME_CAPS, POSTER_FX, TV_SEAT_KINDS, tvSeatFactor } from '../data/furniture.js';
 import { own } from './util.js';
 import { DESTINATION_BY_ID } from '../data/destinations.js';
 
@@ -14,6 +14,9 @@ export function ownedCount(s, type) { if (!itemDef(type)) return 0; if (isPoster
 export const placedCount = (s, type) => (Array.isArray(s.home?.placed) ? s.home.placed : []).filter((p) => p.type === type).length;
 export const availableToPlace = (s, type) => ownedCount(s, type) - placedCount(s, type);
 export const ownedTypes = (s) => [...Object.keys(FURNITURE), ...(s.souvenirs || []).map((d) => `poster_${d}`)].filter((t) => ownedCount(s, t) > 0);
+/** Owned but not placed, per type (the "+N in storage" list) and in total (free souvenir posters count as owned). */
+export const storageItems = (s) => ownedTypes(s).map((type) => ({ type, n: availableToPlace(s, type) })).filter((x) => x.n > 0);
+export const storageCount = (s) => storageItems(s).reduce((n, x) => n + x.n, 0);
 
 /* ---------- walkability: a placement must never wall the player in or cut them off from a fixture ---------- */
 const CELL = 0.25, PLAYER_R = 0.38, COLS = Math.round((ROOM.x1 - ROOM.x0) / CELL), ROWS = Math.round((ROOM.z1 - ROOM.z0) / CELL);
@@ -63,6 +66,7 @@ export function canPlace(s, type, x, z, rot = 0, ignoreId = null) {
 }
 export function buyFurniture(store, type) {
   const def = own(FURNITURE, type) ? FURNITURE[type] : null; if (!def) return { ok: false, error: 'Unknown item' };
+  if (ownedCount(store.state, type) >= MAX_OWNED_EACH) return { ok: false, error: `You can own up to ${MAX_OWNED_EACH} of one item` };
   const r = store.ledger.debit(def.price, `Furniture: ${def.name}`, { category: 'purchase' }); if (!r.ok) return r;
   const h = (store.state.home ||= { owned: {}, placed: [] }); h.owned ||= {}; h.owned[type] = ownedCount(store.state, type) + 1; store.commit('home'); return { ok: true };
 }
@@ -84,15 +88,45 @@ export function removeFurniture(store, id) {
 export function sellFurniture(store, type) {
   const s = store.state, def = own(FURNITURE, type) ? FURNITURE[type] : null; if (!def) return { ok: false, error: 'Cannot sell that' };
   if (availableToPlace(s, type) < 1) return { ok: false, error: 'Remove it from the room first' };
-  const refund = Math.floor(def.price * SELL_RATIO), r = store.ledger.credit(refund, `Sold: ${def.name}`, { category: 'income' }); if (!r.ok) return r;
+  const refund = sellPrice(def.price), r = store.ledger.credit(refund, `Sold: ${def.name}`, { category: 'income' }); if (!r.ok) return r;
   s.home.owned[type]--; if (!s.home.owned[type]) delete s.home.owned[type]; store.commit('home'); return { ok: true, refund };
 }
 /** Paint/flooring: pay the first time you pick an option; free to switch back to ones you own. */
 export function setStyle(store, kind, key) {
   if (kind !== 'wall' && kind !== 'floor') return { ok: false, error: 'Unknown style' };
-  const s = store.state, table = kind === 'wall' ? WALLS : FLOORS, price = kind === 'wall' ? WALL_PRICE : FLOOR_PRICE, h = (s.home ||= { owned: {}, placed: [] });
+  const s = store.state, table = kind === 'wall' ? WALLS : FLOORS, h = (s.home ||= { owned: {}, placed: [] });
   if (!own(table, key)) return { ok: false, error: 'Unknown style' };
+  const price = kind === 'wall' ? wallPrice(key) : floorPrice(key);
   const owned = (Array.isArray(h[kind + 's']) ? h[kind + 's'] : (h[kind + 's'] = kind === 'wall' ? ['cream'] : ['oak']));
-  if (!owned.includes(key)) { const r = store.ledger.debit(price, `${kind === 'wall' ? 'Paint' : 'Flooring'}: ${table[key][0]}`, { category: 'purchase' }); if (!r.ok) return r; owned.push(key); }
+  if (!owned.includes(key)) { if (price > 0) { const r = store.ledger.debit(price, `${kind === 'wall' ? 'Paint' : 'Flooring'}: ${table[key][0]}`, { category: 'purchase' }); if (!r.ok) return r; } owned.push(key); }
   h[kind] = key; store.commit('home'); return { ok: true };
+}
+
+/* ---------- what the room does for you ---------- */
+const BONUS_ZERO = () => ({ sleep: 0, comfort: 0, fun: 0, skill: 0, mood: 0 });
+/**
+ * Gameplay value of the PLACED furniture (stored pieces and unowned ones count for nothing). Pure over the state.
+ * Returns { sleep, comfort, fun, skill, mood }: the first four are fractions (0.2 = +20%), mood is flat points; every value is >= 0 and
+ * hard-capped by HOME_CAPS. Pieces of one kind stack best-first with each repeat worth `rep` times the previous one (diminishing returns);
+ * a TV is only as fun as the best seat in the room (tvSeatFactor). `skill` (optional) = 'fitness' | 'charisma' | 'cooking' counts only the
+ * gear that trains that skill; omitted, it counts all skill gear.
+ */
+export function homeBonuses(state, skill = null) {
+  const placed = Array.isArray(state?.home?.placed) ? state.home.placed : [], used = {}, groups = {}; let seat = 0;
+  for (const p of placed) {
+    const type = p?.type, def = itemDef(type); if (!def) continue;
+    used[type] = (used[type] || 0) + 1; if (used[type] > ownedCount(state, type)) continue; // placed beyond what you own is ignored
+    let fx = null, v = 0, key = def.kind;
+    if (def.poster) { fx = POSTER_FX; v = POSTER_FX.v; key = 'poster'; } else if (own(HOME_FX, def.kind)) { fx = HOME_FX[def.kind]; v = fx.v[Math.min(4, Math.max(1, def.tier | 0)) - 1]; }
+    if (TV_SEAT_KINDS.includes(def.kind)) seat = Math.max(seat, def.tier | 0);
+    if (!fx || !(v > 0) || (fx.stat === 'skill' && skill != null && fx.skill !== skill)) continue;
+    (groups[key] ||= { fx, vals: [] }).vals.push(v);
+  }
+  const raw = BONUS_ZERO();
+  for (const [key, g] of Object.entries(groups)) {
+    g.vals.sort((a, b) => b - a); let sum = 0, k = 1; for (const v of g.vals) { sum += v * k; k *= g.fx.rep; }
+    raw[g.fx.stat] += key === 'tv' ? sum * tvSeatFactor(seat) : sum;
+  }
+  const out = BONUS_ZERO(); for (const k of Object.keys(out)) out[k] = Math.round(Math.min(HOME_CAPS[k], raw[k]) * 1000) / 1000;
+  return out;
 }
