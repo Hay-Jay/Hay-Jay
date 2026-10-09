@@ -4,6 +4,9 @@ import { Store, SAVE_KEY } from '../src/core/store.js';
 import * as H from '../src/core/home.js';
 import * as FD from '../src/data/furniture.js';
 import * as M from '../src/ui/catalogue-model.js';
+import * as THREE from 'three';
+import { makeThumbs, frameBox, createGLRenderer, ISO_DIR } from '../src/ui/thumbs.js';
+import { furnitureModel } from '../src/world/furnitureModels.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 const fmt = (c) => '$' + (c / 100).toFixed(2);
@@ -163,5 +166,94 @@ describe('catalogue model: interaction maths', () => {
     expect(M.cardLabel(c, fmt)).toContain(c.name); expect(M.cardLabel(c, fmt)).toContain(fmt(c.price)); expect(M.cardLabel(c, fmt)).toContain(`Need ${fmt(c.shortBy)} more`);
     const w = M.tabView(store.state, M.TAB_DESIGN, 0).sections[0].cards;
     expect(M.cardLabel(w.find((x) => x.active), fmt)).toMatch(/in use/); expect(M.cardLabel(w.find((x) => !x.owned), fmt)).toMatch(/Need/);
+  });
+});
+
+/* ---------------------------------------------------------------- thumbnails */
+describe('thumbs: queue and cache (fake renderer, manual scheduler)', () => {
+  const rig = (over = {}) => {
+    const calls = [], slots = []; let made = 0;
+    const renderer = { render: (type) => { calls.push(type); return `data:${type}`; }, dispose: vi.fn(), lost: () => false };
+    const th = makeThumbs({ size: 64, idleMs: 0, createRenderer: (sz) => { made++; expect(sz).toBe(64); return over.renderer === undefined ? renderer : over.renderer; }, schedule: (fn) => slots.push(fn), ...over.opts });
+    return { th, calls, slots, renderer, made: () => made, runOne: () => slots.shift()?.() };
+  };
+  it('renders one item per scheduled slot, never more', async () => {
+    const r = rig(), ps = ['a', 'b', 'c'].map((x) => r.th.get(x));
+    expect(r.slots).toHaveLength(1); expect(r.calls).toEqual([]);
+    r.runOne(); expect(r.calls).toEqual(['a']); expect(r.slots).toHaveLength(1); expect(r.th.pending).toBe(2);
+    r.runOne(); r.runOne(); expect(r.calls).toEqual(['a', 'b', 'c']); expect(await Promise.all(ps)).toEqual(['data:a', 'data:b', 'data:c']); expect(r.slots).toHaveLength(0);
+  });
+  it('creates the renderer lazily, only once', () => {
+    const r = rig(); expect(r.made()).toBe(0); r.th.get('a'); expect(r.made()).toBe(0); r.runOne(); r.th.get('b'); r.runOne(); expect(r.made()).toBe(1);
+  });
+  it('caches: peek is null until rendered, then instant; repeat get never re-renders', async () => {
+    const r = rig(); expect(r.th.peek('a')).toBeNull(); const p = r.th.get('a'); expect(r.th.peek('a')).toBeNull(); r.runOne(); expect(await p).toBe('data:a');
+    expect(r.th.peek('a')).toBe('data:a'); expect(r.th.has('a')).toBe(true); expect(await r.th.get('a')).toBe('data:a'); expect(r.slots).toHaveLength(0); expect(r.calls).toEqual(['a']);
+  });
+  it('de-duplicates concurrent requests for the same piece', async () => {
+    const r = rig(), p1 = r.th.get('a'), p2 = r.th.get('a'); expect(p1).toBe(p2); expect(r.th.pending).toBe(1); r.runOne(); await p1; expect(r.calls).toEqual(['a']);
+  });
+  it('runs higher priority first (newest tab wins), ties in request order', () => {
+    const r = rig(); r.th.get('old1'); r.th.get('old2'); r.th.get('new1', { priority: 5 }); r.th.get('new2', { priority: 5 }); r.th.get('old1', { priority: 9 });
+    for (let i = 0; i < 6; i++) r.runOne(); expect(r.calls).toEqual(['old1', 'new1', 'new2', 'old2']);
+  });
+  it('rejects bad types and resolves null when the renderer cannot be created', async () => {
+    const r = rig({ renderer: null }); expect(await r.th.get(42)).toBeNull(); expect(await r.th.get(undefined)).toBeNull();
+    const p1 = r.th.get('a'), p2 = r.th.get('b'); r.runOne(); expect(await p1).toBeNull(); expect(await p2).toBeNull(); expect(r.th.pending).toBe(0);
+    expect(await r.th.get('c')).toBeNull(); expect(r.slots).toHaveLength(0); // dead renderer: no more work is scheduled
+  });
+  it('a renderer that throws or returns nothing fails that piece only, and is not retried', async () => {
+    const calls = []; const th = makeThumbs({ idleMs: 0, schedule: (fn) => fn(), createRenderer: () => ({ render: (t) => { calls.push(t); if (t === 'boom') throw new Error('x'); return t === 'blank' ? null : `data:${t}`; } }) });
+    expect(await th.get('boom')).toBeNull(); expect(await th.get('blank')).toBeNull(); expect(await th.get('ok')).toBe('data:ok');
+    expect(await th.get('boom')).toBeNull(); expect(calls).toEqual(['boom', 'blank', 'ok']);
+  });
+  it('supports renderers that answer asynchronously', async () => {
+    const th = makeThumbs({ idleMs: 0, schedule: (fn) => fn(), createRenderer: () => ({ render: async (t) => `async:${t}` }) });
+    expect(await th.get('a')).toBe('async:a'); expect(th.peek('a')).toBe('async:a');
+  });
+  it('rebuilds a lost context once and retries the piece', async () => {
+    let lost = true, made = 0; const th = makeThumbs({ idleMs: 0, schedule: (fn) => fn(), createRenderer: () => { made++; const mine = made; return { lost: () => lost && mine === 1, render: (t) => (mine === 1 ? null : `data:${t}`), dispose() {} }; } });
+    expect(await th.get('a')).toBe('data:a'); expect(made).toBe(2);
+  });
+  it('releases the GPU context after the idle delay and recreates it on demand', async () => {
+    vi.useFakeTimers(); try {
+      const r = rig({ opts: { idleMs: 1000 } }), p = r.th.get('a'); r.runOne(); await p;
+      expect(r.renderer.dispose).not.toHaveBeenCalled(); vi.advanceTimersByTime(1001); expect(r.renderer.dispose).toHaveBeenCalledTimes(1);
+      r.th.get('b'); r.runOne(); expect(r.made()).toBe(2);
+    } finally { vi.useRealTimers(); }
+  });
+  it('dispose() and clear() are safe at any time', async () => {
+    const r = rig(); r.th.dispose(); const p = r.th.get('a'); r.runOne(); await p; r.th.dispose(); expect(r.renderer.dispose).toHaveBeenCalled(); r.th.clear(); expect(r.th.peek('a')).toBeNull();
+  });
+  it('degrades to null without WebGL or a document (this very test run is node)', async () => {
+    expect(createGLRenderer()).toBeNull();
+    const th = makeThumbs({ schedule: (fn) => setTimeout(fn, 0) }); expect(th.peek('armchair')).toBeNull(); expect(await th.get('armchair')).toBeNull(); expect(await th.get('armchair')).toBeNull();
+  });
+});
+
+describe('thumbs: isometric framing', () => {
+  const ndc = (cam, v) => v.clone().project(cam);
+  it('fits every corner of a box inside the view with a margin, for flat and tall pieces alike', () => {
+    for (const [w, h, d] of [[1, 1, 1], [2, 0.03, 2], [0.4, 1.7, 0.4], [3, 0.9, 1], [0.1, 1, 0.7]]) {
+      const box = new THREE.Box3(new THREE.Vector3(-w / 2, 0, -d / 2), new THREE.Vector3(w / 2, h, d / 2)), cam = frameBox(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 50), box);
+      let max = 0; for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) { const p = ndc(cam, new THREE.Vector3(x, y, z)); max = Math.max(max, Math.abs(p.x), Math.abs(p.y)); expect(p.z).toBeGreaterThan(-1); expect(p.z).toBeLessThan(1); }
+      expect(max).toBeLessThanOrEqual(1 + 1e-9); expect(max).toBeGreaterThan(0.8); // fills the frame (square), but never clips
+      expect(cam.right - cam.left).toBeCloseTo(cam.top - cam.bottom, 9);
+    }
+  });
+  it('looks from the front-right and above (3/4 view), toward the model', () => {
+    const box = new THREE.Box3(new THREE.Vector3(-1, 0, -1), new THREE.Vector3(1, 1, 1)), cam = frameBox(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 50), box), c = box.getCenter(new THREE.Vector3());
+    expect(cam.position.x).toBeGreaterThan(c.x); expect(cam.position.y).toBeGreaterThan(c.y); expect(cam.position.z).toBeGreaterThan(c.z); expect(ISO_DIR.every((v) => v > 0)).toBe(true);
+    const fwd = new THREE.Vector3(); cam.getWorldDirection(fwd); expect(fwd.dot(c.clone().sub(cam.position).normalize())).toBeGreaterThan(0.999);
+  });
+});
+
+describe('thumbs: every catalogue model can be framed', () => {
+  it('has geometry and a sane bounding box for each piece and a souvenir poster', () => {
+    for (const id of [...Object.keys(FD.FURNITURE), 'poster_banff']) {
+      const m = furnitureModel(id), box = new THREE.Box3().setFromObject(m); expect(m.children.length, id).toBeGreaterThan(0); expect(box.isEmpty(), id).toBe(false);
+      const cam = frameBox(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 50), box); expect(cam.right - cam.left, id).toBeGreaterThan(0.2);
+      for (const v of [cam.left, cam.right, cam.top, cam.bottom, cam.far]) expect(Number.isFinite(v), id).toBe(true);
+    }
   });
 });
