@@ -19,7 +19,7 @@ function kit() {
     if (!mat) { mat = new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }); mats.set(key, mat); }
     return mat;
   };
-  const put = (geo, color, x, y, z, o = {}) => { geo.applyMatrix4(tmp.compose(new THREE.Vector3(x, y, z), q.setFromEuler(e.set(o.rx || 0, o.ry || 0, o.rz || 0)), one)); parts.push({ geo, mat: mk(color, o), flat: !!o.flat }); };
+  const put = (geo, color, x, y, z, o = {}) => { geo.applyMatrix4(tmp.compose(new THREE.Vector3(x, y, z), q.setFromEuler(e.set(o.rx || 0, o.ry || 0, o.rz || 0)), one)); parts.push({ geo, mat: mk(color, o) }); };
   const k = {
     b: (w, h, d, col, x, y, z, o) => put(new THREE.BoxGeometry(w, h, d), col, x, y + h / 2, z, o),
     c: (rt, rb, h, col, x, y, z, seg = 16, o) => put(new THREE.CylinderGeometry(rt, rb, h, seg), col, x, y + h / 2, z, o),
@@ -36,12 +36,12 @@ function kit() {
       const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b2), dir = B.clone().sub(A), len = dir.length(), geo = new THREE.CylinderGeometry(r, r, len, seg);
       geo.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize())); const mid = A.add(B).multiplyScalar(0.5); put(geo, col, mid.x, mid.y, mid.z, o);
     },
-    /** Merge all queued parts into one mesh per material. */
-    bake: () => {
+    /** Merge all queued parts into one mesh per material (`cast`: whether the piece casts shadows; flat rugs and mats do not). */
+    bake: (cast = true) => {
       const g = new THREE.Group(), by = new Map(); for (const p of parts) { const a = by.get(p.mat) || by.set(p.mat, []).get(p.mat); a.push(p); }
       for (const [mat, list] of by) {
         const geo = mergeGeometries(list.map((p) => (p.geo.index ? p.geo.toNonIndexed() : p.geo)), false); list.forEach((p) => p.geo.dispose());
-        const me = new THREE.Mesh(geo, mat); me.castShadow = !list.every((p) => p.flat); me.receiveShadow = true; g.add(me);
+        const me = new THREE.Mesh(geo, mat); me.castShadow = cast; me.receiveShadow = true; g.add(me);
       }
       return g;
     },
@@ -364,5 +364,5 @@ export function furnitureModel(type, opts = {}) {
   const def = Object.prototype.hasOwnProperty.call(FURNITURE, type) ? FURNITURE[type] : null; if (!def) return g;
   const k = kit(), build = BUILD[def.kind];
   if (build) build(k, def); else k.b(def.w, def.h, def.d, def.color, 0, 0, 0);
-  const inner = k.bake(); if (opts.fit !== false) fit(inner, def); g.add(inner); return g;
+  const inner = k.bake(def.h > 0.1); if (opts.fit !== false) fit(inner, def); g.add(inner); return g;
 }
