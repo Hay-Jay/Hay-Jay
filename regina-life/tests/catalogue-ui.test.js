@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { makeThumbs, frameBox, createGLRenderer, ISO_DIR } from '../src/ui/thumbs.js';
 import { furnitureModel } from '../src/world/furnitureModels.js';
 import { Catalogue, tabsHTML, bodyHTML } from '../src/ui/catalogue.js';
+import { BuildMode, gridLines, gridColorFor, makeFloorGrid, SNAP } from '../src/ui/build.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 const fmt = (c) => '$' + (c / 100).toFixed(2);
@@ -425,5 +426,136 @@ describe('Catalogue markup (pure strings)', () => {
   it('design swatches: pressed state, material hint, first-time price', () => {
     const html = bodyHTML(M.tabView(store.state, M.TAB_DESIGN, 0), fmt);
     expect(html).toContain('aria-pressed="true"'); expect(html).toContain('data-mat="tile"'); expect(html).toContain('data-mat="wood"'); expect(html).toContain('In use'); expect(html).toContain(fmt(FD.WALL_PRICE)); expect(html).toContain(`${fmt(FD.FLOOR_PRICE)} the first time`);
+  });
+});
+
+/* ---------------------------------------------------------------- build bar + floor grid */
+describe('floor grid geometry', () => {
+  const segs = (flat) => { const out = []; for (let i = 0; i < flat.length; i += 4) out.push(flat.slice(i, i + 4)); return out; };
+  it('every line sits on a multiple of the 0.25 m placement snap, inside the room', () => {
+    const { minor, major } = gridLines(FD.ROOM); expect(minor.length % 4).toBe(0); expect(major.length % 4).toBe(0);
+    for (const [x0, z0, x1, z1] of [...segs(minor), ...segs(major)]) {
+      const vertical = x0 === x1, c = vertical ? x0 : z0; expect(Math.abs(c / SNAP - Math.round(c / SNAP))).toBeLessThan(1e-9);
+      if (vertical) { expect([z0, z1]).toEqual([FD.ROOM.z0, FD.ROOM.z1]); expect(c).toBeGreaterThanOrEqual(FD.ROOM.x0); expect(c).toBeLessThanOrEqual(FD.ROOM.x1); } else { expect([x0, x1]).toEqual([FD.ROOM.x0, FD.ROOM.x1]); expect(c).toBeGreaterThanOrEqual(FD.ROOM.z0); expect(c).toBeLessThanOrEqual(FD.ROOM.z1); }
+    }
+  });
+  it('has the expected number of minor and major lines for a known room, and majors are whole metres', () => {
+    const room = { x0: -1, x1: 1, z0: -0.5, z1: 0.5 }, g = gridLines(room, 0.25, 1);
+    // x: -1,-.75,...,1 = 9 lines (3 major: -1, 0, 1); z: -.5,-.25,0,.25,.5 = 5 lines (1 major: 0)
+    expect(segs(g.major)).toHaveLength(4); expect(segs(g.minor)).toHaveLength(9 + 5 - 4);
+    for (const [x0, z0, x1] of segs(g.major)) expect(Math.abs((x0 === x1 ? x0 : z0) % 1)).toBeLessThan(1e-9);
+  });
+  it('picks dark lines for light floors and light lines for dark floors', () => {
+    expect(gridColorFor(FD.FLOORS.birch[2])).toBe('#24323b'); expect(gridColorFor(FD.FLOORS.walnut[2])).toBe('#ffffff'); expect(gridColorFor(null)).toMatch(/^#/);
+  });
+});
+
+describe('floor grid fade', () => {
+  const manual = () => { const q = []; return { raf: (fn) => q.push(fn), run: (ms) => { const fn = q.shift(); fn?.(ms); return !!fn; }, q }; };
+  it('starts hidden, shows instantly on request, hides instantly on request', () => {
+    const g = makeFloorGrid({ raf: undefined }); expect(g.group.visible).toBe(false); expect(g.level).toBe(0);
+    g.set(true); expect(g.group.visible).toBe(true); expect(g.level).toBe(1); expect(g.group.children.every((c) => c.material.opacity > 0)).toBe(true);
+    g.set(false); expect(g.group.visible).toBe(false); expect(g.group.children.every((c) => c.material.opacity === 0)).toBe(true);
+    g.set(true, true); g.set(false, true); expect(g.level).toBe(0);
+  });
+  it('fades in over ~220 ms with frames, and back out', () => {
+    const m = manual(), g = makeFloorGrid({ raf: m.raf, reduced: () => false }); vi.spyOn(performance, 'now').mockReturnValue(1000);
+    g.set(true); expect(m.q).toHaveLength(1); expect(g.level).toBe(0); m.run(1050); expect(g.level).toBeGreaterThan(0.2); expect(g.level).toBeLessThan(0.3); expect(g.group.visible).toBe(true);
+    m.run(1100); m.run(1150); m.run(1200); m.run(1250); expect(g.level).toBe(1); expect(m.q).toHaveLength(0);
+    g.set(false); expect(m.q).toHaveLength(1); m.run(1300 + 0); for (let i = 0; i < 6; i++) m.run(1400 + i * 60); expect(g.level).toBe(0); expect(g.group.visible).toBe(false); vi.restoreAllMocks();
+  });
+  it('reverses cleanly when the target flips mid-fade, without stacking frames', () => {
+    const m = manual(), g = makeFloorGrid({ raf: m.raf, reduced: () => false }); vi.spyOn(performance, 'now').mockReturnValue(0);
+    g.set(true); m.run(100); const mid = g.level; g.set(false); g.set(true); g.set(false); expect(m.q).toHaveLength(1); m.run(150); expect(g.level).toBeLessThan(mid); vi.restoreAllMocks();
+  });
+  it('reduced-motion users get no fade', () => {
+    const m = manual(), g = makeFloorGrid({ raf: m.raf, reduced: () => true }); g.set(true); expect(g.level).toBe(1); expect(m.q).toHaveLength(0);
+  });
+  it('recolours the lines and disposes its GPU resources', () => {
+    const g = makeFloorGrid({ raf: undefined }); g.setColor('#123456'); expect(g.group.children[0].material.color.getHexString()).toBe('123456'); expect(g.group.children[2].material.color.getHexString()).not.toBe('123456');
+    const spies = g.group.children.map((c) => vi.spyOn(c.geometry, 'dispose')); g.dispose(); for (const s of spies) expect(s).toHaveBeenCalled();
+  });
+});
+
+describe('BuildMode with the Catalogue', () => {
+  let els, win, canvasEl, scene, camera, panels, audio, toasts, catalogue, build, layouts, body;
+  const mkEls = () => { els = {}; for (const id of ['build', 'b-hint', 'b-rot', 'b-del', 'b-buy', 'b-stored', 'b-stored-n', 'b-done']) els[id] = new El(id.startsWith('b-') && id !== 'b-hint' && id !== 'b-stored-n' ? 'button' : 'div'); els.build.hidden = true; els['b-stored'].hidden = true; };
+  beforeEach(() => {
+    mkEls(); win = {}; body = new Set();
+    globalThis.document = { getElementById: (id) => els[id], body: { classList: { add: (c) => body.add(c), remove: (c) => body.delete(c) } }, activeElement: null };
+    globalThis.addEventListener = (t, f) => { (win[t] ||= []).push(f); }; globalThis.matchMedia = () => ({ matches: true }); globalThis.innerHeight = 800; globalThis.innerWidth = 400;
+    canvasEl = new El('canvas'); canvasEl.getBoundingClientRect = () => ({ left: 0, top: 0, width: 800, height: 800 });
+    scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100); camera.position.set(0, 14, 0.01); camera.lookAt(0, 0, 0); camera.updateMatrixWorld(true); camera.updateProjectionMatrix();
+    panels = { open: false, furnitureShop: vi.fn() }; audio = { blip: vi.fn() }; toasts = []; layouts = [];
+    catalogue = { isOpen: false, height: 0, open: vi.fn(function (tab) { this.isOpen = true; this.openedTab = tab; }), close: vi.fn(function () { this.isOpen = false; }), closedBy: () => false };
+    build = new BuildMode({ canvas: canvasEl, camera, scene, store, panels, audio, toast: (m, k) => toasts.push([m, k]), catalogue, onLayout: (f) => layouts.push(f) });
+  });
+  afterEach(() => { for (const k of ['document', 'addEventListener', 'matchMedia', 'innerHeight', 'innerWidth']) delete globalThis[k]; });
+  const key = (k, extra = {}) => ({ key: k, target: { tagName: 'DIV' }, repeat: false, ...extra });
+  const press = (k, extra) => { for (const f of win.keydown) f(key(k, extra)); };
+  const px = (x, z) => { const v = new THREE.Vector3(x, 0, z).project(camera); return { clientX: (v.x + 1) / 2 * 800, clientY: (1 - v.y) / 2 * 800, pointerId: 1, button: 0 }; };
+  const clickAt = (x, z) => { const p = px(x, z); canvasEl.dispatch('pointerdown', p); canvasEl.dispatch('pointerup', p); };
+
+  it('puts the grid in the scene, hidden until a piece is selected, then fades it in and out with the selection', () => {
+    const grid = scene.getObjectByName('floor-grid'); expect(grid).toBeTruthy(); build.start(); expect(grid.visible).toBe(false);
+    H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); expect(grid.visible).toBe(true); expect(build.grid.target).toBe(1);
+    build.select(null); expect(grid.visible).toBe(false); build.select({ type: 'plant', id: null }); build.stop(); expect(grid.visible).toBe(false);
+  });
+  it('start()/stop() toggle the bar and the body class; quiet start skips the toast; stop() hides the Catalogue too', () => {
+    build.start(); expect(els.build.hidden).toBe(false); expect(body.has('building')).toBe(true); expect(build.active).toBe(true); expect(toasts).toHaveLength(1);
+    build.stop(); build.start({ quiet: true }); expect(toasts).toHaveLength(1); catalogue.open(); build.stop(); expect(catalogue.close).toHaveBeenCalled(); expect(els.build.hidden).toBe(true); expect(body.has('building')).toBe(false); expect(build.active).toBe(false);
+  });
+  it('Buy opens the Catalogue; the storage pill opens its In storage tab; with no Catalogue the old shop panel is used', () => {
+    build.start(); els['b-buy'].onclick(); expect(catalogue.open).toHaveBeenCalledWith(undefined); els['b-stored'].onclick(); expect(catalogue.open).toHaveBeenLastCalledWith('in-storage');
+    build.setCatalogue(null); els['b-buy'].onclick(); expect(panels.furnitureShop).toHaveBeenCalledTimes(1); build.setCatalogue(catalogue); els['b-buy'].onclick(); expect(catalogue.open).toHaveBeenCalledTimes(3);
+  });
+  it('the catalogue option and setCatalogue are interchangeable', () => {
+    const b2 = new BuildMode({ canvas: new El('canvas'), camera, scene: new THREE.Scene(), store, panels, audio, toast() {} }); expect(b2.catalogue).toBeNull(); expect(b2.setCatalogue(catalogue)).toBe(b2); expect(b2.catalogue).toBe(catalogue);
+  });
+  it('the bar shows the number of stored pieces and enables Rotate/Store only when they apply', () => {
+    build.start(); expect(els['b-stored'].hidden).toBe(true); expect(els['b-rot'].disabled).toBe(true); expect(els['b-del'].disabled).toBe(true);
+    H.buyFurniture(store, 'plant'); H.buyFurniture(store, 'plant'); build.refresh(); expect(els['b-stored'].hidden).toBe(false); expect(els['b-stored-n'].textContent).toBe('2');
+    build.select({ type: 'plant', id: null }); expect(els['b-rot'].disabled).toBe(false); expect(els['b-del'].disabled).toBe(true); expect(els['b-hint'].textContent).toMatch(/place/i);
+    clickAt(-3.5, -0.4); const placed = store.state.home.placed[0]; expect(placed).toBeTruthy(); build.select({ type: 'plant', id: placed.id }); expect(els['b-del'].disabled).toBe(false); expect(els['b-hint'].textContent).toMatch(/move/i);
+  });
+  it('places a selected piece with the ghost, clears the selection after the last copy, and shows the blocking rule in the hint', () => {
+    build.start(); H.buyFurniture(store, 'armchair'); build.select({ type: 'armchair', id: null });
+    canvasEl.dispatch('pointermove', px(-0.4, -0.9)); expect(build.ghost.visible).toBe(true); expect(els['b-hint'].dataset.err).toMatch(/Blocked by the tv/); expect(els['b-hint'].textContent).toMatch(/Blocked by the tv/);
+    clickAt(-0.4, -0.9); expect(store.state.home.placed).toHaveLength(0); expect(toasts.at(-1)[1]).toBe('warn'); expect(audio.blip).toHaveBeenCalledWith('error');
+    canvasEl.dispatch('pointermove', px(0.5, 1.0)); expect(els['b-hint'].dataset.err).toBe(''); expect(els['b-hint'].textContent).toMatch(/place/i);
+    clickAt(0.5, 1.0); expect(store.state.home.placed).toHaveLength(1); expect(build.sel).toBeNull(); expect(build.grid.target).toBe(0); expect(els['b-hint'].textContent).toMatch(/Buy/);
+  });
+  it('R rotates only with a selection; Delete stores the selected placed piece', () => {
+    build.start(); press('r'); expect(build.rot).toBe(0); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); press('r'); expect(build.rot).toBe(1);
+    clickAt(-3.5, -0.4); expect(store.state.home.placed).toHaveLength(1); expect(store.state.home.placed[0].rot).toBe(1);
+    build.select({ type: 'plant', id: store.state.home.placed[0].id }); expect(build.rot).toBe(1); press('Delete'); expect(store.state.home.placed).toHaveLength(0); expect(build.sel).toBeNull(); expect(H.availableToPlace(store.state, 'plant')).toBe(1);
+  });
+  it('Esc deselects first, then exits; typing, key-repeat, panels and phone never trigger it', () => {
+    build.start(); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null });
+    press('Escape', { target: { tagName: 'INPUT' } }); expect(build.sel).toBeTruthy(); press('Escape', { target: { tagName: 'TEXTAREA' } }); press('Escape', { target: { isContentEditable: true } }); press('r', { target: { tagName: 'SELECT' } }); expect(build.rot).toBe(0);
+    press('Escape', { repeat: true }); expect(build.sel).toBeTruthy(); panels.open = true; press('Escape'); expect(build.sel).toBeTruthy(); panels.open = false;
+    build.isBlocked = () => true; press('Escape'); expect(build.active).toBe(true); build.isBlocked = () => false;
+    press('Escape'); expect(build.sel).toBeNull(); expect(build.active).toBe(true); press('Escape'); expect(build.active).toBe(false);
+    press('Escape'); press('r'); expect(build.active).toBe(false); // inactive: keys are ignored entirely
+  });
+  it('keys belong to the Catalogue while it is open, and an Esc that just hid it does not also exit build mode', () => {
+    build.start(); catalogue.isOpen = true; press('Escape'); press('r'); press('Delete'); expect(build.active).toBe(true);
+    catalogue.isOpen = false; const hidden = key('Escape'); catalogue.closedBy = (e) => e === hidden; for (const f of win.keydown) f(hidden); expect(build.active).toBe(true);
+    press('Escape'); expect(build.active).toBe(false);
+  });
+  it('ignores canvas taps while the Catalogue is open', () => {
+    build.start(); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); catalogue.isOpen = true; clickAt(-3.5, -0.4); expect(store.state.home.placed).toHaveLength(0); catalogue.isOpen = false; clickAt(-3.5, -0.4); expect(store.state.home.placed).toHaveLength(1);
+  });
+  it('frames the room above whichever is taller: the bar or the open sheet', () => {
+    els.build.offsetHeight = 100; build.start(); expect(layouts.at(-1)).toBeCloseTo((100 + 14) / 800, 6);
+    catalogue.isOpen = true; catalogue.height = 480; build.layout(); expect(layouts.at(-1)).toBeCloseTo(Math.min(0.6, (480 + 14) / 800), 6); catalogue.height = 760; build.layout(); expect(layouts.at(-1)).toBe(0.6);
+    catalogue.isOpen = false; build.layout(); expect(layouts.at(-1)).toBeCloseTo((100 + 14) / 800, 6); build.stop(); const n = layouts.length; build.layout(); expect(layouts).toHaveLength(n);
+  });
+  it('keeps the public API the integrator relies on', () => {
+    for (const m of ['start', 'stop', 'select', 'refresh', 'rotate', 'removeSel', 'click', 'layout', 'setCatalogue', 'openCatalogue']) expect(build[m], m).toBeTypeOf('function');
+    expect(build.active).toBe(false); expect(build.state).toBe(store.state);
+  });
+  it('select() of a stale piece (stored copy sold elsewhere) is dropped on refresh', () => {
+    build.start(); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); expect(build.sel).toBeTruthy(); H.sellFurniture(store, 'plant'); build.refresh(); expect(build.sel).toBeNull(); expect(build.grid.target).toBe(0);
   });
 });

@@ -86,10 +86,15 @@
     <div class="map-zoom"><button id="mz-in" aria-label="Zoom in">+</button><button id="mz-out" aria-label="Zoom out">−</button><button id="mz-me" aria-label="Centre on me">◎</button></div>
   </div>
 
-  <div id="build" class="buildbar" hidden>
-    <div class="b-head"><b>🎨 Redecorate</b><span id="b-hint">Tap a piece below</span><button id="b-done" class="btn primary small">Done</button></div>
-    <div class="b-items" id="b-items"></div>
-    <div class="b-actions"><button id="b-rot" class="btn small">↻ Rotate (R)</button><button id="b-del" class="btn small">🗑 Store (Del)</button><button id="b-shop" class="btn small">🛋️ Shop</button><button id="b-style" class="btn small">🎨 Paint</button></div>
+  <div id="build" class="buildbar" hidden role="toolbar" aria-label="Redecorate your home">
+    <p id="b-hint" class="b-hint">Tap Buy to shop · tap furniture to move it</p>
+    <div class="b-actions">
+      <button id="b-buy" class="btn primary small" aria-haspopup="dialog">🛋️ Buy</button>
+      <button id="b-stored" class="btn small" hidden aria-label="Open the pieces in storage">📦 <b id="b-stored-n">0</b></button>
+      <button id="b-rot" class="btn small" disabled>↻ Rotate</button>
+      <button id="b-del" class="btn small" disabled>🗑 Store</button>
+      <button id="b-done" class="btn small done">Done</button>
+    </div>
   </div>
 
   <div id="panels"></div>
