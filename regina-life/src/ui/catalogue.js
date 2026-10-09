@@ -60,8 +60,13 @@ export class Catalogue {
     this._open = false; this.tab = null; this._tsig = this._bsig = this._bal = null; this._prio = 0; this._closedBy = null; this._hideT = null; this._prevFocus = null; this._unsub = null;
     const root = this.root = document.createElement('div'); root.className = 'cat-root'; root.id = 'catalogue'; root.hidden = true; root.innerHTML = SKELETON;
     const q = (s) => root.querySelector(s); this.sheet = q('.cat-sheet'); this.$bal = q('.cat-bal'); this.$banner = q('.cat-banner-t'); this.$chip = q('.cat-chip'); this.$tabs = q('.cat-tabs'); this.$body = q('.cat-body'); this.$top = q('.cat-top');
-    root.addEventListener('click', (e) => this._click(e)); root.addEventListener('keydown', (e) => this._keydown(e)); this._bindDrag();
-    this._onKey = (e) => { if (this._open && e.key === 'Escape') { e.preventDefault?.(); e.stopPropagation?.(); this._closedBy = e; this.close(); } };
+    root.addEventListener('click', (e) => this._click(e)); this._bindDrag();
+    // one window-level capture listener while open: the sheet is modal, so Esc hides it, Tab/arrows drive the sheet, and no key leaks to the game's hotkeys
+    this._onKey = (e) => {
+      if (!this._open) return;
+      if (e.key === 'Escape') { e.preventDefault?.(); e.stopPropagation?.(); this._closedBy = e; this.close(); return; }
+      this._keydown(e); e.stopPropagation?.();
+    };
     this._onResize = () => this.build?.layout?.();
     (mount ?? document.body).appendChild(root);
   }

@@ -358,21 +358,21 @@ describe('Catalogue sheet', () => {
     cat.root.dispatch('click', { target: { closest: () => null } }); cat.root.dispatch('click', { target: null }); // stray clicks are ignored
   });
   it('Esc hides the sheet and marks that very key event so build mode does not also exit', () => {
-    make(); cat.open(); const other = keyEv('a'); win.keydown(other); expect(cat.isOpen).toBe(true);
+    make(); cat.open(); const other = keyEv('a'); win.keydown(other); expect(cat.isOpen).toBe(true); expect(other.stopPropagation).toHaveBeenCalled(); expect(other.preventDefault).not.toHaveBeenCalled(); // game hotkeys never leak through the modal sheet
     const esc = keyEv('Escape'); win.keydown(esc); expect(cat.isOpen).toBe(false); expect(esc.preventDefault).toHaveBeenCalled(); expect(esc.stopPropagation).toHaveBeenCalled(); expect(cat.closedBy(esc)).toBe(true); expect(cat.closedBy(keyEv('Escape'))).toBe(false); expect(cat.closedBy(null)).toBe(false);
   });
   it('tabs are a roving list: arrows, Home and End move and select', () => {
     make(); cat.open(); const ids = M.tabList(store.state).map((x) => x.id), k = (key, id) => ({ ...keyEv(key), target: { closest: (sel) => (sel === '[role="tab"]' ? { dataset: { id } } : null) } });
-    cat.root.dispatch('keydown', k('ArrowRight', cat.tab)); expect(cat.tab).toBe(ids[ids.indexOf(M.defaultTab()) + 1]);
-    cat.root.dispatch('keydown', k('End', cat.tab)); expect(cat.tab).toBe(ids.at(-1)); cat.root.dispatch('keydown', k('ArrowRight', cat.tab)); expect(cat.tab).toBe(ids[0]);
-    cat.root.dispatch('keydown', k('ArrowLeft', cat.tab)); expect(cat.tab).toBe(ids.at(-1)); cat.root.dispatch('keydown', k('Home', cat.tab)); expect(cat.tab).toBe(ids[0]);
+    win.keydown(k('ArrowRight', cat.tab)); expect(cat.tab).toBe(ids[ids.indexOf(M.defaultTab()) + 1]);
+    win.keydown(k('End', cat.tab)); expect(cat.tab).toBe(ids.at(-1)); win.keydown(k('ArrowRight', cat.tab)); expect(cat.tab).toBe(ids[0]);
+    win.keydown(k('ArrowLeft', cat.tab)); expect(cat.tab).toBe(ids.at(-1)); win.keydown(k('Home', cat.tab)); expect(cat.tab).toBe(ids[0]);
     expect(cat.$tabs.querySelector('.cat-tab.on').focusCalls).toBeGreaterThan(0);
   });
   it('Tab keeps focus inside the sheet (wraps at both ends)', () => {
     make(); cat.open(); const els = [new El(), new El(), new El()]; for (const e of els) e.getAttribute = () => null; cat.sheet.querySelectorAll = () => els;
-    globalThis.document.activeElement = els[2]; const fwd = keyEv('Tab'); cat.root.dispatch('keydown', fwd); expect(fwd.preventDefault).toHaveBeenCalled(); expect(els[0].focusCalls).toBe(1);
-    globalThis.document.activeElement = els[0]; const back = keyEv('Tab', { shiftKey: true }); cat.root.dispatch('keydown', back); expect(els[2].focusCalls).toBe(1);
-    globalThis.document.activeElement = els[1]; const mid = keyEv('Tab'); cat.root.dispatch('keydown', mid); expect(mid.preventDefault).not.toHaveBeenCalled();
+    globalThis.document.activeElement = els[2]; const fwd = keyEv('Tab'); win.keydown(fwd); expect(fwd.preventDefault).toHaveBeenCalled(); expect(els[0].focusCalls).toBe(1);
+    globalThis.document.activeElement = els[0]; const back = keyEv('Tab', { shiftKey: true }); win.keydown(back); expect(els[2].focusCalls).toBe(1);
+    globalThis.document.activeElement = els[1]; const mid = keyEv('Tab'); win.keydown(mid); expect(mid.preventDefault).not.toHaveBeenCalled();
   });
   it('refresh() redraws on balance/state changes and skips the DOM when nothing changed', () => {
     make(); cat.open(); const html = cat.$body.innerHTML, c = firstCard(); let writes = 0; const orig = Object.getOwnPropertyDescriptor(El.prototype, 'innerHTML');
