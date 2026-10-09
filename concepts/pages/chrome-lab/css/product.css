@@ -9,15 +9,13 @@ main{position:relative;z-index:1}
 
 /* ----- stage ----- */
 .stage{min-width:0}
-.stage-main{position:relative;aspect-ratio:4/5;width:100%;background:#09090b;border:1px solid var(--line);border-radius:14px;overflow:hidden;touch-action:pan-y;view-transition-name:pimg}
-@media(min-width:1000px){.stage-main{aspect-ratio:auto;height:min(80vh,820px);min-height:520px}}
+.stage-main{position:relative;aspect-ratio:1/1;width:100%;background:#09090b;border:1px solid var(--line);border-radius:14px;overflow:hidden;touch-action:pan-y;view-transition-name:pimg}
+@media(min-width:1000px){.stage-main{aspect-ratio:4/3}}
 .shots{position:absolute;inset:0}
 .shots li{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s ease,visibility .5s}
 .shots li.on{opacity:1;visibility:visible}
-.shots li::before{content:"";position:absolute;inset:-12%;background:var(--bd) center/cover no-repeat;filter:blur(26px) brightness(.5) saturate(1.1);display:none}
-.shots li[data-fit="contain"]::before{display:block}
-.shots img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.shots li[data-fit="contain"] img{object-fit:contain}
+.shots li::before{content:"";position:absolute;inset:-14%;background:var(--bd) center/cover no-repeat;filter:blur(32px) brightness(.55) saturate(1.15)}
+.shots img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 /* instrument corner marks */
 .crop{position:absolute;z-index:3;width:18px;height:18px;pointer-events:none;border:0 solid rgba(255,255,255,.7)}
 .crop.tl{left:12px;top:12px;border-left-width:1px;border-top-width:1px}
@@ -45,9 +43,9 @@ html:not(.js) .crop{display:none}
 /* ----- buy panel ----- */
 .buy{display:grid;gap:12px;min-width:0}
 .buy-card{padding:clamp(20px,2.4vw,30px);border-radius:16px;display:grid;gap:14px}
-.buy-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;min-height:64px;margin-bottom:-6px}
+.buy-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;min-height:64px}
 .p-type{color:var(--mute);padding-top:4px}
-.gl-accent{position:relative;flex:none;width:76px;height:76px;margin:-8px -8px 0 0;pointer-events:none}
+.gl-accent{position:relative;flex:none;width:104px;height:104px;margin:-14px -10px -34px 0;pointer-events:none}
 .gl-accent canvas{position:absolute;inset:0;width:100%;height:100%;display:block;opacity:0;transition:opacity .9s}
 .gl-accent.live canvas{opacity:1}
 .p-title{font:900 clamp(28px,3.6vw,46px)/.95 var(--f-d);font-stretch:114%;letter-spacing:-.03em;text-transform:uppercase;background:linear-gradient(180deg,#fff 0%,#ececf0 45%,#b4b6be 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding:.04em 0 .08em;overflow-wrap:break-word;hyphens:manual;text-wrap:balance}
@@ -102,6 +100,7 @@ button#sold{opacity:.55}
 
 /* ----- related ----- */
 .related{padding:clamp(40px,8vh,90px) 0 clamp(60px,10vh,110px)}
+@media(min-width:701px){.related .chrome-h{font-size:clamp(36px,5.2vw,84px)}}
 .rel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media(min-width:900px){.rel-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}}
 .pn{display:grid;gap:12px;margin-top:clamp(30px,5vw,56px)}

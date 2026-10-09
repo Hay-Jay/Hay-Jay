@@ -191,6 +191,8 @@ function pageContext(path, key, meta, extra = {}) {
     base_path: esc(basePath),
     countries: String(nCountries),
     pieces: String(nPieces),
+    // font preloads are CORS requests, which browsers refuse on file:// - the preview build skips them
+    font_preload: preview ? '' : ['BodoniModa-normal-400-900-latin', 'DMMono-normal-400-latin'].map(f => `<link rel="preload" href="${esc(ctx.asset('assets/fonts/' + f + '.woff2'))}" as="font" type="font/woff2" crossorigin>`).join('\n'),
     foot_ticker: tickerHtml(['Delivering to', ...countryNames]),
     news_action: esc(STORE + '/contact#contact_form'),
     ...extra
@@ -502,7 +504,8 @@ for (const x of items) {
   const key = 'notfound';
   const meta = { title: 'Lost — Page missing from this issue — MONOCHROME®', description: 'This page is missing from the issue. Go back to the cover, the index or the lookbook.', tone: 'ink', css: 'contact', js: null, noindex: true, current: '__none', folio: '404' };
   const ctx = pageContext('', key, meta, {
-    head_extra: `<script>(function(){var p=location.pathname;if(!/\\/404\\.html$/.test(p)&&location.protocol!=='file:')document.write('<base href="'+location.origin+'${basePath}">')})()</script>`
+    // a host serves this file at any missing URL, so it pins its own base (see README) and re-aims its in-page anchors
+    head_extra: `<script>(function(){var p=location.pathname;if(/\\/404\\.html$/.test(p)||location.protocol==='file:')return;document.write('<base href="'+location.origin+'${basePath}">');addEventListener('DOMContentLoaded',function(){document.querySelectorAll('a[href^="#"]').forEach(function(a){a.setAttribute('href',location.pathname+location.search+a.getAttribute('href'))})})})()</script>`
   });
   emit('', ctx, tpl(read('pages', '404.html'), ctx), '404.html');
 }

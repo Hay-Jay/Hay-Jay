@@ -36,12 +36,10 @@ export default function home(ctx) {
   <!-- 01 NOW SHOWING -->
   <section class="featured" id="featured" aria-labelledby="featH">
     <div class="wrap">
-      <div class="sec-head split">
-        <div><span class="eyebrow">01 / NOW SHOWING</span><h2 id="featH" class="chrome-h"><span>FRESH FROM</span> <span>THE LAB.</span></h2></div>
-        <div class="sec-side">
-          <p class="sec-p">Four pieces to start with. Every one has its own page with photos, sizes and a direct line to checkout.</p>
-          <a class="btn ghost glass" href="${ctx.href('shop/')}">See all ${n} pieces ${ic('right')}</a>
-        </div>
+      <div class="sec-head feat-head">
+        <span class="eyebrow">01 / NOW SHOWING</span><h2 id="featH" class="chrome-h"><span>FRESH FROM</span> <span>THE LAB.</span></h2>
+        <p class="sec-p">Four pieces to start with. Every one has its own page with photos, sizes and a direct line to checkout.</p>
+        <a class="btn ghost glass" href="${ctx.href('shop/')}">See all ${n} pieces ${ic('right')}</a>
       </div>
       <ul class="fstrip">
         ${picks.map((x, i) => `<li>${card(ctx, x, i, { sizes: '(min-width:1100px) 22vw, (min-width:760px) 44vw, 46vw' })}</li>`).join('\n        ')}
@@ -86,15 +84,14 @@ export default function home(ctx) {
   <!-- 04 SIGNAL -->
   <section class="signal" id="signal" aria-labelledby="signalH">
     <div class="wrap signal-grid">
-      <div>
+      <div class="signal-copy">
         <span class="eyebrow">04 / SIGNAL</span>
         <h2 id="signalH" class="chrome-h"><span>STAY IN</span> <span>ORBIT.</span></h2>
-      </div>
-      <div class="signal-form">
         <p class="sec-p">New drops are small and some do not return. Leave your email and we will tell you first.</p>
         ${newsletter(ctx, { id: 'news' })}
         <p class="signal-links"><a href="${ctx.href('contact/')}">More ways to reach us ${ic('right')}</a></p>
       </div>
+      <div class="signal-void" aria-hidden="true"></div>
     </div>
   </section>`;
 

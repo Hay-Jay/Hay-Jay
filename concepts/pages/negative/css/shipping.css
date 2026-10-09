@@ -3,8 +3,8 @@
 .dst-h { font-size: clamp(2.6rem, 10.2vw, 11rem); }
 .dst-deck { max-width: 28em; margin-top: 5vh; font: italic 400 clamp(1.2rem, 2.2vw, 1.9rem)/1.3 var(--serif); }
 .dst-hl { display: grid; gap: 12px; margin-top: 8vh; }
-.hl { display: flex; flex-direction: column; justify-content: space-between; gap: 22px; min-height: 250px; padding: 18px 18px 22px; border: 1px solid var(--fg); }
-.hl b { font: 500 clamp(3.4rem, 11vw, 10rem)/.86 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+.hl { container-type: inline-size; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; min-height: 250px; padding: 18px 18px 22px; border: 1px solid var(--fg); }
+.hl b { font: 500 clamp(3rem, 19cqw, 10rem)/.86 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
 .hl .mono { color: var(--dim); }
 .hl p { max-width: 30ch; font: italic 400 1.2rem/1.35 var(--serif); }
 .hl p strong { font-weight: 600; }
@@ -22,7 +22,7 @@
 .tbl thead th { text-align: left; font-weight: 400; color: var(--dim); padding: 10px 10px 10px 0; border-bottom: 1px solid var(--fg); }
 .tbl td, .tbl th { padding: 10px 10px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
 .tbl tbody th { text-align: left; font: 500 clamp(1.15rem, 1.7vw, 1.6rem)/1.1 var(--serif); letter-spacing: -.02em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
-.tbl tbody th em { font: italic 400 .62em/1 var(--serif); text-transform: none; letter-spacing: 0; margin-left: .7em; opacity: .85; }
+.tbl tbody th em { white-space: nowrap; font: italic 400 .62em/1 var(--serif); text-transform: none; letter-spacing: 0; margin-left: .7em; opacity: .85; }
 .tbl .c-no, .tbl .c-code { color: var(--dim); font-variant-numeric: tabular-nums; }
 .tbl tr.nigeria, .tbl tr.canada { background: var(--fg); color: var(--bg); }
 .tbl tr.nigeria > *, .tbl tr.canada > * { border-bottom-color: var(--bg); color: var(--bg); padding-left: 10px; }
@@ -43,14 +43,14 @@
 
 .dst-steps { padding: clamp(70px, 11vh, 140px) var(--gut); overflow: clip; }
 .steps { display: grid; border-top: 1px solid var(--fg); margin-top: 4vh; }
-.steps li { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "n w" ". p"; column-gap: 14px; row-gap: 8px; padding: 22px 0 28px; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.steps li { container-type: inline-size; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "n w" ". p"; column-gap: 14px; row-gap: 8px; padding: 22px 0 28px; border-bottom: 1px solid var(--rule); align-items: baseline; }
 .steps .mono { grid-area: n; color: var(--dim); }
 .steps b { grid-area: w; font: 500 clamp(2.8rem, 10vw, 7rem)/.9 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
 .steps p { grid-area: p; max-width: 30ch; color: var(--dim); font: italic 400 clamp(1.05rem, 1.5vw, 1.25rem)/1.4 var(--serif); }
 
 .dst-sizing { padding: clamp(80px, 12vh, 150px) var(--gut) clamp(70px, 11vh, 130px); overflow: clip; }
 .sz-list { margin-top: 8vh; border-top: 1px solid var(--fg); }
-.sz-list > div { display: grid; gap: 6px; padding: 16px 0 18px; border-bottom: 1px solid var(--rule); }
+.sz-list > div { display: grid; align-content: start; gap: 6px; padding: 16px 0 18px; border-bottom: 1px solid var(--rule); }
 .sz-list dt { color: var(--dim); }
 .sz-list dd { font: italic 400 clamp(1.15rem, 2vw, 1.6rem)/1.3 var(--serif); max-width: 30em; }
 .sz-foot { margin-top: 5vh; max-width: 30em; font: 400 1.15rem/1.5 var(--serif); }
@@ -60,6 +60,7 @@
   .steps { grid-template-columns: repeat(3, 1fr); }
   .steps li { grid-template-columns: 1fr; grid-template-areas: "n" "w" "p"; padding: 22px 20px 30px; border-bottom: 0; border-left: 1px solid var(--rule); row-gap: 14px; }
   .steps li:first-child { border-left: 0; padding-left: 0; }
+  .steps b { font-size: clamp(2.2rem, 16cqw, 7rem); }
   .sz-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gut); }
 }
 @media (min-width: 1000px) {
@@ -79,4 +80,5 @@
   .tbl tr.nigeria > *, .tbl tr.canada > * { padding-left: 0; }
   .tbl tr.nigeria .c-reg, .tbl tr.canada .c-reg { color: color-mix(in srgb, var(--bg) 70%, var(--fg)); }
   .tbl-h .mono { font-size: 12px; }
+  .tbl tbody th { font-weight: 600; font-variation-settings: 'opsz' 12; letter-spacing: -.01em; }
 }

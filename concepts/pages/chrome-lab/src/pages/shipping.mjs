@@ -7,24 +7,26 @@ export default function shipping(ctx) {
   const dest = app.dest, st = app.cfgStore;
   const others = dest.count - 2;
   const body = `
-  <section class="ed-head" aria-labelledby="shipH">
-    <div class="wrap">
-      <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${ctx.href('')}">Home</a></li><li aria-current="page">Shipping</li></ol></nav>
-      <span class="eyebrow">04 / ROUTES</span>
-      <h1 id="shipH" class="chrome-h"><span>SHIPS</span> <span>WORLDWIDE.</span></h1>
-      <p class="lead">Orders leave from ${st.city}, ${st.province}, Canada. The store delivers to ${dest.count} destinations, Nigeria included.</p>
+  <section class="ship-hero" aria-labelledby="shipH">
+    <div class="wrap ship-grid">
+      <div class="ship-copy">
+        <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${ctx.href('')}">Home</a></li><li aria-current="page">Shipping</li></ol></nav>
+        <span class="eyebrow">04 / ROUTES</span>
+        <h1 id="shipH" class="chrome-h"><span>SHIPS</span> <span>WORLDWIDE.</span></h1>
+        <p class="lead">Orders leave from ${st.city}, ${st.province}, Canada. The store delivers to ${dest.count} destinations, Nigeria included.</p>
+        <ul class="route-cards">
+          <li class="glass rc-ca"><b class="rc-code chrome" aria-hidden="true">CA</b><div><span class="mono">ORIGIN / CANADA</span><h2>Free standard shipping</h2><p>Orders to anywhere in Canada ship free with standard shipping. The checkout confirms it for your address.</p></div></li>
+          <li class="glass rc-ng"><b class="rc-code chrome" aria-hidden="true">NG</b><div><span class="mono">DELIVERED / NIGERIA</span><h2>Nigeria is on the route</h2><p>The store delivers to Nigeria. The rate is calculated at checkout from your address, so you see the cost before you pay.</p></div></li>
+        </ul>
+      </div>
+      ${globe(ctx, dest)}
     </div>
   </section>
 
-  <section class="ed-sec route-sec" aria-labelledby="routeH">
-    <div class="wrap route-grid">
-      <div class="route-copy">
-        <h2 id="routeH" class="h2">Two routes to know</h2>
-        <ul class="route-cards">
-          <li class="glass rc-ca"><span class="mono">ORIGIN / CANADA</span><h3>Free standard shipping</h3><p>Orders to anywhere in Canada ship free with standard shipping. Pick your pieces, enter your address and the checkout confirms it.</p></li>
-          <li class="glass rc-ng"><span class="mono">DELIVERED / NIGERIA</span><h3>Nigeria is on the route</h3><p>The store delivers to Nigeria. The rate is calculated at checkout from your address, so you see the cost before you pay.</p></li>
-          <li class="glass"><span class="mono">+${others} / REST OF THE WORLD</span><h3>Calculated at checkout</h3><p>Everywhere else on the list below works the same way: enter your address and the store shows the shipping rate before you pay.</p></li>
-        </ul>
+  <section class="ed-sec rest-sec" aria-label="Everywhere else">
+    <div class="wrap">
+      <div class="rest glass">
+        <div class="rest-copy"><span class="mono">+${others} / REST OF THE WORLD</span><h2 class="h2">Calculated at checkout</h2><p>Every other destination below works the same way: enter your address at checkout and the store shows the shipping rate before you pay. We do not quote prices or delivery times on this page.</p></div>
         <dl class="facts">
           <div><dt>Origin</dt><dd>${st.city}, ${st.province}, Canada</dd></div>
           <div><dt>Destinations</dt><dd>${dest.count}</dd></div>
@@ -32,7 +34,6 @@ export default function shipping(ctx) {
           <div><dt>Shipping rates</dt><dd>Calculated at checkout</dd></div>
         </dl>
       </div>
-      ${globe(ctx, dest)}
     </div>
   </section>
 
@@ -42,7 +43,7 @@ export default function shipping(ctx) {
         <p class="sec-p">Canada and Nigeria are highlighted. The list comes straight from the store's shipping settings.</p></div>
       <div class="dest glass">
         <ul class="dest-list" aria-label="Destinations">
-          ${dest.sorted.map(c => `<li class="${c === 'CA' ? 'home ' : ''}${c === 'NG' ? 'home ng' : ''}"><b>${esc(c)}</b>${esc(dest.name(c))}</li>`.replace('class=""', '')).join('\n          ')}
+          ${dest.sorted.map(c => `<li${c === 'CA' ? ' class="home"' : c === 'NG' ? ' class="home ng"' : ''}><b>${esc(c)}</b>${esc(dest.name(c))}</li>`).join('\n          ')}
         </ul>
       </div>
     </div>
@@ -52,10 +53,10 @@ export default function shipping(ctx) {
     <div class="wrap">
       <div class="sec-head"><span class="eyebrow">HOW IT WORKS</span><h2 id="howH" class="h2">From bag to doorstep</h2></div>
       <ol class="steps">
-        <li class="glass"><b class="chrome">01</b><h3>Pick your pieces</h3><p>Choose a size on the product page and press Add to bag. It opens your bag on the Monochrome store.</p></li>
+        <li class="glass"><b class="chrome">01</b><h3>Pick your pieces</h3><p>Choose your size or option on the product page and press Add to bag. It opens your bag on the Monochrome store.</p></li>
         <li class="glass"><b class="chrome">02</b><h3>Enter your address</h3><p>At checkout the store reads your destination and shows the shipping rate for it.</p></li>
         <li class="glass"><b class="chrome">03</b><h3>Pay in CAD</h3><p>All prices are in Canadian dollars. If your card is in another currency, your bank converts it.</p></li>
-        <li class="glass"><b class="chrome">04</b><h3>Track it</h3><p>Once your order leaves, the store sends you a tracking update by email.</p></li>
+        <li class="glass"><b class="chrome">04</b><h3>Delivery</h3><p>The delivery options for your address are shown at checkout. The store's shipping policy has the details.</p></li>
       </ol>
       <p class="fine">The store's own terms always apply: <a href="${ctx.store('/policies/shipping-policy')}" data-store="/policies/shipping-policy" target="_blank" rel="noopener">shipping policy ${ic('ne')}</a></p>
     </div>
@@ -67,9 +68,9 @@ export default function shipping(ctx) {
       <div class="glass panel">
         <p>If something does not fit or is not what you expected, contact us soon after your order arrives and include your order number.</p>
         <ul class="tick-list">
-          <li>Items should be unworn and in their original condition.</li>
           <li>Tell us whether you would like an exchange or a return.</li>
-          <li>The final terms are the ones in the store's policy.</li>
+          <li>Keep the piece in the condition you received it while we sort it out.</li>
+          <li>The store's returns policy has the final word on what can be returned, when and at whose cost.</li>
         </ul>
         <div class="actions"><a class="btn solid" href="${ctx.store('/policies/refund-policy')}" data-store="/policies/refund-policy" target="_blank" rel="noopener">Returns policy ${ic('ne')}</a><a class="btn ghost glass" href="mailto:info.mccanada@gmail.com">Email us</a></div>
       </div>
@@ -80,11 +81,11 @@ export default function shipping(ctx) {
     <div class="wrap two">
       <div class="sec-head"><span class="eyebrow">SIZE GUIDANCE</span><h2 id="sizeH" class="h2">Finding your size</h2></div>
       <div class="glass panel">
-        <p>Tops are cut relaxed. If you are between sizes, go up. Each product page lists the sizes in stock for that piece, and sold-out sizes are crossed out.</p>
+        <p>Every product page lists the sizes for that piece, and a size that is sold out cannot be selected. We do not publish measurements here. If you are between two sizes, going up is the safe choice.</p>
         <ul class="tick-list">
           <li><b>Tops and bottoms:</b> choose from the sizes listed on the product page.</li>
-          <li><b>Rings:</b> sized by number. Measure a ring you already wear before you order.</li>
-          <li><b>Chains and necklaces:</b> one size.</li>
+          <li><b>Rings:</b> listed in numbered sizes. Check a ring you already wear before you order.</li>
+          <li><b>Chains and necklaces:</b> choose the option shown on the product page.</li>
           <li><b>Gift cards:</b> no size. Choose an amount.</li>
         </ul>
         <p>Still not sure? Message us on Instagram or email and tell us what you usually wear. We will help you choose.</p>

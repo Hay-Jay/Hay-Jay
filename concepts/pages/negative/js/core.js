@@ -58,6 +58,10 @@
     if (r.top < innerHeight && r.bottom > 0) el.classList.add('in');
   });
   setTimeout(releaseVisible, 2500);
+  // guaranteed fallback: whatever the visitor has not scrolled to yet is released too, so the page is complete at rest
+  const releaseAll = () => rvEls.forEach(el => el.classList.add('in'));
+  setTimeout(releaseAll, 6500);
+  addEventListener('beforeprint', releaseAll);
   addEventListener('load', () => setTimeout(releaseVisible, 800));
   let rvT = 0; addEventListener('scroll', () => { clearTimeout(rvT); rvT = setTimeout(releaseVisible, 250); }, { passive: true });
 
@@ -357,7 +361,7 @@
     try {
       if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
       const u = new URL(a.href, location.href);
-      if (!/^https?:|^file:/.test(u.protocol) || u.origin !== location.origin) return;
+      if (!/^https?:$/.test(u.protocol) || u.origin !== location.origin) return; // file:// cannot prefetch
       u.hash = '';
       if (u.href === location.href.split('#')[0] || warmed.has(u.href)) return;
       warmed.add(u.href);

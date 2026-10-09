@@ -30,9 +30,14 @@ html.no-gl .hero-emblem{display:block}
 /* shared section rhythm */
 .featured,.brand-t,.world-t,.signal{position:relative;padding:clamp(70px,12vh,150px) 0}
 
+/* section headings on the home page are a step smaller than the hero, so they sit beside the 3D scene instead of under it */
+@media(min-width:701px){.featured .chrome-h,.brand-t .chrome-h,.world-t .chrome-h,.signal .chrome-h{font-size:clamp(36px,5.2vw,84px)}}
+
 /* 01 FEATURED: four floating glass cards */
 .featured{padding-bottom:clamp(90px,14vh,170px)}
-.sec-side{display:grid;gap:18px;justify-items:start}
+.feat-head{display:grid;gap:18px;justify-items:start;margin-bottom:clamp(26px,5vw,56px)}
+.feat-head .eyebrow{margin-bottom:0}
+.feat-head .sec-p{max-width:40ch}
 .fstrip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .fstrip li:nth-child(even){margin-top:clamp(18px,5vw,56px)}
 .fstrip li:nth-child(odd){margin-bottom:clamp(18px,5vw,56px)}
@@ -81,9 +86,12 @@ html.no-gl .hero-emblem{display:block}
 @media(max-width:560px){.chip-d em{display:none}}
 
 /* 04 SIGNAL */
-.signal-grid{display:grid;gap:clamp(24px,4vw,56px);align-items:end}
-@media(min-width:960px){.signal-grid{grid-template-columns:minmax(0,1fr) minmax(0,.9fr)}}
-.signal-form{display:grid;gap:18px}
+.signal-grid{display:grid;gap:clamp(24px,4vw,56px);align-items:start}
+@media(min-width:960px){.signal-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}}
+.signal-copy{display:grid;gap:clamp(16px,2.4vw,24px);justify-items:start}
+.signal-copy .eyebrow{margin-bottom:0}
+.signal-copy .news{width:100%;max-width:640px}
+.signal-void{display:none}
 .news{padding:clamp(18px,2.4vw,30px);display:grid;gap:14px;border-radius:14px}
 .news label{color:var(--mute)}
 .news .row{display:flex;gap:10px;flex-wrap:wrap}

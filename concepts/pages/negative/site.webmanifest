@@ -1,1 +1,1 @@
-{"name":"MONOCHROME®","short_name":"Monochrome","start_url":"/","display":"standalone","background_color":"#050505","theme_color":"#050505","icons":[{"src":"assets/emblem.webp","sizes":"299x322","type":"image/webp"}]}
+{"name":"MONOCHROME®","short_name":"Monochrome","start_url":"./","display":"standalone","background_color":"#050505","theme_color":"#050505","icons":[{"src":"assets/emblem.webp","sizes":"299x322","type":"image/webp"}],"scope":"./"}

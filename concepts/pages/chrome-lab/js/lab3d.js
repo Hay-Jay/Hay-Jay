@@ -31,7 +31,7 @@ async function boot() {
   const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
   const mobileGPU = Math.min(innerWidth, innerHeight) < 700;
   const GP = .06;                       // share of the runway spent diving through the ring before the first piece
-  const USE_BLOB = HERO || GALLERY || (MODE === 'ambient' && !ACCENT && !mobileGPU && ['about', 'contact', 'notfound'].includes(PAGE));
+  const USE_BLOB = HERO || GALLERY || (MODE === 'ambient' && !ACCENT && !mobileGPU && PAGE === 'notfound');   // editorial pages: ring + star only
   const USE_DROPS = HERO || GALLERY;
 
   // ------------------------------------------------------------------ renderer
@@ -141,7 +141,7 @@ vec3 objectTangent=vec3(tangent.xyz);
 
   const orbit = new THREE.Group();
   const R = 2.35;
-  orbit.add(new THREE.Mesh(new THREE.TorusGeometry(R, .026, ACCENT ? 14 : 20, ACCENT ? 160 : 260), chrome));
+  orbit.add(new THREE.Mesh(new THREE.TorusGeometry(R, ACCENT ? .11 : .026, ACCENT ? 18 : 20, ACCENT ? 120 : 260), chrome));
   const sh = new THREE.Shape();
   for (let i = 0; i < 8; i++) {
     const a = i / 8 * Math.PI * 2 - Math.PI / 2, r = i % 2 ? .26 : 1;
@@ -480,10 +480,10 @@ vec3 objectTangent=vec3(tangent.xyz);
   function ambientPose() {
     const P = portrait;
     const poses = {
-      about: { sx: .6, sy: .08, sc: 1.1, dim: .36 },
-      shipping: { sx: .62, sy: .32, sc: .8, dim: .5 },
-      faq: { sx: .66, sy: .3, sc: .85, dim: .48 },
-      contact: { sx: .56, sy: .04, sc: 1.0, dim: .42 },
+      about: { sx: .74, sy: .2, sc: .9, dim: .42 },
+      shipping: { sx: .62, sy: .1, sc: 1.05, dim: .5 },
+      faq: { sx: .76, sy: .3, sc: .85, dim: .62 },
+      contact: { sx: .8, sy: -.2, sc: 1.0, dim: .5 },
       notfound: { sx: .46, sy: .02, sc: 1.1, dim: .22 }
     };
     const p = poses[PAGE] || poses.about;
@@ -636,11 +636,11 @@ vec3 objectTangent=vec3(tangent.xyz);
     // ---------------- accent: a small ring + star in the product panel
     if (ACCENT) {
       camera.position.set(0, 0, Z0); camera.up.set(0, 1, 0); camera.lookAt(0, 0, 0); camera.updateMatrixWorld();
-      rig.position.set(0, 0, 0); rig.scale.setScalar(.9); rig.rotation.set(0, 0, 0);
+      rig.position.set(0, 0, 0); rig.scale.setScalar(1.08); rig.rotation.set(0, 0, 0);
       orbit.visible = true; orbit.scale.setScalar(1);
       orbit.rotation.set(1.0 + Math.sin(time * .35) * .18 - mouseY * .35, .25 + Math.cos(time * .27) * .2 + mouseX * .45, -.5 + time * .12);
       const a = time * .8;
-      star.position.set(Math.cos(a) * R, Math.sin(a) * R, 0); star.rotation.set(0, 0, a * 2); star.scale.setScalar(.3); star.visible = true;
+      star.position.set(Math.cos(a) * R, Math.sin(a) * R, 0); star.rotation.set(0, 0, a * 2); star.scale.setScalar(.6); star.visible = true;
       renderer.render(scene, camera);
       if (!shown) { shown = true; host.classList.add('live'); }
       frameNo++;

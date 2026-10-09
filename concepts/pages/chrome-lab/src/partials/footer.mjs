@@ -13,7 +13,7 @@ export function footer(ctx, page) {
       <span class="mono">WEAR THE UNKNOWN</span>
       <p class="foot-cad mono">PRICES IN CAD</p>
     </div>
-    <nav class="foot-nav" aria-label="Footer">
+    <nav class="foot-nav site" aria-label="Footer">
       <span class="mono foot-h">SITE</span>
       <a href="${ctx.href('')}">Home</a>
       ${NAV.map(([, label, to]) => `<a href="${ctx.href(to)}">${label}</a>`).join('\n      ')}
@@ -29,7 +29,7 @@ export function footer(ctx, page) {
       <span class="mono foot-h">SIGNAL</span>
       <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">Instagram ${ic('ne')}</a>
       <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
-      <a href="${ctx.href('contact/')}">Drop alerts</a>
+      <a href="${ctx.href('contact/#signal')}">Drop alerts</a>
     </nav>
   </div>
   <p class="foot-base mono">© <span id="year">${year}</span> MONOCHROME®. All rights reserved. Prices in CAD.</p>

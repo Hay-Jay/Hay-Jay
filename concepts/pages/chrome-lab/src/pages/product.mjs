@@ -34,9 +34,8 @@ export default function product(ctx, x) {
   // ---------- gallery (all photos, server-rendered) ----------
   const shots = p.images.map((im, i) => {
     const r = im.w / im.h;
-    const fit = r >= 0.7 && r <= 1.2 ? 'cover' : 'contain';
     const w = 1400, h = Math.round(w / r);
-    return `<li class="${i === 0 ? 'on' : ''}" data-fit="${fit}" style="--bd:url('${esc(sized(im.src, 48))}')">
+    return `<li class="${i === 0 ? 'on' : ''}" style="--bd:url('${esc(sized(im.src, 48))}')">
             <img src="${esc(sized(im.src, w))}" srcset="${srcset(im.src, [700, 1000, 1400, 1800])}" sizes="(min-width:1000px) 54vw, 100vw" alt="${esc(x.n)}, photo ${i + 1} of ${p.images.length}" width="${w}" height="${h}" ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" data-img>
           </li>`;
   }).join('\n          ');
@@ -146,8 +145,8 @@ export default function product(ctx, x) {
   <section class="pdp-more" aria-label="Shipping, returns and sizing">
     <div class="wrap more-grid">
       <article class="glass"><span class="mono">01 / SHIPPING</span><h2>Worldwide</h2><p>${esc(shipNote)}</p><a href="${ctx.href('shipping/')}">See every destination ${ic('right')}</a></article>
-      <article class="glass"><span class="mono">02 / RETURNS</span><h2>If it is not right</h2><p>Contact us soon after your order arrives with your order number. Items should be unworn and in original condition.</p><a href="${ctx.href('shipping/#returns')}">Returns &amp; exchanges ${ic('right')}</a></article>
-      <article class="glass"><span class="mono">03 / SIZING</span><h2>Finding your size</h2><p>${x.t === 'gift' ? 'Gift cards need no size. Pick an amount above.' : 'Between two sizes, go up. Not sure? Message us and we will help you choose.'}</p><a href="${ctx.href('shipping/#size')}">Size guidance ${ic('right')}</a></article>
+      <article class="glass"><span class="mono">02 / RETURNS</span><h2>If it is not right</h2><p>Contact us soon after your order arrives with your order number. The store's returns policy has the final word.</p><a href="${ctx.href('shipping/#returns')}">Returns &amp; exchanges ${ic('right')}</a></article>
+      <article class="glass"><span class="mono">03 / SIZING</span><h2>Finding your size</h2><p>${x.t === 'gift' ? 'Gift cards need no size. Pick an amount above.' : 'Pick from the sizes listed above. Between two sizes, going up is the safe choice. Not sure? Message us and we will help you choose.'}</p><a href="${ctx.href('shipping/#size')}">Size guidance ${ic('right')}</a></article>
     </div>
   </section>
 

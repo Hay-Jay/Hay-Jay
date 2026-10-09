@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script>(function(){var p=location.pathname;if(!/\/404\.html$/.test(p)&&location.protocol!=='file:')document.write('<base href="'+location.origin+'/">')})()</script>
+<script>(function(){var p=location.pathname;if(/\/404\.html$/.test(p)||location.protocol==='file:')return;document.write('<base href="'+location.origin+'/">');addEventListener('DOMContentLoaded',function(){document.querySelectorAll('a[href^="#"]').forEach(function(a){a.setAttribute('href',location.pathname+location.search+a.getAttribute('href'))})})})()</script>
 <meta name="theme-color" content="#070707">
 <title>Lost — Page missing from this issue — MONOCHROME®</title>
 <meta name="description" content="This page is missing from the issue. Go back to the cover, the index or the lookbook.">

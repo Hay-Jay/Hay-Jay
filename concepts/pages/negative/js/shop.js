@@ -50,9 +50,11 @@
   }
 
   // ---- render ------------------------------------------------------------------------
+  const BASE_TITLE = document.title, CAT_TITLE = { top: 'Tops', bottom: 'Bottoms', accessory: 'Objects', gift: 'Gift cards' };
   function apply() {
     const q = state.q.trim().toLowerCase();
     root.dataset.view = state.v;
+    document.title = state.c === 'all' ? BASE_TITLE : `${CAT_TITLE[state.c]} — The Index — MONOCHROME®`;
     if (state.c === 'all') delete root.dataset.c; else root.dataset.c = state.c;
     $$('.filter').forEach(b => { const on = b.dataset.filter === state.c; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     $$('.view').forEach(b => { const on = b.dataset.view === state.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });

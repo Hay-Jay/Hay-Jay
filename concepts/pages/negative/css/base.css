@@ -360,6 +360,7 @@ html.vt-back::view-transition-new(root) { animation-name: vt-in-back; }
   .plate img { filter: grayscale(1) contrast(1.35) brightness(.95); transform: none; }
 }
 html.reduce .ticker-t { animation: none; }
+@media print { .rv, .rv-lines .ln > span { clip-path: none !important; transform: none !important; opacity: 1 !important; } .bar, .menu, body::after { display: none !important; } }
 
 /* ---- optical size ------------------------------------------------------------------
    Big Bodoni at its automatic optical size has hairlines the print grain swallows, so display sizes are

@@ -10,7 +10,7 @@ export default function about(ctx) {
     return { k, label: CAT[k], n: list.length, pic: list.find(x => x.main) };
   });
   const body = `
-  <section class="ed-head" aria-labelledby="aboutH">
+  <section class="ed-head ab-head" aria-labelledby="aboutH">
     <div class="wrap">
       <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="${ctx.href('')}">Home</a></li><li aria-current="page">About</li></ol></nav>
       <span class="eyebrow">03 / THE FORMULA</span>
@@ -19,14 +19,18 @@ export default function about(ctx) {
     </div>
   </section>
 
-  <section class="ed-sec" aria-labelledby="palH">
+  <section class="ed-sec eq-sec" aria-labelledby="eqH">
     <div class="wrap">
-      <div class="sec-head"><span class="eyebrow">THE PALETTE</span><h2 id="palH" class="h2">Three materials of light</h2></div>
-      <ul class="palette">
-        <li class="glass pal-black"><span class="pal-sw" aria-hidden="true"></span><h3>Black</h3><p>The base tone. It takes the light and gives nothing back, so everything placed against it reads clearly.</p><span class="mono">#050505</span></li>
-        <li class="glass pal-white"><span class="pal-sw" aria-hidden="true"></span><h3>White</h3><p>The contrast. A hard edge of white cuts through the dark and keeps a look sharp from across the street.</p><span class="mono">#F2F2F2</span></li>
-        <li class="glass pal-chrome"><span class="pal-sw" aria-hidden="true"></span><h3>Chrome</h3><p>The finish. Rings, chains, necklaces and small details that catch whatever light is in the room.</p><span class="mono">MIRROR</span></li>
-      </ul>
+      <div class="sec-head"><span class="eyebrow">THE EQUATION</span><h2 id="eqH" class="h2">Three materials of light</h2></div>
+      <ol class="eq">
+        <li class="glass eq-t pal-black"><span class="pal-sw" aria-hidden="true"></span><h3>Black</h3><p>The base tone. It takes the light and gives nothing back, so everything placed against it reads clearly.</p><span class="mono">#050505</span></li>
+        <li class="eq-op" aria-hidden="true">+</li>
+        <li class="glass eq-t pal-white"><span class="pal-sw" aria-hidden="true"></span><h3>White</h3><p>The contrast. A hard edge of white cuts through the dark and keeps a look sharp from across the street.</p><span class="mono">#F2F2F2</span></li>
+        <li class="eq-op" aria-hidden="true">+</li>
+        <li class="glass eq-t pal-chrome"><span class="pal-sw" aria-hidden="true"></span><h3>Chrome</h3><p>The finish. Rings, chains, necklaces and small details that catch whatever light is in the room.</p><span class="mono">MIRROR</span></li>
+        <li class="eq-op" aria-hidden="true">=</li>
+        <li class="glass eq-t eq-res"><span class="eq-emblem"><img src="${ctx.asset('assets/emblem-a.webp')}" alt="" width="299" height="322" loading="lazy"></span><h3>Monochrome<sup>®</sup></h3><p>Wear the unknown.</p><span class="mono">ONE SYSTEM</span></li>
+      </ol>
     </div>
   </section>
 
@@ -35,7 +39,7 @@ export default function about(ctx) {
       <div class="sec-head"><span class="eyebrow">THE FORMULA</span><h2 id="ruleH" class="h2">Four rules</h2><p class="sec-p">The brand runs on a short list, and every drop is measured against it.</p></div>
       <ol class="rules">
         <li class="glass"><b class="sp-n chrome">01</b><div><h3>Two tones</h3><p>A strict palette means every piece mixes with every other piece. You never have to ask whether it goes.</p></div></li>
-        <li class="glass"><b class="sp-n chrome">02</b><div><h3>Small runs</h3><p>Pieces are made in limited drops, so what you wear is not on everyone else. Some pieces return. Some do not.</p></div></li>
+        <li class="glass"><b class="sp-n chrome">02</b><div><h3>Small runs</h3><p>Pieces are made in small runs, so what you wear is not on everyone else. Drops are limited, and some pieces do not return.</p></div></li>
         <li class="glass"><b class="sp-n chrome">03</b><div><h3>Chrome finish</h3><p>Hardware, objects and details with a mirror edge. They are there to catch the light, not to shout.</p></div></li>
         <li class="glass"><b class="sp-n chrome">04</b><div><h3>Made to mix</h3><p>Tops, bottoms and objects are one system. Put a chain over a hoodie or a ring with a jersey and it still reads as one outfit.</p></div></li>
       </ol>
@@ -69,7 +73,7 @@ export default function about(ctx) {
         <p>MONOCHROME® is based in ${st.city}, ${st.province}, Canada. The store ships worldwide, including Nigeria, and shoppers pay in Canadian dollars.</p>
         <p>Shipping rates are calculated at checkout from your address. Standard shipping inside Canada is free.</p>
         <div class="actions"><a class="btn solid" href="${ctx.href('shipping/')}">Shipping &amp; returns ${ic('right')}</a><a class="btn ghost glass" href="${ctx.href('gallery/')}">Walk the gallery</a></div>
-        <a class="event mono" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">ARCHIVE / EVENT: MONOCHROME FASHION SHOW 2025 ${ic('ne')}</a>
+        <a class="ev-link mono" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">ARCHIVE / EVENT: MONOCHROME FASHION SHOW 2025 ${ic('ne')}</a>
       </div>
     </div>
   </section>`;
