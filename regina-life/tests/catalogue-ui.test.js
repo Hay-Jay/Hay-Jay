@@ -7,6 +7,7 @@ import * as M from '../src/ui/catalogue-model.js';
 import * as THREE from 'three';
 import { makeThumbs, frameBox, createGLRenderer, ISO_DIR } from '../src/ui/thumbs.js';
 import { furnitureModel } from '../src/world/furnitureModels.js';
+import { Catalogue, tabsHTML, bodyHTML } from '../src/ui/catalogue.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 const fmt = (c) => '$' + (c / 100).toFixed(2);
@@ -255,5 +256,174 @@ describe('thumbs: every catalogue model can be framed', () => {
       const cam = frameBox(new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 50), box); expect(cam.right - cam.left, id).toBeGreaterThan(0.2);
       for (const v of [cam.left, cam.right, cam.top, cam.bottom, cam.far]) expect(Number.isFinite(v), id).toBe(true);
     }
+  });
+});
+
+/* ---------------------------------------------------------------- the sheet (tiny fake DOM) */
+class El {
+  constructor(tag = 'div') { this.tag = tag; this.memo = new Map(); this.handlers = {}; this.dataset = {}; this.attrs = {}; this.style = {}; this.classes = new Set(); this.hidden = false; this.scrollTop = 0; this.scrollLeft = 0; this.offsetHeight = 480; this.focusCalls = 0; this._html = ''; this.children = []; }
+  get classList() { return { add: (c) => this.classes.add(c), remove: (c) => this.classes.delete(c), contains: (c) => this.classes.has(c) }; }
+  set innerHTML(v) { this._html = String(v); this.memo.clear(); } get innerHTML() { return this._html; }
+  set textContent(v) { this._text = String(v); } get textContent() { return this._text ?? ''; }
+  querySelector(sel) { if (!this.memo.has(sel)) this.memo.set(sel, new El()); return this.memo.get(sel); }
+  querySelectorAll() { return []; }
+  addEventListener(t, fn) { (this.handlers[t] ||= []).push(fn); }
+  dispatch(t, ev) { for (const fn of this.handlers[t] ?? []) fn(ev); }
+  setAttribute(k, v) { this.attrs[k] = v; } getAttribute(k) { return this.attrs[k]; }
+  appendChild(c) { this.children.push(c); return c; } remove() { this.removed = true; } contains() { return false; }
+  focus() { this.focusCalls++; globalThis.document.activeElement = this; } setPointerCapture() {}
+  get offsetWidth() { return 100; }
+}
+/** An event whose target.closest(sel) returns a fake [data-act] element carrying the given dataset. */
+const tap = (dataset, extra = {}) => ({ target: { closest: (sel) => (sel === '[data-act]' ? { dataset } : null) }, ...extra });
+const keyEv = (key, extra = {}) => ({ key, preventDefault: vi.fn(), stopPropagation: vi.fn(), ...extra });
+
+describe('Catalogue sheet', () => {
+  let win, build, audio, toasts, changes, cat;
+  const env = () => {
+    win = {}; globalThis.document = { createElement: (t) => new El(t), body: new El('body'), activeElement: null };
+    globalThis.addEventListener = vi.fn((t, f) => { win[t] = f; }); globalThis.removeEventListener = vi.fn((t) => { delete win[t]; }); globalThis.matchMedia = () => ({ matches: false }); globalThis.innerHeight = 800;
+  };
+  const make = (over = {}) => {
+    build = { active: false, start: vi.fn(function () { this.active = true; }), select: vi.fn(), refresh: vi.fn(), layout: vi.fn() }; audio = { blip: vi.fn() }; toasts = []; changes = [];
+    cat = new Catalogue({ store, build, audio, toast: (m, k) => toasts.push([m, k]), fmtMoney: fmt, thumbs: over.thumbs ?? null, onChange: (d) => changes.push(d), ...over.opts });
+    return cat;
+  };
+  beforeEach(() => { vi.useFakeTimers(); env(); });
+  afterEach(() => { vi.useRealTimers(); for (const k of ['document', 'addEventListener', 'removeEventListener', 'matchMedia', 'innerHeight']) delete globalThis[k]; });
+  const firstCard = (tabId = M.defaultTab()) => M.tabView(store.state, tabId, 0).cards[0];
+
+  it('mounts hidden, opens with a slide-in class, shows balance, banner, tabs and cards', () => {
+    make(); expect(globalThis.document.body.children).toContain(cat.root); expect(cat.root.hidden).toBe(true); expect(cat.isOpen).toBe(false);
+    cat.open(); expect(cat.isOpen).toBe(true); expect(cat.root.hidden).toBe(false); expect(cat.root.classes.has('open')).toBe(true);
+    expect(cat.$bal.textContent).toBe(fmt(bal())); expect(cat.$banner.textContent).toBe(M.bannerText());
+    const c = firstCard(); expect(cat.$tabs.innerHTML).toContain('role="tab"'); expect(cat.$body.innerHTML).toContain(c.name); expect(cat.$body.innerHTML).toContain(fmt(c.price)); expect(cat.$body.innerHTML).toContain(c.sizeLabel);
+    expect(win.keydown).toBeTypeOf('function'); expect(build.layout).toHaveBeenCalled(); expect(audio.blip).toHaveBeenCalledWith('tick');
+  });
+  it('close() slides out, hides after the animation, removes the key listener; toggle works; reduced motion hides at once', () => {
+    make(); cat.open(); cat.close(); expect(cat.isOpen).toBe(false); expect(cat.root.classes.has('open')).toBe(false); expect(cat.root.hidden).toBe(false);
+    vi.advanceTimersByTime(400); expect(cat.root.hidden).toBe(true); expect(win.keydown).toBeUndefined();
+    cat.toggle(); expect(cat.isOpen).toBe(true); cat.toggle(); expect(cat.isOpen).toBe(false);
+    globalThis.matchMedia = () => ({ matches: true }); cat.open(); cat.close(); expect(cat.root.hidden).toBe(true);
+  });
+  it('open(tab) accepts ids, labels and "storage"; remembers the last tab; unknown tabs fall back', () => {
+    make(); const cats = M.categories().filter((c) => c.id !== M.TAB_DESIGN), pick = cats[1]?.id ?? cats[0].id;
+    cat.open(pick); expect(cat.tab).toBe(pick); cat.close(); cat.open(); expect(cat.tab).toBe(pick); cat.close();
+    cat.open('Design'); expect(cat.tab).toBe(M.TAB_DESIGN); cat.close(); cat.open('storage'); expect(cat.tab).toBe(M.TAB_STORAGE); cat.close(); cat.open('zzz'); expect(cat.tab).toBe(M.TAB_STORAGE);
+    cat.setTab(M.TAB_DESIGN); expect(cat.tab).toBe(M.TAB_DESIGN); expect(cat.$body.innerHTML).toContain('Walls'); expect(cat.$body.innerHTML).toContain('Floors');
+  });
+  it('tapping an affordable card buys it, starts build mode quietly, hands it over and hides the sheet', () => {
+    make(); cat.open(); const c = firstCard(), b0 = bal();
+    cat.root.dispatch('click', tap({ act: 'buy', id: c.id }));
+    expect(b0 - bal()).toBe(c.price); expect(H.ownedCount(store.state, c.id)).toBe(1);
+    expect(build.start).toHaveBeenCalledWith({ quiet: true }); expect(build.select).toHaveBeenCalledWith({ type: c.id, id: null }); expect(build.start.mock.invocationCallOrder[0]).toBeLessThan(build.select.mock.invocationCallOrder[0]);
+    expect(cat.isOpen).toBe(false); expect(toasts[0]).toEqual([`Bought ${c.name} · ${fmt(c.price)}`, 'good']); expect(audio.blip).toHaveBeenCalledWith('cash'); expect(changes).toEqual([{ kind: 'buy', type: c.id, price: c.price }]);
+  });
+  it('does not restart build mode when it is already active', () => {
+    make(); build.active = true; cat.open(); const c = firstCard(); cat.root.dispatch('click', tap({ act: 'buy', id: c.id })); expect(build.start).not.toHaveBeenCalled(); expect(build.select).toHaveBeenCalledWith({ type: c.id, id: null });
+  });
+  it('an unaffordable tap buys nothing, says how much is missing, and keeps the sheet open', () => {
+    make(); const c = firstCard(); store.state.bank.balance = c.price - 250; cat.open(); expect(cat.$body.innerHTML).toContain('is-poor'); expect(cat.$body.innerHTML).toContain(`Need ${fmt(250)} more`);
+    cat.root.dispatch('click', tap({ act: 'buy', id: c.id }));
+    expect(bal()).toBe(c.price - 250); expect(H.ownedCount(store.state, c.id)).toBe(0); expect(cat.isOpen).toBe(true); expect(build.select).not.toHaveBeenCalled();
+    expect(toasts[0]).toEqual([`Need ${fmt(250)} more`, 'warn']); expect(audio.blip).toHaveBeenCalledWith('error'); expect(changes).toEqual([]);
+  });
+  it('outside the apartment (canBuild false) it still buys, leaves the piece in storage and does not touch build mode', () => {
+    make({ opts: { canBuild: () => false } }); cat.open(); const c = firstCard(); cat.root.dispatch('click', tap({ act: 'buy', id: c.id }));
+    expect(H.availableToPlace(store.state, c.id)).toBe(1); expect(build.start).not.toHaveBeenCalled(); expect(build.select).not.toHaveBeenCalled(); expect(cat.isOpen).toBe(true); expect(toasts.at(-1)[1]).toBe('info');
+    expect(cat.$tabs.innerHTML).toContain('cat-tab-n'); // storage badge appears
+  });
+  it('works without a build mode at all (sheet-only)', () => {
+    make({ opts: { build: null } }); cat.open(); const c = firstCard(); cat.root.dispatch('click', tap({ act: 'buy', id: c.id })); expect(H.ownedCount(store.state, c.id)).toBe(1);
+  });
+  it('the In storage tab lists owned-unplaced pieces; Place hands one to build mode, Sell pays the sell ratio', () => {
+    const id = Object.keys(FD.FURNITURE)[0], def = FD.FURNITURE[id], refund = Math.floor(def.price * FD.SELL_RATIO); H.buyFurniture(store, id); H.buyFurniture(store, id);
+    make(); cat.open(M.TAB_STORAGE); expect(cat.$body.innerHTML).toContain('2 in storage'); expect(cat.$body.innerHTML).toContain('data-act="place"'); expect(cat.$body.innerHTML).toContain(`Sell · ${fmt(refund)}`);
+    const b0 = bal(); cat.root.dispatch('click', tap({ act: 'sell', id })); expect(bal() - b0).toBe(refund); expect(H.availableToPlace(store.state, id)).toBe(1);
+    expect(toasts.at(-1)).toEqual([`Sold ${def.name} for ${fmt(refund)}`, 'good']); expect(build.refresh).toHaveBeenCalled(); expect(cat.isOpen).toBe(true); expect(cat.$body.innerHTML).toContain('1 in storage');
+    cat.root.dispatch('click', tap({ act: 'place', id })); expect(build.select).toHaveBeenCalledWith({ type: id, id: null }); expect(cat.isOpen).toBe(false); expect(changes.map((x) => x.kind)).toEqual(['sell', 'place']);
+  });
+  it('an empty storage tab explains itself', () => { make(); cat.open(M.TAB_STORAGE); expect(cat.$body.innerHTML).toContain('Nothing in storage'); });
+  it('the Design tab paints and floors from the sheet, stays open and reports the change', () => {
+    make(); cat.open('design'); const b0 = bal(); cat.root.dispatch('click', tap({ act: 'style', kind: 'wall', key: 'sage' }));
+    expect(b0 - bal()).toBe(FD.WALL_PRICE); expect(store.state.home.wall).toBe('sage'); expect(cat.isOpen).toBe(true); expect(changes).toEqual([{ kind: 'style', style: 'wall', key: 'sage', paid: FD.WALL_PRICE }]);
+    expect(cat.$body.innerHTML).toContain('In use'); cat.root.dispatch('click', tap({ act: 'style', kind: 'wall', key: 'cream' })); expect(bal()).toBe(b0 - FD.WALL_PRICE); expect(store.state.home.wall).toBe('cream');
+    store.state.bank.balance = 5; cat.root.dispatch('click', tap({ act: 'style', kind: 'floor', key: 'walnut' })); expect(store.state.home.floor).toBe('oak'); expect(toasts.at(-1)[1]).toBe('warn');
+  });
+  it('Hide button, scrim and the "+N in storage" chip route through data-act', () => {
+    H.buyFurniture(store, 'plant'); make(); cat.open(); expect(cat.$chip.hidden).toBe(false); expect(cat.$chip.textContent).toBe('+1 in storage');
+    cat.root.dispatch('click', tap({ act: 'tab', id: M.TAB_STORAGE })); expect(cat.tab).toBe(M.TAB_STORAGE); expect(cat.$chip.hidden).toBe(true);
+    cat.root.dispatch('click', tap({ act: 'hide' })); expect(cat.isOpen).toBe(false);
+    cat.root.dispatch('click', { target: { closest: () => null } }); cat.root.dispatch('click', { target: null }); // stray clicks are ignored
+  });
+  it('Esc hides the sheet and marks that very key event so build mode does not also exit', () => {
+    make(); cat.open(); const other = keyEv('a'); win.keydown(other); expect(cat.isOpen).toBe(true);
+    const esc = keyEv('Escape'); win.keydown(esc); expect(cat.isOpen).toBe(false); expect(esc.preventDefault).toHaveBeenCalled(); expect(esc.stopPropagation).toHaveBeenCalled(); expect(cat.closedBy(esc)).toBe(true); expect(cat.closedBy(keyEv('Escape'))).toBe(false); expect(cat.closedBy(null)).toBe(false);
+  });
+  it('tabs are a roving list: arrows, Home and End move and select', () => {
+    make(); cat.open(); const ids = M.tabList(store.state).map((x) => x.id), k = (key, id) => ({ ...keyEv(key), target: { closest: (sel) => (sel === '[role="tab"]' ? { dataset: { id } } : null) } });
+    cat.root.dispatch('keydown', k('ArrowRight', cat.tab)); expect(cat.tab).toBe(ids[ids.indexOf(M.defaultTab()) + 1]);
+    cat.root.dispatch('keydown', k('End', cat.tab)); expect(cat.tab).toBe(ids.at(-1)); cat.root.dispatch('keydown', k('ArrowRight', cat.tab)); expect(cat.tab).toBe(ids[0]);
+    cat.root.dispatch('keydown', k('ArrowLeft', cat.tab)); expect(cat.tab).toBe(ids.at(-1)); cat.root.dispatch('keydown', k('Home', cat.tab)); expect(cat.tab).toBe(ids[0]);
+    expect(cat.$tabs.querySelector('.cat-tab.on').focusCalls).toBeGreaterThan(0);
+  });
+  it('Tab keeps focus inside the sheet (wraps at both ends)', () => {
+    make(); cat.open(); const els = [new El(), new El(), new El()]; for (const e of els) e.getAttribute = () => null; cat.sheet.querySelectorAll = () => els;
+    globalThis.document.activeElement = els[2]; const fwd = keyEv('Tab'); cat.root.dispatch('keydown', fwd); expect(fwd.preventDefault).toHaveBeenCalled(); expect(els[0].focusCalls).toBe(1);
+    globalThis.document.activeElement = els[0]; const back = keyEv('Tab', { shiftKey: true }); cat.root.dispatch('keydown', back); expect(els[2].focusCalls).toBe(1);
+    globalThis.document.activeElement = els[1]; const mid = keyEv('Tab'); cat.root.dispatch('keydown', mid); expect(mid.preventDefault).not.toHaveBeenCalled();
+  });
+  it('refresh() redraws on balance/state changes and skips the DOM when nothing changed', () => {
+    make(); cat.open(); const html = cat.$body.innerHTML, c = firstCard(); let writes = 0; const orig = Object.getOwnPropertyDescriptor(El.prototype, 'innerHTML');
+    Object.defineProperty(cat.$body, 'innerHTML', { set(v) { writes++; orig.set.call(this, v); }, get() { return orig.get.call(this); }, configurable: true });
+    cat.refresh(); expect(writes).toBe(0); expect(cat.$body.innerHTML).toBe(html);
+    store.state.bank.balance = 123; cat.refresh(); expect(writes).toBe(1); expect(cat.$bal.textContent).toBe(fmt(123)); expect(cat.$body.innerHTML).toContain('is-poor'); expect(cat.$body.innerHTML).toContain(fmt(c.price));
+  });
+  it('re-renders itself when the store commits while open, and stops listening when closed', () => {
+    make(); cat.open(); const c = firstCard(); H.buyFurniture(store, c.id); expect(cat.$body.innerHTML).toContain('+1 in storage'); cat.close();
+    const html = cat.$body.innerHTML; H.buyFurniture(store, c.id); expect(cat.$body.innerHTML).toBe(html);
+  });
+  it('thumbnails: cached ones show immediately, others fill in when ready; only the visible tab is requested', async () => {
+    const cards = M.tabView(store.state, M.defaultTab(), 0).cards, [a, b] = cards, requested = [];
+    const th = { peek: (id) => (id === a.id ? 'data:A' : null), get: (id, o) => { requested.push([id, o.priority]); return Promise.resolve(id === b.id ? 'data:B' : null); } };
+    make({ thumbs: th }); cat.open(); await Promise.resolve(); await Promise.resolve();
+    expect(cat.$body.querySelector(`img[data-thumb="${a.id}"]`).src).toBe('data:A'); expect(cat.$body.querySelector(`img[data-thumb="${b.id}"]`).src).toBe('data:B');
+    expect(requested.map((x) => x[0])).not.toContain(a.id); expect(requested.map((x) => x[0])).toContain(b.id); expect(requested.length).toBe(cards.length - 1);
+    const p1 = requested[0][1]; requested.length = 0; cat.setTab(M.TAB_DESIGN); expect(requested).toEqual([]); // swatches need no thumbnails
+    cat.setTab(M.defaultTab()); expect(requested.length).toBeGreaterThan(0); expect(requested[0][1]).toBeGreaterThan(p1); // newer tab = higher priority
+  });
+  it('a failed thumbnail (null) leaves the colour swatch', async () => {
+    make({ thumbs: { peek: () => null, get: () => Promise.resolve(null) } }); cat.open(); await Promise.resolve(); await Promise.resolve();
+    expect(cat.$body.querySelector(`img[data-thumb="${firstCard().id}"]`).src).toBeUndefined();
+  });
+  it('dragging the handle down dismisses; a short drag springs back; a tap on the handle hides', () => {
+    make(); cat.open(); const ev = (type, y, t, target = { closest: () => null }) => ({ type, clientY: y, pointerId: 1, timeStamp: t, button: 0, target });
+    cat.$top.dispatch('pointerdown', ev('pointerdown', 100, 0)); cat.$top.dispatch('pointermove', ev('pointermove', 140, 100)); expect(cat.sheet.style.transform).toBe('translateY(40px)');
+    cat.$top.dispatch('pointerup', ev('pointerup', 140, 900)); expect(cat.isOpen).toBe(true); expect(cat.sheet.style.transform).toBe('');
+    cat.$top.dispatch('pointerdown', ev('pointerdown', 100, 0)); cat.$top.dispatch('pointermove', ev('pointermove', 400, 200)); cat.$top.dispatch('pointerup', ev('pointerup', 400, 300)); expect(cat.isOpen).toBe(false);
+    cat.open(); const handle = { closest: (s) => (s === '.cat-grab' ? {} : null) }; cat.$top.dispatch('pointerdown', ev('pointerdown', 100, 0, handle)); cat.$top.dispatch('pointerup', ev('pointerup', 100, 120, handle)); expect(cat.isOpen).toBe(false);
+    cat.open(); const btn = { closest: (s) => (s === 'button' ? {} : null) }; cat.$top.dispatch('pointerdown', ev('pointerdown', 100, 0, btn)); cat.$top.dispatch('pointerup', ev('pointerup', 100, 100, btn)); expect(cat.isOpen).toBe(true);
+  });
+  it('height is the sheet height while open and 0 when hidden', () => { make(); expect(cat.height).toBe(0); cat.open(); expect(cat.height).toBe(480); cat.close(); expect(cat.height).toBe(0); });
+  it('accepts the "change" option as an alias of onChange, and a throwing callback never breaks a purchase', () => {
+    const seen = []; make({ opts: { onChange: null, change: (d) => seen.push(d.kind) } }); cat.open(); cat.root.dispatch('click', tap({ act: 'buy', id: firstCard().id })); expect(seen).toEqual(['buy']);
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {}); make({ opts: { onChange: () => { throw new Error('x'); } } }); cat.open(); const c = firstCard(), n0 = H.ownedCount(store.state, c.id); cat.root.dispatch('click', tap({ act: 'buy', id: c.id })); expect(H.ownedCount(store.state, c.id)).toBe(n0 + 1); err.mockRestore();
+  });
+});
+
+describe('Catalogue markup (pure strings)', () => {
+  it('tabs: one selected tab, roving tabindex, storage badge, escaped labels', () => {
+    const html = tabsHTML([{ id: 'a', label: 'A<b>', emoji: '🛏️', kind: 'category' }, { id: M.TAB_STORAGE, label: 'In storage', emoji: '📦', kind: 'storage', count: 3 }], 'a');
+    expect(html.match(/aria-selected="true"/g)).toHaveLength(1); expect(html).toContain('tabindex="0"'); expect(html).toContain('tabindex="-1"'); expect(html).toContain('A&lt;b&gt;'); expect(html).toContain('>3<');
+  });
+  it('cards: size tag, stars, owned badge, unaffordable hint, aria-label with the price; no raw markup injection', () => {
+    H.buyFurniture(store, 'armchair'); const tab = M.categories().find((c) => M.tabView(store.state, c.id, 0).cards.some((x) => x.id === 'armchair')).id, view = M.tabView(store.state, tab, 0);
+    const html = bodyHTML(view, fmt), c = view.cards.find((x) => x.id === 'armchair');
+    expect(html).toContain(`>${c.sizeLabel}<`); expect(html).toContain('★'.repeat(c.stars)); expect(html).toContain('×1'); expect(html).toContain('+1 in storage'); expect(html).toContain(`Need ${fmt(c.price)} more`); expect(html).toContain(`aria-label="${M.cardLabel(c, fmt)}`);
+    expect(bodyHTML({ kind: 'category', sections: [{ id: 'x', label: null, cards: [] }], cards: [], empty: '<img onerror=x>' }, fmt)).not.toContain('<img onerror');
+  });
+  it('design swatches: pressed state, material hint, first-time price', () => {
+    const html = bodyHTML(M.tabView(store.state, M.TAB_DESIGN, 0), fmt);
+    expect(html).toContain('aria-pressed="true"'); expect(html).toContain('data-mat="tile"'); expect(html).toContain('data-mat="wood"'); expect(html).toContain('In use'); expect(html).toContain(fmt(FD.WALL_PRICE)); expect(html).toContain(`${fmt(FD.FLOOR_PRICE)} the first time`);
   });
 });
