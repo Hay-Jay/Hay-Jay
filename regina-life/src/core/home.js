@@ -22,9 +22,11 @@ export const storageCount = (s) => storageItems(s).reduce((n, x) => n + x.n, 0);
 const CELL = 0.25, PLAYER_R = 0.38, COLS = Math.round((ROOM.x1 - ROOM.x0) / CELL), ROWS = Math.round((ROOM.z1 - ROOM.z0) / CELL);
 const cx = (c) => ROOM.x0 + (c + 0.5) * CELL, cz = (r) => ROOM.z0 + (r + 0.5) * CELL;
 const distToRect = (x, z, r) => Math.hypot(Math.max(r.x0 - x, 0, x - r.x1), Math.max(r.z0 - z, 0, z - r.z1));
+/** Cells whose centre lies within `pad` of a rect (a window of the grid, so only the cells that can matter are visited). */
+function cellWindow(r, pad) { return { c0: Math.max(0, Math.floor((r.x0 - pad - ROOM.x0) / CELL - 0.5)), c1: Math.min(COLS - 1, Math.ceil((r.x1 + pad - ROOM.x0) / CELL - 0.5)), r0: Math.max(0, Math.floor((r.z0 - pad - ROOM.z0) / CELL - 0.5)), r1: Math.min(ROWS - 1, Math.ceil((r.z1 + pad - ROOM.z0) / CELL - 0.5)) }; }
 function walkable(obstacles) {
-  const free = new Uint8Array(COLS * ROWS);
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { const x = cx(c), z = cz(r); let ok = 1; for (const o of obstacles) if (distToRect(x, z, o) < PLAYER_R) { ok = 0; break; } free[r * COLS + c] = ok; }
+  const free = new Uint8Array(COLS * ROWS).fill(1);
+  for (const o of obstacles) { const w = cellWindow(o, PLAYER_R); for (let r = w.r0; r <= w.r1; r++) for (let c = w.c0; c <= w.c1; c++) if (distToRect(cx(c), cz(r), o) < PLAYER_R) free[r * COLS + c] = 0; }
   return free;
 }
 /** Which key points can the player still reach from the entrance? */
@@ -35,7 +37,7 @@ function accessible(obstacles) {
   const out = new Set(); if (best < 0) return out;
   const q = [best]; seen[best] = 1;
   while (q.length) { const i = q.pop(), r = (i / COLS) | 0, c = i % COLS; for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nr = r + dr, nc = c + dc; if (nr < 0 || nc < 0 || nr >= ROWS || nc >= COLS) continue; const j = nr * COLS + nc; if (free[j] && !seen[j]) { seen[j] = 1; q.push(j); } } }
-  for (const k of KEY_POINTS) { let hit = false; for (let r = 0; r < ROWS && !hit; r++) for (let c = 0; c < COLS; c++) if (seen[r * COLS + c] && Math.hypot(cx(c) - k.x, cz(r) - k.z) <= 1.1) { hit = true; break; } if (hit) out.add(k.n); }
+  for (const k of KEY_POINTS) { let hit = false; const w = cellWindow({ x0: k.x, x1: k.x, z0: k.z, z1: k.z }, 1.1); for (let r = w.r0; r <= w.r1 && !hit; r++) for (let c = w.c0; c <= w.c1; c++) if (seen[r * COLS + c] && Math.hypot(cx(c) - k.x, cz(r) - k.z) <= 1.1) { hit = true; break; } if (hit) out.add(k.n); }
   return out;
 }
 const solidRects = (s, ignoreId = null) => (Array.isArray(s.home?.placed) ? s.home.placed : []).filter((p) => p.id !== ignoreId && itemDef(p.type)?.solid).map((p) => { const f = footprint(p.type, p.rot); return rect(p.x, p.z, f.w, f.d); });
@@ -61,7 +63,7 @@ export function canPlace(s, type, x, z, rot = 0, ignoreId = null) {
   const clearOnly = def.solid; // rugs/posters may sit anywhere inside the room except right on fixtures that would hide them
   if (def.solid || def.poster) for (const k of KEEPOUT) if (hit(r, k)) return { ok: false, error: `Blocked by the ${k.n}` };
   if (def.solid) for (const p of Array.isArray(s.home?.placed) ? s.home.placed : []) { if (p.id === ignoreId) continue; const pd = itemDef(p.type); if (!pd.solid) continue; const pf = footprint(p.type, p.rot); if (hit(r, rect(p.x, p.z, pf.w, pf.d))) return { ok: false, error: 'Overlaps other furniture' }; }
-  if (def.solid) { const gone = missingKeys([...FIXTURES, ...solidRects(s, ignoreId), r]), before = missingKeys([...FIXTURES, ...solidRects(s, ignoreId)]); const worse = gone.filter((n) => !before.includes(n)); if (worse.length) return { ok: false, error: `Blocks the way to the ${worse[0]}` }; }
+  if (def.solid) { const others = [...FIXTURES, ...solidRects(s, ignoreId)], gone = missingKeys([...others, r]); if (gone.length) { const before = missingKeys(others), worse = gone.filter((n) => !before.includes(n)); if (worse.length) return { ok: false, error: `Blocks the way to the ${worse[0]}` }; } }
   return { ok: true, x: snap(x), z: snap(z) };
 }
 export function buyFurniture(store, type) {
