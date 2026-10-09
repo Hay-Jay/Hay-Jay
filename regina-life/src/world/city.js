@@ -6,7 +6,7 @@ import { facadeTextures, asphaltTexture, intersectionTexture, concreteTexture, g
 import { CollisionGrid } from './collision.js';
 import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById } from './cityData.js';
 import { buildLandmarks } from './landmarks.js';
-import { BILLBOARDS, DAY_PRICE, THEMES } from '../data/billboards.js';
+import { BILLBOARDS, DAY_PRICE, THEMES, rotationFor } from '../data/billboards.js';
 import { drawBillboard } from './textures.js';
 
 const R2 = ROAD_W / 2;
@@ -360,14 +360,24 @@ export function buildCity({ quality = 'high' } = {}) {
       const face = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), mat); face.position.set(0, poleH + Hh / 2, 0.12); root.add(face);
       const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
       colliders.add(b.x - 1.5 - Math.abs(rx) * W * 0.32, b.z - 1.5 - Math.abs(rz) * W * 0.32, b.x + 1.5 + Math.abs(rx) * W * 0.32, b.z + 1.5 + Math.abs(rz) * W * 0.32, poleH);
-      const board = { ...b, cv, tex, mat, mega, priceLabel: `$${(DAY_PRICE[b.tier] / 100).toFixed(0)} / day` };
+      const board = { ...b, cv, tex, mat, mega, root, slots: [], slot: 0, priceLabel: `$${(DAY_PRICE[b.tier] / 100).toFixed(0)} / day` };
       boards.push(board);
       interactables.push({ id: 'bb_' + b.id, kind: 'billboard', boardId: b.id, x: b.x + fx * 10, z: b.z + fz * 10, radius: 9, label: `Billboard · ${b.name}` });
     }
   }
-  const refreshBillboards = (ads = {}, now = Date.now(), priceMult = 1) => {
-    for (const b of boards) { const a = ads[b.id]; drawBillboard(b.cv, a && a.until > now ? a : null, { tier: b.tier, priceLabel: `$${(Math.round(DAY_PRICE[b.tier] * priceMult) / 100).toFixed(0)} / day` }, THEMES); b.tex.needsUpdate = true; }
+  /** Each board rotates the player's ad (if any) with in-game sponsor ads, like a real digital board. */
+  const paintBoard = (b) => { const a = b.slots[b.slot % Math.max(1, b.slots.length)]; drawBillboard(b.cv, a, { tier: b.tier, onImage: () => paintBoard(b) }, THEMES); b.tex.needsUpdate = true; };
+  const refreshBillboards = (ads = {}, now = Date.now()) => {
+    for (const b of boards) { const a = ads[b.id]; b.slots = rotationFor(b, a && a.until > now ? a : null); b.slot = 0; paintBoard(b); }
   };
+  let rotT = 0;
+  const rotateBoards = (dt, camPos) => {
+    rotT += dt; if (rotT < 6) return; rotT = 0;
+    for (const b of boards) { if (b.slots.length < 2) continue; if (Math.hypot(b.x - camPos.x, b.z - camPos.z) > 1400 && !overview) continue; b.slot = (b.slot + 1) % b.slots.length; paintBoard(b); }
+  };
+  /** In the overview map the boards are drawn oversized so the ads read from far away (like the map in the game that inspired this). */
+  let overview = false;
+  const setOverview = (on) => { overview = on; for (const b of boards) b.root.scale.setScalar(on ? 2.6 : 1); };
   refreshBillboards();
 
   /* ---------------- instanced props ---------------- */
@@ -460,7 +470,7 @@ export function buildCity({ quality = 'high' } = {}) {
   const api = {
     group, colliders, interactables, mats, chunks, lamps, trees, signMeshes,
     spawn: { x: -14, z: 4, heading: Math.PI / 2 },
-    recolorTrees, billboards: boards, refreshBillboards,
+    recolorTrees, billboards: boards, refreshBillboards, setOverview, rotateBoards,
     carsReady: Promise.resolve().then(() => {
       const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.5 }), cars.length);
       const c = new THREE.Color();
@@ -481,7 +491,7 @@ export function buildCity({ quality = 'high' } = {}) {
       mats.roof.color.set('#ffffff').lerp(new THREE.Color('#dfe7ee'), Math.max(snow, season === 'winter' ? 0.6 : 0) * 0.8);
     },
     update(dt, cam) {
-      state.lastChunkCheck += dt;
+      rotateBoards(dt, cam); state.lastChunkCheck += dt;
       if (state.lastChunkCheck > 0.25) {
         state.lastChunkCheck = 0;
         for (const c of chunks) c.mesh.visible = c.center.distanceTo(cam) < state.viewDist + CHUNK * 0.8;

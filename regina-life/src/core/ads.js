@@ -46,7 +46,10 @@ export function expireAds(store, now = store.now()) {
   for (const [id, a] of Object.entries(s.ads || {})) if (a.until <= now) { delete s.ads[id]; n++; notify(store, { app: 'ads', title: 'Billboard ended', body: `Your ad on ${BOARD_BY_ID[id]?.name ?? id} has finished.` }); }
   if (n) store.commit('ads'); return n;
 }
-export function buyAd(store, boardId, days, text, theme = 'prairie', now = store.now()) {
+/** An uploaded creative must be a small JPEG data URL (the UI resizes + re-encodes it); anything else is dropped. */
+export const MAX_IMAGE_CHARS = 240000;
+export const validImage = (v) => typeof v === 'string' && v.length <= MAX_IMAGE_CHARS && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(v);
+export function buyAd(store, boardId, days, text, theme = 'prairie', now = store.now(), image = null) {
   const s = store.state, b = own(BOARD_BY_ID, boardId) ? BOARD_BY_ID[boardId] : null;
   if (!b) return { ok: false, error: 'Unknown billboard' };
   const price = adPrice(boardId, days, s); if (price == null) return { ok: false, error: 'Choose 1, 3 or 7 days' };
@@ -55,7 +58,7 @@ export function buyAd(store, boardId, days, text, theme = 'prairie', now = store
   if (activeAd(s, boardId, now)) return { ok: false, error: 'This billboard is already booked.' };
   const r = store.ledger.debit(price, `Billboard: ${b.name} (${days}d)`, { category: 'advertising', ref: `ad:${boardId}:${now}` });
   if (!r.ok) return r;
-  (s.ads ||= {})[boardId] = { text: m.text, theme, bought: now, until: now + days * DAY_MS, days, paid: price };
+  (s.ads ||= {})[boardId] = { text: m.text, theme, bought: now, until: now + days * DAY_MS, days, paid: price, ...(validImage(image) ? { image } : {}) };
   store.commit('ads'); return { ok: true, price, until: s.ads[boardId].until };
 }
 export const myAds = (s, now) => Object.entries(s.ads || {}).filter(([, a]) => a.until > now).map(([id, a]) => ({ id, ...a }));

@@ -25,7 +25,7 @@ export class Hub {
     this.level = 'close'; this.active = false; this.selected = null; this.t = 0;
     this.pos = new THREE.Vector3(); this.look = new THREE.Vector3(); this.fov = VIEW.close.fov; this.snapNext = true;
     this._v = new THREE.Vector3(); this.pins = new Map();
-    this.fitted = { close: null, far: null }; this.dirty = true; this.safe = null; this._fitCam = new THREE.PerspectiveCamera();
+    this.custom = null; this.fitted = { close: null, far: null }; this.dirty = true; this.safe = null; this._fitCam = new THREE.PerspectiveCamera();
     pinsEl.addEventListener('click', (e) => { const b = e.target.closest('[data-pin]'); if (!b) return; if (b.dataset.pin === 'downtown') this.setLevel('close'); else this.select(this.selected === b.dataset.pin ? null : b.dataset.pin); });
     addEventListener('resize', () => { this.dirty = true; });
     document.fonts?.ready?.then(() => { this.dirty = true; }); // header/card heights change once the web fonts land
@@ -37,8 +37,8 @@ export class Hub {
   render() {
     const ids = this.level === 'close' ? CLOSE : FAR;
     const mk = (id, emoji, name, open, cls = '') => `<button class="pin ${open ? 'open' : ''} ${cls}" data-pin="${id}" aria-label="${name}"><span class="pe">${emoji}</span><span class="pl">${name}</span></button>`;
-    const items = ids.map((id) => { const p = poiById[id]; return { id, html: mk(id, p.emoji, p.name.replace(/ \(Home\)/, ''), p.state === 'open'), p, name: p.name.replace(/ \(Home\)/, '') }; });
-    if (this.level === 'far') items.push({ id: 'downtown', html: mk('downtown', '🏙️', 'Downtown Regina', true), p: { x: 0, z: 0 }, name: 'Downtown Regina' });
+    const items = this.custom ? this.custom.map((c) => ({ id: c.id, html: mk(c.id, c.emoji, c.name, c.open), p: { x: c.x, z: c.z }, name: c.name })) : ids.map((id) => { const p = poiById[id]; return { id, html: mk(id, p.emoji, p.name.replace(/ \(Home\)/, ''), p.state === 'open'), p, name: p.name.replace(/ \(Home\)/, '') }; });
+    if (this.level === 'far' && !this.custom) items.push({ id: 'downtown', html: mk('downtown', '🏙️', 'Downtown Regina', true), p: { x: 0, z: 0 }, name: 'Downtown Regina' });
     for (const e of this.extra?.() ?? []) items.push({ id: e.id, html: mk(e.id, e.emoji, e.name, false, e.id), p: { x: e.x, z: e.z }, name: e.name, extra: e });
     this.pinsEl.dataset.level = this.level;
     this.pinsEl.innerHTML = `<svg class="leaders" aria-hidden="true">${items.map((i) => `<g data-l="${i.id}"><line/><circle r="4"/></g>`).join('')}</svg>` + items.map((i) => i.html).join('');
@@ -52,8 +52,11 @@ export class Hub {
     const id = this.selected; if (!id) { this.cardEl.classList.remove('sel'); return; }
     this.cardEl.classList.add('sel');
   }
+  /** Show a custom set of pins instead of the default places (e.g. every billboard); pass null to go back. */
+  setPins(list, level = 'far') { this.custom = list; this.level = level; this.selected = null; this.dirty = true; this.render(); this.onSelect?.(null, null); this.onZoom?.(level); }
   info() {
     const id = this.selected; if (!id) return null;
+    const cu = this.custom?.find((c) => c.id === id); if (cu) return { name: cu.name, emoji: cu.emoji, blurb: cu.blurb ?? '', open: !!cu.open, custom: cu };
     const ex = this.extra?.().find((e) => e.id === id); if (ex) return { name: ex.name, emoji: ex.emoji, blurb: ex.blurb ?? '', open: false, extra: ex };
     if (id === 'downtown') return { name: 'Downtown Regina', emoji: '🏙️', blurb: 'Scarth Street, Victoria Ave and your neighbourhood. Zoom in to pick a building.', open: true, downtown: true };
     const p = poiById[id]; return { name: p.name, emoji: p.emoji, blurb: p.blurb, open: p.state === 'open' };

@@ -117,3 +117,13 @@ body.building .ovmap{display:none}
 body.map-ov #hud{display:none!important}
 
 body.home-view #hud .hud-tr{display:none!important}
+
+/* ---------- Ads app: tier card + picture picker ---------- */
+.tiercard .tc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.tc-badge{font:800 11px var(--body);padding:4px 10px;border-radius:var(--r-pill);color:#fff;letter-spacing:.02em}
+.tc-price{font:600 22px var(--head);color:#fff} .tc-price small{font:600 12px var(--body);color:#9aa6bd}
+.tiercard p{margin:0;font-size:12.5px;line-height:1.45;color:#b8c2d6}
+.adpic{display:flex;align-items:center;gap:10px;flex-wrap:wrap} .adpic img{width:92px;height:46px;object-fit:cover;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.18)} .adpic small{flex:1 1 140px;color:#8f99ac;font-size:11.5px}
+.row .ok{color:#34c98b;font-weight:700}
+
+.pc-go.three{grid-template-columns:repeat(3,1fr)}

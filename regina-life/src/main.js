@@ -24,7 +24,7 @@ import { ICON } from './ui/icons.js';
 import { Hub } from './ui/hub.js';
 import { rollEvent, resolveEvent, choiceAvailable, EVENT_BY_ID } from './core/events.js';
 import { generateNews } from './core/news.js';
-import { expireAds } from './core/ads.js';
+import { expireAds, adQuote, activeAd } from './core/ads.js';
 import * as SOC from './core/social.js';
 import * as POL from './core/politics.js';
 import * as H from './core/home.js';
@@ -385,8 +385,17 @@ async function boot() {
     onSelect: (info, id) => renderPlaceCard(info, id), onZoom: () => paintMapChips(),
   });
   const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Wheat City Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : poiById[id]);
-  let ovPick = null;
+  let ovPick = null, ovMode = 'places';
+  const boardPick = (b) => ({ id: 'bb_' + b.id, name: `Billboard · ${b.name}`, area: 'Billboard', emoji: '📢', x: b.x + Math.sin(b.yaw) * 10, z: b.z + Math.cos(b.yaw) * 10, state: 'open', board: b });
+  function renderBoardCard(b) {
+    const q = adQuote(b.id, S()), a = activeAd(S(), b.id, Date.now()), p = boardPick(b), d = Math.hypot(p.x - player.pos.x, p.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)); ovPick = p;
+    $('ov-place').innerHTML = `<div class="pc-head"><span class="pc-ico">📢</span><div><h3>${esc(b.name)}</h3><small>${esc(q.tier.name)} · ${esc(q.tier.size.label)}</small></div><span class="pc-tag ${a ? 'open' : ''}">${a ? '● On air' : 'Free to book'}</span></div>
+      <p class="pc-blurb">${a ? `Your ad “${esc(a.text)}” is rotating here.` : `Book this board for 7 days and your ad rotates with up to ${q.maxRotation - 1} in-game sponsor${q.maxRotation > 2 ? 's' : ''}. About ${q.reach.toLocaleString()} simulated views.`}</p>
+      <div class="pc-acts"><span>${fmtMoney(q.price)} / 7 days</span><span>👁️ ${b.traffic.toLocaleString()} / day</span><span>${esc(q.tier.name)}</span></div>
+      <div class="pc-go three"><button class="gobtn primary" data-go="book"><b>📢 ${a ? 'See ad' : 'Book it'}</b><small>${a ? 'Ads app' : fmtMoney(q.price)}</small></button><button class="gobtn" data-go="walk"><b>🚶 Walk</b><small>about ${mins} min</small></button><button class="gobtn" data-go="cab" ${fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)}</small></button></div>`;
+  }
   function renderPlaceCard(info, id) {
+    if (info?.custom?.board) { $('ov-hint').hidden = true; renderBoardCard(info.custom.board); return; }
     ovPick = info && id && id !== 'you' ? placeById(id) : null; const el = $('ov-place'); $('ov-hint').hidden = !!info;
     if (!info) { el.innerHTML = ''; return; }
     if (!ovPick) { el.innerHTML = `<div class="pc-head"><span class="pc-ico">📍</span><div><h3>You are here</h3><small>${esc(inInterior ? 'Indoors' : 'Out and about in Regina')}</small></div></div>`; return; }
@@ -397,18 +406,30 @@ async function boot() {
   }
   $('ov-card').addEventListener('click', (e) => {
     const b = e.target.closest('[data-go]'); if (!b || !ovPick) return; const p = ovPick;
+    if (b.dataset.go === 'book') { closeMapOverview(); ctx.adsFocus = p.board.id; phone.open(); phone.openApp('ads'); return; }
     if (b.dataset.go === 'walk') { closeMapOverview(); setDestination(p); audio.blip('ok'); }
     else { closeMapOverview(); if (!ctx.quickCab(p)) openMapOverview(); }
   });
   function paintMapChips() {
-    shell.setChips([{ id: 'zoom', icon: ovHub.level === 'close' ? '🗺️' : '🏙️', label: ovHub.level === 'close' ? 'All Regina' : 'Downtown' }, { id: 'ads', icon: '📢', label: 'Billboards' }, { id: 'gov', icon: '🏛️', label: 'Gov' }, { id: 'neighbours', icon: '👥', label: 'Neighbours' }],
-      (c) => { if (c === 'zoom') ovHub.setLevel(ovHub.level === 'close' ? 'far' : 'close'); else { closeMapOverview(); phone.open(); phone.openApp(c === 'ads' ? 'ads' : c === 'gov' ? 'townhall' : 'social'); } });
+    shell.setChips([{ id: 'zoom', icon: ovHub.level === 'close' ? '🗺️' : '🏙️', label: ovHub.level === 'close' ? 'All Regina' : 'Downtown', on: false }, { id: 'ads', icon: '📢', label: 'Billboards', on: ovMode === 'boards' }, { id: 'gov', icon: '🏛️', label: 'Gov' }, { id: 'neighbours', icon: '👥', label: 'Neighbours' }],
+      (c) => {
+        if (c === 'zoom') { if (ovMode === 'boards') showBoards(false); ovHub.setLevel(ovHub.level === 'close' ? 'far' : 'close'); }
+        else if (c === 'ads') showBoards(ovMode !== 'boards');
+        else { closeMapOverview(); phone.open(); phone.openApp(c === 'gov' ? 'townhall' : 'social'); }
+      });
+  }
+  /** The Billboards chip: every board in Regina as a pin (green dot = free to book). */
+  function showBoards(on) {
+    ovMode = on ? 'boards' : 'places';
+    if (on) ovHub.setPins(city.billboards.map((b) => ({ id: 'bb:' + b.id, emoji: '📢', name: b.name, x: b.x, z: b.z, open: !activeAd(S(), b.id, Date.now()), blurb: '', board: b })), 'far');
+    else { ovHub.setPins(null, 'close'); }
+    paintMapChips();
   }
   async function openMapOverview() {
     if (mapOverview || creator || camMode || fading) return;
     if (homeView) setHomeView(false); if (build.active) build.stop(); phone.close(); panels.close(); if (mapOpen) closeMap();
     if (inInterior) await exitInterior();
-    mapOverview = true; document.body.classList.add('map-ov'); $('ovmap').hidden = false; enterHubMode(true); ovHub.level = 'close'; ovHub.selected = null; ovHub.show(); renderPlaceCard(null); paintMapChips(); syncTab();
+    mapOverview = true; ovMode = 'places'; ovHub.custom = null; document.body.classList.add('map-ov'); $('ovmap').hidden = false; enterHubMode(true); ovHub.level = 'close'; ovHub.selected = null; ovHub.show(); renderPlaceCard(null); paintMapChips(); syncTab();
   }
   function closeMapOverview() {
     if (!mapOverview) return; mapOverview = false; document.body.classList.remove('map-ov'); ovHub.hide(); ovHub.selected = null; $('ovmap').hidden = true; enterHubMode(false); rig.snap(player); shell.setChips([]); syncTab();
@@ -430,7 +451,7 @@ async function boot() {
     camera.near = on ? 50 : 0.25; camera.far = on ? 60000 : 4200; camera.updateProjectionMatrix();
     atmo.fogOverride = on ? { near: 60000, far: 90000 } : null; atmo.hubLift = on;
     player.char.root.visible = !on; ped.setVisible(!on); ped.limit = on ? 0 : QUALITY[qLevel].npc;
-    if (on) city.setViewDistance(42000); else { applySettings(); }
+    city.setOverview(on); if (on) city.setViewDistance(42000); else { applySettings(); }
     lastEnvAt = 0; updateEnv(true);
   };
   const startPlay = () => {

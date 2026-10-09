@@ -55,3 +55,32 @@ export const THEMES = {
   prairie: ['#1f6f4a', '#7ad06a'], sunset: ['#ff7a45', '#ffd24a'], lake: ['#1e6ea8', '#58d0e8'], rider: ['#0a6b3a', '#1ea85a'],
   night: ['#2b1b5a', '#8a52ff'], berry: ['#c01d5a', '#ff7ab0'],
 };
+
+/**
+ * In-game sponsors: fictional Regina businesses that fill the rest of a board's rotation, so boards are never blank.
+ * They are clearly labelled "In-game sponsor" on the board. Your own booking takes one slot among them.
+ */
+export const HOUSE_ADS = [
+  { id: 'market', text: 'Prairie Corner Market · Fresh daily', theme: 'rider' },
+  { id: 'lofts', text: 'Wheat City Lofts · Now leasing', theme: 'sunset' },
+  { id: 'fitness', text: 'Prairie Fitness · First week free', theme: 'lake' },
+  { id: 'threads', text: 'Prairie Threads · Toques are in', theme: 'berry' },
+  { id: 'cabs', text: 'Queen City Cabs · Always on call', theme: 'night' },
+  { id: 'ducks', text: 'Wascana Duck Tours · Quack!', theme: 'lake' },
+  { id: 'buskers', text: 'Scarth St. Busker Fest · Free', theme: 'night' },
+  { id: 'pub', text: 'Green & White Pub · Game-day wings', theme: 'rider' },
+  { id: 'coffee', text: 'Flatland Coffee · Triple-triple', theme: 'sunset' },
+  { id: 'honey', text: 'Canola Fields Honey · Local', theme: 'prairie' },
+  { id: 'wireless', text: 'Aurora Wireless · Sky-high speeds', theme: 'night' },
+  { id: 'bannock', text: 'Bannock & Co. · Hot out of the oven', theme: 'prairie' },
+];
+/**
+ * What a board shows in rotation: the player's active ad first, then deterministic sponsor ads, up to the tier's
+ * maxRotation. Pure; `ad` is the player's active ad for this board (or null).
+ */
+export function rotationFor(board, ad) {
+  const t = AD_TIERS[board.adTier] ?? AD_TIERS.standard, n = t.maxRotation, out = ad ? [{ ...ad, mine: true }] : [];
+  let h = 0; for (const c of board.id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  for (let i = 0; out.length < n; i++) { const a = HOUSE_ADS[(h + i * 5) % HOUSE_ADS.length]; if (!out.some((o) => o.id === a.id)) out.push({ ...a, house: true }); }
+  return out;
+}
