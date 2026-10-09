@@ -444,10 +444,7 @@ async function boot() {
     const open = poi.state === 'open';
     player.teleport(poi.x, poi.z + (open ? 0 : 8), open ? 0 : Math.PI); city.colliders.resolve(player.pos, 0.5); player.syncRoot();
   };
-  // the all-Regina view looks out past the edge of the 26 km ground plane; widen it there so the map never floats in a void
-  const hubGround = (wide) => city.group.getObjectByName('ground')?.scale.setScalar(wide ? 4 : 1);
   const enterHubMode = (on) => {
-    if (!on) hubGround(false);
     camera.near = on ? 50 : 0.25; camera.far = on ? 60000 : 4200; camera.updateProjectionMatrix();
     atmo.fogOverride = on ? { near: 60000, far: 90000 } : null; atmo.hubLift = on;
     player.char.root.visible = !on; ped.setVisible(!on); ped.limit = on ? 0 : QUALITY[qLevel].npc;
@@ -496,7 +493,7 @@ async function boot() {
       $('btn-continue').textContent = info ? (hasLife() ? 'Play here' : 'Start here') : 'Continue';
       $('hc-welcome').style.display = info ? 'none' : '';
     },
-    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; hubGround(l === 'far'); },
+    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; },
   });
   $('hub-zoom').onclick = () => hub.setLevel(hub.level === 'close' ? 'far' : 'close');
   const hubRefresh = () => {

@@ -7,7 +7,7 @@ const FAR = ['leg', 'bridge', 'wascana', 'stadium', 'uofr', 'airport', 'harbour'
 // target/dist are only the starting guess: fit() reframes each level so every pin sits between the header and the card
 const VIEW = {
   close: { target: new THREE.Vector3(20, 0, 5), dist: 440, fov: 34, pinY: 22 },
-  far:   { target: new THREE.Vector3(500, 0, 450), dist: 12500, fov: 32, pinY: 90 },
+  far:   { target: new THREE.Vector3(0, 0, 400), dist: 7500, fov: 32, pinY: 90, dir: new THREE.Vector3(0.1, 0.62, 0.9).normalize() },
 };
 const DIR = new THREE.Vector3(0.2, 1.05, 0.72).normalize(); // camera sits south-east and above → north is "up" on screen
 const UP = THREE.Object3D.DEFAULT_UP;
@@ -85,16 +85,16 @@ export class Hub {
     const ax0 = safe.x0 + PIN / 2, ax1 = safe.x1 - PIN / 2, ay0 = safe.y0 + LIFT + PIN, ay1 = safe.y1 + LIFT - labels;
     const tgt = new THREE.Box3().setFromPoints(pts).getCenter(new THREE.Vector3()); tgt.y = 0;
     const cam = this._fitCam; cam.fov = v.fov; cam.aspect = w / h; cam.near = 1; cam.far = 1e6; cam.updateProjectionMatrix();
-    const fwd = new THREE.Vector3(-DIR.x, 0, -DIR.z).normalize(), right = new THREE.Vector3().crossVectors(fwd, UP).normalize(), tmp = new THREE.Vector3();
+    const D = v.dir ?? DIR, fwd = new THREE.Vector3(-D.x, 0, -D.z).normalize(), right = new THREE.Vector3().crossVectors(fwd, UP).normalize(), tmp = new THREE.Vector3();
     let dist = v.dist;
     for (let i = 0; i < 24; i++) {
-      cam.position.copy(DIR).multiplyScalar(dist).add(tgt); cam.lookAt(tgt); cam.updateMatrixWorld();
+      cam.position.copy(D).multiplyScalar(dist).add(tgt); cam.lookAt(tgt); cam.updateMatrixWorld();
       let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
       for (const p of pts) { const s = tmp.copy(p).project(cam), x = ((s.x + 1) / 2) * w, y = ((1 - s.y) / 2) * h; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
       const k = Math.max((x1 - x0) / Math.max(1, ax1 - ax0), (y1 - y0) / Math.max(1, ay1 - ay0));
       dist = Math.min(40000, Math.max(120, dist * Math.min(1.45, Math.max(0.7, k))));
       const ppm = h / 2 / (Math.tan((v.fov * Math.PI) / 360) * dist), dx = (ax0 + ax1) / 2 - (x0 + x1) / 2, dy = (ay0 + ay1) / 2 - (y0 + y1) / 2;
-      tgt.addScaledVector(right, -dx / ppm).addScaledVector(fwd, dy / (ppm * DIR.y));
+      tgt.addScaledVector(right, -dx / ppm).addScaledVector(fwd, dy / (ppm * D.y));
     }
     this.fitted[this.level] = { target: tgt, dist: dist * 1.04 };
   }
@@ -105,7 +105,7 @@ export class Hub {
     if (this.dirty && w) { this._fit(w, h); this.dirty = false; }
     const f = this.fitted[this.level] ?? v;
     // the camera holds still once framed: pins are laid out from fixed anchors, so they never shuffle or drift
-    const wantPos = this._v.copy(DIR).multiplyScalar(f.dist).add(f.target), k = this.snapNext ? 1 : 1 - Math.exp(-dt * 2.2);
+    const wantPos = this._v.copy(v.dir ?? DIR).multiplyScalar(f.dist).add(f.target), k = this.snapNext ? 1 : 1 - Math.exp(-dt * 2.2);
     const snap = this.snapNext; this.pos.lerp(wantPos, k); this.look.lerp(f.target, k); this.fov += (v.fov - this.fov) * k; this.snapNext = false;
     camera.position.copy(this.pos); camera.lookAt(this.look);
     // scale the clip planes with distance so far views keep enough depth precision (otherwise the lake z-fights the park)

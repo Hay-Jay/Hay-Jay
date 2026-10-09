@@ -40,7 +40,7 @@ export const BILLBOARDS = [
   { id: 'airport', name: 'Airport Arrivals', tier: 'standard', adTier: 'standard', x: A.x + 70, z: A.z + 90, yaw: -Math.PI / 2, traffic: 1400 },
   { id: 'uofr', name: 'University of Regina', tier: 'standard', adTier: 'standard', x: U.x + 120, z: U.z + 10, yaw: -Math.PI / 2, traffic: 1300 },
   { id: 'harbour', name: 'Harbour Landing', tier: 'standard', adTier: 'standard', x: H.x - 80, z: H.z + 20, yaw: Math.PI / 2, traffic: 1200 },
-  { id: 'ring-road', name: 'Ring Road West', tier: 'standard', adTier: 'standard', x: -3840, z: 1200, yaw: Math.PI / 2, traffic: 1600 },
+  { id: 'ring-road', name: 'Ring Road West', tier: 'standard', adTier: 'standard', x: -3040, z: 1200, yaw: Math.PI / 2, traffic: 1600 },
   { id: 'downtown-south', name: 'Downtown South Gateway', tier: 'standard', adTier: 'standard', x: -240, z: 585, yaw: 0, traffic: 2000 },
 ];
 export const BOARD_BY_ID = Object.fromEntries(BILLBOARDS.map((b) => [b.id, b]));
