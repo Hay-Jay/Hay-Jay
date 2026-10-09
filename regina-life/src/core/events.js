@@ -16,7 +16,7 @@ export const EVENTS = [
   { id: 'snowbank', where: ['street'], cond: (c) => c.temp <= -3, icon: '🚗', title: 'Stuck in a snowbank',
     text: "A driver's wheels are spinning in a snowbank on the corner. They wave at you. Classic Regina January.",
     choices: [
-      { label: 'Help push', fx: { energy: -8, mood: 6, money: 2000, skill: { charisma: 4 } }, result: 'The car pops free. "Thanks, bud!" — they hand you a twenty for coffee.' },
+      { label: 'Help push', fx: { energy: -8, mood: 6, money: 1000, skill: { charisma: 4 } }, result: 'The car pops free. "Thanks, bud!" — they press a ten into your mitten for coffee.' },
       { label: 'Call it in and keep walking', fx: { mood: -1, skill: { charisma: 1 } }, result: 'You phone it in and keep your boots dry.' },
     ] },
   { id: 'rider_pride', where: ['street'], icon: '💚', title: 'Rider Pride',
@@ -47,7 +47,7 @@ export const EVENTS = [
   { id: 'wind', where: ['street'], cond: (c) => c.temp <= -15, icon: '🥶', title: 'Wind chill warning',
     text: "It's so cold your eyelashes are freezing together. A shop door is right there.",
     choices: [
-      { label: 'Duck inside for a hot chocolate ($4)', cost: 400, fx: { money: -400, energy: 6, mood: 6, hunger: 4 }, result: 'Warm hands. Warm heart.' },
+      { label: 'Duck inside for a hot chocolate ($5)', cost: 500, fx: { money: -500, energy: 6, mood: 6, hunger: 4 }, result: 'Warm hands. Warm heart.' },
       { label: 'Tough it out', fx: { energy: -8, mood: -6, skill: { fitness: 3 } }, result: 'You are now 14% more Saskatchewan.' },
     ] },
   { id: 'mosquito', where: ['street'], cond: (c) => c.season === 'summer' && c.night > 0.4, icon: '🦟', title: 'Mosquito season',
@@ -116,8 +116,8 @@ export const EVENTS = [
   { id: 'trip_moosejaw', where: ['trip:moosejaw'], icon: '♨️', title: 'Moose Jaw',
     text: 'You step off the coach into a town of murals, tunnels and a very large moose. Where to first?',
     choices: [
-      { label: 'Tunnel tour ($12)', cost: 1200, fx: { money: -1200, fun: 20, mood: 6, skill: { charisma: 3 } }, result: 'Prohibition-era stories and a guide with excellent timing.' },
-      { label: 'Soak in the hot springs ($18)', cost: 1800, fx: { money: -1800, energy: 14, hygiene: 20, mood: 12 }, result: 'Steam, stars and zero thoughts.' },
+      { label: 'Tunnel tour ($22)', cost: 2200, fx: { money: -2200, fun: 20, mood: 6, skill: { charisma: 3 } }, result: 'Prohibition-era stories and a guide with excellent timing.' },
+      { label: 'Soak in the hot springs ($32)', cost: 3200, fx: { money: -3200, energy: 14, hygiene: 20, mood: 12 }, result: 'Steam, stars and zero thoughts.' },
       { label: 'Pose with the giant moose', fx: { fun: 8, mood: 6 }, result: 'It towers over you. You look very small. It is perfect.' },
     ] },
   { id: 'trip_saskatoon', where: ['trip:saskatoon'], icon: '🌉', title: 'Saskatoon',
@@ -130,9 +130,9 @@ export const EVENTS = [
   { id: 'trip_winnipeg', where: ['trip:winnipeg'], icon: '🍂', title: 'Winnipeg',
     text: 'The Forks is buzzing, with food stalls and river trails in every direction.',
     choices: [
-      { label: 'Graze the market stalls ($10)', cost: 1000, fx: { money: -1000, hunger: 18, fun: 14 }, result: 'You eat things you cannot pronounce. Delicious.' },
+      { label: 'Graze the market stalls ($15)', cost: 1500, fx: { money: -1500, hunger: 18, fun: 14 }, result: 'You eat things you cannot pronounce. Delicious.' },
       { label: 'Run the river trail', fx: { energy: -6, mood: 7, skill: { fitness: 6 } }, result: 'Cold air, warm lungs, glorious.' },
-      { label: 'People-watch with a coffee ($4)', cost: 400, fx: { money: -400, mood: 8, energy: 6 }, result: 'Everyone seems to have somewhere to be. You do not.' },
+      { label: 'People-watch with a coffee ($5)', cost: 500, fx: { money: -500, mood: 8, energy: 6 }, result: 'Everyone seems to have somewhere to be. You do not.' },
     ] },
   { id: 'trip_calgary', where: ['trip:calgary'], icon: '🤠', title: 'Calgary',
     text: 'There are cowboy hats on the streets and a chinook wind is warming the whole sky.',
@@ -145,14 +145,14 @@ export const EVENTS = [
     text: 'A lake the colour of a swimming-pool dream sits under a wall of mountains. You are speechless.',
     choices: [
       { label: 'Sunrise photos by the lake', fx: { mood: 16, fun: 14, skill: { charisma: 2 } }, result: 'The light does half the work. You get the other half.' },
-      { label: 'Hot chocolate by the fire ($7)', cost: 700, fx: { money: -700, mood: 10, energy: 8 }, result: 'Marshmallows, mountains, mittens.' },
+      { label: 'Hot chocolate by the fire ($8)', cost: 800, fx: { money: -800, mood: 10, energy: 8 }, result: 'Marshmallows, mountains, mittens.' },
       { label: 'Hike the shoreline trail', fx: { energy: -10, mood: 10, skill: { fitness: 8 } }, result: 'Your legs hate you. Your heart is thrilled.' },
     ] },
   { id: 'trip_vancouver', where: ['trip:vancouver'], icon: '🌧️', title: 'Vancouver',
     text: 'It is drizzling, of course. The sea smells like salt and ambition.',
     choices: [
       { label: 'Walk the seawall', fx: { energy: -6, mood: 10, skill: { fitness: 5 } }, result: 'Mountains on one side, ocean on the other. Greedy city.' },
-      { label: 'Ramen on a rainy night ($14)', cost: 1400, fx: { money: -1400, hunger: 30, mood: 12 }, result: 'Steam on your glasses. Life is good.' },
+      { label: 'Ramen on a rainy night ($19)', cost: 1900, fx: { money: -1900, hunger: 30, mood: 12 }, result: 'Steam on your glasses. Life is good.' },
       { label: 'Watch the ferries come in', fx: { fun: 8, mood: 8 }, result: 'Everyone else is in a hurry. You are not.' },
     ] },
 ];

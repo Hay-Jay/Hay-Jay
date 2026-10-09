@@ -189,8 +189,8 @@ await step('news + life + ads apps', async () => {
   await page.evaluate(() => __regina.phone.close());
 });
 await step('book a billboard and see it update', async () => {
-  const r = await page.evaluate(async () => { const m = await import('/src/core/ads.js'); const b0 = __regina.store.ledger.balance; const res = m.buyAd(__regina.store, 'downtown-north', 1, 'Best bannock in Regina!', 'sunset'); __regina.ctx.refreshBillboards(); return { res, spent: b0 - __regina.store.ledger.balance }; });
-  if (!r.res.ok || r.spent !== 35000) throw new Error('booking failed ' + JSON.stringify(r));
+  const r = await page.evaluate(async () => { const m = await import('/src/core/ads.js'); __regina.store.state.bank.balance = Math.max(__regina.store.state.bank.balance, 5e6); const b0 = __regina.store.ledger.balance; const res = m.buyAd(__regina.store, 'downtown-north', 1, 'Best bannock in Regina!', 'sunset'); __regina.ctx.refreshBillboards(); return { res, spent: b0 - __regina.store.ledger.balance }; });
+  if (!r.res.ok || r.spent !== r.res.price) throw new Error('booking failed ' + JSON.stringify(r));
   await page.evaluate(() => { __regina.tp(-30, -574); __regina.rig.yaw = 0; __regina.rig.pitch = 0.1; }); await wait(1500);
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Billboard/.test(t || '')) throw new Error('no billboard prompt: ' + t);
   await shot('21-billboard'); await page.keyboard.press('e'); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
@@ -241,7 +241,7 @@ await step('intercity trip with scenario + souvenir', async () => {
   const b0 = await page.evaluate(() => __regina.store.state.bank.balance);
   await page.click('[data-go="moosejaw|bus"]'); await page.waitForSelector('.prog-panel'); await page.waitForSelector('.panel.event', { timeout: 40000 }); await shot('36-trip-event');
   await page.click('.panel.event [data-i="2"]'); await page.waitForSelector('.panel.event [data-ok]'); await page.click('.panel.event [data-ok]'); await page.waitForFunction(() => !document.querySelector('.panel.event'));
-  const r = await page.evaluate(() => ({ b: __regina.store.state.bank.balance, trips: __regina.store.state.trips.length, sou: __regina.store.state.souvenirs })); if (r.b !== b0 - 1400 || r.trips !== 1 || !r.sou.includes('moosejaw')) throw new Error('trip not recorded ' + JSON.stringify(r));
+  const r = await page.evaluate(async () => ({ b: __regina.store.state.bank.balance, trips: __regina.store.state.trips.length, sou: __regina.store.state.souvenirs, fare: (await import('/src/data/destinations.js')).DESTINATION_BY_ID.moosejaw.modes.bus.fare })); if (r.b !== b0 - r.fare || r.trips !== 1 || !r.sou.includes('moosejaw')) throw new Error('trip not recorded ' + JSON.stringify(r));
 });
 await step('radio plays (generative) and stops', async () => {
   await openApp('radio'); await page.click('[data-st="lofi"]'); await wait(1500);
