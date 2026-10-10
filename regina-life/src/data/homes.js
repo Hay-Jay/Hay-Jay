@@ -40,26 +40,41 @@ export const rotRect = (rc, rot = 0) => { const a = rotXZ(rc.x0, rc.z0, rot), b 
 export const ACTIONS = ['sleep', 'sit', 'tv', 'cook', 'fridge', 'computer', 'radio', 'wardrobe', 'read', 'shower', 'lights', 'storage'];
 
 /**
- * Fixture kinds. Geometry is built in LOCAL coordinates at rot 0 (see world/homeBuilder.js); `w` x `d` is the footprint centred on the pose,
- * `h` the height. `uses` are the interactables the kind owns: `dx, dz` is the standing spot relative to the pose (rotates with `rot`),
- * `action` names the handler in the builder (sleep, sit, tv, cook, fridge, computer, radio, wardrobe, read, shower, lights, storage...).
- * `pad` is the extra keep-out margin (metres) used when keep-out rectangles are derived rather than listed. `ch` is the collider height
- * (defaults to `h`); `solid: false` kinds (the wall switch) get no collider or keep-out; `y` is the mount height of a wall-mounted piece.
+ * Fixture kinds: every kind a layout can build in (world/homeKinds.js has exactly one builder per key here). Geometry is built in LOCAL
+ * coordinates at rot 0 (see world/homeBuilder.js); `w` x `d` is the footprint centred on the pose, `h` the visual height, `ch` the collider height
+ * (what the camera and the player bump into; low for beds and sofas), `name` the plain noun used in messages. `pad` is the extra keep-out margin
+ * (metres) used when keep-out rectangles are derived rather than listed; `solid: false` kinds (the wall switch) get no collider or keep-out;
+ * `y` is the mount height of a wall-mounted piece.
+ * `uses` are the interactables the kind owns: `dx, dz` is the standing spot relative to the pose (rotates with `rot`, see rotXZ), `action` names
+ * the handler in the builder (ACTIONS below), `noun` (default: the kind's `name`) is what a blocked path "blocks the way to". A 'sit' use also
+ * carries `sit: { dx, dz, yaw, y }`: the seat relative to the pose and the facing at rot 0 (yaw 0 faces the local -z side, as the Studio sofa does).
+ * FRONTS at rot 0 (the side you stand on): bed east (+x), sofa north (-z), tv_unit south (+z), kitchen and fridge west (-x), desk_pc and office_desk
+ * north, stereo south, wardrobe south, bookshelf east, shower east, guest_bed east, garage_shelf south, dining_set south; toilet and vanity have
+ * their back to -z. A switch plate sits on a wall whose room is to its north: you stand at pose + rotXZ(-0.1, -0.77, rot).
  * Interactable ids: `use.id` when unique within the layout, otherwise `<fixture.id>:<use.id>` (the Studio keeps its plain ids).
  */
 export const FIXTURE_KINDS = {
-  bed:        { w: 2.0,  d: 2.4,  h: 1.1,  pad: 0.1, uses: [{ id: 'bed', dx: 1.2, dz: 0.6, radius: 1.9, label: 'Sleep', action: 'sleep' }] },
-  nightstand: { w: 0.5,  d: 0.5,  h: 0.8,  pad: 0.1 },
-  sofa:       { w: 2.86, d: 1.04, h: 1.0,  pad: 0.1, uses: [{ id: 'sofa', dx: 0, dz: -1.0, radius: 1.5, label: 'Sit on sofa', action: 'sit', sit: { dx: 0, dz: -0.05, yaw: 0, y: 0.18 } }] },
-  tv_unit:    { w: 1.8,  d: 0.45, h: 1.6,  pad: 0.1, uses: [{ id: 'tv', dx: 0, dz: 1.2, radius: 2.0, label: 'Watch TV', action: 'tv' }] },
-  kitchen:    { w: 0.9,  d: 3.4,  h: 1.0,  pad: 0.1, uses: [{ id: 'stove', dx: -1.0, dz: 0.6, radius: 1.5, label: 'Cook a quick meal', action: 'cook' }] },
-  fridge:     { w: 0.9,  d: 0.85, h: 1.9,  pad: 0.1, uses: [{ id: 'fridge', dx: -1.2, dz: 0, radius: 1.8, label: 'Open fridge / eat', action: 'fridge' }] },
-  desk_pc:    { w: 1.8,  d: 0.8,  h: 1.3,  pad: 0.1, uses: [{ id: 'computer', dx: 0, dz: -0.7, radius: 1.6, label: 'Use computer', action: 'computer' }] },
-  stereo:     { w: 0.6,  d: 0.35, h: 0.4,  pad: 0.1, uses: [{ id: 'stereo', dx: 0, dz: 0.95, radius: 1.5, label: 'Radio', action: 'radio' }] },
-  wardrobe:   { w: 1.5,  d: 0.65, h: 2.3,  pad: 0.1, uses: [{ id: 'wardrobe', dx: 0, dz: 1.05, radius: 1.6, label: 'Open wardrobe', action: 'wardrobe' }] },
-  bookshelf:  { w: 0.4,  d: 1.8,  h: 2.0,  pad: 0.1, uses: [{ id: 'books', dx: 0.95, dz: 0.1, radius: 1.5, label: 'Read a book', action: 'read' }] },
-  shower:     { w: 1.75, d: 1.75, h: 2.2,  pad: 0.1, uses: [{ id: 'shower', dx: 1.3, dz: 0, radius: 1.5, label: 'Take a shower', action: 'shower' }] },
-  switch:     { w: 0.1,  d: 0.03, h: 0.16, pad: 0, solid: false, y: 1.2, uses: [{ id: 'switch', dx: -0.1, dz: -0.77, radius: 1.2, label: 'Toggle lights', action: 'lights' }] },
+  bed:        { name: 'bed',          w: 2.0,  d: 2.4,  h: 1.1,  ch: 0.4,  pad: 0.1, uses: [{ id: 'bed', dx: 1.2, dz: 0.6, radius: 1.9, label: 'Sleep', action: 'sleep' }] },
+  nightstand: { name: 'nightstand',   w: 0.5,  d: 0.5,  h: 0.8,  ch: 0.5,  pad: 0.1 },
+  sofa:       { name: 'sofa',         w: 2.86, d: 1.04, h: 1.0,  ch: 0.55, pad: 0.1, uses: [{ id: 'sofa', dx: 0, dz: -1.0, radius: 1.5, label: 'Sit on sofa', action: 'sit', sit: { dx: 0, dz: -0.05, yaw: 0, y: 0.18 } }] },
+  tv_unit:    { name: 'TV',           w: 1.8,  d: 0.45, h: 1.6,  ch: 0.5,  pad: 0.1, uses: [{ id: 'tv', dx: 0, dz: 1.2, radius: 2.0, label: 'Watch TV', action: 'tv' }] },
+  kitchen:    { name: 'kitchen',      w: 0.9,  d: 3.4,  h: 1.0,  ch: 0.9,  pad: 0.1, uses: [{ id: 'stove', dx: -1.0, dz: 0.6, radius: 1.5, label: 'Cook a quick meal', action: 'cook', noun: 'stove' }] },
+  fridge:     { name: 'fridge',       w: 0.9,  d: 0.85, h: 1.9,  ch: 1.9,  pad: 0.1, uses: [{ id: 'fridge', dx: -1.2, dz: 0, radius: 1.8, label: 'Open fridge / eat', action: 'fridge' }] },
+  desk_pc:    { name: 'computer desk', w: 1.8, d: 0.8,  h: 1.3,  ch: 0.8,  pad: 0.1, uses: [{ id: 'computer', dx: 0, dz: -0.7, radius: 1.6, label: 'Use computer', action: 'computer', noun: 'computer' }] },
+  stereo:     { name: 'stereo',       w: 0.6,  d: 0.35, h: 0.4,  ch: 0.35, pad: 0.1, uses: [{ id: 'stereo', dx: 0, dz: 0.95, radius: 1.5, label: 'Radio', action: 'radio' }] },
+  wardrobe:   { name: 'wardrobe',     w: 1.5,  d: 0.65, h: 2.3,  ch: 2.3,  pad: 0.1, uses: [{ id: 'wardrobe', dx: 0, dz: 1.05, radius: 1.6, label: 'Open wardrobe', action: 'wardrobe' }] },
+  bookshelf:  { name: 'bookshelf',    w: 0.4,  d: 1.8,  h: 2.0,  ch: 2.0,  pad: 0.1, uses: [{ id: 'books', dx: 0.95, dz: 0.1, radius: 1.5, label: 'Read a book', action: 'read' }] },
+  shower:     { name: 'shower',       w: 1.75, d: 1.75, h: 2.2,  ch: 2.2,  pad: 0.1, uses: [{ id: 'shower', dx: 1.3, dz: 0, radius: 1.5, label: 'Take a shower', action: 'shower' }] },
+  switch:     { name: 'light switch', w: 0.1,  d: 0.03, h: 0.16, ch: 0.16, pad: 0,   solid: false, y: 1.2, uses: [{ id: 'switch', dx: -0.1, dz: -0.77, radius: 1.2, label: 'Toggle lights', action: 'lights' }] },
+  /* ---- new in the multi-room homes ---- */
+  toilet:       { name: 'toilet',         w: 0.45, d: 0.75, h: 0.8,  ch: 0.8,  pad: 0.1 },
+  vanity:       { name: 'vanity',         w: 1.2,  d: 0.55, h: 1.0,  ch: 1.0,  pad: 0.1 },
+  dining_set:   { name: 'dining table',   w: 1.8,  d: 1.9,  h: 0.9,  ch: 0.78, pad: 0.1, uses: [{ id: 'dining', dx: 0, dz: 1.55, radius: 1.4, label: 'Sit at the table', action: 'sit', sit: { dx: 0, dz: 0.85, yaw: 0, y: 0.2 } }] },
+  island:       { name: 'kitchen island', w: 2.0,  d: 0.9,  h: 0.95, ch: 0.92, pad: 0.1 },
+  guest_bed:    { name: 'guest bed',      w: 1.4,  d: 2.1,  h: 0.9,  ch: 0.4,  pad: 0.1, uses: [{ id: 'guest_bed', dx: 1.25, dz: 0.5, radius: 1.8, label: 'Nap on the guest bed', action: 'sleep' }] },
+  office_desk:  { name: 'office desk',    w: 1.6,  d: 0.8,  h: 1.25, ch: 0.8,  pad: 0.1, uses: [{ id: 'office', dx: 0, dz: -0.75, radius: 1.6, label: 'Work at the desk', action: 'computer', noun: 'desk' }] },
+  garage_shelf: { name: 'storage shelf',  w: 2.4,  d: 0.5,  h: 1.9,  ch: 1.9,  pad: 0.1, uses: [{ id: 'storage', dx: 0, dz: 1.05, radius: 1.7, label: 'Open storage', action: 'storage' }] },
+  car:          { name: 'car',            w: 1.9,  d: 4.4,  h: 1.5,  ch: 1.4,  pad: 0.1 },
 };
 
 /**
