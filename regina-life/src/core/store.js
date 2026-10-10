@@ -16,7 +16,7 @@ export function freshState(now = Date.now()) {
     needs: { energy: 88, hunger: 76, mood: 70, hygiene: 82, fun: 66 },
     skills: { cooking: 0, fitness: 0, charisma: 0 }, ads: {}, flags: {}, eventLog: [],
     friends: {}, partner: null, politics: null, trips: [], souvenirs: [], pendingEvent: null,
-    home: { owned: {}, placed: [], wall: 'cream', floor: 'oak' }, radio: { station: null, volume: 0.7 },
+    home: { owned: {}, placed: [], wall: 'cream', floor: 'oak', layout: 'studio', rooms: {} }, radio: { station: null, volume: 0.7 },
     job: { active: null, application: null, shift: null },
     phone: { wallpaper: 0, battery: 86, airplane: false, dnd: false, wifi: true, bluetooth: true, brightness: 1, volume: 0.6, flashlight: false, unlocked: false },
     messages: {}, unread: {}, notifications: [], photos: [], calls: [],
