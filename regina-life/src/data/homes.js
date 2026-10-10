@@ -104,8 +104,8 @@ export const STUDIO = {
     { kind: 'sign', text: 'SASKATCHEWAN · LIVING SKIES', x: 4.46, y: 1.7, z: 1.2, w: 1.6, h: 0.9, ry: -Math.PI / 2 },
   ],
   windows: [{ x: -2.2, y: 1.7, z: -5.38, w: 2.6, h: 1.7, ry: 0 }, { x: 2.2, y: 1.7, z: -5.38, w: 2.6, h: 1.7, ry: 0 }],
-  ceilingLights: [{ x: 0, z: -1.5, w: 1.2, d: 1.2 }, { x: 0, z: 2.5, w: 1.2, d: 1.2 }],
-  pointLights: [{ x: 0, y: 2.9, z: -1.5, intensity: 15, color: '#ffeccc', dist: 16 }, { x: 0, y: 2.9, z: 2.5, intensity: 12, color: '#ffeccc', dist: 14 }],
+  ceilingLights: [{ x: 0, z: -1.5, w: 1.2, d: 1.2, room: 'living' }, { x: 0, z: 2.5, w: 1.2, d: 1.2, room: 'living' }],
+  pointLights: [{ x: 0, y: 2.9, z: -1.5, intensity: 15, color: '#ffeccc', dist: 16, room: 'living' }, { x: 0, y: 2.9, z: 2.5, intensity: 12, color: '#ffeccc', dist: 14, room: 'living' }],
   collide: FIXTURES, keepout: KEEPOUT, keyPoints: KEY_POINTS,
   /** What the player actually bumps into (measured from the original hand-built apartment; heights matter to the camera). */
   colliders: [
