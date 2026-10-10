@@ -44,7 +44,7 @@ const auditPins = () => page.evaluate(() => {
   const blockers = [...document.querySelectorAll('.hub-top .brandpill, .hub-top .chip, .hub-card, #topbar, #chiprow button, #navbar')].filter((e) => e.offsetParent !== null).map((e) => ({ ...box(e.getBoundingClientRect()), name: e.id || e.className.split(' ')[0] || e.tagName }));
   const bad = [];
   // a pin the player cannot tap (something opaque on top of it) is as bad as an overlap
-  live.forEach((p) => { const r = p.querySelector('.pe').getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (t?.closest('.pin') !== p) bad.push(`${p.dataset.pin} is not tappable`); });
+  live.forEach((p) => { const r = p.querySelector('.pe').getBoundingClientRect(), t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); if (t?.closest('.pin') !== p) bad.push(`${p.dataset.pin} is not tappable (covered by ${t ? (t.id ? '#' + t.id : '') + '.' + String(t.className).split(' ')[0] + ' in ' + (t.closest('[id]')?.id || '?') : 'nothing'})`); });
   pins.forEach((a, i) => { pins.slice(i + 1).forEach((b) => hit(a, b) && bad.push(`${a.id} overlaps ${b.id}`)); blockers.forEach((b) => hit(a, b) && bad.push(`${a.id} under ${b.name}`)); if (a.x0 < 0 || a.y0 < 0 || a.x1 > innerWidth || a.y1 > innerHeight) bad.push(`${a.id} off-screen`); });
   return { n: pins.length, bad };
 });
