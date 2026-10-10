@@ -112,7 +112,7 @@ describe('catalogue model: Design tab', () => {
     expect(walls.find((w) => w.key === 'cream')).toMatchObject({ kind: 'wall', owned: true, active: true, cost: 0, price: FD.WALL_PRICE, canAfford: true });
     expect(walls.find((w) => w.key === 'sage')).toMatchObject({ owned: false, active: false, cost: FD.WALL_PRICE, price: FD.WALL_PRICE, canAfford: false, shortBy: FD.WALL_PRICE });
     expect(floors.find((f) => f.key === 'oak')).toMatchObject({ kind: 'floor', owned: true, active: true, cost: 0 });
-    expect(floors.find((f) => f.key === 'slate')).toMatchObject({ owned: false, price: FD.FLOOR_PRICE, material: 'tile', color: FD.FLOORS.slate[2], cost: FD.FLOOR_PRICE });
+    expect(floors.find((f) => f.key === 'slate')).toMatchObject({ owned: false, price: FD.floorPrice('slate'), material: 'tile', color: FD.FLOORS.slate[2], cost: FD.floorPrice('slate') });   // the real price of that floor (the old flat FLOOR_PRICE was the pre-existing swatch price bug)
     expect(M.tabView(store.state, M.TAB_DESIGN, FD.WALL_PRICE).sections[0].cards.find((w) => w.key === 'sage')).toMatchObject({ canAfford: true, shortBy: 0 });
     expect(v.cards).toHaveLength(walls.length + floors.length);
   });
@@ -146,7 +146,7 @@ describe('catalogue model: actions', () => {
     expect(bal() - b0).toBe(Math.floor(def.price * FD.SELL_RATIO)); expect(M.sellPiece(store, 'chair').ok).toBe(false);
   });
   it('applyStyle: unaffordable first-time styles are refused early, owned ones are free', () => {
-    store.state.bank.balance = FD.FLOOR_PRICE - 1;
+    store.state.bank.balance = FD.floorPrice('walnut') - 1;   // walnut is a premium floor: the gap is measured against ITS price, not the cheapest one
     expect(M.applyStyle(store, 'floor', 'walnut')).toEqual({ ok: false, error: 'not-enough', shortBy: 1 }); expect(store.state.home.floor).toBe('oak');
     expect(M.applyStyle(store, 'floor', 'oak')).toMatchObject({ ok: true, paid: 0 });
     for (const bad of [['wall', 'constructor'], ['wall', '__proto__'], ['placed', 'oak'], ['floor', 'lava']]) expect(M.applyStyle(store, ...bad).ok, bad.join()).toBe(false);
