@@ -677,7 +677,7 @@ async function boot() {
 
   /* ---------- debug / test handle ---------- */
   window.__regina = {
-    catalogue,
+    catalogue, settleBuildCam: () => rig.snapBuild(),
     store, G, player, rig, city, camera, scene, renderer, phone, panels, ctx, atmo,
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,

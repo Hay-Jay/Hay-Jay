@@ -260,12 +260,14 @@ await step('build mode: buy, place, paint', async () => {
   await page.evaluate(async () => { const H = await import('/src/core/home.js'); __regina.store.state.bank.balance = 500000; H.buyFurniture(__regina.store, 'armchair'); H.buyFurniture(__regina.store, 'plant'); H.buyFurniture(__regina.store, 'rug_round'); __regina.store.state.souvenirs.push('banff'); });
   await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1200);
   await page.evaluate(() => __regina.build.start()); await wait(1800); await shot('38-build-empty');
+  const frames = (n) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+  const settle = async () => { await page.evaluate(() => __regina.settleBuildCam()); await frames(3); };   // the overhead camera glides after the sheet opens/closes; jump to its resting place so pixels map to the floor
   const pxAt = (x, z) => page.evaluate(([x, z]) => { const v = new (window.__regina.camera.position.constructor)(x, 0, z).project(window.__regina.camera); const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height }; }, [x, z]);
   // the pieces we already own wait in storage: open the Buy sheet's "In storage" shelf, tap Place, then tap the floor
   for (const [type, x, z] of [['armchair', 0.5, 1.0], ['plant', -3.5, -0.4], ['poster_banff', -0.7, -3.2]]) {
     await page.click('#b-stored'); await page.waitForSelector(`.cat-sheet [data-act="place"][data-id="${type}"]`, { timeout: 30000 }); if (type === 'armchair') await shot('38b-catalogue-storage');
     await page.click(`.cat-sheet [data-act="place"][data-id="${type}"]`); await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 });
-    const p = await pxAt(x, z); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(400);
+    await settle(); const p = await pxAt(x, z); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(400);
   }
   // Buy sheet: Esc hides the sheet only (not build mode), and tapping a card buys it through the validated rules and hands it over to place
   await page.click('#b-buy'); await page.waitForSelector('.cat-sheet [data-act="buy"]', { timeout: 30000 }); await shot('38c-catalogue-buy'); await page.keyboard.press('Escape'); await wait(500);
@@ -279,7 +281,7 @@ await step('build mode: buy, place, paint', async () => {
   const placed = await page.evaluate(() => __regina.store.state.home.placed.map((i) => i.type)); if (placed.length !== 3) throw new Error('expected 3 placed, got ' + placed.join(','));
   // blocked placement is refused (on top of the bed)
   await page.click('#b-stored'); await page.waitForSelector('.cat-sheet [data-act="place"][data-id="rug_round"]', { timeout: 30000 }); await page.click('.cat-sheet [data-act="place"][data-id="rug_round"]');
-  await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 }); const pb = await pxAt(-3.2, -3.9); await page.mouse.move(pb.x, pb.y); await wait(250); await page.mouse.click(pb.x, pb.y); await wait(300);
+  await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 }); await settle(); const pb = await pxAt(-3.2, -3.9); await page.mouse.move(pb.x, pb.y); await wait(250); await page.mouse.click(pb.x, pb.y); await wait(300);
   if ((await page.evaluate(() => __regina.store.state.home.placed.length)) !== 3) throw new Error('a rug was placed on top of the bed');
   await page.keyboard.press('Escape'); await wait(300);
   // Design tab: paint and floors through the same sheet
