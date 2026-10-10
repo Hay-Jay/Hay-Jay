@@ -33,7 +33,7 @@ describe('resolving', () => {
   it('applies needs, money and skills; logs the event', () => {
     const b0 = store.ledger.balance, e0 = store.state.needs.energy;
     const r = resolveEvent(store, 'snowbank', 0);
-    expect(r.ok).toBe(true); expect(store.state.needs.energy).toBe(e0 - 8); expect(store.ledger.balance).toBe(b0 + 2000);
+    expect(r.ok).toBe(true); expect(store.state.needs.energy).toBe(e0 - 8); expect(store.ledger.balance).toBe(b0 + 1000);
     expect(store.state.skills.charisma).toBe(4); expect(store.state.eventLog[0]).toBe('snowbank');
   });
   it('refuses choices you cannot afford, without side effects', () => {
@@ -97,8 +97,8 @@ describe('billboards', () => {
     const id = 'victoria-west', b0 = store.ledger.balance;
     expect(buyAd(store, id, 2, 'Hello Regina', 'prairie', t).ok).toBe(false);
     expect(buyAd(store, id, 1, 'Hello Regina', 'bogus', t).ok).toBe(false);
-    expect(buyAd(store, id, 1, 'Hello Regina', 'prairie', t)).toMatchObject({ ok: true, price: 12000 });
-    expect(store.ledger.balance).toBe(b0 - 12000);
+    const price = adPrice(id, 1); expect(buyAd(store, id, 1, 'Hello Regina', 'prairie', t)).toMatchObject({ ok: true, price });
+    expect(store.ledger.balance).toBe(b0 - price);
     expect(buyAd(store, id, 1, 'Again', 'prairie', t + 1000).error).toMatch(/booked/);
     expect(activeAd(store.state, id, t + 1000)).toBeTruthy();
     expect(expireAds(store, t + 86_400_001)).toBe(1); expect(activeAd(store.state, id, t + 86_400_001)).toBeNull();

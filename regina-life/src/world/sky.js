@@ -74,7 +74,7 @@ export class Atmosphere {
 
   /** @param {Date} date Regina "now"  @param {object} weather from core/weather */
   setTime(date, weather) {
-    if (this.indoor) { this.hemi.intensity = 0.55; this.hemi.color.set('#fff4e0'); this.hemi.groundColor.set('#8a7f70'); this.fill.intensity = 0.3; this.sun.visible = false; return this.env; }
+    if (this.indoor) { this.hemi.intensity = this.homeLift ? 1.25 : 0.55; this.hemi.color.set('#fff4e0'); this.hemi.groundColor.set('#8a7f70'); this.fill.intensity = this.homeLift ? 0.65 : 0.3; this.sun.visible = false; this.exposureBase = this.homeLift ? 1.1 : 0.95; return this.env; }
     const sp = sunPosition(date); const alt = sp.altitude;
     const clock = reginaClock(date), season = seasonOf(clock.month);
     const altDeg = (alt * 180) / Math.PI;

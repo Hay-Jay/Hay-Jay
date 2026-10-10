@@ -8,8 +8,8 @@ import { fmtMoney } from '../core/ledger.js';
 import { sunTimes, hoursLabel, reginaParts, TZ } from '../core/time.js';
 import { WALLPAPERS } from './wallpapers.js';
 import { SKILLS, skillLevel, moodWord } from '../core/game.js';
-import { BILLBOARDS, BOARD_BY_ID, DAY_PRICE, DURATIONS, THEMES } from '../data/billboards.js';
-import { adPrice, adReach, buyAd, activeAd, moderate, MAX_AD_CHARS } from '../core/ads.js';
+import { BILLBOARDS, BOARD_BY_ID, THEMES, AD_TIERS, AD_TIER_ORDER, rotationFor } from '../data/billboards.js';
+import { adPrice, adReach, adQuote, buyAd, activeAd, moderate, validImage, MAX_AD_CHARS, MAX_IMAGE_CHARS } from '../core/ads.js';
 import { drawBillboard } from '../world/textures.js';
 import * as SOC from '../core/social.js';
 import * as POL from '../core/politics.js';
@@ -29,14 +29,21 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const walkEta = (m) => { const s = m / 3.1; return s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`; };
 const fmtDist = (m) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
 
-/** Re-rendering an app keeps the scroll position unless the screen changed (its title differs). */
+/**
+ * Re-rendering an app keeps the scroll position unless the screen changed (its title differs), and an identical re-render is skipped
+ * outright (apps redraw on every store tick, which would otherwise replace the very button a thumb is about to press).
+ */
 function scrollSafe(el) {
+  let last = null;
+  const dirty = new MutationObserver(() => {}); dirty.observe(el, { subtree: true, childList: true, attributes: true, characterData: true });
   return new Proxy(el, {
     get(t, k) { const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; },
     set(t, k, v) {
       if (k !== 'innerHTML') { t[k] = v; return true; }
+      const touched = dirty.takeRecords().length > 0;                         // the app (or a handler) changed the DOM since we last drew it
+      if (!touched && v === last && t.firstChild) return true;
       const sc = t.querySelector('.scroll'), y = sc ? sc.scrollTop : 0, title = t.querySelector('.nav h2')?.textContent;
-      t.innerHTML = v;
+      t.innerHTML = v; last = v; dirty.takeRecords();
       const n = t.querySelector('.scroll'); if (n && y && t.querySelector('.nav h2')?.textContent === title) n.scrollTop = y;
       return true;
     },
@@ -398,45 +405,75 @@ const newsApp = app('news', 'Prairie News', (body, ctx) => {
 /* ================= ADS (billboards) ================= */
 const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
   const { store } = ctx; let sel = ctx.adsFocus || null; ctx.adsFocus = null;
-  let form = { text: '', theme: 'prairie', days: 1, err: '' };
+  let form = { text: '', theme: 'prairie', image: null, err: '', busy: false };
   const left = (t) => { const h = Math.max(0, (t - store.now()) / 3.6e6); return h >= 24 ? `${Math.round(h / 24)}d ${Math.round(h % 24)}h left` : `${Math.max(1, Math.round(h))}h left`; };
+  const tierDot = { standard: 'linear-gradient(135deg,#0b8f86,#2a74d6)', big: 'linear-gradient(135deg,#6a2cff,#ff2d95)', landmark: 'linear-gradient(135deg,#ffb347,#ff5a5f)' };
   const list = () => {
     const s = store.state, now = store.now(), mine = BILLBOARDS.filter((b) => activeAd(s, b.id, now));
     body.innerHTML = `${nav('Ads')}<div class="scroll">
-      ${mine.length ? `<h4 class="sec">Your campaigns</h4><div class="list">${mine.map((b) => { const a = s.ads[b.id]; return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:linear-gradient(135deg,${THEMES[a.theme][0]},${THEMES[a.theme][1]})">📢</div><div class="grow"><b>“${esc(a.text)}”</b><p>${esc(b.name)} · ${left(a.until)}</p></div></button>`; }).join('')}</div>` : ''}
-      <h4 class="sec">Billboards in Regina</h4><div class="list">${BILLBOARDS.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${b.tier === 'mega' ? 'linear-gradient(135deg,#6a2cff,#ff2d95)' : 'linear-gradient(135deg,#0b8f86,#2a74d6)'}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${b.tier === 'mega' ? 'MEGA SCREEN' : 'Standard'} · ${fmtMoney(adPrice(b.id, 1, s))}/day</p></div><small class="${a ? 'red' : 'green'}">${a ? 'Booked' : 'Available'}</small></button>`; }).join('')}</div>
-      <p class="fine pad">Billboards are paid in Prairie Dollars only. No real money is involved. Reach numbers are simulated.</p></div>`;
+      ${mine.length ? `<h4 class="sec">On air now</h4><div class="list">${mine.map((b) => { const a = s.ads[b.id]; return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:linear-gradient(135deg,${THEMES[a.theme][0]},${THEMES[a.theme][1]})">${a.image ? '🖼️' : '📢'}</div><div class="grow"><b>“${esc(a.text)}”</b><p>${esc(b.name)} · ${left(a.until)}</p></div></button>`; }).join('')}</div>` : ''}
+      ${AD_TIER_ORDER.map((tid) => { const t = AD_TIERS[tid], boards = BILLBOARDS.filter((b) => b.adTier === tid); return `<h4 class="sec">${esc(t.name)} · ${fmtMoney(t.price)} / ${t.days} days</h4><p class="fine pad">${esc(t.blurb)} Up to ${t.maxRotation} ads share the screen.</p><div class="list">${boards.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${tierDot[tid]}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${a ? `<span class="ok">● On air</span> · ${left(a.until)}` : `Free to book · ${t.size.label}`}</p></div></button>`; }).join('')}</div>`; }).join('')}
+      <div class="card"><b>Advertise for real?</b><p>Local businesses with accounts will be able to book these same boards for real money: about <b>CA$${(AD_TIERS.standard.realMoney.cents / 100).toFixed(0)}</b> per 7 days for a Standard board, <b>CA$${(AD_TIERS.big.realMoney.cents / 100).toFixed(0)}</b> for a Big board and <b>CA$${(AD_TIERS.landmark.realMoney.cents / 100).toFixed(0)}</b> for a Landmark board. That arrives with accounts and secure payments, so it is not available yet.</p></div>
+      <p class="fine pad">Here, billboards are paid in Prairie Dollars only. Boards rotate your ad with in-game sponsor ads. Reach numbers are simulated.</p></div>`;
   };
   const detail = () => {
-    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), price = adPrice(sel, form.days, s);
-    body.innerHTML = `${nav(esc(b.name), { back: true })}<div class="scroll"><canvas class="bbprev" width="480" height="${Math.round(480 * (b.tier === 'mega' ? 0.5 : 0.5))}"></canvas>
-      ${a ? `<div class="card"><b>Booked</b><p>“${esc(a.text)}” — ${left(a.until)}</p><small>Your ad is on display at this location.</small></div>
-      <button class="btn wide" data-act="go">Navigate there</button>`
+    const b = BOARD_BY_ID[sel], s = store.state, now = store.now(), a = activeAd(s, sel, now), q = adQuote(sel, s), t = q.tier, price = q.price;
+    body.innerHTML = `${nav(esc(b.name), { back: true })}<div class="scroll"><canvas class="bbprev" width="480" height="240"></canvas>
+      <div class="card tiercard"><div class="tc-top"><span class="tc-badge" style="background:${tierDot[b.adTier]}">${esc(t.name)}</span><span class="tc-price">${fmtMoney(price)}<small> / ${q.days} days</small></span></div>
+        <p>${esc(t.size.label)} · shares the screen with up to ${q.maxRotation - 1} in-game sponsor${q.maxRotation > 2 ? 's' : ''} (about ${Math.round(q.airtime * 100)}% of the time for your ad) · 👁️ about <b>${q.reach.toLocaleString()}</b> simulated views.</p></div>
+      ${a ? `<div class="card"><b>● On air</b><p>“${esc(a.text)}” — ${left(a.until)}</p><small>Your ad is rotating on this board. Go and see it!</small></div><button class="btn wide" data-act="go">Navigate there</button>`
       : `<div class="form"><label>Your message <small>(<span id="cnt">${form.text.length}</span>/${MAX_AD_CHARS})</small><input id="adtext" maxlength="${MAX_AD_CHARS}" value="${esc(form.text)}" placeholder="e.g. Best bannock in Regina!" autocomplete="off"></label>
         <label>Colours</label><div class="swatches">${Object.entries(THEMES).map(([k, [c1, c2]]) => `<button class="sw ${form.theme === k ? 'on' : ''}" data-theme="${k}" style="background:linear-gradient(135deg,${c1},${c2})" aria-label="${k}"></button>`).join('')}</div>
-        <label>Duration</label><div class="seg tight">${Object.keys(DURATIONS).map((d) => `<button class="${form.days == d ? 'on' : ''}" data-days="${d}">${d} day${d == 1 ? '' : 's'}<small>${fmtMoney(adPrice(sel, +d, s))}</small></button>`).join('')}</div>
-        <p class="meta">👁️ Simulated reach: <b>${adReach(sel, form.days).toLocaleString()}</b> views · Balance ${fmtMoney(s.bank.balance)}</p><p class="err">${esc(form.err)}</p>
-        <button class="btn primary wide" data-act="book" ${price > s.bank.balance ? 'disabled' : ''}>Book for ${fmtMoney(price)}</button></div>
+        <label>Picture <small>(optional)</small></label><div class="adpic">${form.image ? `<img alt="Your picture" src="${form.image}"><button class="btn small" data-act="rmimg">Remove</button>` : `<button class="btn small" data-act="pick">📷 Add a picture</button><small>JPEG/PNG, cropped to fit the board. Only you can see it until accounts arrive.</small>`}<input id="adimg" type="file" accept="image/*" hidden></div>
+        <p class="meta">Balance ${fmtMoney(s.bank.balance)}</p><p class="err">${esc(form.err)}</p>
+        <button class="btn primary wide" data-act="book" ${price > s.bank.balance || form.busy ? 'disabled' : ''}>Book 7 days · ${fmtMoney(price)}</button>${price > s.bank.balance ? `<p class="fine">Need ${fmtMoney(price - s.bank.balance)} more.</p>` : ''}</div>
       <button class="btn wide" data-act="go">Navigate there</button>`}</div>`;
     previewDraw();
   };
-  const previewDraw = () => { const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], a = activeAd(store.state, sel, store.now()); const t = form.text.trim().length >= 3 ? form.text.trim() : ''; cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, a || (t ? { text: t, theme: form.theme } : null), { tier: b.tier, priceLabel: `${fmtMoney(adPrice(sel, 1, store.state))} / day` }, THEMES); };
+  let prevT = 0;
+  const previewDraw = () => {
+    const cv = body.querySelector('.bbprev'); if (!cv) return; const b = BOARD_BY_ID[sel], s = store.state, a = activeAd(s, sel, store.now()), tx = form.text.trim();
+    const mine = a ? a : tx.length >= 3 || form.image ? { text: tx.length >= 3 ? tx : 'Your message here', theme: form.theme, image: form.image } : null;
+    const slots = rotationFor(b, mine); const ad = slots[prevT % slots.length];
+    cv.height = Math.round(cv.width * (b.tier === 'mega' ? 7.5 / 15 : 5.25 / 10.5)); drawBillboard(cv, ad, { tier: b.tier, onImage: previewDraw }, THEMES);
+  };
+  const tick = setInterval(() => { if (sel && body.querySelector('.bbprev')) { prevT++; previewDraw(); } }, 2500);
+  /** Crop to the board's shape, shrink and re-encode as JPEG so it fits the save file. */
+  const toJpeg = (file) => new Promise((resolve, reject) => {
+    const b = BOARD_BY_ID[sel], aspect = b.tier === 'mega' ? 2 : 2, im = new Image(), url = URL.createObjectURL(file);
+    im.onload = () => {
+      URL.revokeObjectURL(url); let W = 720;
+      for (let tries = 0; tries < 6; tries++) {
+        const c = document.createElement('canvas'); c.width = W; c.height = Math.round(W / aspect); const g = c.getContext('2d'), k = Math.max(c.width / im.width, c.height / im.height);
+        g.drawImage(im, (c.width - im.width * k) / 2, (c.height - im.height * k) / 2, im.width * k, im.height * k);
+        const out = c.toDataURL('image/jpeg', 0.8 - tries * 0.08); if (validImage(out)) { resolve(out); return; } W = Math.round(W * 0.8);
+      }
+      reject(new Error('That picture is too detailed to fit. Try a simpler one.'));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read that picture.')); }; im.src = url;
+  });
   body.addEventListener('click', (e) => {
     const b = e.target.closest('[data-b]'); if (b) { sel = b.dataset.b; form.err = ''; detail(); return; }
     const th = e.target.closest('[data-theme]'); if (th) { form.theme = th.dataset.theme; detail(); return; }
-    const dy = e.target.closest('[data-days]'); if (dy) { form.days = +dy.dataset.days; detail(); return; }
     const a = e.target.closest('[data-act]')?.dataset.act;
     if (a === 'back') { sel = null; list(); }
+    if (a === 'pick') body.querySelector('#adimg')?.click();
+    if (a === 'rmimg') { form.image = null; detail(); }
     if (a === 'go') { const bb = BOARD_BY_ID[sel]; ctx.setDestination({ id: 'bb_' + bb.id, name: `Billboard · ${bb.name}`, x: bb.x + Math.sin(bb.yaw) * 10, z: bb.z + Math.cos(bb.yaw) * 10 }); phone.openApp('maps'); }
     if (a === 'book') {
       const m = moderate(form.text); if (!m.ok) { form.err = m.error; ctx.audio?.blip('error'); detail(); return; }
-      const r = buyAd(store, sel, form.days, m.text, form.theme); if (!r.ok) { form.err = r.error; ctx.audio?.blip('error'); detail(); return; }
-      ctx.audio?.blip('cash'); ctx.toast('Billboard booked! Go see it.', 'good'); ctx.refreshBillboards(); form = { text: '', theme: 'prairie', days: 1, err: '' }; detail();
+      const r = buyAd(store, sel, 7, m.text, form.theme, store.now(), form.image); if (!r.ok) { form.err = r.error; ctx.audio?.blip('error'); detail(); return; }
+      ctx.audio?.blip('cash'); ctx.toast('Billboard booked! Go see it.', 'good'); ctx.refreshBillboards(); form = { text: '', theme: 'prairie', image: null, err: '', busy: false }; detail();
     }
+  });
+  body.addEventListener('change', async (e) => {
+    if (e.target.id !== 'adimg' || !e.target.files?.[0]) return; form.busy = true; form.err = '';
+    try { form.image = await toJpeg(e.target.files[0]); } catch (err) { form.err = err.message; }
+    form.busy = false; detail();
   });
   body.addEventListener('input', (e) => { if (e.target.id === 'adtext') { form.text = e.target.value; body.querySelector('#cnt').textContent = form.text.length; previewDraw(); } });
   sel ? detail() : list();
-  return { update(topic) { if (document.activeElement?.id === 'adtext') return; sel ? detail() : list(); } };
+  return { update(topic) { if (document.activeElement?.id === 'adtext' || form.busy) return; sel ? detail() : list(); }, destroy() { clearInterval(tick); } };
 });
 
 

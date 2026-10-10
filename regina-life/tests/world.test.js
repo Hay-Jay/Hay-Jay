@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { CollisionGrid } from '../src/world/collision.js';
-import { POIS, DISTRICTS, lakePolygon, mapRoads, GRID, PITCH, poiById } from '../src/world/cityData.js';
+import { POIS, DISTRICTS, lakePolygon, mapRoads, GRID, PITCH, poiById, ISLAND } from '../src/world/cityData.js';
 import { outfitForTemp } from '../src/world/npcs.js';
 import { simulateWeather, fetchWeather, WMO } from '../src/core/weather.js';
 import { CLOTHES, STARTER_WARDROBE, DEFAULT_LOOK, SLOT_KEY } from '../src/data/catalog.js';
@@ -27,12 +27,17 @@ describe('City data', () => {
     const ids = POIS.map((p) => p.id); expect(new Set(ids).size).toBe(ids.length);
     for (const p of POIS) { expect(Number.isFinite(p.x) && Number.isFinite(p.z)).toBe(true); }
   });
-  it('places districts in plausible real-world relation to downtown', () => {
+  it('keeps each district on its real compass bearing from downtown, in a compact ring', () => {
     const d = (id) => DISTRICTS.find((x) => x.id === id);
-    expect(d('uofr').z).toBeGreaterThan(2000);            // south-east of downtown
-    expect(d('rochdale').z).toBeLessThan(-2000);          // north-west
-    expect(d('airport').x).toBeLessThan(-2000);           // west
-    expect(d('east').x).toBeGreaterThan(2000);            // east
+    expect(d('uofr').x).toBeGreaterThan(0); expect(d('uofr').z).toBeGreaterThan(1500);          // south-east
+    expect(d('rochdale').x).toBeLessThan(0); expect(d('rochdale').z).toBeLessThan(-1000);        // north-west
+    expect(d('airport').x).toBeLessThan(-2000);                                                   // west
+    expect(d('stadium').x).toBeLessThan(-800); expect(d('cathedral').x).toBeLessThan(-800);       // west of downtown
+    expect(d('east').x).toBeGreaterThan(1500); expect(d('south').z).toBeGreaterThan(1500);
+    for (const x of DISTRICTS) { if (x.detail === 'playable') continue; const r = Math.hypot(x.x, x.z); expect(r, x.id).toBeGreaterThan(900); expect(r, x.id).toBeLessThan(3600); }
+  });
+  it('every district and place sits on the island', () => {
+    for (const x of [...DISTRICTS, ...POIS]) { expect(x.x, x.id).toBeGreaterThan(ISLAND.x0); expect(x.x, x.id).toBeLessThan(ISLAND.x1); expect(x.z, x.id).toBeGreaterThan(ISLAND.z0); expect(x.z, x.id).toBeLessThan(ISLAND.z1); }
   });
   it('lake lies between downtown and the Legislative Building', () => {
     const lz = lakePolygon().map(([, z]) => z); expect(Math.min(...lz)).toBeGreaterThan(GRID.j1 * PITCH); expect(Math.max(...lz)).toBeLessThan(poiById.leg.z);

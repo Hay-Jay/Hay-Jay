@@ -6,7 +6,7 @@ import { DEFAULT_LOOK, FOOD, CLOTHES, STORE_STOCK, MARKET_STOCK } from '../data/
 import { JOBS } from '../data/jobs.js';
 import { mulberry32 } from '../core/rng.js';
 import { furnitureModel } from './furnitureModels.js';
-import { FURNITURE, WALLS, FLOORS, isPoster } from '../data/furniture.js';
+import { FURNITURE, WALLS, FLOORS, isPoster, KIND_ACTIVITY } from '../data/furniture.js';
 import { itemDef, footprint } from '../core/home.js';
 
 const H = 3.3; // ceiling height
@@ -398,9 +398,16 @@ export function buildInterior(kind, { texCache = {} } = {}) {
     if (apt.fm.map !== floorTex[fk]) { apt.fm.map = floorTex[fk]; apt.fm.needsUpdate = true; }
     while (decor.children.length) { const c = decor.children.pop(); c.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.(); }); }
     colliders.removeTag('furn');
+    for (let i = interactables.length - 1; i >= 0; i--) if (interactables[i].furn) interactables.splice(i, 1);   // the pieces you can use follow what is placed
+    const usedKinds = new Set();
     for (const it of home.placed || []) {
       const mdl = furnitureModel(it.type); mdl.position.set(it.x, 0, it.z); mdl.rotation.y = (it.rot * Math.PI) / 2; decor.add(mdl);
       const def = itemDef(it.type); if (def?.solid) { const f = footprint(it.type, it.rot); colliders.add(it.x - f.w / 2, it.z - f.d / 2, it.x + f.w / 2, it.z + f.d / 2, def.h, 'furn'); }
+      const act = def && KIND_ACTIVITY[def.kind];
+      if (act && !usedKinds.has(def.kind + it.id)) {   // stand in front of it (+z, the side the piece faces) so the prompt never fights the piece's own collider
+        usedKinds.add(def.kind + it.id); const r = ((it.rot % 4) + 4) % 4, off = [[0, 1], [1, 0], [0, -1], [-1, 0]][r], reach = Math.max(def.w, def.d) / 2 + 0.6;
+        interactables.push({ id: `furn_${it.id}`, furn: true, x: it.x + off[0] * reach, z: it.z + off[1] * reach, radius: 1.5, label: `${act[1]} ${def.name.toLowerCase()}`, run: (ctx) => ctx.ui.activity(act[0]) });
+      }
     }
   };
 

@@ -1,4 +1,5 @@
 import { DEFAULT_LOOK, STARTER_WARDROBE } from '../data/catalog.js';
+import { STARTING_BALANCE } from '../data/economy.js';
 import { Ledger } from './ledger.js';
 import { sanitize } from './sanitize.js';
 
@@ -10,7 +11,7 @@ export function freshState(now = Date.now()) {
     v: SAVE_VERSION, created: now, started: false,
     player: { name: 'Alex', look: { ...DEFAULT_LOOK } },
     wardrobe: [...STARTER_WARDROBE],
-    bank: { balance: 250000, history: [] },
+    bank: { balance: STARTING_BALANCE, history: [] },
     inventory: {},
     needs: { energy: 88, hunger: 76, mood: 70, hygiene: 82, fun: 66 },
     skills: { cooking: 0, fitness: 0, charisma: 0 }, ads: {}, flags: {}, eventLog: [],
@@ -19,7 +20,7 @@ export function freshState(now = Date.now()) {
     job: { active: null, application: null, shift: null },
     phone: { wallpaper: 0, battery: 86, airplane: false, dnd: false, wifi: true, bluetooth: true, brightness: 1, volume: 0.6, flashlight: false, unlocked: false },
     messages: {}, unread: {}, notifications: [], photos: [], calls: [],
-    destination: null, calendar: [],
+    destination: null, calendar: [], daily: { last: '', streak: 0 },
     settings: { quality: 'auto', timeMode: 'live' },
     pos: null,
   };

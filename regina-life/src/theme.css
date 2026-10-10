@@ -1,0 +1,132 @@
+/* ============================================================================
+   REGINA LIFE — design system v2 ("prairie bright")
+   Light, friendly, springy. Loaded after style.css; everything here is additive or an intentional override.
+   Tokens first, then the app shell (top bar, tab bar, chips), then motion.
+   ========================================================================== */
+:root{
+  --c-ink:#12202a; --c-ink-2:#44545f; --c-ink-3:#74838d;
+  --cream:#fffaf0; --paper:#ffffff; --sky:#bfe3f5; --sky-2:#8fcdea;
+  --leaf:#22b573; --leaf-d:#168f59; --leaf-l:#e2f7ec; --wheat:#ffc83d; --wheat-d:#f2a900; --coral:#ff6b5e; --plum:#7a5af8;
+  --pill:rgba(255,255,255,.94); --pill-line:rgba(18,32,42,.08); --shadow-1:0 4px 14px rgba(18,32,42,.14); --shadow-2:0 12px 34px rgba(18,32,42,.22); --shadow-3:0 22px 60px rgba(18,32,42,.3);
+  --r-s:12px; --r-m:18px; --r-l:26px; --r-pill:999px;
+  --spring:cubic-bezier(.34,1.56,.64,1); --ease:cubic-bezier(.2,.8,.2,1);
+  --head:"Fredoka","Plus Jakarta Sans",var(--font); --body:"Plus Jakarta Sans",var(--font);
+  --nav-h:64px;
+}
+body{font-family:var(--body)}
+
+/* ---------- the shell: top bar ---------- */
+.shell{position:fixed;inset:0;z-index:45;pointer-events:none;font-family:var(--body)}
+.shell>*{pointer-events:auto}
+.topbar{position:absolute;top:calc(10px + var(--safe-t));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;max-width:calc(100vw - 20px);padding:6px 6px 6px 16px;border-radius:var(--r-pill);background:var(--pill);color:var(--c-ink);box-shadow:var(--shadow-2),0 0 0 1px var(--pill-line);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);font-size:13px;font-weight:700;white-space:nowrap;animation:dropIn .55s var(--spring) both}
+.tb-item{display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.tb-clock small{color:var(--c-ink-3);font-weight:600}
+.tb-mood[data-tone=great],.tb-mood[data-tone=good]{color:var(--leaf-d)} .tb-mood[data-tone=okay]{color:#9a6b00} .tb-mood[data-tone=low],.tb-mood[data-tone=bad]{color:#c2352b}
+.tb-sep{width:1px;height:18px;background:var(--pill-line)}
+.tb-money{font-family:var(--head);font-size:15px;font-weight:600;letter-spacing:.01em;display:inline-block}
+.tb-money.bump{animation:bump .5s var(--spring)}
+.tb-plus{position:relative;width:34px;height:34px;border-radius:50%;border:0;background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff;display:grid;place-items:center;font-size:22px;font-weight:700;line-height:1;box-shadow:0 4px 12px rgba(22,143,89,.4);transition:transform .15s var(--spring)}
+.tb-plus:hover{transform:scale(1.08)} .tb-plus:active{transform:scale(.92)}
+.tb-plus.ready::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--wheat);animation:ping 1.6s ease-out infinite}
+.tb-plus.ready::before{content:"🎁";position:absolute;top:-9px;right:-7px;font-size:14px;animation:wobble 2s ease-in-out infinite}
+
+/* ---------- context chips ---------- */
+.chiprow{position:absolute;top:calc(60px + var(--safe-t));left:50%;transform:translateX(-50%);display:flex;gap:8px;max-width:calc(100vw - 20px);overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.chiprow::-webkit-scrollbar{display:none}
+.chiprow button{flex:none;border:0;border-radius:var(--r-pill);padding:8px 14px;background:var(--pill);color:var(--c-ink);font:700 13px var(--body);box-shadow:var(--shadow-1),0 0 0 1px var(--pill-line);display:flex;gap:6px;align-items:center;transition:transform .15s var(--spring),background .2s;animation:chipIn .5s var(--spring) both}
+.chiprow button:hover{transform:translateY(-1px)} .chiprow button:active{transform:scale(.95)}
+.chiprow button.on{background:var(--c-ink);color:#fff}
+
+/* ---------- the tab bar ---------- */
+.navbar{position:absolute;bottom:calc(12px + var(--safe-b));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:6px;border-radius:var(--r-pill);background:var(--pill);box-shadow:var(--shadow-3),0 0 0 1px var(--pill-line);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);animation:riseIn .6s var(--spring) both}
+.navbar .nsep{display:none}
+.navbar button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:68px;height:54px;padding:0 10px;border:0;border-radius:var(--r-pill);background:transparent;color:var(--c-ink-3);font:700 11px var(--body);transition:background .25s var(--ease),color .2s,transform .2s var(--spring)}
+.navbar button .ni{width:22px;height:22px;transition:transform .3s var(--spring)} .navbar button .ni svg{width:22px;height:22px}
+.navbar button:hover{color:var(--c-ink)} .navbar button:active{transform:scale(.93)}
+.navbar button.on{background:var(--c-ink);color:#fff;box-shadow:0 6px 16px rgba(18,32,42,.35)}
+.navbar button.on .ni{transform:translateY(-1px) scale(1.12)}
+.nbadge{position:absolute;top:3px;right:12px;min-width:17px;height:17px;border-radius:9px;padding:0 4px;background:var(--coral);color:#fff;font:800 10px/17px var(--body);text-align:center;box-shadow:0 0 0 2px #fff}
+
+/* ---------- re-home the legacy HUD around the shell ---------- */
+body.shell-on #hud .hud-tl .pill.money,body.shell-on #hud .hud-tr .clockchip,body.shell-on #hud #b-phone,body.shell-on #hud #b-map,body.shell-on #hud .hint{display:none!important}
+body.shell-on #hud .hud-tl{top:auto;bottom:calc(88px + var(--safe-b));left:calc(10px + var(--safe-l))}
+body.shell-on #hud .hud-tr{top:calc(62px + var(--safe-t))}
+body.shell-on #hud .hud-tc{top:calc(64px + var(--safe-t))}
+body.shell-on #hud .hud-btns{bottom:calc(88px + var(--safe-b));flex-direction:column}
+body.shell-on.touch-mode #hud .hud-btns{bottom:calc(150px + var(--safe-b))}
+body.shell-on #hud .needs{background:var(--pill);border:0;box-shadow:var(--shadow-1),0 0 0 1px var(--pill-line);color:var(--c-ink);backdrop-filter:blur(12px)}
+body.shell-on #hud .needs .bar{background:rgba(18,32,42,.1)}
+body.shell-on #hud .hbtn{background:var(--pill);border:0;box-shadow:var(--shadow-1),0 0 0 1px var(--pill-line);color:var(--c-ink)}
+body.shell-on #hud #minimap{border-color:#fff;box-shadow:var(--shadow-2)}
+body.building .shell .navbar,body.building .shell .chiprow{display:none}
+body.hud-hidden .shell{visibility:hidden}
+@media (max-width:520px){
+  .topbar{gap:8px;padding-left:12px;font-size:12px} .tb-sep{display:none} .tb-weather{display:none}
+  .navbar button{min-width:60px}
+}
+@media (max-height:480px) and (orientation:landscape){
+  .navbar button{height:44px;min-width:58px;flex-direction:row;gap:6px} .navbar .nl{font-size:11px} .navbar{bottom:calc(6px + var(--safe-b))}
+}
+
+/* ---------- motion ---------- */
+@keyframes dropIn{from{opacity:0;transform:translate(-50%,-14px) scale(.96)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes riseIn{from{opacity:0;transform:translate(-50%,24px) scale(.96)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes chipIn{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes ping{0%{opacity:.9;transform:scale(.9)}100%{opacity:0;transform:scale(1.7)}}
+@keyframes wobble{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+@keyframes cardIn{from{opacity:0;transform:translate(-50%,16px) scale(.97)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ---------- toasts: light pills with a coloured edge, below the bar/chips ---------- */
+body.shell-on #toasts{top:calc(104px + var(--safe-t))}
+.toast{background:var(--pill);color:var(--c-ink);border:0;border-radius:var(--r-pill);padding:10px 18px;font:700 13.5px var(--body);box-shadow:var(--shadow-2),0 0 0 1px var(--pill-line);animation:toastPop .45s var(--spring) both;backdrop-filter:blur(14px)}
+.toast::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:9px;vertical-align:1px;background:var(--sky-2)}
+.toast.good::before{background:var(--leaf)} .toast.warn::before{background:var(--coral)} .toast.info::before{background:#4da3ff}
+.toast.good,.toast.warn,.toast.info{border:0}
+@keyframes toastPop{from{opacity:0;transform:translateY(-10px) scale(.92)}to{opacity:1;transform:none}}
+
+/* ---------- Map tab: the bright overview + place card ---------- */
+.ovmap{position:fixed;inset:0;z-index:44;pointer-events:none;font-family:var(--body)}
+.ovmap .pin,.ovmap .ov-card{pointer-events:auto}
+.ovmap .ov-card{bottom:calc(92px + var(--safe-b));width:min(92vw,460px);padding:14px 16px 16px;border-radius:var(--r-l);background:var(--pill);color:var(--c-ink);text-align:left;box-shadow:var(--shadow-3),0 0 0 1px var(--pill-line);backdrop-filter:blur(16px);animation:cardIn .5s var(--spring) both}
+.ovmap .ov-card:not(.sel){width:max-content;max-width:92vw;padding:10px 18px;border-radius:var(--r-pill)}
+.ov-hint{margin:0;font:700 13px var(--body);color:var(--c-ink-2);text-align:center}
+.ov-card.sel .ov-hint{display:none}
+.ov-card .hc-place{display:none;border:0;margin:0;padding:0}
+.ov-card.sel .hc-place{display:block;animation:fadeUp .35s var(--ease) both}
+.pc-head{display:flex;align-items:center;gap:12px}
+.pc-ico{flex:none;width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-size:26px;background:linear-gradient(145deg,#fff,#eef3f6);box-shadow:inset 0 0 0 1px var(--pill-line)}
+.pc-head h3{margin:0;font:600 19px var(--head);letter-spacing:.005em;color:var(--c-ink)} .pc-head small{display:block;margin-top:1px;font:600 12px var(--body);color:var(--c-ink-3)}
+.pc-tag{margin-left:auto;flex:none;font:800 11px var(--body);padding:4px 10px;border-radius:var(--r-pill);background:#eef0f3;color:#58626b}
+.pc-tag.open{background:var(--leaf-l);color:#13734a}
+.pc-blurb{margin:10px 0 8px;font:500 13.5px/1.45 var(--body);color:var(--c-ink-2)}
+.pc-acts{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.pc-acts span{font:700 12px var(--body);padding:5px 10px;border-radius:var(--r-pill);background:#f2f5f7;color:var(--c-ink)} .pc-acts span.soon{opacity:.55}
+.pc-go{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gobtn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 8px;border:0;border-radius:var(--r-m);background:#f2f5f7;color:var(--c-ink);font:700 14px var(--body);box-shadow:inset 0 0 0 1px var(--pill-line);transition:transform .15s var(--spring),background .2s}
+.gobtn small{font:700 11.5px var(--body);color:var(--c-ink-3)}
+.gobtn:hover{background:#e8eef1} .gobtn:active{transform:scale(.96)}
+.gobtn.primary{background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff;box-shadow:0 8px 20px rgba(22,143,89,.35)} .gobtn.primary small{color:#d9fbe9}
+.gobtn:disabled{opacity:.45;pointer-events:none}
+.pin.you .pe{background:#4da3ff;box-shadow:0 0 0 5px rgba(77,163,255,.3),0 5px 14px rgba(0,0,0,.35);animation:youPulse 2s ease-out infinite} .pin.you .pl{display:none}
+@keyframes youPulse{0%{box-shadow:0 0 0 0 rgba(77,163,255,.55),0 5px 14px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(77,163,255,0),0 5px 14px rgba(0,0,0,.35)}}
+body.building .ovmap{display:none}
+
+body.map-ov #hud{display:none!important}
+
+body.home-view #hud .hud-tr{display:none!important}
+
+/* ---------- Ads app: tier card + picture picker ---------- */
+.tiercard .tc-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.tc-badge{font:800 11px var(--body);padding:4px 10px;border-radius:var(--r-pill);color:#fff;letter-spacing:.02em}
+.tc-price{font:600 22px var(--head);color:#fff} .tc-price small{font:600 12px var(--body);color:#9aa6bd}
+.tiercard p{margin:0;font-size:12.5px;line-height:1.45;color:#b8c2d6}
+.adpic{display:flex;align-items:center;gap:10px;flex-wrap:wrap} .adpic img{width:92px;height:46px;object-fit:cover;border-radius:8px;box-shadow:0 0 0 1px rgba(255,255,255,.18)} .adpic small{flex:1 1 140px;color:#8f99ac;font-size:11.5px}
+.row .ok{color:#34c98b;font-weight:700}
+
+.pc-go.three{grid-template-columns:repeat(3,1fr)}
+
+/* the Buy sheet owns the lower half of the screen: tuck the contextual chips away so the room gets the space */
+body.cat-open #chiprow{display:none}

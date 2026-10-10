@@ -8,10 +8,13 @@ import * as H from '../src/core/home.js';
 import { resolveEvent as _resolve, issueEvent, EVENTS } from '../src/core/events.js';
 import { RESIDENTS, findResident, searchResidents, residentReply } from '../src/data/residents.js';
 import { CONTACTS, contactIds, npcReply } from '../src/data/contacts.js';
-import { DESTINATIONS } from '../src/data/destinations.js';
+import { DESTINATIONS, DESTINATION_BY_ID } from '../src/data/destinations.js';
 import { POLICIES, CANDIDATES } from '../src/data/policies.js';
-import { FURNITURE, KEEPOUT, ROOM } from '../src/data/furniture.js';
+import { FURNITURE, KEEPOUT, ROOM, sellPrice, wallPrice } from '../src/data/furniture.js';
 import { adPrice } from '../src/core/ads.js';
+import { AD_TIERS, DURATIONS } from '../src/data/billboards.js';
+import { JOBS } from '../src/data/jobs.js';
+import { FOOD } from '../src/data/catalog.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 let t, store; beforeEach(() => { t = 1_700_000_000_000; store = new Store(mem(), () => t); });
@@ -34,7 +37,7 @@ describe('residents & friends (all NPCs)', () => {
   });
   it('hangouts cost money, need energy, have cooldowns and raise the bond', () => {
     S.addFriend(store, 'priya', t); const b0 = store.ledger.balance, l0 = store.state.friends.priya.level;
-    expect(S.hangout(store, 'priya', 'coffee', t).ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 600); expect(store.state.friends.priya.level).toBeGreaterThan(l0);
+    expect(S.hangout(store, 'priya', 'coffee', t).ok).toBe(true); expect(store.ledger.balance).toBe(b0 - S.HANGOUTS.coffee.cost); expect(store.state.friends.priya.level).toBeGreaterThan(l0);
     expect(S.hangout(store, 'priya', 'walk', t + 1000).error).toMatch(/minute/);
     expect(S.hangout(store, 'priya', 'dinner', t + 60000).error).toMatch(/dating/);
     store.state.needs.energy = 10; expect(S.hangout(store, 'priya', 'gym', t + 60000).error).toMatch(/tired/);
@@ -83,7 +86,7 @@ describe('mayor elections (fictional)', () => {
     const share = (r, id) => r.find((x) => x.id === id).share; expect(share(backed, slate[0].id)).toBeGreaterThan(share(none, slate[0].id));
   });
   it('terms end, install the winner, reset votes and change real prices', () => {
-    const p = P.ensurePolitics(store, t); expect(G.priceFor(store, 'bread')).toBe(Math.round(449 * 0.88)); // default mayor: cheap groceries
+    const p = P.ensurePolitics(store, t); expect(G.priceFor(store, 'bread')).toBe(Math.round(FOOD.bread.price * 0.88)); // default mayor: cheap groceries
     t += P.TERM_MS + 1000; expect(P.tallyIfDue(store, t)).toBe(1); expect(store.state.politics.term).toBe(2); expect(store.state.politics.vote).toBeNull(); expect(store.state.politics.history).toHaveLength(1);
     const pol = P.activePolicy(store.state); expect(pol).toBeTruthy();
     t += P.TERM_MS * 3; expect(P.tallyIfDue(store, t)).toBe(3);
@@ -91,9 +94,9 @@ describe('mayor elections (fictional)', () => {
   it('policies really change wages, clothing, ads and fitness gains', () => {
     const st = store.state; P.ensurePolitics(store, t);
     st.politics.mayor.policy = 'fair_wages'; G.applyForJob(store, 'retail'); st.job.application.offerAt = 0; G.tickJobs(store); G.acceptOffer(store); G.startShift(store); for (let i = 0; i < 4; i++) G.completeTask(store);
-    const real = store.now; store.now = () => t + 600000; const bal = store.ledger.balance; const r = G.finishShift(store); store.now = real; expect(r.pay).toBe(10450); expect(store.ledger.balance).toBe(bal + 10450);
+    const real = store.now; store.now = () => t + 600000; const bal = store.ledger.balance; const r = G.finishShift(store); store.now = real; const raised = Math.round(JOBS.retail.levels[0].wage * 1.1); expect(r.pay).toBe(raised); expect(store.ledger.balance).toBe(bal + raised);
     st.politics.mayor.policy = 'wardrobe_rebate'; expect(G.priceFor(store, 'hoodie_red')).toBe(5850);
-    st.politics.mayor.policy = 'open_signs'; expect(adPrice('victoria-west', 1, st)).toBe(9600);
+    st.politics.mayor.policy = 'open_signs'; expect(adPrice('victoria-west', 1, st)).toBe(Math.round((AD_TIERS.standard.price / 7) * DURATIONS[1] * 0.8));
     st.politics.mayor.policy = 'fit_city'; st.needs.energy = 90; G.doActivity(store, 'treadmill'); expect(st.skills.fitness).toBe(12.5);
   });
 });
@@ -101,7 +104,7 @@ describe('mayor elections (fictional)', () => {
 describe('intercity travel', () => {
   it('charges the fare, tires you, gives a scenario and a one-time souvenir', () => {
     const b0 = store.ledger.balance, e0 = store.state.needs.energy; const r = travel(store, 'saskatoon', 'bus', t, () => 0);
-    expect(r.ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 3800); expect(store.state.needs.energy).toBeLessThan(e0); expect(r.event.id).toBe('trip_saskatoon'); expect(store.state.souvenirs).toContain('saskatoon'); expect(r.first).toBe(true);
+    expect(r.ok).toBe(true); expect(store.ledger.balance).toBe(b0 - DESTINATION_BY_ID.saskatoon.modes.bus.fare); expect(store.state.needs.energy).toBeLessThan(e0); expect(r.event.id).toBe('trip_saskatoon'); expect(store.state.souvenirs).toContain('saskatoon'); expect(r.first).toBe(true);
     expect(travel(store, 'saskatoon', 'bus', t + 1000).error).toMatch(/few minutes/);
     const r2 = travel(store, 'saskatoon', 'flight', t + 400000); expect(r2.first).toBe(false); expect(store.state.souvenirs.filter((x) => x === 'saskatoon')).toHaveLength(1);
   });
@@ -118,20 +121,21 @@ describe('intercity travel', () => {
 describe('home decorating', () => {
   it('buy → place → move → remove → sell, all validated', () => {
     expect(H.placeFurniture(store, 'armchair', 0, 0, 0).error).toMatch(/none/);
-    const b0 = store.ledger.balance; expect(H.buyFurniture(store, 'armchair').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 6900);
+    store.state.bank.balance = 1e6; // fund the player: the default balance is only $400
+    const b0 = store.ledger.balance; expect(H.buyFurniture(store, 'armchair').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - FURNITURE.armchair.price);
     const p = H.placeFurniture(store, 'armchair', 0.1, 0.9, 0); expect(p.ok).toBe(true); expect(p.item.x).toBe(0); expect(p.item.z).toBe(1); // snapped to 0.25 grid
     expect(H.placeFurniture(store, 'armchair', 1, 1, 0).error).toMatch(/none/);
     H.buyFurniture(store, 'armchair'); expect(H.placeFurniture(store, 'armchair', 0, 1.25, 0).error).toMatch(/Overlaps/);
     expect(H.moveFurniture(store, p.item.id, 1.5, 1, 1).ok).toBe(true); expect(H.sellFurniture(store, 'armchair').ok).toBe(true); // sells the spare one
-    expect(H.sellFurniture(store, 'armchair').error).toMatch(/Remove it/); H.removeFurniture(store, p.item.id); expect(H.sellFurniture(store, 'armchair').refund).toBe(3450);
+    expect(H.sellFurniture(store, 'armchair').error).toMatch(/Remove it/); H.removeFurniture(store, p.item.id); expect(H.sellFurniture(store, 'armchair').refund).toBe(sellPrice(FURNITURE.armchair.price)); // 60% of list
   });
   it('rejects spots outside the room, on fixtures, or with bad numbers', () => {
-    H.buyFurniture(store, 'dining'); expect(H.canPlace(store.state, 'dining', 9, 0, 0).error).toMatch(/Outside/); expect(H.canPlace(store.state, 'dining', -3.2, -4, 0).error).toMatch(/bed/);
+    store.state.bank.balance = 1e6; H.buyFurniture(store, 'dining'); expect(H.canPlace(store.state, 'dining', 9, 0, 0).error).toMatch(/Outside/); expect(H.canPlace(store.state, 'dining', -3.2, -4, 0).error).toMatch(/bed/);
     expect(H.canPlace(store.state, 'dining', NaN, 0, 0).ok).toBe(false); expect(H.canPlace(store.state, 'dining', 0, 0, 7).ok).toBe(false); expect(H.canPlace(store.state, 'nope', 0, 0, 0).ok).toBe(false);
     expect(H.canPlace(store.state, 'dining', 0, 0.5, 0).ok).toBe(true);
   });
   it('rugs can sit under furniture; rotation swaps the footprint', () => {
-    H.buyFurniture(store, 'rug_round'); H.buyFurniture(store, 'dining'); H.placeFurniture(store, 'dining', 0, 0.5, 0); expect(H.placeFurniture(store, 'rug_round', 0, 0.5, 0).ok).toBe(true);
+    store.state.bank.balance = 1e6; H.buyFurniture(store, 'rug_round'); H.buyFurniture(store, 'dining'); H.placeFurniture(store, 'dining', 0, 0.5, 0); expect(H.placeFurniture(store, 'rug_round', 0, 0.5, 0).ok).toBe(true);
     expect(H.footprint('dining', 1)).toEqual({ w: 0.9, d: 1.5 });
   });
   it('limits placed pieces and unlocks free souvenir posters after trips', () => {
@@ -140,8 +144,8 @@ describe('home decorating', () => {
     expect(H.placeFurniture(store, 'poster_banff', -1, -2, 0).ok).toBe(true); expect(H.placeFurniture(store, 'poster_banff', 1, -2, 0).error).toMatch(/none/);
   });
   it('paint and flooring cost once, then switching back is free', () => {
-    const b0 = store.ledger.balance; expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 4000);
-    expect(H.setStyle(store, 'wall', 'cream').ok).toBe(true); expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 4000); expect(H.setStyle(store, 'floor', 'plaid').ok).toBe(false);
+    store.state.bank.balance = 1e6; const b0 = store.ledger.balance; expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - wallPrice('sage'));
+    expect(H.setStyle(store, 'wall', 'cream').ok).toBe(true); expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - wallPrice('sage')); expect(H.setStyle(store, 'floor', 'plaid').ok).toBe(false);
     store.state.bank.balance = 10; expect(H.setStyle(store, 'floor', 'walnut').error).toMatch(/Insufficient/);
   });
   it('catalog keepout zones lie inside the room', () => { for (const k of KEEPOUT) { expect(k.x0).toBeLessThan(k.x1); expect(k.z0).toBeLessThan(k.z1); } expect(Object.keys(FURNITURE).length).toBeGreaterThan(10); expect(ROOM.x1).toBeGreaterThan(0); });

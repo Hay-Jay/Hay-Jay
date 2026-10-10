@@ -5,6 +5,7 @@ import { CONTACTS, npcReply } from '../data/contacts.js';
 import { fmtMoney } from './ledger.js';
 import { policyMult, MAX_CAMPAIGN_POINTS, CANVASS_COOLDOWN_MS } from './policy.js';
 import { own } from './util.js';
+import { homeBonuses } from './home.js';
 
 const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
 let _id = 0;
@@ -191,23 +192,28 @@ export function addSkill(store, name, xp) {
 }
 export const moodWord = (n) => { const avg = (n.energy + n.hunger + n.hygiene + n.fun + n.mood) / 5; return avg > 80 ? 'Thriving' : avg > 62 ? 'Content' : avg > 42 ? 'Meh' : avg > 25 ? 'Struggling' : 'Miserable'; };
 
-export function tickNeeds(store, dtSec) {
-  const n = store.state.needs, fit = skillLevel(store.state.skills?.fitness || 0);
+/**
+ * Needs drift over time. At home (opts.home) the furniture you placed helps: comfort slows tiredness, fun-pieces slow boredom and
+ * mood-pieces lift your mood a little. Every bonus is capped in data/furniture.js (HOME_CAPS), so there is no way to buy your way out of needs.
+ */
+export function tickNeeds(store, dtSec, opts = {}) {
+  const n = store.state.needs, fit = skillLevel(store.state.skills?.fitness || 0), hb = opts.home ? homeBonuses(store.state) : null;
   n.hygiene ??= 80; n.fun ??= 65;
   n.hunger = clamp(n.hunger - dtSec * 0.045);
-  n.energy = clamp(n.energy - dtSec * 0.028 * (1 - Math.min(0.4, fit * 0.04)));
+  n.energy = clamp(n.energy - dtSec * 0.028 * (1 - Math.min(0.4, fit * 0.04)) * (1 - (hb?.comfort ?? 0)));
   n.hygiene = clamp(n.hygiene - dtSec * 0.03);
-  n.fun = clamp(n.fun - dtSec * 0.035);
+  n.fun = clamp(n.fun - dtSec * 0.035 * (1 - (hb?.fun ?? 0)));
   const low = [n.hunger, n.energy, n.hygiene, n.fun].filter((v) => v < 15).length;
   if (low) n.mood = clamp(n.mood - dtSec * 0.05 * low);
-  else n.mood = clamp(n.mood + dtSec * 0.005, 0, 100);
+  else n.mood = clamp(n.mood + dtSec * (0.005 + (hb?.mood ?? 0) * 0.004), 0, 100);
   const p = store.state.phone;
   p.battery = clamp(p.battery - dtSec * (p.flashlight ? 0.02 : 0.004), 1, 100);
 }
-export function sleep(store) {
+export function sleep(store, opts = {}) {
   const n = store.state.needs;
   if (n.energy > 85) return { ok: false, error: "You're not tired right now." };
-  n.energy = 100; n.hunger = clamp(n.hunger - 10); n.mood = clamp(n.mood + 8); n.hygiene = clamp((n.hygiene ?? 70) - 8);
+  const b = opts.home ? homeBonuses(store.state).sleep : 0;      // a better bed in your own place: more mood, less hunger on waking
+  n.energy = 100; n.hunger = clamp(n.hunger - Math.round(10 * (1 - b))); n.mood = clamp(n.mood + Math.round(8 * (1 + b * 4))); n.hygiene = clamp((n.hygiene ?? 70) - 8);
   store.commit('needs');
   return { ok: true };
 }
@@ -240,15 +246,20 @@ export const ACTIVITIES = {
   yoga:    { label: 'Stretching on the mat…', secs: 4, needs: { energy: -4, hygiene: -3, fun: 8, mood: 8 }, skill: ['fitness', 5] },
   canvass: { label: 'Handing out flyers…', secs: 6, needs: { energy: -8, hygiene: -4, fun: 4, mood: 2 }, skill: ['charisma', 6], minEnergy: 20,
     requires: (store) => { const p = store.state.politics; if (!p?.vote) return 'Vote first (Town Hall app), then you can hand out flyers.'; if (p.points >= MAX_CAMPAIGN_POINTS) return 'Your campaign is already at full strength.'; if (store.now() - (p.lastCanvass || 0) < CANVASS_COOLDOWN_MS) return 'Give people a breather — try again in a moment.'; return null; } },
+  piano:   { label: 'Playing the piano…', secs: 5, needs: { energy: -3, fun: 16, mood: 6 }, skill: ['charisma', 6], minEnergy: 15 },
+  paint:   { label: 'Painting at the easel…', secs: 5, needs: { energy: -3, fun: 14, mood: 7 }, skill: ['charisma', 5], minEnergy: 15 },
+  gaming:  { label: 'Playing a game…', secs: 4, needs: { energy: -4, fun: 24 }, minEnergy: 10 },
   water:   { label: 'Having a drink of water…', secs: 2, needs: { energy: 3, hunger: 1 } },
 };
 /** Pre-check so the UI can refuse before starting a progress bar. */
 export function activityBlocked(store, id) { const a = own(ACTIVITIES, id) ? ACTIVITIES[id] : null; if (!a) return 'Unknown activity'; if (a.minEnergy && store.state.needs.energy < a.minEnergy) return "You're too tired for that. Rest or grab a coffee."; return a.requires?.(store) ?? null; }
 /** Apply an activity's effects (called when its progress bar completes). Validates energy so you can't train while exhausted. */
-export function doActivity(store, id) {
+export function doActivity(store, id, opts = {}) {
   const a = own(ACTIVITIES, id) ? ACTIVITIES[id] : null, n = store.state.needs; if (!a) return { ok: false, error: 'Unknown activity' };
   const bad = activityBlocked(store, id); if (bad) return { ok: false, error: bad };
-  for (const [k, v] of Object.entries(a.needs)) n[k] = clamp((n[k] ?? 50) + v);
-  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (a.skill[0] === 'fitness' ? policyMult(store.state, 'fitness') : 1));
+  // at home, your furniture makes the same activity pay a little more (fun from TV/games/stereo, comfort for resting, skill XP from gear)
+  const hb = opts.home ? homeBonuses(store.state, a.skill?.[0] ?? null) : null, funBoost = hb ? 1 + hb.fun + (id === 'read' || id === 'tv' ? hb.comfort : 0) : 1;
+  for (const [k, v] of Object.entries(a.needs)) n[k] = clamp((n[k] ?? 50) + (k === 'fun' && v > 0 ? Math.round(v * funBoost) : v) + (k === 'mood' && v > 0 && hb ? Math.round(hb.mood) : 0));
+  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (a.skill[0] === 'fitness' ? policyMult(store.state, 'fitness') : 1) * (hb ? 1 + hb.skill : 1));
   store.commit('needs'); return { ok: true, activity: a };
 }

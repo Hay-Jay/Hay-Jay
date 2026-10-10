@@ -3,7 +3,7 @@
 A browser-based open-world life simulation set in **Regina, Saskatchewan** — live, work, shop, travel and build a life
 in a stylised 3D city that follows the **real Regina clock, sun and weather**.
 
-> **Status: Milestone 3 ("Social life, politics & home")** on top of Milestones 1–2. See [`docs/PLAN.md`](docs/PLAN.md) for the roadmap.
+> **Status: Milestone 4 in progress ("Home first")** on top of Milestones 1–3. See [`docs/VISION.md`](docs/VISION.md) for where the game is heading and [`docs/PLAN.md`](docs/PLAN.md) for the original roadmap.
 
 ## Run it
 
@@ -79,6 +79,19 @@ generated procedurally — no third-party art assets, so there are no asset lice
   (no audio files or licences); *Prairie Talk* reads the news aloud. Listening raises Fun.
 * **Build mode** — buy furniture from the computer, then Redecorate from an overhead view: place, move, rotate, store,
   sell; repaint walls and change flooring. All placements are validated (room bounds, fixtures, overlaps, limits).
+
+## What's new in Milestone 4 (so far)
+
+* **App shell** — one status pill (clock, mood, money count-up, daily-reward "+") and a four-tab bar: **Home · Buy · Map · Phone**.
+* **Home first** — the game opens on a bright cut-away dollhouse of your apartment on a lawn; walk around it, tap **Edit room**.
+* **Catalogue (Buy tab)** — a bottom sheet with ~70 original pieces in 10 shelves (Sleep, Kitchen, Bath, Comfort, Fun, Skills, Light, …),
+  1–4★ quality tiers, size tags, 3D thumbnails, a **60% sell-back**, an **In storage** shelf (pieces you own but haven't placed) and a
+  **Design** shelf for paint and floors. Prices are realistic Canadian retail; every purchase and placement is validated in `core/home.js`.
+* **Furniture matters at home** — beds improve sleep, sofas slow tiredness, TVs/games slow boredom, plants/lamps lift mood, and training gear
+  (treadmill, weights, yoga mat, piano, easel, consoles) becomes usable in your own place. Bonuses are capped (`HOME_CAPS`), so they help but never trivialise needs.
+* **Map tab** — a dense bright overview with tidy pins, place cards (what to do, how to get there, cab fare) and a **Billboards** mode.
+* **Billboards** — three tiers with sponsor rotation, picture uploads, and 7-day bookings; see [`docs/ECONOMY.md`](docs/ECONOMY.md) for prices, tiers and the intended real-money scale.
+* **Compact island Regina** — neighbourhoods ring downtown, green belts between, beach and sea around. Everything is original, fictional and offline-first.
 
 ## Economy & anti-exploit (important)
 

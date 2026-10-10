@@ -4,9 +4,11 @@ import { mulberry32 } from '../core/rng.js';
 import { Batcher, CHUNK, facadeBox, plainBox, gableRoof, stripQuad, tint } from './batch.js';
 import { facadeTextures, asphaltTexture, intersectionTexture, concreteTexture, grassTexture, glowTexture, signTexture } from './textures.js';
 import { CollisionGrid } from './collision.js';
-import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById } from './cityData.js';
+import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById, OUTER_ROADS, ISLAND } from './cityData.js';
 import { buildLandmarks } from './landmarks.js';
-import { BILLBOARDS, DAY_PRICE, THEMES } from '../data/billboards.js';
+import { BILLBOARDS, THEMES, rotationFor } from '../data/billboards.js';
+import { adQuote } from '../core/ads.js';
+import { fmtMoney } from '../core/ledger.js';
 import { drawBillboard } from './textures.js';
 
 const R2 = ROAD_W / 2;
@@ -36,6 +38,7 @@ export function buildCity({ quality = 'high' } = {}) {
   const batch = new Batcher();
   const lake = lakePolygon();
   const trees = [];            // {x,z,s}
+  let api_seaMat = null;
   const lamps = [];            // {x,z}
   const cars = [];             // {x,z,rot,color}
   const crossings = [];        // {x,z,rot}
@@ -293,12 +296,10 @@ export function buildCity({ quality = 'high' } = {}) {
   /* ---------------- outer arterials + neighbourhood massing ---------------- */
   const arterialStrip = (a, b, w = 14) => { const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; add('road', stripQuad(a[0], a[1], b[0], b[1], w, 0.06), m[0], m[1]); };
   const longRoad = (pts, w) => { for (let k = 0; k < pts.length - 1; k++) { const [ax, az] = pts[k], [bx, bz] = pts[k + 1]; const n = Math.ceil(Math.hypot(bx - ax, bz - az) / 300); for (let q = 0; q < n; q++) arterialStrip([ax + ((bx - ax) * q) / n, az + ((bz - az) * q) / n], [ax + ((bx - ax) * (q + 1)) / n, az + ((bz - az) * (q + 1)) / n], w); } };
-  longRoad([[grid.x1, 0], [4400, 0], [5200, -120]], 16);
-  longRoad([[grid.x0, 0], [-2500, 0], [-3800, -60]], 16);
-  longRoad([[ALBERT_X, grid.z0], [ALBERT_X, -2600]], 16);
-  longRoad([[ALBERT_X, 1190], [ALBERT_X, 5000]], 16);
-  longRoad([[-3800, -60], [-3800, 3500], [-2500, 4200], [ALBERT_X, 4300], [2300, 3900], [3200, 3200]], 16);
+  for (const r of OUTER_ROADS) longRoad(r.pts, 16);
 
+  // distance from a point to the long roads, so neighbourhood houses never sit on an arterial
+  const nearRoad = (x, z, d) => OUTER_ROADS.some((r) => r.pts.some((a, k) => { const b = r.pts[k + 1]; if (!b) return false; const vx = b[0] - a[0], vz = b[1] - a[1], t = Math.max(0, Math.min(1, ((x - a[0]) * vx + (z - a[1]) * vz) / (vx * vx + vz * vz))); return Math.hypot(x - (a[0] + vx * t), z - (a[1] + vz * t)) < d; }));
   const hood = (d) => {
     const pitch = 72, half = Math.floor(d.r / pitch);
     const keep = (x, z) => !(x > grid.x0 - 40 && x < grid.x1 + 40 && z > grid.z0 - 40 && z < PARK_RECT.z1 + 40);
@@ -331,7 +332,7 @@ export function buildCity({ quality = 'high' } = {}) {
         while (x < bx1 - 12) {
           const w = 9 + rnd() * 4, dd = 9 + rnd() * 3;
           const z0 = side ? bz1 - 4 - dd : bz0 + 4;
-          if (rnd() > (d.density ?? 0.82)) { x += w + 3; continue; }
+          if (rnd() > (d.density ?? 0.82) || nearRoad(x + w / 2, z0 + dd / 2, 18)) { x += w + 3; continue; }
           building({ x0: x, x1: x + w, z0, z1: z0 + dd, floors: rnd() < 0.25 ? 2 : 1, style: 'siding', color: pick(PALETTES.siding), roofColor: pick(ROOFS), flat: false, ridgeX: rnd() < 0.6, collide: Math.hypot(x - 0, z0 - 0) < 4200 });
           if (rnd() < 0.25) trees.push({ x: x + w / 2, z: side ? z0 + dd + 3 : z0 - 3, s: 0.6 + rnd() * 0.5 });
           x += w + 3 + rnd() * 2;
@@ -343,6 +344,26 @@ export function buildCity({ quality = 'high' } = {}) {
   for (const d of DISTRICTS) {
     if (d.id === 'downtown' || d.id === 'wascana') continue;
     hood({ ...d, skipR: extras.skip[d.id] ?? 0, density: d.id === 'airport' ? 0.3 : d.id === 'uofr' ? 0.35 : 0.82, r: d.r });
+  }
+  /* ---------------- the island: green belts of trees between the neighbourhoods, a sandy beach, water all round ---------------- */
+  const hoods = DISTRICTS.filter((d) => d.id !== 'downtown' && d.id !== 'wascana');
+  for (let x = ISLAND.x0 + 60; x < ISLAND.x1 - 40; x += 58) for (let z = ISLAND.z0 + 60; z < ISLAND.z1 - 40; z += 58) {
+    const tx = x + (rnd() - 0.5) * 46, tz = z + (rnd() - 0.5) * 46;
+    if (tx > grid.x0 - 60 && tx < grid.x1 + 60 && tz > grid.z0 - 60 && tz < PARK_RECT.z1 + 60) continue;          // downtown + Wascana have their own trees
+    if (hoods.some((d) => Math.hypot(tx - d.x, tz - d.z) < d.r + 25)) continue;                                      // neighbourhoods have their own
+    if (nearRoad(tx, tz, 22) || inPoly(tx, tz, lake)) continue;
+    if (rnd() < 0.5 + 0.2 * Math.sin(tx / 380) * Math.cos(tz / 420)) trees.push({ x: tx, z: tz, s: 0.8 + rnd() * 0.9, belt: true });   // clumpy, not a uniform grid
+  }
+  {
+    const rr = (path, x0, z0, x1, z1, r) => { path.moveTo(x0 + r, z0); path.lineTo(x1 - r, z0); path.quadraticCurveTo(x1, z0, x1, z0 + r); path.lineTo(x1, z1 - r); path.quadraticCurveTo(x1, z1, x1 - r, z1); path.lineTo(x0 + r, z1); path.quadraticCurveTo(x0, z1, x0, z1 - r); path.lineTo(x0, z0 + r); path.quadraticCurveTo(x0, z0, x0 + r, z0); return path; };
+    const flat = (shape, y, color, opts = {}) => { const m = new THREE.Mesh(new THREE.ShapeGeometry(shape, 24).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color, roughness: 0.45, metalness: 0.05, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3, ...opts })); m.position.y = y; m.receiveShadow = true; group.add(m); return m; };
+    const I = ISLAND, B = 70;
+    const sea = new THREE.Shape(); sea.moveTo(-40000, -40000); sea.lineTo(40000, -40000); sea.lineTo(40000, 40000); sea.lineTo(-40000, 40000); sea.closePath(); sea.holes.push(rr(new THREE.Path(), I.x0 - B, I.z0 - B, I.x1 + B, I.z1 + B, I.r + B));
+    const beach = new THREE.Shape(); rr(beach, I.x0 - B, I.z0 - B, I.x1 + B, I.z1 + B, I.r + B); beach.holes.push(rr(new THREE.Path(), I.x0, I.z0, I.x1, I.z1, I.r));
+    api_seaMat = flat(sea, 0.09, '#4aa9dc', { roughness: 0.3, metalness: 0.15 }).material; flat(beach, 0.08, '#ecdcab', { roughness: 0.95 });
+    // invisible walls at the shore keep you on the island
+    colliders.add(I.x0 - 8, I.z0 - 40, I.x1 + 8, I.z0 - 16, 12); colliders.add(I.x0 - 8, I.z1 + 16, I.x1 + 8, I.z1 + 40, 12);
+    colliders.add(I.x0 - 40, I.z0 - 8, I.x0 - 16, I.z1 + 8, 12); colliders.add(I.x1 + 16, I.z0 - 8, I.x1 + 40, I.z1 + 8, 12);
   }
 
   /* ---------------- billboards ---------------- */
@@ -360,28 +381,42 @@ export function buildCity({ quality = 'high' } = {}) {
       const face = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), mat); face.position.set(0, poleH + Hh / 2, 0.12); root.add(face);
       const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
       colliders.add(b.x - 1.5 - Math.abs(rx) * W * 0.32, b.z - 1.5 - Math.abs(rz) * W * 0.32, b.x + 1.5 + Math.abs(rx) * W * 0.32, b.z + 1.5 + Math.abs(rz) * W * 0.32, poleH);
-      const board = { ...b, cv, tex, mat, mega, priceLabel: `$${(DAY_PRICE[b.tier] / 100).toFixed(0)} / day` };
+      const board = { ...b, cv, tex, mat, mega, root, slots: [], slot: 0, priceLabel: `${fmtMoney(adQuote(b.id)?.price ?? 0)} / week` };   // the board's own tier rate (landmark boards cost more than roadside ones)
       boards.push(board);
       interactables.push({ id: 'bb_' + b.id, kind: 'billboard', boardId: b.id, x: b.x + fx * 10, z: b.z + fz * 10, radius: 9, label: `Billboard · ${b.name}` });
     }
   }
-  const refreshBillboards = (ads = {}, now = Date.now(), priceMult = 1) => {
-    for (const b of boards) { const a = ads[b.id]; drawBillboard(b.cv, a && a.until > now ? a : null, { tier: b.tier, priceLabel: `$${(Math.round(DAY_PRICE[b.tier] * priceMult) / 100).toFixed(0)} / day` }, THEMES); b.tex.needsUpdate = true; }
+  /** Each board rotates the player's ad (if any) with in-game sponsor ads, like a real digital board. */
+  const paintBoard = (b) => { const a = b.slots[b.slot % Math.max(1, b.slots.length)]; drawBillboard(b.cv, a, { tier: b.tier, onImage: () => paintBoard(b) }, THEMES); b.tex.needsUpdate = true; };
+  const refreshBillboards = (ads = {}, now = Date.now()) => {
+    for (const b of boards) { const a = ads[b.id]; b.slots = rotationFor(b, a && a.until > now ? a : null); b.slot = 0; paintBoard(b); }
   };
+  let rotT = 0;
+  const rotateBoards = (dt, camPos) => {
+    rotT += dt; if (rotT < 6) return; rotT = 0;
+    for (const b of boards) { if (b.slots.length < 2) continue; if (Math.hypot(b.x - camPos.x, b.z - camPos.z) > 1400 && !overview) continue; b.slot = (b.slot + 1) % b.slots.length; paintBoard(b); }
+  };
+  /** In the overview map the boards are drawn oversized so the ads read from far away (like the map in the game that inspired this). */
+  let overview = false;
+  const setOverview = (on) => { overview = on; for (const b of boards) b.root.scale.setScalar(on ? 2.6 : 1); };
   refreshBillboards();
 
   /* ---------------- instanced props ---------------- */
   const props = new THREE.Group(); group.add(props);
   const dummy = new THREE.Object3D();
 
-  // trees
-  let crownMesh;
+  // trees: the town's own trees are full-detail and cast shadows; the green belts between districts (thousands) are cheap low-poly stand-ins
+  const crownMeshes = [];
   {
-    const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.18, 0.28, 3.2, 6).translate(0, 1.6, 0), new THREE.MeshStandardMaterial({ color: '#5b4330', roughness: 1 }), trees.length);
-    const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(2.5, 1).translate(0, 5.1, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, flatShading: true }), trees.length);
-    trees.forEach((t, i) => { dummy.position.set(t.x, 0, t.z); dummy.rotation.set(0, rnd() * 6, 0); dummy.scale.set(t.s, t.s * (0.9 + rnd() * 0.3), t.s); dummy.updateMatrix(); trunk.setMatrixAt(i, dummy.matrix); crown.setMatrixAt(i, dummy.matrix); });
-    trunk.castShadow = crown.castShadow = true; trunk.receiveShadow = crown.receiveShadow = true;
-    props.add(trunk, crown); crownMesh = crown;
+    const dense = trees.map((t, i) => [t, i]).filter(([t]) => !t.belt), belt = trees.map((t, i) => [t, i]).filter(([t]) => t.belt);
+    const mk = (list, lowPoly) => {
+      const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.18, 0.28, 3.2, lowPoly ? 4 : 6, 1, lowPoly).translate(0, 1.6, 0), new THREE.MeshStandardMaterial({ color: '#5b4330', roughness: 1 }), list.length);
+      const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(2.5, lowPoly ? 0 : 1).translate(0, 5.1, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, flatShading: true }), list.length);
+      list.forEach(([t], k) => { dummy.position.set(t.x, 0, t.z); dummy.rotation.set(0, rnd() * 6, 0); dummy.scale.set(t.s, t.s * (0.9 + rnd() * 0.3), t.s); dummy.updateMatrix(); trunk.setMatrixAt(k, dummy.matrix); crown.setMatrixAt(k, dummy.matrix); });
+      trunk.castShadow = crown.castShadow = !lowPoly; trunk.receiveShadow = crown.receiveShadow = !lowPoly;
+      props.add(trunk, crown); crownMeshes.push({ mesh: crown, idx: list.map(([, i]) => i) });
+    };
+    mk(dense, false); if (belt.length) mk(belt, true);
     trees.forEach((t) => { if (t.s > 0.7) colliders.add(t.x - 0.35, t.z - 0.35, t.x + 0.35, t.z + 0.35, 4); });
   }
   const treeTints = trees.map(() => rnd());
@@ -391,8 +426,7 @@ export function buildCity({ quality = 'high' } = {}) {
       autumn: ['#c9822f', '#b3532a', '#d8a53a', '#9c3d24', '#8c9a3a'], winter: ['#9aa6a0', '#8d9892', '#a8b3ae', '#7e8a85'],
     }[season];
     const c = new THREE.Color();
-    treeTints.forEach((u, i) => { c.set(pal[Math.floor(u * pal.length) % pal.length]); crownMesh.setColorAt(i, c); });
-    crownMesh.instanceColor.needsUpdate = true;
+    for (const { mesh, idx } of crownMeshes) { idx.forEach((ti, k) => { c.set(pal[Math.floor(treeTints[ti] * pal.length) % pal.length]); mesh.setColorAt(k, c); }); mesh.instanceColor.needsUpdate = true; }
   }
 
   // street lamps + glow pools
@@ -460,7 +494,7 @@ export function buildCity({ quality = 'high' } = {}) {
   const api = {
     group, colliders, interactables, mats, chunks, lamps, trees, signMeshes,
     spawn: { x: -14, z: 4, heading: Math.PI / 2 },
-    recolorTrees, billboards: boards, refreshBillboards,
+    recolorTrees, billboards: boards, refreshBillboards, setOverview, rotateBoards,
     carsReady: Promise.resolve().then(() => {
       const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.5 }), cars.length);
       const c = new THREE.Color();
@@ -481,7 +515,7 @@ export function buildCity({ quality = 'high' } = {}) {
       mats.roof.color.set('#ffffff').lerp(new THREE.Color('#dfe7ee'), Math.max(snow, season === 'winter' ? 0.6 : 0) * 0.8);
     },
     update(dt, cam) {
-      state.lastChunkCheck += dt;
+      rotateBoards(dt, cam); state.lastChunkCheck += dt;
       if (state.lastChunkCheck > 0.25) {
         state.lastChunkCheck = 0;
         for (const c of chunks) c.mesh.visible = c.center.distanceTo(cam) < state.viewDist + CHUNK * 0.8;

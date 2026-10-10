@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import './style.css';
+import './theme.css';
 import { Store } from './core/store.js';
 import * as G from './core/game.js';
 import { fmtMoney } from './core/ledger.js';
@@ -23,15 +24,19 @@ import { ICON } from './ui/icons.js';
 import { Hub } from './ui/hub.js';
 import { rollEvent, resolveEvent, choiceAvailable, EVENT_BY_ID } from './core/events.js';
 import { generateNews } from './core/news.js';
-import { expireAds } from './core/ads.js';
+import { expireAds, adQuote, activeAd } from './core/ads.js';
 import * as SOC from './core/social.js';
 import * as POL from './core/politics.js';
 import * as H from './core/home.js';
 import { policyMult } from './core/policy.js';
-import { travel } from './core/travel.js';
+import { travel, cabFare } from './core/travel.js';
 import { Radio } from './ui/radio.js';
 import { STATIONS } from './data/radio.js';
 import { BuildMode } from './ui/build.js';
+import { Catalogue } from './ui/catalogue.js';
+import { makeThumbs } from './ui/thumbs.js';
+import { Shell, moodOf } from './ui/shell.js';
+import { dailyStatus, claimDaily } from './core/daily.js';
 import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
 
 const $ = (id) => document.getElementById(id);
@@ -127,7 +132,6 @@ async function boot() {
     while ($('toasts').children.length > 3) $('toasts').firstChild.remove();
   };
   const fadeTo = async (on, ms = 450) => { const f = $('fade'); f.style.transitionDuration = ms + 'ms'; f.classList.toggle('on', on); await new Promise((r) => setTimeout(r, ms)); };
-  const cabFare = (d) => 450 + Math.round(d * 0.35);
   const setDestination = (poi) => {
     S().destination = poi ? { id: poi.id, name: poi.name, x: poi.x, z: poi.z } : null; store.commit('destination');
     if (poi) toast(`Navigating to ${poi.name}`, 'info');
@@ -154,7 +158,7 @@ async function boot() {
       if (!r.ok) { toast(r.error, 'warn'); audio.blip('error'); return false; }
       store.commit('bank'); audio.blip('cash');
       (async () => {
-        await fadeTo(true); closeMap();
+        await fadeTo(true); closeMap(); closeMapOverview();
         player.teleport(poi.x, poi.z + 7, Math.PI); player.pos.z = poi.z + 7; city.colliders.resolve(player.pos, 0.5); player.syncRoot();
         rig.snapBehind(player.yaw); rig.snap(player);
         await new Promise((r2) => setTimeout(r2, 350)); await fadeTo(false); toast(`Arrived at ${poi.name} · paid ${fmtMoney(fare)}`, 'good');
@@ -183,10 +187,18 @@ async function boot() {
   panels = new Panels($('panels'), { ...ctx, player: { gesture: (g) => player.gesture(g) } });
   panels.ctx.rebuildPlayer = rebuildPlayer;
 
+  let homeView = false;
   /* ---------- build mode ---------- */
   const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f) => { rig.buildInset = f; },
     onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); },
-    onStop: () => { interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good'); } });
+    onStop: () => {
+      if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
+      interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good');
+    } });
+  /** The Buy tab: a bottom sheet over the Home view / build mode. Pieces you buy are handed to build mode to place. */
+  const catalogue = new Catalogue({ store, build, audio, toast, fmtMoney, thumbs: makeThumbs({ size: 160 }), canBuild: () => inInterior === 'apartment',
+    onChange: () => build.refresh(), onOpen: () => { buyOpen = true; document.body.classList.add('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); }, onClose: () => { buyOpen = false; document.body.classList.remove('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); } });
+  build.setCatalogue(catalogue);
 
   /* ---------- interiors ---------- */
   const interiors = {};
@@ -197,7 +209,7 @@ async function boot() {
       toast, menu: (t, tx, b) => panels.menu(t, tx, b), shop: (t, ids, w) => panels.shop(t, ids, w), clothingShop: () => panels.clothingShop(),
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
       exitInterior: () => exitInterior(),
-      furnitureShop: () => panels.furnitureShop(),
+      furnitureShop: () => catalogue.open(),
       build: () => { if (inInterior !== 'apartment') return; phone.close(); build.start(); },
       radioMenu: () => panels.menu('📻 Radio', radio.playing ? `Now playing: ${radio.nowTitle}` : 'Pick a station. The music is generated live in your browser.', [...STATIONS.map((st) => ({ label: `${st.emoji} ${st.name} · ${st.freq}`, run: () => radio.play(st.id) })), { label: '⏹ Turn off', run: () => radio.stop() }]),
       mayorTalk: () => {
@@ -208,16 +220,16 @@ async function boot() {
       activity: (id) => {
         const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
         const a = G.ACTIVITIES[id]; player.gesture('use', a.secs);
-        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
+        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
-        fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store); await fadeTo(false, 700); fading = false;
+        fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store, { home: inInterior === 'apartment' }); await fadeTo(false, 700); fading = false;
         if (r.ok) toast('You feel well rested.', 'good');
       },
     },
   };
-  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
+  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', piano: 'Lovely tune 🎹', paint: 'A little masterpiece 🎨', gaming: 'Good game! 🎮', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
   async function enterInterior(kind, door) {
     if (fading || inInterior) return; fading = true; lastDoor = door;
     await fadeTo(true, 380);
@@ -232,7 +244,7 @@ async function boot() {
     toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' })[kind], 'info');
   }
   async function exitInterior() {
-    if (fading || !inInterior) return; fading = true; await fadeTo(true, 380);
+    if (fading || !inInterior) return; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
     interior.group.userData.tvOff?.(); scene.remove(interior.group); interior = null; inInterior = null;
     city.group.visible = true; ped.setVisible(true); setIndoor(false);
     player.bounds = null; player.grid = city.colliders; rig.grid = city.colliders; rig.indoor = false; rig.bounds = null; rig.targetDist = 6; rig.pitch = 0.28;
@@ -322,11 +334,114 @@ async function boot() {
   $('t-run').addEventListener('pointerdown', (e) => { e.preventDefault(); input.runToggle = !input.runToggle; $('t-run').classList.toggle('on', input.runToggle); });
   const togglePhone = () => { if (creator || camMode || build.active) return; phone.toggle(); };
   input.on('phone', togglePhone); $('b-phone').onclick = togglePhone;
-  input.on('map', () => (mapOpen ? closeMap() : openFullMap())); $('b-map').onclick = () => (mapOpen ? closeMap() : openFullMap());
+  input.on('map', () => goTab('map')); $('b-map').onclick = () => goTab('map');
   const openOutfit = () => { if (creator || camMode) return; if (!inInterior) { toast('Change outfits at home or in a clothing store.', 'info'); return; } panels.wardrobe(); };
   input.on('wardrobe', openOutfit); $('b-wardrobe').onclick = openOutfit;
+
+  /* ---------- app shell: Home · Buy · Map · Phone ---------- */
+  const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet() });
+  const syncTab = () => { if (!panels.open && !catalogue.isOpen) buyOpen = false; shell.setTab(mapOverview || mapOpen ? 'map' : phone.isOpen ? 'phone' : (panels.open || catalogue.isOpen) && buyOpen ? 'buy' : homeView ? 'home' : null); };
+  /** Home view: a live, tilted dollhouse of your apartment. You can still walk around and use things; Edit / Buy change the room. */
+  // the dollhouse sits on a little lawn under a clear sky, so the home screen reads as a toy diorama rather than a dark room
+  const homeStage = new THREE.Group(); homeStage.visible = false; scene.add(homeStage);
+  { const disc = new THREE.Mesh(new THREE.CircleGeometry(11.5, 56).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#9ed48a', roughness: 1 })); disc.position.y = -0.07; disc.receiveShadow = true; homeStage.add(disc);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(11.5, 12.6, 56).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 })); ring.position.y = -0.065; homeStage.add(ring); }
+  /** Keep the whole room between the top bar/chips and the tab bar. */
+  const homeInsets = () => { rig.buildInset = Math.min(0.6, Math.max(92, catalogue.isOpen ? catalogue.height + 14 : 0) / innerHeight); rig.buildTop = Math.min(0.24, (catalogue.isOpen ? 76 : 118) / innerHeight); };
+  addEventListener('resize', () => { if (homeView && !build.active) homeInsets(); });
+  function setHomeView(on) {
+    if (on === homeView) return; homeView = on; homeStage.visible = on; atmo.homeLift = on; if (inInterior) { scene.background = new THREE.Color(on ? '#cfe6f3' : '#181a20'); lastEnvAt = 0; updateEnv(true); }
+    if (on) {
+      rig.mode = 'build'; homeInsets(); rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true); document.body.classList.add('home-view');
+      shell.setChips([{ id: 'edit', icon: '✏️', label: 'Edit room' }, { id: 'paint', icon: '🎨', label: 'Paint & floors' }, { id: 'out', icon: '🚪', label: 'Go outside' }], (c) => { if (c === 'edit') build.start(); else if (c === 'paint') catalogue.open('design'); else exitInterior(); });
+    } else {
+      document.body.classList.remove('home-view'); interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.fov = 62; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); shell.setChips([]);
+    }
+    syncTab();
+  }
+  async function goHome() {
+    if (creator || camMode || fading || build.active) return;
+    phone.close(); panels.close(); if (mapOpen) closeMap(); if (mapOverview) closeMapOverview();
+    if (inInterior === 'apartment') { setHomeView(!homeView); return; }
+    if (inInterior) await exitInterior();
+    const door = poiById.lofts; await enterInterior('apartment', { x: door.x, z: door.z, nx: 0, nz: 1 }); setHomeView(true);
+  }
+  async function goTab(t) {
+    if (creator || camMode || fading || gameMode !== 'play') return;
+    if (t !== 'map' && mapOverview) closeMapOverview();
+    if (t === 'phone') { if (build.active) return; if (mapOpen) closeMap(); panels.close(); phone.toggle(); syncTab(); return; }
+    if (t === 'map') { if (mapOverview) { closeMapOverview(); return; } await openMapOverview(); return; }
+    if (t === 'buy') { phone.close(); if (mapOpen) closeMap(); if (inInterior !== 'apartment' || !homeView) { await goHome(); if (!homeView) setHomeView(true); } openBuy(); return; }
+    if (t === 'home') { await goHome(); syncTab(); }
+  }
+  let buyOpen = false;
+  function openBuy() { buyOpen = true; catalogue.open(); syncTab(); }
+  function openWallet() {
+    const st = dailyStatus(S(), Date.now());
+    panels.menu('💰 Wallet', `Balance ${fmtMoney(S().bank.balance)}. ${st.ready ? `Daily reward ready — day ${st.day} of 7: ${fmtMoney(st.amount)}.` : 'Daily reward claimed — see you tomorrow!'} Prairie Dollars are the fictional in-game currency; buying more arrives with accounts and secure payments.`, [
+      ...(st.ready ? [{ label: `🎁 Claim ${fmtMoney(st.amount)}`, primary: true, run: () => { const r = claimDaily(store); if (r.ok) { audio.blip('cash'); toast(`Daily reward · +${fmtMoney(r.amount)}`, 'good'); } else toast(r.error, 'warn'); } }] : []),
+      { label: 'Open Bank app', run: () => { phone.open(); phone.openApp('bank'); } }, { label: 'Close' }]);
+  }
+
+  /* ---------- Map tab: a bright 3D overview with place cards (reuses the home-screen pin engine) ---------- */
+  let mapOverview = false;
+  const ovHub = new Hub({
+    pinsEl: $('ov-pins'), cardEl: $('ov-card'), topEls: [$('topbar'), $('chiprow')], selExtra: 210,
+    extra: () => [{ id: 'you', emoji: '📍', name: 'You', x: player.pos.x, z: player.pos.z, blurb: 'You are here.' }],
+    onSelect: (info, id) => renderPlaceCard(info, id), onZoom: () => paintMapChips(),
+  });
+  const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Wheat City Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : poiById[id]);
+  let ovPick = null, ovMode = 'places';
+  const boardPick = (b) => ({ id: 'bb_' + b.id, name: `Billboard · ${b.name}`, area: 'Billboard', emoji: '📢', x: b.x + Math.sin(b.yaw) * 10, z: b.z + Math.cos(b.yaw) * 10, state: 'open', board: b });
+  function renderBoardCard(b) {
+    const q = adQuote(b.id, S()), a = activeAd(S(), b.id, Date.now()), p = boardPick(b), d = Math.hypot(p.x - player.pos.x, p.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)); ovPick = p;
+    $('ov-place').innerHTML = `<div class="pc-head"><span class="pc-ico">📢</span><div><h3>${esc(b.name)}</h3><small>${esc(q.tier.name)} · ${esc(q.tier.size.label)}</small></div><span class="pc-tag ${a ? 'open' : ''}">${a ? '● On air' : 'Free to book'}</span></div>
+      <p class="pc-blurb">${a ? `Your ad “${esc(a.text)}” is rotating here.` : `Book this board for 7 days and your ad rotates with up to ${q.maxRotation - 1} in-game sponsor${q.maxRotation > 2 ? 's' : ''}. About ${q.reach.toLocaleString()} simulated views.`}</p>
+      <div class="pc-acts"><span>${fmtMoney(q.price)} / 7 days</span><span>👁️ ${b.traffic.toLocaleString()} / day</span><span>${esc(q.tier.name)}</span></div>
+      <div class="pc-go three"><button class="gobtn primary" data-go="book"><b>📢 ${a ? 'See ad' : 'Book it'}</b><small>${a ? 'Ads app' : fmtMoney(q.price)}</small></button><button class="gobtn" data-go="walk"><b>🚶 Walk</b><small>about ${mins} min</small></button><button class="gobtn" data-go="cab" ${fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)}</small></button></div>`;
+  }
+  function renderPlaceCard(info, id) {
+    if (info?.custom?.board) { $('ov-hint').hidden = true; renderBoardCard(info.custom.board); return; }
+    ovPick = info && id && id !== 'you' ? placeById(id) : null; const el = $('ov-place'); $('ov-hint').hidden = !!info;
+    if (!info) { el.innerHTML = ''; return; }
+    if (!ovPick) { el.innerHTML = `<div class="pc-head"><span class="pc-ico">📍</span><div><h3>You are here</h3><small>${esc(inInterior ? 'Indoors' : 'Out and about in Regina')}</small></div></div>`; return; }
+    const p = ovPick, d = Math.hypot(p.x - player.pos.x, p.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)), dist = d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m', here = d < 40;
+    el.innerHTML = `<div class="pc-head"><span class="pc-ico">${p.emoji}</span><div><h3>${esc(p.name.replace(/ \(Home\)/, ''))}</h3><small>${esc(p.area ?? 'Regina')} · ${here ? 'you are here' : dist + ' away'}</small></div><span class="pc-tag ${p.state === 'open' ? 'open' : ''}">${p.state === 'open' ? '● Open now' : 'Visit & explore'}</span></div>
+      <p class="pc-blurb">${esc(p.blurb)}</p><div class="pc-acts">${(p.acts ?? []).map((a) => `<span class="${/\(soon\)/.test(a) ? 'soon' : ''}">${esc(a)}</span>`).join('')}</div>
+      <div class="pc-go"><button class="gobtn primary" data-go="walk" ${here ? 'disabled' : ''}><b>🚶 Walk</b><small>${here ? 'Already here' : `Free · about ${mins} min`}</small></button><button class="gobtn" data-go="cab" ${here || fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)} · instant</small></button></div>`;
+  }
+  $('ov-card').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-go]'); if (!b || !ovPick) return; const p = ovPick;
+    if (b.dataset.go === 'book') { closeMapOverview(); ctx.adsFocus = p.board.id; phone.open(); phone.openApp('ads'); return; }
+    if (b.dataset.go === 'walk') { closeMapOverview(); setDestination(p); audio.blip('ok'); }
+    else { closeMapOverview(); if (!ctx.quickCab(p)) openMapOverview(); }
+  });
+  function paintMapChips() {
+    shell.setChips([{ id: 'zoom', icon: ovHub.level === 'close' ? '🗺️' : '🏙️', label: ovHub.level === 'close' ? 'All Regina' : 'Downtown', on: false }, { id: 'ads', icon: '📢', label: 'Billboards', on: ovMode === 'boards' }, { id: 'gov', icon: '🏛️', label: 'Gov' }, { id: 'neighbours', icon: '👥', label: 'Neighbours' }],
+      (c) => {
+        if (c === 'zoom') { if (ovMode === 'boards') showBoards(false); ovHub.setLevel(ovHub.level === 'close' ? 'far' : 'close'); }
+        else if (c === 'ads') showBoards(ovMode !== 'boards');
+        else { closeMapOverview(); phone.open(); phone.openApp(c === 'gov' ? 'townhall' : 'social'); }
+      });
+  }
+  /** The Billboards chip: every board in Regina as a pin (green dot = free to book). */
+  function showBoards(on) {
+    ovMode = on ? 'boards' : 'places';
+    if (on) ovHub.setPins(city.billboards.map((b) => ({ id: 'bb:' + b.id, emoji: '📢', name: b.name, x: b.x, z: b.z, open: !activeAd(S(), b.id, Date.now()), blurb: '', board: b })), 'far');
+    else { ovHub.setPins(null, 'close'); }
+    paintMapChips();
+  }
+  async function openMapOverview() {
+    if (mapOverview || creator || camMode || fading) return;
+    if (homeView) setHomeView(false); if (build.active) build.stop(); phone.close(); panels.close(); if (mapOpen) closeMap();
+    if (inInterior) await exitInterior();
+    mapOverview = true; ovMode = 'places'; ovHub.custom = null; document.body.classList.add('map-ov'); $('ovmap').hidden = false; enterHubMode(true); ovHub.level = 'close'; ovHub.selected = null; ovHub.show(); renderPlaceCard(null); paintMapChips(); syncTab();
+  }
+  function closeMapOverview() {
+    if (!mapOverview) return; mapOverview = false; document.body.classList.remove('map-ov'); ovHub.hide(); ovHub.selected = null; $('ovmap').hidden = true; enterHubMode(false); rig.snap(player); shell.setChips([]); syncTab();
+  }
   input.on('view', () => (camMode ? stopCamera() : startCamera()));
-  input.on('escape', () => { if (panels.open) panels.close(); else if (mapOpen) closeMap(); else if (camMode) stopCamera(); else if (phone.isOpen) phone.close(); });
+  input.on('escape', () => { if (panels.open) panels.close(); else if (mapOverview) closeMapOverview(); else if (mapOpen) closeMap(); else if (camMode) stopCamera(); else if (phone.isOpen) phone.close(); });
 
   /* ---------- new game / title ---------- */
   let pendingStart = null, hub;
@@ -335,19 +450,16 @@ async function boot() {
     const open = poi.state === 'open';
     player.teleport(poi.x, poi.z + (open ? 0 : 8), open ? 0 : Math.PI); city.colliders.resolve(player.pos, 0.5); player.syncRoot();
   };
-  // the all-Regina view looks out past the edge of the 26 km ground plane; widen it there so the map never floats in a void
-  const hubGround = (wide) => city.group.getObjectByName('ground')?.scale.setScalar(wide ? 4 : 1);
   const enterHubMode = (on) => {
-    if (!on) hubGround(false);
     camera.near = on ? 50 : 0.25; camera.far = on ? 60000 : 4200; camera.updateProjectionMatrix();
     atmo.fogOverride = on ? { near: 60000, far: 90000 } : null; atmo.hubLift = on;
     player.char.root.visible = !on; ped.setVisible(!on); ped.limit = on ? 0 : QUALITY[qLevel].npc;
-    if (on) city.setViewDistance(42000); else { applySettings(); }
+    city.setOverview(on); if (on) city.setViewDistance(42000); else { applySettings(); }
     lastEnvAt = 0; updateEnv(true);
   };
   const startPlay = () => {
     hub?.hide(); gameMode = 'play'; creator = false; camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
-    $('title').classList.remove('on'); $('hud').classList.remove('hidden'); S().started = true; store.commit('started');
+    $('title').classList.remove('on'); $('hud').classList.remove('hidden'); shell.show(true); S().started = true; store.commit('started');
     input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player);
     setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000);
   };
@@ -387,7 +499,7 @@ async function boot() {
       $('btn-continue').textContent = info ? (hasLife() ? 'Play here' : 'Start here') : 'Continue';
       $('hc-welcome').style.display = info ? 'none' : '';
     },
-    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; hubGround(l === 'far'); },
+    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; },
   });
   $('hub-zoom').onclick = () => hub.setLevel(hub.level === 'close' ? 'far' : 'close');
   const hubRefresh = () => {
@@ -406,9 +518,11 @@ async function boot() {
   const updateHud = (dt) => {
     hudT += dt; if (hudT < 0.2) return; hudT = 0; const s = S();
     hudMoney.textContent = fmtMoney(s.bank.balance);
+    shell.setMoney(s.bank.balance); shell.setMood(moodOf(s.needs)); shell.setReward(dailyStatus(s, Date.now()).ready); syncTab();
     const vals = [s.needs.energy, s.needs.hunger, s.needs.hygiene ?? 0, s.needs.fun ?? 0, s.needs.mood];
     hudNeeds.querySelectorAll('.bar').forEach((b, i) => { b.firstChild.style.width = vals[i] + '%'; b.classList.toggle('low', vals[i] < 20); });
     const c = clock(); hudClock.innerHTML = `${c.label} ${c.ampm} <small>${weather.icon} ${weather.temp}°${weather.live ? '' : ' · sim'}</small>`;
+    shell.setClock(`<span aria-hidden="true">${(env?.night ?? 0) > 0.5 ? '🌙' : '☀️'}</span> ${c.date.toLocaleDateString('en-CA', { weekday: 'short', day: 'numeric', timeZone: 'America/Regina' })} · ${c.label} ${c.ampm} <small class="tb-weather">${weather.icon} ${weather.temp}°${weather.live ? '' : ' sim'}</small>`);
     // place
     let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' }[inInterior] : 'Regina';
     if (!inInterior) { let bd = 1e9; for (const d of DISTRICTS) { const k = Math.hypot(player.pos.x - d.x, player.pos.z - d.z) - d.r; if (k < bd && k < 0) { bd = k; place = d.name; } } }
@@ -428,6 +542,7 @@ async function boot() {
       hudJob.hidden = false; hudJob.textContent = '💼 ' + txt;
     } else hudJob.hidden = true;
     const un = G.unreadTotal(s); const bd = $('b-phone').querySelector('.badge'); bd.hidden = !un; bd.textContent = un;
+    shell.setBadge('phone', un);
   };
   const setPrompt = (label) => {
     if (label === lastPrompt) return; lastPrompt = label;
@@ -475,7 +590,7 @@ async function boot() {
     panels.event(ev, { can: (i) => choiceAvailable(store, ev, i), pick: (i) => { const r = resolveEvent(store, ev.id, i); if (r.ok) audio.blip(r.summary?.startsWith('−') ? 'tick' : 'ok'); return r; } });
   };
   const maybeEvent = () => {
-    if (panels.open || phone.isOpen || mapOpen || camMode || creator || fading || build.active || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
+    if (panels.open || catalogue.isOpen || phone.isOpen || mapOpen || mapOverview || camMode || creator || fading || build.active || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
     const sh = S().job.shift; let where = null, p = 0.03;
     if (inInterior === 'apartment') where = 'home'; else if (!inInterior) where = 'street';
     if (sh && inInterior && JOBS[sh.id].place === inInterior) { where = 'shift:' + sh.id; p = 0.09; }
@@ -492,7 +607,7 @@ async function boot() {
   /* ---------- scripted life events ---------- */
   setInterval(() => {
     if (gameMode !== 'play') return;
-    G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1); G.tickJobs(store);
+    G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1, { home: inInterior === 'apartment' }); G.tickJobs(store);
     maybeEvent();
     SOC.decaySocial(store, 1); if (Math.random() < 0.015) SOC.maybePing(store); if (radio.playing) S().needs.fun = Math.min(100, (S().needs.fun ?? 50) + 0.04);
     const s = S(), f = (s.flags ||= {});
@@ -525,11 +640,12 @@ async function boot() {
         else if (fps > 57) { highT++; lowT = 0; if (highT >= 6 && qLevel < (isTouch ? 1 : 3)) { setQuality(qLevel + 1); highT = 0; } } else { lowT = 0; highT = 0; }
       }
     }
-    input.enabled = gameMode === 'play' && !panels.open && !mapOpen && !fading && !creator && !build.active;
+    input.enabled = gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !fading && !creator && !build.active;
     const slow = S().needs.hunger < 8 || S().needs.energy < 8 ? 0.75 : 1;
     updateEnv();
 
-    if (gameMode === 'title' || gameMode === 'loading') {
+    if (mapOverview) ovHub.update(dt, camera, innerWidth, innerHeight);
+    else if (gameMode === 'title' || gameMode === 'loading') {
       titleT += dt; hub.update(dt, camera, innerWidth, innerHeight);
     } else {
       player.update(dt, input, rig.yaw, player.grid ?? city.colliders, slow);
@@ -551,7 +667,7 @@ async function boot() {
     const dst = S().destination; beacon.visible = !!dst && !inInterior && gameMode === 'play';
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
     // interaction prompt
-    if (gameMode === 'play' && !panels.open && !mapOpen && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
+    if (gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
     // minimap + hud
     if (gameMode === 'play' && !camMode) { mapView.draw(); updateHud(dt); }
     if (mapOpen) fullMap.draw();
@@ -561,12 +677,14 @@ async function boot() {
 
   /* ---------- debug / test handle ---------- */
   window.__regina = {
+    catalogue, settleBuildCam: () => rig.snapBuild(),
     store, G, player, rig, city, camera, scene, renderer, phone, panels, ctx, atmo,
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
-    radio, build, SOC, POL, fullMap: () => fullMap,
+    dbg: () => ({ mapOpen, mapOverview, camMode, creator, fading, homeView, inInterior, gameMode, panelsOpen: panels.open, phoneOpen: phone.isOpen, building: build.active, pos: [player.pos.x, player.pos.z], disableEvents: S().flags?.disableEvents, nCity: city.interactables.length, near: city.interactables.map((it) => [it.id, Math.round(Math.hypot(it.x - player.pos.x, it.z - player.pos.z)), it.radius, typeof it.enabled]).filter((r) => r[1] < 25) }),
+    radio, build, SOC, POL, fullMap: () => fullMap, openMap2D: () => openFullMap(), closeMap2D: () => closeMap(), ovHub, goTab, get homeView() { return homeView; }, get mapOverview() { return mapOverview; },
     hub, startAt: (id) => { hub.select(id); }, showEvent, news: () => ctx.news(),
     tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,
     skipTitle: () => { $('btn-continue').style.display === 'none' ? newLife() : $('btn-continue').click(); },
