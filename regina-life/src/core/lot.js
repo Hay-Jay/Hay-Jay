@@ -249,14 +249,17 @@ export function validateLayout(layout) {
   for (const run of lot.walls) {
     if (run.rooms[0] === null && run.rooms[1] === null) err(`wall run ${run.id} has no room on either side`);
     if (run.rooms[0] !== null && run.rooms[0] === run.rooms[1]) err(`wall run ${run.id} has the same room on both sides`);
-    for (const t of [0.15, 0.5, 0.85]) {
-      const m = run.a + (run.b - run.a) * t, n = run.axis === 'x' ? { x: m, z: run.c - H - 0.1 } : { x: run.c - H - 0.1, z: m }, p = run.axis === 'x' ? { x: m, z: run.c + H + 0.1 } : { x: run.c + H + 0.1, z: m };
+    for (let m = run.a + 0.15; m < run.b - 0.1; m += 0.1) {   // every 10 cm along the centre-line (not the 0.1 m corner overhang): both sides must keep the same room all the way
+      const n = run.axis === 'x' ? { x: m, z: run.c - H - 0.1 } : { x: run.c - H - 0.1, z: m }, p = run.axis === 'x' ? { x: m, z: run.c + H + 0.1 } : { x: run.c + H + 0.1, z: m };
       if ((roomIdOfFloor(lot.rooms, n.x, n.z) ?? null) !== run.rooms[0] || (roomIdOfFloor(lot.rooms, p.x, p.z) ?? null) !== run.rooms[1]) { err(`wall run ${run.id} borders more than one room on a side (split the wall where the neighbour changes)`); break; }
     }
     for (const rm of lot.rooms) if (rectsHit(run, rm.floor)) err(`wall run ${run.id} cuts into room ${rm.id}`);
     if (Object.hasOwn(L.walls.find((w) => w.id === run.wallId) || {}, 'exterior') && !!L.walls.find((w) => w.id === run.wallId).exterior !== (run.role === 'exterior')) err(`wall ${run.wallId} says exterior=${!!L.walls.find((w) => w.id === run.wallId).exterior} but borders ${run.rooms.join(' / ')}`);
   }
-  for (const d of lot.doorways) { if (!d.rooms[0] || !d.rooms[1] || d.rooms[0] === d.rooms[1]) err(`doorway ${d.id} must join two different rooms`); }
+  for (const d of lot.doorways) {
+    if (!d.rooms[0] || !d.rooms[1] || d.rooms[0] === d.rooms[1]) { err(`doorway ${d.id} must join two different rooms`); continue; }
+    for (const id of d.rooms) { const p = lot.byId.get(id).place, a = d.axis === 'x' ? [d.band.x0, d.band.x1, p.x0, p.x1] : [d.band.z0, d.band.z1, p.z0, p.z1]; if (a[0] < a[2] - EPS || a[1] > a[3] + EPS) err(`doorway ${d.id} opens past the place rect of ${id} (keep it 0.45 m from the corner)`); }
+  }
   const covered = (x, z) => lot.walls.some((w) => inRect(x, z, grow(w, 0.01))) || lot.doorways.some((d) => inRect(x, z, d.band));
   for (const rm of lot.rooms) {                                                    // the envelope: no open edge around any room
     const f = rm.floor, probes = []; for (let x = f.x0 + 0.05; x < f.x1; x += 0.1) probes.push([x, f.z0 - 0.05], [x, f.z1 + 0.05]); for (let z = f.z0 + 0.05; z < f.z1; z += 0.1) probes.push([f.x0 - 0.05, z], [f.x1 + 0.05, z]);
