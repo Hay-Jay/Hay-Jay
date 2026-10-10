@@ -350,7 +350,7 @@ export function buildCity({ quality = 'high' } = {}) {
     if (tx > grid.x0 - 60 && tx < grid.x1 + 60 && tz > grid.z0 - 60 && tz < PARK_RECT.z1 + 60) continue;          // downtown + Wascana have their own trees
     if (hoods.some((d) => Math.hypot(tx - d.x, tz - d.z) < d.r + 25)) continue;                                      // neighbourhoods have their own
     if (nearRoad(tx, tz, 22) || inPoly(tx, tz, lake)) continue;
-    if (rnd() < 0.5 + 0.2 * Math.sin(tx / 380) * Math.cos(tz / 420)) trees.push({ x: tx, z: tz, s: 0.8 + rnd() * 0.9 });   // clumpy, not a uniform grid
+    if (rnd() < 0.5 + 0.2 * Math.sin(tx / 380) * Math.cos(tz / 420)) trees.push({ x: tx, z: tz, s: 0.8 + rnd() * 0.9, belt: true });   // clumpy, not a uniform grid
   }
   {
     const rr = (path, x0, z0, x1, z1, r) => { path.moveTo(x0 + r, z0); path.lineTo(x1 - r, z0); path.quadraticCurveTo(x1, z0, x1, z0 + r); path.lineTo(x1, z1 - r); path.quadraticCurveTo(x1, z1, x1 - r, z1); path.lineTo(x0 + r, z1); path.quadraticCurveTo(x0, z1, x0, z1 - r); path.lineTo(x0, z0 + r); path.quadraticCurveTo(x0, z0, x0 + r, z0); return path; };
@@ -403,14 +403,18 @@ export function buildCity({ quality = 'high' } = {}) {
   const props = new THREE.Group(); group.add(props);
   const dummy = new THREE.Object3D();
 
-  // trees
-  let crownMesh;
+  // trees: the town's own trees are full-detail and cast shadows; the green belts between districts (thousands) are cheap low-poly stand-ins
+  const crownMeshes = [];
   {
-    const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.18, 0.28, 3.2, 6).translate(0, 1.6, 0), new THREE.MeshStandardMaterial({ color: '#5b4330', roughness: 1 }), trees.length);
-    const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(2.5, 1).translate(0, 5.1, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, flatShading: true }), trees.length);
-    trees.forEach((t, i) => { dummy.position.set(t.x, 0, t.z); dummy.rotation.set(0, rnd() * 6, 0); dummy.scale.set(t.s, t.s * (0.9 + rnd() * 0.3), t.s); dummy.updateMatrix(); trunk.setMatrixAt(i, dummy.matrix); crown.setMatrixAt(i, dummy.matrix); });
-    trunk.castShadow = crown.castShadow = true; trunk.receiveShadow = crown.receiveShadow = true;
-    props.add(trunk, crown); crownMesh = crown;
+    const dense = trees.map((t, i) => [t, i]).filter(([t]) => !t.belt), belt = trees.map((t, i) => [t, i]).filter(([t]) => t.belt);
+    const mk = (list, lowPoly) => {
+      const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.18, 0.28, 3.2, lowPoly ? 4 : 6, 1, lowPoly).translate(0, 1.6, 0), new THREE.MeshStandardMaterial({ color: '#5b4330', roughness: 1 }), list.length);
+      const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(2.5, lowPoly ? 0 : 1).translate(0, 5.1, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, flatShading: true }), list.length);
+      list.forEach(([t], k) => { dummy.position.set(t.x, 0, t.z); dummy.rotation.set(0, rnd() * 6, 0); dummy.scale.set(t.s, t.s * (0.9 + rnd() * 0.3), t.s); dummy.updateMatrix(); trunk.setMatrixAt(k, dummy.matrix); crown.setMatrixAt(k, dummy.matrix); });
+      trunk.castShadow = crown.castShadow = !lowPoly; trunk.receiveShadow = crown.receiveShadow = !lowPoly;
+      props.add(trunk, crown); crownMeshes.push({ mesh: crown, idx: list.map(([, i]) => i) });
+    };
+    mk(dense, false); if (belt.length) mk(belt, true);
     trees.forEach((t) => { if (t.s > 0.7) colliders.add(t.x - 0.35, t.z - 0.35, t.x + 0.35, t.z + 0.35, 4); });
   }
   const treeTints = trees.map(() => rnd());
@@ -420,8 +424,7 @@ export function buildCity({ quality = 'high' } = {}) {
       autumn: ['#c9822f', '#b3532a', '#d8a53a', '#9c3d24', '#8c9a3a'], winter: ['#9aa6a0', '#8d9892', '#a8b3ae', '#7e8a85'],
     }[season];
     const c = new THREE.Color();
-    treeTints.forEach((u, i) => { c.set(pal[Math.floor(u * pal.length) % pal.length]); crownMesh.setColorAt(i, c); });
-    crownMesh.instanceColor.needsUpdate = true;
+    for (const { mesh, idx } of crownMeshes) { idx.forEach((ti, k) => { c.set(pal[Math.floor(treeTints[ti] * pal.length) % pal.length]); mesh.setColorAt(k, c); }); mesh.instanceColor.needsUpdate = true; }
   }
 
   // street lamps + glow pools

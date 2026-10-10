@@ -676,6 +676,7 @@ async function boot() {
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
+    dbg: () => ({ mapOpen, mapOverview, camMode, creator, fading, homeView, inInterior, gameMode, panelsOpen: panels.open, phoneOpen: phone.isOpen, building: build.active, pos: [player.pos.x, player.pos.z], disableEvents: S().flags?.disableEvents, nCity: city.interactables.length, near: city.interactables.map((it) => [it.id, Math.round(Math.hypot(it.x - player.pos.x, it.z - player.pos.z)), it.radius, typeof it.enabled]).filter((r) => r[1] < 25) }),
     radio, build, SOC, POL, fullMap: () => fullMap, openMap2D: () => openFullMap(), closeMap2D: () => closeMap(), ovHub, goTab, get homeView() { return homeView; }, get mapOverview() { return mapOverview; },
     hub, startAt: (id) => { hub.select(id); }, showEvent, news: () => ctx.news(),
     tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,

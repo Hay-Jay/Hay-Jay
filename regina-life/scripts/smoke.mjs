@@ -13,6 +13,7 @@ const OUT = join(process.cwd(), '.scratch', 'shots'); mkdirSync(OUT, { recursive
 const find = () => { const root = process.env.PLAYWRIGHT_BROWSERS_PATH || '/opt/pw-browsers'; if (!existsSync(root)) return undefined; const d = readdirSync(root).find((x) => x.startsWith('chromium')); return d ? join(root, d, 'chrome-linux', 'chrome') : undefined; };
 const exe = process.env.CHROME_PATH || (existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : find());
 const mobile = process.argv.includes('--mobile');
+const STOP_AFTER = process.env.SMOKE_STOP_AFTER; // dev aid: SMOKE_STOP_AFTER='step name' ends the run after that step
 
 const server = await createServer({ server: { port: 5199, host: '127.0.0.1' }, logLevel: 'error' }); await server.listen();
 const browser = await chromium.launch({ executablePath: exe, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--no-sandbox'] });
@@ -25,7 +26,7 @@ await page.route('**/api.open-meteo.com/**', (r) => r.abort()); // force the sim
 
 const tag = mobile ? 'm-' : '';
 const shot = async (name) => { await page.screenshot({ path: join(OUT, `${tag}${name}.png`) }); console.log('  shot', name); };
-const step = async (name, fn) => { try { await fn(); console.log('PASS', name); } catch (e) { errors.push(`STEP ${name}: ${e.message}`); console.log('FAIL', name, e.message); } };
+const step = async (name, fn) => { try { await fn(); console.log('PASS', name); } catch (e) { errors.push(`STEP ${name}: ${e.message}`); console.log('FAIL', name, e.message); } if (STOP_AFTER && name === STOP_AFTER) { console.log('STOPPING after', name); await browser.close(); await server.close(); process.exit(errors.length ? 1 : 0); } };
 const wait = (ms) => page.waitForTimeout(ms);
 // Software WebGL renders at a few fps, so wait until the game loop has actually picked an interaction target before pressing E.
 const pressE = async (re) => { await page.waitForFunction((src) => new RegExp(src, 'i').test(window.__regina.getTarget()?.label || ''), re, { timeout: 30000 }); await page.keyboard.press('e'); };
@@ -133,12 +134,14 @@ await step('full 2D map: badges never overlap, clusters zoom in', async () => {
   await page.evaluate(() => __regina.closeMap2D());
 });
 await step('enter market via door', async () => {
-  await page.evaluate(() => __regina.tp(30, 9.8)); await wait(1200);
-  const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Market/.test(t || '')) throw new Error('no door prompt: ' + t);
+  await page.evaluate(() => __regina.tp(30, 9.8));
+  await page.waitForFunction(() => /Market/.test(__regina.getTarget()?.label || ''), null, { timeout: 20000 }).catch(() => {});
+  const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Market/.test(t || '')) throw new Error('no door prompt: ' + t + ' ' + (await page.evaluate(() => JSON.stringify(__regina.dbg()))));
   await shot('13-door-prompt'); await page.keyboard.press('e'); await page.waitForFunction(() => __regina.inInterior === 'market', null, { timeout: 8000 }); await wait(1200); await shot('14-market');
 });
 await step('buy groceries', async () => {
-  await page.evaluate(() => { __regina.player.pos.x = -2.9; __regina.player.pos.z = 1.35; }); await wait(400);
+  await page.evaluate(() => { __regina.player.pos.x = -2.9; __regina.player.pos.z = 1.35; });
+  await page.waitForFunction(() => /Browse/.test(__regina.getTarget()?.label || ''), null, { timeout: 20000 }).catch(() => {});
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Browse/.test(t || '')) throw new Error('no shelf prompt: ' + t);
   await page.keyboard.press('e'); await page.waitForSelector('.panel.shop'); await shot('15-shop');
   const shown = await page.$eval('[data-buy]', (el) => Math.round(parseFloat(el.parentElement.querySelector('span').textContent.replace(/[^0-9.]/g, ' ').trim().split(' ')[0]) * 100));
@@ -191,13 +194,15 @@ await step('news + life + ads apps', async () => {
 await step('book a billboard and see it update', async () => {
   const r = await page.evaluate(async () => { const m = await import('/src/core/ads.js'); __regina.store.state.bank.balance = Math.max(__regina.store.state.bank.balance, 5e6); const b0 = __regina.store.ledger.balance; const res = m.buyAd(__regina.store, 'downtown-north', 1, 'Best bannock in Regina!', 'sunset'); __regina.ctx.refreshBillboards(); return { res, spent: b0 - __regina.store.ledger.balance }; });
   if (!r.res.ok || r.spent !== r.res.price) throw new Error('booking failed ' + JSON.stringify(r));
-  await page.evaluate(() => { __regina.tp(-30, -574); __regina.rig.yaw = 0; __regina.rig.pitch = 0.1; }); await wait(1500);
+  await page.evaluate(() => { __regina.tp(-30, -574); __regina.rig.yaw = 0; __regina.rig.pitch = 0.1; });
+  await page.waitForFunction(() => /Billboard/.test(__regina.getTarget()?.label || ''), null, { timeout: 20000 }).catch(() => {});
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Billboard/.test(t || '')) throw new Error('no billboard prompt: ' + t);
   await shot('21-billboard'); await page.keyboard.press('e'); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
 });
 await step('gym: treadmill trains fitness', async () => {
   await page.evaluate(() => __regina.enterInterior('gym')); await page.waitForFunction(() => __regina.inInterior === 'gym'); await wait(1300); await shot('23-gym');
-  await page.evaluate(() => { __regina.store.state.needs.energy = 90; __regina.player.pos.x = -1.5; __regina.player.pos.z = -2.2; }); await wait(500);
+  await page.evaluate(() => { __regina.store.state.needs.energy = 90; __regina.player.pos.x = -1.5; __regina.player.pos.z = -2.2; });
+  await page.waitForFunction(() => /treadmill/i.test(__regina.getTarget()?.label || ''), null, { timeout: 20000 }).catch(() => {});
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/treadmill/i.test(t || '')) throw new Error('no treadmill prompt: ' + t);
   await page.keyboard.press('e'); await page.waitForSelector('.prog-panel'); await shot('24-activity'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
   const f = await page.evaluate(() => __regina.store.state.skills.fitness); if (!(f >= 10)) throw new Error('fitness not trained: ' + f);
