@@ -29,14 +29,21 @@ const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const walkEta = (m) => { const s = m / 3.1; return s < 90 ? `${Math.round(s)} s` : `${Math.round(s / 60)} min`; };
 const fmtDist = (m) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
 
-/** Re-rendering an app keeps the scroll position unless the screen changed (its title differs). */
+/**
+ * Re-rendering an app keeps the scroll position unless the screen changed (its title differs), and an identical re-render is skipped
+ * outright (apps redraw on every store tick, which would otherwise replace the very button a thumb is about to press).
+ */
 function scrollSafe(el) {
+  let last = null;
+  const dirty = new MutationObserver(() => {}); dirty.observe(el, { subtree: true, childList: true, attributes: true, characterData: true });
   return new Proxy(el, {
     get(t, k) { const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; },
     set(t, k, v) {
       if (k !== 'innerHTML') { t[k] = v; return true; }
+      const touched = dirty.takeRecords().length > 0;                         // the app (or a handler) changed the DOM since we last drew it
+      if (!touched && v === last && t.firstChild) return true;
       const sc = t.querySelector('.scroll'), y = sc ? sc.scrollTop : 0, title = t.querySelector('.nav h2')?.textContent;
-      t.innerHTML = v;
+      t.innerHTML = v; last = v; dirty.takeRecords();
       const n = t.querySelector('.scroll'); if (n && y && t.querySelector('.nav h2')?.textContent === title) n.scrollTop = y;
       return true;
     },
