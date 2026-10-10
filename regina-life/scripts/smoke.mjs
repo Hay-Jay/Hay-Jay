@@ -98,7 +98,9 @@ await step('messages send + NPC reply', async () => {
 await step('incoming call UI', async () => { await page.evaluate(() => __regina.phone.incomingCall('dani')); await wait(700); await shot('09-call'); await page.click('.callov [data-c="accept"]'); await wait(900); await shot('09b-call-active'); await page.click('.callov [data-c="end"]'); await wait(300); });
 await step('control + notification centre', async () => {
   await page.evaluate(() => { if (__regina.phone.call) __regina.phone.endCall(true); }); await wait(300); if (!(await page.evaluate(() => __regina.phone.isOpen))) await page.keyboard.press('p'); await wait(800); await page.click('.sb-right'); await wait(600); await shot('10-control'); await page.click('.sb-right'); await page.click('.sb-left'); await wait(600); await shot('11-notifs'); await page.click('.sb-left'); });
-await step('close phone', async () => { await page.keyboard.press('p'); await wait(600); });
+await step('close phone', async () => {
+  await page.keyboard.press('p'); await page.waitForFunction(() => { const ph = document.getElementById('phone'); return !__regina.phone.isOpen && (!ph || ph.getBoundingClientRect().top >= innerHeight - 1 || ph.getBoundingClientRect().left >= innerWidth - 1); }, null, { timeout: 60000 }); await wait(300);   // software GL barely ticks the slide-away transition: wait until the phone really left the screen
+});
 await step('map tab: bright overview, place card, walk there', async () => {
   await page.keyboard.press('m'); await page.waitForFunction(() => __regina.mapOverview, null, { timeout: 60000 });
   await page.evaluate(() => { __regina.ovHub.snapNext = true; }); await page.waitForFunction(() => !__regina.ovHub.snapNext && !__regina.ovHub.dirty, null, { timeout: 90000 }); await wait(500);
