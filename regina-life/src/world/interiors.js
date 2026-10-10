@@ -328,7 +328,7 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     dispose() { homeApi?.dispose(); disposables.forEach((d) => d.dispose?.()); },
   };
   if (homeApi) {   // everything homes know about themselves: layout, rooms, room groups, wall modes, per-room lights
-    for (const k of ['layout', 'rooms', 'roomGroups', 'yard', 'parts', 'lot', 'setWallMode', 'setViewer', 'setRoomLights', 'roomLightsOn']) interior[k] = homeApi[k];
+    for (const k of ['layout', 'rooms', 'roomGroups', 'yard', 'parts', 'lot', 'setWallMode', 'setViewer', 'setCameraCut', 'setRoomLights', 'roomLightsOn']) interior[k] = homeApi[k];
     for (const k of ['wallMode', 'overheadMode', 'viewerRoom']) Object.defineProperty(interior, k, { get: () => homeApi[k], enumerable: true });
   }
   return interior;

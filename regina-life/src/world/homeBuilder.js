@@ -22,7 +22,7 @@ import { buildYard } from './homeYard.js';
 
 const EPS = 1e-6, T = WALL_T;
 export const SHELL = { wall: '#e9e3d6', ceil: '#f4f2ec', trim: '#ffffff', sill: '#a89a84' };
-const TRIM_H = 0.12, TRIM_T = 0.05, TRIM_OFF = 0.03, DOOR_VIS_H = 2.4, DOOR_VIS_T = 0.08, LIGHT_ON = 1.4;
+const CAMERA_CUT_H = 0.9, TRIM_H = 0.12, TRIM_T = 0.05, TRIM_OFF = 0.03, DOOR_VIS_H = 2.4, DOOR_VIS_T = 0.08, LIGHT_ON = 1.4;
 
 /* =========================================================================================== pure geometry (no THREE) */
 
@@ -96,13 +96,18 @@ export function deriveHome(layout) {
       const xs = [p.s0, ...inner, p.s1];
       for (let i = 0; i < xs.length - 1; i++) out.push({ s0: xs[i], s1: xs[i + 1], k0: i === 0 ? p.k0 : 'split', k1: i === xs.length - 2 ? p.k1 : 'split' });
     }
-    out.forEach((p, n) => {
+    const kept = [];
+    for (const p of out) {
       const e0 = p.k0 === 'end' && onJunction(ln, p.s0, c) ? T / 2 : 0, e1 = p.k1 === 'end' && onJunction(ln, p.s1, c) ? T / 2 : 0;
       const mid = (p.s0 + p.s1) / 2, rooms2 = [faceRoom(axis, c, mid, -1), faceRoom(axis, c, mid, 1)];
+      if (!rooms2[0] && !rooms2[1] && p.s1 - p.s0 < T + 0.05) continue;   // the sliver of an exterior wall behind a partition's end: the partition's own box fills it
+      kept.push({ p, e0, e1, rooms2 });
+    }
+    kept.forEach(({ p, e0, e1, rooms2 }, n) => {
       const role = rooms2[0] && rooms2[1] ? 'partition' : 'exterior';
       const side = role === 'partition' ? null : !rooms2[0] ? (axis === 'x' ? 'N' : 'W') : (axis === 'x' ? 'S' : 'E');
       const a = p.s0 - e0, b = p.s1 + e1, box = axis === 'x' ? { x0: a, x1: b, z0: c - T / 2, z1: c + T / 2 } : { x0: c - T / 2, x1: c + T / 2, z0: a, z1: b };
-      walls.push({ id: out.length > 1 ? `${w.id}.${n}` : w.id, wallId: w.id, axis, c, s0: p.s0, s1: p.s1, ends: [e0, e1], ...box, rooms: rooms2, role, side });
+      walls.push({ id: kept.length > 1 ? `${w.id}.${n}` : w.id, wallId: w.id, axis, c, s0: p.s0, s1: p.s1, ends: [e0, e1], ...box, rooms: rooms2, role, side });
     });
   }
   // a run that lies on the outer edge of the bbox is already held in by `bounds`; every other run (partitions, notches of an L-shaped house) is a collider
@@ -220,6 +225,7 @@ export function buildHome(layout, kit) {
   const wallGroup = mk('walls');
   const roomGroups = {}; for (const r of geo.rooms) roomGroups[r.id] = mk(`room:${r.id}`);
   const parts = { group, wallGroup, rooms: geo.rooms, roomGroups, walls: [], lintels: [], trims: [], ceilings: [], ceilFixtures: [], floors: [], yard: null };
+  const cuttable = [];   // the pieces the walk camera may lower out of its way: partitions and the lintels over their doorways
   const groupOf = (roomId) => roomGroups[roomId] ?? roomGroups[geo.rooms[0].id];
 
   /* ----- per-room materials: wall paint, floor ----- */
@@ -256,6 +262,7 @@ export function buildHome(layout, kit) {
   };
   for (const run of geo.walls) {
     const m = wallBox(run, { a: run.axis === 'x' ? run.x0 : run.z0, b: run.axis === 'x' ? run.x1 : run.z1, role: run.role, side: run.side, name: `wall:${run.id}` }); parts.walls.push(m);
+    if (run.role === 'partition') cuttable.push({ m, rect: run, lintel: false, goal: 1 });
     run.rooms.forEach((rid, si) => {   // skirting along each face that has a room in front of it, clipped to that room's floor
       if (!rid) return; const f = geo.rooms.find((q) => q.id === rid).floor, lo = Math.max(run.s0, run.axis === 'x' ? f.x0 : f.z0), hi = Math.min(run.s1, run.axis === 'x' ? f.x1 : f.z1);
       if (hi - lo < 0.02) return;
@@ -272,6 +279,7 @@ export function buildHome(layout, kit) {
     const sill = kit.add(sg, sillMat, d.x, 0.002, d.z, { cast: false, parent: groupOf(d.rooms[0] ?? d.rooms[1]) }); sill.name = `sill:${d.wallId}:${d.i}`;
     const lo = (d.axis === 'x' ? d.x : d.z) - d.w / 2, hi = lo + d.w, run = { id: `${d.wallId}:${d.i}`, axis: d.axis, c: d.axis === 'x' ? d.z : d.x, rooms: d.rooms };
     const lm = wallBox(run, { y0: DOOR_H, h: CEIL_H - DOOR_H, a: lo, b: hi, role: 'lintel', side: null, name: `lintel:${run.id}` }); parts.lintels.push(lm);
+    cuttable.push({ m: lm, lintel: true, goal: 1, rect: d.axis === 'x' ? { x0: lo, x1: hi, z0: d.z - T / 2, z1: d.z + T / 2 } : { x0: d.x - T / 2, x1: d.x + T / 2, z0: lo, z1: hi } });
   }
 
   /* ----- lights: per room; a switch toggles only its own room, and lights are never added or removed at runtime (intensity only) ----- */
@@ -323,15 +331,40 @@ export function buildHome(layout, kit) {
   parts.yard = buildYard(layout, { ...kit, mat, basic, track }) ?? null;
   if (parts.yard) group.add(parts.yard);
 
-  /* ----- wall modes ----- */
+  /* ----- camera cut: a partition between the player's head and the walk camera drops out of the way (eased); the rest of the wall stays ----- */
   let mode = 'walk', overhead = false, pick = geo.rooms.length > 1 ? 'cut' : 'up', viewer = null;
+  const cutLow = CAMERA_CUT_H / CEIL_H;
+  const segHitsRect = (ax, az, bx, bz, r) => {   // 2D segment against a rect (slab test)
+    let t0 = 0, t1 = 1; const dx = bx - ax, dz = bz - az;
+    for (const [o, d, lo, hi] of [[ax, dx, r.x0, r.x1], [az, dz, r.z0, r.z1]]) {
+      if (Math.abs(d) < 1e-9) { if (o < lo || o > hi) return false; continue; }
+      let u = (lo - o) / d, v = (hi - o) / d; if (u > v) [u, v] = [v, u]; t0 = Math.max(t0, u); t1 = Math.min(t1, v); if (t0 > t1) return false;
+    }
+    return true;
+  };
+  const resetCut = () => { for (const c of cuttable) { c.goal = 1; c.m.scale.y = 1; c.m.visible = true; } };
+  /** Called by the walk camera every frame with the head and camera positions ({x, z}); null clears. Only acts while walking. */
+  const setCameraCut = (head, cam) => {
+    if (mode !== 'walk') return;
+    for (const c of cuttable) c.goal = head && cam && segHitsRect(head.x, head.z, cam.x, cam.z, c.rect) ? (c.lintel ? 0 : cutLow) : 1;
+  };
+  animated.push((dt) => {   // about 0.15 s to settle
+    if (mode !== 'walk') return; const k = 1 - Math.exp(-dt / 0.05);
+    for (const c of cuttable) {
+      const y = c.m.scale.y; if (y === c.goal || (c.goal === 1 && y === 1)) continue;
+      const n = Math.abs(y - c.goal) < 0.01 ? c.goal : y + (c.goal - y) * k;
+      c.m.scale.y = Math.max(0.001, n); c.m.visible = !(c.lintel && n < 0.05);
+    }
+  });
+
+  /* ----- wall modes ----- */
   const nearby = (roomId) => { const s = new Set([roomId]); for (const d of geo.doorways) if (d.rooms.includes(roomId)) d.rooms.forEach((r) => r && s.add(r)); return s; };
   const roomVisibility = () => {   // walking: only the player's room and the rooms one doorway away are drawn; every overhead mode shows the whole house
     const show = mode === 'walk' && viewer ? nearby(viewer) : null;
     for (const r of geo.rooms) roomGroups[r.id].visible = !show || show.has(r.id);
   };
   const apply = (m) => {
-    mode = m; const walk = m === 'walk';
+    mode = m; const walk = m === 'walk'; resetCut();
     for (const c of parts.ceilings) c.visible = walk;
     for (const c of parts.ceilFixtures) c.visible = walk;
     if (parts.yard) parts.yard.visible = !walk;
@@ -421,7 +454,7 @@ export function buildHome(layout, kit) {
 
   return {
     layout, rooms: geo.rooms, bounds: geo.bounds, spawn: { ...geo.entry.spawn }, exit: { ...geo.entry.exit }, roomGroups, yard: parts.yard, parts, lot: geo,
-    setHome, setOverhead, setWallMode, setViewer, setRoomLights, roomLightsOn: (id) => !!lit[id]?.on,
+    setHome, setOverhead, setWallMode, setViewer, setCameraCut, setRoomLights, roomLightsOn: (id) => !!lit[id]?.on,
     get wallMode() { return mode; }, get overheadMode() { return pick; }, get viewerRoom() { return viewer; },
     dispose,
   };
