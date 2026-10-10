@@ -17,7 +17,7 @@ const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness
  *   { group, bounds, colliders, interactables[], spawn, exit, update(dt, env), setLights(on), dispose() }
  * Interactables: { id, x, z, radius, label | label(ctx), run(ctx), enabled?(ctx) }
  */
-export function buildInterior(kind, { texCache = {} } = {}) {
+export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   // `layout` (a data/homes.js entry or id) only matters for 'apartment'; the multi-room builder consumes it
   const rnd = mulberry32(kind.length * 977);
   const group = new THREE.Group(); group.name = 'interior:' + kind;
   const colliders = new CollisionGrid(8);
