@@ -12,7 +12,7 @@ main{position:relative;z-index:1}
 
 .shop{padding:0 0 clamp(60px,10vh,120px)}
 .toolbar{display:flex;flex-direction:column;gap:12px;padding:12px;margin-bottom:18px;border-radius:14px;z-index:40}
-.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 30px 2px 2px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent)}
 .filters::-webkit-scrollbar{display:none}
 .filter{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border:1px solid var(--line);border-radius:999px;font:500 11px/1 var(--f-m);letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:background .2s,color .2s,border-color .2s}
 .filter sup{font:500 9px/1 var(--f-m);letter-spacing:.04em;color:var(--dim);vertical-align:baseline;position:relative;top:-.45em}
@@ -24,7 +24,7 @@ select{appearance:none;-webkit-appearance:none;min-height:44px;padding:0 40px 0 
 select:hover{border-color:var(--line2)}
 @media(min-width:900px){
   .toolbar{flex-direction:row;align-items:center;justify-content:space-between;padding:10px 14px;position:sticky;top:64px}
-  .filters{overflow:visible}
+  .filters{overflow:visible;padding:2px;-webkit-mask-image:none;mask-image:none}
 }
 .count{color:var(--mute);margin:0 2px 16px}
 .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;grid-auto-flow:dense}

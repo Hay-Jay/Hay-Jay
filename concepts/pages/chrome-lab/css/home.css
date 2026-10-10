@@ -38,6 +38,11 @@ html.no-gl .hero-emblem{display:block}
 .feat-head{display:grid;gap:18px;justify-items:start;margin-bottom:clamp(26px,5vw,56px)}
 .feat-head .eyebrow{margin-bottom:0}
 .feat-head .sec-p{max-width:40ch}
+/* on phones the droplets pass behind this block: a dark halo keeps the chrome type and the paragraph readable */
+@media(max-width:759px){
+  .feat-head .chrome-h{filter:drop-shadow(0 0 10px rgba(3,3,4,.95)) drop-shadow(0 0 3px rgba(3,3,4,.9))}
+  .feat-head .sec-p,.feat-head .eyebrow{text-shadow:0 0 10px #030304,0 0 3px #030304,0 0 22px #030304}
+}
 .fstrip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .fstrip li:nth-child(even){margin-top:clamp(18px,5vw,56px)}
 .fstrip li:nth-child(odd){margin-bottom:clamp(18px,5vw,56px)}

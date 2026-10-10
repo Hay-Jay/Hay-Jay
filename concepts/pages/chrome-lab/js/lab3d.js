@@ -450,8 +450,8 @@ vec3 objectTangent=vec3(tangent.xyz);
     // HERO (home page): blob -> droplets -> ring -> Worldwide ring -> blob -> emblem
     const { ft, bt, wt, st, fin } = M;
     add(Math.max(ft - .55 * H, 10), { sc: HS * 1.04, sy: HY - (P ? 0 : .05) });
-    add(ft + .1 * H, { blob: .72, drops: 1, dropR: .3, sx: SX, sy: P ? .66 : .08, sc: P ? .5 : .8, dim: P ? .5 : .32 });
-    add(bt - .25 * H, { blob: .3, drops: 1, dropR: 1, sx: SX, sy: P ? .66 : .06, sc: P ? .5 : .95, dim: P ? .45 : .2 });
+    add(ft + .1 * H, { blob: .72, drops: 1, dropR: .3, sx: SX, sy: P ? .66 : .08, sc: P ? .5 : .8, dim: P ? .72 : .32 });
+    add(bt - .25 * H, { blob: .3, drops: 1, dropR: 1, sx: SX, sy: P ? .66 : .06, sc: P ? .5 : .95, dim: P ? .64 : .2 });
     add(bt + .3 * H, { blob: 0, drops: 1, dropR: 1.05, pull: .85, ring: 1, star: 1, face: .4, sx: P ? .3 : .44, sy: P ? .72 : .02, sc: P ? .46 : .95, dim: P ? .5 : .12 });
     add(bt + .9 * H, { blob: 0, drops: 0, dropR: 1, pull: 1, ring: 1, star: 1, face: 1, sx: P ? .3 : .42, sy: P ? .72 : 0, sc: P ? .46 : .98, dim: P ? .5 : .16 });
     // worldwide: the ring is large and face-on behind the heading
@@ -785,16 +785,21 @@ vec3 objectTangent=vec3(tangent.xyz);
     else if (avg < .02 && dprCap < dprMax && climbs < 2) { if (++good >= 4) { good = 0; climbs++; dprCap = Math.min(dprMax, dprCap + .25); applyDpr(); } }
     else good = 0;
   }
-  let raf = 0, lastNow = 0, onScreen = true;
+  let raf = 0, lastNow = 0, onScreen = true, leaving = false;
   function tick(now) {
     raf = 0;
-    if (document.hidden || reduce || lost || dead || !onScreen) return;
+    if (document.hidden || reduce || lost || dead || !onScreen || leaving) return;
     renderFrame(now);
     if (lastNow) perf((now - lastNow) / 1000);
     lastNow = now; loop();
   }
   function loop() { if (!raf) raf = requestAnimationFrame(tick); }
   document.addEventListener('visibilitychange', () => { last = performance.now(); lastNow = 0; if (!document.hidden) loop(); });
+  // The page is being navigated away from (a view transition is about to swap documents): stop drawing so the next page gets the CPU/GPU.
+  // The last frame stays on screen for the transition. If the page comes back from the back/forward cache, start again.
+  const resumeDrawing = () => { if (!leaving) return; leaving = false; last = performance.now(); lastNow = 0; loop(); };
+  addEventListener('pageswap', () => { leaving = true; setTimeout(resumeDrawing, 5000); });   // a cancelled navigation must not leave the scene frozen
+  addEventListener('pageshow', e => { if (e.persisted) resumeDrawing(); });
   if (ACCENT && 'IntersectionObserver' in window) {
     new IntersectionObserver(es => { onScreen = es[es.length - 1].isIntersecting; if (onScreen) { last = performance.now(); lastNow = 0; loop(); } }).observe(host);
   }
