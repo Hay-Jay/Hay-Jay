@@ -10,7 +10,7 @@ import { RESIDENTS, findResident, searchResidents, residentReply } from '../src/
 import { CONTACTS, contactIds, npcReply } from '../src/data/contacts.js';
 import { DESTINATIONS, DESTINATION_BY_ID } from '../src/data/destinations.js';
 import { POLICIES, CANDIDATES } from '../src/data/policies.js';
-import { FURNITURE, KEEPOUT, ROOM } from '../src/data/furniture.js';
+import { FURNITURE, KEEPOUT, ROOM, sellPrice, wallPrice } from '../src/data/furniture.js';
 import { adPrice } from '../src/core/ads.js';
 import { AD_TIERS, DURATIONS } from '../src/data/billboards.js';
 import { JOBS } from '../src/data/jobs.js';
@@ -121,20 +121,21 @@ describe('intercity travel', () => {
 describe('home decorating', () => {
   it('buy → place → move → remove → sell, all validated', () => {
     expect(H.placeFurniture(store, 'armchair', 0, 0, 0).error).toMatch(/none/);
-    const b0 = store.ledger.balance; expect(H.buyFurniture(store, 'armchair').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 6900);
+    store.state.bank.balance = 1e6; // fund the player: the default balance is only $400
+    const b0 = store.ledger.balance; expect(H.buyFurniture(store, 'armchair').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - FURNITURE.armchair.price);
     const p = H.placeFurniture(store, 'armchair', 0.1, 0.9, 0); expect(p.ok).toBe(true); expect(p.item.x).toBe(0); expect(p.item.z).toBe(1); // snapped to 0.25 grid
     expect(H.placeFurniture(store, 'armchair', 1, 1, 0).error).toMatch(/none/);
     H.buyFurniture(store, 'armchair'); expect(H.placeFurniture(store, 'armchair', 0, 1.25, 0).error).toMatch(/Overlaps/);
     expect(H.moveFurniture(store, p.item.id, 1.5, 1, 1).ok).toBe(true); expect(H.sellFurniture(store, 'armchair').ok).toBe(true); // sells the spare one
-    expect(H.sellFurniture(store, 'armchair').error).toMatch(/Remove it/); H.removeFurniture(store, p.item.id); expect(H.sellFurniture(store, 'armchair').refund).toBe(3450);
+    expect(H.sellFurniture(store, 'armchair').error).toMatch(/Remove it/); H.removeFurniture(store, p.item.id); expect(H.sellFurniture(store, 'armchair').refund).toBe(sellPrice(FURNITURE.armchair.price)); // 60% of list
   });
   it('rejects spots outside the room, on fixtures, or with bad numbers', () => {
-    H.buyFurniture(store, 'dining'); expect(H.canPlace(store.state, 'dining', 9, 0, 0).error).toMatch(/Outside/); expect(H.canPlace(store.state, 'dining', -3.2, -4, 0).error).toMatch(/bed/);
+    store.state.bank.balance = 1e6; H.buyFurniture(store, 'dining'); expect(H.canPlace(store.state, 'dining', 9, 0, 0).error).toMatch(/Outside/); expect(H.canPlace(store.state, 'dining', -3.2, -4, 0).error).toMatch(/bed/);
     expect(H.canPlace(store.state, 'dining', NaN, 0, 0).ok).toBe(false); expect(H.canPlace(store.state, 'dining', 0, 0, 7).ok).toBe(false); expect(H.canPlace(store.state, 'nope', 0, 0, 0).ok).toBe(false);
     expect(H.canPlace(store.state, 'dining', 0, 0.5, 0).ok).toBe(true);
   });
   it('rugs can sit under furniture; rotation swaps the footprint', () => {
-    H.buyFurniture(store, 'rug_round'); H.buyFurniture(store, 'dining'); H.placeFurniture(store, 'dining', 0, 0.5, 0); expect(H.placeFurniture(store, 'rug_round', 0, 0.5, 0).ok).toBe(true);
+    store.state.bank.balance = 1e6; H.buyFurniture(store, 'rug_round'); H.buyFurniture(store, 'dining'); H.placeFurniture(store, 'dining', 0, 0.5, 0); expect(H.placeFurniture(store, 'rug_round', 0, 0.5, 0).ok).toBe(true);
     expect(H.footprint('dining', 1)).toEqual({ w: 0.9, d: 1.5 });
   });
   it('limits placed pieces and unlocks free souvenir posters after trips', () => {
@@ -143,8 +144,8 @@ describe('home decorating', () => {
     expect(H.placeFurniture(store, 'poster_banff', -1, -2, 0).ok).toBe(true); expect(H.placeFurniture(store, 'poster_banff', 1, -2, 0).error).toMatch(/none/);
   });
   it('paint and flooring cost once, then switching back is free', () => {
-    const b0 = store.ledger.balance; expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 4000);
-    expect(H.setStyle(store, 'wall', 'cream').ok).toBe(true); expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - 4000); expect(H.setStyle(store, 'floor', 'plaid').ok).toBe(false);
+    store.state.bank.balance = 1e6; const b0 = store.ledger.balance; expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - wallPrice('sage'));
+    expect(H.setStyle(store, 'wall', 'cream').ok).toBe(true); expect(H.setStyle(store, 'wall', 'sage').ok).toBe(true); expect(store.ledger.balance).toBe(b0 - wallPrice('sage')); expect(H.setStyle(store, 'floor', 'plaid').ok).toBe(false);
     store.state.bank.balance = 10; expect(H.setStyle(store, 'floor', 'walnut').error).toMatch(/Insufficient/);
   });
   it('catalog keepout zones lie inside the room', () => { for (const k of KEEPOUT) { expect(k.x0).toBeLessThan(k.x1); expect(k.z0).toBeLessThan(k.z1); } expect(Object.keys(FURNITURE).length).toBeGreaterThan(10); expect(ROOM.x1).toBeGreaterThan(0); });
