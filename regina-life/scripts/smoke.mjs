@@ -212,8 +212,8 @@ await step('gym: treadmill trains fitness', async () => {
 });
 await step('apartment shower restores hygiene', async () => {
   await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1000);
-  await page.evaluate(() => { __regina.store.state.needs.hygiene = 5; __regina.player.pos.x = -2.2; __regina.player.pos.z = 3.8; }); await wait(500);
-  await page.keyboard.press('e'); await page.waitForSelector('.prog-panel'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
+  await page.evaluate(() => { __regina.store.state.needs.hygiene = 5; __regina.player.pos.x = -2.2; __regina.player.pos.z = 3.8; });
+  await pressE('shower'); await page.waitForSelector('.prog-panel'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
   const h = await page.evaluate(() => __regina.store.state.needs.hygiene); if (h < 90) throw new Error('hygiene ' + h);
   await shot('25-apartment-shower'); await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
 });

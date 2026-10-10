@@ -310,7 +310,7 @@ describe('Catalogue sheet', () => {
   it('open(tab) accepts ids, labels and "storage"; remembers the last tab; unknown tabs fall back', () => {
     make(); const cats = M.categories().filter((c) => c.id !== M.TAB_DESIGN), pick = cats[1]?.id ?? cats[0].id;
     cat.open(pick); expect(cat.tab).toBe(pick); cat.close(); cat.open(); expect(cat.tab).toBe(pick); cat.close();
-    cat.open('Design'); expect(cat.tab).toBe(M.TAB_DESIGN); cat.close(); cat.open('storage'); expect(cat.tab).toBe(M.TAB_STORAGE); cat.close(); cat.open('zzz'); expect(cat.tab).toBe(M.TAB_STORAGE);
+    cat.open('Design'); expect(cat.tab).toBe(M.TAB_DESIGN); cat.close(); cat.open('storage'); expect(cat.tab).toBe(M.TAB_STORAGE); cat.close(); cat.open('zzz'); expect(cat.tab).toBe(M.defaultTab());   // a plain Buy never reopens the storage shelf
     cat.setTab(M.TAB_DESIGN); expect(cat.tab).toBe(M.TAB_DESIGN); expect(cat.$body.innerHTML).toContain('Walls'); expect(cat.$body.innerHTML).toContain('Floors');
   });
   it('tapping an affordable card buys it, starts build mode quietly, hands it over and hides the sheet', () => {

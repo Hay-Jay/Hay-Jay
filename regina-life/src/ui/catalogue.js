@@ -85,7 +85,7 @@ export class Catalogue {
   open(tab) {
     const want = this._resolve(tab);
     if (this._open) { if (want) this.setTab(want); return this; }
-    this._open = true; this.tab = want ?? (this.tab && M.hasTab(this.store.state, this.tab) ? this.tab : M.defaultTab());
+    this._open = true; this.tab = want ?? (this.tab && this.tab !== M.TAB_STORAGE && M.hasTab(this.store.state, this.tab) ? this.tab : M.defaultTab());   // plain Buy reopens the shop, never the storage shelf
     this._prevFocus = typeof document !== 'undefined' ? document.activeElement : null; this._tsig = this._bsig = this._bal = null; this._prio++;
     clearTimeout(this._hideT); this.root.hidden = false; this._render();
     addEventListener('keydown', this._onKey, true); addEventListener('resize', this._onResize); this._unsub = this.store.subscribe?.(() => { if (this._open) this.refresh(); });
