@@ -261,15 +261,32 @@ await step('build mode: buy, place, paint', async () => {
   await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1200);
   await page.evaluate(() => __regina.build.start()); await wait(1800); await shot('38-build-empty');
   const pxAt = (x, z) => page.evaluate(([x, z]) => { const v = new (window.__regina.camera.position.constructor)(x, 0, z).project(window.__regina.camera); const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height }; }, [x, z]);
+  // the pieces we already own wait in storage: open the Buy sheet's "In storage" shelf, tap Place, then tap the floor
   for (const [type, x, z] of [['armchair', 0.5, 1.0], ['plant', -3.5, -0.4], ['poster_banff', -0.7, -3.2]]) {
-    await page.click(`#b-items [data-type="${type}"]`); await wait(200); const p = await pxAt(x, z); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(400);
+    await page.click('#b-stored'); await page.waitForSelector(`.cat-sheet [data-act="place"][data-id="${type}"]`, { timeout: 30000 }); if (type === 'armchair') await shot('38b-catalogue-storage');
+    await page.click(`.cat-sheet [data-act="place"][data-id="${type}"]`); await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 });
+    const p = await pxAt(x, z); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(400);
   }
-  await page.click('#b-shop'); await page.waitForSelector('.panel.shop'); await page.keyboard.press('Escape'); await wait(300);
-  if (!(await page.evaluate(() => __regina.build.active))) throw new Error('Esc on the shop panel also exited build mode');
+  // Buy sheet: Esc hides the sheet only (not build mode), and tapping a card buys it through the validated rules and hands it over to place
+  await page.click('#b-buy'); await page.waitForSelector('.cat-sheet [data-act="buy"]', { timeout: 30000 }); await shot('38c-catalogue-buy'); await page.keyboard.press('Escape'); await wait(500);
+  if (!(await page.evaluate(() => __regina.build.active))) throw new Error('Esc on the Buy sheet also exited build mode');
+  if (await page.evaluate(() => __regina.catalogue.isOpen)) throw new Error('Esc should hide the Buy sheet');
+  const b0 = await page.evaluate(() => __regina.store.state.bank.balance); await page.click('#b-buy'); await page.waitForSelector('.cat-sheet [data-act="buy"]:not(.is-poor)', { timeout: 30000 });
+  const want = await page.$eval('.cat-sheet [data-act="buy"]:not(.is-poor)', (el) => ({ id: el.dataset.id, label: el.getAttribute('aria-label') })); await page.click(`.cat-sheet [data-act="buy"][data-id="${want.id}"]`);
+  await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 });
+  const b1 = await page.evaluate(() => __regina.store.state.bank.balance); if (b1 >= b0) throw new Error('buying from the catalogue did not charge: ' + b0 + ' -> ' + b1 + ' ' + want.label);
+  await page.keyboard.press('Escape'); await wait(300);
   const placed = await page.evaluate(() => __regina.store.state.home.placed.map((i) => i.type)); if (placed.length !== 3) throw new Error('expected 3 placed, got ' + placed.join(','));
   // blocked placement is refused (on top of the bed)
-  await page.click('#b-items [data-type="rug_round"]'); const pb = await pxAt(-3.2, -3.9); await page.mouse.click(pb.x, pb.y); await wait(300);
-  await page.evaluate(async () => { const H = await import('/src/core/home.js'); H.setStyle(__regina.store, 'wall', 'sage'); H.setStyle(__regina.store, 'floor', 'walnut'); }); await wait(600);
+  await page.click('#b-stored'); await page.waitForSelector('.cat-sheet [data-act="place"][data-id="rug_round"]', { timeout: 30000 }); await page.click('.cat-sheet [data-act="place"][data-id="rug_round"]');
+  await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 }); const pb = await pxAt(-3.2, -3.9); await page.mouse.move(pb.x, pb.y); await wait(250); await page.mouse.click(pb.x, pb.y); await wait(300);
+  if ((await page.evaluate(() => __regina.store.state.home.placed.length)) !== 3) throw new Error('a rug was placed on top of the bed');
+  await page.keyboard.press('Escape'); await wait(300);
+  // Design tab: paint and floors through the same sheet
+  await page.evaluate(() => { __regina.store.state.bank.balance = Math.max(__regina.store.state.bank.balance, 5e6); });
+  await page.click('#b-buy'); await page.waitForSelector('#cat-tab-design', { timeout: 30000 }); await page.click('#cat-tab-design'); await page.waitForSelector('.cat-sheet [data-act="style"][data-kind="wall"][data-key="sage"]', { timeout: 30000 });
+  await page.click('.cat-sheet [data-act="style"][data-kind="wall"][data-key="sage"]'); await wait(300); await page.click('.cat-sheet [data-act="style"][data-kind="floor"][data-key="walnut"]'); await wait(500); await shot('38d-catalogue-design');
+  await page.keyboard.press('Escape'); await wait(600);
   await shot('39-build-furnished');
   await page.evaluate(() => __regina.build.stop()); await wait(1500); await shot('40-home-furnished');
   if (await page.evaluate(() => __regina.store.state.home.wall) !== 'sage') throw new Error('paint not saved');

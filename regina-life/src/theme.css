@@ -127,3 +127,6 @@ body.home-view #hud .hud-tr{display:none!important}
 .row .ok{color:#34c98b;font-weight:700}
 
 .pc-go.three{grid-template-columns:repeat(3,1fr)}
+
+/* the Buy sheet owns the lower half of the screen: tuck the contextual chips away so the room gets the space */
+body.cat-open #chiprow{display:none}

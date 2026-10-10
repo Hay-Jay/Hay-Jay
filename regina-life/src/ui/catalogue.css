@@ -15,15 +15,15 @@
 }
 .cat-root[hidden]{display:none}
 .cat-root *,.cat-root *::before,.cat-root *::after{box-sizing:border-box}
-.cat-root button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.cat-root button:focus-visible,.cat-root [tabindex="0"]:focus-visible{outline:3px solid var(--k-wheat-d);outline-offset:2px}
+:where(.cat-root) button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+:where(.cat-root) button:focus-visible,.cat-root [tabindex="0"]:focus-visible{outline:3px solid var(--k-wheat-d);outline-offset:2px}
 .cat-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 .cat-scrim{position:absolute;inset:0;background:rgba(18,32,42,.24);opacity:0;transition:opacity .28s ease}
 .cat-root.open .cat-scrim{opacity:1}
 
 /* the sheet: full width on phones, centred (max 760px) on desktop; slides up with a spring */
-.cat-sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;width:min(100%,760px);height:min(62vh,580px);display:flex;flex-direction:column;
+.cat-sheet{position:absolute;left:0;right:0;bottom:0;margin:0 auto;width:min(100%,760px);height:min(54vh,560px);display:flex;flex-direction:column;
   background:var(--k-cream);border-radius:26px 26px 0 0;box-shadow:var(--k-sh3),0 0 0 1px var(--k-line);padding-bottom:env(safe-area-inset-bottom,0px);
   transform:translateY(106%);transition:transform .55s var(--k-spring);will-change:transform;outline:none}
 .cat-root.open .cat-sheet{transform:translateY(0)}

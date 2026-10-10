@@ -40,13 +40,20 @@ describe('catalogue model against the expanded data shape', () => {
     expect([...all].sort()).toEqual(Object.keys(FD.FURNITURE).sort());
   });
   it('matches a card to its category by id or by label, ignoring case', () => {
-    expect(M.tabView(store.state, 'fun', 0).cards.map((c) => c.id)).toEqual(['pool']);
+    const ids = (tab) => M.tabView(store.state, tab, 0).cards.map((c) => c.id);
+    const want = Object.values(FD.FURNITURE).filter((d) => String(d.cat).toLowerCase() === 'fun').map((d) => d.id);
+    expect(want).toContain('pool');                                                  // the mocked piece files itself under the label 'Fun'
+    expect([...ids('fun')].sort()).toEqual([...want].sort());
   });
   it('orders by tier, then price, then name', () => {
-    expect(M.tabView(store.state, 'sleep', 0).cards.map((c) => c.id)).toEqual(['bed_a', 'bed_c', 'bed_b']); // tier 1 $300, tier 1 $450, tier 3 $900
+    const cards = M.tabView(store.state, 'sleep', 0).cards, key = (c) => [FD.FURNITURE[c.id].tier ?? 1, FD.FURNITURE[c.id].price, FD.FURNITURE[c.id].name];
+    const sorted = [...cards].sort((a, b) => { const x = key(a), y = key(b); return x[0] - y[0] || x[1] - y[1] || String(x[2]).localeCompare(String(y[2])); });
+    expect(cards.map((c) => c.id)).toEqual(sorted.map((c) => c.id));
+    const ids = cards.map((c) => c.id); expect(ids.indexOf('bed_a')).toBeLessThan(ids.indexOf('bed_c')); expect(ids.indexOf('bed_c')).toBeLessThan(ids.indexOf('bed_b'));   // tier 1 $300, tier 1 $450, tier 3 $900
   });
   it('takes size labels and stars from the data module', () => {
-    const pool = M.tabView(store.state, 'fun', 0).cards[0]; expect(pool).toMatchObject({ sizeLabel: '3x2', stars: 4 });
+    const pool = M.tabView(store.state, 'fun', 0).cards.find((c) => c.id === 'pool'); expect(pool).toMatchObject({ sizeLabel: '3x2', stars: 4 });
+    for (const c of M.tabView(store.state, 'fun', 0).cards) expect(c).toMatchObject({ sizeLabel: FD.sizeLabel(FD.FURNITURE[c.id]), stars: FD.tierStars(FD.FURNITURE[c.id]) });
     expect(M.sizeOf({ w: 1.6, d: 2.1 })).toBe('2x3'); expect(M.starsOf({ tier: 9 })).toBe(4);
   });
   it('sells at the data module ratio: floor(price * 0.6), and the banner says so', () => {

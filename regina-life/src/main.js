@@ -33,6 +33,8 @@ import { travel, cabFare } from './core/travel.js';
 import { Radio } from './ui/radio.js';
 import { STATIONS } from './data/radio.js';
 import { BuildMode } from './ui/build.js';
+import { Catalogue } from './ui/catalogue.js';
+import { makeThumbs } from './ui/thumbs.js';
 import { Shell, moodOf } from './ui/shell.js';
 import { dailyStatus, claimDaily } from './core/daily.js';
 import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
@@ -193,6 +195,10 @@ async function boot() {
       if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
       interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good');
     } });
+  /** The Buy tab: a bottom sheet over the Home view / build mode. Pieces you buy are handed to build mode to place. */
+  const catalogue = new Catalogue({ store, build, audio, toast, fmtMoney, thumbs: makeThumbs({ size: 160 }), canBuild: () => inInterior === 'apartment',
+    onChange: () => build.refresh(), onOpen: () => { buyOpen = true; document.body.classList.add('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); }, onClose: () => { buyOpen = false; document.body.classList.remove('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); } });
+  build.setCatalogue(catalogue);
 
   /* ---------- interiors ---------- */
   const interiors = {};
@@ -203,7 +209,7 @@ async function boot() {
       toast, menu: (t, tx, b) => panels.menu(t, tx, b), shop: (t, ids, w) => panels.shop(t, ids, w), clothingShop: () => panels.clothingShop(),
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
       exitInterior: () => exitInterior(),
-      furnitureShop: () => panels.furnitureShop(),
+      furnitureShop: () => catalogue.open(),
       build: () => { if (inInterior !== 'apartment') return; phone.close(); build.start(); },
       radioMenu: () => panels.menu('📻 Radio', radio.playing ? `Now playing: ${radio.nowTitle}` : 'Pick a station. The music is generated live in your browser.', [...STATIONS.map((st) => ({ label: `${st.emoji} ${st.name} · ${st.freq}`, run: () => radio.play(st.id) })), { label: '⏹ Turn off', run: () => radio.stop() }]),
       mayorTalk: () => {
@@ -334,20 +340,20 @@ async function boot() {
 
   /* ---------- app shell: Home · Buy · Map · Phone ---------- */
   const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet() });
-  const syncTab = () => { if (!panels.open) buyOpen = false; shell.setTab(mapOverview || mapOpen ? 'map' : phone.isOpen ? 'phone' : panels.open && buyOpen ? 'buy' : homeView ? 'home' : null); };
+  const syncTab = () => { if (!panels.open && !catalogue.isOpen) buyOpen = false; shell.setTab(mapOverview || mapOpen ? 'map' : phone.isOpen ? 'phone' : (panels.open || catalogue.isOpen) && buyOpen ? 'buy' : homeView ? 'home' : null); };
   /** Home view: a live, tilted dollhouse of your apartment. You can still walk around and use things; Edit / Buy change the room. */
   // the dollhouse sits on a little lawn under a clear sky, so the home screen reads as a toy diorama rather than a dark room
   const homeStage = new THREE.Group(); homeStage.visible = false; scene.add(homeStage);
   { const disc = new THREE.Mesh(new THREE.CircleGeometry(11.5, 56).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#9ed48a', roughness: 1 })); disc.position.y = -0.07; disc.receiveShadow = true; homeStage.add(disc);
     const ring = new THREE.Mesh(new THREE.RingGeometry(11.5, 12.6, 56).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 })); ring.position.y = -0.065; homeStage.add(ring); }
   /** Keep the whole room between the top bar/chips and the tab bar. */
-  const homeInsets = () => { rig.buildInset = Math.min(0.2, 92 / innerHeight); rig.buildTop = Math.min(0.24, 118 / innerHeight); };
+  const homeInsets = () => { rig.buildInset = Math.min(0.6, Math.max(92, catalogue.isOpen ? catalogue.height + 14 : 0) / innerHeight); rig.buildTop = Math.min(0.24, (catalogue.isOpen ? 76 : 118) / innerHeight); };
   addEventListener('resize', () => { if (homeView && !build.active) homeInsets(); });
   function setHomeView(on) {
     if (on === homeView) return; homeView = on; homeStage.visible = on; atmo.homeLift = on; if (inInterior) { scene.background = new THREE.Color(on ? '#cfe6f3' : '#181a20'); lastEnvAt = 0; updateEnv(true); }
     if (on) {
       rig.mode = 'build'; homeInsets(); rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true); document.body.classList.add('home-view');
-      shell.setChips([{ id: 'edit', icon: '✏️', label: 'Edit room' }, { id: 'paint', icon: '🎨', label: 'Paint & floors' }, { id: 'out', icon: '🚪', label: 'Go outside' }], (c) => { if (c === 'edit') build.start(); else if (c === 'paint') panels.styleMenu(() => build.refresh()); else exitInterior(); });
+      shell.setChips([{ id: 'edit', icon: '✏️', label: 'Edit room' }, { id: 'paint', icon: '🎨', label: 'Paint & floors' }, { id: 'out', icon: '🚪', label: 'Go outside' }], (c) => { if (c === 'edit') build.start(); else if (c === 'paint') catalogue.open('design'); else exitInterior(); });
     } else {
       document.body.classList.remove('home-view'); interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.fov = 62; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); shell.setChips([]);
     }
@@ -369,7 +375,7 @@ async function boot() {
     if (t === 'home') { await goHome(); syncTab(); }
   }
   let buyOpen = false;
-  function openBuy() { buyOpen = true; panels.furnitureShop(() => build.refresh()); syncTab(); }
+  function openBuy() { buyOpen = true; catalogue.open(); syncTab(); }
   function openWallet() {
     const st = dailyStatus(S(), Date.now());
     panels.menu('💰 Wallet', `Balance ${fmtMoney(S().bank.balance)}. ${st.ready ? `Daily reward ready — day ${st.day} of 7: ${fmtMoney(st.amount)}.` : 'Daily reward claimed — see you tomorrow!'} Prairie Dollars are the fictional in-game currency; buying more arrives with accounts and secure payments.`, [
@@ -584,7 +590,7 @@ async function boot() {
     panels.event(ev, { can: (i) => choiceAvailable(store, ev, i), pick: (i) => { const r = resolveEvent(store, ev.id, i); if (r.ok) audio.blip(r.summary?.startsWith('−') ? 'tick' : 'ok'); return r; } });
   };
   const maybeEvent = () => {
-    if (panels.open || phone.isOpen || mapOpen || mapOverview || camMode || creator || fading || build.active || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
+    if (panels.open || catalogue.isOpen || phone.isOpen || mapOpen || mapOverview || camMode || creator || fading || build.active || gameMode !== 'play' || S().flags?.disableEvents) return; // flag is a dev/test switch
     const sh = S().job.shift; let where = null, p = 0.03;
     if (inInterior === 'apartment') where = 'home'; else if (!inInterior) where = 'street';
     if (sh && inInterior && JOBS[sh.id].place === inInterior) { where = 'shift:' + sh.id; p = 0.09; }
@@ -634,7 +640,7 @@ async function boot() {
         else if (fps > 57) { highT++; lowT = 0; if (highT >= 6 && qLevel < (isTouch ? 1 : 3)) { setQuality(qLevel + 1); highT = 0; } } else { lowT = 0; highT = 0; }
       }
     }
-    input.enabled = gameMode === 'play' && !panels.open && !mapOpen && !mapOverview && !fading && !creator && !build.active;
+    input.enabled = gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !fading && !creator && !build.active;
     const slow = S().needs.hunger < 8 || S().needs.energy < 8 ? 0.75 : 1;
     updateEnv();
 
@@ -661,7 +667,7 @@ async function boot() {
     const dst = S().destination; beacon.visible = !!dst && !inInterior && gameMode === 'play';
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
     // interaction prompt
-    if (gameMode === 'play' && !panels.open && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
+    if (gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
     // minimap + hud
     if (gameMode === 'play' && !camMode) { mapView.draw(); updateHud(dt); }
     if (mapOpen) fullMap.draw();
@@ -671,6 +677,7 @@ async function boot() {
 
   /* ---------- debug / test handle ---------- */
   window.__regina = {
+    catalogue,
     store, G, player, rig, city, camera, scene, renderer, phone, panels, ctx, atmo,
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
