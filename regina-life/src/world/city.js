@@ -6,7 +6,9 @@ import { facadeTextures, asphaltTexture, intersectionTexture, concreteTexture, g
 import { CollisionGrid } from './collision.js';
 import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById, OUTER_ROADS, ISLAND } from './cityData.js';
 import { buildLandmarks } from './landmarks.js';
-import { BILLBOARDS, DAY_PRICE, THEMES, rotationFor } from '../data/billboards.js';
+import { BILLBOARDS, THEMES, rotationFor } from '../data/billboards.js';
+import { adQuote } from '../core/ads.js';
+import { fmtMoney } from '../core/ledger.js';
 import { drawBillboard } from './textures.js';
 
 const R2 = ROAD_W / 2;
@@ -379,7 +381,7 @@ export function buildCity({ quality = 'high' } = {}) {
       const face = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), mat); face.position.set(0, poleH + Hh / 2, 0.12); root.add(face);
       const rx = Math.cos(b.yaw), rz = -Math.sin(b.yaw), fx = Math.sin(b.yaw), fz = Math.cos(b.yaw);
       colliders.add(b.x - 1.5 - Math.abs(rx) * W * 0.32, b.z - 1.5 - Math.abs(rz) * W * 0.32, b.x + 1.5 + Math.abs(rx) * W * 0.32, b.z + 1.5 + Math.abs(rz) * W * 0.32, poleH);
-      const board = { ...b, cv, tex, mat, mega, root, slots: [], slot: 0, priceLabel: `$${(DAY_PRICE[b.tier] / 100).toFixed(0)} / day` };
+      const board = { ...b, cv, tex, mat, mega, root, slots: [], slot: 0, priceLabel: `${fmtMoney(adQuote(b.id)?.price ?? 0)} / week` };   // the board's own tier rate (landmark boards cost more than roadside ones)
       boards.push(board);
       interactables.push({ id: 'bb_' + b.id, kind: 'billboard', boardId: b.id, x: b.x + fx * 10, z: b.z + fz * 10, radius: 9, label: `Billboard · ${b.name}` });
     }

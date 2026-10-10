@@ -294,6 +294,21 @@ await step('build mode: buy, place, paint', async () => {
   if (await page.evaluate(() => __regina.store.state.home.wall) !== 'sage') throw new Error('paint not saved');
   await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
 });
+await step('placed treadmill is usable at home and trains fitness', async () => {
+  const spot = await page.evaluate(async () => {
+    const H = await import('/src/core/home.js'), st = __regina.store; st.state.bank.balance = Math.max(st.state.bank.balance, 5e6);
+    if (!H.buyFurniture(st, 'treadmill').ok) return null;
+    for (let z = 4.5; z >= -4.5; z -= 0.5) for (let x = -3.5; x <= 3.5; x += 0.5) if (H.canPlace(st.state, 'treadmill', x, z, 0).ok && H.placeFurniture(st, 'treadmill', x, z, 0).ok) return { x, z };
+    return null;
+  });
+  if (!spot) throw new Error('no room for a treadmill');
+  await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1000);
+  const f0 = await page.evaluate(() => { __regina.store.state.needs.energy = 90; return __regina.store.state.skills.fitness || 0; });
+  await page.evaluate((sp) => { __regina.player.pos.x = sp.x; __regina.player.pos.z = sp.z + 1.4; }, spot);
+  await pressE('treadmill'); await page.waitForSelector('.prog-panel'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
+  const f1 = await page.evaluate(() => __regina.store.state.skills.fitness || 0); if (!(f1 > f0)) throw new Error(`home treadmill did not train fitness: ${f0} -> ${f1}`);
+  await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
+});
 await step('home tab: live dollhouse view, edit chip, back outside', async () => {
   await page.click('#navbar [data-tab="home"]'); await page.waitForFunction(() => __regina.inInterior === 'apartment' && __regina.homeView, null, { timeout: 60000 }); await wait(2500);
   const on = await page.$eval('#navbar [data-tab="home"]', (b) => b.classList.contains('on')); if (!on) throw new Error('Home tab is not highlighted');

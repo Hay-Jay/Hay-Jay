@@ -148,6 +148,11 @@ export const HOME_FX = {
   aquarium: { stat: 'mood', v: [1.0, 1.5, 2.0, 2.5], rep: 0.5 }, clock:    { stat: 'mood', v: [0.4, 0.6, 0.8, 1.0], rep: 0.5 }, mirror: { stat: 'mood', v: [0.3, 0.5, 0.7, 0.9], rep: 0.5 },
   dtable:   { stat: 'mood', v: [0.2, 0.4, 0.6, 0.8], rep: 0.5 },
 };
+/** Placed pieces you can USE at home: kind -> [activity id (core/game.js ACTIVITIES), verb on the prompt]. */
+export const KIND_ACTIVITY = {
+  cardio: ['treadmill', 'Work out on'], weights: ['weights', 'Lift with'], mat: ['yoga', 'Stretch on'], easel: ['paint', 'Paint at'],
+  piano: ['piano', 'Play'], game: ['gaming', 'Play'], tv: ['tv', 'Watch'],
+};
 /** Placed souvenir posters each add a little mood (decaying like any repeat). */
 export const POSTER_FX = { stat: 'mood', v: 0.3, rep: 0.6 };
 /** Hard caps: no amount of furniture goes past these. */

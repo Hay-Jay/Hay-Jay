@@ -220,16 +220,16 @@ async function boot() {
       activity: (id) => {
         const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
         const a = G.ACTIVITIES[id]; player.gesture('use', a.secs);
-        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
+        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
-        fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store); await fadeTo(false, 700); fading = false;
+        fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store, { home: inInterior === 'apartment' }); await fadeTo(false, 700); fading = false;
         if (r.ok) toast('You feel well rested.', 'good');
       },
     },
   };
-  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
+  const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', piano: 'Lovely tune 🎹', paint: 'A little masterpiece 🎨', gaming: 'Good game! 🎮', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
   async function enterInterior(kind, door) {
     if (fading || inInterior) return; fading = true; lastDoor = door;
     await fadeTo(true, 380);
@@ -607,7 +607,7 @@ async function boot() {
   /* ---------- scripted life events ---------- */
   setInterval(() => {
     if (gameMode !== 'play') return;
-    G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1); G.tickJobs(store);
+    G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1, { home: inInterior === 'apartment' }); G.tickJobs(store);
     maybeEvent();
     SOC.decaySocial(store, 1); if (Math.random() < 0.015) SOC.maybePing(store); if (radio.playing) S().needs.fun = Math.min(100, (S().needs.fun ?? 50) + 0.04);
     const s = S(), f = (s.flags ||= {});
