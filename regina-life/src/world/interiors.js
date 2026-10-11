@@ -5,9 +5,9 @@ import { buildCharacter } from '../player/character.js';
 import { DEFAULT_LOOK, FOOD, CLOTHES, STORE_STOCK, MARKET_STOCK } from '../data/catalog.js';
 import { JOBS } from '../data/jobs.js';
 import { mulberry32 } from '../core/rng.js';
-import { furnitureModel } from './furnitureModels.js';
-import { FURNITURE, WALLS, FLOORS, isPoster, KIND_ACTIVITY } from '../data/furniture.js';
-import { itemDef, footprint } from '../core/home.js';
+import { buildHome } from './homeBuilder.js';
+import { HOMES, STUDIO } from '../data/homes.js';
+import { own } from '../core/util.js';
 
 const H = 3.3; // ceiling height
 const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...o });
@@ -17,7 +17,7 @@ const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness
  *   { group, bounds, colliders, interactables[], spawn, exit, update(dt, env), setLights(on), dispose() }
  * Interactables: { id, x, z, radius, label | label(ctx), run(ctx), enabled?(ctx) }
  */
-export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   // `layout` (a data/homes.js entry or id) only matters for 'apartment'; the multi-room builder consumes it
+export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   // `layout` (a data/homes.js entry or id) only matters for 'apartment' (the Studio by default); world/homeBuilder.js consumes it
   const rnd = mulberry32(kind.length * 977);
   const group = new THREE.Group(); group.name = 'interior:' + kind;
   const colliders = new CollisionGrid(8);
@@ -35,8 +35,11 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     if (collide) colliders.add(x - w / 2, z - d / 2, x + w / 2, z + d / 2, h);
     return m;
   };
-  const blobTex = glowTexture();
-  const blob = (x, z, w, d, op = 0.4) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.5, d * 1.5).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: blobTex, color: '#000', transparent: true, opacity: op, depthWrite: false })); m.position.set(x, 0.012, z); group.add(m); };
+  const blobTex = glowTexture(); disposables.push(blobTex);
+  const blob = (x, z, w, d, op = 0.4, parent = group) => {   // a soft contact shadow under a piece
+    const geo = new THREE.PlaneGeometry(w * 1.5, d * 1.5).rotateX(-Math.PI / 2), bm = new THREE.MeshBasicMaterial({ map: blobTex, color: '#000', transparent: true, opacity: op, depthWrite: false });
+    const m = new THREE.Mesh(geo, bm); m.position.set(x, 0.012, z); parent.add(m); disposables.push(geo, bm); return m;
+  };
 
   /* ----- room shell ----- */
   const shell = (W, D, { floor, wall = '#e8e1d2', ceil = '#f4f2ec', trim = '#cfc8b8' }) => {
@@ -54,24 +57,23 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     // thin wall colliders (player radius handles distance); bounds clamp keeps them in
     return { hw, hd, wm, fm: f.material };
   };
-  const ceilingLight = (x, z, w = 1.6, d = 0.4) => {
+  const ceilingLight = (x, z, w = 1.6, d = 0.4, parent = group) => {
     const m = new THREE.MeshStandardMaterial({ color: '#fff', emissive: new THREE.Color('#fff6e0'), emissiveIntensity: 1.4 });
-    disposables.push(m); ceilMeshes.push(add(new THREE.BoxGeometry(w, 0.06, d), m, x, H - 0.04, z, { cast: false })); lights.push(m);
+    const mesh = add(new THREE.BoxGeometry(w, 0.06, d), m, x, H - 0.04, z, { cast: false, parent }); disposables.push(m); ceilMeshes.push(mesh); lights.push(m); return mesh;
   };
   const point = (x, y, z, intensity = 14, color = '#fff2d8', dist = 14) => {
     const p = new THREE.PointLight(color, intensity, dist, 1.7); p.position.set(x, y, z); group.add(p); lights.push(p); return p;
   };
-  const windowPane = (x, y, z, w, h, ry = 0) => {
+  const windowPane = (x, y, z, w, h, ry = 0, parent = group) => {   // the pane sits 4 cm into the room: (sin ry, cos ry) is the inward normal, whatever the wall
     const m = new THREE.MeshBasicMaterial({ color: '#bfe3ff' }); disposables.push(m);
-    const frame = add(new THREE.BoxGeometry(w + 0.16, h + 0.16, 0.06), mat('#f1efe8'), x, y, z, { cast: false });
-    const g = add(new THREE.PlaneGeometry(w, h), m, x, y, z, { cast: false }); g.position.z += ry === 0 ? 0.04 : 0; frame.rotation.y = g.rotation.y = ry;
-    if (ry !== 0) g.position.x += 0.04 * Math.sign(ry) * -1;
+    const frame = add(new THREE.BoxGeometry(w + 0.16, h + 0.16, 0.06), mat('#f1efe8'), x, y, z, { cast: false, parent });
+    const g = add(new THREE.PlaneGeometry(w, h), m, x + 0.04 * Math.sin(ry), y, z + 0.04 * Math.cos(ry), { cast: false, parent }); frame.rotation.y = g.rotation.y = ry;
     windows.push(m);
   };
   const label = (text, w, h, x, y, z, ry = 0, opts = {}) => {
     const t = signTexture(text, { w: 512, h: Math.round(512 * (h / w)), accent: opts.accent ?? '#ffb347', bg: opts.bg ?? '#14161a', sub: opts.sub ?? '' });
     const m = new THREE.MeshBasicMaterial({ map: t }); disposables.push(m, t);
-    const p = add(new THREE.PlaneGeometry(w, h), m, x, y, z, { cast: false }); p.rotation.y = ry; return p;
+    const p = add(new THREE.PlaneGeometry(w, h), m, x, y, z, { cast: false, parent: opts.parent ?? group }); p.rotation.y = ry; return p;
   };
   const npc = (x, z, yaw, look = {}) => {
     const c = buildCharacter({ ...DEFAULT_LOOK, ...look }, { detail: 0.6 }); c.root.position.set(x, 0, z); c.root.rotation.y = yaw; group.add(c.root);
@@ -79,6 +81,7 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
   };
   const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.34, 4).rotateX(Math.PI), new THREE.MeshBasicMaterial({ color: '#ffd24a' })); arrow.visible = false; group.add(arrow);
   const ring = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.62, 28).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffd24a', transparent: true, opacity: 0.7, side: THREE.DoubleSide, depthWrite: false })); ring.visible = false; ring.position.y = 0.03; group.add(ring);
+  disposables.push(arrow.geometry, arrow.material, ring.geometry, ring.material);
 
   /* ----- shift task engine shared by market + threads ----- */
   const stations = [];
@@ -131,7 +134,7 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
   });
   const exitDoor = (x, z, yawOut) => interactables.push({ id: 'exit', x, z, radius: 1.8, label: 'Leave', run: (ctx) => ctx.ui.exitInterior() });
 
-  let spawn, bounds, exit, apt = null, decor = null;
+  let spawn, bounds, exit, homeApi = null;
 
   /* ======================= MARKET ======================= */
   if (kind === 'market') {
@@ -244,86 +247,11 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     });
   }
 
-  /* ======================= APARTMENT ======================= */
-  if (kind === 'apartment') {
-    const W = 9, D = 11; const shl = shell(W, D, { floor: woodTexture('#b08a62'), wall: '#e9e3d6', trim: '#ffffff' }); apt = shl;
-    decor = new THREE.Group(); group.add(decor);
-    bounds = { x0: -W / 2 + 0.45, x1: W / 2 - 0.45, z0: -D / 2 + 0.45, z1: D / 2 - 0.45 };
-    spawn = { x: 3.2, z: 4.4, yaw: Math.PI }; exit = { x: 3.2, z: 4.9 };
-    ceilingLight(0, -1.5, 1.2, 1.2); ceilingLight(0, 2.5, 1.2, 1.2);
-    const roomLights = [point(0, 2.9, -1.5, 15, '#ffeccc', 16), point(0, 2.9, 2.5, 12, '#ffeccc', 14)];
-    windowPane(-2.2, 1.7, -5.38, 2.6, 1.7); windowPane(2.2, 1.7, -5.38, 2.6, 1.7);
-    // rug
-    const rug = add(new THREE.PlaneGeometry(3.6, 2.6).rotateX(-Math.PI / 2), mat('#6e4b57', { roughness: 1 }), -0.4, 0.015, 0.6, { cast: false });
-    // bed
-    box(2.0, 0.4, 2.4, '#5b4331', -3.2, 0, -3.9, { collide: true }); box(1.9, 0.22, 2.3, '#f1ede6', -3.2, 0.4, -3.9); box(1.92, 0.12, 1.2, '#3e5b7a', -3.2, 0.62, -3.5);
-    box(0.7, 0.14, 0.4, '#ffffff', -3.55, 0.62, -4.9); box(0.7, 0.14, 0.4, '#ffffff', -2.85, 0.62, -4.9); box(2.0, 1.1, 0.12, '#5b4331', -3.2, 0, -5.12);
-    blob(-3.2, -3.9, 2.2, 2.6, 0.45);
-    box(0.5, 0.5, 0.5, '#5b4331', -1.8, 0, -4.9, { collide: true }); box(0.2, 0.3, 0.2, '#f6e9b8', -1.8, 0.5, -4.9, { mo: { emissive: new THREE.Color('#ffd98a'), emissiveIntensity: 0.5 } });
-    interactables.push({ id: 'bed', x: -2.0, z: -3.3, radius: 1.9, label: 'Sleep', run: (ctx) => ctx.ui.sleep() });
-    // sofa + TV
-    box(2.6, 0.45, 1.0, '#44505f', -0.4, 0, 3.6, { collide: true }); box(2.6, 0.55, 0.28, '#3b4553', -0.4, 0.4, 4.0, { collide: true }); for (const s of [-1, 1]) box(0.25, 0.7, 1.0, '#3b4553', -0.4 + s * 1.3, 0, 3.6);
-    blob(-0.4, 3.6, 2.8, 1.2, 0.4);
-    box(1.8, 0.5, 0.45, '#2a2420', -0.4, 0, -0.9, { collide: true });
-    const tvCanvas = document.createElement('canvas'); tvCanvas.width = 256; tvCanvas.height = 144; const tg = tvCanvas.getContext('2d');
-    const tvTex = new THREE.CanvasTexture(tvCanvas); tvTex.colorSpace = THREE.SRGBColorSpace; disposables.push(tvTex);
-    const tvMat = new THREE.MeshBasicMaterial({ map: tvTex }); disposables.push(tvMat);
-    box(1.7, 0.98, 0.06, '#101114', -0.4, 0.62, -1.0); const scr = add(new THREE.PlaneGeometry(1.6, 0.9), tvMat, -0.4, 1.1, -0.96, { cast: false });
-    let tvOn = false, tvT = 0, tvShow = 0;
-    const drawTv = () => {
-      if (!tvOn) { tg.fillStyle = '#050608'; tg.fillRect(0, 0, 256, 144); tvTex.needsUpdate = true; return; }
-      const hues = [[30, 60, 120], [200, 230, 260], [340, 10, 40]][tvShow % 3];
-      const gr = tg.createLinearGradient(0, 0, 256, 144); gr.addColorStop(0, `hsl(${hues[0] + tvT * 20},70%,40%)`); gr.addColorStop(1, `hsl(${hues[1] + tvT * 30},70%,25%)`); tg.fillStyle = gr; tg.fillRect(0, 0, 256, 144);
-      tg.fillStyle = 'rgba(255,255,255,.18)'; for (let k = 0; k < 5; k++) tg.fillRect(((tvT * 40 + k * 60) % 300) - 20, 30 + k * 18, 70, 10);
-      tg.fillStyle = '#fff'; tg.font = '700 14px sans-serif'; tg.fillText(['PRAIRIE NEWS NOW', 'HOCKEY NIGHT', 'COOKING W/ BANNOCK'][tvShow % 3], 12, 128); tvTex.needsUpdate = true;
-    };
-    drawTv();
-    interactables.push({ id: 'tv', x: -0.4, z: 0.3, radius: 2.0, label: () => (tvOn ? 'Change channel / Off' : 'Watch TV'), run: (ctx) => {
-      if (!tvOn) { tvOn = true; ctx.audio?.blip('tick'); ctx.ui.activity('tv'); }
-      else ctx.ui.menu('Television', 'What would you like to do?', [{ label: 'Next channel', run: () => { tvShow++; } }, { label: 'Turn off', run: () => { tvOn = false; drawTv(); } }, { label: 'Cancel' }]);
-    } });
-    interactables.push({ id: 'sofa', x: -0.4, z: 2.6, radius: 1.5, label: 'Sit on sofa', run: (ctx) => ctx.player.sitAt({ x: -0.4, z: 3.55, yaw: 0, y: 0.18 }) });
-    // kitchen
-    box(0.9, 0.9, 3.4, '#d7d2c6', 3.8, 0, -3.2, { collide: true }); box(1.0, 0.05, 3.5, '#4a4f55', 3.8, 0.9, -3.2); box(0.5, 0.02, 0.5, '#9aa3ad', 3.8, 0.95, -4.4, { mo: { metalness: 0.8 } });
-    box(0.8, 0.04, 0.6, '#25272b', 3.8, 0.95, -2.7); for (let k = 0; k < 4; k++) add(new THREE.CylinderGeometry(0.09, 0.09, 0.02, 12), mat('#555'), 3.65 + (k % 2) * 0.28, 1.0, -2.55 - Math.floor(k / 2) * 0.3);
-    box(0.9, 1.9, 0.85, '#d8dde2', 3.9, 0, -0.9, { collide: true, mo: { metalness: 0.5, roughness: 0.35 } }); box(0.03, 0.5, 0.04, '#999', 3.43, 1.0, -1.15);
-    blob(3.9, -2.4, 1.0, 5, 0.3);
-    interactables.push({ id: 'fridge', x: 2.7, z: -0.9, radius: 1.8, label: 'Open fridge / eat', run: (ctx) => ctx.ui.openFridge() });
-    interactables.push({ id: 'stove', x: 2.8, z: -2.6, radius: 1.5, label: 'Cook a quick meal', run: (ctx) => ctx.ui.cook() });
-    // desk + computer
-    box(1.8, 0.05, 0.8, '#7a5a3e', 3.3, 0.74, 3.6, { collide: false }); for (const [dx, dz] of [[-0.8, -0.35], [0.8, -0.35], [-0.8, 0.35], [0.8, 0.35]]) box(0.06, 0.74, 0.06, '#3d2f22', 3.3 + dx, 0, 3.6 + dz);
-    colliders.add(2.4, 3.2, 4.2, 4.0, 0.8);
-    box(0.7, 0.42, 0.04, '#111214', 3.3, 0.95, 3.8); add(new THREE.PlaneGeometry(0.64, 0.36), new THREE.MeshBasicMaterial({ color: '#4aa8ff' }), 3.3, 1.16, 3.78, { cast: false }).rotation.y = Math.PI; box(0.04, 0.2, 0.04, '#111', 3.3, 0.79, 3.82);
-    box(0.5, 0.02, 0.18, '#2a2c30', 3.3, 0.8, 3.45);
-    interactables.push({ id: 'computer', x: 3.3, z: 2.9, radius: 1.6, label: 'Use computer', run: (ctx) => ctx.ui.menu('Computer', 'What would you like to do?', [
-      { label: '💼 Browse jobs', run: () => ctx.ui.openApp('jobs') }, { label: '📰 Read the news', run: () => ctx.ui.openApp('news') },
-      { label: '🛋️ Furniture shop', run: () => ctx.ui.furnitureShop() }, { label: '🎨 Redecorate (build mode)', primary: true, run: () => ctx.ui.build() }, { label: 'Close' }]) });
-    // stereo (radio) on the little shelf by the TV
-    box(0.6, 0.35, 0.35, '#2b2e33', 1.3, 0.0, -0.55, { collide: true }); box(0.5, 0.04, 0.02, '#4ae0d0', 1.3, 0.26, -0.37, { mo: { emissive: new THREE.Color('#4ae0d0'), emissiveIntensity: 0.8 } });
-    interactables.push({ id: 'stereo', x: 1.3, z: 0.4, radius: 1.5, label: 'Radio', run: (ctx) => ctx.ui.radioMenu() });
-    // wardrobe
-    box(1.5, 2.3, 0.65, '#a98e6f', 0.9, 0, -4.95, { collide: true }); box(0.03, 2.1, 0.03, '#2b2118', 0.9, 0.1, -4.62); blob(0.9, -4.95, 1.5, 0.7, 0.3);
-    interactables.push({ id: 'wardrobe', x: 0.9, z: -3.9, radius: 1.6, label: 'Open wardrobe', run: (ctx) => ctx.ui.openWardrobe() });
-    // bookshelf + plant + frames
-    box(0.4, 2.0, 1.8, '#6b4f36', -4.25, 0, 1.2, { collide: true }); for (let r = 0; r < 5; r++) for (let k = 0; k < 7; k++) box(0.22, 0.28, 0.07, ['#a3312f', '#223458', '#3e5b43', '#d8cdb4', '#8e6bd8'][(r + k) % 5], -4.18, 0.1 + r * 0.38, 0.5 + k * 0.2);
-    // shower cubicle
-    box(1.7, 0.05, 1.7, '#cfe3ea', -3.5, 0, 3.8, { mo: { roughness: 0.3 } });
-    box(0.05, 2.2, 1.7, '#bfe6ff', -2.65, 0, 3.8, { mo: { transparent: true, opacity: 0.25, roughness: 0.05 } });
-    box(1.7, 2.2, 0.05, '#bfe6ff', -3.5, 0, 2.95, { mo: { transparent: true, opacity: 0.25, roughness: 0.05 } });
-    box(0.06, 2.3, 0.06, '#9aa3ad', -4.3, 0, 4.6, { mo: { metalness: 0.9, roughness: 0.2 } }); add(new THREE.CylinderGeometry(0.12, 0.12, 0.03, 14), mat('#c8ced6', { metalness: 0.9, roughness: 0.2 }), -4.2, 2.2, 4.5);
-    colliders.add(-4.35, 2.9, -2.6, 4.65, 2.2);
-    interactables.push({ id: 'shower', x: -2.2, z: 3.8, radius: 1.5, label: 'Take a shower', run: (ctx) => ctx.ui.activity('shower') });
-    interactables.push({ id: 'books', x: -3.3, z: 1.3, radius: 1.5, label: 'Read a book', run: (ctx) => ctx.ui.activity('read') });
-    label('SASKATCHEWAN · LIVING SKIES', 1.6, 0.9, 4.46, 1.7, 1.2, -Math.PI / 2, { bg: '#25456a', accent: '#ffb347' });
-    // light switch
-    let lightsOn = true;
-    box(0.1, 0.16, 0.03, '#f3f3f3', 4.1, 1.2, 4.97);
-    interactables.push({ id: 'switch', x: 4.0, z: 4.2, radius: 1.2, label: 'Toggle lights', run: (ctx) => { lightsOn = !lightsOn; roomLights.forEach((l, i) => (l.intensity = lightsOn ? [15, 12][i] : 0)); lights.forEach((l) => { if (l.isMaterial) l.emissiveIntensity = lightsOn ? 1.4 : 0; }); ctx.audio?.blip('tick'); } });
-    // door
-    box(1.6, 2.4, 0.08, '#6b4f36', 3.2, 0, 5.46);
-    exitDoor(3.2, 4.9);
-    animated.push((dt) => { tvT += dt * 0.5; if (tvOn) { tg.save(); drawTv(); tg.restore(); } });
-    group.userData.tvOff = () => { tvOn = false; drawTv(); };
+  /* ======================= APARTMENT (the Studio, and every bigger home) ======================= */
+  if (kind === 'apartment') {   // data-driven: rooms, walls, fixtures and lights all come from the layout (data/homes.js, built by world/homeBuilder.js)
+    const lay = layout && typeof layout === 'object' ? layout : typeof layout === 'string' && own(HOMES, layout) ? HOMES[layout] : STUDIO;
+    homeApi = buildHome(lay, { group, colliders, interactables, lights, ceilMeshes, windows, animated, disposables, mat, add, blob, label, ceilingLight, point, windowPane });
+    ({ spawn, bounds, exit } = homeApi);
   }
 
 
@@ -388,37 +316,20 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     exitDoor(0, 5.2); box(2.0, 2.6, 0.08, '#3a2a1c', 0, 0, 5.93, { mo: { metalness: 0.2 } });
   }
 
-  /* ---------- apartment: decorating (furniture, paint, flooring) ---------- */
-  const floorTex = {};
-  const setHome = (home) => {
-    if (!apt || !decor) return;
-    apt.wm.color.set((WALLS[home.wall] ?? WALLS.cream)[1]);
-    const fk = FLOORS[home.floor] ? home.floor : 'oak', fl = FLOORS[fk];
-    if (!floorTex[fk]) { const t = fl[1] === 'tile' ? tileTexture(fl[2], '#7b808a') : woodTexture(fl[2]); t.repeat.set(3, 11 / 3); floorTex[fk] = t; disposables.push(t); }
-    if (apt.fm.map !== floorTex[fk]) { apt.fm.map = floorTex[fk]; apt.fm.needsUpdate = true; }
-    while (decor.children.length) { const c = decor.children.pop(); c.traverse((o) => { o.geometry?.dispose(); o.material?.dispose?.(); }); }
-    colliders.removeTag('furn');
-    for (let i = interactables.length - 1; i >= 0; i--) if (interactables[i].furn) interactables.splice(i, 1);   // the pieces you can use follow what is placed
-    const usedKinds = new Set();
-    for (const it of home.placed || []) {
-      const mdl = furnitureModel(it.type); mdl.position.set(it.x, 0, it.z); mdl.rotation.y = (it.rot * Math.PI) / 2; decor.add(mdl);
-      const def = itemDef(it.type); if (def?.solid) { const f = footprint(it.type, it.rot); colliders.add(it.x - f.w / 2, it.z - f.d / 2, it.x + f.w / 2, it.z + f.d / 2, def.h, 'furn'); }
-      const act = def && KIND_ACTIVITY[def.kind];
-      if (act && !usedKinds.has(def.kind + it.id)) {   // stand in front of it (+z, the side the piece faces) so the prompt never fights the piece's own collider
-        usedKinds.add(def.kind + it.id); const r = ((it.rot % 4) + 4) % 4, off = [[0, 1], [1, 0], [0, -1], [-1, 0]][r], reach = Math.max(def.w, def.d) / 2 + 0.6;
-        interactables.push({ id: `furn_${it.id}`, furn: true, x: it.x + off[0] * reach, z: it.z + off[1] * reach, radius: 1.5, label: `${act[1]} ${def.name.toLowerCase()}`, run: (ctx) => ctx.ui.activity(act[0]) });
-      }
-    }
-  };
-
   const interior = {
-    kind, group, setHome,
-    /** Overhead (build-mode) view: hide ceiling fixtures that would otherwise show as white blocks. */
-    setOverhead(on) { ceilMeshes.forEach((c) => (c.visible = !on)); }, colliders, interactables, bounds, spawn, exit,
+    kind, group,
+    /** The apartment's furniture, paint and floors follow the saved home (a no-op for every other building). */
+    setHome: (home) => homeApi?.setHome(home),
+    /** Overhead (build-mode / Home) view: hide the ceiling and the fixtures that would otherwise show as white blocks. */
+    setOverhead: (on) => (homeApi ? homeApi.setOverhead(on) : ceilMeshes.forEach((c) => (c.visible = !on))), colliders, interactables, bounds, spawn, exit,
     lights, task, stations,
     update(dt, env, ctx) { for (const f of animated) f(dt, env, ctx); const d = env?.night ?? 0; windows.forEach((m) => m.color.set(d > 0.6 ? '#10182e' : d > 0.2 ? '#e8a46a' : '#bfe3ff')); },
     resetTask() { task.carrying = false; task.target = -1; arrow.visible = ring.visible = false; },
-    dispose() { disposables.forEach((d) => d.dispose?.()); },
+    dispose() { homeApi?.dispose(); disposables.forEach((d) => d.dispose?.()); },
   };
+  if (homeApi) {   // everything homes know about themselves: layout, rooms, room groups, wall modes, per-room lights
+    for (const k of ['layout', 'rooms', 'roomGroups', 'yard', 'parts', 'lot', 'setWallMode', 'setViewer', 'setCameraCut', 'setRoomLights', 'roomLightsOn']) interior[k] = homeApi[k];
+    for (const k of ['wallMode', 'overheadMode', 'viewerRoom']) Object.defineProperty(interior, k, { get: () => homeApi[k], enumerable: true });
+  }
   return interior;
 }
