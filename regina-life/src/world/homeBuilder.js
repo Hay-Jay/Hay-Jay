@@ -17,7 +17,7 @@ import { itemDef } from '../core/home.js';
 import { tileTexture, woodTexture } from './textures.js';
 import { furnitureModel } from './furnitureModels.js';
 import { FIXTURE_BUILDERS, FIXTURE_META } from './homeKinds.js';
-import { WALL_MODES, applyWallMode } from './homeWalls.js';
+import { WALL_MODES, applyWallMode, buildWallExtras, sideOfNormal, sideOfPoint } from './homeWalls.js';
 import { buildYard } from './homeYard.js';
 
 const EPS = 1e-6, T = WALL_T;
@@ -224,7 +224,7 @@ export function buildHome(layout, kit) {
 
   const wallGroup = mk('walls');
   const roomGroups = {}; for (const r of geo.rooms) roomGroups[r.id] = mk(`room:${r.id}`);
-  const parts = { group, wallGroup, rooms: geo.rooms, roomGroups, walls: [], lintels: [], trims: [], ceilings: [], ceilFixtures: [], floors: [], yard: null };
+  const parts = { group, wallGroup, rooms: geo.rooms, roomGroups, walls: [], lintels: [], trims: [], ceilings: [], ceilFixtures: [], floors: [], yard: null, openings: [], labels: null };
   const cuttable = [];   // the pieces the walk camera may lower out of its way: partitions and the lintels over their doorways
   const groupOf = (roomId) => roomGroups[roomId] ?? roomGroups[geo.rooms[0].id];
 
@@ -293,16 +293,17 @@ export function buildHome(layout, kit) {
   };
 
   /* ----- windows, decor, front door ----- */
-  for (const w of geo.windows) kit.windowPane(w.x, w.y, w.z, w.w, w.h, w.ry ?? 0, groupOf(w.room));
+  const hang = (meshes, role, side) => { for (const m of [].concat(meshes)) { m.userData.wall = { role, side }; parts.openings.push(m); } };   // B2: what hangs on a wall follows it in the cutaway modes
+  for (const w of geo.windows) { const g = groupOf(w.room), n = g.children.length; kit.windowPane(w.x, w.y, w.z, w.w, w.h, w.ry ?? 0, g); hang(g.children.slice(n), 'window', sideOfNormal(w.ry ?? 0)); }
   for (const d of geo.decor) {
     const g = groupOf(d.room);
     if (d.kind === 'rug') kit.add(new THREE.PlaneGeometry(d.w, d.d).rotateX(-Math.PI / 2), mat(d.color ?? '#6e4b57', { roughness: 1 }), d.x, 0.015, d.z, { cast: false, parent: g });
-    else if (d.kind === 'sign') kit.label(d.text, d.w, d.h, d.x, d.y, d.z, d.ry ?? 0, { bg: d.bg ?? '#25456a', accent: d.accent ?? '#ffb347', parent: g });
+    else if (d.kind === 'sign') hang(kit.label(d.text, d.w, d.h, d.x, d.y, d.z, d.ry ?? 0, { bg: d.bg ?? '#25456a', accent: d.accent ?? '#ffb347', parent: g }), 'sign', sideOfNormal(d.ry ?? 0));
   }
   const door = geo.entry.door;
   if (door) {
     const w = door.w ?? 1.6, gm = door.axis === 'x' ? new THREE.BoxGeometry(w, DOOR_VIS_H, DOOR_VIS_T) : new THREE.BoxGeometry(DOOR_VIS_T, DOOR_VIS_H, w);
-    const dm = kit.add(gm, mat('#6b4f36'), door.x, DOOR_VIS_H / 2, door.z, { cast: false, parent: groupOf(door.room) }); dm.name = 'front-door';
+    const dm = kit.add(gm, mat('#6b4f36'), door.x, DOOR_VIS_H / 2, door.z, { cast: false, parent: groupOf(door.room) }); dm.name = 'front-door'; hang(dm, 'door', sideOfPoint(geo.bbox, door.x, door.z));
   }
 
   /* ----- fixtures ----- */
@@ -330,6 +331,7 @@ export function buildHome(layout, kit) {
   /* ----- the yard (B2): scenery around the house, overhead views only ----- */
   parts.yard = buildYard(layout, { ...kit, mat, basic, track }) ?? null;
   if (parts.yard) group.add(parts.yard);
+  buildWallExtras(parts, geo, { ...kit, mat, basic, track });   // B2: room name decals (2+ rooms) and the garage roller door
 
   /* ----- camera cut: a partition between the player's head and the walk camera drops out of the way (eased); the rest of the wall stays ----- */
   let mode = 'walk', overhead = false, pick = geo.rooms.length > 1 ? 'cut' : 'up', viewer = null;
