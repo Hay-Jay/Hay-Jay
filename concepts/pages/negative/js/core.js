@@ -52,18 +52,20 @@
     ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rvIo.unobserve(e.target); } }), { rootMargin: '0px 0px -5% 0px', threshold: 0.05 })
     : null;
   rvEls.forEach(el => (rvIo && !reduce) ? rvIo.observe(el) : el.classList.add('in'));
+  // the observer can lag behind a fast scroll, so the scroll position itself also releases whatever has come into view
   const releaseVisible = () => rvEls.forEach(el => {
     if (el.classList.contains('in')) return;
     const r = el.getBoundingClientRect();
-    if (r.top < innerHeight && r.bottom > 0) el.classList.add('in');
+    if (r.top < innerHeight * 0.96 && r.bottom > 0) el.classList.add('in');
   });
-  setTimeout(releaseVisible, 2500);
-  // guaranteed fallback: whatever the visitor has not scrolled to yet is released too, so the page is complete at rest
+  // guaranteed fallback: whatever the visitor has not scrolled to is released a few seconds after load,
+  // so every page is complete at rest (the reveals are an entrance, never a gate)
   const releaseAll = () => rvEls.forEach(el => el.classList.add('in'));
-  setTimeout(releaseAll, 6500);
+  setTimeout(releaseVisible, 1200);
+  addEventListener('load', () => { setTimeout(releaseVisible, 400); setTimeout(releaseAll, 2600); });
+  setTimeout(releaseAll, 5000); // in case load never fires (a stalled image)
   addEventListener('beforeprint', releaseAll);
-  addEventListener('load', () => setTimeout(releaseVisible, 800));
-  let rvT = 0; addEventListener('scroll', () => { clearTimeout(rvT); rvT = setTimeout(releaseVisible, 250); }, { passive: true });
+  let rvRaf = 0; addEventListener('scroll', () => { if (!rvRaf) rvRaf = requestAnimationFrame(() => { rvRaf = 0; releaseVisible(); }); }, { passive: true });
 
   // ---- Tickers ----------------------------------------------------------------
   const tickers = $$('[data-ticker]');

@@ -11,7 +11,7 @@
 .ab-text p { margin: 0 0 1.1em; }
 .ab-text .drop::first-letter { float: left; font: 900 5.4em/.76 var(--serif); padding: .06em .09em 0 0; letter-spacing: -.04em; font-variation-settings: 'opsz' 22; }
 .lead-in { font: 700 .86em/1 var(--serif); letter-spacing: .08em; text-transform: uppercase; }
-.ab-h { display: flex; align-items: baseline; gap: 12px; margin: 1.7em 0 .5em; font: 500 clamp(1.5rem, 2.3vw, 2.1rem)/1.05 var(--serif); letter-spacing: -.02em; text-transform: uppercase; break-after: avoid; font-variation-settings: 'opsz' 30; }
+.ab-h { display: flex; align-items: baseline; gap: 12px; margin: 0 0 .5em; padding-top: 1.7em; font: 500 clamp(1.5rem, 2.3vw, 2.1rem)/1.05 var(--serif); letter-spacing: -.02em; text-transform: uppercase; break-after: avoid; font-variation-settings: 'opsz' 30; }
 .ab-h .mono { color: var(--dim); }
 .ab-a { text-underline-offset: 4px; }
 .ab-pull { margin: 1.4em 0 1.2em; padding: .9em 0; border-block: 1px solid var(--fg); font: italic 400 clamp(1.8rem, 3.4vw, 3.2rem)/1.05 var(--serif); letter-spacing: -.03em; font-variation-settings: 'opsz' 14; column-span: all; }

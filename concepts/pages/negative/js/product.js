@@ -16,7 +16,7 @@
     const v = variantFor();
     $$('.chip').forEach(ch => {
       const oi = +ch.dataset.o, val = ch.dataset.v, on = sel[oi] === val;
-      const ok = data.variants.some(x => x.a && x.o[oi] === val && x.o.every((ov, k) => k === oi || ov === sel[k]));
+      const ok = data.variants.some(x => x.a && x.o[oi] === val); // a chip is disabled only when nothing with that value is left
       ch.classList.toggle('on', on); ch.setAttribute('aria-pressed', String(on)); ch.disabled = !ok;
     });
     $$('fieldset.opt').forEach(fs => { const b = $('legend b', fs); if (b) b.textContent = sel[+fs.dataset.o] || ''; });
@@ -31,9 +31,25 @@
       $('span', stockEl).textContent = can ? 'In stock' : 'Sold out';
     }
   }
+  // picking a value keeps the other choices when that variant exists and is in stock; otherwise the other choices
+  // move to the nearest variant that is, so every variant that is in stock can be reached
+  function choose(oi, val) {
+    const next = sel.slice(); next[oi] = val;
+    const exact = data.variants.find(x => x.o.every((o, i) => o === next[i]));
+    if (!exact || !exact.a) {
+      let best = null, bs = -1;
+      for (const x of data.variants) {
+        if (!x.a || x.o[oi] !== val) continue;
+        const score = x.o.reduce((n, o, i) => n + (i !== oi && o === sel[i] ? 1 : 0), 0);
+        if (score > bs) { bs = score; best = x; }
+      }
+      if (best) next.splice(0, next.length, ...best.o);
+    }
+    sel.splice(0, sel.length, ...next);
+  }
   $$('.chip').forEach(ch => ch.addEventListener('click', () => {
     if (ch.disabled) return;
-    sel[+ch.dataset.o] = ch.dataset.v; chosen = true; sync();
+    choose(+ch.dataset.o, ch.dataset.v); chosen = true; sync();
   }));
   sync();
 
@@ -70,6 +86,15 @@
     stage.addEventListener('pointerup', e => { if (sx != null && Math.abs(e.clientX - sx) > 50) show(cur + (e.clientX < sx ? 1 : -1)); sx = null; });
     stage.addEventListener('pointercancel', () => { sx = null; });
   }
+
+
+  // phones: the buy bar pins to the bottom of the screen once the visitor has started scrolling
+  // (at rest it stays in the flow, so nothing floats over the caption)
+  const rootEl = document.documentElement;
+  let pinRaf = 0;
+  const pinCheck = () => { pinRaf = 0; rootEl.classList.toggle('buy-pin', scrollY > 90); };
+  addEventListener('scroll', () => { if (!pinRaf) pinRaf = requestAnimationFrame(pinCheck); }, { passive: true });
+  pinCheck();
 
   // ---- Develop colour: the keyboard- and touch-friendly twin of the lens -------------------------
   const dev = $('#dev');

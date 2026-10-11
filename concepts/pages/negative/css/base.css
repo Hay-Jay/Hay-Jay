@@ -76,7 +76,7 @@ h1, h2, h3, p, figure, blockquote, dl, dd { margin: 0; }
 .link-line { text-decoration: none; display: inline-block; padding-bottom: 3px; border-bottom: 1px solid currentColor; }
 .link-line:hover { background: var(--fg); color: var(--bg); }
 .hint-touch { display: none; }
-@media (hover: none) { .hint-fine { display: none; } .hint-touch { display: inline; } }
+@media (hover: none), (max-width: 699px) { .hint-fine { display: none; } .hint-touch { display: inline; } }
 
 /* print grain: one static tile, no blend mode, no animation */
 body::after {
@@ -311,6 +311,9 @@ html.neg .cv-top img, html.neg .foot-brand .emblem, html.neg .foot-brand .word, 
 
 /* ---- small screens and touch ------------------------------------------------------ */
 @media (max-width: 899px), (pointer: coarse) {
+  /* links inside sentences: the tap area grows (padding on an inline box adds no line height) */
+  .ab-a, .ans a, .mg-notes a, .sz-foot a, .tbl-foot a, .pl-note a { padding: 11px 3px; }
+  .fq-foot a { display: inline-flex; align-items: center; min-height: 44px; }
   .link-line { display: inline-flex; align-items: center; min-height: 44px; padding: 0; border-bottom: 0; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
   .link-line:hover { background: none; color: inherit; }
   .foot-col { gap: 0; }

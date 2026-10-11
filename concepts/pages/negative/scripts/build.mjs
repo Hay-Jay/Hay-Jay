@@ -92,6 +92,8 @@ const shipsTo = (DATA.store.shipsTo || []).map(c => ({ code: c, name: dn.of(c) |
 const countryNames = [...shipsTo.filter(c => c.code === 'NG'), ...shipsTo.filter(c => c.code === 'CA'), ...shipsTo.filter(c => c.code !== 'NG' && c.code !== 'CA').sort((a, b) => a.name.localeCompare(b.name))].map(c => c.name);
 const nCountries = shipsTo.length;
 const shipsNG = shipsTo.some(c => c.code === 'NG');
+// the copy names Nigeria and Canada as delivery countries: it may only say so while the store data says so
+for (const code of ['NG', 'CA']) if (!shipsTo.some(c => c.code === code)) throw new Error(`data.store.shipsTo no longer lists ${code}: review the pages that name Nigeria and Canada before building`);
 
 // ---- pages ---------------------------------------------------------------------------------------
 const PAGES = [
@@ -205,8 +207,8 @@ function tickerHtml(words) {
 }
 
 const written = [];
-function emit(path, ctx, body, file = 'index.html') {
-  const html = tpl(read('partials', 'layout.html'), { ...ctx, body: '\u0000BODY\u0000' }).replace('\u0000BODY\u0000', () => body);
+function emit(path, ctx, body, file = 'index.html', post = h => h) {
+  const html = post(tpl(read('partials', 'layout.html'), { ...ctx, body: '\u0000BODY\u0000' }).replace('\u0000BODY\u0000', () => body));
   const dir = join(OUT, path);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, file), html);
@@ -254,6 +256,7 @@ if (OUT !== ROOT) {
     n_tops: String(countsBy('top')), n_bottoms: String(countsBy('bottom')), n_objects: String(countsBy('accessory')),
     ticker_cover: tickerHtml(['Wear the unknown', 'Issue 01', 'Black / white / chrome', `${nPieces} pieces`, 'Prices in CAD', 'The Unknown']),
     ticker_ship: tickerHtml(['Delivering to', ...countryNames]),
+    price_span: (() => { const v = items.filter(x => x.t !== 'gift').map(x => x.p), n = x => Number.isInteger(x) ? String(x) : x.toFixed(2); return `CAD ${n(Math.min(...v))} – ${n(Math.max(...v))}`; })(),
     ng_note: shipsNG ? 'Nigeria is on the list.' : ''
   });
   emit('', ctx, tpl(read('pages', 'home.html'), ctx));
@@ -311,7 +314,7 @@ for (const x of items) {
   const canonical = `${SITE}/${path}`;
   const first = p.variants.find(v => v.available) || p.variants[0];
   const sel = first ? first.options.slice() : [];
-  const variantAvail = (oi, val) => p.variants.some(v => v.available && v.options[oi] === val && v.options.every((ov, k) => k === oi || ov === sel[k]));
+  const variantAvail = (oi, val) => p.variants.some(v => v.available && v.options[oi] === val);
 
   // options, printed as size labels
   const opts = hasChoice(p) ? p.options.map((o, oi) => {
@@ -498,16 +501,28 @@ for (const x of items) {
 }
 
 // ===================================================================================================================
-// 404 — served by the host at any missing URL, so it fixes its own base (see README)
+// 404 — a host serves this one file at ANY missing URL (/a/b/c), so relative links would resolve against the wrong folder.
+// The page pins its own base (see README, --base-path) and only then requests anything: the preload scanner reads ahead of
+// scripts, so stylesheets, scripts and images are written out by the same inline script after <base>, never left in the markup.
 // ===================================================================================================================
 {
   const key = 'notfound';
   const meta = { title: 'Lost — Page missing from this issue — MONOCHROME®', description: 'This page is missing from the issue. Go back to the cover, the index or the lookbook.', tone: 'ink', css: 'contact', js: null, noindex: true, current: '__none', folio: '404' };
+  const baseJs = `var p=location.pathname;if(!(/\\/404\\.html$/.test(p)||location.protocol==='file:'))document.write('<base href="'+location.origin+'${basePath}">');`;
   const ctx = pageContext('', key, meta, {
-    // a host serves this file at any missing URL, so it pins its own base (see README) and re-aims its in-page anchors
-    head_extra: `<script>(function(){var p=location.pathname;if(/\\/404\\.html$/.test(p)||location.protocol==='file:')return;document.write('<base href="'+location.origin+'${basePath}">');addEventListener('DOMContentLoaded',function(){document.querySelectorAll('a[href^="#"]').forEach(function(a){a.setAttribute('href',location.pathname+location.search+a.getAttribute('href'))})})})()</script>`
+    font_preload: '',
+    head_extra: `<script>(function(){${baseJs}addEventListener('DOMContentLoaded',function(){var q=location.pathname;if(/\\/404\\.html$/.test(q)||location.protocol==='file:')return;document.querySelectorAll('a[href^="#"]').forEach(function(a){a.setAttribute('href',q+location.search+a.getAttribute('href'))})})})()</script>`
   });
-  emit('', ctx, tpl(read('pages', '404.html'), ctx), '404.html');
+  const defer = html => {
+    const w = tag => `<script>document.write(${JSON.stringify(tag).replace(/</g, '\\u003c')})</script>`;
+    html = html.replace(/<link rel="stylesheet" href="[^"]+">/g, t => w(t));
+    html = html.replace(/<script src="([^"]+)"( defer)?><\/script>/g, (_, src) => w(`<script src="${src}"></` + 'script>'));
+    // images start without a source and receive it once the base is in force
+    html = html.replace(/<img ([^>]*?)src="([^"]+)"/g, (_, pre, src) => `<img ${pre}data-src="${src}"`);
+    html = html.replace('</body>', `<script>document.querySelectorAll('img[data-src]').forEach(function(i){i.src=i.getAttribute('data-src')})</script>\n<noscript><p style="position:fixed;inset:0;margin:0;padding:96px 16px;background:#070707;color:#eee;font:16px/1.5 monospace">Page not found. <a style="color:#fff" href="${SITE}${basePath}">Back to the cover</a></p></noscript>\n</body>`);
+    return html;
+  };
+  emit('', ctx, tpl(read('pages', '404.html'), ctx), '404.html', defer);
 }
 
 // ===================================================================================================================

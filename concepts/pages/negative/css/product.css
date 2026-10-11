@@ -9,6 +9,7 @@
 .pl-crumb li { display: inline-flex; align-items: center; }
 .pl-crumb li + li::before { content: "/"; padding-right: 4px; opacity: .6; }
 .pl-crumb a { text-decoration: none; display: inline-flex; align-items: center; min-height: 28px; padding: 0 2px; }
+@media (max-width: 899px), (pointer: coarse) { .pl-crumb { padding-block: 0; } .pl-crumb ol { gap: 0 2px; } .pl-crumb li { min-height: 44px; } .pl-crumb a { min-height: 44px; min-width: 44px; justify-content: center; } }
 .pl-crumb a:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
 .pl-crumb [aria-current=page] { color: var(--fg); }
 
@@ -59,7 +60,7 @@
 .chip::after { content: ""; position: absolute; inset: 3px; border: 1px dashed color-mix(in srgb, currentColor 34%, transparent); pointer-events: none; }
 .chip i { font: 400 8px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; font-style: normal; opacity: .62; }
 .chip b { font: 500 1.35rem/1 var(--serif); letter-spacing: -.01em; text-transform: uppercase; font-variation-settings: 'opsz' 30; white-space: nowrap; }
-.chip:hover:not(:disabled) { background: color-mix(in srgb, var(--fg) 14%, var(--bg)); }
+.chip:hover:not(:disabled):not(.on) { background: color-mix(in srgb, var(--fg) 14%, var(--bg)); }
 .chip.on { background: var(--fg); color: var(--bg); }
 .chip:disabled { opacity: .42; cursor: not-allowed; border-color: color-mix(in srgb, var(--fg) 55%, var(--bg)); background-image: linear-gradient(to top right, transparent calc(50% - .6px), currentColor calc(50% - .6px), currentColor calc(50% + .6px), transparent calc(50% + .6px)); }
 html:not(.js) .chip { pointer-events: none; }
@@ -104,11 +105,14 @@ html:not(.js) .pl-bar, html:not(.js) .thumbs { display: none; }
 
 @media (max-width: 899px) {
   /* the buy path stays under the thumb while the photographs and notes scroll */
-  .pl-buy { position: sticky; bottom: 0; z-index: 6; margin: 0 calc(var(--gut) * -1); padding: 10px var(--gut) calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--rule); }
+  .pl-buy { margin: 0 calc(var(--gut) * -1); padding: 10px var(--gut) calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--bg); border-top: 1px solid var(--rule); }
   .pl-buy .buy { padding: 16px 18px; }
-  .pl-buy:has(.buy[aria-disabled=true]) { position: static; margin: 0; padding: 0; border-top: 0; background: none; }
+  /* product.js sets html.buy-pin once the visitor starts scrolling, so the page at rest has no bar floating over its title */
+  html.buy-pin .pl-buy { position: sticky; bottom: 0; z-index: 6; }
+  .pl-buy:has(.buy[aria-disabled=true]) { position: static !important; margin: 0; padding: 0; border-top: 0; background: none; }
 }
 @media (max-width: 699px) {
+  .pl-crumb li:last-child { display: none; } /* the title sits right below */
   .opt-name, .dev, .pl-price small, .pl-bar { font-size: 12px; }
   .pl-hint { display: none; }
   .chip i { font-size: 9px; }

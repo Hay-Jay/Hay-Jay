@@ -1,6 +1,9 @@
-# Copy this file to the site root as `_redirects` ONLY AFTER the Shopify store has moved to shop.monochrome.com.ng.
-# Netlify and Cloudflare Pages both read it. Old store links keep working by forwarding to the new store address.
-/products/*      https://shop.monochrome.com.ng/products/:splat      301
+# Copy this file to the site root as `_redirects` ONLY AFTER the Shopify store has moved to shop.monochrome.com.ng
+# (and `storeUrl` in config.js has been changed and the site rebuilt). Netlify and Cloudflare Pages both read it.
+# Old store links keep working by forwarding to the new store address.
+#
+# /products/<handle>/ is NOT forwarded: this site serves a page at that path for every product (same handle as the
+# store), and each of those pages links on to the store to buy.
 /collections/*   https://shop.monochrome.com.ng/collections/:splat   301
 /cart            https://shop.monochrome.com.ng/cart                 301
 /cart/*          https://shop.monochrome.com.ng/cart/:splat          301

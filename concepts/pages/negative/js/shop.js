@@ -58,6 +58,12 @@
     if (state.c === 'all') delete root.dataset.c; else root.dataset.c = state.c;
     $$('.filter').forEach(b => { const on = b.dataset.filter === state.c; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     $$('.view').forEach(b => { const on = b.dataset.view === state.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+    // phones: the filter row scrolls sideways; keep the active filter in view
+    const fbox = $('#filters'), fon = $('.filter.on');
+    if (fbox && fon && fbox.scrollWidth > fbox.clientWidth + 2) {
+      const want = fbox.scrollLeft + fon.getBoundingClientRect().left - fbox.getBoundingClientRect().left - 16;
+      fbox.scrollTo({ left: Math.max(0, want), behavior: 'auto' });
+    }
     sortEl.value = state.s;
     if (qEl && qEl.value !== state.q) qEl.value = state.q;
 
@@ -127,7 +133,7 @@
     if (nameEl && P.rowFor !== row) {
       P.rowFor = row;
       const rg = document.createRange(); rg.selectNodeContents(nameEl);
-      P.minX = rg.getBoundingClientRect().right + 30; P.rowL = a.getBoundingClientRect().left;
+      P.minX = rg.getBoundingClientRect().right + 44; P.rowL = a.getBoundingClientRect().left;
     }
     P.tx = x; P.ty = y;
     if (!P.on) { P.x = Math.min(Math.max(x + 34, P.minX), innerWidth - plate.offsetWidth - 14); P.y = y; P.on = true; plate.classList.add('on'); if (!P.raf) P.raf = requestAnimationFrame(plateTick); }
