@@ -103,7 +103,7 @@ describe('deriveHome: the pure geometry of a layout', () => {
   it('derives colliders from the fixture kinds with rotRect, and interactable positions with rotXZ', () => {
     const d = deriveHome(SYN), bed = d.colliders.find((c) => c.n === 'bed');
     // the bed is 2.0 x 2.4 at rot 1: its rect is 2.4 wide in x and 2.0 deep in z, about the pose (2.0, -8.5)
-    expect([bed.x0, bed.x1, bed.z0, bed.z1].map((v) => +v.toFixed(6))).toEqual([0.8, 3.2, -9.5, -7.5]); expect(bed.h).toBe(FIXTURE_KINDS.bed.h);
+    expect([bed.x0, bed.x1, bed.z0, bed.z1].map((v) => +v.toFixed(6))).toEqual([0.8, 3.2, -9.5, -7.5]); expect(bed.h).toBe(FIXTURE_KINDS.bed.ch ?? FIXTURE_KINDS.bed.h);   // the physics collider uses the kind's collider height `ch`
     expect(d.colliders.some((c) => c.n === 'sw_l')).toBe(false);   // a wall switch is not solid
     const bedUse = d.interactables.find((i) => i.id === 'bed'), o = rotXZ(1.2, 0.6, 1);
     expect(bedUse.x).toBeCloseTo(2.0 + o.x, 9); expect(bedUse.z).toBeCloseTo(-8.5 + o.z, 9); expect(bedUse.room).toBe('bedroom');
@@ -225,7 +225,7 @@ describe('buildHome on a two-room layout', () => {
 
   it('puts a rotated fixture\'s collider and interactable where rotXZ says (the rotated visual group agrees)', () => {
     const bed = it0.colliders.rects.find((r) => r.tag === null && Math.abs(r.x0 - 0.8) < 1e-9); expect(bed).toBeTruthy();
-    expect([bed.x1, bed.z0, bed.z1, bed.h].map((v) => +v.toFixed(6))).toEqual([3.2, -9.5, -7.5, 1.1]);
+    expect([bed.x1, bed.z0, bed.z1, bed.h].map((v) => +v.toFixed(6))).toEqual([3.2, -9.5, -7.5, FIXTURE_KINDS.bed.ch ?? FIXTURE_KINDS.bed.h]);
     const use = it0.interactables.find((i) => i.id === 'bed'), o = rotXZ(1.2, 0.6, 1); near(use.x, 2.0 + o.x); near(use.z, -8.5 + o.z); expect(use.room).toBe('bedroom'); expect(use.radius).toBe(1.9); expect(use.label).toBe('Sleep');
     const g = it0.roomGroups.bedroom.children.find((c) => c.name === 'fixture:bed'); near(g.rotation.y, Math.PI / 2); near(g.position.x, 2.0); near(g.position.z, -8.5);
     // a local +z offset of the group's content really lands at world pose + rotXZ(0, d, rot)
