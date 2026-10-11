@@ -197,18 +197,20 @@ async function boot() {
   // room focus strip. The larger of the two wins, and the Studio (no strip) behaves exactly as it always did.
   let homeTop = 0, stripTop = 0, wallMode = null;   // wallMode: the session's Walls choice ('up' | 'cut' | 'down'); null = the interior's own default. Not saved.
   const applyTop = () => { rig.buildTop = Math.max(homeView ? homeTop : 0, stripTop); };
-  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f, top = 0) => { rig.buildInset = f; stripTop = top; if (build.active) applyTop(); },
+  // toasts normally start 104 px down (theme.css); while the focus strip is up they start just below it, so a toast never sits on the chips (the strip is 0 high in the Studio)
+  const placeToasts = () => { $('toasts').style.top = stripTop > 0 ? `max(calc(104px + var(--safe-t)), ${Math.round(stripTop * innerHeight) + 12}px)` : ''; };
+  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f, top = 0) => { rig.buildInset = f; stripTop = top; if (build.active) { applyTop(); placeToasts(); } },
     onWallMode: (m) => { wallMode = m; interior?.setWallMode?.(m); },
     onFocus: (id, rect) => rig.setBuildFocus(rect),
     onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); if (interior?.overheadMode) build.setWallMode(interior.overheadMode); },
     onStop: () => {
-      stripTop = 0;
+      stripTop = 0; placeToasts();
       if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
       interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good');
     } });
   /** The Buy tab: a bottom sheet over the Home view / build mode. Pieces you buy are handed to build mode to place. */
   const catalogue = new Catalogue({ store, build, audio, toast, fmtMoney, thumbs: makeThumbs({ size: 160 }), canBuild: () => inInterior === 'apartment',
-    onChange: () => build.refresh(), onOpen: () => { buyOpen = true; document.body.classList.add('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); }, onClose: () => { buyOpen = false; document.body.classList.remove('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); } });
+    onChange: () => build.refresh(), onOpen: (c) => { c.setRoom(build.active ? build.focus : null); buyOpen = true; document.body.classList.add('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); }, onClose: () => { buyOpen = false; document.body.classList.remove('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); } });
   build.setCatalogue(catalogue);
 
   /* ---------- interiors ---------- */
