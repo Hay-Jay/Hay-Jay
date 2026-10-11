@@ -73,7 +73,9 @@ export function pieceCard(def, s, balance) {
   };
 }
 /** The room the Design shelf is editing: a valid room id on a multi-room home, else null (= All rooms, the house default). */
-const designRoom = (s, room) => { const L = layoutOf(s); return L.rooms.length > 1 && typeof room === 'string' && L.rooms.some((r) => r.id === room) ? room : null; };
+export const designRoom = (s, room) => { const L = layoutOf(s); return L.rooms.length > 1 && typeof room === 'string' && L.rooms.some((r) => r.id === room) ? room : null; };
+/** A room's display name on the current home, or null. */
+export const roomName = (s, id) => layoutOf(s).rooms.find((r) => r.id === id)?.name ?? null;
 /** The style every room shows for `kind`, or null when the rooms differ ("Mixed"). */
 const sharedStyle = (s, kind) => { const all = layoutOf(s).rooms.map((r) => styleOf(s, r.id)[kind]); return all.every((k) => k === all[0]) ? all[0] : null; };
 /**
@@ -103,9 +105,11 @@ export function tabView(s, tabId, balance, opts = {}) {
   const view = { id: tab.id, label: tab.label, emoji: tab.emoji, kind: tab.kind, sections: [], cards: [], empty: '' };
   if (tab.kind === 'design') {
     const rid = designRoom(s, opts?.room), d = designCards(s, balance, rid), L = layoutOf(s), multi = L.rooms.length > 1;
+    // a section's "from $X" is the cheapest priced style in it, read from the same quotes as the swatches (never a separate constant)
+    const from = (cards) => Math.min(...cards.map((c) => c.price).filter((p) => p > 0)), cheapest = (cards) => (Number.isFinite(from(cards)) ? from(cards) : 0);
     view.sections = [
-      { id: 'walls', label: 'Walls', price: X.WALL_PRICE ?? 0, mixed: !rid && multi && sharedStyle(s, 'wall') == null, cards: d.walls },
-      { id: 'floors', label: 'Floors', price: X.FLOOR_PRICE ?? 0, mixed: !rid && multi && sharedStyle(s, 'floor') == null, cards: d.floors },
+      { id: 'walls', label: 'Walls', price: cheapest(d.walls), mixed: !rid && multi && sharedStyle(s, 'wall') == null, cards: d.walls },
+      { id: 'floors', label: 'Floors', price: cheapest(d.floors), mixed: !rid && multi && sharedStyle(s, 'floor') == null, cards: d.floors },
     ];
     view.room = rid;   // the room being edited (null = All rooms); `rooms` (the chip strip) exists only on multi-room homes and is not a section
     if (multi) view.rooms = [{ id: 'all', label: 'All rooms', active: rid == null }, ...L.rooms.map((r) => ({ id: r.id, label: r.name, active: rid === r.id }))];
