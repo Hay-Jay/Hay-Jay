@@ -141,8 +141,9 @@ describe('wall modes on the real homes', () => {
 
 /* ------------------------------------------------------------------------------------------------ wall-mounted fixtures */
 describe('wall-mounted fixtures (the light switches) follow their wall', () => {
-  for (const [id, switches] of [['onebed', ['switch_bed']], ['bungalow', ['switch_bed', 'switch_bath', 'switch_den', 'switch_garage']]]) it(`${id}: a switch on a partition is hidden when the partition is cut or gone, shown otherwise`, () => {
-    const hm = build(id), g = (name) => hm.group.getObjectByName(`fixture:${name}`);
+  const partitionSwitches = (id) => HOMES[id].fixtures.filter((f) => f.kind === 'switch' && f.id.startsWith('switch_')).map((f) => f.id);   // the ones a layout hangs on its partitions
+  for (const id of ['onebed', 'bungalow']) it(`${id}: a switch on a partition is hidden when the partition is cut or gone, shown otherwise`, () => {
+    const hm = build(id), g = (name) => hm.group.getObjectByName(`fixture:${name}`), switches = partitionSwitches(id); expect(switches.length).toBeGreaterThan(0);
     for (const sw of switches) {
       expect(g(sw).userData.wall, sw).toEqual({ role: 'mounted', side: null }); expect(hm.parts.openings, sw).toContain(g(sw));
       expect(g(sw).visible).toBe(true);   // walking
@@ -164,9 +165,9 @@ describe('the garage roller door', () => {
   it('is drawn on both faces of the garage\'s south wall, as a few merged meshes tagged as a door on the south side', () => {
     const ps = pieces(); expect(ps.length).toBeGreaterThan(2); expect(ps.length).toBeLessThan(10);
     const box = new THREE.Box3(); for (const m of ps) { expect(m.userData.wall).toMatchObject({ role: 'door', side: 'S' }); box.union(new THREE.Box3().setFromObject(m)); }
-    const garage = HOMES.bungalow.rooms.find((r) => r.id === 'garage').floor, cx = (garage.x0 + garage.x1) / 2;
+    const garage = HOMES.bungalow.rooms.find((r) => r.id === 'garage').floor, cx = (garage.x0 + garage.x1) / 2, wz = HOMES.bungalow.walls.find((w) => w.style === 'roller').z0;
     near((box.min.x + box.max.x) / 2, cx, 0.1); expect(box.max.x - box.min.x).toBeGreaterThan(3); expect(box.max.x - box.min.x).toBeLessThan(garage.x1 - garage.x0);
-    expect(box.min.z).toBeLessThan(5.6 - WALL_T / 2); expect(box.max.z).toBeGreaterThan(5.6 + WALL_T / 2); near(box.min.y, 0, 1e-6); expect(box.max.y).toBeGreaterThan(2.2); expect(box.max.y).toBeLessThan(2.7);
+    expect(box.min.z).toBeLessThan(wz - WALL_T / 2); expect(box.max.z).toBeGreaterThan(wz + WALL_T / 2); near(box.min.y, 0, 1e-6); expect(box.max.y).toBeGreaterThan(2.2); expect(box.max.y).toBeLessThan(2.7);
   });
   it('is lowered with the wall in the cutaway and restored for walking', () => {
     hm.setOverhead(true); const top = () => Math.max(...pieces().map(topOf));

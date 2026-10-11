@@ -10,6 +10,8 @@ import { planYard, buildYard } from '../src/world/homeYard.js';
 import { lotOf } from '../src/core/lot.js';
 import { HOMES, STUDIO, BUNGALOW, WALL_T } from '../src/data/homes.js';
 
+/** The facts of the Bungalow's rows this file leans on, read from the data so a tweak to the layout moves them too. */
+const GARAGE = BUNGALOW.rooms.find((r) => r.id === 'garage').floor, ROLLER = BUNGALOW.walls.find((w) => w.style === 'roller'), GARAGE_X = (GARAGE.x0 + GARAGE.x1) / 2, DOOR_X = BUNGALOW.entry.door.x;
 const near = (a, b, d = 1e-6) => expect(Math.abs(a - b), `${a} vs ${b}`).toBeLessThan(d);
 const inside = (r, x, z, tol = 1e-6) => x >= r.x0 - tol && x <= r.x1 + tol && z >= r.z0 - tol && z <= r.z1 + tol;
 const grow = (r, d) => ({ x0: r.x0 - d, z0: r.z0 - d, x1: r.x1 + d, z1: r.z1 + d });
@@ -44,7 +46,7 @@ describe('the plan of the Bungalow\'s yard', () => {
   const plan = planYard(BUNGALOW), lot = lotOf(BUNGALOW);
   it('knows the lot: the lawn is the yard rect (footprint + 3 m), the house stands in its hole', () => {
     expect(plan.yardRect).toEqual(lot.yardRect); expect(plan.hole.x0).toBeCloseTo(lot.bbox.x0 - WALL_T / 2, 9); expect(plan.house.z1).toBeCloseTo(lot.bbox.z1 + WALL_T, 9);
-    expect(plan.door).toMatchObject({ side: 'S', nx: 0, nz: 1, x: 3.2 });
+    expect(plan.door).toMatchObject({ side: 'S', nx: 0, nz: 1, x: DOOR_X });
   });
   it('is deterministic (a layout always gets the same yard) and different layouts do not share trees', () => {
     expect(planYard(BUNGALOW)).toEqual(plan);
@@ -56,11 +58,11 @@ describe('the plan of the Bungalow\'s yard', () => {
     for (let i = 0; i < p.length; i++) { expect(Math.abs(p[i].x - plan.door.x), 'stays on the door line').toBeLessThan(0.15); expect(inside(plan.yardRect, p[i].x, p[i].z)).toBe(true); expect(inside(plan.house, p[i].x, p[i].z)).toBe(false); if (i) expect(p[i].z - p[i - 1].z).toBeLessThan(0.65); }
   });
   it('opens the fence at the path (1.3 m) and at the garage (3.8 m), nowhere else', () => {
-    expect(plan.gates).toEqual([{ side: 'S', at: 3.2, w: 1.3 }, { side: 'S', at: -7.4, w: 3.8 }]);
+    expect(plan.gates).toEqual([{ side: 'S', at: DOOR_X, w: 1.3 }, { side: 'S', at: GARAGE_X, w: 3.8 }]);
   });
   it('runs a driveway from the outside of the roller door to the lawn edge, centred on the garage', () => {
-    const d = plan.drive, garage = BUNGALOW.rooms.find((r) => r.id === 'garage').floor;
-    near((d.x0 + d.x1) / 2, (garage.x0 + garage.x1) / 2, 1e-6); near(d.z0, 5.6 + WALL_T / 2); near(d.z1, plan.yardRect.z1); expect(d.axis).toBe('z'); expect(d.x1 - d.x0).toBeGreaterThan(car().w);
+    const d = plan.drive;
+    near((d.x0 + d.x1) / 2, GARAGE_X, 1e-6); near(d.z0, ROLLER.z0 + WALL_T / 2); near(d.z1, plan.yardRect.z1); expect(d.axis).toBe('z'); expect(d.x1 - d.x0).toBeGreaterThan(car().w);
     function car() { return { w: 1.9 }; }
   });
   it('plants two to four trees well clear of the house, the path, the driveway and the mailbox', () => {
@@ -122,7 +124,7 @@ describe('the yard\'s meshes', () => {
   });
   it('keeps the stones, driveway and mailbox on the lawn and clear of the house walls', () => {
     for (const hex of ['#cfc7b8', '#bdb9b0', '#d3cbbb']) { const vs = vertsOfColour(yard, hex); expect(vs.length, hex).toBeGreaterThan(0); for (const v of vs) { expect(inside(plan.yardRect, v.x, v.z)).toBe(true); expect(v.y).toBeGreaterThanOrEqual(-1e-6); expect(v.y).toBeLessThan(0.06); } }
-    const drive = vertsOfColour(yard, '#bdb9b0'); near(Math.min(...drive.map((v) => v.z)), 5.6 + WALL_T / 2, 1e-4); near(Math.max(...drive.map((v) => v.z)), plan.yardRect.z1, 1e-4);
+    const drive = vertsOfColour(yard, '#bdb9b0'); near(Math.min(...drive.map((v) => v.z)), ROLLER.z0 + WALL_T / 2, 1e-4); near(Math.max(...drive.map((v) => v.z)), plan.yardRect.z1, 1e-4);
     for (const v of vertsOfColour(yard, '#2f6fb5')) { expect(v.y).toBeGreaterThan(0.9); expect(v.y).toBeLessThan(1.3); expect(inside(plan.house, v.x, v.z)).toBe(false); }
   });
   it('keeps every tree under 4.5 m and in its own spot (canopy never reaches the wall)', () => {
