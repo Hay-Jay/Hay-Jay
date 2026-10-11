@@ -105,9 +105,11 @@ export function tabView(s, tabId, balance, opts = {}) {
   const view = { id: tab.id, label: tab.label, emoji: tab.emoji, kind: tab.kind, sections: [], cards: [], empty: '' };
   if (tab.kind === 'design') {
     const rid = designRoom(s, opts?.room), d = designCards(s, balance, rid), L = layoutOf(s), multi = L.rooms.length > 1;
+    // a section's "from $X" is the cheapest priced style in it, read from the same quotes as the swatches (never a separate constant)
+    const from = (cards) => Math.min(...cards.map((c) => c.price).filter((p) => p > 0)), cheapest = (cards) => (Number.isFinite(from(cards)) ? from(cards) : 0);
     view.sections = [
-      { id: 'walls', label: 'Walls', price: X.WALL_PRICE ?? 0, mixed: !rid && multi && sharedStyle(s, 'wall') == null, cards: d.walls },
-      { id: 'floors', label: 'Floors', price: X.FLOOR_PRICE ?? 0, mixed: !rid && multi && sharedStyle(s, 'floor') == null, cards: d.floors },
+      { id: 'walls', label: 'Walls', price: cheapest(d.walls), mixed: !rid && multi && sharedStyle(s, 'wall') == null, cards: d.walls },
+      { id: 'floors', label: 'Floors', price: cheapest(d.floors), mixed: !rid && multi && sharedStyle(s, 'floor') == null, cards: d.floors },
     ];
     view.room = rid;   // the room being edited (null = All rooms); `rooms` (the chip strip) exists only on multi-room homes and is not a section
     if (multi) view.rooms = [{ id: 'all', label: 'All rooms', active: rid == null }, ...L.rooms.map((r) => ({ id: r.id, label: r.name, active: rid === r.id }))];

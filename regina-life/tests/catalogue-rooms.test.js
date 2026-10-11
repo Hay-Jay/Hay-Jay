@@ -25,6 +25,11 @@ describe('Design view-model: rooms', () => {
       expect(v.rooms.slice(1).map((r) => r.label)).toEqual(HOMES[id].rooms.map((r) => r.name)); expect(v.sections.map((s) => s.id)).toEqual(['walls', 'floors']); expect(v.cards.every((c) => c.kind === 'wall' || c.kind === 'floor')).toBe(true);
     }
   });
+  it('each section\'s "from" price is the cheapest priced swatch in it (from the quotes, equal to the old flat rates for today\'s data)', () => {
+    const { store } = makeStore({ layout: 'bungalow' }), v = M.tabView(store.state, M.TAB_DESIGN, 0);
+    for (const sec of v.sections) expect(sec.price).toBe(Math.min(...sec.cards.map((c) => c.price).filter((p) => p > 0)));
+    expect(v.sections.map((x) => x.price)).toEqual([WALL_PRICE, FLOOR_PRICE]);
+  });
   it('only the design tab carries rooms', () => {
     const { store } = makeStore({ layout: 'bungalow' }); for (const t of M.tabList(store.state).filter((x) => x.kind !== 'design')) { const v = M.tabView(store.state, t.id, 0, { room: 'den' }); expect(v.rooms, t.id).toBeUndefined(); }
   });
