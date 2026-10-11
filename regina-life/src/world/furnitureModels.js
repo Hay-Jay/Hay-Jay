@@ -11,12 +11,15 @@ const hash = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0
  * Tiny modelling kit: every part is queued with its transform and baked into ONE mesh per material (few draw calls per piece).
  * Positions are metres from the floor-centre of the footprint; box/cylinder/sphere `y` is the part's BOTTOM.
  * Material options: e = emissive colour, ei = emissive strength, op = opacity, r = roughness, mt = metalness, f = flat shading.
+ * Exported for the home builders (world/homeKinds.js, homeYard.js), which merge fixture detail per material. `makeMat(color, o)` (optional) supplies the
+ * material for a (colour, options) pair instead of a fresh MeshStandardMaterial, so a caller can share and dispose materials itself; the kit still
+ * calls it once per distinct pair. `bake()` returns new geometries (the caller owns them); the materials belong to whoever made them.
  */
-function kit() {
+export function kit(makeMat = null) {
   const parts = [], mats = new Map(), tmp = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), one = new THREE.Vector3(1, 1, 1);
   const mk = (color, o = {}) => {
     const key = `${color}|${o.e || ''}|${o.ei ?? ''}|${o.op ?? ''}|${o.r ?? ''}|${o.mt ?? ''}|${o.f ? 1 : 0}`; let mat = mats.get(key);
-    if (!mat) { mat = new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }); mats.set(key, mat); }
+    if (!mat) { mat = makeMat ? makeMat(color, o) : new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }); mats.set(key, mat); }
     return mat;
   };
   const put = (geo, color, x, y, z, o = {}) => { geo.applyMatrix4(tmp.compose(new THREE.Vector3(x, y, z), q.setFromEuler(e.set(o.rx || 0, o.ry || 0, o.rz || 0)), one)); parts.push({ geo, mat: mk(color, o) }); };
