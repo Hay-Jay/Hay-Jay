@@ -115,7 +115,7 @@ const lite = (hex, l) => `#${new THREE.Color(hex).offsetHSL(0, 0, l).getHexStrin
 
 /** Bake `draw(m)` (queued modelling-kit parts, local coordinates) into one mesh per material under `g`. */
 function bakeFixture(g, k, draw) {
-  const m = modelKit((color, o) => k.mat(color, { roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }));
+  const m = modelKit((color, o) => k.mat(color, { roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, vertexColors: !!o.vc, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }), { vertexColors: true });
   draw(m);
   const baked = m.bake(false); baked.name = 'baked'; baked.traverse((o) => { if (o.geometry) k.track(o.geometry); });
   g.add(baked); return baked;

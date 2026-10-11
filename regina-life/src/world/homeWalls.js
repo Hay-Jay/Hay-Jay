@@ -140,7 +140,7 @@ export function buildRoomLabels(geo, kit) {
 const ROLLER_H = 2.35;   // the panel; its head trim makes the whole door ROLLER_H + 0.12
 function buildRollerDoors(geo, kit) {
   const runs = geo.walls.filter((r) => geo.layout.walls?.find((w) => w.id === r.wallId)?.style === 'roller'); if (!runs.length) return [];
-  const m = modelKit((color, o) => kit.mat(color, { roughness: o.r ?? 0.8, metalness: o.mt ?? 0 })), PH = ROLLER_H;
+  const m = modelKit((color, o) => kit.mat(color, { roughness: o.r ?? 0.8, metalness: o.mt ?? 0, vertexColors: !!o.vc }), { vertexColors: true }), PH = ROLLER_H;
   for (const run of runs) {
     const inRoom = run.rooms.map((id) => geo.rooms.find((r) => r.id === id)).find(Boolean);   // centre the door on the room it belongs to
     const along0 = run.axis === 'x' ? (inRoom ? (inRoom.floor.x0 + inRoom.floor.x1) / 2 : (run.x0 + run.x1) / 2) : (inRoom ? (inRoom.floor.z0 + inRoom.floor.z1) / 2 : (run.z0 + run.z1) / 2);

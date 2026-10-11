@@ -110,8 +110,8 @@ export function buildYard(layout, kit) {
 
   // everything else is queued on one modelling kit and baked to one mesh per material. `po`: a flat surface laid on the lawn, pulled towards the camera in depth.
   const m = modelKit((color, o) => (o.po
-    ? track(new THREE.MeshStandardMaterial({ color, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }))
-    : kit.mat(color, { roughness: o.r ?? 0.85, metalness: o.mt ?? 0, flatShading: !!o.f })));
+    ? track(new THREE.MeshStandardMaterial({ color, vertexColors: !!o.vc, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }))
+    : kit.mat(color, { roughness: o.r ?? 0.85, metalness: o.mt ?? 0, flatShading: !!o.f, vertexColors: !!o.vc })), { vertexColors: true });
   /** A box on a wall-aligned frame: `horiz` walls run along x (u = x, v = z), the others along z (u = z, v = x); du x dv are its sizes along u and v. */
   const frame = (horiz) => (du, h, dv, col, u, y, v, o) => (horiz ? m.b(du, h, dv, col, u, y, v, o) : m.b(dv, h, du, col, v, y, u, o));
   const fb = frame(plan.horiz), { door, out, along, wallFace, edge } = plan;

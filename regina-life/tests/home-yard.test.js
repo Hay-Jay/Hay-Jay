@@ -16,7 +16,15 @@ const grow = (r, d) => ({ x0: r.x0 - d, z0: r.z0 - d, x1: r.x1 + d, z1: r.z1 + d
 /** Every vertex of a mesh in world space. */
 function worldVerts(mesh) { mesh.updateWorldMatrix(true, false); const a = mesh.geometry.attributes.position, v = new THREE.Vector3(), out = []; for (let i = 0; i < a.count; i++) out.push(v.fromBufferAttribute(a, i).applyMatrix4(mesh.matrixWorld).clone()); return out; }
 const detail = (yard) => yard.getObjectByName('yard-detail').children;
-const byColour = (yard, hex) => detail(yard).find((m) => m.material.color.getHexString() === hex.replace('#', ''));
+/** World-space vertices of everything drawn in one colour (parts that differ only in colour share a mesh and carry their colour per vertex). */
+function vertsOfColour(yard, hex) {
+  const want = new THREE.Color(hex), out = [], v = new THREE.Vector3();
+  for (const m of detail(yard)) {
+    m.updateWorldMatrix(true, false); const a = m.geometry.attributes.position, c = m.geometry.attributes.color;
+    for (let i = 0; i < a.count; i++) if (Math.abs(c.getX(i) - want.r) < 1e-5 && Math.abs(c.getY(i) - want.g) < 1e-5 && Math.abs(c.getZ(i) - want.b) < 1e-5) out.push(v.fromBufferAttribute(a, i).applyMatrix4(m.matrixWorld).clone());
+  }
+  return out;
+}
 const FENCE_COLOURS = ['#f7f2e8', '#efe8d8', '#e4dac4', '#c9a878'];
 
 describe('which homes get a yard', () => {
@@ -77,7 +85,7 @@ describe('the plan on a house whose door is not on the south', () => {
     const p = planYard(east); expect(p.door).toMatchObject({ side: 'E', nx: 1, nz: 0 }); expect(p.drive).toBeNull();
     expect(p.path.length).toBeGreaterThanOrEqual(3); for (const s of p.path) { near(s.z, 2.0, 0.15); expect(s.x).toBeGreaterThan(p.house.x1); expect(s.x).toBeLessThan(p.yardRect.x1); }
     expect(p.gates).toEqual([{ side: 'E', at: 2.0, w: 1.3 }]); near(p.mailbox.x, p.yardRect.x1 - 0.2);
-    const g = buildYard(east, { mat: (c, o) => new THREE.MeshStandardMaterial({ color: c }), track: (o) => o }); expect(g.getObjectByName('yard-detail').children.length).toBeGreaterThan(5);
+    const g = buildYard(east, { mat: (c, o) => new THREE.MeshStandardMaterial({ color: c }), track: (o) => o }); expect(g.getObjectByName('yard-detail').children.length).toBeGreaterThan(1); expect(vertsOfColour(g, '#cfc7b8').length, 'stones').toBeGreaterThan(0);
   });
 });
 
@@ -98,33 +106,34 @@ describe('the yard\'s meshes', () => {
   });
 
   it('keeps the whole fence outside the house (at least 2 m from the walls) and inside the lawn', () => {
-    const fence = FENCE_COLOURS.map((c) => byColour(yard, c)).filter(Boolean); expect(fence.length).toBe(4);
     const clear = grow(plan.house, 2.0);
-    for (const m of fence) for (const v of worldVerts(m)) { expect(inside(plan.yardRect, v.x, v.z), 'inside the lawn').toBe(true); expect(inside(clear, v.x, v.z), 'not near the house').toBe(false); }
+    for (const hex of FENCE_COLOURS) { const vs = vertsOfColour(yard, hex); expect(vs.length, hex).toBeGreaterThan(0); for (const v of vs) { expect(inside(plan.yardRect, v.x, v.z), 'inside the lawn').toBe(true); expect(inside(clear, v.x, v.z), 'not near the house').toBe(false); } }
   });
   it('leaves the fence open at the gates: no picket or rail across the path or the driveway', () => {
-    const pickets = byColour(yard, '#f7f2e8'), rails = byColour(yard, '#efe8d8'), south = plan.fence.z1;
-    for (const m of [pickets, rails]) for (const v of worldVerts(m)) {
+    const pickets = vertsOfColour(yard, '#f7f2e8'), rails = vertsOfColour(yard, '#efe8d8'), south = plan.fence.z1;
+    for (const vs of [pickets, rails]) for (const v of vs) {
       if (Math.abs(v.z - south) > 0.2) continue;   // only the south run
       for (const g of plan.gates.filter((q) => q.side === 'S')) expect(Math.abs(v.x - g.at) >= g.w / 2 - 0.01, `fence vertex at x ${v.x.toFixed(2)} inside the gate at ${g.at}`).toBe(true);
     }
     // ... and it is closed everywhere else along the south run: a picket every 22 cm
-    const xs = [...new Set(worldVerts(pickets).filter((v) => Math.abs(v.z - south) < 0.1 && v.y > 0.5).map((v) => Math.round(v.x * 50) / 50))].sort((p, q) => p - q);
+    const xs = [...new Set(pickets.filter((v) => Math.abs(v.z - south) < 0.1 && v.y > 0.5).map((v) => Math.round(v.x * 50) / 50))].sort((p, q) => p - q);
     let maxGap = 0; for (let i = 1; i < xs.length; i++) { const outside = plan.gates.some((g) => g.side === 'S' && xs[i - 1] > g.at - g.w / 2 - 0.2 && xs[i] < g.at + g.w / 2 + 0.2); if (!outside) maxGap = Math.max(maxGap, xs[i] - xs[i - 1]); }
     expect(maxGap).toBeLessThan(0.2);
   });
   it('keeps the stones, driveway and mailbox on the lawn and clear of the house walls', () => {
-    const flat = ['#cfc7b8', '#bdb9b0', '#d3cbbb'].map((c) => byColour(yard, c)); for (const m of flat) { expect(m, 'present').toBeTruthy(); for (const v of worldVerts(m)) { expect(inside(plan.yardRect, v.x, v.z)).toBe(true); expect(v.y).toBeGreaterThanOrEqual(-1e-6); expect(v.y).toBeLessThan(0.06); } }
-    const drive = worldVerts(byColour(yard, '#bdb9b0')); near(Math.min(...drive.map((v) => v.z)), 5.6 + WALL_T / 2, 1e-4); near(Math.max(...drive.map((v) => v.z)), plan.yardRect.z1, 1e-4);
-    for (const v of worldVerts(byColour(yard, '#2f6fb5'))) { expect(v.y).toBeGreaterThan(0.9); expect(v.y).toBeLessThan(1.3); expect(inside(plan.house, v.x, v.z)).toBe(false); }
+    for (const hex of ['#cfc7b8', '#bdb9b0', '#d3cbbb']) { const vs = vertsOfColour(yard, hex); expect(vs.length, hex).toBeGreaterThan(0); for (const v of vs) { expect(inside(plan.yardRect, v.x, v.z)).toBe(true); expect(v.y).toBeGreaterThanOrEqual(-1e-6); expect(v.y).toBeLessThan(0.06); } }
+    const drive = vertsOfColour(yard, '#bdb9b0'); near(Math.min(...drive.map((v) => v.z)), 5.6 + WALL_T / 2, 1e-4); near(Math.max(...drive.map((v) => v.z)), plan.yardRect.z1, 1e-4);
+    for (const v of vertsOfColour(yard, '#2f6fb5')) { expect(v.y).toBeGreaterThan(0.9); expect(v.y).toBeLessThan(1.3); expect(inside(plan.house, v.x, v.z)).toBe(false); }
   });
   it('keeps every tree under 4.5 m and in its own spot (canopy never reaches the wall)', () => {
-    const trees = [['#5aa564', '#74b968', '#8cc875', '#7a5a3e', '#6b4f36', '#3c8454', '#47965f', '#52a46a']].flat().map((c) => byColour(yard, c)).filter(Boolean); expect(trees.length).toBeGreaterThan(3);
-    for (const m of trees) for (const v of worldVerts(m)) { expect(v.y).toBeLessThan(4.5); expect(inside(grow(plan.house, 0.2), v.x, v.z), 'tree geometry inside the house').toBe(false); }
+    const colours = ['#5aa564', '#74b968', '#8cc875', '#7a5a3e', '#6b4f36', '#3c8454', '#47965f', '#52a46a']; let n = 0;
+    for (const hex of colours) for (const v of vertsOfColour(yard, hex)) { n++; expect(v.y).toBeLessThan(4.5); expect(inside(grow(plan.house, 0.2), v.x, v.z), 'tree geometry inside the house').toBe(false); }
+    expect(n).toBeGreaterThan(100);
+    const tallest = Math.max(...colours.flatMap((hex) => vertsOfColour(yard, hex).map((v) => v.y))); expect(tallest).toBeGreaterThan(2.5);
   });
   it('is cheap: a few merged meshes however long the fence is, with no lights, no shadows cast and nothing for the player to bump into', () => {
     let meshes = 0, lights = 0, casters = 0; yard.traverse((o) => { if (o.isMesh) { meshes++; if (o.castShadow) casters++; } if (o.isLight) lights++; });
-    expect(meshes).toBeLessThanOrEqual(24); expect(lights).toBe(0); expect(casters).toBe(0);
+    expect(meshes).toBeLessThanOrEqual(10); expect(lights).toBe(0); expect(casters).toBe(0);
     const empty = buildInterior('apartment', { layout: { ...BUNGALOW, id: 'bungalow-noyard', yard: undefined } });   // the same house without a yard has exactly the same colliders
     expect(b.colliders.rects.length).toBe(empty.colliders.rects.length);
   });
