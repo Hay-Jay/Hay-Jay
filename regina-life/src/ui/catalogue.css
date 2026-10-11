@@ -111,10 +111,20 @@ button.cat-card:active{transform:scale(.96)}
 }
 
 /* Design shelf, multi-room homes: which room the swatches apply to. Its own flex-none row between the category pills and the scrolling grid, so it stays put while the swatches scroll. */
-.cat-rooms{flex:none;display:flex;gap:8px;overflow-x:auto;padding:0 14px 10px;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.cat-rooms{flex:none;display:flex;gap:8px;overflow-x:auto;padding:0 14px 10px;scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%)}
 .cat-rooms[hidden]{display:none}
 .cat-rooms::-webkit-scrollbar{display:none}
 .cat-room{flex:none;min-height:44px;padding:0 14px;border:0;border-radius:var(--k-rpill);background:var(--k-paper);color:var(--k-ink2);box-shadow:inset 0 0 0 1px var(--k-line);font:700 13px var(--k-body);white-space:nowrap;transition:background .2s,color .2s,transform .18s var(--k-spring)}
 .cat-room:active{transform:scale(.95)}
 .cat-room.on{background:var(--k-leaf-d);color:#fff;box-shadow:0 6px 14px rgba(22,143,89,.3)}
 .cat-mixed{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:var(--k-rpill);background:var(--k-wheat);color:var(--k-ink);font:800 10.5px/1.4 var(--k-body);letter-spacing:.03em;vertical-align:2px}
+
+/* Design tab: compact swatches (they are colour chips, not products), and no sell-price banner (it is about furniture), so the room chips do not push the swatches off a phone-sized sheet */
+.cat-root[data-kind="design"] .cat-banner{display:none}
+.cat-grid.cat-design{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.cat-design .cat-card{padding:6px 6px 8px;gap:3px}
+.cat-design .cat-thumb{aspect-ratio:3/2}
+.cat-design .cat-name{min-height:0;-webkit-line-clamp:1;font-size:12px}
+.cat-design .cat-price{font-size:13.5px}
+.cat-design .cat-size{top:10px;left:10px;font-size:9.5px}

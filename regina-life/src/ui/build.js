@@ -109,7 +109,7 @@ const wsvg = (d) => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none"
 export const WALL_ICON = {
   up: wsvg('<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12L4 7.5M12 12v9"/>'),
   cut: wsvg('<path d="M4 14l8 4.5 8-4.5-8-4.5z"/><path d="M4 14V7.5L12 3l8 4.5V14"/><path d="M12 9.5V3"/>'),
-  down: wsvg('<path d="M4 15l8 4.5 8-4.5-8-4.5z"/><path d="M4 15v-1.6M20 15v-1.6M12 19.5v-1.6"/>'),
+  down: wsvg('<path d="M3 11.5l9 5 9-5-9-5z"/><path d="M3 11.5v3l9 5 9-5v-3M12 16.5v3"/>'),
 };
 /** Chip labels of the room focus strip: short, by room type, so five rooms fit a phone. */
 const ROOM_SHORT = { living: 'Living', bedroom: 'Bedroom', bath: 'Bath', den: 'Den', garage: 'Garage' };
@@ -191,7 +191,7 @@ export class BuildMode {
     this._roomsSig = null; this._syncChrome(); if (this.active) this.refresh();
     return this;
   }
-  _syncChrome() { if (this.wallBtn) this.wallBtn.hidden = !this.multi; this._renderRooms(); }
+  _syncChrome() { if (this.wallBtn) this.wallBtn.hidden = !this.multi; this.el?.classList?.[this.multi ? 'add' : 'remove']('has-walls'); this._renderRooms(); }
   _renderRooms() {
     const el = this.roomsEl; if (!el) return;
     const show = this.active && this.multi, sig = `${this.lot.id}|${this.focus ?? ''}|${show}`; el.hidden = !show;
@@ -248,7 +248,12 @@ export class BuildMode {
     if (this.focus != null) { this.focus = null; this.onFocus?.(null, null); }
     this.onStop?.();
   }
-  _layout() { this.onLayout?.(Math.min(0.6, (Math.max(this.el.offsetHeight, this.catalogue?.isOpen ? this.catalogue.height ?? 0 : 0) + 14) / Math.max(1, innerHeight))); }
+  /** Tell main.js how much of the screen the UI covers: onLayout(bottomFraction, topFraction). The bottom is the bar or the open Buy sheet; the top is the room focus strip (0 when it is hidden, i.e. always in the Studio). */
+  _layout() { this.onLayout?.(Math.min(0.6, (Math.max(this.el.offsetHeight, this.catalogue?.isOpen ? this.catalogue.height ?? 0 : 0) + 14) / Math.max(1, innerHeight)), this._topInset()); }
+  _topInset() {
+    const el = this.roomsEl, r = this.active && this.multi && el && !el.hidden ? el.getBoundingClientRect?.() : null;
+    return r && r.height > 0 ? Math.min(0.3, (r.bottom + 8) / Math.max(1, innerHeight)) : 0;
+  }
   /** Re-measure the bottom inset (the Catalogue calls this as it opens/closes so the room stays framed above it). */
   layout() { if (this.active) this._layout(); }
   select(sel) {

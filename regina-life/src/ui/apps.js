@@ -583,7 +583,7 @@ const homesApp = app('homes', 'Homes', (body, ctx) => {
   const cardHtml = (c) => {
     const why = c.canMove && !c.canAfford ? `<p class="hm-why" id="hm-why-${c.id}">${esc(c.reason)}</p>` : '';
     return `<article class="card hm-card${c.current ? ' current' : ''}${c.owned && !c.current ? ' owned' : ''}" data-tier="${c.id}"${c.current ? ' aria-current="true"' : ''}>
-      <div class="hm-head">${planSvg(c.id)}<div class="grow"><h3>${esc(c.name)}</h3><small>${esc(c.title)}</small><div class="hm-meta">${esc(c.roomsLabel)} · ${esc(c.areaLabel)}</div></div>${c.badge ? `<span class="hm-badge ${c.current ? 'cur' : 'own'}">${c.badge}</span>` : ''}</div>
+      <div class="hm-head">${planSvg(c.id)}<div class="grow"><h3>${esc(c.name)}</h3><small>${esc(c.title).split(' · ').join('<br>')}</small><div class="hm-meta">${esc(c.roomsLabel)} · ${esc(c.areaLabel)}</div></div>${c.badge ? `<span class="hm-badge ${c.current ? 'cur' : 'own'}">${c.badge}</span>` : ''}</div>
       <p>${esc(c.blurb)}</p><div class="chips">${c.roomNames.map((n) => `<span>${esc(n)}</span>`).join('')}</div>
       ${c.canMove ? `<div class="hm-foot"><div class="grow"><b class="hm-price">${fmtMoney(c.price)}</b><small>${esc(c.planLabel)}</small></div><button class="btn primary" data-move="${c.id}"${c.canAfford ? '' : ` disabled aria-describedby="hm-why-${c.id}"`}>Move in</button></div>${why}` : ''}
     </article>`;

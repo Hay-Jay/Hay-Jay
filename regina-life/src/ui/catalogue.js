@@ -44,7 +44,7 @@ export function bodyHTML(view, fmt) {
     for (const c of sec.cards) out.push(c.kind === 'wall' || c.kind === 'floor' ? styleHTML(c, fmt) : view.kind === 'storage' ? storedHTML(c, fmt) : pieceHTML(c, fmt));
   }
   if (!view.cards.length) out.push(`<li class="cat-empty">${esc(view.empty || 'Nothing here yet.')}</li>`);
-  return `<ul class="cat-grid" role="list">${out.join('')}</ul>`;
+  return `<ul class="cat-grid${view.kind === 'design' ? ' cat-design' : ''}" role="list">${out.join('')}</ul>`;
 }
 
 const SKELETON = `<div class="cat-scrim" data-act="hide"></div>
@@ -122,7 +122,7 @@ export class Catalogue {
   /* ---------- drawing ---------- */
   _render() {
     const s = this.store.state, bal = this.store.ledger.balance, tabs = M.tabList(s); this.room = M.designRoom(s, this.room);   // a room that no longer exists (after a move) means All rooms
-    const view = M.tabView(s, this.tab, bal, { room: this.room }), fmt = this.fmt; this.tab = view.id;
+    const view = M.tabView(s, this.tab, bal, { room: this.room }), fmt = this.fmt; this.tab = view.id; if (this.root.dataset) this.root.dataset.kind = view.kind;
     if (this._bal !== bal) { this._bal = bal; this.$bal.textContent = fmt(bal); }
     this.$banner.textContent = M.bannerText();
     const n = M.storageCount(s); this.$chip.hidden = !(n > 0 && view.kind !== 'storage'); if (!this.$chip.hidden) this.$chip.textContent = `+${n} in storage`;

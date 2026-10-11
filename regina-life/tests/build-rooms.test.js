@@ -235,6 +235,14 @@ describe('BuildMode on multi-room homes', () => {
     });
   });
 
+  it('onLayout gets the top inset too: the focus strip\'s bottom edge plus a margin, and 0 whenever the strip is not showing', () => {
+    mk('bungalow'); els['b-rooms'].getBoundingClientRect = () => ({ top: 62, bottom: 110, height: 48 }); els.build.offsetHeight = 100;
+    build.start(); expect(calls.layout.at(-1)).toBeCloseTo((100 + 14) / 800, 6);   // the first argument is unchanged
+    const seen = []; build.onLayout = (b, t) => seen.push([b, t]); build.layout(); expect(seen.at(-1)[1]).toBeCloseTo((110 + 8) / 800, 6);
+    els['b-rooms'].getBoundingClientRect = () => ({ top: 0, bottom: 0, height: 0 }); build.layout(); expect(seen.at(-1)[1]).toBe(0); els['b-rooms'].getBoundingClientRect = () => ({ top: 62, bottom: 110, height: 48 });
+    build.stop(); const n0 = seen.length; build.layout(); expect(seen).toHaveLength(n0);   // not building: no callbacks at all
+    mk('studio'); build.start(); const s2 = []; build.onLayout = (b, t) => s2.push(t); build.layout(); expect(s2.at(-1)).toBe(0);
+  });
   it('the public API C2 wires is all there', () => {
     mk('bungalow'); for (const m of ['setLayout', 'setWallMode', 'cycleWalls', 'focusRoom', 'start', 'stop', 'refresh', 'layout', 'select', 'setCatalogue']) expect(build[m], m).toBeTypeOf('function');
     expect(build.multi).toBe(true); expect(build.focus).toBeNull(); expect(build.wallMode).toBe('cut');
