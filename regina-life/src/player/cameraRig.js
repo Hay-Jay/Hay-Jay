@@ -88,7 +88,9 @@ export class CameraRig {
     // occlusion: pull the camera in front of whatever blocks the line from the player's head
     let t = 1;
     if (this.grid) {
-      t = this.grid.rayBlocked(this.look.x, this.look.y, this.look.z, want.x, want.y, want.z);
+      // Indoors the camera passes through partition walls (tag 'wall'): the interior cuts the one between the head and the camera instead (setCameraCut), so a wall in
+      // another room never drags the camera onto the player's nose. Furniture still blocks it. (The Studio has no wall rects, so nothing changes there.)
+      t = this.grid.rayBlocked(this.look.x, this.look.y, this.look.z, want.x, want.y, want.z, this.indoor ? { skip: 'wall' } : undefined);
       if (t < 1) t = Math.max(0.08, t - 0.035 / Math.max(0.5, this.dist));
     }
     const safe = new THREE.Vector3().lerpVectors(this.look, want, t);

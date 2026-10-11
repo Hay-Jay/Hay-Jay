@@ -381,8 +381,11 @@ async function boot() {
   let target = null;
   const nearestInteractable = () => {
     let best = null, bd = 1e9;
+    // multi-room homes: a prompt needs line of sight, so nothing is offered through a wall (a doorway passes). Items in the player's own room need no ray; the Studio has no walls to check.
+    const sight = inInterior === 'apartment' && interior.rooms.length > 1, here = sight ? roomAtFloor(interior.layout, player.pos.x, player.pos.z)?.id : null;
     const consider = (it, label) => {
       const d = Math.hypot(it.x - player.pos.x, it.z - player.pos.z); if (d > it.radius) return;
+      if (sight && it.room !== here && interior.colliders.rayBlocked(player.pos.x, 0.9, player.pos.z, it.x, 0.9, it.z, { only: 'wall' }) < 1) return;
       if (it.enabled && !it.enabled(ictx)) return;
       const score = d / it.radius; if (score < bd) { bd = score; best = { it, label }; }
     };
@@ -735,6 +738,10 @@ async function boot() {
       if (!inInterior) ped.update(dt, player.pos);
       const speedNorm = Math.min(1, player.speed / 7.2);
       rig.update(dt, input, player, { speedNorm, sensitivity: isTouch ? 0.9 : 1 });
+      if (inInterior === 'apartment' && interior.rooms.length > 1) {   // walking through a multi-room home: draw only the rooms near the player, and cut a partition that stands between the head and the camera
+        interior.setViewer(player.pos.x, player.pos.z);
+        if (rig.mode !== 'build') interior.setCameraCut(player.pos, camera.position);
+      }
       if (creator && rig.mode !== 'creator') rig.mode = 'creator';
     }
     // studio key light for the character creator / selfie so faces are always readable, even at night
@@ -764,6 +771,16 @@ async function boot() {
     store, G, player, rig, city, camera, scene, renderer, phone, panels, ctx, atmo,
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
+    // multi-room homes: the layout the save lives in, its rooms and lot (pure data), the move, and what the interior on screen is doing right now
+    get layout() { return layoutOf(S()).id; }, get rooms() { return lotOf(layoutOf(S())).rooms; }, get lot() { return lotOf(layoutOf(S())); }, moveHome: (id) => moveHome(id),
+    interiorInfo: () => {
+      const i = interior; if (!i) return { kind: null, cached: Object.keys(interiors) };
+      const groups = i.roomGroups ?? null, calls = renderer.info.render.calls, tris = renderer.info.render.triangles;
+      return { kind: i.kind, layout: i.layout?.id ?? null, stateLayout: layoutOf(S()).id, wallMode: i.wallMode ?? null, overheadMode: i.overheadMode ?? null, viewer: i.viewerRoom ?? null,
+        playerRoom: i.layout ? roomAtFloor(i.layout, player.pos.x, player.pos.z)?.id ?? null : null, rooms: i.rooms?.map((r) => r.id) ?? null, visibleRooms: groups ? Object.keys(groups).filter((id) => groups[id].visible) : null,
+        yardVisible: i.yard ? !!i.yard.visible : null, cached: Object.keys(interiors), calls, tris, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures,
+        bounds: { ...i.bounds }, spawn: { ...i.spawn }, interactables: i.interactables.length, colliders: i.colliders.rects.length };
+    },
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
     dbg: () => ({ mapOpen, mapOverview, camMode, creator, fading, homeView, inInterior, gameMode, panelsOpen: panels.open, phoneOpen: phone.isOpen, building: build.active, pos: [player.pos.x, player.pos.z], disableEvents: S().flags?.disableEvents, nCity: city.interactables.length, near: city.interactables.map((it) => [it.id, Math.round(Math.hypot(it.x - player.pos.x, it.z - player.pos.z)), it.radius, typeof it.enabled]).filter((r) => r[1] < 25) }),
