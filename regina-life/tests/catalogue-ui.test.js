@@ -479,7 +479,7 @@ describe('floor grid fade', () => {
 
 describe('BuildMode with the Catalogue', () => {
   let els, win, canvasEl, scene, camera, panels, audio, toasts, catalogue, build, layouts, body;
-  const mkEls = () => { els = {}; for (const id of ['build', 'b-hint', 'b-rot', 'b-del', 'b-buy', 'b-stored', 'b-stored-n', 'b-done']) els[id] = new El(id.startsWith('b-') && id !== 'b-hint' && id !== 'b-stored-n' ? 'button' : 'div'); els.build.hidden = true; els['b-stored'].hidden = true; };
+  const mkEls = () => { els = {}; for (const id of ['build', 'b-hint', 'b-rot', 'b-del', 'b-buy', 'b-stored', 'b-stored-n', 'b-done', 'b-walls', 'b-rooms']) els[id] = new El(id.startsWith('b-') && id !== 'b-hint' && id !== 'b-stored-n' && id !== 'b-rooms' ? 'button' : 'div'); els.build.hidden = true; els['b-stored'].hidden = true; els['b-walls'].hidden = true; els['b-rooms'].hidden = true; };
   beforeEach(() => {
     mkEls(); win = {}; body = new Set();
     globalThis.document = { getElementById: (id) => els[id], body: { classList: { add: (c) => body.add(c), remove: (c) => body.delete(c) } }, activeElement: null };
@@ -552,8 +552,12 @@ describe('BuildMode with the Catalogue', () => {
     catalogue.isOpen = false; build.layout(); expect(layouts.at(-1)).toBeCloseTo((100 + 14) / 800, 6); build.stop(); const n = layouts.length; build.layout(); expect(layouts).toHaveLength(n);
   });
   it('keeps the public API the integrator relies on', () => {
-    for (const m of ['start', 'stop', 'select', 'refresh', 'rotate', 'removeSel', 'click', 'layout', 'setCatalogue', 'openCatalogue']) expect(build[m], m).toBeTypeOf('function');
+    for (const m of ['start', 'stop', 'select', 'refresh', 'rotate', 'removeSel', 'click', 'layout', 'setCatalogue', 'openCatalogue', 'setLayout', 'setWallMode', 'cycleWalls', 'focusRoom']) expect(build[m], m).toBeTypeOf('function');
     expect(build.active).toBe(false); expect(build.state).toBe(store.state);
+  });
+  it('the Studio build bar is unchanged: the Walls button and the room strip stay hidden through a whole session', () => {
+    build.start(); expect(els['b-walls'].hidden).toBe(true); expect(els['b-rooms'].hidden).toBe(true); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); expect(els['b-rooms'].hidden).toBe(true); expect(build.focus).toBeNull();
+    expect(build.grid.rooms).toEqual([{ ...FD.ROOM, id: 'living' }]); build.stop(); expect(els['b-walls'].hidden).toBe(true);
   });
   it('select() of a stale piece (stored copy sold elsewhere) is dropped on refresh', () => {
     build.start(); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); expect(build.sel).toBeTruthy(); H.sellFurniture(store, 'plant'); build.refresh(); expect(build.sel).toBeNull(); expect(build.grid.target).toBe(0);
