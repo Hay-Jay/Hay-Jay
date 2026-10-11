@@ -20,6 +20,7 @@ import { tripBlocked } from '../core/travel.js';
 import { STATIONS } from '../data/radio.js';
 import { contactIds } from '../data/contacts.js';
 import { ownedTypes } from '../core/home.js';
+import { homeCards, moveConfirm, planSvg } from './homes-model.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nav = (title, { back = false, right = '' } = {}) => `<div class="nav">${back ? `<button class="nav-back" data-act="back">${ICON.back}<span>Back</span></button>` : '<span></span>'}<h2>${title}</h2><span class="nav-right">${right}</span></div>`;
@@ -576,5 +577,35 @@ const radioApp = app('radio', 'Radio', (body, ctx) => {
   render(); return { update() {}, destroy() { radio.onChange = prev; } };
 });
 
-export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp];
+/* ================= HOMES (move up: Studio -> One-bedroom -> Bungalow) ================= */
+const homesApp = app('homes', 'Homes', (body, ctx) => {
+  const { store } = ctx;
+  const cardHtml = (c) => {
+    const why = c.canMove && !c.canAfford ? `<p class="hm-why" id="hm-why-${c.id}">${esc(c.reason)}</p>` : '';
+    return `<article class="card hm-card${c.current ? ' current' : ''}${c.owned && !c.current ? ' owned' : ''}" data-tier="${c.id}"${c.current ? ' aria-current="true"' : ''}>
+      <div class="hm-head">${planSvg(c.id)}<div class="grow"><h3>${esc(c.name)}</h3><small>${esc(c.title)}</small><div class="hm-meta">${esc(c.roomsLabel)} · ${esc(c.areaLabel)}</div></div>${c.badge ? `<span class="hm-badge ${c.current ? 'cur' : 'own'}">${c.badge}</span>` : ''}</div>
+      <p>${esc(c.blurb)}</p><div class="chips">${c.roomNames.map((n) => `<span>${esc(n)}</span>`).join('')}</div>
+      ${c.canMove ? `<div class="hm-foot"><div class="grow"><b class="hm-price">${fmtMoney(c.price)}</b><small>${esc(c.planLabel)}</small></div><button class="btn primary" data-move="${c.id}"${c.canAfford ? '' : ` disabled aria-describedby="hm-why-${c.id}"`}>Move in</button></div>${why}` : ''}
+    </article>`;
+  };
+  const render = () => {
+    const s = store.state, cards = homeCards(s, fmtMoney), here = cards.find((c) => c.current);
+    body.innerHTML = `${nav('Homes')}<div class="scroll"><p class="fine pad hm-here">You live at <b>${esc(here?.title ?? '')}</b>. Balance ${fmtMoney(s.bank.balance)}.</p>
+      ${cards.map(cardHtml).join('')}
+      <p class="fine pad">Moving keeps everything you own. Pieces that fit in the new place stay where they are; the rest wait in storage. There is no rent yet.</p></div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-move]'); if (!b || b.disabled) return;
+    const c = homeCards(store.state, fmtMoney).find((x) => x.id === b.dataset.move); if (!c?.canMove) return;
+    if (!c.canAfford) { ctx.toast(c.reason, 'warn'); ctx.audio?.blip('error'); return; }
+    if (typeof ctx.moveHome !== 'function' || typeof ctx.confirm !== 'function') { ctx.toast('Moving is not available right now.', 'warn'); return; }
+    const m = moveConfirm(c, fmtMoney);
+    ctx.confirm(m.title, m.text, m.yes, () => ctx.moveHome?.(c.id));
+  });
+  render();
+  // Homes only changes when the house or the money does; the other topics (needs ticks, weather, ...) must not redraw it. No topic = the phone opened or a deferred redraw.
+  return { update(topic) { if (topic === undefined || topic === 'deferred' || topic === 'home' || topic === 'bank') render(); } };
+});
+
+export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp];
 export const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));
