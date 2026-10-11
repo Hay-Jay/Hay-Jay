@@ -234,6 +234,7 @@ async function boot() {
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
       exitInterior: () => exitInterior(),
       furnitureShop: () => catalogue.open(),
+      openStorage: () => catalogue.open('in-storage'),
       build: () => { if (inInterior !== 'apartment') return; phone.close(); build.start(); },
       radioMenu: () => panels.menu('📻 Radio', radio.playing ? `Now playing: ${radio.nowTitle}` : 'Pick a station. The music is generated live in your browser.', [...STATIONS.map((st) => ({ label: `${st.emoji} ${st.name} · ${st.freq}`, run: () => radio.play(st.id) })), { label: '⏹ Turn off', run: () => radio.stop() }]),
       mayorTalk: () => {
@@ -772,7 +773,7 @@ async function boot() {
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
     // multi-room homes: the layout the save lives in, its rooms and lot (pure data), the move, and what the interior on screen is doing right now
-    get layout() { return layoutOf(S()).id; }, get rooms() { return lotOf(layoutOf(S())).rooms; }, get lot() { return lotOf(layoutOf(S())); }, moveHome: (id) => moveHome(id),
+    get interior() { return interior; }, get layout() { return layoutOf(S()).id; }, get rooms() { return lotOf(layoutOf(S())).rooms; }, get lot() { return lotOf(layoutOf(S())); }, moveHome: (id) => moveHome(id),
     interiorInfo: () => {
       const i = interior; if (!i) return { kind: null, cached: Object.keys(interiors) };
       const groups = i.roomGroups ?? null, calls = renderer.info.render.calls, tris = renderer.info.render.triangles;
