@@ -73,7 +73,9 @@ export function pieceCard(def, s, balance) {
   };
 }
 /** The room the Design shelf is editing: a valid room id on a multi-room home, else null (= All rooms, the house default). */
-const designRoom = (s, room) => { const L = layoutOf(s); return L.rooms.length > 1 && typeof room === 'string' && L.rooms.some((r) => r.id === room) ? room : null; };
+export const designRoom = (s, room) => { const L = layoutOf(s); return L.rooms.length > 1 && typeof room === 'string' && L.rooms.some((r) => r.id === room) ? room : null; };
+/** A room's display name on the current home, or null. */
+export const roomName = (s, id) => layoutOf(s).rooms.find((r) => r.id === id)?.name ?? null;
 /** The style every room shows for `kind`, or null when the rooms differ ("Mixed"). */
 const sharedStyle = (s, kind) => { const all = layoutOf(s).rooms.map((r) => styleOf(s, r.id)[kind]); return all.every((k) => k === all[0]) ? all[0] : null; };
 /**

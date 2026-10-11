@@ -33,10 +33,14 @@ function styleHTML(c, fmt) {
   const poor = !c.owned && !c.canAfford;
   return `<li><button type="button" class="cat-card cat-style${c.active ? ' is-on' : ''}${poor ? ' is-poor' : ''}" data-act="style" data-kind="${c.kind}" data-key="${esc(c.key)}" data-id="${esc(c.id)}" aria-pressed="${c.active}" aria-label="${esc(M.cardLabel(c, fmt))}"${poor ? ' aria-disabled="true"' : ''}><span class="cat-size" aria-hidden="true">${c.kind === 'wall' ? 'Wall' : 'Floor'}</span><span class="cat-thumb cat-swatch" style="--sw:${esc(c.color)}" data-mat="${esc(c.material || c.kind)}"></span><span class="cat-name">${esc(c.name)}</span><span class="cat-price">${c.active ? 'In use' : c.owned ? 'Owned' : fmt(c.price)}</span>${poor ? `<span class="cat-notes"><span class="cat-note bad">${esc(M.needText(c.shortBy, fmt))}</span></span>` : ''}</button></li>`;
 }
+/** The Design shelf's room chips (multi-room homes): "All rooms" then one per room; `rooms` is view.rooms. Pressed = the room being styled. */
+export function roomsHTML(rooms) {
+  return (rooms ?? []).map((r) => `<button type="button" class="cat-room${r.active ? ' on' : ''}" data-act="room" data-id="${esc(r.id)}" aria-pressed="${!!r.active}">${esc(r.label)}</button>`).join('');
+}
 export function bodyHTML(view, fmt) {
   const out = [];
   for (const sec of view.sections) {
-    if (sec.label) out.push(`<li class="cat-sec" role="presentation"><h3>${esc(sec.label)}</h3>${sec.price ? `<small>${fmt(sec.price)} the first time</small>` : ''}</li>`);
+    if (sec.label) out.push(`<li class="cat-sec" role="presentation"><h3>${esc(sec.label)}${sec.mixed ? ' <span class="cat-mixed">Mixed</span>' : ''}</h3>${sec.price ? `<small>from ${fmt(sec.price)} the first time</small>` : ''}</li>`);
     for (const c of sec.cards) out.push(c.kind === 'wall' || c.kind === 'floor' ? styleHTML(c, fmt) : view.kind === 'storage' ? storedHTML(c, fmt) : pieceHTML(c, fmt));
   }
   if (!view.cards.length) out.push(`<li class="cat-empty">${esc(view.empty || 'Nothing here yet.')}</li>`);
@@ -51,15 +55,16 @@ const SKELETON = `<div class="cat-scrim" data-act="hide"></div>
   </div>
   <div class="cat-banner"><span class="cat-banner-t"></span><button type="button" class="cat-chip" data-act="tab" data-id="${M.TAB_STORAGE}" hidden></button></div>
   <div class="cat-tabs" role="tablist" aria-label="Catalogue categories"></div>
+  <div class="cat-rooms" role="group" aria-label="Which room to paint and floor" hidden></div>
   <div class="cat-body" id="cat-panel" role="tabpanel" tabindex="0"></div>
 </section>`;
 
 export class Catalogue {
   constructor({ store, build = null, audio = null, toast = () => {}, fmtMoney = defaultFmt, thumbs = null, onChange = null, change = null, onOpen = null, onClose = null, canBuild = () => true, mount = null } = {}) {
     Object.assign(this, { store, build, audio, toast, fmt: fmtMoney, thumbs, onChange: onChange ?? change, onOpen, onClose, canBuild });
-    this._open = false; this.tab = null; this._tsig = this._bsig = this._bal = null; this._prio = 0; this._closedBy = null; this._hideT = null; this._prevFocus = null; this._unsub = null;
+    this._open = false; this.tab = null; this.room = null; this._rsig = null; this._tsig = this._bsig = this._bal = null; this._prio = 0; this._closedBy = null; this._hideT = null; this._prevFocus = null; this._unsub = null;
     const root = this.root = document.createElement('div'); root.className = 'cat-root'; root.id = 'catalogue'; root.hidden = true; root.innerHTML = SKELETON;
-    const q = (s) => root.querySelector(s); this.sheet = q('.cat-sheet'); this.$bal = q('.cat-bal'); this.$banner = q('.cat-banner-t'); this.$chip = q('.cat-chip'); this.$tabs = q('.cat-tabs'); this.$body = q('.cat-body'); this.$top = q('.cat-top');
+    const q = (s) => root.querySelector(s); this.sheet = q('.cat-sheet'); this.$bal = q('.cat-bal'); this.$banner = q('.cat-banner-t'); this.$chip = q('.cat-chip'); this.$tabs = q('.cat-tabs'); this.$rooms = q('.cat-rooms'); this.$body = q('.cat-body'); this.$top = q('.cat-top');
     root.addEventListener('click', (e) => this._click(e)); this._bindDrag();
     // one window-level capture listener while open: the sheet is modal, so Esc hides it, Tab/arrows drive the sheet, and no key leaks to the game's hotkeys
     this._onKey = (e) => {
@@ -110,16 +115,21 @@ export class Catalogue {
     const want = this._resolve(id) ?? M.defaultTab(); if (want === this.tab) { if (focus) this._focusTab(); return this; }
     this.tab = want; this._prio++; this.$body.scrollTop = 0; this._render(); if (focus) this._focusTab(); return this;
   }
+  /** Choose which room the Design shelf paints and floors: a room id, or null for All rooms (the house default). Unknown ids and single-room homes mean All rooms. */
+  setRoom(id) { const next = M.designRoom(this.store.state, id); if (next !== this.room) { this.room = next; this._render(); } return this; }
   destroy() { this.close(); clearTimeout(this._hideT); this.root.remove?.(); }
 
   /* ---------- drawing ---------- */
   _render() {
-    const s = this.store.state, bal = this.store.ledger.balance, tabs = M.tabList(s), view = M.tabView(s, this.tab, bal), fmt = this.fmt; this.tab = view.id;
+    const s = this.store.state, bal = this.store.ledger.balance, tabs = M.tabList(s); this.room = M.designRoom(s, this.room);   // a room that no longer exists (after a move) means All rooms
+    const view = M.tabView(s, this.tab, bal, { room: this.room }), fmt = this.fmt; this.tab = view.id;
     if (this._bal !== bal) { this._bal = bal; this.$bal.textContent = fmt(bal); }
     this.$banner.textContent = M.bannerText();
     const n = M.storageCount(s); this.$chip.hidden = !(n > 0 && view.kind !== 'storage'); if (!this.$chip.hidden) this.$chip.textContent = `+${n} in storage`;
     const ts = JSON.stringify([tabs.map((t) => [t.id, t.label, t.emoji, t.count ?? 0]), this.tab]);
     if (ts !== this._tsig) { this._tsig = ts; this._swap(this.$tabs, tabsHTML(tabs, this.tab)); this._centerTab(); }
+    const rs = JSON.stringify(view.rooms ?? null);
+    if (rs !== this._rsig) { this._rsig = rs; this.$rooms.hidden = !view.rooms; this._swap(this.$rooms, view.rooms ? roomsHTML(view.rooms) : ''); }
     const bs = JSON.stringify(view);
     if (bs !== this._bsig) { this._bsig = bs; this._swap(this.$body, bodyHTML(view, fmt)); this.$body.setAttribute?.('aria-labelledby', `cat-tab-${this.tab}`); this._hydrate(view); }
   }
@@ -147,6 +157,7 @@ export class Catalogue {
     const el = e.target?.closest?.('[data-act]'); if (!el) return; const { act, id, kind, key } = el.dataset;
     if (act === 'hide') return void this.close();
     if (act === 'tab') return void this.setTab(id);
+    if (act === 'room') return void this.setRoom(id === 'all' ? null : id);
     if (act === 'buy') return void this._buy(id);
     if (act === 'place') return void this._place(id);
     if (act === 'sell') return void this._sell(id);
@@ -202,8 +213,9 @@ export class Catalogue {
     this.build?.refresh?.(); this.refresh();
   }
   _style(kind, key) {
-    const r = M.applyStyle(this.store, kind, key); if (!r.ok) return void this._fail(r);
-    this.audio?.blip?.(r.paid ? 'cash' : 'ok'); this.toast(r.paid ? `${r.name} ${kind === 'wall' ? 'paint' : 'flooring'} · ${this.fmt(r.paid)}` : `${r.name} applied`, 'good'); this._changed({ kind: 'style', style: kind, key, paid: r.paid });
+    const room = this.room, r = M.applyStyle(this.store, kind, key, room); if (!r.ok) return void this._fail(r);
+    const where = room ? M.roomName(this.store.state, room) : null;
+    this.audio?.blip?.(r.paid ? 'cash' : 'ok'); this.toast(r.paid ? `${r.name} ${kind === 'wall' ? 'paint' : 'flooring'} · ${this.fmt(r.paid)}` : `${r.name} applied${where ? ` to ${where}` : ''}`, 'good'); this._changed({ kind: 'style', style: kind, key, paid: r.paid, ...(room ? { room } : {}) });
     this.refresh();
   }
 }
