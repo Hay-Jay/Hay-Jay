@@ -139,6 +139,24 @@ describe('wall modes on the real homes', () => {
   });
 });
 
+/* ------------------------------------------------------------------------------------------------ wall-mounted fixtures */
+describe('wall-mounted fixtures (the light switches) follow their wall', () => {
+  for (const [id, switches] of [['onebed', ['switch_bed']], ['bungalow', ['switch_bed', 'switch_bath', 'switch_den', 'switch_garage']]]) it(`${id}: a switch on a partition is hidden when the partition is cut or gone, shown otherwise`, () => {
+    const hm = build(id), g = (name) => hm.group.getObjectByName(`fixture:${name}`);
+    for (const sw of switches) {
+      expect(g(sw).userData.wall, sw).toEqual({ role: 'mounted', side: null }); expect(hm.parts.openings, sw).toContain(g(sw));
+      expect(g(sw).visible).toBe(true);   // walking
+      hm.setOverhead(true); expect(g(sw).visible, `${sw} cut`).toBe(false);
+      hm.setWallMode('up'); expect(g(sw).visible, `${sw} up`).toBe(true);
+      hm.setWallMode('down'); expect(g(sw).visible, `${sw} down`).toBe(false);
+      hm.setWallMode('cut'); hm.setOverhead(false); expect(g(sw).visible, `${sw} walking again`).toBe(true);
+    }
+  });
+  it('a kind without a mount height is never treated as wall-mounted', () => {
+    const hm = build('bungalow'); for (const m of hm.parts.openings) if (m.userData.wall.role === 'mounted') expect(m.name).toMatch(/^fixture:switch/);
+  });
+});
+
 /* ------------------------------------------------------------------------------------------------ the roller door */
 describe('the garage roller door', () => {
   const hm = build('bungalow');

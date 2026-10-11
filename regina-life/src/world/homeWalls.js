@@ -8,15 +8,16 @@
  * The overhead camera never rotates (north is screen-up), so "the wall nearest the camera" is the south wall and only that exterior wall is cut.
  *
  * Wall pieces carry `userData.wall = { role, side }`: role 'exterior' | 'partition' | 'lintel', side 'N' | 'S' | 'E' | 'W' (exterior) or null.
- * Things that hang on a wall (windows, the front door, signs, the garage roller door) are `parts.openings`; they carry `userData.wall = { role, side }`
- * with role 'window' | 'door' | 'sign' and the side of the wall they are mounted on, and follow that wall: gone when it is hidden or cut (a window
- * would float above a 0.9 m wall), except a door, which is lowered with its wall so the cutaway still shows where you come in.
+ * Things that hang on a wall (windows, the front door, signs, the garage roller door, wall-mounted fixtures such as the light switch) are `parts.openings`;
+ * they carry `userData.wall = { role, side }` with role 'window' | 'door' | 'sign' | 'mounted' and the side of the wall they are mounted on (null: a
+ * partition), and follow that wall: gone when it is hidden or cut (a window or a switch plate would float above a 0.9 m wall), except a door, which is
+ * lowered with its wall so the cutaway still shows where you come in.
  *
  * applyWallMode(parts, mode) only changes visibility and scale (no allocation), is idempotent, and works from any mode to any other.
  */
 import * as THREE from 'three';
 import { kit as modelKit } from './furnitureModels.js';
-import { WALL_T, CEIL_H } from '../data/homes.js';
+import { WALL_T, CEIL_H, FIXTURE_KINDS } from '../data/homes.js';
 
 export const WALL_MODES = ['walk', 'up', 'cut', 'down'];
 /** Height of a lowered wall in the 'cut' mode (waist high: a person at the sofa is still visible from above, nothing is lost behind a wall). */
@@ -79,7 +80,7 @@ export function applyWallMode(parts, mode) {
 
 /* ============================================================================================ room name decals */
 
-const LABEL_H = 0.46, LABEL_Y = 0.07;   // a pill 46 cm high lying 7 cm above the floor: above the thickest rug (the shag rug is 5 cm) and the contact shadows (1.2 cm)
+const LABEL_H = 0.52, LABEL_Y = 0.07;   // a pill 52 cm high lying 7 cm above the floor: above the thickest rug (the shag rug is 5 cm) and the contact shadows (1.2 cm)
 
 /**
  * Where a room's label goes: the free spot closest to the middle of the room's place rect whose pill clears every fixture (and the doorway approaches),
@@ -168,6 +169,11 @@ function buildRollerDoors(geo, kit) {
  */
 export function buildWallExtras(parts, geo, kit) {
   parts.openings = parts.openings || [];
+  for (const f of geo.fixtures) {   // wall-mounted fixtures (kinds with a mount height `y`: the light switch) follow the wall they hang on
+    if (!(FIXTURE_KINDS[f.kind]?.y > 0)) continue; const g = parts.group.getObjectByName(`fixture:${f.id}`); if (!g) continue;
+    let best = null, bd = Infinity; for (const w of geo.walls) { const d = Math.hypot(Math.max(w.x0 - f.x, 0, f.x - w.x1), Math.max(w.z0 - f.z, 0, f.z - w.z1)); if (d < bd) { bd = d; best = w; } }
+    if (best) { g.userData.wall = { role: 'mounted', side: best.role === 'partition' ? null : best.side }; parts.openings.push(g); }
+  }
   if (geo.rooms.length > 1) {   // a foundation slab under the whole footprint: with the walls hidden ('down'), the gaps between the rooms show concrete, not the ground of the stage
     const b = geo.bbox, g = new THREE.PlaneGeometry(b.x1 - b.x0 + 2 * WALL_T, b.z1 - b.z0 + 2 * WALL_T).rotateX(-Math.PI / 2);
     const slab = kit.add(g, kit.mat('#bdb6a8', { roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 }), (b.x0 + b.x1) / 2, -0.02, (b.z0 + b.z1) / 2, { cast: false, recv: true, parent: parts.group }); slab.name = 'foundation'; parts.foundation = slab;
