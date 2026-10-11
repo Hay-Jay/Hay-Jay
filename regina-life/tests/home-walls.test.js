@@ -158,6 +158,17 @@ describe('the garage roller door', () => {
   it('only the layout that asks for one gets one', () => { for (const id of ['studio', 'onebed']) expect(build(id).parts.openings.some((m) => m.name === 'roller-door')).toBe(false); });
 });
 
+/* ------------------------------------------------------------------------------------------------ the foundation slab */
+describe('the foundation slab', () => {
+  for (const id of ['onebed', 'bungalow']) it(`${id}: one slab under the whole footprint (wall faces included), below the floors, never in front of them in depth`, () => {
+    const hm = build(id), slab = hm.parts.foundation, b = hm.lot.bbox; expect(slab).toBeTruthy(); expect(slab.name).toBe('foundation');
+    const box = new THREE.Box3().setFromObject(slab); near(box.min.x, b.x0 - WALL_T, 1e-6); near(box.max.x, b.x1 + WALL_T, 1e-6); near(box.min.z, b.z0 - WALL_T, 1e-6); near(box.max.z, b.z1 + WALL_T, 1e-6);
+    expect(box.max.y).toBeLessThan(0); expect(slab.material.polygonOffset && slab.material.polygonOffsetFactor > 0, 'loses ties against the floors').toBe(true);
+    for (const f of hm.parts.floors) expect(f.position.y).toBeGreaterThan(box.max.y);
+  });
+  it('the Studio has none (its mesh count is pinned to the hand-built apartment)', () => { expect(build('studio').parts.foundation).toBeUndefined(); });
+});
+
 /* ------------------------------------------------------------------------------------------------ room labels */
 describe('room name decals', () => {
   it('labelSpot picks the free spot nearest the middle and never overlaps an obstacle', () => {
@@ -175,7 +186,7 @@ describe('room name decals', () => {
       expect(labels).toBeTruthy(); const metas = labels.userData.labels; expect(metas.map((l) => l.room)).toEqual(HOMES[id].rooms.map((r) => r.id));
       for (const { room, mesh } of metas) {
         const r = hm.lot.rooms.find((q) => q.id === room), w = mesh.geometry.parameters.width, d = mesh.geometry.parameters.height;
-        expect(mesh.position.y).toBeGreaterThan(0.02); expect(mesh.position.y).toBeLessThan(0.06);
+        expect(mesh.position.y, 'above the thickest rug (the shag rug is 5 cm)').toBeGreaterThan(0.055); expect(mesh.position.y).toBeLessThan(0.1);
         expect(mesh.position.x - w / 2).toBeGreaterThanOrEqual(r.place.x0 - 1e-6); expect(mesh.position.x + w / 2).toBeLessThanOrEqual(r.place.x1 + 1e-6);
         expect(mesh.position.z - d / 2).toBeGreaterThanOrEqual(r.place.z0 - 1e-6); expect(mesh.position.z + d / 2).toBeLessThanOrEqual(r.place.z1 + 1e-6);
         expect(w).toBeGreaterThan(0.8); expect(w).toBeLessThan(3); expect(mesh.material.map).toBeTruthy(); expect(mesh.material.depthWrite).toBe(false);

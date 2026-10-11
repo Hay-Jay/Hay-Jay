@@ -79,7 +79,7 @@ export function applyWallMode(parts, mode) {
 
 /* ============================================================================================ room name decals */
 
-const LABEL_H = 0.46, LABEL_Y = 0.03;   // a pill 46 cm high lying 3 cm above the floor (above rugs at 1.6 cm and the contact shadows at 1.2 cm)
+const LABEL_H = 0.46, LABEL_Y = 0.07;   // a pill 46 cm high lying 7 cm above the floor: above the thickest rug (the shag rug is 5 cm) and the contact shadows (1.2 cm)
 
 /**
  * Where a room's label goes: the free spot closest to the middle of the room's place rect whose pill clears every fixture (and the doorway approaches),
@@ -163,11 +163,15 @@ function buildRollerDoors(geo, kit) {
 
 /**
  * Everything the cutaway needs beyond the wall boxes, added to an interior's `parts`: `parts.labels` (room name decals; null for single-room homes),
- * `parts.openings` gets the roller door pieces. Windows, the front door and signs are tagged by the builder itself (it created them).
+ * `parts.openings` gets the roller door pieces, `parts.foundation` is the slab under a multi-room footprint. Windows, the front door and signs are tagged by the builder itself (it created them).
  * @param parts the interior's parts (group, wallGroup, openings...)  @param geo deriveHome(layout)  @param kit the interior kit (mat, track)
  */
 export function buildWallExtras(parts, geo, kit) {
   parts.openings = parts.openings || [];
+  if (geo.rooms.length > 1) {   // a foundation slab under the whole footprint: with the walls hidden ('down'), the gaps between the rooms show concrete, not the ground of the stage
+    const b = geo.bbox, g = new THREE.PlaneGeometry(b.x1 - b.x0 + 2 * WALL_T, b.z1 - b.z0 + 2 * WALL_T).rotateX(-Math.PI / 2);
+    const slab = kit.add(g, kit.mat('#bdb6a8', { roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 }), (b.x0 + b.x1) / 2, -0.02, (b.z0 + b.z1) / 2, { cast: false, recv: true, parent: parts.group }); slab.name = 'foundation'; parts.foundation = slab;
+  }
   for (const o of buildRollerDoors(geo, kit)) { parts.wallGroup.add(o); parts.openings.push(o); }
   parts.labels = buildRoomLabels(geo, kit);
   if (parts.labels) parts.group.add(parts.labels);
