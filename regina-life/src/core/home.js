@@ -1,17 +1,25 @@
-/** Home decorating: buying, placing and removing furniture; paint & flooring. Validated rules (no trusting the editor UI). */
-import { FURNITURE, POSTER_SIZE, isPoster, WALLS, FLOORS, wallPrice, floorPrice, sellPrice, MAX_PLACED, MAX_OWNED_EACH, ROOM, KEEPOUT, FIXTURES, KEY_POINTS, HOME_FX, HOME_CAPS, POSTER_FX, TV_SEAT_KINDS, tvSeatFactor } from '../data/furniture.js';
+/**
+ * Home decorating: buying, placing and removing furniture; paint & flooring. Validated rules (no trusting the editor UI). Everything that depends
+ * on the house is layout-aware through layoutOf(state) (data/homes.js) and the pure geometry in core/lot.js; the Studio behaves exactly as it
+ * did before multi-room homes (tests/legacy-home.js is the frozen old copy the differential test compares with).
+ * LAYERING: data/homes.js <- core/lot.js <- core/home.js <- core/move.js <- core/sanitize.js. Nothing evaluated at module load here may call into lot.js.
+ */
+import { FURNITURE, POSTER_SIZE, isPoster, WALLS, FLOORS, wallPrice, floorPrice, sellPrice, MAX_OWNED_EACH, KEY_POINTS, HOME_FX, HOME_CAPS, POSTER_FX, TV_SEAT_KINDS, tvSeatFactor } from '../data/furniture.js';
+import { layoutOf } from '../data/homes.js';
 import { own } from './util.js';
+import { lotOf, reachableKeys, rectAt, rectsHit, rectInside } from './lot.js';
 import { DESTINATION_BY_ID } from '../data/destinations.js';
 
 const GRID = 0.25, snap = (v) => Math.round(v / GRID) * GRID;
 let _uid = 0; const uid = () => `f${Date.now().toString(36)}${(_uid++).toString(36)}`;
 export const itemDef = (type) => (typeof type !== 'string' ? null : isPoster(type) ? (own(DESTINATION_BY_ID, type.slice(7)) ? { id: type, name: `${DESTINATION_BY_ID[type.slice(7)].name} poster`, ...POSTER_SIZE, solid: false, price: 0, poster: true } : null) : own(FURNITURE, type) ? FURNITURE[type] : null);
 export const footprint = (type, rot) => { const d = itemDef(type); return rot % 2 ? { w: d.d, d: d.w } : { w: d.w, d: d.d }; };
-const rect = (x, z, w, d) => ({ x0: x - w / 2, x1: x + w / 2, z0: z - d / 2, z1: z + d / 2 });
-const hit = (a, b) => a.x0 < b.x1 - 1e-6 && a.x1 > b.x0 + 1e-6 && a.z0 < b.z1 - 1e-6 && a.z1 > b.z0 + 1e-6;
+/** How many pieces this house holds (60 / 85 / 110): the layout's own cap, the Studio's being the long-standing MAX_PLACED. */
+export const maxPlaced = (s) => layoutOf(s).maxPlaced;
+const placedOf = (s) => (Array.isArray(s?.home?.placed) ? s.home.placed : []);
 
 export function ownedCount(s, type) { if (!itemDef(type)) return 0; if (isPoster(type)) return (s.souvenirs || []).includes(type.slice(7)) ? 1 : 0; const n = own(s.home?.owned, type) ? s.home.owned[type] : 0; return Number.isInteger(n) && n > 0 ? n : 0; }
-export const placedCount = (s, type) => (Array.isArray(s.home?.placed) ? s.home.placed : []).filter((p) => p.type === type).length;
+export const placedCount = (s, type) => placedOf(s).filter((p) => p.type === type).length;
 export const availableToPlace = (s, type) => ownedCount(s, type) - placedCount(s, type);
 export const ownedTypes = (s) => [...Object.keys(FURNITURE), ...(s.souvenirs || []).map((d) => `poster_${d}`)].filter((t) => ownedCount(s, t) > 0);
 /** Owned but not placed, per type (the "+N in storage" list) and in total (free souvenir posters count as owned). */
@@ -19,52 +27,43 @@ export const storageItems = (s) => ownedTypes(s).map((type) => ({ type, n: avail
 export const storageCount = (s) => storageItems(s).reduce((n, x) => n + x.n, 0);
 
 /* ---------- walkability: a placement must never wall the player in or cut them off from a fixture ---------- */
-const CELL = 0.25, PLAYER_R = 0.38, COLS = Math.round((ROOM.x1 - ROOM.x0) / CELL), ROWS = Math.round((ROOM.z1 - ROOM.z0) / CELL);
-const cx = (c) => ROOM.x0 + (c + 0.5) * CELL, cz = (r) => ROOM.z0 + (r + 0.5) * CELL;
-const distToRect = (x, z, r) => Math.hypot(Math.max(r.x0 - x, 0, x - r.x1), Math.max(r.z0 - z, 0, z - r.z1));
-/** Cells whose centre lies within `pad` of a rect (a window of the grid, so only the cells that can matter are visited). */
-function cellWindow(r, pad) { return { c0: Math.max(0, Math.floor((r.x0 - pad - ROOM.x0) / CELL - 0.5)), c1: Math.min(COLS - 1, Math.ceil((r.x1 + pad - ROOM.x0) / CELL - 0.5)), r0: Math.max(0, Math.floor((r.z0 - pad - ROOM.z0) / CELL - 0.5)), r1: Math.min(ROWS - 1, Math.ceil((r.z1 + pad - ROOM.z0) / CELL - 0.5)) }; }
-function walkable(obstacles) {
-  const free = new Uint8Array(COLS * ROWS).fill(1);
-  for (const o of obstacles) { const w = cellWindow(o, PLAYER_R); for (let r = w.r0; r <= w.r1; r++) for (let c = w.c0; c <= w.c1; c++) if (distToRect(cx(c), cz(r), o) < PLAYER_R) free[r * COLS + c] = 0; }
-  return free;
-}
-/** Which key points can the player still reach from the entrance? */
-function accessible(obstacles) {
-  const free = walkable(obstacles), seen = new Uint8Array(COLS * ROWS), start = KEY_POINTS[0];
-  // the entrance spot itself can sit within the player's radius of the desk: start from the nearest free cell (within 0.7 m)
-  let best = -1, bd = 0.7; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { const d = Math.hypot(cx(c) - start.x, cz(r) - start.z); if (free[r * COLS + c] && d < bd) { bd = d; best = r * COLS + c; } }
-  const out = new Set(); if (best < 0) return out;
-  const q = [best]; seen[best] = 1;
-  while (q.length) { const i = q.pop(), r = (i / COLS) | 0, c = i % COLS; for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nr = r + dr, nc = c + dc; if (nr < 0 || nc < 0 || nr >= ROWS || nc >= COLS) continue; const j = nr * COLS + nc; if (free[j] && !seen[j]) { seen[j] = 1; q.push(j); } } }
-  for (const k of KEY_POINTS) { let hit = false; const w = cellWindow({ x0: k.x, x1: k.x, z0: k.z, z1: k.z }, 1.1); for (let r = w.r0; r <= w.r1 && !hit; r++) for (let c = w.c0; c <= w.c1; c++) if (seen[r * COLS + c] && Math.hypot(cx(c) - k.x, cz(r) - k.z) <= 1.1) { hit = true; break; } if (hit) out.add(k.n); }
-  return out;
-}
-const solidRects = (s, ignoreId = null) => (Array.isArray(s.home?.placed) ? s.home.placed : []).filter((p) => p.id !== ignoreId && itemDef(p.type)?.solid).map((p) => { const f = footprint(p.type, p.rot); return rect(p.x, p.z, f.w, f.d); });
-/** Key points reachable with the empty room (the reference every arrangement is compared with). */
-const BASELINE = accessible(FIXTURES);
-const missingKeys = (obstacles) => { const a = accessible(obstacles); return [...BASELINE].filter((n) => !a.has(n)); };
-/** Names of the apartment fixtures the player can currently walk to from the entrance (for tests & the soft-lock check). */
-export const accessibleKeys = (s) => [...accessible([...FIXTURES, ...solidRects(s)])];
-export const BASELINE_KEYS = [...BASELINE];
-/** Moves furniture to storage (latest first) until every normally-reachable fixture is reachable again. Returns how many pieces were stored. */
+/** Footprint rects of the placed pieces that block walking (everything solid except `ignoreId`). */
+const solidRects = (placed, ignoreId = null) => placed.filter((p) => p.id !== ignoreId && itemDef(p.type)?.solid).map((p) => { const f = footprint(p.type, p.rot); return rectAt(p.x, p.z, f.w, f.d); });
+/** Key points that are reachable in the empty house but not with these extra obstacles. */
+const missingKeys = (lot, extra) => { const a = reachableKeys(lot, extra); return [...lot.baseline].filter((n) => !a.has(n)); };
+const keyLabel = (lot, n) => lot.keyPoints.find((k) => k.n === n)?.label ?? n;
+/** Names of the key points (the entrance and every fixture, doorway and room) the player can currently walk to from the entrance (for tests and the soft-lock check). */
+export const accessibleKeys = (s) => [...reachableKeys(lotOf(layoutOf(s)), solidRects(placedOf(s)))];
+/** The Studio's key names (its listed KEY_POINTS; every one is reachable in the empty Studio, which a test locks against lotOf(STUDIO).baseline). */
+export const BASELINE_KEYS = KEY_POINTS.map((k) => k.n);
+/** Moves furniture to storage (latest first) until every normally-reachable key point is reachable again. Returns how many pieces were stored. */
 export function repairHome(store) {
-  const h = store.state.home; if (!h || !Array.isArray(h.placed)) return 0; let n = 0;
-  while (missingKeys([...FIXTURES, ...solidRects(store.state)]).length) { const i = [...h.placed].map((p, k) => [p, k]).reverse().find(([p]) => itemDef(p.type)?.solid)?.[1]; if (i == null) break; h.placed.splice(i, 1); n++; }
+  const h = store.state.home; if (!h || !Array.isArray(h.placed)) return 0; const lot = lotOf(layoutOf(store.state)); let n = 0;
+  while (missingKeys(lot, solidRects(h.placed)).length) { const i = [...h.placed].map((p, k) => [p, k]).reverse().find(([p]) => itemDef(p.type)?.solid)?.[1]; if (i == null) break; h.placed.splice(i, 1); n++; }
   if (n) store.commit('home'); return n;
 }
 
-/** Check a placement. `ignoreId` lets you validate moving an already-placed piece. */
-export function canPlace(s, type, x, z, rot = 0, ignoreId = null) {
+/**
+ * Check a placement against a layout and the pieces already `placed`, at the RAW coordinates given (no snapping: saves are validated as stored).
+ * `ignoreId` lets you validate moving an already-placed piece. Returns { ok } or { ok: false, error }.
+ */
+export function validatePlacement(layout, placed, type, x, z, rot = 0, ignoreId = null) {
   const def = itemDef(type); if (!def) return { ok: false, error: 'Unknown item' };
   if (![x, z, rot].every(Number.isFinite) || !Number.isInteger(rot) || rot < 0 || rot > 3) return { ok: false, error: 'Invalid position' };
-  const f = footprint(type, rot), r = rect(snap(x), snap(z), f.w, f.d);
-  if (r.x0 < ROOM.x0 - 1e-6 || r.x1 > ROOM.x1 + 1e-6 || r.z0 < ROOM.z0 - 1e-6 || r.z1 > ROOM.z1 + 1e-6) return { ok: false, error: 'Outside the room' };
-  const clearOnly = def.solid; // rugs/posters may sit anywhere inside the room except right on fixtures that would hide them
-  if (def.solid || def.poster) for (const k of KEEPOUT) if (hit(r, k)) return { ok: false, error: `Blocked by the ${k.n}` };
-  if (def.solid) for (const p of Array.isArray(s.home?.placed) ? s.home.placed : []) { if (p.id === ignoreId) continue; const pd = itemDef(p.type); if (!pd.solid) continue; const pf = footprint(p.type, p.rot); if (hit(r, rect(p.x, p.z, pf.w, pf.d))) return { ok: false, error: 'Overlaps other furniture' }; }
-  if (def.solid) { const others = [...FIXTURES, ...solidRects(s, ignoreId)], gone = missingKeys([...others, r]); if (gone.length) { const before = missingKeys(others), worse = gone.filter((n) => !before.includes(n)); if (worse.length) return { ok: false, error: `Blocks the way to the ${worse[0]}` }; } }
-  return { ok: true, x: snap(x), z: snap(z) };
+  const lot = lotOf(layout), f = footprint(type, rot), r = rectAt(x, z, f.w, f.d);
+  if (!lot.rooms.some((rm) => rectInside(r, rm.place)) || lot.walls.some((w) => rectsHit(r, w))) return { ok: false, error: 'Outside the room' };
+  if (def.solid || def.poster) for (const k of lot.keepout) if (rectsHit(r, k)) return { ok: false, error: `Blocked by the ${k.n}` };   // rugs and mats may lie on fixtures; posters and solids may not
+  if (def.solid) for (const p of placed) { if (p.id === ignoreId) continue; const pd = itemDef(p.type); if (!pd?.solid) continue; const pf = footprint(p.type, p.rot); if (rectsHit(r, rectAt(p.x, p.z, pf.w, pf.d))) return { ok: false, error: 'Overlaps other furniture' }; }
+  if (def.solid) {
+    const others = solidRects(placed, ignoreId), gone = missingKeys(lot, [...others, r]);
+    if (gone.length) { const before = missingKeys(lot, others), worse = gone.filter((n) => !before.includes(n)); if (worse.length) return { ok: false, error: `Blocks the way to the ${keyLabel(lot, worse[0])}` }; }
+  }
+  return { ok: true };
+}
+/** Check a placement in the player's own house: snaps to the 0.25 m grid, then validatePlacement. On success returns { ok, x, z } (the snapped spot). */
+export function canPlace(s, type, x, z, rot = 0, ignoreId = null) {
+  const sx = Number.isFinite(x) ? snap(x) : x, sz = Number.isFinite(z) ? snap(z) : z, v = validatePlacement(layoutOf(s), placedOf(s), type, sx, sz, rot, ignoreId);
+  return v.ok ? { ok: true, x: sx, z: sz } : v;
 }
 export function buyFurniture(store, type) {
   const def = own(FURNITURE, type) ? FURNITURE[type] : null; if (!def) return { ok: false, error: 'Unknown item' };
@@ -75,7 +74,7 @@ export function buyFurniture(store, type) {
 export function placeFurniture(store, type, x, z, rot = 0) {
   const s = store.state, h = (s.home ||= { owned: {}, placed: [] }); h.placed ||= [];
   if (availableToPlace(s, type) < 1) return { ok: false, error: 'You have none of those in storage' };
-  if (h.placed.length >= MAX_PLACED) return { ok: false, error: `You can place up to ${MAX_PLACED} items` };
+  const cap = maxPlaced(s); if (h.placed.length >= cap) return { ok: false, error: `You can place up to ${cap} items` };
   const c = canPlace(s, type, x, z, rot); if (!c.ok) return c;
   const item = { id: uid(), type, x: c.x, z: c.z, rot }; h.placed.push(item); store.commit('home'); return { ok: true, item };
 }
@@ -93,15 +92,43 @@ export function sellFurniture(store, type) {
   const refund = sellPrice(def.price), r = store.ledger.credit(refund, `Sold: ${def.name}`, { category: 'income' }); if (!r.ok) return r;
   s.home.owned[type]--; if (!s.home.owned[type]) delete s.home.owned[type]; store.commit('home'); return { ok: true, refund };
 }
-/** Paint/flooring: pay the first time you pick an option; free to switch back to ones you own. */
-export function setStyle(store, kind, key) {
-  if (kind !== 'wall' && kind !== 'floor') return { ok: false, error: 'Unknown style' };
-  const s = store.state, table = kind === 'wall' ? WALLS : FLOORS, h = (s.home ||= { owned: {}, placed: [] });
+
+/* ---------- paint and flooring ---------- */
+const styleTable = (kind) => (kind === 'wall' ? WALLS : kind === 'floor' ? FLOORS : null);
+const baseStyle = (kind) => (kind === 'wall' ? 'cream' : 'oak');
+/** What a style costs right now: { ok, owned, price (list), cost (0 once owned) }. The one place that prices paint and flooring: the UI shows `cost`, setStyle charges it. */
+export function styleQuote(s, kind, key) {
+  const table = styleTable(kind); if (!table || !own(table, key)) return { ok: false, owned: false, price: 0, cost: 0 };
+  const list = s?.home?.[kind + 's'], owned = Array.isArray(list) ? list.includes(key) : key === baseStyle(kind), price = kind === 'wall' ? wallPrice(key) : floorPrice(key);
+  return { ok: true, owned, price, cost: owned ? 0 : price };
+}
+/** The wall paint and floor a room shows: its own override if the house has several rooms and the key is valid, else the house default. */
+export function styleOf(s, roomId = null) {
+  const h = s?.home ?? {}, layout = layoutOf(s), pick = (kind) => {
+    const table = styleTable(kind), room = roomId != null && layout.rooms.length > 1 && own(h.rooms, roomId) && h.rooms[roomId] && typeof h.rooms[roomId] === 'object' ? h.rooms[roomId][kind] : null;
+    if (typeof room === 'string' && own(table, room)) return room;
+    return typeof h[kind] === 'string' && own(table, h[kind]) ? h[kind] : baseStyle(kind);
+  };
+  return { wall: pick('wall'), floor: pick('floor') };
+}
+/**
+ * Paint/flooring: pay the first time you pick an option (once per style key for the whole house); free to switch back to ones you own.
+ * `roomId` null sets the house default AND clears every per-room override of that kind; a room id (an own id of the current layout, else
+ * 'Unknown room') sets that room only. Single-room layouts never write `rooms`. Returns { ok, paid } (paid = cents charged, 0 when owned).
+ */
+export function setStyle(store, kind, key, roomId = null) {
+  const table = styleTable(kind); if (!table) return { ok: false, error: 'Unknown style' };
+  const s = store.state, h = (s.home ||= { owned: {}, placed: [] });
   if (!own(table, key)) return { ok: false, error: 'Unknown style' };
-  const price = kind === 'wall' ? wallPrice(key) : floorPrice(key);
-  const owned = (Array.isArray(h[kind + 's']) ? h[kind + 's'] : (h[kind + 's'] = kind === 'wall' ? ['cream'] : ['oak']));
-  if (!owned.includes(key)) { if (price > 0) { const r = store.ledger.debit(price, `${kind === 'wall' ? 'Paint' : 'Flooring'}: ${table[key][0]}`, { category: 'purchase' }); if (!r.ok) return r; } owned.push(key); }
-  h[kind] = key; store.commit('home'); return { ok: true };
+  const layout = layoutOf(s);
+  if (roomId != null && !(typeof roomId === 'string' && layout.rooms.some((r) => r.id === roomId))) return { ok: false, error: 'Unknown room' };
+  if (layout.rooms.length < 2) roomId = null;
+  const q = styleQuote(s, kind, key), owned = (Array.isArray(h[kind + 's']) ? h[kind + 's'] : (h[kind + 's'] = [baseStyle(kind)]));
+  let paid = 0;
+  if (!owned.includes(key)) { if (q.price > 0) { const r = store.ledger.debit(q.price, `${kind === 'wall' ? 'Paint' : 'Flooring'}: ${table[key][0]}`, { category: 'purchase' }); if (!r.ok) return r; paid = q.price; } owned.push(key); }
+  if (roomId == null) { h[kind] = key; if (h.rooms && typeof h.rooms === 'object') for (const id of Object.keys(h.rooms)) { const o = h.rooms[id]; if (o && typeof o === 'object') { delete o[kind]; if (!Object.keys(o).length) delete h.rooms[id]; } } }
+  else { h.rooms = h.rooms && typeof h.rooms === 'object' && !Array.isArray(h.rooms) ? h.rooms : {}; h.rooms[roomId] = { ...(own(h.rooms, roomId) && h.rooms[roomId] && typeof h.rooms[roomId] === 'object' ? h.rooms[roomId] : {}), [kind]: key }; }
+  store.commit('home'); return { ok: true, paid };
 }
 
 /* ---------- what the room does for you ---------- */
