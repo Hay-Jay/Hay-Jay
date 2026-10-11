@@ -23,6 +23,7 @@
  * A test asserts Object.keys(FIXTURE_BUILDERS) equals Object.keys(FIXTURE_KINDS) once B2 has landed.
  */
 import * as THREE from 'three';
+import { kit as modelKit } from './furnitureModels.js';
 
 export const FIXTURE_BUILDERS = {};
 export const FIXTURE_META = {};
@@ -104,3 +105,118 @@ registerFixtureKind('shower', (g, k) => {
 }, { blob: false });
 
 registerFixtureKind('switch', (g, k) => { k.box(0.1, 0.16, 0.03, '#f3f3f3', 0, 1.2, 0); }, { blob: false });
+
+/* ---------------------------------------------------------------- the multi-room kinds (package B2)
+ * Drawn with the modelling kit of world/furnitureModels.js: every part is queued, then baked into ONE mesh per material (a toilet is 3 draw calls, not 12),
+ * with materials shared across the whole interior through the framework's k.mat and geometries tracked for disposal. Same warm, bright palette as the Studio.
+ * Every model fits its FIXTURE_KINDS w x d footprint (tests/home-kinds.test.js pins the tolerance and lists the few deliberate overhangs). */
+const WARM = { cream: '#f1ece0', oak: '#c9a878', wood: '#a67c52', walnut: '#6b4f36', brass: '#c9a24a', steel: '#c0c4c8', dark: '#2b2e33', china: '#f4f6f7', sage: '#8fae95', teal: '#4a8f96', clay: '#c4694a', mustard: '#e0b04a' };
+const lite = (hex, l) => `#${new THREE.Color(hex).offsetHSL(0, 0, l).getHexString()}`;
+
+/** Bake `draw(m)` (queued modelling-kit parts, local coordinates) into one mesh per material under `g`. */
+function bakeFixture(g, k, draw) {
+  const m = modelKit((color, o) => k.mat(color, { roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, vertexColors: !!o.vc, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }), { vertexColors: true });
+  draw(m);
+  const baked = m.bake(false); baked.name = 'baked'; baked.traverse((o) => { if (o.geometry) k.track(o.geometry); });
+  g.add(baked); return baked;
+}
+
+registerFixtureKind('toilet', (g, k) => bakeFixture(g, k, (m) => {   // back (the cistern) to -z, the seat opens towards +z
+  const china = WARM.china;
+  m.ce(0.26, 0.4, 0.3, china, 0, 0, -0.04, 16);                                            // pedestal
+  m.ce(0.38, 0.56, 0.15, china, 0, 0.28, 0.08, 18);                                        // bowl
+  m.ce(0.37, 0.5, 0.035, '#fbfbf8', 0, 0.43, 0.1, 18); m.ce(0.25, 0.34, 0.006, '#cfd9dd', 0, 0.465, 0.12, 14);   // seat ring and the water in the bowl
+  m.b(0.4, 0.4, 0.17, china, 0, 0.38, -0.29); m.b(0.42, 0.03, 0.19, '#fbfbf8', 0, 0.76, -0.29);   // cistern and its lid
+  m.c(0.032, 0.032, 0.01, WARM.steel, 0, 0.79, -0.29, 10, { mt: 0.8, r: 0.25 });          // flush button
+}), { blob: false });
+
+registerFixtureKind('vanity', (g, k) => bakeFixture(g, k, (m) => {   // cabinet with a basin, back to -z, doors facing +z
+  const body = '#b48c62', door = lite(body, 0.07), top = '#f1efe9';
+  m.b(1.14, 0.08, 0.5, WARM.dark, 0, 0, -0.02);                                            // plinth
+  m.b(1.2, 0.74, 0.55, body, 0, 0.08, 0);                                                  // carcass
+  for (const sx of [-1, 1]) { m.b(0.56, 0.62, 0.012, door, sx * 0.29, 0.14, 0.281); m.b(0.02, 0.1, 0.014, WARM.brass, sx * 0.05, 0.5, 0.287, { mt: 0.5 }); }
+  m.b(1.2, 0.04, 0.55, top, 0, 0.82, 0); m.b(1.2, 0.12, 0.03, top, 0, 0.86, -0.26);       // worktop and splash-back
+  m.ce(0.5, 0.36, 0.008, '#e3edf1', 0, 0.86, 0.04, 20); m.ce(0.4, 0.27, 0.004, '#bfe0ec', 0, 0.867, 0.04, 18, { op: 0.9, r: 0.2 });   // basin and its water
+  m.c(0.018, 0.018, 0.1, WARM.steel, 0, 0.86, -0.17, 8, { mt: 0.9, r: 0.2 }); m.cz(0.11, 0.011, WARM.steel, 0, 0.955, -0.12, 8, { mt: 0.9, r: 0.2 });   // tap
+  m.c(0.03, 0.026, 0.09, '#e8a0a0', -0.44, 0.86, -0.12, 10); m.c(0.024, 0.024, 0.11, '#6fb3a0', 0.44, 0.86, -0.16, 10); m.b(0.26, 0.05, 0.18, '#ead9bb', 0.36, 0.86, 0.1);   // cup, soap pump, folded towel
+}), { blob: false });
+
+registerFixtureKind('island', (g, k) => bakeFixture(g, k, (m) => {   // doors face +z, the breakfast overhang faces -z
+  const cab = '#d7d2c6';
+  m.b(1.9, 0.78, 0.5, cab, 0, 0.08, 0.15); m.b(1.84, 0.08, 0.44, WARM.dark, 0, 0, 0.15);   // carcass and plinth
+  for (let i = 0; i < 4; i++) { const x = -0.7125 + i * 0.475; m.b(0.45, 0.66, 0.012, lite(cab, 0.05), x, 0.14, 0.406); m.b(0.11, 0.02, 0.014, WARM.brass, x + (i % 2 ? -0.14 : 0.14), 0.7, 0.412, { mt: 0.5 }); }
+  for (const sx of [-1, 1]) m.b(0.04, 0.82, 0.4, WARM.wood, sx * 0.96, 0.04, -0.25);       // side panels under the overhang
+  m.b(2.0, 0.045, 0.9, '#ece7dd', 0, 0.86, 0);                                             // worktop, a lip all round the cabinet
+  m.b(0.5, 0.022, 0.32, WARM.oak, 0.55, 0.905, 0.08); m.b(0.28, 0.07, 0.1, '#d9a45a', 0.55, 0.927, 0.08, { r: 0.9 });   // chopping board and a loaf
+  m.ce(0.3, 0.3, 0.05, '#d9553f', -0.6, 0.905, 0.0, 14); m.s(0.08, 0.08, 0.08, '#f0a030', -0.65, 0.925, -0.02, { lo: true }); m.s(0.08, 0.08, 0.08, '#e0584a', -0.55, 0.925, 0.03, { lo: true }); m.s(0.08, 0.08, 0.08, '#8cc05a', -0.6, 0.94, 0.0, { lo: true });
+}), { blob: { w: 2.1, d: 1.0, op: 0.3 } });
+
+registerFixtureKind('dining_set', (g, k) => bakeFixture(g, k, (m) => {   // a table with four chairs; the south chair (z +0.75) is the one you sit in
+  const top = '#b88a5a', leg = lite(top, -0.2);
+  m.b(1.3, 0.05, 0.85, top, 0, 0.71, 0); m.b(1.14, 0.006, 0.69, lite(top, 0.08), 0, 0.76, 0);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) m.b(0.07, 0.71, 0.07, leg, sx * 0.58, 0, sz * 0.34);
+  m.b(1.0, 0.04, 0.05, leg, 0, 0.6, 0);                                                   // stretcher
+  const chair = (x, z, back) => {   // `back`: the side the backrest is on ('n' | 's' | 'e' | 'w'); the seat is 0.40 square
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) m.b(0.035, 0.43, 0.035, leg, x + sx * 0.17, 0, z + sz * 0.17);
+    m.b(0.4, 0.04, 0.4, WARM.sage, x, 0.43, z); m.b(0.34, 0.03, 0.34, lite(WARM.sage, 0.09), x, 0.47, z);
+    const ns = back === 'n' || back === 's', sgn = back === 'n' || back === 'w' ? -1 : 1;
+    if (ns) { m.b(0.4, 0.43, 0.035, top, x, 0.47, z + sgn * 0.1825); m.b(0.3, 0.2, 0.012, lite(WARM.sage, 0.09), x, 0.6, z + sgn * 0.158); } else { m.b(0.035, 0.43, 0.4, top, x + sgn * 0.1825, 0.47, z); m.b(0.012, 0.2, 0.3, lite(WARM.sage, 0.09), x + sgn * 0.158, 0.6, z); }
+  };
+  chair(0, -0.75, 'n'); chair(0, 0.75, 's'); chair(-0.7, 0, 'w'); chair(0.7, 0, 'e');
+  m.ce(0.22, 0.22, 0.05, WARM.clay, 0, 0.766, 0, 14); m.s(0.09, 0.09, 0.09, '#f0b030', -0.04, 0.8, 0.01, { lo: true }); m.s(0.09, 0.09, 0.09, '#8cc05a', 0.05, 0.8, -0.02, { lo: true });   // fruit bowl
+  for (const [x, z] of [[-0.4, -0.25], [0.4, -0.25], [-0.4, 0.25], [0.4, 0.25]]) m.ce(0.2, 0.2, 0.012, WARM.china, x, 0.766, z, 14);   // plates
+}), { blob: { w: 2.0, d: 2.1, op: 0.3 } });
+
+registerFixtureKind('guest_bed', (g, k) => bakeFixture(g, k, (m) => {   // headboard at -z, you get in from the east (+x)
+  const pine = '#c9a878';
+  m.b(1.4, 0.26, 2.1, lite(pine, -0.08), 0, 0, 0); m.b(1.34, 0.2, 2.0, '#f1ede6', 0, 0.26, 0.02);   // frame and mattress
+  m.b(1.4, 0.9, 0.1, pine, 0, 0, -1.0); m.b(1.2, 0.5, 0.03, lite(pine, 0.08), 0, 0.3, -0.935); m.b(1.4, 0.4, 0.06, pine, 0, 0, 1.02);   // headboard (panelled), footboard
+  m.b(1.36, 0.08, 1.35, WARM.sage, 0, 0.44, 0.2); m.b(1.38, 0.082, 0.16, lite(WARM.sage, -0.12), 0, 0.44, -0.18);   // quilt with a folded band
+  m.b(0.56, 0.12, 0.36, '#ffffff', -0.3, 0.46, -0.72); m.b(0.56, 0.12, 0.36, '#fbe8c8', 0.3, 0.46, -0.72);   // pillows
+  m.b(1.3, 0.1, 0.36, WARM.mustard, 0, 0.5, 0.72);                                         // blanket folded at the foot
+}), { blob: { w: 1.6, d: 2.3, op: 0.4 } });
+
+registerFixtureKind('office_desk', (g, k) => bakeFixture(g, k, (m) => {   // you sit on the -z side; the monitor faces -z
+  const oak = '#c8a36f', frame = '#3d3f45';
+  m.b(1.6, 0.04, 0.8, oak, 0, 0.7, 0);
+  m.b(0.5, 0.7, 0.72, lite(WARM.wood, -0.02), -0.55, 0, 0);                                // drawer pedestal
+  for (let i = 0; i < 3; i++) { m.b(0.44, 0.19, 0.012, lite(WARM.wood, 0.06), -0.55, 0.05 + i * 0.22, -0.366); m.b(0.14, 0.02, 0.014, WARM.brass, -0.55, 0.15 + i * 0.22, -0.372, { mt: 0.5 }); }
+  m.b(0.05, 0.7, 0.72, frame, 0.76, 0, 0); m.b(1.0, 0.4, 0.02, lite(WARM.wood, -0.05), 0.2, 0.3, 0.34);   // steel end frame, modesty panel
+  m.b(0.22, 0.02, 0.16, frame, 0.1, 0.74, 0.2); m.b(0.04, 0.12, 0.03, frame, 0.1, 0.76, 0.22);   // monitor foot and neck
+  m.b(0.74, 0.44, 0.04, '#111214', 0.1, 0.84, 0.24); m.b(0.68, 0.38, 0.01, '#6ec0ff', 0.1, 0.87, 0.215, { e: '#4aa8ff', ei: 0.7 });
+  m.b(0.45, 0.02, 0.15, '#2a2c30', 0.1, 0.74, -0.14); m.b(0.07, 0.025, 0.11, '#2a2c30', 0.5, 0.74, -0.14);   // keyboard, mouse
+  m.c(0.07, 0.07, 0.02, frame, 0.66, 0.74, 0.27, 12); m.rod([0.66, 0.75, 0.27], [0.58, 1.0, 0.16], 0.012, frame); m.cone(0.07, 0.1, WARM.mustard, 0.55, 0.98, 0.12, 10);   // desk lamp
+  m.b(0.25, 0.035, 0.33, '#f6f1e6', -0.5, 0.74, -0.05); m.b(0.2, 0.012, 0.26, '#cfe3ee', -0.46, 0.775, -0.02);   // papers
+  m.c(0.04, 0.035, 0.09, WARM.clay, -0.15, 0.74, 0.2, 10);                                  // mug
+}), { blob: false });
+
+registerFixtureKind('garage_shelf', (g, k, ctx) => bakeFixture(g, k, (m) => {   // open steel shelving, the front (and the Storage prompt) faces +z
+  const post = '#4f78a8', ys = [0.1, 0.6, 1.1, 1.6, 1.86];
+  for (const x of [-1.175, 0, 1.175]) for (const z of [-0.22, 0.22]) m.b(0.05, 1.9, 0.05, post, x, 0, z);
+  for (const y of ys) m.b(2.4, 0.04, 0.5, WARM.oak, 0, y, 0);
+  const r = ctx.rnd, boxCols = ['#c89a62', '#b98d57', '#d4a972'], binCols = ['#3a8fb7', '#4a8f96', '#c4694a', '#e0b04a'], canCols = ['#e0b04a', '#c4694a', '#8fae95', '#d9553f'];
+  for (const [li, y] of [[0, 0.14], [1, 0.64], [2, 1.14], [3, 1.64]]) {   // contents of each shelf, left to right
+    let x = -1.12; const room = li === 3 ? 0.18 : 0.38;   // the top shelf holds low things; nothing goes past the end posts (|x| <= 1.15)
+    while (x < 1.0) {
+      const t = r(), w = Math.min(0.3 + r() * 0.25, 1.15 - x);
+      if (t < 0.34) { m.b(w, room + 0.08, 0.38, boxCols[Math.floor(r() * 3)], x + w / 2, y, 0); m.b(0.05, 0.003, 0.38, '#e8dcc0', x + w / 2, y + room + 0.081, 0); }   // cardboard box with tape
+      else if (t < 0.62) { m.b(w, room, 0.36, binCols[Math.floor(r() * 4)], x + w / 2, y, 0, { r: 0.5 }); m.b(w, 0.03, 0.38, lite(binCols[0], 0.1), x + w / 2, y + room, 0); }   // lidded bin
+      else if (t < 0.85) { const n = Math.max(1, Math.min(2 + Math.floor(r() * 2), Math.floor(w / 0.17))); for (let i = 0; i < n; i++) m.c(0.075, 0.075, 0.17, canCols[Math.floor(r() * 4)], x + 0.085 + i * 0.17, y, (i % 2) * 0.1 - 0.05, 12, { mt: 0.2 }); }   // paint cans
+      else { const tw = Math.min(w, 0.4); m.b(tw, 0.16, 0.2, '#c8102e', x + tw / 2, y, 0); m.b(0.18, 0.04, 0.05, WARM.dark, x + tw / 2, y + 0.16, 0); }   // toolbox
+      x += w + 0.06 + r() * 0.1;
+    }
+  }
+}), { blob: { w: 2.5, d: 0.7, op: 0.35 } });
+
+registerFixtureKind('car', (g, k) => bakeFixture(g, k, (m) => {   // a small hatchback with its nose towards +z (the roller door)
+  const red = '#d8573c', glass = '#9ccfe3', tyre = '#23252a';
+  m.b(1.76, 0.46, 4.1, red, 0, 0.32, 0.05); m.b(1.7, 0.1, 1.15, lite(red, 0.04), 0, 0.78, 1.38);   // body and bonnet
+  m.b(1.58, 0.58, 1.96, glass, 0, 0.78, -0.6, { r: 0.3 }); m.b(1.62, 0.06, 1.8, lite(red, 0.06), 0, 1.36, -0.62);   // glasshouse and roof
+  for (const z of [0.36, -0.6, -1.56]) m.b(1.62, 0.58, 0.07, red, 0, 0.78, z);                 // A, B and C pillars show as bands across the glass
+  m.b(1.5, 0.625, 0.04, glass, 0, 0.8075, 0.6, { rx: -0.695, r: 0.3 }); m.b(1.5, 0.703, 0.04, glass, 0, 0.7385, -1.725, { rx: 0.695, r: 0.3 });   // windscreen, tailgate window
+  m.b(1.8, 0.16, 0.2, WARM.dark, 0, 0.25, 2.1); m.b(1.8, 0.16, 0.2, WARM.dark, 0, 0.25, -2.1);   // bumpers
+  m.b(0.8, 0.12, 0.04, '#3a3d44', 0, 0.45, 2.1);                                              // grille
+  for (const sx of [-1, 1]) { m.b(0.32, 0.13, 0.05, '#fff3c4', sx * 0.62, 0.55, 2.1, { e: '#ffe9a0', ei: 0.6 }); m.b(0.3, 0.1, 0.05, '#d11a2a', sx * 0.66, 0.6, -2.1, { e: '#ff3b3b', ei: 0.5 }); }   // headlamps, tail lights
+  m.b(0.5, 0.12, 0.03, '#f4f1e8', 0, 0.4, -2.14);                                              // number plate
+  for (const sx of [-1, 1]) { m.b(0.1, 0.1, 0.16, red, sx * 0.9, 0.9, 0.55); for (const sz of [-1, 1]) { m.cx(0.22, 0.32, tyre, sx * 0.84, 0.32, sz * 1.3, 16); m.cx(0.235, 0.17, '#c9ced4', sx * 0.84, 0.32, sz * 1.3, 10, { mt: 0.6, r: 0.3 }); } }   // wing mirrors, wheels with hubcaps
+}), { blob: { w: 2.0, d: 4.6, op: 0.45 } });

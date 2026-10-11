@@ -11,15 +11,25 @@ const hash = (s) => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0
  * Tiny modelling kit: every part is queued with its transform and baked into ONE mesh per material (few draw calls per piece).
  * Positions are metres from the floor-centre of the footprint; box/cylinder/sphere `y` is the part's BOTTOM.
  * Material options: e = emissive colour, ei = emissive strength, op = opacity, r = roughness, mt = metalness, f = flat shading.
+ * Exported for the home builders (world/homeKinds.js, homeYard.js), which merge fixture detail per material. `makeMat(color, o)` (optional) supplies the
+ * material for a (colour, options) pair instead of a fresh MeshStandardMaterial, so a caller can share and dispose materials itself; the kit still
+ * calls it once per distinct pair. `bake()` returns new geometries (the caller owns them); the materials belong to whoever made them.
+ * `{ vertexColors: true }`: the part's colour is written into the geometry (a `color` attribute, in the working colour space, so the picture is the same)
+ * and parts that differ only in colour share ONE material (white, `vertexColors`; makeMat then gets '#ffffff' and `o.vc = true`). A piece with many
+ * colours is then one mesh per surface kind (matt / metal / glass / glowing) instead of one per colour: about a third of the draw calls.
  */
-function kit() {
+export function kit(makeMat = null, { vertexColors = false } = {}) {
   const parts = [], mats = new Map(), tmp = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), one = new THREE.Vector3(1, 1, 1);
   const mk = (color, o = {}) => {
-    const key = `${color}|${o.e || ''}|${o.ei ?? ''}|${o.op ?? ''}|${o.r ?? ''}|${o.mt ?? ''}|${o.f ? 1 : 0}`; let mat = mats.get(key);
-    if (!mat) { mat = new THREE.MeshStandardMaterial({ color, roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) }); mats.set(key, mat); }
+    const key = `${vertexColors ? '' : color}|${o.e || ''}|${o.ei ?? ''}|${o.op ?? ''}|${o.r ?? ''}|${o.mt ?? ''}|${o.f ? 1 : 0}|${o.po ? 1 : 0}`; let mat = mats.get(key);
+    if (!mat) {
+      const base = vertexColors ? '#ffffff' : color, opts = vertexColors ? { ...o, vc: true } : o;
+      mat = makeMat ? makeMat(base, opts) : new THREE.MeshStandardMaterial({ color: base, vertexColors, roughness: o.r ?? 0.8, metalness: o.mt ?? 0, flatShading: !!o.f, ...(o.e ? { emissive: new THREE.Color(o.e), emissiveIntensity: o.ei ?? 0.8 } : {}), ...(o.op != null ? { transparent: true, opacity: o.op } : {}) });
+      mats.set(key, mat);
+    }
     return mat;
   };
-  const put = (geo, color, x, y, z, o = {}) => { geo.applyMatrix4(tmp.compose(new THREE.Vector3(x, y, z), q.setFromEuler(e.set(o.rx || 0, o.ry || 0, o.rz || 0)), one)); parts.push({ geo, mat: mk(color, o) }); };
+  const put = (geo, color, x, y, z, o = {}) => { geo.applyMatrix4(tmp.compose(new THREE.Vector3(x, y, z), q.setFromEuler(e.set(o.rx || 0, o.ry || 0, o.rz || 0)), one)); parts.push({ geo, mat: mk(color, o), col: vertexColors ? new THREE.Color(color) : null }); };
   const k = {
     b: (w, h, d, col, x, y, z, o) => put(new THREE.BoxGeometry(w, h, d), col, x, y + h / 2, z, o),
     c: (rt, rb, h, col, x, y, z, seg = 16, o) => put(new THREE.CylinderGeometry(rt, rb, h, seg), col, x, y + h / 2, z, o),
@@ -40,7 +50,11 @@ function kit() {
     bake: (cast = true) => {
       const g = new THREE.Group(), by = new Map(); for (const p of parts) { const a = by.get(p.mat) || by.set(p.mat, []).get(p.mat); a.push(p); }
       for (const [mat, list] of by) {
-        const geo = mergeGeometries(list.map((p) => (p.geo.index ? p.geo.toNonIndexed() : p.geo)), false); list.forEach((p) => p.geo.dispose());
+        const geo = mergeGeometries(list.map((p) => {
+          const gg = p.geo.index ? p.geo.toNonIndexed() : p.geo;
+          if (p.col) { const n = gg.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) { a[i * 3] = p.col.r; a[i * 3 + 1] = p.col.g; a[i * 3 + 2] = p.col.b; } gg.setAttribute('color', new THREE.BufferAttribute(a, 3)); }
+          return gg;
+        }), false); list.forEach((p) => p.geo.dispose());
         const me = new THREE.Mesh(geo, mat); me.castShadow = cast; me.receiveShadow = true; g.add(me);
       }
       return g;
@@ -362,7 +376,7 @@ export function furnitureModel(type, opts = {}) {
     return g;
   }
   const def = Object.prototype.hasOwnProperty.call(FURNITURE, type) ? FURNITURE[type] : null; if (!def) return g;
-  const k = kit(), build = BUILD[def.kind];
+  const k = kit(null, { vertexColors: true }), build = BUILD[def.kind];
   if (build) build(k, def); else k.b(def.w, def.h, def.d, def.color, 0, 0, 0);
   const inner = k.bake(def.h > 0.1); if (opts.fit !== false) fit(inner, def); g.add(inner); return g;
 }

@@ -47,7 +47,7 @@ describe('Studio interior parity (the refactor must not change a thing)', () => 
 });
 
 describe('builders registry', () => {
-  it.skip('has a builder for every fixture kind and nothing else (enabled once B1/B2 land the registry)', () => { expect(Object.keys(FIXTURE_BUILDERS).sort()).toEqual(Object.keys(FIXTURE_KINDS).sort()); });
+  it('has a builder for every fixture kind and nothing else', () => { expect(Object.keys(FIXTURE_BUILDERS).sort()).toEqual(Object.keys(FIXTURE_KINDS).sort()); });
 });
 
 /* ---------------------------------------------------------------------------------------------------------------------------------
