@@ -1,0 +1,64 @@
+  <!-- PLATE: one piece, one spread ------------------------------------------- -->
+  <article class="plate-page" data-handle="{{h}}">
+  <section class="spread ink pl" id="plate" data-tone="ink" aria-labelledby="plTitle">
+    <div class="pl-l">
+      <div class="pl-crumb mono">
+        <nav aria-label="Breadcrumb"><ol>
+          <li><a href="{{href:}}">Cover</a></li>
+          <li><a href="{{href:shop/}}">The Index</a></li>
+          <li><a href="{{shop_cat_href}}">{{cat_plural}}</a></li>
+          <li><span aria-current="page">{{title_h}}</span></li>
+        </ol></nav>
+      </div>
+      <div class="stage"><ol class="shots" id="shots">{{shots}}</ol></div>
+      <div class="pl-bar mono">
+        {{count_block}}
+        <button class="dev" id="dev" type="button" aria-pressed="false"><span class="bar-dot" aria-hidden="true"></span><span>Develop colour</span></button>
+        <span class="pl-hint"><span class="hint-fine">Hover to expose</span><span class="hint-touch">Press and hold to expose</span></span>
+      </div>
+      {{thumbs_block}}
+    </div>
+
+    <div class="pl-r paper">
+      <div class="pl-num" aria-hidden="true">{{no}}</div>
+      <div class="pl-cap">
+        <p class="mono pl-type">Fig. {{no}} — {{cat}}{{new_flag}}</p>
+        <h1 class="pl-title" id="plTitle">{{title_h}}</h1>
+        <div class="pl-priceline">
+          <p class="pl-price" id="price">{{price_text}}<small>CAD</small></p>
+          <p class="pl-stock mono {{stock_cls}}" id="stock"><i aria-hidden="true"></i><span>{{stock_text}}</span></p>
+        </div>
+        {{desc}}
+        <div class="pl-opts" id="opts">{{opts}}</div>
+        <div class="pl-buy">
+          {{buy}}
+        </div>
+        <p class="pl-ship mono"><span class="pl-ship-k">Delivery</span>{{ship_note}} <a class="link-line" href="{{href:shipping/}}">Shipping &amp; returns</a></p>
+        <dl class="pl-credits mono">
+          <div><dt>Plate</dt><dd>No. {{no}} of {{total}}</dd></div>
+          <div><dt>Section</dt><dd>{{cat}}</dd></div>
+          <div><dt>Sizes</dt><dd>{{sizes_text}}</dd></div>
+          <div><dt>Photographs</dt><dd>{{n_shots_pad}}</dd></div>
+          <div><dt>Currency</dt><dd>CAD</dd></div>
+        </dl>
+        {{store_link}}
+        <p class="mono pl-note">Prices in CAD. Checkout happens on the Monochrome store. Photographs are shown in black and white; hover or press and hold for the colour they were shot in.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="spread paper rel" data-tone="paper" aria-labelledby="relH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">{{no}}</div>
+    <p class="mono kicker rv">More from the issue</p>
+    <h2 class="display sm rv-lines" id="relH"><span class="ln"><span>Related </span></span><span class="ln"><span class="ital">plates<i class="stop">.</i></span></span></h2>
+    <div class="sheet-wrap strip"><div class="strip-row rel-row">
+{{related}}
+    </div></div>
+    <nav class="turn mono" aria-label="Turn the page">
+      <a class="turn-p" href="{{prev_href}}" rel="prev"><span>Previous plate</span><b>{{prev_label}}</b></a>
+      <a class="turn-i" href="{{href:shop/}}"><span>Back to</span><b>The Index</b></a>
+      <a class="turn-n" href="{{next_href}}" rel="next"><span>Next plate</span><b>{{next_label}}</b></a>
+    </nav>
+  </section>
+  </article>
+  <script type="application/json" id="pdata">{{pdata}}</script>

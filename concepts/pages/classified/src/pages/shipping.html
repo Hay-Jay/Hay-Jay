@@ -1,0 +1,67 @@
+  <!-- 05 DISTRIBUTION: a printed table of countries -------------------------------------------- -->
+  <section class="spread paper dst-open" data-tone="paper" aria-labelledby="distH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">05</div>
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — Distribution — Shipping &amp; returns</div>
+    <p class="mono kicker rv">Distribution — p.05</p>
+    <h1 class="display dst-h rv-lines" id="distH"><span class="ln"><span>Distribution<i class="stop">.</i></span></span></h1>
+    <p class="dst-deck rv">Where the issue goes, what it costs to get there, and what to do if it does not fit.</p>
+    <div class="dst-hl">
+      <div class="hl hl-ng"><span class="mono">Table 1 — Featured</span><b>Nigeria</b><p>Delivered. The rate for your address is calculated at checkout, before you pay.</p></div>
+      <div class="hl hl-ca"><span class="mono">Table 1 — Home market</span><b>Canada</b><p><strong>Free standard shipping.</strong> Pick your piece, check out on the store, and that is it.</p></div>
+    </div>
+  </section>
+
+  <section class="spread paper dst-table" data-tone="paper" aria-labelledby="tblH">
+    <div class="dst-grid">
+      <div class="dst-main">
+        <h2 class="tbl-h" id="tblH"><span class="mono">Table 1</span>Countries on the delivery list <em>({{countries}})</em></h2>
+        <p class="tbl-sub mono">{{n_regions}} regions: {{regions_text}}. Nigeria and Canada are highlighted. All rates are calculated at checkout from your address, except where stated.</p>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <caption class="sr-only">Countries the Monochrome store delivers to, with region and shipping rate</caption>
+            <thead><tr><th scope="col" class="mono">No.</th><th scope="col" class="mono">Country</th><th scope="col" class="mono">Code</th><th scope="col" class="mono">Region</th><th scope="col" class="mono">Rate</th></tr></thead>
+            <tbody>
+{{country_rows}}
+            </tbody>
+          </table>
+        </div>
+        <p class="tbl-foot mono">The store decides the final list and rates. If your country is missing, <a class="link-line" href="{{href:contact/}}">write to us</a>.</p>
+      </div>
+
+      <aside class="dst-aside" aria-labelledby="retH" id="returns">
+        <p class="mono mg-k">Marginalia</p>
+        <h2 id="retH">Returns &amp; exchanges</h2>
+        <ol class="mg-notes">
+          <li><span class="mono">1</span><p>If something does not fit, contact us soon after your order arrives and include your order number.</p></li>
+          <li><span class="mono">2</span><p>Items should be unworn and in original condition.</p></li>
+          <li><span class="mono">3</span><p>Need another size? Tell us which piece and which size, and we will point you to the right next step.</p></li>
+          <li><span class="mono">4</span><p>The final terms are the store’s. Read the <a href="{{policy_refund}}">refund policy</a> and the <a href="{{policy_ship}}">shipping policy</a> before you order.</p></li>
+        </ol>
+        <p class="mono mg-links"><a class="link-line" href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com<span class="arr" aria-hidden="true"></span></a><br><a class="link-line" href="{{policy_terms}}">Terms of service</a> <a class="link-line" href="{{policy_privacy}}">Privacy policy</a></p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="spread ink dst-steps" data-tone="ink" aria-labelledby="stepsH">
+    <h2 class="mono kicker rv" id="stepsH">How an order travels</h2>
+    <ol class="steps">
+      <li class="rv"><span class="mono">01</span><b>Choose</b><p>Open a plate, pick your size and use Add to bag. Your bag lives on the store.</p></li>
+      <li class="rv"><span class="mono">02</span><b>Check out</b><p>Enter your address. The store shows the shipping rate for your country before you pay. Canada: free standard shipping.</p></li>
+      <li class="rv"><span class="mono">03</span><b>Delivered</b><p>You get an email update once your order ships. Rates, not promises: we do not quote delivery times here.</p></li>
+    </ol>
+  </section>
+
+  <section class="spread paper dst-sizing" id="sizing" data-tone="paper" aria-labelledby="sizeH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">Aa</div>
+    <p class="mono kicker rv">Fit notes</p>
+    <h2 class="display sm rv-lines" id="sizeH"><span class="ln"><span>Size </span></span><span class="ln"><span class="ital">guidance<i class="stop">.</i></span></span></h2>
+    <dl class="sz-list">
+      <div class="rv"><dt class="mono">Tops &amp; jerseys</dt><dd>Cut relaxed and true to size. If you are between sizes, go up.</dd></div>
+      <div class="rv"><dt class="mono">Bottoms</dt><dd>Cargo shorts and the cargo skirt are listed in the sizes shown on each plate. Not sure? Message us before you order.</dd></div>
+      <div class="rv"><dt class="mono">Rings</dt><dd>Sold by ring size. Pick from the sizes on the plate; between two sizes, go up for comfort.</dd></div>
+      <div class="rv"><dt class="mono">Chains &amp; necklaces</dt><dd>One size. Photographs show how they sit when worn.</dd></div>
+      <div class="rv"><dt class="mono">Custom jersey</dt><dd>Up to 10 characters. Contact us with the details before you order.</dd></div>
+      <div class="rv"><dt class="mono">Gift cards</dt><dd>No size. Choose an amount on the plate.</dd></div>
+    </dl>
+    <p class="sz-foot rv">Want a recommendation? Email <a class="ab-a" href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a> with the piece and the size you usually wear.</p>
+  </section>

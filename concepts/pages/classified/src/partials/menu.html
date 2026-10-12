@@ -1,0 +1,19 @@
+<!-- CONTENTS: opens over any page; also the command bar (find a page or a piece) -->
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Contents and search" hidden>
+  <div class="menu-in">
+    <div class="menu-top"><p class="mono menu-kick">Contents — Issue 01 / The Unknown</p><button class="menu-x mono" type="button" data-close>Close<span>Esc</span></button></div>
+    <div class="menu-find">
+      <label class="mono" for="jump">Find a page or a piece <span class="menu-keys">/ to open anywhere</span></label>
+      <input id="jump" type="search" placeholder="shipping, hoodie, ring, nigeria…" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="jumpList" aria-autocomplete="list">
+      <ul class="jump-list" id="jumpList" role="listbox" aria-label="Results" hidden></ul>
+      <p class="mono jump-none" id="jumpNone" hidden>Nothing in this issue matches that.</p>
+    </div>
+    <nav aria-label="Contents"><ol class="menu-list">{{nav_menu}}</ol></nav>
+    <div class="menu-foot mono">
+      <a data-store="/cart" href="{{store_cart}}">Bag<span class="arr" aria-hidden="true"></span></a>
+      <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca<span class="arr" aria-hidden="true"></span></a>
+      <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
+      <span>Prices in CAD</span>
+    </div>
+  </div>
+</div>
