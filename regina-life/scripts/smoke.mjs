@@ -333,6 +333,7 @@ const settleCam = async () => { await page.evaluate(() => __regina.settleBuildCa
 const pxOf = (x, z) => page.evaluate(([x, z]) => { const v = new (window.__regina.camera.position.constructor)(x, 0, z).project(window.__regina.camera); const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height }; }, [x, z]);
 const homeNow = () => page.evaluate(async () => { const H = await import('/src/core/home.js'), s = __regina.store.state; return { layout: s.home.layout, bal: s.bank.balance, placed: s.home.placed.length, stored: H.storageCount(s), wall: s.home.wall, rooms: JSON.parse(JSON.stringify(s.home.rooms || {})), living: H.styleOf(s, 'living') }; });
 const info = () => page.evaluate(() => __regina.interiorInfo());
+const homeKeys = (i) => i.cached.filter((k) => k.startsWith('apartment')).join();   // the shops and the gym stay cached too: only the apartment entries matter here
 /** Opens the phone on the Homes app (open() first: openApp alone does nothing when the app is already the phone's current view). */
 const homesApp = async () => { await page.evaluate(() => { __regina.phone.open(); __regina.phone.openApp('homes'); }); await wait(700); };
 const closePhone = () => page.evaluate(() => { __regina.phone.closeApp(true); __regina.phone.close(); });
@@ -364,7 +365,7 @@ await step('move up to the One-bedroom through the phone: price, furniture, boun
   const a = await homeNow(), i = await info();
   if (b.bal - a.bal !== 150000) throw new Error(`the move should cost exactly $1,500: ${b.bal} -> ${a.bal}`);
   if (a.placed + a.stored !== b.placed + b.stored) throw new Error(`pieces were lost: placed+stored ${b.placed}+${b.stored} -> ${a.placed}+${a.stored}`);
-  if (a.layout !== 'onebed' || i.stateLayout !== 'onebed' || i.cached.join() !== 'apartment:onebed') throw new Error('layout/cache after the move: ' + JSON.stringify(i));
+  if (a.layout !== 'onebed' || i.stateLayout !== 'onebed' || homeKeys(i) !== 'apartment:onebed') throw new Error('layout/cache after the move: ' + JSON.stringify(i));
   if (!(i.bounds.z0 <= -10.2) || i.wallMode !== 'walk') throw new Error('the bounds should cover the bedroom and the walls should be up: ' + JSON.stringify(i));
   if (Math.hypot(i.spawn.x - 3.2, i.spawn.z - 4.4) > 0.01) throw new Error('spawn: ' + JSON.stringify(i.spawn));
   const t = await page.evaluate(() => window.__toasts); if (!t.some((x) => /Cathedral Court/.test(x))) throw new Error('no move-in toast: ' + JSON.stringify(t));
@@ -424,7 +425,7 @@ await step('home view of the One-bedroom, then move up to the Bungalow from the 
   const a = await homeNow(); i = await info();
   if (b.bal - a.bal !== 350000) throw new Error(`the Bungalow move from the One-bedroom should cost exactly $3,500: ${b.bal} -> ${a.bal}`);
   if (a.placed + a.stored !== b.placed + b.stored) throw new Error('pieces were lost on the second move');
-  if (!(await page.evaluate(() => __regina.homeView)) || i.layout !== 'bungalow' || i.wallMode !== 'cut' || i.cached.join() !== 'apartment:bungalow' || !(i.bounds.x0 <= -9.6)) throw new Error('after the Bungalow move: ' + JSON.stringify(i));
+  if (!(await page.evaluate(() => __regina.homeView)) || i.layout !== 'bungalow' || i.wallMode !== 'cut' || homeKeys(i) !== 'apartment:bungalow' || !(i.bounds.x0 <= -9.6)) throw new Error('after the Bungalow move: ' + JSON.stringify(i));
   const cx = await page.evaluate(() => __regina.camera.position.x); if (Math.abs(cx - -2.8) > 0.2) throw new Error('the Home view camera should be centred on the Bungalow (x -2.8), it is at ' + cx);
   await shot('58-bungalow-home-view');
 });
@@ -441,7 +442,7 @@ await step('New life resets the cache: the next apartment is the Studio again', 
   await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null && !__regina.dbg().fading, null, { timeout: 60000 });
   await page.evaluate(() => __regina.store.reset());
   await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment' && !__regina.dbg().fading, null, { timeout: 60000 });
-  const i = await info(); if (i.layout !== 'studio' || i.stateLayout !== 'studio' || i.cached.join() !== 'apartment:studio' || i.rooms.join() !== 'living') throw new Error('after store.reset() the apartment should be the Studio: ' + JSON.stringify(i));
+  const i = await info(); if (i.layout !== 'studio' || i.stateLayout !== 'studio' || homeKeys(i) !== 'apartment:studio' || i.rooms.join() !== 'living') throw new Error('after store.reset() the apartment should be the Studio: ' + JSON.stringify(i));
   await shot('61-studio-after-reset');
 });
 
