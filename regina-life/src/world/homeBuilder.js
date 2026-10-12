@@ -190,7 +190,7 @@ const ACTION_RUN = {
   read: (c) => c.ui.activity('read'),
   shower: (c) => c.ui.activity('shower'),
   lights: (c, h) => { h.toggleLights(h.room); c.audio?.blip('tick'); },
-  storage: (c) => c.ui.furnitureShop(),
+  storage: (c) => (c.ui.openStorage ?? c.ui.furnitureShop)(),   // the garage shelf opens the Catalogue's "In storage" tab (main.js ui.openStorage); a host without it opens the shop
 };
 /** Actions whose prompt text changes at runtime. */
 const ACTION_LABEL = { tv: (h) => () => (h.fx.tv?.on ? 'Change channel / Off' : h.use.label) };

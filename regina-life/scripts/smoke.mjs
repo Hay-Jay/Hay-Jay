@@ -1,6 +1,7 @@
 /**
  * End-to-end smoke test: serves the production build, boots the game in headless Chromium (software WebGL),
- * walks through title → creator → play → phone → enter buildings → job loop, and fails on any console/page error.
+ * walks through title → creator → play → phone → enter buildings → job loop → (last) multi-room homes (move up through the phone,
+ * doorways, room focus, per-room paint, garage storage), and fails on any console/page error.
  * Screenshots are written to .scratch/shots (git-ignored).
  *   npm run build && npm run smoke
  */
@@ -324,6 +325,126 @@ await step('home tab: live dollhouse view, edit chip, back outside', async () =>
 });
 await step('night + snow rendering', async () => { await page.evaluate(() => { __regina.tp(0, 6); __regina.setWeather({ kind: 'snow', temp: -18, text: 'Snow', cloud: 90 }); __regina.store.state.settings.timeMode = 'fast'; }); await wait(1500); await shot('20-weather'); });
 await step('fps sanity', async () => { const q = await page.evaluate(() => __regina.qLevel()); console.log('  quality level', q); });
+
+/* ---------- multi-room homes (docs/HOMES.md): Homes app, moving, doorways, room focus, per-room paint, garage storage ---------- */
+// Everything below runs after the original steps. It talks to the game through the same hooks the player uses (phone UI, buttons, keys) and reads state through __regina.
+const idle = (n = 3) => page.evaluate((k) => new Promise((r) => { let i = 0; const f = () => (++i >= k ? r() : requestAnimationFrame(f)); requestAnimationFrame(f); }), n);
+const settleCam = async () => { await page.evaluate(() => __regina.settleBuildCam()); await idle(3); };   // the overhead camera glides after a frame change; jump to where it rests
+const pxOf = (x, z) => page.evaluate(([x, z]) => { const v = new (window.__regina.camera.position.constructor)(x, 0, z).project(window.__regina.camera); const r = document.getElementById('game').getBoundingClientRect(); return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height }; }, [x, z]);
+const homeNow = () => page.evaluate(async () => { const H = await import('/src/core/home.js'), s = __regina.store.state; return { layout: s.home.layout, bal: s.bank.balance, placed: s.home.placed.length, stored: H.storageCount(s), wall: s.home.wall, rooms: JSON.parse(JSON.stringify(s.home.rooms || {})), living: H.styleOf(s, 'living') }; });
+const info = () => page.evaluate(() => __regina.interiorInfo());
+const homeKeys = (i) => i.cached.filter((k) => k.startsWith('apartment')).join();   // the shops and the gym stay cached too: only the apartment entries matter here
+/** Opens the phone on the Homes app (open() first: openApp alone does nothing when the app is already the phone's current view). */
+const homesApp = async () => { await page.evaluate(() => { __regina.phone.open(); __regina.phone.openApp('homes'); }); await wait(700); };
+const closePhone = () => page.evaluate(() => { __regina.phone.closeApp(true); __regina.phone.close(); });
+/** Phone UI: Homes app -> Move in -> the confirmation panel -> Move in. Returns once the swap (or the outdoor move) and the fade are over. */
+const moveViaPhone = async (tier, layoutAfter) => {
+  await homesApp(); await page.click(`[data-move="${tier}"]`, { timeout: 60000 }); await page.waitForSelector('.panel.menu .btn.primary', { timeout: 30000 });
+  await page.click('.panel.menu .btn.primary');
+  await page.waitForFunction((id) => __regina.layout === id && !__regina.dbg().fading, layoutAfter, { timeout: 120000 }); await wait(400);
+};
+
+await step('homes app: three tiers, Move in disabled with a reason when you cannot afford it', async () => {
+  await page.evaluate(() => { __regina.setTime(null); __regina.store.state.settings.timeMode = 'live'; __regina.store.state.bank.balance = 1000; window.__toasts = []; new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => window.__toasts.push(n.textContent)))).observe(document.getElementById('toasts'), { childList: true }); });
+  await homesApp(); await page.waitForSelector('.hm-card', { timeout: 30000 });
+  const cards = await page.$$eval('.hm-card', (c) => c.map((x) => { const b = x.querySelector('[data-move]'); return { tier: x.dataset.tier, current: x.classList.contains('current'), badge: x.querySelector('.hm-badge')?.textContent ?? null, move: b ? { disabled: b.disabled, why: x.querySelector('.hm-why')?.textContent ?? '' } : null }; }));
+  if (cards.map((c) => c.tier).join() !== 'studio,onebed,bungalow') throw new Error('tiers: ' + JSON.stringify(cards));
+  if (!cards[0].current || cards[0].badge !== 'Current' || cards[0].move) throw new Error('the Studio card should say Current and have no Move in: ' + JSON.stringify(cards[0]));
+  for (const c of cards.slice(1)) if (!c.move?.disabled || !/Need/.test(c.move.why)) throw new Error(`Move in for ${c.tier} should be disabled with a reason: ` + JSON.stringify(c));
+  if ((await page.$$('.app-ic[data-app="homes"]')).length !== 1) throw new Error('the Homes icon is missing from the phone home screen');
+  await shot('50-homes-app'); await closePhone();
+});
+await step('move up to the One-bedroom through the phone: price, furniture, bounds, toast', async () => {
+  await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment' && __regina.interiorInfo().layout === 'studio', null, { timeout: 60000 }); await wait(800);
+  await page.evaluate(() => { __regina.store.state.bank.balance = 3000000; });
+  const b = await homeNow(); await homesApp();
+  await page.click('[data-move="onebed"]', { timeout: 60000 }); await page.waitForSelector('.panel.menu .btn.primary', { timeout: 30000 }); await shot('51-homes-confirm');
+  const ask = await page.$eval('.panel.menu', (e) => e.innerText); if (!/One-bedroom/.test(ask) || !/\$1,500/.test(ask)) throw new Error('confirmation text: ' + ask);
+  await page.click('.panel.menu .btn.primary');
+  await page.waitForFunction(() => __regina.layout === 'onebed' && __regina.interiorInfo().layout === 'onebed' && !__regina.dbg().fading, null, { timeout: 120000 }); await wait(500);
+  const a = await homeNow(), i = await info();
+  if (b.bal - a.bal !== 150000) throw new Error(`the move should cost exactly $1,500: ${b.bal} -> ${a.bal}`);
+  if (a.placed + a.stored !== b.placed + b.stored) throw new Error(`pieces were lost: placed+stored ${b.placed}+${b.stored} -> ${a.placed}+${a.stored}`);
+  if (a.layout !== 'onebed' || i.stateLayout !== 'onebed' || homeKeys(i) !== 'apartment:onebed') throw new Error('layout/cache after the move: ' + JSON.stringify(i));
+  if (!(i.bounds.z0 <= -10.2) || i.wallMode !== 'walk') throw new Error('the bounds should cover the bedroom and the walls should be up: ' + JSON.stringify(i));
+  if (Math.hypot(i.spawn.x - 3.2, i.spawn.z - 4.4) > 0.01) throw new Error('spawn: ' + JSON.stringify(i.spawn));
+  const t = await page.evaluate(() => window.__toasts); if (!t.some((x) => /Cathedral Court/.test(x))) throw new Error('no move-in toast: ' + JSON.stringify(t));
+  await shot('52-onebed-walk');
+});
+await step('walk through the doorway into the bedroom and back; no prompt through a wall', async () => {
+  await page.evaluate(() => { __regina.tp(0.3, -4.0); __regina.rig.snapBehind(Math.PI); __regina.rig.snap(__regina.player); }); await idle(3);
+  if ((await info()).playerRoom !== 'living') throw new Error('should start in the living room: ' + JSON.stringify(await info()));
+  await page.keyboard.down('w');
+  await page.waitForFunction(() => __regina.interiorInfo().playerRoom === 'bedroom' && __regina.player.pos.z < -6.1, null, { timeout: 150000 }); await page.keyboard.up('w'); await idle(2);
+  let i = await info(); if (i.viewer !== 'bedroom' || !i.visibleRooms.includes('bedroom') || !i.visibleRooms.includes('living')) throw new Error('in the bedroom: ' + JSON.stringify(i));
+  await shot('53-bedroom-walk');
+  await page.evaluate(() => { __regina.rig.yaw = Math.PI; __regina.rig.snap(__regina.player); }); await idle(2);   // camera to the north, so W walks back south
+  await page.keyboard.down('w');
+  await page.waitForFunction(() => __regina.interiorInfo().playerRoom === 'living' && __regina.player.pos.z > -5.0, null, { timeout: 150000 }); await page.keyboard.up('w'); await idle(2);
+  i = await info(); if (i.viewer !== 'living') throw new Error('back in the living room: ' + JSON.stringify(i));
+  // line of sight: a prompt in the bedroom is not offered through the partition, but is through the doorway
+  await page.evaluate(() => { __regina.interior.interactables.push({ id: 'smoke-los', x: 0.3, z: -7.0, radius: 4.5, label: 'Smoke LOS probe', room: 'bedroom', run() {} }); });
+  await page.evaluate(() => __regina.tp(-2.0, -4.4)); await idle(4);
+  let lbl = await page.evaluate(() => __regina.getTarget()?.label || ''); if (/Smoke LOS/.test(lbl)) throw new Error('a prompt was offered through a wall');
+  await page.evaluate(() => __regina.tp(0.3, -4.4)); await page.waitForFunction(() => /Smoke LOS/.test(__regina.getTarget()?.label || ''), null, { timeout: 30000 }).catch(() => {});
+  lbl = await page.evaluate(() => __regina.getTarget()?.label || ''); if (!/Smoke LOS/.test(lbl)) throw new Error('a prompt through the doorway should be offered, got: ' + lbl);
+  await page.evaluate(() => { const l = __regina.interior.interactables; l.splice(l.findIndex((x) => x.id === 'smoke-los'), 1); });
+});
+await step('build mode: focus the bedroom, place from storage inside it, cycle the Walls button', async () => {
+  await page.evaluate(async () => { const H = await import('/src/core/home.js'); __regina.store.state.bank.balance = Math.max(__regina.store.state.bank.balance, 3e6); if (!H.buyFurniture(__regina.store, 'plant').ok) throw new Error('could not buy a plant'); });
+  await page.evaluate(() => __regina.build.start()); await page.waitForFunction(() => __regina.build.active, null, { timeout: 20000 }); await wait(1200);
+  await page.waitForSelector('#b-rooms:not([hidden]) [data-id="bedroom"]', { timeout: 20000 });
+  const chips = await page.$$eval('#b-rooms [data-act="focus"]', (b) => b.map((x) => x.dataset.id)); if (chips.join() !== 'all,living,bedroom') throw new Error('focus chips: ' + chips);
+  if (await page.$eval('#b-walls', (b) => b.hidden)) throw new Error('the Walls button should show on a multi-room home');
+  await page.click('#b-rooms [data-id="bedroom"]'); await page.waitForFunction(() => __regina.build.focus === 'bedroom' && __regina.rig.buildFocus?.z0 < -10, null, { timeout: 20000 }); await settleCam(); await shot('54-build-focus-bedroom');
+  await page.click('#b-stored'); await page.waitForSelector('.cat-sheet [data-act="place"][data-id="plant"]', { timeout: 30000 });
+  await page.click('.cat-sheet [data-act="place"][data-id="plant"]'); await page.waitForFunction(() => !__regina.catalogue.isOpen && !!__regina.build.sel, null, { timeout: 30000 });
+  await settleCam(); const p = await pxOf(-0.5, -7.5); await page.mouse.move(p.x, p.y); await wait(250); await page.mouse.click(p.x, p.y); await wait(500);
+  const put = await page.evaluate(async () => { const { lotOf } = await import('/src/core/lot.js'), { layoutOf } = await import('/src/data/homes.js'), s = __regina.store.state, bed = lotOf(layoutOf(s)).rooms.find((r) => r.id === 'bedroom').place; return s.home.placed.filter((i) => i.type === 'plant' && i.x >= bed.x0 && i.x <= bed.x1 && i.z >= bed.z0 && i.z <= bed.z1).length; });
+  if (put < 1) throw new Error('the plant was not placed inside the bedroom: ' + JSON.stringify(await page.evaluate(() => ({ placed: __regina.store.state.home.placed.filter((i) => i.type === 'plant'), err: __regina.build.lastErr, sel: __regina.build.sel }))));
+  const seen = []; for (let k = 0; k < 3; k++) { await page.click('#b-walls'); seen.push(await page.evaluate(() => `${__regina.build.wallMode}/${__regina.interiorInfo().overheadMode}`)); if (k === 0) { await settleCam(); await shot('55-build-walls-down'); } }
+  if (seen.join() !== 'down/down,up/up,cut/cut') throw new Error('Walls button cycle: ' + seen.join());
+});
+await step('design shelf: the Bedroom chip paints only the bedroom', async () => {
+  const b = await homeNow(); await page.evaluate(() => { __regina.store.state.bank.balance = Math.max(__regina.store.state.bank.balance, 3e6); });
+  await page.click('#b-buy'); await page.waitForSelector('#cat-tab-design', { timeout: 30000 }); await page.click('#cat-tab-design');
+  await page.waitForSelector('.cat-rooms:not([hidden]) [data-act="room"][data-id="bedroom"]', { timeout: 30000 }); await page.click('.cat-rooms [data-act="room"][data-id="bedroom"]');
+  await page.waitForSelector('.cat-room.on[data-id="bedroom"]', { timeout: 20000 }); await page.waitForSelector('.cat-sheet [data-act="style"][data-kind="wall"][data-key="terracotta"]', { timeout: 30000 }); await shot('56-design-bedroom');
+  await page.click('.cat-sheet [data-act="style"][data-kind="wall"][data-key="terracotta"]'); await wait(500);
+  const a = await homeNow();
+  if (a.rooms.bedroom?.wall !== 'terracotta') throw new Error('the bedroom wall should be terracotta: ' + JSON.stringify(a.rooms));
+  if (a.living.wall !== b.living.wall || a.wall !== b.wall || a.rooms.living?.wall) throw new Error(`the living room must not change: ${JSON.stringify(b.living)} -> ${JSON.stringify(a.living)} (default ${b.wall} -> ${a.wall}, rooms ${JSON.stringify(a.rooms)})`);
+  await page.keyboard.press('Escape'); await wait(500); await page.evaluate(() => __regina.build.stop()); await wait(1200);
+  if (await page.evaluate(() => __regina.build.active)) throw new Error('build mode should be over');
+});
+await step('home view of the One-bedroom, then move up to the Bungalow from the dollhouse', async () => {
+  await page.click('#navbar [data-tab="home"]'); await page.waitForFunction(() => __regina.homeView && !__regina.dbg().fading, null, { timeout: 60000 }); await wait(1500); await settleCam();
+  let i = await info(); if (i.wallMode !== 'cut' || i.layout !== 'onebed') throw new Error('One-bedroom Home view should be cut away: ' + JSON.stringify(i)); await shot('57-onebed-home-view');
+  await page.evaluate(() => { __regina.store.state.bank.balance = Math.max(__regina.store.state.bank.balance, 3e6); });
+  const b = await homeNow(); await moveViaPhone('bungalow', 'bungalow'); await wait(1500); await settleCam();
+  const a = await homeNow(); i = await info();
+  if (b.bal - a.bal !== 350000) throw new Error(`the Bungalow move from the One-bedroom should cost exactly $3,500: ${b.bal} -> ${a.bal}`);
+  if (a.placed + a.stored !== b.placed + b.stored) throw new Error('pieces were lost on the second move');
+  if (!(await page.evaluate(() => __regina.homeView)) || i.layout !== 'bungalow' || i.wallMode !== 'cut' || homeKeys(i) !== 'apartment:bungalow' || !(i.bounds.x0 <= -9.6)) throw new Error('after the Bungalow move: ' + JSON.stringify(i));
+  const cx = await page.evaluate(() => __regina.camera.position.x); if (Math.abs(cx - -2.8) > 0.2) throw new Error('the Home view camera should be centred on the Bungalow (x -2.8), it is at ' + cx);
+  await shot('58-bungalow-home-view');
+});
+await step('bungalow: the garage storage shelf opens the In storage tab', async () => {
+  await page.click('#navbar [data-tab="home"]'); await page.waitForFunction(() => !__regina.homeView && !__regina.dbg().fading, null, { timeout: 60000 });
+  const st = await page.evaluate(() => __regina.lot.interactables.find((x) => x.id === 'storage')); if (!st) throw new Error('the Bungalow has no storage interactable');
+  await page.evaluate((s) => { __regina.tp(s.x, s.z); __regina.rig.snapBehind(Math.PI / 2); __regina.rig.snap(__regina.player); }, st);
+  await pressE('storage'); await page.waitForFunction(() => __regina.catalogue.isOpen && __regina.catalogue.tab === 'in-storage', null, { timeout: 30000 }); await wait(600); await shot('59-garage-storage');
+  await page.keyboard.press('Escape'); await wait(500);
+  if (await page.evaluate(() => __regina.catalogue.isOpen)) throw new Error('Esc should hide the Catalogue');
+  await page.evaluate(() => { __regina.tp(-7.4, 0.2); __regina.rig.snapBehind(Math.PI); __regina.rig.snap(__regina.player); }); await wait(900); await shot('60-garage-car');
+});
+await step('New life resets the cache: the next apartment is the Studio again', async () => {
+  await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null && !__regina.dbg().fading, null, { timeout: 60000 });
+  await page.evaluate(() => __regina.store.reset());
+  await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment' && !__regina.dbg().fading, null, { timeout: 60000 });
+  const i = await info(); if (i.layout !== 'studio' || i.stateLayout !== 'studio' || homeKeys(i) !== 'apartment:studio' || i.rooms.join() !== 'living') throw new Error('after store.reset() the apartment should be the Studio: ' + JSON.stringify(i));
+  await shot('61-studio-after-reset');
+});
 
 await browser.close(); await server.close();
 if (errors.length) { console.log('\nERRORS:\n' + errors.join('\n---\n')); process.exit(1); }
