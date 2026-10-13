@@ -27,7 +27,10 @@ await page.route('**/api.open-meteo.com/**', (r) => r.abort()); // force the sim
 
 const tag = mobile ? 'm-' : '';
 const shot = async (name) => { await page.screenshot({ path: join(OUT, `${tag}${name}.png`) }); console.log('  shot', name); };
-const step = async (name, fn) => { try { await fn(); console.log('PASS', name); } catch (e) { errors.push(`STEP ${name}: ${e.message}`); console.log('FAIL', name, e.message); } if (STOP_AFTER && name === STOP_AFTER) { console.log('STOPPING after', name); await browser.close(); await server.close(); process.exit(errors.length ? 1 : 0); } };
+const ONLY = process.env.SMOKE_ONLY ? new RegExp(process.env.SMOKE_ONLY, 'i') : null;   // dev aid: SMOKE_ONLY='homes|bungalow' runs only matching steps (plus the boot steps)
+const BOOT = new Set(['loads to title', 'new life → creator', 'creator customisation', 'gameplay starts']);
+const step = async (name, fn) => {
+  if (ONLY && !ONLY.test(name) && !BOOT.has(name)) { console.log('SKIP', name); return; } try { await fn(); console.log('PASS', name); } catch (e) { errors.push(`STEP ${name}: ${e.message}`); console.log('FAIL', name, e.message); } if (STOP_AFTER && name === STOP_AFTER) { console.log('STOPPING after', name); await browser.close(); await server.close(); process.exit(errors.length ? 1 : 0); } };
 const wait = (ms) => page.waitForTimeout(ms);
 // Software WebGL renders at a few fps, so wait until the game loop has actually picked an interaction target before pressing E.
 const pressE = async (re) => { await page.waitForFunction((src) => new RegExp(src, 'i').test(window.__regina.getTarget()?.label || ''), re, { timeout: 30000 }); await page.keyboard.press('e'); };
@@ -305,7 +308,10 @@ await step('placed treadmill is usable at home and trains fitness', async () => 
   if (!spot) throw new Error('no room for a treadmill');
   await page.evaluate(() => __regina.enterInterior('apartment')); await page.waitForFunction(() => __regina.inInterior === 'apartment'); await wait(1000);
   const f0 = await page.evaluate(() => { __regina.store.state.needs.energy = 90; return __regina.store.state.skills.fitness || 0; });
-  await page.evaluate((sp) => { __regina.player.pos.x = sp.x; __regina.player.pos.z = sp.z + 1.4; }, spot);
+  // the standing spot adapts to what is around the piece (the desk blocks the south side here), so ask the interior where the prompt really is
+  const stand = await page.evaluate(() => { const i = __regina.interior.interactables.find((x) => /^furn_/.test(x.id) && /treadmill/i.test(typeof x.label === 'function' ? x.label() : x.label)); return i ? { x: i.x, z: i.z } : null; });
+  if (!stand) throw new Error('a placed treadmill should offer a prompt');
+  await page.evaluate((sp) => { __regina.player.pos.x = sp.x; __regina.player.pos.z = sp.z; }, stand);
   await pressE('treadmill'); await page.waitForSelector('.prog-panel'); await page.waitForFunction(() => !document.querySelector('.prog-panel'), null, { timeout: 30000 });
   const f1 = await page.evaluate(() => __regina.store.state.skills.fitness || 0); if (!(f1 > f0)) throw new Error(`home treadmill did not train fitness: ${f0} -> ${f1}`);
   await page.evaluate(() => __regina.exitInterior()); await page.waitForFunction(() => __regina.inInterior === null); await wait(600);
