@@ -8,8 +8,8 @@
   const countEl = $('#count'), emptyEl = $('#empty'), sortEl = $('#sort'), qEl = $('#q');
   if (!toc || !sheet) return;
 
-  const CATS = ['top', 'bottom', 'accessory', 'gift'];
-  const NOUN = { all: ['asset', 'assets'], top: ['top', 'tops'], bottom: ['bottom', 'bottoms'], accessory: ['hardware asset', 'hardware assets'], gift: ['gift card', 'gift cards'] };
+  const CATS = ['top', 'bottom', 'accessory', 'gift', 'print'];
+  const NOUN = { all: ['asset', 'assets'], top: ['top', 'tops'], bottom: ['bottom', 'bottoms'], accessory: ['hardware asset', 'hardware assets'], gift: ['gift card', 'gift cards'], print: ['print issue', 'print issues'] };
   const SORTS = {
     featured: (a, b) => a.f - b.f,
     new: (a, b) => b.av - a.av || b.pub - a.pub,
@@ -50,7 +50,7 @@
   }
 
   // ---- render ------------------------------------------------------------------------
-  const BASE_TITLE = document.title, CAT_TITLE = { top: 'Tops', bottom: 'Bottoms', accessory: 'Hardware', gift: 'Gift cards' };
+  const BASE_TITLE = document.title, CAT_TITLE = { top: 'Tops', bottom: 'Bottoms', accessory: 'Hardware', gift: 'Gift cards', print: 'Print' };
   function apply() {
     const q = state.q.trim().toLowerCase();
     root.dataset.view = state.v;

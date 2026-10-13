@@ -20,12 +20,19 @@ const get = async path => {
   return r.json();
 };
 
-const text = html => (html || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+// paragraph and line breaks become sentence breaks, so "20 pages</p><p>This listing" reads "20 pages. This listing"
+const text = html => (html || '')
+  .replace(/<\/(p|div|li|h[1-6])>|<br\s*\/?>/gi, ' \u00b6 ')
+  .replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#39;|&rsquo;/g, '\u2019')
+  .replace(/\s+/g, ' ')
+  .replace(/([^.!?:;,\u2014\u00b7\u00b6\s])\s*\u00b6\s*/g, '$1. ').replace(/\s*\u00b6\s*/g, ' ')
+  .trim();
 
 // top / bottom / accessory drive the Fit Studio; gift is sold but never styled onto the avatar.
 const category = p => {
   const s = `${p.title} ${p.product_type}`.toLowerCase();
   if (/gift/.test(s)) return 'gift';
+  if (/magazine|publication|\bzine\b/.test(s)) return 'print';
   if (/ring|chain|necklace|jewel|accessor/.test(s)) return 'accessory';
   if (/short|skirt|pant(?!s chain)|trouser|jean/.test(s)) return 'bottom';
   return 'top';

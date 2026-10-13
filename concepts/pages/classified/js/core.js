@@ -221,13 +221,14 @@
       });
     }, { passive: true });
   }
-  // touch: press and hold
+  // touch: press and hold (the listener that stops the page scrolling under the lens exists only while a finger is holding)
   let tp = null;
+  const blockTouch = e => { if (e.cancelable) e.preventDefault(); };
   document.addEventListener('pointerdown', e => {
     if (e.pointerType !== 'touch') return;
     const xp = e.target.closest ? e.target.closest('.xp') : null; if (!xp || xp.classList.contains('dev')) return;
     tp = { xp, id: e.pointerId, x: e.clientX, y: e.clientY, on: false };
-    tp.t = setTimeout(() => { if (!tp) return; tp.on = true; lensStart(xp, tp.x, tp.y, true); if (navigator.vibrate) try { navigator.vibrate(8); } catch { /* ignore */ } }, 300);
+    tp.t = setTimeout(() => { if (!tp) return; tp.on = true; document.addEventListener('touchmove', blockTouch, { passive: false }); lensStart(xp, tp.x, tp.y, true); if (navigator.vibrate) try { navigator.vibrate(8); } catch { /* ignore */ } }, 300);
   }, { passive: true });
   document.addEventListener('pointermove', e => {
     if (!tp || e.pointerId !== tp.id) return;
@@ -237,12 +238,11 @@
   const tpEnd = e => {
     if (!tp || (e && e.pointerId !== tp.id)) return;
     clearTimeout(tp.t);
-    if (tp.on) { lensStop(); suppressClick = performance.now() + 450; }
+    if (tp.on) { lensStop(); suppressClick = performance.now() + 450; document.removeEventListener('touchmove', blockTouch); }
     tp = null;
   };
   document.addEventListener('pointerup', tpEnd, { passive: true });
   document.addEventListener('pointercancel', tpEnd, { passive: true });
-  document.addEventListener('touchmove', e => { if (tp && tp.on && e.cancelable) e.preventDefault(); }, { passive: false });
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.xp') && (tp || noHover())) e.preventDefault(); });
   document.addEventListener('click', e => { if (suppressClick > performance.now()) { e.preventDefault(); e.stopPropagation(); } }, true);
 
@@ -273,6 +273,7 @@
       ['Page', 'Bottoms', 'shop/?c=bottom', 'Asset register', 'cargo shorts skirt pants'],
       ['Page', 'Hardware', 'shop/?c=accessory', 'Asset register', 'rings chains necklace jewellery jewelry accessories objects'],
       ['Page', 'Gift cards', 'shop/?c=gift', 'Asset register', 'gift card voucher present'],
+      ['Page', 'Print: the Vision Issue', 'shop/?c=print', 'Asset register', 'magazine print issue vision zine read'],
       ['Page', 'Returns & exchanges', 'shipping/#returns', 'Extraction routes', 'refund return exchange policy'],
       ['Page', 'Size guidance', 'shipping/#sizing', 'Extraction routes', 'size sizing fit measurements'],
       ['Page', 'Join the network', 'contact/#subscribe', 'Report in', 'newsletter email drop alerts signup subscribe']
@@ -352,12 +353,104 @@
         if (e.key === 'Tab') trap(e, menu);
         return;
       }
+      if (MC.popupOpen && MC.popupOpen()) return;
       const typing = e.target.closest && e.target.closest('input,textarea,select,[contenteditable]');
       if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === '/') { e.preventDefault(); openMenu(true); }
       else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openMenu(true); }
     });
     menuBtn.addEventListener('pointerenter', () => { loadCatalog(); }, { once: true });
   }
+
+  // ---- Self-typing search boxes: the placeholder types a real query, backspaces it, then types the next ------------------
+  // The phrases come from the generator (data-hints), each one checked against the catalogue so every suggestion finds something.
+  // It runs only while the box is empty, unfocused and on screen; with reduced motion the static placeholder stays.
+  function typingHints(input) {
+    const hints = (input.dataset.hints || '').split('|').filter(Boolean);
+    if (reduce || hints.length < 2) return;
+    const base = input.getAttribute('placeholder') || '';
+    let timer = 0, w = Math.floor(Math.random() * hints.length), k = 0, phase = 'pause', onScreen = false;
+    const set = t => input.setAttribute('placeholder', t);
+    const idle = () => onScreen && !document.hidden && document.activeElement !== input && !input.value;
+    function stop() { clearTimeout(timer); timer = 0; set(base); }
+    function start(delay) { if (!timer && idle()) timer = setTimeout(tick, delay || 0); }
+    function tick() {
+      timer = 0;
+      if (!idle()) { set(base); return; }
+      const word = hints[w];
+      if (phase === 'pause') { k = 0; phase = 'type'; set('|'); timer = setTimeout(tick, 450); return; }
+      if (phase === 'type') {
+        k++; set(word.slice(0, k) + '|');
+        if (k >= word.length) { phase = 'hold'; timer = setTimeout(tick, 900); return; }
+        timer = setTimeout(tick, 80 + Math.random() * 90); return;
+      }
+      if (phase === 'hold') { set(word); phase = 'hold2'; timer = setTimeout(tick, 380); return; }
+      if (phase === 'hold2') { set(word + '|'); phase = 'erase'; timer = setTimeout(tick, 380); return; }
+      k--; set(k > 0 ? word.slice(0, k) + '|' : '|');
+      if (k <= 0) { phase = 'pause'; w = (w + 1) % hints.length; timer = setTimeout(tick, 380); return; }
+      timer = setTimeout(tick, 34);
+    }
+    input.addEventListener('focus', stop);
+    input.addEventListener('input', stop);
+    input.addEventListener('blur', () => { phase = 'pause'; start(900); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else { phase = 'pause'; start(400); } });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(es => es.forEach(e => { onScreen = e.isIntersecting; if (onScreen) { phase = 'pause'; start(900); } else stop(); })).observe(input);
+    }
+  }
+  $$('input[data-hints]').forEach(typingHints);
+
+  // ---- Incoming transmission: the magazine pop-up -----------------------------------------------------------------
+  // Offered once a week per browser (remembered in localStorage, guarded), a few seconds in or when the visitor has read a good way down,
+  // never over the intro, the file index or a box they are typing in. Esc, the backdrop, Close and "Not now" all dismiss it.
+  const mp = $('#magpop');
+  const saveDataEarly = !!(navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || '')));
+  if (mp) (function () {
+    const KEY = 'mc-magpop-' + mp.dataset.key, WEEK = 7 * 864e5, card = $('.mp-card', mp);
+    let stored = true;
+    const last = () => { try { return +localStorage.getItem(KEY) || 0; } catch { stored = false; return 0; } };
+    if (Date.now() - last() < WEEK) return;
+    if (!stored && MC.page !== 'home') return; // cannot remember a dismissal, so only ever offer it on the briefing
+    // the cover sits in a hidden box, so a lazy image would only start loading when it opens: fetch it quietly once the page has settled
+    const warmCover = () => { if (saveDataEarly) return; const im = $('.mp-img', mp); if (im) im.loading = 'eager'; };
+    if (document.readyState === 'complete') setTimeout(warmCover, 1500); else addEventListener('load', () => setTimeout(warmCover, 1500));
+    let seconds = 0, shown = false, exit = false, back = null;
+    const isOpen = () => mp.classList.contains('open');
+    MC.popupOpen = isOpen;
+    const ready = () => !shown && !document.hidden && !root.style.overflow && !$('.intro') && !(menu && menuOpen()) &&
+      !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName));
+    function show() {
+      shown = true; back = document.activeElement;
+      try { localStorage.setItem(KEY, String(Date.now())); } catch { /* storage blocked */ }
+      mp.hidden = false; root.style.overflow = 'hidden';
+      requestAnimationFrame(() => requestAnimationFrame(() => { mp.classList.add('open'); card.focus({ preventScroll: true }); }));
+    }
+    function hide() {
+      if (!isOpen()) return;
+      mp.classList.remove('open'); root.style.overflow = '';
+      setTimeout(() => { mp.hidden = true; }, reduce ? 0 : 320);
+      if (back && back.focus) try { back.focus({ preventScroll: true }); } catch { /* element gone */ }
+    }
+    mp.addEventListener('click', e => { if (e.target.closest('[data-close]')) hide(); });
+    document.addEventListener('keydown', e => {
+      if (!isOpen()) return;
+      if (e.key === 'Escape') { e.preventDefault(); hide(); return; }
+      if (e.key !== 'Tab') return;
+      const f = $$('a[href],button:not(:disabled)', mp).filter(x => x.offsetParent !== null && x.tabIndex !== -1);
+      if (!f.length) return;
+      const a = f[0], z = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === a || !mp.contains(document.activeElement) || document.activeElement === card)) { e.preventDefault(); z.focus(); }
+      else if (!e.shiftKey && (document.activeElement === z || !mp.contains(document.activeElement))) { e.preventDefault(); a.focus(); }
+    });
+    if (fine) document.addEventListener('mouseout', e => { if (!e.relatedTarget && e.clientY <= 0 && seconds >= 6) exit = true; });
+    const wait = noHover() ? 12 : 9;
+    const iv = setInterval(() => {
+      if (document.hidden) return;
+      seconds++;
+      const depth = (scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight);
+      if ((seconds >= wait || (seconds >= 4 && depth > 0.6) || exit) && ready()) { clearInterval(iv); show(); }
+      else if (seconds > 120) clearInterval(iv);
+    }, 1000);
+  })();
 
   // ---- Intro: IDENTITY VERIFIED / CLEARANCE GRANTED. Briefing page only, once per session, skippable, never blocks ------
   // The overlay ignores the pointer (pointer-events: none) so nothing underneath is ever blocked; any key, tap, click or scroll
@@ -383,8 +476,10 @@
 
   // ---- Instant prefetch: warm the page under the pointer / finger / focus -----------------------
   const warmed = new Set();
+  const saveData = !!(navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || '')));
   function warm(a) {
     try {
+      if (saveData) return;
       if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
       const u = new URL(a.href, location.href);
       if (!/^https?:$/.test(u.protocol) || u.origin !== location.origin) return; // file:// cannot prefetch

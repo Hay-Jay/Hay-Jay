@@ -122,3 +122,23 @@
 .in-bar { display: block; width: 100%; height: 3px; margin-top: 10px; background: linear-gradient(#f2f2f2, #f2f2f2) 0 0 / 0 100% no-repeat, rgba(255, 255, 255, .22); animation: fill 2.6s linear both; }
 @keyframes fill { to { background-size: 100% 100%; } }
 .in-skip { margin-top: 6px; color: #9c9c9c; font-size: 11px; font-weight: 400; }
+
+/* INCOMING INTEL: the magazine ---------------------------------------------------------------------------------------- */
+.mag { overflow: clip; background-image: radial-gradient(70% 90% at 78% 40%, rgba(255, 255, 255, .13), transparent 62%), var(--grain-l); }
+.mag-grid { display: grid; gap: clamp(28px, 5vw, 64px); align-items: center; }
+.mag-copy .h2 { font-size: clamp(3.2rem, 9vw, 7.4rem); }
+.mag-sub { margin: 14px 0 0; color: var(--dim); }
+.mag-blurb { margin-top: 18px; max-width: 46ch; font-size: 1.05rem; }
+.mag-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.mag-note { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 18px; color: var(--dim); font-size: 11px; line-height: 1.5; }
+.mag-note span:first-child { color: var(--fg); }
+.mag-fig { position: relative; margin: 0; justify-self: center; width: min(100%, 440px); }
+.mag-cover { display: block; position: relative; transform: rotate(-2.4deg); box-shadow: 14px 18px 0 rgba(0, 0, 0, .55), 0 0 90px rgba(255, 255, 255, .12); background: #000; transition: transform .5s var(--ease); }
+.mag-cover:hover { transform: rotate(0deg) translateY(-6px); }
+.mag-img { width: 100%; height: auto; aspect-ratio: 1391 / 1800; object-fit: cover; }
+.mag-cover .mag-clip { right: 18%; top: -26px; }
+.mag-stamp { position: absolute; left: -10px; bottom: 22px; z-index: 6; font-size: 1.25rem; }
+.mag-fig figcaption { margin-top: 20px; color: var(--dim); font-size: 11px; line-height: 1.5; }
+@media (min-width: 900px) { .mag-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); } .mag-stamp { left: -34px; } }
+@media (max-width: 899px) { .mag-fig { order: -1; width: min(78%, 360px); } }
+@media (prefers-reduced-motion: reduce) { .mag-cover { transition: none; } }

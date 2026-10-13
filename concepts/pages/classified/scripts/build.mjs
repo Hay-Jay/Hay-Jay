@@ -54,11 +54,13 @@ const read = (...p) => readFileSync(join(SRC, ...p), 'utf8');
 const trunc = (s, n) => { s = String(s).replace(/\s+/g, ' ').trim(); return s.length <= n ? s : s.slice(0, n - 1).replace(/[\s,.;:-]+\S*$/, '') + '…'; };
 const jsonLd = obj => `<script type="application/ld+json">\n${JSON.stringify(obj).replace(/</g, '\\u003c')}\n</script>`;
 
-const CAT = { top: 'Top', bottom: 'Bottom', accessory: 'Hardware', gift: 'Gift card' };
-const CAT_PLURAL = { top: 'Tops', bottom: 'Bottoms', accessory: 'Hardware', gift: 'Gift cards' };
+const CAT = { top: 'Top', bottom: 'Bottom', accessory: 'Hardware', gift: 'Gift card', print: 'Print' };
+const CAT_PLURAL = { top: 'Tops', bottom: 'Bottoms', accessory: 'Hardware', gift: 'Gift cards', print: 'Print' };
 
 // ---- the product model ---------------------------------------------------------------------------
 const HERO = { 'monochrome-sweatshirt': 4 }; // its first frame is half black fabric
+// THE HOMEPAGE PICTURE: swap the product handle and the photo number (0 = the product's first photo) to change it
+const HOME_COVER = { handle: 'acid-washed-monochrome-hoodie', image: 3 };
 const items = DATA.products.map(p => {
   const imgs = p.images.slice();
   return {
@@ -75,7 +77,7 @@ const featuredOrder = items.slice().sort(FEATURED);
 featuredOrder.forEach((x, i) => { x.no = i + 1; });
 const byHandle = h => items.find(x => x.h === h);
 const priceText = x => (x.pMax > x.p ? 'From ' : '') + fmt(x.p);
-const sizeText = x => x.sizes.length ? x.sizes.slice(0, 7).join(' ') : (x.t === 'gift' ? 'Choose amount' : 'One size');
+const sizeText = x => x.sizes.length ? x.sizes.slice(0, 7).join(' ') : (x.t === 'gift' ? 'Choose amount' : x.t === 'print' ? 'Single issue' : 'One size');
 const zoomy = x => x.t === 'accessory' && /ring/i.test(x.h);
 const leadImg = x => x.imgs[x.hero];
 const fileNo = x => 'MC-' + pad3(x.no);
@@ -183,6 +185,80 @@ function card(ctx, x, { i = 0, sizes = '(min-width:1500px) 20vw, (min-width:900p
 </a>`;
 }
 
+// ---- the magazine (a print product: featured on the briefing, offered in a pop-up, listed in the register) ----------------------
+const MAG = items.find(x => x.t === 'print' && x.avail) || null;
+const magFacts = x => {
+  const t = String(x.d.description || '');
+  const m = t.match(/Volume\s+(\d+)\s*[·•.\-]\s*Issue\s+(\d+)\s*[·•.\-]\s*(\d+)\s+pages/i);
+  const blurb = t.split(/Volume\s+\d+/i)[0].replace(/\s+/g, ' ').trim();
+  return { vol: m ? m[1] : '', issue: m ? m[2] : '', pages: m ? m[3] : '', blurb };
+};
+const magLine = f => ['Print', f.vol && `Vol. ${f.vol}`, f.issue && `Issue ${f.issue}`, f.pages && `${f.pages} pages`].filter(Boolean).join(' — ');
+const magCart = x => `${STORE}/cart/${x.d.variants[0].id}:1`;
+function magSection(ctx) {
+  if (!MAG) return '';
+  const f = magFacts(MAG), im = leadImg(MAG), page = ctx.href('products/' + MAG.h + '/');
+  return `  <!-- INCOMING INTEL: the magazine -------------------------------------------------------------- -->
+  <section class="spread dark mag" id="vision" aria-labelledby="magH">
+    <div class="wrap mag-grid">
+      <div class="mag-copy">
+        <p class="kick mono"><b class="rec" aria-hidden="true"></b> Incoming transmission</p>
+        <h2 class="h2 rv" id="magH">${esc(MAG.n.replace(/^MONOCHROME Magazine\s*[—-]\s*/i, '').replace(/\s*\(Print\)\s*$/i, ''))}</h2>
+        <p class="mag-sub mono">${esc(magLine(f))}</p>
+        <p class="mag-blurb rv">${esc(f.blurb)}</p>
+        <p class="mag-cta">
+          <a class="btn" data-store="/cart/${MAG.d.variants[0].id}:1" href="${esc(magCart(MAG))}">Requisition a copy<i class="arr" aria-hidden="true"></i></a>
+          <a class="btn ghost" href="${esc(page)}">Open the file</a>
+        </p>
+        <p class="mag-note mono"><span>${fmt(MAG.p)} CAD</span><span>Printed copy</span><span>Delivered to ${nCountries} countries${shipsNG ? ', Nigeria included' : ''}. Rate calculated at checkout</span></p>
+      </div>
+      <figure class="mag-fig">
+        <a class="mag-cover" href="${esc(page)}" aria-label="Open ${esc(MAG.n)}">
+          <span class="mag-clip clip" aria-hidden="true"></span>
+          ${imgTag(im, { alt: `${MAG.n}, front cover`, cls: 'mag-img', sizes: '(min-width:900px) 34vw, 78vw', widths: [480, 720, 1080] })}
+          <span class="stamp white sm mag-stamp" style="--r:-9deg" aria-hidden="true">New intel</span>
+        </a>
+        <figcaption class="mono">Exhibit M / ${fileNo(MAG)}. The one file we declassified in full colour.</figcaption>
+      </figure>
+    </div>
+  </section>
+`;
+}
+// the pop-up offer: markup on a few pages, timing and memory in core.js (it never shows without JavaScript)
+const POPUP_KEYS = new Set(['home', 'shop', 'lookbook', 'about', 'shipping', 'faq']);
+function magPopup(ctx, key) {
+  if (!MAG || !POPUP_KEYS.has(key)) return '';
+  const f = magFacts(MAG), im = leadImg(MAG), page = ctx.href('products/' + MAG.h + '/');
+  const short = f.blurb.split(/(?<=[.!?])\s+/).slice(0, 2).join(' ');
+  return `<aside class="magpop" id="magpop" role="dialog" aria-modal="true" aria-labelledby="magpopT" data-key="${esc(MAG.h)}" hidden>
+  <div class="mp-back" data-close></div>
+  <div class="mp-card paper" tabindex="-1">
+    <button class="mp-x mono" type="button" data-close aria-label="Close this message">Close<span>Esc</span></button>
+    <p class="mp-kick mono"><b class="rec" aria-hidden="true"></b> Incoming transmission — new intel</p>
+    <div class="mp-body">
+      <a class="mp-cover" href="${esc(page)}" tabindex="-1" aria-hidden="true">${imgTag(im, { alt: '', cls: 'mp-img', sizes: '(min-width:700px) 260px, 38vw', widths: [260, 400, 640] })}</a>
+      <div class="mp-copy">
+        <h2 class="mp-t" id="magpopT">${esc(MAG.n.replace(/^MONOCHROME Magazine\s*[—-]\s*/i, '').replace(/\s*\(Print\)\s*$/i, ''))}</h2>
+        <p class="mp-meta mono">${esc(magLine(f))}</p>
+        <p class="mp-line">${esc(short)}</p>
+        <p class="mp-price mono"><b>${fmt(MAG.p)}</b> CAD <span>Printed copy</span></p>
+        <p class="mp-cta">
+          <a class="btn" data-store="/cart/${MAG.d.variants[0].id}:1" href="${esc(magCart(MAG))}">Order your copy<i class="arr" aria-hidden="true"></i></a>
+          <a class="btn ghost" href="${esc(page)}">Read the brief</a>
+        </p>
+        <button class="mp-later mono" type="button" data-close>Not now</button>
+      </div>
+    </div>
+  </div>
+</aside>`;
+}
+
+// phrases the search boxes type out on their own: only phrases that really match something in the register
+const HINT_POOL = ['acid wash', 'hoodie', 'necklace', 'white jersey', 'cargo shorts', 'signet ring', 'magazine', 'black jersey', 'chain', 'gift card', 'sweatshirt', 'trinity ring'];
+const hintHay = items.map(x => `${x.n} ${x.d.type || ''} ${CAT_PLURAL[x.t]}`.toLowerCase().replace(/-/g, ' '));
+const SEARCH_HINTS = HINT_POOL.filter(h => hintHay.some(t => h.split(' ').every(w => t.includes(w))));
+const hintsAttr = esc(SEARCH_HINTS.join('|'));
+
 // ---- page: common context -----------------------------------------------------------------------------------
 const SITE_NAME = 'MONOCHROME®';
 function pageContext(path, key, meta, extra = {}) {
@@ -227,6 +303,8 @@ function pageContext(path, key, meta, extra = {}) {
     foot_ticker: tickerHtml(['Delivering to', ...countryNames]),
     foot_barcode: barcode((pg ? docNo(pg) : 'MC-404') + 'foot', 220, 34),
     news_action: esc(STORE + '/contact#contact_form'),
+    mag_popup: meta.noPopup ? '' : magPopup(ctx, key),
+    search_hints: hintsAttr,
     ...extra
   });
   return ctx;
@@ -271,8 +349,8 @@ if (OUT !== ROOT) {
 // ===================================================================================================================
 {
   const key = 'home', ctx0 = makeCtx('');
-  const cover = byHandle('white-monochrome-jersey');
-  const coverIm = cover.imgs[1] || cover.imgs[0];
+  const cover = byHandle(HOME_COVER.handle) || byHandle('white-monochrome-jersey') || items[0];
+  const coverIm = cover.imgs[HOME_COVER.image] || cover.imgs[0];
   const PICKS = [['black-monochrome-jersey', 3], ['acid-washed-monochrome-hoodie', 5], ['monochrome-cargo-shorts-black', 0], ['monochrome-pants-chain', 1], ['royal-black', 0]]
     .map(([h, i]) => ({ x: byHandle(h), i })).filter(p => p.x);
   const pickCards = PICKS.map(({ x, i }, n) => card(ctx0, x, { i: n, pic: x.imgs[Math.min(i, x.imgs.length - 1)], sizes: '(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw' })).join('\n');
@@ -293,8 +371,9 @@ if (OUT !== ROOT) {
     cover_img: imgTag(coverIm, { alt: `${cover.n}, photograph`, sizes: '(min-width:900px) 40vw, 80vw', widths: [640, 960, 1280, 1800], eager: true }),
     cover_cam: cam(1, { ex: 'Exhibit 01', live: true }),
     pick_cards: pickCards,
-    n_tops: String(countsBy('top')), n_bottoms: String(countsBy('bottom')), n_hardware: String(countsBy('accessory')),
-    ticker_cover: tickerHtml(['Wear the unknown', 'Do not cross', 'Operation: Wear the Unknown', 'Black / white / chrome', `${nPieces} assets on file`, 'Prices in CAD'], 'hazard'),
+    mag_section: magSection(ctx0),
+    n_tops: String(countsBy('top')), n_bottoms: String(countsBy('bottom')), n_hardware: String(countsBy('accessory')), n_print: String(countsBy('print')),
+    ticker_cover: tickerHtml(['Wear the unknown', 'Do not cross', 'Operation: Wear the Unknown', 'Black / white / chrome', ...(MAG ? ['New intel: the Vision Issue'] : []), `${nPieces} assets on file`, 'Prices in CAD'], 'hazard'),
     radar: radar(),
     price_span: price,
     bc_cover: barcode('MC-101cover', 200, 34)
@@ -326,12 +405,12 @@ if (OUT !== ROOT) {
     description: `The MONOCHROME® asset register: every item of field equipment on file. Tops, bottoms, rings, chains, necklaces and gift cards in black, white and chrome. Filter by category, sort by price, search by name. Prices in CAD.`,
     css: 'shop', js: 'shop',
     fh: { file: docNo(pageByKey.shop), doc: 'Asset register', extra: ` — ${nPieces} assets` },
-    headExtra: `<script>(function(){try{var q=new URLSearchParams(location.search),c=q.get('c'),d=document.documentElement;if(/^(top|bottom|accessory|gift)$/.test(c))d.dataset.c=c;var v=q.get('v');if(v!=='sheet'&&v!=='index')v=matchMedia('(hover: none), (max-width: 699px)').matches?'sheet':'index';d.dataset.view=v}catch(e){}})()</script>`,
+    headExtra: `<script>(function(){try{var q=new URLSearchParams(location.search),c=q.get('c'),d=document.documentElement;if(/^(top|bottom|accessory|gift|print)$/.test(c))d.dataset.c=c;var v=q.get('v');if(v!=='sheet'&&v!=='index')v=matchMedia('(hover: none), (max-width: 699px)').matches?'sheet':'index';d.dataset.view=v}catch(e){}})()</script>`,
     jsonld: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Asset Register — all assets', url: `${SITE}/shop/`, mainEntity: { '@type': 'ItemList', numberOfItems: nPieces, itemListElement: featuredOrder.map((x, i) => ({ '@type': 'ListItem', position: i + 1, url: `${SITE}/products/${x.h}/`, name: x.n })) } }]
   };
   const ctx = pageContext('shop/', key, meta, {
     shop_rows: rows, shop_cards: cards, total: String(nPieces),
-    filters: [filt('all', 'All assets'), filt('top', 'Tops'), filt('bottom', 'Bottoms'), filt('accessory', 'Hardware'), filt('gift', 'Gift cards')].join('\n        '),
+    filters: [filt('all', 'All assets'), filt('top', 'Tops'), filt('bottom', 'Bottoms'), filt('accessory', 'Hardware'), filt('gift', 'Gift cards'), filt('print', 'Print')].join('\n        '),
     in_stock: String(items.filter(x => x.avail).length)
   });
   emit('shop/', ctx, tpl(read('pages', 'shop.html'), ctx));
@@ -471,7 +550,7 @@ for (const x of items) {
     fig_a: a.html, fig_a_name: esc(a.x.n), fig_a_price: esc(fmt(a.x.p)), fig_a_href: esc(ctx0.href('products/' + a.x.h + '/')), fig_a_cam: cam(4, { ex: 'Exhibit A' }),
     fig_b: b.html, fig_b_name: esc(b.x.n), fig_b_price: esc(fmt(b.x.p)), fig_b_href: esc(ctx0.href('products/' + b.x.h + '/')), fig_b_cam: cam(9, { ex: 'Exhibit B' }),
     fig_c: c.html, fig_c_name: esc(c.x.n), fig_c_price: esc(fmt(c.x.p)), fig_c_href: esc(ctx0.href('products/' + c.x.h + '/')), fig_c_cam: cam(6, { ex: 'Exhibit C' }),
-    n_tops: String(countsBy('top')), n_bottoms: String(countsBy('bottom')), n_hardware: String(countsBy('accessory')), n_gift: String(countsBy('gift')),
+    n_tops: String(countsBy('top')), n_bottoms: String(countsBy('bottom')), n_hardware: String(countsBy('accessory')), n_print: String(countsBy('print')), n_gift: String(countsBy('gift')),
     store_city: esc(`${DATA.store.city}, ${DATA.store.province}`)
   });
   emit('about/', ctx, tpl(read('pages', 'about.html'), ctx));

@@ -41,7 +41,7 @@
 html[data-view=index] .sheet-wrap, html[data-view=sheet] .toc, html:not([data-view]) .toc { display: none; }
 /* deep link ?c=top is applied before first paint */
 html[data-c=top] [data-cat]:not([data-cat=top]), html[data-c=bottom] [data-cat]:not([data-cat=bottom]),
-html[data-c=accessory] [data-cat]:not([data-cat=accessory]), html[data-c=gift] [data-cat]:not([data-cat=gift]) { display: none; }
+html[data-c=accessory] [data-cat]:not([data-cat=accessory]), html[data-c=gift] [data-cat]:not([data-cat=gift]), html[data-c=print] [data-cat]:not([data-cat=print]) { display: none; }
 html:not(.js) .toolbar, html:not(.js) .count { display: none; }
 
 /* the ledger */
