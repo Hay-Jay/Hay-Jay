@@ -58,7 +58,7 @@ export const ACTIONS = ['sleep', 'sit', 'tv', 'cook', 'fridge', 'computer', 'rad
  * `y` is the mount height of a wall-mounted piece.
  * `uses` are the interactables the kind owns: `dx, dz` is the standing spot relative to the pose (rotates with `rot`, see rotXZ), `action` names
  * the handler in the builder (ACTIONS below), `noun` (default: the kind's `name`) is what a blocked path "blocks the way to". A 'sit' use also
- * carries `sit: { dx, dz, yaw, y }`: the seat relative to the pose and the facing at rot 0 (yaw 0 faces the local -z side, as the Studio sofa does).
+ * carries `sit: { dx, dz, yaw, y }`: the seat relative to the pose and the facing at rot 0. In this game yaw 0 faces world +z (the character's nose is at +z, spawn yaw PI faces north into the room), so a seat whose back is on the local +z side faces the local -z front with yaw PI.
  * FRONTS at rot 0 (the side you stand on): bed east (+x), sofa north (-z), tv_unit south (+z), kitchen and fridge west (-x), desk_pc and office_desk
  * north, stereo south, wardrobe south, bookshelf east, shower east, guest_bed east, garage_shelf south, dining_set south; toilet and vanity have
  * their back to -z. A switch plate sits on a wall whose room is to its north: you stand at pose + rotXZ(-0.1, -0.77, rot).
@@ -67,7 +67,7 @@ export const ACTIONS = ['sleep', 'sit', 'tv', 'cook', 'fridge', 'computer', 'rad
 export const FIXTURE_KINDS = {
   bed:        { name: 'bed',          w: 2.0,  d: 2.4,  h: 1.1,  ch: 0.4,  pad: 0.1, uses: [{ id: 'bed', dx: 1.2, dz: 0.6, radius: 1.9, label: 'Sleep', action: 'sleep' }] },
   nightstand: { name: 'nightstand',   w: 0.5,  d: 0.5,  h: 0.8,  ch: 0.5,  pad: 0.1 },
-  sofa:       { name: 'sofa',         w: 2.86, d: 1.04, h: 1.0,  ch: 0.55, pad: 0.1, uses: [{ id: 'sofa', dx: 0, dz: -1.0, radius: 1.5, label: 'Sit on sofa', action: 'sit', sit: { dx: 0, dz: -0.05, yaw: 0, y: 0.18 } }] },
+  sofa:       { name: 'sofa',         w: 2.86, d: 1.04, h: 1.0,  ch: 0.55, pad: 0.1, uses: [{ id: 'sofa', dx: 0, dz: -1.0, radius: 1.5, label: 'Sit on sofa', action: 'sit', sit: { dx: 0, dz: -0.05, yaw: Math.PI, y: 0.18 } }] },
   tv_unit:    { name: 'TV',           w: 1.8,  d: 0.45, h: 1.6,  ch: 0.5,  pad: 0.1, uses: [{ id: 'tv', dx: 0, dz: 1.2, radius: 2.0, label: 'Watch TV', action: 'tv' }] },
   kitchen:    { name: 'kitchen',      w: 0.9,  d: 3.4,  h: 1.0,  ch: 0.9,  pad: 0.1, uses: [{ id: 'stove', dx: -1.0, dz: 0.6, radius: 1.5, label: 'Cook a quick meal', action: 'cook', noun: 'stove' }] },
   fridge:     { name: 'fridge',       w: 0.9,  d: 0.85, h: 1.9,  ch: 1.9,  pad: 0.1, uses: [{ id: 'fridge', dx: -1.2, dz: 0, radius: 1.8, label: 'Open fridge / eat', action: 'fridge' }] },
@@ -80,7 +80,7 @@ export const FIXTURE_KINDS = {
   /* ---- new in the multi-room homes ---- */
   toilet:       { name: 'toilet',         w: 0.45, d: 0.75, h: 0.8,  ch: 0.8,  pad: 0.1 },
   vanity:       { name: 'vanity',         w: 1.2,  d: 0.55, h: 1.0,  ch: 1.0,  pad: 0.1 },
-  dining_set:   { name: 'dining table',   w: 1.8,  d: 1.9,  h: 0.9,  ch: 0.78, pad: 0.1, uses: [{ id: 'dining', dx: 0, dz: 1.55, radius: 1.4, label: 'Sit at the table', action: 'sit', sit: { dx: 0, dz: 0.85, yaw: 0, y: 0.2 } }] },
+  dining_set:   { name: 'dining table',   w: 1.8,  d: 1.9,  h: 0.9,  ch: 0.78, pad: 0.1, uses: [{ id: 'dining', dx: 0, dz: 1.55, radius: 1.4, label: 'Sit at the table', action: 'sit', sit: { dx: 0, dz: 0.85, yaw: Math.PI, y: 0.2 } }] },
   island:       { name: 'kitchen island', w: 2.0,  d: 0.9,  h: 0.95, ch: 0.92, pad: 0.1 },
   guest_bed:    { name: 'guest bed',      w: 1.4,  d: 2.1,  h: 0.9,  ch: 0.4,  pad: 0.1, uses: [{ id: 'guest_bed', dx: 1.25, dz: 0.5, radius: 1.8, label: 'Nap on the guest bed', action: 'sleep' }] },
   office_desk:  { name: 'office desk',    w: 1.6,  d: 0.8,  h: 1.25, ch: 0.8,  pad: 0.1, uses: [{ id: 'office', dx: 0, dz: -0.75, radius: 1.6, label: 'Work at the desk', action: 'computer', noun: 'desk' }] },
@@ -209,7 +209,7 @@ export const BUNGALOW = {
     { id: 'toilet', kind: 'toilet', x: -5.5, z: -10.3, rot: 0, room: 'bath' }, { id: 'switch_bath', kind: 'switch', x: -6.0, z: -5.715, rot: 0, room: 'bath' },
     { id: 'guest_bed', kind: 'guest_bed', x: -9.3, z: -4.35, rot: 0, room: 'den' }, { id: 'office', kind: 'office_desk', x: -7.0, z: -1.9, rot: 0, room: 'den' },
     { id: 'switch_den', kind: 'switch', x: -4.715, z: -3.9, rot: 1, room: 'den' },
-    { id: 'car', kind: 'car', x: -7.4, z: 2.5, rot: 0, room: 'garage' }, { id: 'shelf', kind: 'garage_shelf', x: -9.85, z: 2.5, rot: 1, room: 'garage' },
+    { id: 'car', kind: 'car', x: -7.4, z: 2.9, rot: 0, room: 'garage' }, { id: 'shelf', kind: 'garage_shelf', x: -7.4, z: -0.9, rot: 0, room: 'garage' },   // the shelf on the north wall with open floor on both sides of the car: the storage shelf is not at the end of a dead-end corridor
     { id: 'switch_garage', kind: 'switch', x: -4.715, z: 2.3, rot: 1, room: 'garage' },
   ],
   decor: [...STUDIO_DECOR, { kind: 'rug', x: -0.4, z: -7.7, w: 3.4, d: 2.2, color: '#4f6b8a' }, { kind: 'rug', x: -7.0, z: -3.6, w: 2.6, d: 1.6, color: '#7a8f6a' }],

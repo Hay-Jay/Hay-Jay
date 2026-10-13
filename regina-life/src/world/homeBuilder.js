@@ -14,6 +14,7 @@ import { WALLS, FLOORS, KIND_ACTIVITY } from '../data/furniture.js';
 import { own } from '../core/util.js';
 import { mulberry32 } from '../core/rng.js';
 import { itemDef } from '../core/home.js';
+import { lotOf } from '../core/lot.js';
 import { tileTexture, woodTexture } from './textures.js';
 import { furnitureModel } from './furnitureModels.js';
 import { FIXTURE_BUILDERS, FIXTURE_META } from './homeKinds.js';
@@ -123,10 +124,8 @@ export function deriveHome(layout) {
     const def = FIXTURE_KINDS[f.kind]; if (!def || !own(FIXTURE_KINDS, f.kind)) throw new Error(`fixture ${f.id}: unknown kind ${f.kind}`);
     return { ...f, rot: f.rot ?? 0, def, room: f.room ?? roomIdAt(L, f.x, f.z) };
   });
-  const colliders = Array.isArray(layout.colliders) ? layout.colliders.map((c) => ({ ...c })) : fixtures.filter((f) => f.def.solid !== false).map((f) => {
-    const r = rotRect({ x0: -f.def.w / 2, z0: -f.def.d / 2, x1: f.def.w / 2, z1: f.def.d / 2 }, f.rot);
-    return { n: f.id, x0: f.x + r.x0, z0: f.z + r.z0, x1: f.x + r.x1, z1: f.z + r.z1, h: f.def.ch ?? f.def.h };
-  });
+  // ONE source for the physics rectangles: lotOf (a listed `colliders` array wins; fixtures unchanged from the Studio reuse the Studio's measured rows; the rest are derived from the kinds)
+  const colliders = lotOf(layout).colliders.map((c) => ({ ...c }));
   const useCount = new Map(); for (const f of fixtures) for (const u of f.def.uses || []) useCount.set(u.id, (useCount.get(u.id) || 0) + 1);
   const interactables = [];
   for (const f of fixtures) for (const u of f.def.uses || []) {
@@ -357,7 +356,17 @@ export function buildHome(layout, kit) {
       const n = Math.abs(y - c.goal) < 0.01 ? c.goal : y + (c.goal - y) * k;
       c.m.scale.y = Math.max(0.001, n); c.m.visible = !(c.lintel && n < 0.05);
     }
+    for (const m of parts.openings) {   // what hangs on a partition (a light-switch plate, a sign) goes with it while the camera lowers that wall, instead of floating in mid-air
+      if (m.userData.wall?.side != null) continue; const h = mountedHost(m); if (h) m.visible = h.m.scale.y > 0.95;
+    }
   });
+  const hostOf = new WeakMap();
+  const mountedHost = (m) => {
+    if (hostOf.has(m)) return hostOf.get(m);
+    const p = new THREE.Vector3(); m.updateWorldMatrix(true, false); m.getWorldPosition(p);
+    const h = cuttable.find((c) => !c.lintel && p.x >= c.rect.x0 - 0.3 && p.x <= c.rect.x1 + 0.3 && p.z >= c.rect.z0 - 0.3 && p.z <= c.rect.z1 + 0.3) ?? null;
+    hostOf.set(m, h); return h;
+  };
 
   /* ----- wall modes ----- */
   const nearby = (roomId) => { const s = new Set([roomId]); for (const d of geo.doorways) if (d.rooms.includes(roomId)) d.rooms.forEach((r) => r && s.add(r)); return s; };
@@ -412,12 +421,14 @@ export function buildHome(layout, kit) {
     if (def.solid) { const w = rot % 2 ? def.d : def.w, d = rot % 2 ? def.w : def.d; rect = colliders.add(it.x - w / 2, it.z - d / 2, it.x + w / 2, it.z + d / 2, def.h, 'furn'); }
     const act = own(KIND_ACTIVITY, def.kind) ? KIND_ACTIVITY[def.kind] : null;
     if (act) {   // stand in front of it (the side the piece faces) so the prompt never fights the piece's own collider; try the other sides when that spot is walled off
-      const reach = Math.max(def.w, def.d) / 2 + 0.6;
-      for (const r of [rot, (rot + 1) % 4, (rot + 3) % 4, (rot + 2) % 4]) {
-        const o = rotXZ(0, reach, r), sx = it.x + o.x, sz = it.z + o.z;
-        if (!spotOk(sx, sz, it.x, it.z)) continue;
-        inter = { id: `furn_${it.id}`, furn: true, x: sx, z: sz, radius: 1.5, label: `${act[1]} ${def.name.toLowerCase()}`, room: roomIdAt(geo, sx, sz), run: (ctx) => ctx.ui.activity(act[0]) };
-        interactables.push(inter); break;
+      const half = Math.max(def.w, def.d) / 2;
+      search: for (const reach of [half + 0.6, half + 0.45, half + 0.32]) {   // the comfortable spot first; closer in when a neighbour or a wall is in the way (a prompt must never be lost: gear in a tight den or garage still has to be usable)
+        for (const r of [rot, (rot + 1) % 4, (rot + 3) % 4, (rot + 2) % 4]) {
+          const o = rotXZ(0, reach, r), sx = it.x + o.x, sz = it.z + o.z;
+          if (!spotOk(sx, sz, it.x, it.z)) continue;
+          inter = { id: `furn_${it.id}`, furn: true, x: sx, z: sz, radius: 1.5, label: `${act[1]} ${def.name.toLowerCase()}`, room: roomIdAt(geo, sx, sz), run: (ctx) => ctx.ui.activity(act[0]) };
+          interactables.push(inter); break search;
+        }
       }
     }
     return { sig, obj, rect, inter };

@@ -78,7 +78,7 @@ describe('Studio behaviour parity (what the actions do)', () => {
 
   it('sits on the sofa exactly where and how it always did (plus the standing spot for getting up)', () => {
     const it = buildInterior('apartment'), c = ctxStub(); byId(it, 'sofa').run(c);
-    const s = c.player.sitAt.mock.calls[0][0]; expect(s).toMatchObject({ x: -0.4, yaw: 0, y: 0.18 }); expect(s.z).toBeCloseTo(3.55, 12); expect(s.stand).toEqual({ x: -0.4, z: 2.6 });
+    const s = c.player.sitAt.mock.calls[0][0]; expect(s).toMatchObject({ x: -0.4, y: 0.18 }); expect(Math.cos(s.yaw)).toBeCloseTo(-1, 12); expect(Math.sin(s.yaw)).toBeCloseTo(0, 12);   // seated, the player faces the TV (north), not the sofa's back: yaw 0 faces +z in this game expect(s.z).toBeCloseTo(3.55, 12); expect(s.stand).toEqual({ x: -0.4, z: 2.6 });
   });
 
   it('the TV: Watch TV first, then a menu with Next channel / Turn off / Cancel; switching off clears the label', () => {

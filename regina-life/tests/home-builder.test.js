@@ -237,9 +237,9 @@ describe('buildHome on a two-room layout', () => {
     expect(it0.interactables.find((i) => i.id === 'exit').room).toBe('living');
     const c = ctxStub(); it0.interactables.find((i) => i.id === 'bed').run(c); expect(c.ui.sleep).toHaveBeenCalled();
     it0.interactables.find((i) => i.id === 'exit').run(c); expect(c.ui.exitInterior).toHaveBeenCalled();
-    // the sofa at rot 2: the seat is 0.05 behind the pose in ITS frame, it faces yaw PI, and the standing spot is the interactable's position
+    // the sofa at rot 2: the seat is 0.05 behind the pose in ITS frame, it faces the local -z front, which at rot 2 is world +z (yaw 0 in this game), and the standing spot is the interactable's position
     const sofa = it0.interactables.find((i) => i.id === 'sofa'); sofa.run(c);
-    const s = c.player.sitAt.mock.calls[0][0]; near(s.x, -2.0); near(s.z, 3.0 + 0.05); near(Math.abs(s.yaw), Math.PI, 1e-9); expect(s.y).toBe(0.18); expect(s.stand).toEqual({ x: sofa.x, z: sofa.z });
+    const s = c.player.sitAt.mock.calls[0][0]; near(s.x, -2.0); near(s.z, 3.0 + 0.05); near(Math.abs(s.yaw), 0, 1e-9); expect(s.y).toBe(0.18); expect(s.stand).toEqual({ x: sofa.x, z: sofa.z });
   });
 
   it('lights: a switch toggles only its own room and only intensities change (no light is added, removed or hidden)', () => {

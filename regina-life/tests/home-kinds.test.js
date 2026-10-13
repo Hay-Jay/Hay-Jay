@@ -18,6 +18,7 @@ const kindsLayout = (rot) => ({
   rooms: [{ id: 'living', name: 'Hall', type: 'living', floor: { x0: -20, z0: -20, x1: 20, z1: 20 } }], walls: [],
   fixtures: KINDS.map((kind, i) => ({ id: `f_${kind}`, kind, x: -15 + (i % 6) * 6, z: -12 + Math.floor(i / 6) * 6, rot, room: 'living' })),
   decor: [], windows: [], ceilingLights: [], pointLights: [],
+  entry: { door: { x: 0, z: 19.96, w: 1.6 }, spawn: { x: 0, z: 18, yaw: Math.PI }, exit: { x: 0, z: 18.6 } },   // lotOf wants an entry in every layout
 });
 const POSE = (layout, kind) => layout.fixtures.find((f) => f.kind === kind);
 

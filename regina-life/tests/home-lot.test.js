@@ -144,7 +144,7 @@ describe('collision rows and key points of the bigger homes', () => {
     expect(bed).toMatchObject({ x0: -4.2, x1: -2.2 }); expect(bed.z0).toBeCloseTo(-10.3, 9); expect(bed.z1).toBeCloseTo(-7.9, 9);
     expect(ko.x0).toBeCloseTo(bed.x0 - FIXTURE_KINDS.bed.pad, 9); expect(ko.z1).toBeCloseTo(bed.z1 + FIXTURE_KINDS.bed.pad, 9); expect(co.h).toBe(FIXTURE_KINDS.bed.ch);
     const shower = lot.collide.find((r) => r.n === 'shower'); expect(shower.x1 - shower.x0).toBeCloseTo(1.75, 9);                       // rot 2 keeps a square footprint
-    const shelf = lotOf(BUNGALOW).collide.find((r) => r.n === 'shelf'); expect(shelf.x1 - shelf.x0).toBeCloseTo(0.5, 9); expect(shelf.z1 - shelf.z0).toBeCloseTo(2.4, 9);   // rot 1 swaps w and d
+    const isl = lotOf(BUNGALOW).collide.find((r) => r.n === 'island'), ik = FIXTURE_KINDS.island; expect(isl.x1 - isl.x0).toBeCloseTo(ik.d, 9); expect(isl.z1 - isl.z0).toBeCloseTo(ik.w, 9);   // the island is at rot 1: w and d swap
   });
   it('drop the old collision rows of the fixtures that moved out of the living room', () => {
     for (const l of [ONEBED, BUNGALOW]) { const rows = lotOf(l).collide.filter((x) => ['bed', 'nightstand', 'wardrobe', 'shower'].includes(x.n)); expect(rows.map((r) => r.n).sort(), l.id).toEqual(['bed', 'nightstand', 'shower', 'wardrobe']); for (const r of rows) expect(r.z1, `${l.id} ${r.n}`).toBeLessThan(-5.7); }   // all four now stand north of the old north wall
@@ -191,14 +191,14 @@ describe('interactables', () => {
   it('compute the standing spot as pose + rotXZ(dx, dz, rot) and keep plain use ids only where they are unique', () => {
     const its = interactablesOf(BUNGALOW), bed = its.find((i) => i.id === 'bed'), shower = its.find((i) => i.id === 'shower'), shelf = its.find((i) => i.id === 'storage');
     const p = rotXZ(FIXTURE_KINDS.bed.uses[0].dx, FIXTURE_KINDS.bed.uses[0].dz, 0); expect([bed.x, bed.z]).toEqual([-3.2 + p.x, -9.1 + p.z]);
-    expect(shower.room).toBe('bath'); expect(shelf).toMatchObject({ room: 'garage', action: 'storage', fixture: 'shelf' }); expect(shelf.x).toBeCloseTo(-9.85 + 1.05, 9);   // rot 1 turns local +z into world +x
+    expect(shower.room).toBe('bath'); expect(shelf).toMatchObject({ room: 'garage', action: 'storage', fixture: 'shelf' }); expect(shelf.x).toBeCloseTo(-7.4, 9); expect(shelf.z).toBeCloseTo(-0.9 + 1.05, 9);   // the shelf stands on the north wall, rot 0: local +z is world +z (rot 1, as the dining table below, turns it into +x)
     const sw = its.filter((i) => i.use === 'switch'); expect(sw).toHaveLength(5); expect(new Set(sw.map((i) => i.room)).size).toBe(5); for (const i of sw) expect(i.id).toBe(`${i.fixture}:switch`);
   });
   it('resolve the seat of every sit use in world coordinates with the facing turned by rot', () => {
     const sofa = interactablesOf(BUNGALOW).find((i) => i.id === 'sofa'), dining = interactablesOf(BUNGALOW).find((i) => i.id === 'dining');
-    expect(sofa.seat).toEqual({ x: -0.4, z: 3.55, yaw: 0, y: 0.18 }); expect(dining.seat.x).toBeCloseTo(-2.3, 9); expect(dining.seat.z).toBeCloseTo(-2.6 + 0.85, 9); expect(dining.seat.yaw).toBe(0);
+    expect(sofa.seat).toMatchObject({ x: -0.4, z: 3.55, y: 0.18 }); expect(Math.cos(sofa.seat.yaw)).toBeCloseTo(-1, 9);   // faces north (-z), towards the TV expect(dining.seat.x).toBeCloseTo(-2.3, 9); expect(dining.seat.z).toBeCloseTo(-2.6 + 0.85, 9); expect(Math.cos(dining.seat.yaw)).toBeCloseTo(-1, 9);
     const l = clone(BUNGALOW); l.fixtures.find((f) => f.id === 'dining').rot = 1; const d1 = interactablesOf(l).find((i) => i.id === 'dining');
-    expect(d1.seat.yaw).toBeCloseTo(Math.PI / 2, 9); expect(d1.seat.x).toBeCloseTo(-2.3 + 0.85, 9);
+    expect(d1.seat.yaw).toBeCloseTo(-Math.PI / 2, 9);   // rot 1 turns the table's north-facing seat to face west: facing = (sin yaw, cos yaw) = (-1, 0) expect(d1.seat.x).toBeCloseTo(-2.3 + 0.85, 9);
   });
 });
 

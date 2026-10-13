@@ -36,10 +36,23 @@ const keyLabel = (lot, n) => lot.keyPoints.find((k) => k.n === n)?.label ?? n;
 export const accessibleKeys = (s) => [...reachableKeys(lotOf(layoutOf(s)), solidRects(placedOf(s)))];
 /** The Studio's key names (its listed KEY_POINTS; every one is reachable in the empty Studio, which a test locks against lotOf(STUDIO).baseline). */
 export const BASELINE_KEYS = KEY_POINTS.map((k) => k.n);
-/** Moves furniture to storage (latest first) until every normally-reachable key point is reachable again. Returns how many pieces were stored. */
+/**
+ * Moves furniture to storage until every normally-reachable key point is reachable again. Returns how many pieces were stored.
+ * One room: latest first (the original behaviour, locked by the legacy differential test). Several rooms: the piece whose removal brings back the
+ * most key points goes first (latest breaks ties), so one piece sealing a doorway does not send everything placed after it in other rooms to storage.
+ */
 export function repairHome(store) {
   const h = store.state.home; if (!h || !Array.isArray(h.placed)) return 0; const lot = lotOf(layoutOf(store.state)); let n = 0;
-  while (missingKeys(lot, solidRects(h.placed)).length) { const i = [...h.placed].map((p, k) => [p, k]).reverse().find(([p]) => itemDef(p.type)?.solid)?.[1]; if (i == null) break; h.placed.splice(i, 1); n++; }
+  while (true) {
+    const missing = missingKeys(lot, solidRects(h.placed)).length; if (!missing) break;
+    const solid = h.placed.map((p, k) => [p, k]).filter(([p]) => itemDef(p.type)?.solid); if (!solid.length) break;
+    let pick = solid[solid.length - 1][1];
+    if (lot.rooms.length > 1) {
+      let best = -1;
+      for (const [p, k] of [...solid].reverse()) { const left = missingKeys(lot, solidRects(h.placed, p.id)).length, gain = missing - left; if (gain > best) { best = gain; pick = k; } }
+    }
+    h.placed.splice(pick, 1); n++;
+  }
   if (n) store.commit('home'); return n;
 }
 
@@ -137,7 +150,7 @@ const BONUS_ZERO = () => ({ sleep: 0, comfort: 0, fun: 0, skill: 0, mood: 0 });
  * Gameplay value of the PLACED furniture (stored pieces and unowned ones count for nothing). Pure over the state.
  * Returns { sleep, comfort, fun, skill, mood }: the first four are fractions (0.2 = +20%), mood is flat points; every value is >= 0 and
  * hard-capped by HOME_CAPS. Pieces of one kind stack best-first with each repeat worth `rep` times the previous one (diminishing returns);
- * a TV is only as fun as the best seat in the room (tvSeatFactor). `skill` (optional) = 'fitness' | 'charisma' | 'cooking' counts only the
+ * a TV is only as fun as the best seat in the home (house-wide: bonuses are not room-aware in this slice) (tvSeatFactor). `skill` (optional) = 'fitness' | 'charisma' | 'cooking' counts only the
  * gear that trains that skill; omitted, it counts all skill gear.
  */
 export function homeBonuses(state, skill = null) {
