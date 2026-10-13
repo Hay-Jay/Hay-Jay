@@ -217,6 +217,7 @@ a.etag:hover b { text-decoration: underline; }
 .bar-brand { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; height: calc(var(--bar) - 4px); }
 .bar-emblem { height: 28px; width: auto; mix-blend-mode: screen; }
 .bar-name { font: 900 1.55rem/1 var(--head); letter-spacing: .06em; }
+.bar-word { height: auto; width: 168px; mix-blend-mode: screen; flex: none; }
 .bar-div { display: none; color: var(--dim); font-size: 10.5px; letter-spacing: .14em; border-left: 1px solid rgba(255, 255, 255, .3); padding-left: 10px; }
 @media (min-width: 1620px) { .bar-div { display: inline; } }
 .tabs { display: none; align-self: end; justify-content: center; align-items: flex-end; gap: 4px; height: calc(var(--bar) - 8px); position: relative; z-index: 1; }
@@ -248,11 +249,12 @@ a.etag:hover b { text-decoration: underline; }
   .bar { gap: 8px; }
   .bar-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .bar-name { font-size: 1.35rem; }
+  .bar-word { width: 148px; }
   .bar-emblem { height: 24px; }
   .bar-btn { padding: 0 10px; }
   .bar-r { gap: 6px; }
 }
-@media (max-width: 400px) { .bar-name { font-size: 1.2rem; letter-spacing: .04em; } .bar-brand { gap: 7px; } .bar-btn { padding: 0 8px; } }
+@media (max-width: 400px) { .bar-name { font-size: 1.2rem; letter-spacing: .04em; } .bar-word { width: 132px; } .bar-brand { gap: 7px; } .bar-btn { padding: 0 8px; } }
 
 /* ---- file index overlay + command bar ------------------------------------------------------------------------------- */
 .menu {

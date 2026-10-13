@@ -60,7 +60,7 @@ const CAT_PLURAL = { top: 'Tops', bottom: 'Bottoms', accessory: 'Hardware', gift
 // ---- the product model ---------------------------------------------------------------------------
 const HERO = { 'monochrome-sweatshirt': 4 }; // its first frame is half black fabric
 // THE HOMEPAGE PICTURE: swap the product handle and the photo number (0 = the product's first photo) to change it
-const HOME_COVER = { handle: 'acid-washed-monochrome-hoodie', image: 3 };
+const HOME_COVER = { handle: 'white-monochrome-jersey', image: 0 };
 const items = DATA.products.map(p => {
   const imgs = p.images.slice();
   return {
