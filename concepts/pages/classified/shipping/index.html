@@ -27,6 +27,7 @@
 <script>window.MC = {root:'../', idx:'', page:'shipping'};(function(){var d=document.documentElement;d.classList.add('js');try{if(localStorage.getItem('mc-declass')==='1')d.classList.add('declass')}catch(e){}window.__mcRv=setTimeout(function(){d.classList.add('rv-fail')},4000);addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation&&navigation.activation.navigationType==='traverse'){d.classList.add('vt-back');e.viewTransition.finished.then(function(){d.classList.remove('vt-back')},function(){d.classList.remove('vt-back')})}}catch(x){}})})()</script>
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/shipping.css">
+<link rel="stylesheet" href="../css/mobile.css" media="(max-width: 899px)">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage","name":"Extraction routes: shipping and returns","url":"https://monochrome.com.ng/shipping/"}
 </script>
@@ -65,6 +66,11 @@
       <p class="mono jump-none" id="jumpNone" hidden>No file matches that. Try another keyword.</p>
     </div>
     <nav aria-label="File index"><ol class="menu-list"><li><a href="../"><span class="mono">01</span><b>Briefing</b><i class="mono">Mission briefing</i></a></li><li><a href="../shop/"><span class="mono">02</span><b>Assets</b><i class="mono">Asset register</i></a></li><li><a href="../lookbook/"><span class="mono">03</span><b>Evidence</b><i class="mono">Surveillance exhibits</i></a></li><li><a href="../about/"><span class="mono">04</span><b>Mission</b><i class="mono">Mission and rules of engagement</i></a></li><li><a href="../shipping/" aria-current="page"><span class="mono">05</span><b>Routes</b><i class="mono">Extraction routes</i></a></li><li><a href="../faq/"><span class="mono">06</span><b>Debrief</b><i class="mono">Debrief transcript</i></a></li><li><a href="../contact/"><span class="mono">07</span><b>Report in</b><i class="mono">Secure channel</i></a></li></ol></nav>
+    <button class="menu-dc" id="declassMenu" type="button" data-declass aria-pressed="false">
+      <span class="dc-ico" aria-hidden="true"></span>
+      <span class="menu-dc-t"><b>Declassify the site</b><span class="mono">Lift every redaction bar on every page.</span></span>
+      <span class="menu-dc-s mono" aria-hidden="true"></span>
+    </button>
     <div class="menu-foot mono">
       <a data-store="/cart" href="https://monochrome.com.ng/cart">Bag<span class="arr" aria-hidden="true"></span></a>
       <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca<span class="arr" aria-hidden="true"></span></a>
@@ -128,37 +134,37 @@
         <div class="tbl-wrap">
           <table class="tbl">
             <caption class="sr-only">Countries the Monochrome store delivers to, with region and shipping rate</caption>
-            <thead><tr><th scope="col" class="mono">No.</th><th scope="col" class="mono">Zone</th><th scope="col" class="mono">Code</th><th scope="col" class="mono">Region</th><th scope="col" class="mono">Rate</th></tr></thead>
+            <thead><tr><th scope="col" class="mono">No.</th><th scope="col" class="mono">Zone</th><th scope="col" class="mono">Code</th><th scope="col" class="mono c-reg">Region</th><th scope="col" class="mono">Rate</th></tr></thead>
             <tbody>
-<tr class=""><td class="c-no mono">01</td><th scope="row" class="c-name">Australia</th><td class="c-code mono">AU</td><td class="c-reg mono">Oceania</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">02</td><th scope="row" class="c-name">Austria</th><td class="c-code mono">AT</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">03</td><th scope="row" class="c-name">Belgium</th><td class="c-code mono">BE</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class="canada"><td class="c-no mono">04</td><th scope="row" class="c-name">Canada<em>home base</em></th><td class="c-code mono">CA</td><td class="c-reg mono">North America</td><td class="c-rate mono">Free standard shipping</td></tr>
-<tr class=""><td class="c-no mono">05</td><th scope="row" class="c-name">Czechia</th><td class="c-code mono">CZ</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">06</td><th scope="row" class="c-name">Denmark</th><td class="c-code mono">DK</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">07</td><th scope="row" class="c-name">Finland</th><td class="c-code mono">FI</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">08</td><th scope="row" class="c-name">France</th><td class="c-code mono">FR</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">09</td><th scope="row" class="c-name">Germany</th><td class="c-code mono">DE</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">10</td><th scope="row" class="c-name">Hong Kong SAR China</th><td class="c-code mono">HK</td><td class="c-reg mono">Asia</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">11</td><th scope="row" class="c-name">Ireland</th><td class="c-code mono">IE</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">12</td><th scope="row" class="c-name">Israel</th><td class="c-code mono">IL</td><td class="c-reg mono">Middle East</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">13</td><th scope="row" class="c-name">Italy</th><td class="c-code mono">IT</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">14</td><th scope="row" class="c-name">Japan</th><td class="c-code mono">JP</td><td class="c-reg mono">Asia</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">15</td><th scope="row" class="c-name">Malaysia</th><td class="c-code mono">MY</td><td class="c-reg mono">Asia</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">16</td><th scope="row" class="c-name">Netherlands</th><td class="c-code mono">NL</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">17</td><th scope="row" class="c-name">New Zealand</th><td class="c-code mono">NZ</td><td class="c-reg mono">Oceania</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class="nigeria"><td class="c-no mono">18</td><th scope="row" class="c-name">Nigeria<em>field office</em></th><td class="c-code mono">NG</td><td class="c-reg mono">Africa</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">19</td><th scope="row" class="c-name">Norway</th><td class="c-code mono">NO</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">20</td><th scope="row" class="c-name">Poland</th><td class="c-code mono">PL</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">21</td><th scope="row" class="c-name">Portugal</th><td class="c-code mono">PT</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">22</td><th scope="row" class="c-name">Singapore</th><td class="c-code mono">SG</td><td class="c-reg mono">Asia</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">23</td><th scope="row" class="c-name">South Korea</th><td class="c-code mono">KR</td><td class="c-reg mono">Asia</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">24</td><th scope="row" class="c-name">Spain</th><td class="c-code mono">ES</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">25</td><th scope="row" class="c-name">Sweden</th><td class="c-code mono">SE</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">26</td><th scope="row" class="c-name">Switzerland</th><td class="c-code mono">CH</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">27</td><th scope="row" class="c-name">United Arab Emirates</th><td class="c-code mono">AE</td><td class="c-reg mono">Middle East</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">28</td><th scope="row" class="c-name">United Kingdom</th><td class="c-code mono">GB</td><td class="c-reg mono">Europe</td><td class="c-rate mono">Calculated at checkout</td></tr>
-<tr class=""><td class="c-no mono">29</td><th scope="row" class="c-name">United States</th><td class="c-code mono">US</td><td class="c-reg mono">North America</td><td class="c-rate mono">Calculated at checkout</td></tr>
+<tr class=""><td class="c-no mono">01</td><th scope="row" class="c-name">Australia</th><td class="c-code mono">AU</td><td class="c-reg mono">Oceania</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">02</td><th scope="row" class="c-name">Austria</th><td class="c-code mono">AT</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">03</td><th scope="row" class="c-name">Belgium</th><td class="c-code mono">BE</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class="canada"><td class="c-no mono">04</td><th scope="row" class="c-name">Canada<em>home base</em></th><td class="c-code mono">CA</td><td class="c-reg mono">North America</td><td class="c-rate mono">Free <span class="r-l">standard </span>shipping</td></tr>
+<tr class=""><td class="c-no mono">05</td><th scope="row" class="c-name">Czechia</th><td class="c-code mono">CZ</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">06</td><th scope="row" class="c-name">Denmark</th><td class="c-code mono">DK</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">07</td><th scope="row" class="c-name">Finland</th><td class="c-code mono">FI</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">08</td><th scope="row" class="c-name">France</th><td class="c-code mono">FR</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">09</td><th scope="row" class="c-name">Germany</th><td class="c-code mono">DE</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">10</td><th scope="row" class="c-name">Hong Kong SAR China</th><td class="c-code mono">HK</td><td class="c-reg mono">Asia</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">11</td><th scope="row" class="c-name">Ireland</th><td class="c-code mono">IE</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">12</td><th scope="row" class="c-name">Israel</th><td class="c-code mono">IL</td><td class="c-reg mono">Middle East</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">13</td><th scope="row" class="c-name">Italy</th><td class="c-code mono">IT</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">14</td><th scope="row" class="c-name">Japan</th><td class="c-code mono">JP</td><td class="c-reg mono">Asia</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">15</td><th scope="row" class="c-name">Malaysia</th><td class="c-code mono">MY</td><td class="c-reg mono">Asia</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">16</td><th scope="row" class="c-name">Netherlands</th><td class="c-code mono">NL</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">17</td><th scope="row" class="c-name">New Zealand</th><td class="c-code mono">NZ</td><td class="c-reg mono">Oceania</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class="nigeria"><td class="c-no mono">18</td><th scope="row" class="c-name">Nigeria<em>field office</em></th><td class="c-code mono">NG</td><td class="c-reg mono">Africa</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">19</td><th scope="row" class="c-name">Norway</th><td class="c-code mono">NO</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">20</td><th scope="row" class="c-name">Poland</th><td class="c-code mono">PL</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">21</td><th scope="row" class="c-name">Portugal</th><td class="c-code mono">PT</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">22</td><th scope="row" class="c-name">Singapore</th><td class="c-code mono">SG</td><td class="c-reg mono">Asia</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">23</td><th scope="row" class="c-name">South Korea</th><td class="c-code mono">KR</td><td class="c-reg mono">Asia</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">24</td><th scope="row" class="c-name">Spain</th><td class="c-code mono">ES</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">25</td><th scope="row" class="c-name">Sweden</th><td class="c-code mono">SE</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">26</td><th scope="row" class="c-name">Switzerland</th><td class="c-code mono">CH</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">27</td><th scope="row" class="c-name">United Arab Emirates</th><td class="c-code mono">AE</td><td class="c-reg mono">Middle East</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">28</td><th scope="row" class="c-name">United Kingdom</th><td class="c-code mono">GB</td><td class="c-reg mono">Europe</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
+<tr class=""><td class="c-no mono">29</td><th scope="row" class="c-name">United States</th><td class="c-code mono">US</td><td class="c-reg mono">North America</td><td class="c-rate mono"><span class="r-l">Calculated </span>at checkout</td></tr>
             </tbody>
           </table>
         </div>

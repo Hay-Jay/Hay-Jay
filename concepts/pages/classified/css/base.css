@@ -293,6 +293,7 @@ a.etag:hover b { text-decoration: underline; }
 .menu-list .mono { color: var(--dim); }
 .menu-list i { font-style: normal; text-align: right; }
 @media (max-width: 699px) { .menu-list i { display: none; } .menu-list a[aria-current=page] b::after { display: none; } }
+.menu-dc { display: none; }
 .menu-foot { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: auto; }
 .menu-foot a { text-decoration: none; border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
 

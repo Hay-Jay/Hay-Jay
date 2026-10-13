@@ -194,7 +194,8 @@ const magFacts = x => {
   return { vol: m ? m[1] : '', issue: m ? m[2] : '', pages: m ? m[3] : '', blurb };
 };
 const magLine = f => ['Print', f.vol && `Vol. ${f.vol}`, f.issue && `Issue ${f.issue}`, f.pages && `${f.pages} pages`].filter(Boolean).join(' — ');
-const magCart = x => `${STORE}/cart/${x.d.variants[0].id}:1`;
+const magVariant = x => x.d.variants.find(v => v.available) || x.d.variants[0];
+const magCart = x => `${STORE}/cart/${magVariant(x).id}:1`;
 function magSection(ctx) {
   if (!MAG) return '';
   const f = magFacts(MAG), im = leadImg(MAG), page = ctx.href('products/' + MAG.h + '/');
@@ -207,7 +208,7 @@ function magSection(ctx) {
         <p class="mag-sub mono">${esc(magLine(f))}</p>
         <p class="mag-blurb rv">${esc(f.blurb)}</p>
         <p class="mag-cta">
-          <a class="btn" data-store="/cart/${MAG.d.variants[0].id}:1" href="${esc(magCart(MAG))}">Requisition a copy<i class="arr" aria-hidden="true"></i></a>
+          <a class="btn" data-store="/cart/${magVariant(MAG).id}:1" href="${esc(magCart(MAG))}">Requisition a copy<i class="arr" aria-hidden="true"></i></a>
           <a class="btn ghost" href="${esc(page)}">Open the file</a>
         </p>
         <p class="mag-note mono"><span>${fmt(MAG.p)} CAD</span><span>Printed copy</span><span>Delivered to ${nCountries} countries${shipsNG ? ', Nigeria included' : ''}. Rate calculated at checkout</span></p>
@@ -243,7 +244,7 @@ function magPopup(ctx, key) {
         <p class="mp-line">${esc(short)}</p>
         <p class="mp-price mono"><b>${fmt(MAG.p)}</b> CAD <span>Printed copy</span></p>
         <p class="mp-cta">
-          <a class="btn" data-store="/cart/${MAG.d.variants[0].id}:1" href="${esc(magCart(MAG))}">Order your copy<i class="arr" aria-hidden="true"></i></a>
+          <a class="btn" data-store="/cart/${magVariant(MAG).id}:1" href="${esc(magCart(MAG))}">Order your copy<i class="arr" aria-hidden="true"></i></a>
           <a class="btn ghost" href="${esc(page)}">Read the brief</a>
         </p>
         <button class="mp-later mono" type="button" data-close>Not now</button>
@@ -564,7 +565,7 @@ for (const x of items) {
   const rowsAlpha = shipsTo.slice().sort((a, b) => a.name.localeCompare(b.name));
   const table = rowsAlpha.map((c, i) => {
     const hi = c.code === 'NG' ? ' nigeria' : c.code === 'CA' ? ' canada' : '';
-    const rate = c.code === 'CA' ? 'Free standard shipping' : 'Calculated at checkout';
+    const rate = c.code === 'CA' ? 'Free <span class="r-l">standard </span>shipping' : '<span class="r-l">Calculated </span>at checkout';
     return `<tr class="${hi.trim()}"><td class="c-no mono">${pad(i + 1)}</td><th scope="row" class="c-name">${esc(c.name)}${c.code === 'NG' ? '<em>field office</em>' : c.code === 'CA' ? '<em>home base</em>' : ''}</th><td class="c-code mono">${c.code}</td><td class="c-reg mono">${c.region}</td><td class="c-rate mono">${rate}</td></tr>`;
   }).join('\n');
   const regions = [...new Set(rowsAlpha.map(c => c.region))].sort();

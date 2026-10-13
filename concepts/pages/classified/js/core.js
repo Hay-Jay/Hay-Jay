@@ -122,7 +122,7 @@
 
   // ---- DECLASSIFY: lift every redaction bar (remembered, guarded) -------------------------------------
   // Redaction bars only ever cover decorative secondary text. Names, prices, sizes and availability are never redacted.
-  const dc = $('#declass');
+  const dcs = $$('#declass, [data-declass]');
   const popStamp = () => {
     if (reduce) return;
     $$('.stamp-pop').forEach(n => n.remove());
@@ -132,16 +132,16 @@
   };
   function setDeclass(on, announce) {
     root.classList.toggle('declass', on);
-    if (dc) dc.setAttribute('aria-pressed', String(on));
+    dcs.forEach(b => b.setAttribute('aria-pressed', String(on)));
     if (announce && on) popStamp();
   }
-  if (dc) {
+  if (dcs.length) {
     setDeclass(root.classList.contains('declass'), false);
-    dc.addEventListener('click', () => {
+    dcs.forEach(dc => dc.addEventListener('click', () => {
       const on = !root.classList.contains('declass');
       setDeclass(on, true);
       try { localStorage.setItem('mc-declass', on ? '1' : '0'); } catch { /* storage blocked: the toggle still works for this page */ }
-    });
+    }));
     addEventListener('storage', e => { if (e.key === 'mc-declass') setDeclass(e.newValue === '1', false); });
   }
   // tap (or Enter / Space) on a single bar lifts or drops just that bar

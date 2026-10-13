@@ -12,7 +12,7 @@ generated files are committed next to `src/`, so a host only has to serve this f
 
 | URL | Nav label | What it is |
 | --- | --- | --- |
-| `/` | Briefing | Mission briefing cover: "Operation: Wear the Unknown", stamps, objectives that link into the site. A short skippable "identity verified / clearance granted" intro plays once per session |
+| `/` | Briefing | Mission briefing cover: "Operation: Wear the Unknown", stamps, objectives that link into the site, a "Vision Issue" magazine section (`#vision`). A short skippable "identity verified / clearance granted" intro plays once per session |
 | `/shop/` | Assets | The asset register: all 23 pieces pre-rendered as numbered assets; filter `?c=top\|bottom\|accessory\|gift`, sort `?s=`, search `?q=`, view `?v=index\|sheet` |
 | `/products/<handle>/` | (Assets) | One field-equipment dossier per product (same handle as the Shopify path), generated from `data/products.js` |
 | `/lookbook/` | Evidence | Surveillance evidence wall: exhibits A to L as a horizontal film strip (signature page) |
@@ -21,6 +21,32 @@ generated files are committed next to `src/`, so a host only has to serve this f
 | `/faq/` | Debrief | Debrief transcript: Q&A accordion |
 | `/contact/` | Report in | Secure channel: contact lines and "join the network" signup |
 | `/404.html`, `/sitemap.xml`, `/robots.txt` | | Generated ("File not found / Access denied") |
+
+## Homepage picture, magazine and search hints
+
+* **Homepage photo.** `HOME_COVER` near the top of `scripts/build.mjs` picks the product and which of its photographs is the
+  folder cover (`{ handle: 'acid-washed-monochrome-hoodie', image: 3 }`). Change the handle (any product handle) or the
+  image number, rebuild, done.
+* **The Vision Issue (print magazine).** `scripts/sync-products.mjs` files anything named magazine/publication/zine under
+  the category `print`. The build then adds: a home section (`#vision`, "Incoming transmission"), a pop-up on Home, Assets,
+  Evidence, Mission, Routes and Debrief ("Requisition a copy": the cart link of its first available variant), its own
+  dossier page, a `Print` filter in the register and an entry in the `/` command bar. If the magazine is ever unpublished
+  or sold out, the home section, the pop-up, the ticker line and the command-bar entry drop out by themselves on the next
+  sync + build (its dossier page and the `Print` filter stay, marked sold out).
+  The pop-up never shows on the product pages, waits about 9 seconds on a laptop (12 on a phone, or 60% scroll depth, or
+  mouse leaving the window), shows once per 7 days (`localStorage`, guarded), closes with Esc, the backdrop, Close or
+  "Not now", and the cover photo is only pre-fetched on a connection that is not Save-Data or 2G.
+* **Typing search boxes.** The register search and the file-index search types and clears phrases that exist in the
+  catalogue ("acid wash", "hoodie", "necklace", ...). The list is `HINT_POOL` in `scripts/build.mjs`; only phrases that match
+  at least one product are used. It stops while the box has text or focus, when it is off screen, and with reduced motion.
+
+## Phones and tablets
+
+`css/mobile.css` is linked with `media="(max-width: 899px)"` after each page's own stylesheet, so a laptop never applies it and
+the laptop layout cannot be affected by it. It covers 16px form text (no iOS zoom), safe-area insets, a Declassify switch
+in the file index (the lone header icon is hidden on phones), a tighter home cover so the first button is on the first
+screen, a fade on the scrolling filter row, the shipping manifest as a list (no sideways scrolling), swipe hints on the
+photographs and landscape-phone rules. On the product page the photo area hands sideways drags to the gallery (`touch-action: pan-y`) and ignores mostly-vertical ones.
 
 ## Build
 

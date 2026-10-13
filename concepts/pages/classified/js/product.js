@@ -69,6 +69,7 @@
     const t = thumbs[cur]; if (t && strip) strip.scrollTo({ left: t.offsetLeft - strip.clientWidth / 2 + t.offsetWidth / 2, behavior: MC.reduce ? 'auto' : 'smooth' });
   }
   thumbs.forEach((t, k) => t.addEventListener('click', () => show(k)));
+  if (n > 1) { const bar = $('.pl-bar'); if (bar) bar.classList.add('multi'); }
   show(0);
 
   document.addEventListener('keydown', e => {
@@ -81,10 +82,15 @@
 
   // swipe the plate (touch and pen; a mouse never swipes)
   const stage = $('.stage');
-  let sx = null;
+  let sx = null, sy = 0;
   if (stage) {
-    stage.addEventListener('pointerdown', e => { sx = e.pointerType === 'mouse' ? null : e.clientX; });
-    stage.addEventListener('pointerup', e => { if (sx != null && Math.abs(e.clientX - sx) > 50) show(cur + (e.clientX < sx ? 1 : -1)); sx = null; });
+    stage.addEventListener('pointerdown', e => { sx = e.pointerType === 'mouse' ? null : e.clientX; sy = e.clientY; });
+    // a sideways flick turns the plate; a mostly vertical drag is the page scrolling and never does
+    stage.addEventListener('pointerup', e => {
+      const dx = e.clientX - sx;
+      if (sx != null && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(e.clientY - sy) * 1.5) show(cur + (dx < 0 ? 1 : -1));
+      sx = null;
+    });
     stage.addEventListener('pointercancel', () => { sx = null; });
   }
 
