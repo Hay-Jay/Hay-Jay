@@ -1,0 +1,34 @@
+{%- comment -%}
+  Phrases the search boxes type out by themselves: only phrases that really match something in the register. No params. Output: a|b|c
+{%- endcomment -%}
+{%- liquid
+  assign pool = 'acid wash|hoodie|necklace|white jersey|cargo shorts|signet ring|magazine|black jersey|chain|gift card|sweatshirt|trinity ring' | split: '|'
+  assign hays = ''
+  for p in collections['all'].products
+    assign hays = hays | append: p.title | append: ' ' | append: p.type | append: '~'
+  endfor
+  assign hays = hays | downcase | replace: '-', ' '
+  assign hay_list = hays | split: '~'
+  assign out = ''
+  for phrase in pool
+    assign words = phrase | split: ' '
+    assign hit = false
+    for h in hay_list
+      assign ok = true
+      for w in words
+        unless h contains w
+          assign ok = false
+        endunless
+      endfor
+      if ok
+        assign hit = true
+        break
+      endif
+    endfor
+    if hit
+      assign out = out | append: phrase | append: '|'
+    endif
+  endfor
+  assign out = out | remove_last: '|'
+-%}
+{{- out -}}

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code | default: 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#070707">
+  {%- liquid
+    assign key = 'page'
+    assign page_css = 'mc-contact.css'
+    assign page_js = ''
+    assign popup = false
+    case template.name
+      when 'index'
+        assign key = 'home'
+        assign page_css = 'mc-home.css'
+        assign popup = true
+      when 'collection'
+        assign key = 'shop'
+        assign page_css = 'mc-shop.css'
+        assign page_js = 'mc-shop.js'
+        assign popup = true
+      when 'list-collections'
+        assign key = 'shop'
+        assign page_css = 'mc-shop.css'
+      when 'search'
+        assign key = 'shop'
+        assign page_css = 'mc-shop.css'
+      when 'product'
+        assign key = 'product'
+        assign page_css = 'mc-product.css'
+        assign page_js = 'mc-product.js'
+      when 'cart'
+        assign key = 'cart'
+        assign page_css = 'mc-cart.css'
+      when '404'
+        assign key = '404'
+      when 'gift_card'
+        assign key = 'gift'
+      when 'page'
+        case template.suffix
+          when 'about'
+            assign key = 'about'
+            assign page_css = 'mc-about.css'
+            assign popup = true
+          when 'lookbook'
+            assign key = 'lookbook'
+            assign page_css = 'mc-lookbook.css'
+            assign page_js = 'mc-lookbook.js'
+            assign popup = true
+          when 'shipping'
+            assign key = 'shipping'
+            assign page_css = 'mc-shipping.css'
+            assign popup = true
+          when 'faq'
+            assign key = 'faq'
+            assign page_css = 'mc-faq.css'
+            assign popup = true
+          when 'contact'
+            assign key = 'contact'
+          when 'portfolio'
+            assign key = 'contact'
+        endcase
+      else
+        if template.name contains 'customers'
+          assign key = 'customer'
+        endif
+    endcase
+    if settings.magpop_enable == false
+      assign popup = false
+    endif
+  -%}
+  {% render 'mc-head', key: key %}
+  {%- if settings.favicon != blank %}
+  <link rel="icon" href="{{ settings.favicon | image_url: width: 64 }}">
+  {%- else %}
+  <link rel="icon" href="{{ 'mc-emblem.webp' | asset_url }}" type="image/webp">
+  <link rel="apple-touch-icon" href="{{ 'mc-emblem.webp' | asset_url }}">
+  {%- endif %}
+  {% render 'mc-fonts' %}
+  <script>
+    window.MC = {
+      root: "/", idx: "", page: {{ key | json }},
+      routes: {
+        home: {{ routes.root_url | json }}, shop: {{ routes.all_products_collection_url | json }},
+        lookbook: "/pages/lookbook", about: "/pages/about", shipping: "/pages/shipping", faq: "/pages/faq", contact: "/pages/contact",
+        cart: {{ routes.cart_url | json }}, cartAdd: {{ routes.cart_add_url | json }}, cartChange: {{ routes.cart_change_url | json }}, cartUpdate: {{ routes.cart_update_url | json }},
+        search: {{ routes.search_url | json }}, account: {{ routes.account_url | json }}
+      },
+      catalogUrl: {{ routes.all_products_collection_url | append: '?view=catalog' | json }},
+      currency: {{ cart.currency.iso_code | json }}, moneyFormat: {{ shop.money_format | json }},
+      cartCount: {{ cart.item_count }}, intro: {{ settings.intro_enable | json }}, magpopDelay: {{ settings.magpop_delay | default: 9 }}
+    };
+    (function () {
+      var d = document.documentElement; d.classList.add('js');
+      try { if (localStorage.getItem('mc-declass') === '1') d.classList.add('declass'); } catch (e) {}
+      window.__mcRv = setTimeout(function () { d.classList.add('rv-fail'); }, 4000);
+      addEventListener('pagereveal', function (e) {
+        try {
+          if (e.viewTransition && navigation.activation && navigation.activation.navigationType === 'traverse') {
+            d.classList.add('vt-back');
+            e.viewTransition.finished.then(function () { d.classList.remove('vt-back'); }, function () { d.classList.remove('vt-back'); });
+          }
+        } catch (x) {}
+      });
+    })();
+  </script>
+  {{ 'mc-base.css' | asset_url | stylesheet_tag }}
+  {{ page_css | asset_url | stylesheet_tag }}
+  {%- if template.name contains 'customers' %}
+  {{ 'mc-customer.css' | asset_url | stylesheet_tag }}
+  {%- endif %}
+  {{ 'mc-drawer.css' | asset_url | stylesheet_tag }}
+  <link rel="stylesheet" href="{{ 'mc-mobile.css' | asset_url }}" media="(max-width: 899px)">
+  {{ content_for_header }}
+</head>
+<body class="pg-{{ key }}">
+  <a class="skip" href="#main">Skip to content</a>
+  {% sections 'header-group' %}
+  {%- if popup %}{% render 'mc-magpop' %}{% endif %}
+  <main id="main">
+    {{ content_for_layout }}
+  </main>
+  {% sections 'footer-group' %}
+  {% render 'mc-drawer' %}
+  <script src="{{ 'mc-core.js' | asset_url }}" defer></script>
+  <script src="{{ 'mc-cart.js' | asset_url }}" defer></script>
+  {%- if page_js != blank %}
+  <script src="{{ page_js | asset_url }}" defer></script>
+  {%- endif %}
+</body>
+</html>

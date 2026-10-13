@@ -1,0 +1,29 @@
+{%- comment -%}
+  "Featured order" of the register, used for file numbers (MC-001...), prev/next and the register order:
+  (a) available + in collection new-arrivals, price high to low, (b) other available, price high to low, (c) sold out, price high to low.
+  No params. Output: handles joined by commas, e.g. a,b,c
+{%- endcomment -%}
+{%- liquid
+  assign everything = collections['all'].products
+  assign avail = everything | where: 'available' | sort: 'price' | reverse
+  assign sold = everything | where: 'available', false | sort: 'price' | reverse
+  assign fresh = collections['new-arrivals'].products | map: 'handle' | join: ',' | prepend: ',' | append: ','
+  assign out = ''
+  for p in avail
+    assign hh = p.handle | prepend: ',' | append: ','
+    if fresh contains hh
+      assign out = out | append: p.handle | append: ','
+    endif
+  endfor
+  for p in avail
+    assign hh = p.handle | prepend: ',' | append: ','
+    unless fresh contains hh
+      assign out = out | append: p.handle | append: ','
+    endunless
+  endfor
+  for p in sold
+    assign out = out | append: p.handle | append: ','
+  endfor
+  assign out = out | remove_last: ','
+-%}
+{{- out -}}

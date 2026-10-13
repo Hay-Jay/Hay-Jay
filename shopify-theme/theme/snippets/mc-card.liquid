@@ -1,0 +1,59 @@
+{%- comment -%}
+  Asset card (register photo sheet, home picks, related assets).
+  Params: product, i (0-based position, default 0), sizes, widths, feat (true = big first card), data (true = register data-* attributes),
+          photo (1-based photo number override), order (output of mc-order, saves recomputing)
+{%- endcomment -%}
+{%- liquid
+  capture cls
+    render 'mc-class', product: product
+  endcapture
+  capture fno
+    render 'mc-fileno', product: product, order: order
+  endcapture
+  capture fnum
+    render 'mc-fileno', product: product, order: order, plain: true
+  endcapture
+  capture sz
+    render 'mc-sizes', product: product, cls: cls
+  endcapture
+  capture lead
+    render 'mc-lead', product: product
+  endcapture
+  assign pn = photo | default: lead | plus: 0 | minus: 1
+  assign pic = product.images[pn] | default: product.featured_image
+  assign colh = product.collections | map: 'handle'
+  assign is_new = false
+  if colh contains 'new-arrivals'
+    assign is_new = true
+  endif
+  assign num = fnum | plus: 0
+  assign pos = i | default: 0
+  if pos > 14
+    assign pos = 14
+  endif
+  assign rot = num | times: 7 | modulo: 9 | minus: 4 | times: 0.28 | round: 2
+  case cls
+    when 'top'
+      assign plural = 'Tops'
+    when 'bottom'
+      assign plural = 'Bottoms'
+    when 'accessory'
+      assign plural = 'Hardware'
+    when 'gift'
+      assign plural = 'Gift cards'
+    else
+      assign plural = 'Print'
+  endcase
+  assign hay = product.title | strip | append: ' ' | append: product.type | append: ' ' | append: plural | append: ' ' | append: fno | downcase | escape
+  assign ws = widths | default: '360,540,720,1080'
+  assign sz_attr = sizes | default: '(min-width:1500px) 20vw, (min-width:900px) 25vw, (min-width:700px) 33vw, 50vw'
+  assign is_ring = false
+  if cls == 'accessory' and product.handle contains 'ring'
+    assign is_ring = true
+  endif
+-%}
+<a class="card{% if feat %} feat{% endif %}{% unless product.available %} sold{% endunless %}{% if is_new %} isnew{% endif %}" style="--i:{{ pos }};--rot:{{ rot }}deg"{% if data %} data-h="{{ product.handle }}" data-n="{{ hay }}" data-cat="{{ cls }}" data-p="{{ product.price | divided_by: 100.0 }}" data-pub="{{ product.published_at | date: '%s' }}" data-av="{% if product.available %}1{% else %}0{% endif %}" data-no="{{ num }}" data-f="{{ num | minus: 1 }}"{% endif %} href="{{ product.url }}">
+  <span class="card-hd mono" aria-hidden="true"><span>{{ fno }}</span><span>{% if is_new %}New asset{% else %}Asset{% endif %}</span></span>
+  <div class="xp{% if is_ring %} zoom{% endif %}">{% render 'mc-img', image: pic, alt: product.title, widths: ws, sizes: sz_attr %}{% unless product.available %}<span class="stamp white sm" style="--r:-11deg" aria-hidden="true">Out of stock</span>{% endunless %}</div>
+  <div class="cap"><span class="no mono">{{ fno }}</span><b>{{ product.title | strip | escape }}</b><span class="pr">{% render 'mc-price', product: product %} <small>CAD</small></span><span class="sz">{{ sz | escape }}</span>{% unless product.available %}<span class="st">Sold out</span>{% endunless %}</div>
+</a>

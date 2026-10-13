@@ -1,0 +1,102 @@
+{%- liquid
+  capture pk
+    render 'mc-pagekey'
+  endcapture
+  assign pkp = pk | split: '~'
+  assign key = pkp[0]
+  assign folio = pkp[1]
+  assign level = pkp[2]
+  assign nav_url = pkp[4]
+  assign docno = 100 | plus: folio | prepend: 'MC-'
+  if folio == '0'
+    assign docno = 'MC-404'
+  endif
+  if template.name == 'product'
+    capture docno
+      render 'mc-fileno', product: product
+    endcapture
+  endif
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign words = 'Delivering to'
+  for c in countries
+    assign cn = c | split: '|' | first
+    assign words = words | append: '|' | append: cn
+  endfor
+  assign bc_seed = folio | times: 977 | plus: 13
+  assign wordmark = settings.logo_wordmark
+  assign emblem = settings.logo_emblem
+  assign fh_policy_ship = shop.shipping_policy.url | default: '/policies/shipping-policy'
+  assign fh_policy_refund = shop.refund_policy.url | default: '/policies/refund-policy'
+  assign fh_policy_privacy = shop.privacy_policy.url | default: '/policies/privacy-policy'
+  assign fh_policy_terms = shop.terms_of_service.url | default: '/policies/terms-of-service'
+-%}
+<footer class="foot dark" id="contents">
+  {% render 'mc-ticker', words: words %}
+  <div class="wrap">
+    <div class="foot-top">
+      <span class="ft-bc" aria-hidden="true">{% render 'mc-barcode', seed: bc_seed, w: 220, h: 34 %}</span>
+      <p class="mono ft-file"><b>File no.</b> {{ docno }}{% if folio != '0' %} <span aria-hidden="true">//</span> <b>Page</b> {{ folio }} of 7 <span aria-hidden="true">//</span> <b>Clearance</b> L{{ level }}{% endif %}</p>
+    </div>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        {%- if emblem != blank -%}
+          <img class="emblem" src="{{ emblem | image_url: width: 160 }}" alt="" width="72" height="77" loading="lazy">
+        {%- else -%}
+          <img class="emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="72" height="77" loading="lazy">
+        {%- endif -%}
+        {%- if wordmark != blank -%}
+          <img class="word" src="{{ wordmark | image_url: width: 720 }}" alt="Monochrome" width="360" height="32" loading="lazy">
+        {%- else -%}
+          <img class="word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="Monochrome" width="360" height="32" loading="lazy">
+        {%- endif -%}
+        <p class="mono">The Monochrome Bureau<br>Division of Wearables<br>Operation: Wear the Unknown</p>
+      </div>
+      <nav class="foot-col mono" aria-label="Footer">
+        <p class="foot-h">The dossier</p>
+        {%- for block in section.blocks -%}
+          <a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>
+        {%- endfor -%}
+      </nav>
+      <nav class="foot-col mono" aria-label="Store policies">
+        <p class="foot-h">The store</p>
+        <a href="{{ routes.cart_url }}">Bag</a>
+        <a href="{{ fh_policy_ship }}">Shipping policy</a>
+        <a href="{{ fh_policy_refund }}">Refund policy</a>
+        <a href="{{ fh_policy_privacy }}">Privacy policy</a>
+        <a href="{{ fh_policy_terms }}">Terms of service</a>
+      </nav>
+      <div class="foot-col mono">
+        <p class="foot-h">Secure lines</p>
+        {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">@monochrome.ca</a>{% endif -%}
+        {%- if settings.social_tiktok != blank %}<a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener">TikTok</a>{% endif -%}
+        {%- if settings.social_snapchat != blank %}<a href="{{ settings.social_snapchat }}" target="_blank" rel="noopener">Snapchat</a>{% endif -%}
+        <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
+        <p class="foot-cad">Prices in CAD</p>
+      </div>
+    </div>
+    <p class="foot-fic mono">{{ settings.fiction_line | escape }}</p>
+    <p class="foot-legal mono"><span>© {{ 'now' | date: '%Y' }} MONOCHROME®. All rights reserved. Prices in CAD.</span>{% if folio != '0' %}<span class="folio">Page {{ folio }} of 7</span>{% endif %}</p>
+  </div>
+  <div class="banner bottom" aria-hidden="true"><span class="bn-c">{{ settings.banner_mark | escape }}</span></div>
+</footer>
+
+{% schema %}
+{
+  "name": "Dossier footer",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Dossier link",
+      "limit": 10,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Briefing" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ]
+}
+{% endschema %}

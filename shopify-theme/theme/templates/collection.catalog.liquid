@@ -1,0 +1,7 @@
+{%- layout none -%}
+{%- paginate collection.products by 50 -%}
+[{%- for p in collection.products -%}
+{%- capture cls -%}{%- render 'mc-class', product: p -%}{%- endcapture -%}
+{"h":{{ p.handle | json }},"t":{{ p.title | strip | json }},"u":{{ p.url | json }},"p":{{ p.price | divided_by: 100.0 }},"v":{{ p.price_varies | json }},"a":{{ p.available | json }},"c":{{ cls | json }},"ty":{{ p.type | json }},"s":{{ p.options_with_values | map: 'values' | flatten | join: ' ' | json }}}{% unless forloop.last %},{% endunless %}
+{%- endfor -%}]
+{%- endpaginate -%}

@@ -1,0 +1,21 @@
+{%- comment -%}
+  Which photo represents a product in cards and rows (1 = the first photo). Owner list: settings.lead_photos, one "handle|photo number" per line
+  (the sweatshirt's first frame is half black fabric, so it leads with photo 5). Params: product. Output: the number.
+{%- endcomment -%}
+{%- liquid
+  assign n = 1
+  assign lines = settings.lead_photos | newline_to_br | strip_newlines | split: '<br />'
+  for line in lines
+    assign bits = line | split: '|'
+    if bits.size > 1
+      assign hd = bits[0] | strip
+      if hd == product.handle
+        assign want = bits[1] | strip | plus: 0
+        if want > 0 and want <= product.images.size
+          assign n = want
+        endif
+      endif
+    endif
+  endfor
+-%}
+{{- n -}}

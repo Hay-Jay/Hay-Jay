@@ -1,0 +1,82 @@
+{%- liquid
+  assign n = cart.item_count
+  assign lines = cart.items.size
+-%}
+<section class="spread paper cart" id="cartMain" aria-labelledby="cartH">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-102', doc: 'Requisition manifest', page: 2, level: 3, extra: ' — requisition' %}
+    <header class="reg-head cart-head">
+      <div class="reg-title">
+        <p class="kick mono">Division of Wearables — Requisition</p>
+        <h1 class="h1" id="cartH"><span class="tw caret" style="--n:8">Your bag</span></h1>
+        <p class="reg-sub">{{ section.settings.intro | escape }}</p>
+      </div>
+    </header>
+    {%- if n == 0 -%}
+      <div class="cart-empty">
+        <span class="stamp lg" style="--r:-7deg" aria-hidden="true">Manifest empty</span>
+        <p class="cart-empty-t">No assets requisitioned.</p>
+        <p class="cart-empty-s">Nothing is in your bag. Open the register, pick a file and use <b>Requisition: Add to bag</b>.</p>
+        <p><a class="btn" href="{{ routes.all_products_collection_url }}">Open the asset register<i class="arr" aria-hidden="true"></i></a></p>
+      </div>
+      {%- assign shown = 0 -%}
+      <div class="board cart-picks"><div class="sheet">
+        {%- for p in collections['all'].products -%}
+          {%- if p.available and shown < 4 -%}
+            {% render 'mc-card', product: p, i: shown %}
+            {%- assign shown = shown | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div></div>
+    {%- else -%}
+      <form action="{{ routes.cart_url }}" method="post" id="cart-form" class="cart-form">
+        <div class="cart-grid">
+          <div class="cart-main">
+            <p class="mono cart-count">{{ n }} {% if n == 1 %}asset{% else %}assets{% endif %} on the manifest</p>
+            <ol class="cart-lines" role="list">
+              {%- for item in cart.items -%}
+                {% render 'mc-cart-line', item: item, i: forloop.index %}
+              {%- endfor -%}
+            </ol>
+            <p class="cart-back"><a class="mono link-line" href="{{ routes.all_products_collection_url }}">Continue shopping<span class="arr" aria-hidden="true"></span></a></p>
+          </div>
+          <aside class="cart-sum" aria-label="Order summary">
+            <span class="tape" aria-hidden="true"></span>
+            <p class="mono mg-k">Manifest total</p>
+            <p class="cs-total"><b>{{ cart.total_price | money }}</b><small>CAD</small></p>
+            {%- if cart.total_discount > 0 -%}
+              <p class="mono cs-save">Discounts applied: −{{ cart.total_discount | money }}</p>
+            {%- endif -%}
+            <p class="cs-note">{{ settings.cart_note | escape }}</p>
+            {%- if section.settings.show_note -%}
+              <label class="mono cs-lbl" for="cartNote">Note for the order (optional)</label>
+              <textarea class="cs-ta" id="cartNote" name="note" rows="3">{{ cart.note }}</textarea>
+            {%- endif -%}
+            <button class="btn cs-go" type="submit" name="checkout">Proceed to checkout<i class="arr" aria-hidden="true"></i></button>
+            <noscript><button class="btn ghost cs-up" type="submit" name="update">Update quantities</button></noscript>
+            {%- if settings.cart_dynamic_buttons -%}
+              <div class="cs-pay">{{ content_for_additional_checkout_buttons }}</div>
+            {%- endif -%}
+            <ul class="cs-trust mono">
+              <li>Secure checkout on the Monochrome store</li>
+              <li>Delivered to 29 countries, Nigeria and Canada included</li>
+              <li>All prices in CAD</li>
+            </ul>
+            <span class="stamp ok" style="--r:-5deg" aria-hidden="true">Approved for field use</span>
+          </aside>
+        </div>
+      </form>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Requisition manifest",
+  "settings": [
+    { "type": "textarea", "id": "intro", "label": "Intro line", "default": "Every file you have requisitioned, with sizes and prices. Change a quantity or strike a line, then proceed to checkout." },
+    { "type": "checkbox", "id": "show_note", "label": "Offer an order note", "default": false }
+  ],
+  "presets": [{ "name": "Requisition manifest" }]
+}
+{% endschema %}

@@ -1,0 +1,39 @@
+<div class="dr-head">
+  <div>
+    <p class="mono dr-kick"><b class="rec" aria-hidden="true"></b> Requisition manifest</p>
+    <h2 class="dr-t" id="mcDrawerT">Your bag <span class="dr-n" data-cart-count-text>{{ cart.item_count }}</span></h2>
+  </div>
+  <button class="dr-x mono" type="button" data-close aria-label="Close the bag">Close<span>Esc</span></button>
+</div>
+{%- if cart.item_count == 0 -%}
+  <div class="dr-empty">
+    <span class="stamp pend" style="--r:-6deg" aria-hidden="true">Manifest empty</span>
+    <p class="dr-empty-t">No assets requisitioned yet.</p>
+    <p class="mono dr-empty-s">Open the register and add something to the bag.</p>
+    <a class="btn" href="{{ routes.all_products_collection_url }}">Open the register<i class="arr" aria-hidden="true"></i></a>
+  </div>
+{%- else -%}
+  <ol class="dr-lines" role="list">
+    {%- for item in cart.items -%}
+      {% render 'mc-cart-line', item: item, i: forloop.index, compact: true %}
+    {%- endfor -%}
+  </ol>
+  <div class="dr-foot">
+    <p class="dr-sub"><span class="mono">Subtotal</span><b>{{ cart.total_price | money }}<small>CAD</small></b></p>
+    {%- if cart.total_discount > 0 -%}
+      <p class="mono dr-save">Discounts applied: −{{ cart.total_discount | money }}</p>
+    {%- endif -%}
+    <p class="mono dr-note">{{ settings.cart_note | escape }}</p>
+    <form action="{{ routes.cart_url }}" method="post" class="dr-form">
+      <button class="btn dr-go" type="submit" name="checkout">Proceed to checkout<i class="arr" aria-hidden="true"></i></button>
+    </form>
+    <a class="mono link-line dr-full" href="{{ routes.cart_url }}">View the full manifest<span class="arr" aria-hidden="true"></span></a>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Bag drawer",
+  "settings": []
+}
+{% endschema %}

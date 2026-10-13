@@ -1,0 +1,43 @@
+{
+  "current": {
+    "banner_mark": "Top secret // Eyes only // Monochrome Bureau",
+    "fiction_line": "A work of fiction. MONOCHROME® is a clothing brand and is not affiliated with any government agency.",
+    "intro_enable": true,
+    "contact_email": "info.mccanada@gmail.com",
+    "social_instagram": "https://www.instagram.com/monochrome.ca/",
+    "social_tiktok": "https://www.tiktok.com/@monochrome.ca",
+    "social_snapchat": "https://snapchat.com/monochrome.ca",
+    "ship_countries": "Nigeria|NG|Africa\nCanada|CA|North America\nAustralia|AU|Oceania\nAustria|AT|Europe\nBelgium|BE|Europe\nCzechia|CZ|Europe\nDenmark|DK|Europe\nFinland|FI|Europe\nFrance|FR|Europe\nGermany|DE|Europe\nHong Kong SAR China|HK|Asia\nIreland|IE|Europe\nIsrael|IL|Middle East\nItaly|IT|Europe\nJapan|JP|Asia\nMalaysia|MY|Asia\nNetherlands|NL|Europe\nNew Zealand|NZ|Oceania\nNorway|NO|Europe\nPoland|PL|Europe\nPortugal|PT|Europe\nSingapore|SG|Asia\nSouth Korea|KR|Asia\nSpain|ES|Europe\nSweden|SE|Europe\nSwitzerland|CH|Europe\nUnited Arab Emirates|AE|Middle East\nUnited Kingdom|GB|Europe\nUnited States|US|North America",
+    "lead_photos": "monochrome-sweatshirt|5",
+    "magpop_enable": true,
+    "magpop_delay": 9,
+    "cart_note": "Shipping and taxes are calculated at checkout from your address.",
+    "cart_dynamic_buttons": true,
+    "blocks": {
+      "15683396631634586217": {
+        "type": "shopify://apps/inbox/blocks/chat/841fc607-4181-4ad1-842d-e24d7f8bad6b",
+        "disabled": false,
+        "settings": {
+          "button_color": "#000000",
+          "secondary_color": "#FFFFFF",
+          "ternary_color": "#6A6A6A",
+          "button_icon": "chat_bubble",
+          "button_text": "live_chat",
+          "button_horizontal_position": "bottom_right",
+          "button_vertical_position": "lowest",
+          "greeting_message": ""
+        }
+      },
+      "316487575649303945": {
+        "type": "shopify://apps/easify-options/blocks/app-embed-block/d2288b18-c1ba-42f5-b3b3-26c75c8820bf",
+        "disabled": false,
+        "settings": {}
+      },
+      "13768625480086291342": {
+        "type": "shopify://apps/forms/blocks/forms/8744a304-fcb1-4347-b211-bb6b4759a76a",
+        "disabled": false,
+        "settings": {}
+      }
+    }
+  }
+}

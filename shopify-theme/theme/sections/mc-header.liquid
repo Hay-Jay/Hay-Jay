@@ -1,0 +1,94 @@
+{%- liquid
+  capture pk
+    render 'mc-pagekey'
+  endcapture
+  assign pkp = pk | split: '~'
+  assign folio = pkp[1]
+  assign level = pkp[2]
+  assign nav_url = pkp[4]
+  capture hints
+    render 'mc-hints'
+  endcapture
+  assign wordmark = settings.logo_wordmark
+  assign emblem = settings.logo_emblem
+-%}
+<!-- RUNNING HEAD: the classification banner scrolls away, the dossier tab bar stays (the section wrapper is the sticky element) -->
+<header class="hdr" id="bar">
+  <div class="banner top" aria-hidden="true">
+    <span class="bn-l mono">{% if level != '0' %}{% render 'mc-ladder', n: level %}<span>Clearance L{{ level }}</span>{% endif %}</span>
+    <span class="bn-c">{{ settings.banner_mark | escape }}</span>
+    <span class="bn-r mono">{% if folio != '0' %}Page {{ folio }} of 7{% endif %}</span>
+  </div>
+  <div class="bar">
+    <a class="bar-brand" href="{{ routes.root_url }}"{% if template.name == 'index' %} aria-current="page"{% endif %} aria-label="MONOCHROME, mission briefing">
+      {%- if emblem != blank -%}
+        <img class="bar-emblem" src="{{ emblem | image_url: width: 120 }}" alt="" width="26" height="28">
+      {%- else -%}
+        <img class="bar-emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="26" height="28">
+      {%- endif -%}
+      {%- if wordmark != blank -%}
+        <img class="bar-word" src="{{ wordmark | image_url: width: 600 }}" alt="MONOCHROME" width="{{ wordmark.width }}" height="{{ wordmark.height }}">
+      {%- else -%}
+        <img class="bar-word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="MONOCHROME" width="1170" height="114">
+      {%- endif -%}
+      <span class="bar-div mono">Div. of Wearables</span>
+    </a>
+    <nav class="tabs" aria-label="Primary">
+      {%- for block in section.blocks -%}
+        <a class="tab" href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}><span class="tab-no" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><span class="tab-t">{{ block.settings.label | escape }}</span></a>
+      {%- endfor -%}
+    </nav>
+    <div class="bar-r">
+      <button class="bar-btn" id="declass" type="button" aria-pressed="false" title="Lift every redaction bar on every page"><span class="dc-ico" aria-hidden="true"></span><span class="bar-lbl">Declassify</span></button>
+      <a class="bar-btn" id="menuBtn" href="#contents" aria-controls="menu" aria-expanded="false"><span>Index</span></a>
+      <a class="bar-btn bar-bag" href="{{ routes.cart_url }}" data-cart-open aria-label="Bag, {{ cart.item_count }} {% if cart.item_count == 1 %}item{% else %}items{% endif %}">Bag<b class="bag-n" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</b><span class="arr" aria-hidden="true"></span></a>
+    </div>
+  </div>
+</header>
+<!-- FILE INDEX: opens over any page; also the command bar (search the archive for a page or an asset) -->
+<div class="menu dark" id="menu" role="dialog" aria-modal="true" aria-label="File index and search" hidden>
+  <div class="menu-in">
+    <div class="menu-top"><p class="mono menu-kick">File index // Operation: Wear the Unknown</p><button class="menu-x mono" type="button" data-close>Close<span>Esc</span></button></div>
+    <div class="menu-find">
+      <label class="mono" for="jump">Search the archive <span class="menu-keys">/ to open anywhere</span></label>
+      <input id="jump" type="search" placeholder="shipping, hoodie, ring, nigeria…" data-hints="{{ hints | escape }}" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="jumpList" aria-autocomplete="list">
+      <ul class="jump-list" id="jumpList" role="listbox" aria-label="Results" hidden></ul>
+      <p class="mono jump-none" id="jumpNone" hidden>No file matches that. Try another keyword.</p>
+    </div>
+    <nav aria-label="File index"><ol class="menu-list">
+      {%- for block in section.blocks -%}
+        <li><a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %}><span class="mono">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><b>{{ block.settings.label | escape }}</b><i class="mono">{{ block.settings.doc | escape }}</i></a></li>
+      {%- endfor -%}
+    </ol></nav>
+    <button class="menu-dc" id="declassMenu" type="button" data-declass aria-pressed="false">
+      <span class="dc-ico" aria-hidden="true"></span>
+      <span class="menu-dc-t"><b>Declassify the site</b><span class="mono">Lift every redaction bar on every page.</span></span>
+      <span class="menu-dc-s mono" aria-hidden="true"></span>
+    </button>
+    <div class="menu-foot mono">
+      <a href="{{ routes.cart_url }}">Bag<span class="arr" aria-hidden="true"></span></a>
+      {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">@monochrome.ca<span class="arr" aria-hidden="true"></span></a>{% endif -%}
+      <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
+      <span>Prices in CAD</span>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Dossier header",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "nav",
+      "name": "Page link",
+      "limit": 10,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Briefing" },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "text", "id": "doc", "label": "Document name (shown in the file index)", "default": "Mission briefing" }
+      ]
+    }
+  ]
+}
+{% endschema %}
