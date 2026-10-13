@@ -91,6 +91,7 @@ generated procedurally — no third-party art assets, so there are no asset lice
   (treadmill, weights, yoga mat, piano, easel, consoles) becomes usable in your own place. Bonuses are capped (`HOME_CAPS`), so they help but never trivialise needs.
 * **Map tab** — a dense bright overview with tidy pins, place cards (what to do, how to get there, cab fare) and a **Billboards** mode.
 * **Billboards** — three tiers with sponsor rotation, picture uploads, and 7-day bookings; see [`docs/ECONOMY.md`](docs/ECONOMY.md) for prices, tiers and the intended real-money scale.
+* **Multi-room homes** — move up from the Studio to a **One-bedroom** ($1,500) and a **Bungalow** ($5,000 total: bathroom, den, garage with a car and a Storage shelf, and a fenced yard) from the phone's **Homes** app. Nothing you own is ever lost: pieces that still fit stay where they are, the rest wait in storage. Each room has its own paint and floor (Design shelf room chips); build mode shows a cutaway with a Walls button and a room focus strip so decorating works on a phone. Rules are server-portable (`core/lot.js`, `core/move.js`); design and decisions in [`docs/HOMES.md`](docs/HOMES.md). No rent yet.
 * **Compact island Regina** — neighbourhoods ring downtown, green belts between, beach and sea around. Everything is original, fictional and offline-first.
 
 ## Economy & anti-exploit (important)

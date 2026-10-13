@@ -1,6 +1,6 @@
 # Multi-room homes (design and contract), v2
 
-Status: in progress (milestone M5 of `docs/VISION.md`, first slice). This file is the single source of truth for the work packages;
+Status: implemented (milestone M5 of `docs/VISION.md`, first slice): three homes, per-room paint, cutaway, move flow, Homes app; verified by 926 unit tests and the desktop and mobile smoke run. Not done: rent, free-form walls, a separate house door on the street map. This file is the single source of truth for the work packages;
 `src/data/homes.js` (read its header) is the shared data contract. v2 folds in three independent spec reviews (rules/saves, 3D/rendering,
 UI/flow); every "MUST" below exists because a reviewer found a concrete way the simpler wording breaks.
 
