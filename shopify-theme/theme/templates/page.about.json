@@ -1,0 +1,158 @@
+{
+  "sections": {
+    "open": {
+      "type": "mc-about-open",
+      "settings": {}
+    },
+    "situation": {
+      "type": "mc-about-situation",
+      "settings": {
+        "figure_a": "acid-washed-monochrome-hoodie",
+        "figure_a_photo": 6,
+        "figure_c": "black-monochrome-jersey",
+        "figure_c_photo": 4
+      }
+    },
+    "objectives": {
+      "type": "mc-about-objectives",
+      "blocks": {
+        "o1": {
+          "type": "objective",
+          "settings": {
+            "title": "Wear black, white and chrome.",
+            "text": "That is the whole palette. Everything on file is one of the three, or a mix of them, and it all works together."
+          }
+        },
+        "o2": {
+          "type": "objective",
+          "settings": {
+            "title": "Keep every run small.",
+            "text": "We make pieces in small runs on purpose. When a size sells through it is gone, and some pieces do not come back. Sold-out assets stay in the register, marked out of stock, so you can see what you missed instead of wondering."
+          }
+        },
+        "o3": {
+          "type": "objective",
+          "settings": {
+            "title": "Build everything to mix.",
+            "text": "Tops are cut relaxed and run true to size; go up if you are between sizes. Layer them, tuck them, chain them. Rings come in sizes. Hardware, objects and details are there to catch the light, not to match anything."
+          }
+        },
+        "o4": {
+          "type": "objective",
+          "settings": {
+            "title": "Deliver.",
+            "text": "The store’s address is Regina, Saskatchewan, Canada, and it delivers to {countries} countries, Nigeria and Canada among them. The full list is on the Extraction routes page. Prices are in Canadian dollars."
+          }
+        }
+      },
+      "block_order": [
+        "o1",
+        "o2",
+        "o3",
+        "o4"
+      ],
+      "settings": {}
+    },
+    "rules": {
+      "type": "mc-about-rules",
+      "blocks": {
+        "r1": {
+          "type": "rule",
+          "settings": {
+            "title": "No colour of the month.",
+            "text": "No seasonal palette, no trend colour. Black, white and chrome, every drop."
+          }
+        },
+        "r2": {
+          "type": "rule",
+          "settings": {
+            "title": "Between sizes? Go up.",
+            "text": "Tops have a relaxed cut and run true to size. Not sure? Message us before you order."
+          }
+        },
+        "r3": {
+          "type": "rule",
+          "settings": {
+            "title": "Sold out means sold out.",
+            "text": "Some pieces return and some do not. We will not pretend either way."
+          }
+        },
+        "r4": {
+          "type": "rule",
+          "settings": {
+            "title": "Nothing needs a matching partner.",
+            "text": "Layer it, tuck it, chain it. It is all the same three finishes."
+          }
+        },
+        "r5": {
+          "type": "rule",
+          "settings": {
+            "title": "Photographs are filed in black and white.",
+            "text": "That is the brand. Hold your cursor over a photograph (or press and hold on a phone) to declassify the colour it was shot in. It is the only colour on the site."
+          }
+        },
+        "r6": {
+          "type": "rule",
+          "settings": {
+            "title": "Never explain the outfit.",
+            "text": "Wear the unknown."
+          }
+        }
+      },
+      "block_order": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5",
+        "r6"
+      ],
+      "settings": {
+        "figure_b": "royal-black",
+        "figure_b_photo": 1
+      }
+    },
+    "next": {
+      "type": "mc-next-pages",
+      "blocks": {
+        "n1": {
+          "type": "link",
+          "settings": {
+            "page": "Page 2",
+            "label": "Asset register",
+            "url": "/collections/all"
+          }
+        },
+        "n2": {
+          "type": "link",
+          "settings": {
+            "page": "Page 3",
+            "label": "Evidence wall",
+            "url": "/pages/lookbook"
+          }
+        },
+        "n3": {
+          "type": "link",
+          "settings": {
+            "page": "Page 5",
+            "label": "Extraction routes",
+            "url": "/pages/shipping"
+          }
+        }
+      },
+      "block_order": [
+        "n1",
+        "n2",
+        "n3"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "open",
+    "situation",
+    "objectives",
+    "rules",
+    "next"
+  ]
+}

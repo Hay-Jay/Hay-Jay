@@ -37,3 +37,24 @@
 .lost-stamp { justify-self: start; order: -1; }
 .lost-stamp .stamp { font-size: clamp(2.2rem, 11vw, 4.6rem); white-space: normal; text-align: center; max-width: 5.4em; line-height: 1.02; }
 @media (min-width: 1000px) { .lost-wrap { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); } .lost-stamp { order: 0; justify-self: center; } .lost-stamp .stamp { font-size: clamp(3rem, 5.4vw, 5.6rem); } }
+
+
+/* ---- theme additions: message form, personnel file, generic page body ------------------------------------------------------ */
+.ct-msg { max-width: 860px; }
+.ct-fields { display: grid; gap: 14px; margin-bottom: 18px; }
+@media (min-width: 700px) { .ct-fields { grid-template-columns: 1fr 1fr; } .ct-f-wide { grid-column: 1 / -1; } }
+.ct-f { display: grid; gap: 6px; color: var(--dim); }
+.ct-f input, .ct-f textarea { width: 100%; min-width: 0; background: #f5f5f5; border: 2px solid var(--fg); border-radius: 0; color: var(--fg); font: 400 16px/1.4 var(--type); padding: 12px 14px; box-shadow: inset 3px 3px 0 rgba(0, 0, 0, .14); outline-offset: 4px; }
+.ct-f textarea { resize: vertical; min-height: 140px; }
+.ct-ok { margin: 0; font: 400 1.2rem/1.4 var(--type); }
+.ct-form-sec { padding-top: clamp(30px, 5vw, 60px); }
+.rte p { margin: 0 0 1em; }
+.rte a { text-underline-offset: 4px; }
+.pf-body { max-width: 44em; font: 400 1.15rem/1.6 var(--type); }
+.pf-body p { margin: 0 0 .6em; }
+.pg-body { max-width: 52em; }
+.pg-body h2, .pg-body h3 { font-family: var(--head); text-transform: uppercase; }
+.shopify-policy__container { max-width: 52em; }
+.shopify-policy__title h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/.9 var(--head); text-transform: uppercase; margin: 0 0 1em; }
+.shopify-policy__body { font-size: 1.05rem; }
+.mc-apps { padding-block: 10px; }

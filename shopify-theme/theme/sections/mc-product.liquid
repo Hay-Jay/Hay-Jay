@@ -1,0 +1,295 @@
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+  assign order_list = ord | split: ','
+  assign n_total = order_list.size
+  capture cls
+    render 'mc-class', product: product
+  endcapture
+  capture fno
+    render 'mc-fileno', product: product, order: ord
+  endcapture
+  capture fnum
+    render 'mc-fileno', product: product, order: ord, plain: true
+  endcapture
+  capture sizes_text
+    render 'mc-sizes', product: product, cls: cls
+  endcapture
+  assign num = fnum | plus: 0
+  case cls
+    when 'top'
+      assign cat = 'Top'
+      assign plural = 'Tops'
+    when 'bottom'
+      assign cat = 'Bottom'
+      assign plural = 'Bottoms'
+    when 'accessory'
+      assign cat = 'Hardware'
+      assign plural = 'Hardware'
+    when 'gift'
+      assign cat = 'Gift card'
+      assign plural = 'Gift cards'
+    else
+      assign cat = 'Print'
+      assign plural = 'Print'
+  endcase
+  assign colh = product.collections | map: 'handle'
+  assign is_new = false
+  if colh contains 'new-arrivals'
+    assign is_new = true
+  endif
+  assign cur = product.selected_or_first_available_variant
+  assign n_img = product.images.size
+  assign product_form_id = 'product-form-' | append: section.id
+  assign sheet_text = ' — sheet ' | append: num | append: ' of ' | append: n_total
+  assign n_img_pad = n_img | prepend: '0' | slice: -2, 2
+  assign has_choice = true
+  if product.has_only_default_variant
+    assign has_choice = false
+  endif
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign ng_listed = false
+  if raw contains '|NG|'
+    assign ng_listed = true
+  endif
+  assign pos = 0
+  for h in order_list
+    if h == product.handle
+      assign pos = forloop.index0
+    endif
+  endfor
+  assign prev_i = pos | plus: n_total | minus: 1 | modulo: n_total
+  assign next_i = pos | plus: 1 | modulo: n_total
+  assign prev_p = all_products[order_list[prev_i]]
+  assign next_p = all_products[order_list[next_i]]
+  capture prev_no
+    render 'mc-fileno', product: prev_p, order: ord
+  endcapture
+  capture next_no
+    render 'mc-fileno', product: next_p, order: ord
+  endcapture
+-%}
+<!-- ASSET DOSSIER: one piece of field equipment -------------------------------------- -->
+<article class="plate-page" data-handle="{{ product.handle }}">
+<section class="spread dark pl" id="plate" aria-labelledby="plTitle">
+  <div class="pl-l">
+    <div class="pl-crumb mono">
+      <nav aria-label="Breadcrumb"><ol>
+        <li><a href="{{ routes.root_url }}">Briefing</a></li>
+        <li><a href="{{ routes.all_products_collection_url }}">Asset register</a></li>
+        <li><a href="{{ routes.all_products_collection_url }}?c={{ cls }}">{{ plural }}</a></li>
+        <li><span aria-current="page">{{ product.title | strip | escape }}</span></li>
+      </ol></nav>
+    </div>
+    <div class="stage">
+      <ol class="shots" id="shots">
+        {%- for im in product.images -%}
+          <li class="shot{% if forloop.first %} on{% endif %}" data-i="{{ forloop.index0 }}"><div class="xp" style="--ar:{{ im.width }}/{{ im.height }}">{% render 'mc-img', image: im, alt: product.title, sizes: '(min-width:900px) 56vw, 100vw', widths: '640,960,1280,1800', eager: forloop.first %}</div></li>
+        {%- endfor -%}
+      </ol>
+      {% render 'mc-cam', n: num, ex: fno, live: true %}
+      <span class="etag" aria-hidden="true"><span class="etag-k mono">Exhibit {{ fno }}</span><b>{{ product.title | strip | escape }}</b></span>
+    </div>
+    <div class="pl-bar mono">
+      <span id="shotCount">01 / {{ n_img_pad }}</span>
+      <button class="dev" id="dev" type="button" aria-pressed="false"><span class="dev-ico" aria-hidden="true"></span><span id="devT">Declassify photo</span></button>
+      <span class="pl-hint"><span class="hint-fine">Hover to declassify colour</span><span class="hint-touch">Press and hold to declassify</span></span>
+    </div>
+    {%- if n_img > 1 -%}
+      <div class="thumbs" id="thumbs" role="group" aria-label="Photographs">
+        {%- for im in product.images -%}
+          <button type="button" class="th{% if forloop.first %} on{% endif %}" data-i="{{ forloop.index0 }}" aria-label="Photograph {{ forloop.index }} of {{ n_img }}"{% if forloop.first %} aria-current="true"{% endif %}><img loading="lazy" decoding="async" draggable="false" src="{{ im | image_url: width: 160 }}" width="64" height="80" alt=""><b>{{ forloop.index | prepend: '0' | slice: -2, 2 }}</b></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="pl-r paper">
+    <span class="clip" aria-hidden="true"></span>
+    {% render 'mc-filehead', file: fno, doc: 'Asset dossier', page: 2, level: 4, extra: sheet_text, seed: num %}
+    <div class="pl-cap">
+      <p class="mono pl-type">Asset class: {{ cat }}{% if is_new %} — New{% endif %}</p>
+      <h1 class="pl-title" id="plTitle">{{ product.title | strip | escape }}</h1>
+      <div class="pl-priceline">
+        <p class="pl-price" id="price">{% if product.price_varies and product.selected_variant == blank %}From {{ product.price | money }}{% else %}{{ cur.price | money }}{% endif %}<small>CAD</small></p>
+        <p class="pl-stock mono {% if cur.available %}in{% else %}out{% endif %}" id="stock"><i aria-hidden="true"></i><span>{% if cur.available %}In stock{% else %}Sold out{% endif %}</span></p>
+        <span class="stamp {% if cur.available %}ok{% else %}oos{% endif %}" id="stamp" style="--r:-5deg">{% if cur.available %}Approved for field use{% else %}Out of stock{% endif %}</span>
+      </div>
+      {%- if product.description != blank -%}
+        <div class="pl-brief"><p class="mono brief-k">Briefing note</p><div class="pl-desc rte">{{ product.description }}</div></div>
+      {%- endif -%}
+
+      {%- form 'product', product, id: product_form_id, class: 'pl-form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
+        <input type="hidden" name="id" value="{{ cur.id }}" id="variantId">
+        {%- if has_choice -%}
+          <noscript>
+            <label class="mono opt-name" for="variantSel">Choose</label>
+            <select name="id" id="variantSel" class="pl-select">
+              {%- for v in product.variants -%}<option value="{{ v.id }}"{% if v == cur %} selected{% endif %}{% unless v.available %} disabled{% endunless %}>{{ v.title | escape }} — {{ v.price | money }}{% unless v.available %} (sold out){% endunless %}</option>{%- endfor -%}
+            </select>
+          </noscript>
+          <div class="pl-opts" id="opts">
+            {%- for opt in product.options_with_values -%}
+              {%- assign oi = forloop.index0 -%}
+              {%- if opt.values.size < 2 -%}
+                <div class="opt opt-fixed"><span class="opt-name">{{ opt.name | escape }}<b>{{ opt.values.first | escape }}</b></span></div>
+              {%- else -%}
+                <fieldset class="opt" data-o="{{ oi }}">
+                  <legend class="opt-name">{{ opt.name | escape }}<b>{{ cur.options[oi] | escape }}</b></legend>
+                  <div class="chips">
+                    {%- for val in opt.values -%}
+                      {%- assign val_ok = false -%}
+                      {%- for v in product.variants -%}
+                        {%- if v.available and v.options[oi] == val -%}{%- assign val_ok = true -%}{%- endif -%}
+                      {%- endfor -%}
+                      <button type="button" class="chip{% if cur.options[oi] == val %} on{% endif %}" data-o="{{ oi }}" data-v="{{ val | escape }}" aria-pressed="{% if cur.options[oi] == val %}true{% else %}false{% endif %}"{% unless val_ok %} disabled{% endunless %}><i aria-hidden="true">{{ opt.name | escape }}</i><b>{{ val | escape }}</b></button>
+                    {%- endfor -%}
+                  </div>
+                </fieldset>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when '@app' -%}
+              <div class="pl-app" {{ block.shopify_attributes }}>{% render block %}</div>
+          {%- endcase -%}
+        {%- endfor -%}
+        <div class="pl-buy">
+          <div class="pl-qtyrow">
+            <label class="mono opt-name" for="qty-{{ section.id }}">Quantity</label>
+            <div class="qty pl-qty" data-pqty>
+              <button type="button" data-pq="-1" aria-label="Fewer">−</button>
+              <input type="number" id="qty-{{ section.id }}" name="quantity" value="1" min="1" inputmode="numeric" aria-label="Quantity">
+              <button type="button" data-pq="1" aria-label="More">+</button>
+            </div>
+          </div>
+          {%- if cur.available -%}
+            <button class="buy" id="buy" type="submit" name="add"><span id="buyT">Requisition: Add to bag</span><i class="arr" aria-hidden="true"></i></button>
+          {%- else -%}
+            <button class="buy" id="buy" type="submit" name="add" disabled aria-disabled="true"><span id="buyT">Requisition denied: sold out</span></button>
+          {%- endif -%}
+          <p class="pl-err cart-err mono" role="alert" hidden></p>
+          {%- if section.settings.show_dynamic and settings.cart_dynamic_buttons and cur.available -%}
+            <div class="pl-pay">{{ form | payment_button }}</div>
+          {%- endif -%}
+          <a class="mono pl-alert" id="alertLink" href="{{ '/pages/contact' }}#subscribe"{% if cur.available %} hidden{% endif %}>Get alerts when the next drop is cleared</a>
+        </div>
+      {%- endform -%}
+
+      <p class="pl-ship mono"><span class="pl-ship-k">Delivery</span>Ships to {{ countries.size }} countries{% if ng_listed %}, Nigeria and Canada included{% endif %}. Rate calculated at checkout. <a class="link-line" href="/pages/shipping">Extraction routes &amp; returns</a></p>
+      <dl class="pl-spec mono">
+        <div><dt>File no.</dt><dd>{{ fno }}</dd></div>
+        <div><dt>Asset class</dt><dd>{{ cat }}</dd></div>
+        <div><dt>Sizes</dt><dd>{{ sizes_text | escape }}</dd></div>
+        <div><dt>Photographs</dt><dd>{{ n_img_pad }}</dd></div>
+        <div><dt>Currency</dt><dd>CAD</dd></div>
+        <div class="spec-r"><dt>Origin</dt><dd><span class="redact" tabindex="0">Somewhere in the unknown</span></dd></div>
+        <div class="spec-r"><dt>Field handler</dt><dd><span class="redact" tabindex="0">Agent Chrome, Desk 7</span></dd></div>
+      </dl>
+      <p class="mono pl-note">Prices in CAD. Photographs are filed in black and white; hover or press and hold to declassify the colour they were shot in.</p>
+      <div class="pl-foot" aria-hidden="true">{% render 'mc-barcode', seed: num, w: 220, h: 40 %}<span class="mono">{{ fno }} // Asset dossier</span></div>
+    </div>
+  </div>
+</section>
+
+{%- liquid
+  assign rel_same_av = ''
+  assign rel_other_av = ''
+  assign rel_same_sold = ''
+  assign rel_other_sold = ''
+  for h in order_list
+    if h != product.handle
+      assign q = all_products[h]
+      capture qc
+        render 'mc-class', product: q
+      endcapture
+      if q.available
+        if qc == cls
+          assign rel_same_av = rel_same_av | append: h | append: ','
+        else
+          assign rel_other_av = rel_other_av | append: h | append: ','
+        endif
+      else
+        if qc == cls
+          assign rel_same_sold = rel_same_sold | append: h | append: ','
+        else
+          assign rel_other_sold = rel_other_sold | append: h | append: ','
+        endif
+      endif
+    endif
+  endfor
+  assign rel_all = rel_same_av | append: rel_other_av | append: rel_same_sold | append: rel_other_sold | remove_last: ','
+  assign rel_list = rel_all | split: ','
+-%}
+<section class="spread paper rel" aria-labelledby="relH">
+  <div class="wrap">
+    <header class="sec-h">
+      <p class="kick mono">Cross-reference</p>
+      <h2 class="h2 rv" id="relH">Related assets on file</h2>
+    </header>
+    <div class="board strip"><div class="strip-row rel-row">
+      {%- for h in rel_list limit: 4 -%}
+        {% render 'mc-card', product: all_products[h], i: forloop.index0, order: ord, sizes: '(min-width:1100px) 22vw, (min-width:700px) 33vw, 50vw' %}
+      {%- endfor -%}
+    </div></div>
+    <nav class="turn mono" aria-label="Turn the page">
+      <a class="turn-p" href="{{ prev_p.url }}" rel="prev"><span>Previous file</span><b>{{ prev_no }} {{ prev_p.title | strip | escape }}</b></a>
+      <a class="turn-i" href="{{ routes.all_products_collection_url }}"><span>Back to</span><b>Asset register</b></a>
+      <a class="turn-n" href="{{ next_p.url }}" rel="next"><span>Next file</span><b>{{ next_no }} {{ next_p.title | strip | escape }}</b></a>
+    </nav>
+  </div>
+</section>
+</article>
+
+{%- comment -%} data for mc-product.js {%- endcomment -%}
+<script type="application/json" id="pdata">
+{
+  "h": {{ product.handle | json }},
+  "range": {{ product.price_varies | json }},
+  "min": {{ product.price | divided_by: 100.0 }},
+  "chosen": {% if product.selected_variant != blank %}true{% else %}false{% endif %},
+  "options": [{% for opt in product.options_with_values %}{ "name": {{ opt.name | json }}, "values": {{ opt.values | json }} }{% unless forloop.last %},{% endunless %}{% endfor %}],
+  "variants": [{% for v in product.variants %}{ "id": {{ v.id }}, "o": {{ v.options | json }}, "p": {{ v.price | divided_by: 100.0 }}, "a": {% if v.available %}1{% else %}0{% endif %}, "i": {% if v.featured_image %}{{ v.featured_image.position | minus: 1 }}{% else %}-1{% endif %} }{% unless forloop.last %},{% endunless %}{% endfor %}],
+  "sel": {{ cur.options | json }}
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org", "@type": "Product",
+  "name": {{ product.title | strip | json }},
+  "description": {{ product.description | strip_html | strip_newlines | truncate: 300 | json }},
+  "sku": {{ cur.sku | default: product.handle | json }},
+  "category": {{ cat | json }},
+  "brand": { "@type": "Brand", "name": "MONOCHROME" },
+  "url": {{ canonical_url | json }},
+  "image": [{% for im in product.images limit: 6 %}{{ im | image_url: width: 1200 | prepend: 'https:' | replace: 'https:https:', 'https:' | json }}{% unless forloop.last %},{% endunless %}{% endfor %}],
+  "offers": [{% for v in product.variants %}{ "@type": "Offer", "url": {{ canonical_url | append: '?variant=' | append: v.id | json }}, "price": {{ v.price | divided_by: 100.0 | json }}, "priceCurrency": "CAD", "availability": "{% if v.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}", "itemCondition": "https://schema.org/NewCondition", "sku": {{ v.sku | default: v.id | json }}, "name": {{ v.title | json }} }{% unless forloop.last %},{% endunless %}{% endfor %}]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org", "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Briefing", "item": {{ shop.url | append: '/' | json }} },
+    { "@type": "ListItem", "position": 2, "name": "Asset Register", "item": {{ shop.url | append: routes.all_products_collection_url | json }} },
+    { "@type": "ListItem", "position": 3, "name": {{ plural | json }}, "item": {{ shop.url | append: routes.all_products_collection_url | append: '?c=' | append: cls | json }} },
+    { "@type": "ListItem", "position": 4, "name": {{ product.title | strip | json }}, "item": {{ canonical_url | json }} }
+  ]
+}
+</script>
+
+{% schema %}
+{
+  "name": "Asset dossier (product)",
+  "settings": [
+    { "type": "checkbox", "id": "show_dynamic", "label": "Show accelerated checkout buttons (Shop Pay, PayPal...)", "default": true }
+  ],
+  "blocks": [{ "type": "@app" }]
+}
+{% endschema %}

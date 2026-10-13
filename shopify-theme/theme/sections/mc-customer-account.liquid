@@ -1,0 +1,20 @@
+<section class="spread paper cu" aria-labelledby="cuH">
+  <div class="wrap cu-wrap">
+    {% render 'mc-filehead', file: 'MC-109', doc: 'Operative file', page: 7, level: 3 %}
+    <h1 class="h1" id="cuH">Your file</h1>
+    <p class="mono">{{ customer.first_name | default: customer.email | escape }} — <a class="link-line" href="{{ routes.account_logout_url }}">Sign out</a> — <a class="link-line" href="{{ routes.account_url }}/addresses">Addresses</a></p>
+    <h2 class="h2">Orders</h2>
+    {%- if customer.orders.size > 0 -%}
+      <table class="tbl cu-orders"><thead><tr><th class="mono">Order</th><th class="mono">Date</th><th class="mono">Payment</th><th class="mono">Fulfilment</th><th class="mono">Total</th></tr></thead><tbody>
+        {%- for order in customer.orders -%}
+          <tr><th scope="row"><a class="link-line" href="{{ order.customer_url }}">{{ order.name | escape }}</a></th><td>{{ order.created_at | date: '%b %d, %Y' }}</td><td>{{ order.financial_status_label | escape }}</td><td>{{ order.fulfillment_status_label | escape }}</td><td>{{ order.total_price | money }}</td></tr>
+        {%- endfor -%}
+      </tbody></table>
+    {%- else -%}
+      <p>No orders on file yet. <a class="link-line" href="{{ routes.all_products_collection_url }}">Open the register</a>.</p>
+    {%- endif -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "Account", "settings": [] }
+{% endschema %}

@@ -1,0 +1,147 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-lookbook",
+      "blocks": {
+        "e1": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-acid-washed-black",
+            "photo": 4,
+            "ratio": "4/5",
+            "scale": 100,
+            "offset": 0
+          }
+        },
+        "e2": {
+          "type": "exhibit",
+          "settings": {
+            "product": "white-monochrome-jersey",
+            "photo": 3,
+            "ratio": "3/2",
+            "scale": 72,
+            "offset": 7
+          }
+        },
+        "e3": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-sweatshirt",
+            "photo": 2,
+            "ratio": "3/4",
+            "scale": 100,
+            "offset": -3
+          }
+        },
+        "e4": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-cargo-skirt",
+            "photo": 2,
+            "ratio": "4/3",
+            "scale": 62,
+            "offset": 10
+          }
+        },
+        "e5": {
+          "type": "exhibit",
+          "settings": {
+            "product": "black-monochrome-jersey",
+            "photo": 4,
+            "ratio": "4/5",
+            "scale": 92,
+            "offset": -4
+          }
+        },
+        "e6": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-pants-chain",
+            "photo": 2,
+            "ratio": "1/1",
+            "scale": 68,
+            "offset": 8
+          }
+        },
+        "e7": {
+          "type": "exhibit",
+          "settings": {
+            "product": "acid-washed-monochrome-hoodie",
+            "photo": 4,
+            "ratio": "4/5",
+            "scale": 86,
+            "offset": -6
+          }
+        },
+        "e8": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-cargo-shorts-black",
+            "photo": 3,
+            "ratio": "3/4",
+            "scale": 96,
+            "offset": 2
+          }
+        },
+        "e9": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-sleeveless-crop-top",
+            "photo": 3,
+            "ratio": "3/2",
+            "scale": 60,
+            "offset": 9
+          }
+        },
+        "e10": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-cross-necklace",
+            "photo": 3,
+            "ratio": "4/5",
+            "scale": 84,
+            "offset": -5
+          }
+        },
+        "e11": {
+          "type": "exhibit",
+          "settings": {
+            "product": "monochrome-acid-washed-grey",
+            "photo": 4,
+            "ratio": "3/2",
+            "scale": 64,
+            "offset": 8
+          }
+        },
+        "e12": {
+          "type": "exhibit",
+          "settings": {
+            "product": "royal-black",
+            "photo": 1,
+            "ratio": "1/1",
+            "scale": 56,
+            "offset": -2
+          }
+        }
+      },
+      "block_order": [
+        "e1",
+        "e2",
+        "e3",
+        "e4",
+        "e5",
+        "e6",
+        "e7",
+        "e8",
+        "e9",
+        "e10",
+        "e11",
+        "e12"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

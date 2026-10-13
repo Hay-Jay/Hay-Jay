@@ -172,7 +172,7 @@ export class Shop {
     f('asset_img_url', n => asset(n));
     f('stylesheet_tag', url => `<link href="${url}" rel="stylesheet" type="text/css" media="all">`);
     f('script_tag', url => `<script src="${url}" type="text/javascript"></script>`);
-    f('preload_tag', function (url, ...a) { return `<link rel="preload" href="${url}" as="${named(a).as || 'style'}">`; });
+    f('preload_tag', function (url, ...a) { const n = named(a); return `<link rel="preload" href="${url}" as="${n.as || 'style'}"${n.type ? ` type="${n.type}"` : ''}${n.crossorigin !== undefined ? ' crossorigin' : ''}>`; });
     f('img_url', function (im, ...a) { shop.warnings.warn('deprecated', 'img_url is deprecated: use image_url'); return imageUrl(im, ...a); });
     const imageUrl = (im, ...a) => {
       if (!im) return '';
@@ -194,7 +194,7 @@ export class Shop {
     f('within', (u, col) => `/collections/${col.handle}${u}`);
     f('default_errors', () => 'Please check the form.');
     f('url_param_escape', s => encodeURIComponent(s));
-    f('flatten', a => (Array.isArray(a) ? a.flat(Infinity) : a));
+    f('format_code', c => String(c || '').replace(/(.{4})/g, '$1 ').trim());
     f('payment_button', () => '<div class="shopify-payment-button"><button class="shopify-payment-button__button" type="button">Buy it now</button></div>');
     f('payment_terms', () => '');
     f('time_tag', (d, fmt) => `<time datetime="${new Date(d).toISOString()}">${new Date(d).toDateString()}</time>`);

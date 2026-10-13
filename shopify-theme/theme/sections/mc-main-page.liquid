@@ -5,7 +5,6 @@
   assign pkp = pk | split: '~'
   assign folio = pkp[1] | plus: 0
   assign docno = 100 | plus: folio | prepend: 'MC-'
-  assign doc = page.title | default: 'Document'
 -%}
 <section class="spread paper ct-open" aria-labelledby="pageH">
   <div class="wrap">

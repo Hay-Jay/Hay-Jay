@@ -48,9 +48,10 @@
 {%- endif %}
 {%- if template.name == 'index' %}
 <script type="application/ld+json">
-{{ '{"@context":"https://schema.org","@type":"Organization","name":"MONOCHROME","url":"' | append: shop.url | append: '/","logo":"' | append: og_abs | append: '","sameAs":["' | append: settings.social_instagram | append: '"],"email":"' | append: settings.contact_email | append: '"}' }}
+{ "@context": "https://schema.org", "@type": "Organization", "name": "MONOCHROME", "url": {{ shop.url | append: '/' | json }}, "logo": {{ og_abs | json }}, "sameAs": [{{ settings.social_instagram | json }}], "email": {{ settings.contact_email | json }} }
 </script>
 <script type="application/ld+json">
-{{ '{"@context":"https://schema.org","@type":"WebSite","name":"MONOCHROME®","url":"' | append: shop.url | append: '/","potentialAction":{"@type":"SearchAction","target":"' | append: shop.url | append: '/search?q={search_term_string}","query-input":"required name=search_term_string"}}' }}
+{ "@context": "https://schema.org", "@type": "WebSite", "name": "MONOCHROME®", "url": {{ shop.url | append: '/' | json }},
+  "potentialAction": { "@type": "SearchAction", "target": {{ shop.url | append: '/search?q=' | append: '{search_term_string}' | json }}, "query-input": "required name=search_term_string" } }
 </script>
 {%- endif %}

@@ -1,0 +1,79 @@
+{%- liquid
+  assign n_top = 0
+  assign n_bottom = 0
+  assign n_acc = 0
+  assign n_gift = 0
+  assign n_print = 0
+  for p in collections['all'].products
+    capture cls
+      render 'mc-class', product: p
+    endcapture
+    case cls
+      when 'top'
+        assign n_top = n_top | plus: 1
+      when 'bottom'
+        assign n_bottom = n_bottom | plus: 1
+      when 'accessory'
+        assign n_acc = n_acc | plus: 1
+      when 'gift'
+        assign n_gift = n_gift | plus: 1
+      when 'print'
+        assign n_print = n_print | plus: 1
+    endcase
+  endfor
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign reg = routes.all_products_collection_url
+-%}
+<section class="spread paper ab-sit" aria-labelledby="sitH">
+  <div class="wrap ab-essay">
+    <aside class="ab-margin mono" aria-label="Case notes">
+      <p class="ab-mh">In the file</p>
+      <ul>
+        <li><a href="{{ reg }}?c=top"><span>Tops</span><b>{{ n_top }}</b></a></li>
+        <li><a href="{{ reg }}?c=bottom"><span>Bottoms</span><b>{{ n_bottom }}</b></a></li>
+        <li><a href="{{ reg }}?c=accessory"><span>Hardware</span><b>{{ n_acc }}</b></a></li>
+        <li><a href="{{ reg }}?c=gift"><span>Gift card</span><b>{{ n_gift }}</b></a></li>
+        <li><a href="{{ reg }}?c=print"><span>Print</span><b>{{ n_print }}</b></a></li>
+      </ul>
+      <p class="ab-mh">Store address</p>
+      <p>{{ section.settings.address | escape }}</p>
+      <p class="ab-mh">Delivers to</p>
+      <p>{{ countries.size }} countries. Nigeria and Canada included.</p>
+      <p class="ab-mh">Informant</p>
+      <p><span class="redact" tabindex="0">{{ section.settings.informant | escape }}</span></p>
+    </aside>
+
+    <div class="ab-text">
+      <h2 class="sec-tag" id="sitH"><span class="mono">§1</span>{{ section.settings.heading | escape }}</h2>
+      <p class="drop rv">{{ section.settings.para_1 | escape }}</p>
+      <p class="rv">{% render 'mc-md', text: section.settings.para_2 %}</p>
+      {% render 'mc-figure', product: section.settings.figure_a, photo: section.settings.figure_a_photo, letter: 'a', cam: 4 %}
+      <blockquote class="ab-pull rv">{{ section.settings.pull | escape }}</blockquote>
+    </div>
+
+    {% render 'mc-figure', product: section.settings.figure_c, photo: section.settings.figure_c_photo, letter: 'c', cam: 6 %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About: situation",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Situation" },
+    { "type": "textarea", "id": "para_1", "label": "Opening paragraph", "default": "MONOCHROME® is clothing and objects made from three finishes: black, white and chrome. There is no colour of the month and no seasonal palette. Keeping the list that short means every piece you buy works with every piece you already own." },
+    { "type": "textarea", "id": "para_2", "label": "Second paragraph (put **words** between double stars to set them as lead-ins)", "default": "**Black** is the base. It carries the heavy pieces: the acid-washed hoodie and tees, the cargo shorts and skirt, the jerseys. **White** is contrast, the 77 jersey and the lettering on the chest. **Chrome** is the edge: signet rings, star rings, a trinity ring, a chain for your pants, a cross on a chain." },
+    { "type": "text", "id": "pull", "label": "Pull quote", "default": "Nothing here needs a matching partner. It is all the same three finishes." },
+    { "type": "text", "id": "address", "label": "Store address", "default": "Regina, Saskatchewan, Canada" },
+    { "type": "text", "id": "informant", "label": "Informant (behind a redaction bar)", "default": "A very well dressed source" },
+    { "type": "header", "content": "Photographs" },
+    { "type": "product", "id": "figure_a", "label": "Exhibit A product" },
+    { "type": "range", "id": "figure_a_photo", "label": "Exhibit A photo number", "min": 1, "max": 12, "step": 1, "default": 6 },
+    { "type": "product", "id": "figure_c", "label": "Exhibit C product" },
+    { "type": "range", "id": "figure_c_photo", "label": "Exhibit C photo number", "min": 1, "max": 12, "step": 1, "default": 4 }
+  ],
+  "presets": [{ "name": "About: situation" }]
+}
+{% endschema %}

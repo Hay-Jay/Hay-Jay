@@ -1,0 +1,63 @@
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign gift_amounts = ''
+  for p in collections['all'].products
+    if p.gift_card?
+      for v in p.variants
+        assign gift_amounts = gift_amounts | append: v.price | money | append: ', '
+      endfor
+    endif
+  endfor
+  assign gift_amounts = gift_amounts | remove_last: ', '
+  assign nq = section.blocks.size
+-%}
+<!-- 06 THE DEBRIEF ------------------------------------------------------------------------ -->
+<section class="spread dark faq-spread" aria-labelledby="faqH">
+  <div class="wrap fq-grid">
+    <div class="fq-head">
+      <div class="filehead-wrap">{% render 'mc-filehead', file: 'MC-106', doc: 'Debrief transcript', page: 6, level: 2, extra: ' — questions' %}</div>
+      <p class="kick mono">Debrief — transcript</p>
+      <h1 class="h1" id="faqH"><span class="tw" style="--n:3;--dl:.1s">The</span> <span class="tw caret" style="--n:7;--dl:.45s">debrief</span></h1>
+      <p class="fq-deck">{{ nq }} questions we get most, in the order we get them. Each answer is as short as it can be.</p>
+      <p class="fq-meta mono"><span><b>Subject:</b> You</span><span><b>Debriefed by:</b> Division of Wearables</span><span><b>Witness:</b> <span class="redact" tabindex="0">Agent Chrome, Desk 7</span></span></p>
+      <div class="recorder" aria-hidden="true"><i class="reel"></i><i class="reel"></i><span class="mono"><b class="rec"></b>Rec</span></div>
+    </div>
+    <div class="transcript paper">
+      <span class="clip" aria-hidden="true"></span>
+      <p class="tr-head mono"><span>Transcript</span><span>{{ nq }} entries</span></p>
+      <div class="faq-list">
+        {%- for block in section.blocks -%}
+          {%- assign qn = forloop.index | prepend: '0' | slice: -2, 2 -%}
+          <details{% if forloop.first %} open{% endif %} {{ block.shopify_attributes }}><summary><span class="mono q-no">Q.{{ qn }}</span><b>{{ block.settings.question | escape }}</b><i class="pm" aria-hidden="true"></i></summary><div class="ans"><span class="mono a-lbl" aria-hidden="true">A.{{ qn }}</span>{{ block.settings.answer | replace: '{countries}', countries.size | replace: '{giftamounts}', gift_amounts }}</div></details>
+        {%- endfor -%}
+      </div>
+      <div class="fq-foot">
+        <p class="mono">Not here?</p>
+        <a href="{{ section.settings.report_url | default: '/pages/contact' }}">Report in<span class="arr" aria-hidden="true"></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{% for block in section.blocks %}{ "@type": "Question", "name": {{ block.settings.question | json }}, "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | strip_newlines | json }} } }{% unless forloop.last %},{% endunless %}{% endfor %}] }
+</script>
+
+{% schema %}
+{
+  "name": "Debrief (FAQ)",
+  "settings": [{ "type": "url", "id": "report_url", "label": "'Report in' link" }],
+  "blocks": [
+    {
+      "type": "qa", "name": "Question", "limit": 30,
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Where do I buy?" },
+        { "type": "richtext", "id": "answer", "label": "Answer ({countries} = live count, {giftamounts} = gift card amounts)", "default": "<p>Every piece is sold right here.</p>" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Debrief (FAQ)" }]
+}
+{% endschema %}

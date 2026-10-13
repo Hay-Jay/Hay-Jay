@@ -19,7 +19,10 @@ function patch(src, edits, file) {
 // ---- CSS
 let base = rd('css/base.css').split('\n').filter(l => !l.startsWith('@font-face')).join('\n');
 wr('mc-base.css', base);
-for (const n of ['home', 'shop', 'product', 'lookbook', 'about', 'shipping', 'faq', 'contact', 'mobile']) wr(`mc-${n}.css`, rd(`css/${n}.css`));
+import { existsSync } from 'node:fs';
+const extra = n => { const f = join(DEFAULT_THEME_DIR, '..', 'tools', 'theme-css', n + '.css'); return existsSync(f) ? '\n' + readFileSync(f, 'utf8') : ''; };
+for (const n of ['home', 'shop', 'product', 'lookbook', 'about', 'shipping', 'faq', 'contact', 'mobile']) wr(`mc-${n}.css`, rd(`css/${n}.css`) + extra(n));
+wr('mc-customer.css', extra('customer'));
 
 // ---- core.js
 let core = rd('js/core.js');

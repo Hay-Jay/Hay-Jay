@@ -1,0 +1,31 @@
+<section class="spread dark ab-next" aria-label="Keep reading">
+  <div class="wrap">
+    <p class="ab-big rv">{{ section.settings.big_a | escape }} <em>{{ section.settings.big_b | escape }}<i class="stop">.</i></em></p>
+    <ul class="cn-links">
+      {%- for block in section.blocks -%}
+        <li {{ block.shopify_attributes }}><a href="{{ block.settings.url | default: '/' }}"><span class="mono">{{ block.settings.page | escape }}</span><b>{{ block.settings.label | escape }}</b><i class="arr" aria-hidden="true"></i></a></li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Keep reading",
+  "settings": [
+    { "type": "text", "id": "big_a", "label": "Big words", "default": "Wear the" },
+    { "type": "text", "id": "big_b", "label": "Big words (emphasised)", "default": "unknown" }
+  ],
+  "blocks": [
+    {
+      "type": "link", "name": "Link", "limit": 6,
+      "settings": [
+        { "type": "text", "id": "page", "label": "Small label", "default": "Page 2" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Asset register" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Keep reading" }]
+}
+{% endschema %}

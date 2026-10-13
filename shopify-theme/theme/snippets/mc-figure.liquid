@@ -1,0 +1,15 @@
+{%- comment -%} Taped photograph with a camera overlay (about page). Params: product, photo (1-based), letter (a|b|c), cam (number), zoom (true). {%- endcomment -%}
+{%- liquid
+  if product != blank
+    assign pn = photo | default: 1 | minus: 1
+    assign pic = product.images[pn] | default: product.featured_image
+    assign ex = 'Exhibit ' | append: letter | upcase
+  endif
+-%}
+{%- if product != blank and pic != blank -%}
+<figure class="ab-fig ab-fig-{{ letter }} rv">
+  <span class="tape" aria-hidden="true"></span>
+  <a class="xp{% if zoom %} zoom{% endif %} cam-xp" href="{{ product.url }}" aria-label="Open {{ product.title | strip | escape }}">{% render 'mc-img', image: pic, alt: product.title, sizes: '(min-width:900px) 34vw, 86vw', widths: '480,720,1080,1400' %}{% render 'mc-cam', n: cam, ex: ex %}</a>
+  <figcaption class="mono"><span>{{ ex }} — {{ product.title | strip | escape }}</span><span>{{ product.price | money }} CAD</span></figcaption>
+</figure>
+{%- endif -%}
