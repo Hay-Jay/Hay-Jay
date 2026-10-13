@@ -1,11 +1,17 @@
-/** Spatial-hash of axis-aligned rectangles (x/z) with heights. Used for player collision and camera occlusion. */
+/** A tag filter is one tag or an array of tags. */
+const tagIn = (f, tag) => (Array.isArray(f) ? f.includes(tag) : f === tag);
+
+/**
+ * Spatial-hash of axis-aligned rectangles (x/z) with heights. Used for player collision and camera occlusion.
+ * A rect spans y0..h (y0 defaults to 0, so existing callers are unchanged) and may carry a tag ('wall', 'furn', ...).
+ */
 export class CollisionGrid {
   constructor(cell = 48) { this.cell = cell; this.map = new Map(); this.rects = []; }
   _k(ix, iz) { return ix * 73856093 ^ iz * 19349663; }
-  add(x0, z0, x1, z1, h = 10, tag = null) {
+  add(x0, z0, x1, z1, h = 10, tag = null, y0 = 0) {
     // Reject garbage: non-finite or absurd bounds would otherwise spin the cell loops (a tampered save could freeze the tab).
     if (![x0, z0, x1, z1].every((v) => Number.isFinite(v) && Math.abs(v) < 1e6) || x1 < x0 || z1 < z0 || (x1 - x0) / this.cell > 4000 || (z1 - z0) / this.cell > 4000) return null;
-    const r = { x0, z0, x1, z1, h, tag };
+    const r = { x0, z0, x1, z1, h, tag, y0: Number.isFinite(y0) && y0 > 0 ? y0 : 0 };
     this.rects.push(r);
     const c = this.cell;
     for (let ix = Math.floor(x0 / c); ix <= Math.floor(x1 / c); ix++)
@@ -13,6 +19,19 @@ export class CollisionGrid {
         const k = this._k(ix, iz); let a = this.map.get(k); if (!a) this.map.set(k, (a = [])); a.push(r);
       }
     return r;
+  }
+  /** Remove one rect (the object `add` returned); a no-op for anything else. */
+  remove(r) {
+    if (!r) return false;
+    const i = this.rects.indexOf(r); if (i < 0) return false;
+    this.rects.splice(i, 1);
+    const c = this.cell;
+    for (let ix = Math.floor(r.x0 / c); ix <= Math.floor(r.x1 / c); ix++)
+      for (let iz = Math.floor(r.z0 / c); iz <= Math.floor(r.z1 / c); iz++) {
+        const k = this._k(ix, iz), a = this.map.get(k); if (!a) continue;
+        const j = a.indexOf(r); if (j >= 0) a.splice(j, 1); if (!a.length) this.map.delete(k);
+      }
+    return true;
   }
   /** Remove every rect added with this tag (used to rebuild dynamic furniture colliders). */
   removeTag(tag) {
@@ -46,19 +65,24 @@ export class CollisionGrid {
     }
     return hit;
   }
-  /** Distance fraction (0..1) along ray at which it first enters a rect (below its height), or 1. */
-  rayBlocked(ox, oy, oz, tx, ty, tz) {
+  /**
+   * Distance fraction (0..1) along ray at which it first enters a rect (between its y0 and its height), or 1.
+   * `skip`: a tag (or array of tags) whose rects the ray passes through; `only`: consider just the rects with this tag (or one of these tags).
+   */
+  rayBlocked(ox, oy, oz, tx, ty, tz, { skip = null, only = null } = {}) {
     const minx = Math.min(ox, tx), maxx = Math.max(ox, tx), minz = Math.min(oz, tz), maxz = Math.max(oz, tz);
     let best = 1;
     const dx = tx - ox, dy = ty - oy, dz = tz - oz;
     for (const r of this.query(minx, minz, maxx, maxz)) {
+      if (skip != null && tagIn(skip, r.tag)) continue;
+      if (only != null && !tagIn(only, r.tag)) continue;
       let t0 = 0, t1 = 1;
       const slab = (o, d, lo, hi) => {
         if (Math.abs(d) < 1e-9) return o >= lo && o <= hi;
         let a = (lo - o) / d, b = (hi - o) / d; if (a > b) [a, b] = [b, a];
         t0 = Math.max(t0, a); t1 = Math.min(t1, b); return t0 <= t1;
       };
-      if (slab(ox, dx, r.x0, r.x1) && slab(oy, dy, 0, r.h) && slab(oz, dz, r.z0, r.z1) && t0 < best) best = t0;
+      if (slab(ox, dx, r.x0, r.x1) && slab(oy, dy, r.y0, r.h) && slab(oz, dz, r.z0, r.z1) && t0 < best) best = t0;
     }
     return best;
   }

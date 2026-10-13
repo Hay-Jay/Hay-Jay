@@ -28,6 +28,9 @@ import { expireAds, adQuote, activeAd } from './core/ads.js';
 import * as SOC from './core/social.js';
 import * as POL from './core/politics.js';
 import * as H from './core/home.js';
+import { planMove, upgradeHome } from './core/move.js';
+import { lotOf, roomAtFloor } from './core/lot.js';
+import { HOMES, layoutOf } from './data/homes.js';
 import { policyMult } from './core/policy.js';
 import { travel, cabFare } from './core/travel.js';
 import { Radio } from './ui/radio.js';
@@ -183,25 +186,48 @@ async function boot() {
       panels.event(r.event, { can: (i) => choiceAvailable(store, r.event, i), pick: (i) => { const x = resolveEvent(store, r.event.id, i); if (x.ok) audio.blip('ok'); return x; }, onClose: back });
     }, { stop: false });
   };
+  ctx.moveHome = (id) => moveHome(id);
   phone = new Phone($('phone'), ctx);
   panels = new Panels($('panels'), { ...ctx, player: { gesture: (g) => player.gesture(g) } });
   panels.ctx.rebuildPlayer = rebuildPlayer;
 
   let homeView = false;
   /* ---------- build mode ---------- */
-  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f) => { rig.buildInset = f; },
-    onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); },
+  // buildTop: how much of the top of the screen the overhead camera must keep clear. Home view wants the top bar and chips; build mode on a multi-room home also the
+  // room focus strip. The larger of the two wins, and the Studio (no strip) behaves exactly as it always did.
+  let homeTop = 0, stripTop = 0, wallMode = null;   // wallMode: the session's Walls choice ('up' | 'cut' | 'down'); null = the interior's own default. Not saved.
+  const applyTop = () => { rig.buildTop = Math.max(homeView ? homeTop : 0, stripTop); };
+  // toasts normally start 104 px down (theme.css); while the focus strip is up they start just below it, so a toast never sits on the chips (the strip is 0 high in the Studio)
+  const placeToasts = () => { $('toasts').style.top = stripTop > 0 ? `max(calc(104px + var(--safe-t)), ${Math.round(stripTop * innerHeight) + 12}px)` : ''; };
+  const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f, top = 0) => { rig.buildInset = f; stripTop = top; if (build.active) { applyTop(); placeToasts(); } },
+    onWallMode: (m) => { wallMode = m; interior?.setWallMode?.(m); },
+    onFocus: (id, rect) => rig.setBuildFocus(rect),
+    onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); if (interior?.overheadMode) build.setWallMode(interior.overheadMode); },
     onStop: () => {
+      stripTop = 0; placeToasts();
       if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
       interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good');
     } });
   /** The Buy tab: a bottom sheet over the Home view / build mode. Pieces you buy are handed to build mode to place. */
   const catalogue = new Catalogue({ store, build, audio, toast, fmtMoney, thumbs: makeThumbs({ size: 160 }), canBuild: () => inInterior === 'apartment',
-    onChange: () => build.refresh(), onOpen: () => { buyOpen = true; document.body.classList.add('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); }, onClose: () => { buyOpen = false; document.body.classList.remove('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); } });
+    onChange: () => build.refresh(), onOpen: (c) => { c.setRoom(build.active ? build.focus : null); buyOpen = true; document.body.classList.add('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); }, onClose: () => { buyOpen = false; document.body.classList.remove('cat-open'); if (homeView && !build.active) homeInsets(); syncTab(); } });
   build.setCatalogue(catalogue);
 
   /* ---------- interiors ---------- */
+  // Cache: the shops and the gym by kind, the home as `apartment:<layoutId>` (docs/HOMES.md section 6, cache invariant). Only the entry for the layout the save
+  // lives in survives: a move, New life, a bad save or a move made while outdoors can never hand the player an interior of the wrong layout.
   const interiors = {};
+  const homeKey = () => `apartment:${layoutOf(S()).id}`;
+  const interiorKey = (kind) => (kind === 'apartment' ? homeKey() : kind);
+  /** Dispose every cached apartment except the one for the current layout (never the one that is on screen: swap first). */
+  const dropStaleApartments = () => {
+    const keep = homeKey();
+    for (const k of Object.keys(interiors)) if (k.startsWith('apartment:') && k !== keep && interiors[k] !== interior) { interiors[k].dispose(); delete interiors[k]; }
+  };
+  const interiorFor = (kind) => {
+    if (kind === 'apartment') { dropStaleApartments(); return (interiors[homeKey()] ||= buildInterior('apartment', { layout: layoutOf(S()) })); }
+    return (interiors[kind] ||= buildInterior(kind));
+  };
   const ictx = {
     store, game: G, fmt: fmtMoney, audio,
     player: { setCarry: (v) => player.setCarry(v), gesture: (g) => player.gesture(g), sitAt: (s) => player.sitAt(s) },
@@ -210,6 +236,7 @@ async function boot() {
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
       exitInterior: () => exitInterior(),
       furnitureShop: () => catalogue.open(),
+      openStorage: () => catalogue.open('in-storage'),
       build: () => { if (inInterior !== 'apartment') return; phone.close(); build.start(); },
       radioMenu: () => panels.menu('📻 Radio', radio.playing ? `Now playing: ${radio.nowTitle}` : 'Pick a station. The music is generated live in your browser.', [...STATIONS.map((st) => ({ label: `${st.emoji} ${st.name} · ${st.freq}`, run: () => radio.play(st.id) })), { label: '⏹ Turn off', run: () => radio.stop() }]),
       mayorTalk: () => {
@@ -230,18 +257,38 @@ async function boot() {
     },
   };
   const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', piano: 'Lovely tune 🎹', paint: 'A little masterpiece 🎨', gaming: 'Good game! 🎮', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
+  /**
+   * Put `next` on screen as the interior the player is in (enterInterior) or is being moved into (moveHome): scene, collision, camera limits, and for a home its
+   * furniture and paint, the overhead/wall mode, build mode's grid, the Home stage and the overhead camera frame. Whatever interior was attached before is taken
+   * off the scene (the caller disposes it if it is not cached any more).
+   */
+  function attachInterior(next) {
+    const prev = interior;
+    if (prev && prev !== next) { prev.group.userData.tvOff?.(); scene.remove(prev.group); }
+    interior = next; scene.add(next.group);
+    player.bounds = next.bounds; player.grid = next.colliders; rig.grid = next.colliders; rig.bounds = next.bounds; rig.indoor = true;
+    if (next.kind !== 'apartment') return;
+    const lot = lotOf(next.layout), multi = next.rooms.length > 1;
+    next.setHome(S().home);
+    if (multi && wallMode) next.setWallMode(wallMode);          // the session's Walls choice survives a move (never applied to the Studio: its overhead view is 'up')
+    next.setOverhead(homeView || build.active);
+    build.setLayout(next.layout); build.setWallMode(next.overheadMode);
+    homeStage.fit(lot.yardRect ?? lot.bbox); rig.setBuildFrame(lot.bbox); rig.setBuildFocus(null);
+  }
   async function enterInterior(kind, door) {
     if (fading || inInterior) return; fading = true; lastDoor = door;
     await fadeTo(true, 380);
-    interior = interiors[kind] ||= buildInterior(kind); inInterior = kind;
-    city.group.visible = false; ped.setVisible(false); scene.add(interior.group);
+    const repaired = kind === 'apartment' ? H.repairHome(store) : 0;
+    const next = interiorFor(kind); inInterior = kind;
+    city.group.visible = false; ped.setVisible(false);
     setIndoor(true);
-    player.teleport(interior.spawn.x, interior.spawn.z, interior.spawn.yaw); player.bounds = interior.bounds; player.grid = interior.colliders;
-    if (!S().job.shift) interior.resetTask();
-    if (kind === 'apartment') { const n = H.repairHome(store); interior.setHome(S().home); if (n) toast(`Some furniture was blocking the way — ${n} piece${n > 1 ? 's' : ''} moved to storage.`, 'info'); }
-    rig.grid = interior.colliders; rig.indoor = true; rig.bounds = interior.bounds; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(interior.spawn.yaw); rig.snap(player);
+    attachInterior(next);
+    player.teleport(next.spawn.x, next.spawn.z, next.spawn.yaw);
+    if (!S().job.shift) next.resetTask();
+    if (repaired) toast(`Some furniture was blocking the way — ${repaired} piece${repaired > 1 ? 's' : ''} moved to storage.`, 'info');
+    rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(next.spawn.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
-    toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts · Unit 204', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' })[kind], 'info');
+    toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: layoutOf(S()).title, gym: 'Prairie Fitness', cityhall: 'Regina City Hall' })[kind], 'info');
   }
   async function exitInterior() {
     if (fading || !inInterior) return; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
@@ -251,6 +298,35 @@ async function boot() {
     const d = lastDoor; const out = d ? { x: d.x, z: d.z, yaw: Math.atan2(d.nx, d.nz) } : { x: city.spawn.x, z: city.spawn.z, yaw: 0 };
     player.teleport(out.x + d.nx * 0.8, out.z + d.nz * 0.8, out.yaw); rig.snapBehind(out.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
+  }
+  /**
+   * Move up to a bigger home (docs/HOMES.md section 6, in this order): refuse politely, fade out, build the new interior BEFORE paying (so a failed build costs
+   * nothing), pay and change the save in one go (upgradeHome), then swap the interior if the player is standing in the apartment (otherwise the new interior just waits
+   * in the cache for the next enterInterior), fade back in, say where you live now. Returns true when the move happened.
+   */
+  async function moveHome(tierId) {
+    if (fading || creator || camMode || build.active || gameMode !== 'play') { toast('Not right now.', 'warn'); return false; }
+    const plan = planMove(S(), tierId); if (!plan.ok) { toast(plan.error, 'warn'); audio.blip('error'); return false; }
+    fading = true; phone.close(); panels.close(); catalogue.close(); closeMap(); closeMapOverview();
+    let moved = null;
+    try {
+      await fadeTo(true, 450);
+      const next = buildInterior('apartment', { layout: HOMES[tierId] });
+      const r = upgradeHome(store, tierId);
+      if (!r.ok) { next.dispose(); toast(r.error, 'warn'); audio.blip('error'); return false; }
+      const key = homeKey(); interiors[key]?.dispose(); interiors[key] = next;       // the cache holds exactly one apartment: the new layout's
+      if (inInterior === 'apartment') {
+        attachInterior(next);                                                         // takes the old interior off the scene
+        player.teleport(next.spawn.x, next.spawn.z, next.spawn.yaw); rig.snapBehind(next.spawn.yaw); rig.snap(player);
+        if (homeView) { homeInsets(); rig.snapBuild(); }                              // the dollhouse camera jumps to its new frame behind the fade
+      }
+      dropStaleApartments();                                                          // the old layout's interior (now off the scene) or a stale one from before a move made outdoors
+      audio.blip('cash'); moved = r;
+      return true;
+    } finally {
+      await fadeTo(false, 450); fading = false;
+      if (moved) toast(`${moved.title} · paid ${fmtMoney(moved.price)}`, 'good');
+    }
   }
   function setIndoor(on) {
     atmo.indoor = on;
@@ -308,8 +384,11 @@ async function boot() {
   let target = null;
   const nearestInteractable = () => {
     let best = null, bd = 1e9;
+    // multi-room homes: a prompt needs line of sight, so nothing is offered through a wall (a doorway passes). Items in the player's own room need no ray; the Studio has no walls to check.
+    const sight = inInterior === 'apartment' && interior.rooms.length > 1, here = sight ? roomAtFloor(interior.layout, player.pos.x, player.pos.z)?.id : null;
     const consider = (it, label) => {
       const d = Math.hypot(it.x - player.pos.x, it.z - player.pos.z); if (d > it.radius) return;
+      if (sight && it.room !== here && interior.colliders.rayBlocked(player.pos.x, 0.9, player.pos.z, it.x, 0.9, it.z, { only: 'wall' }) < 1) return;
       if (it.enabled && !it.enabled(ictx)) return;
       const score = d / it.radius; if (score < bd) { bd = score; best = { it, label }; }
     };
@@ -344,15 +423,25 @@ async function boot() {
   /** Home view: a live, tilted dollhouse of your apartment. You can still walk around and use things; Edit / Buy change the room. */
   // the dollhouse sits on a little lawn under a clear sky, so the home screen reads as a toy diorama rather than a dark room
   const homeStage = new THREE.Group(); homeStage.visible = false; scene.add(homeStage);
-  { const disc = new THREE.Mesh(new THREE.CircleGeometry(11.5, 56).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#9ed48a', roughness: 1 })); disc.position.y = -0.07; disc.receiveShadow = true; homeStage.add(disc);
-    const ring = new THREE.Mesh(new THREE.RingGeometry(11.5, 12.6, 56).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 })); ring.position.y = -0.065; homeStage.add(ring); }
+  {
+    const disc = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshStandardMaterial({ color: '#9ed48a', roughness: 1 })); disc.position.y = -0.07; disc.receiveShadow = true; homeStage.add(disc);
+    const ring = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.55 })); ring.position.y = -0.065; homeStage.add(ring);
+    /** Rebuild (not scale) the grass disc and its white ring around a rect {x0, z0, x1, z1} (the home's bbox, or its yard): centred on it, radius hypot(half sides) + 1.5, never smaller than the Studio's 11.5. */
+    homeStage.fit = (r) => {
+      const cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2, rad = Math.max(11.5, Math.hypot((r.x1 - r.x0) / 2, (r.z1 - r.z0) / 2) + 1.5);
+      disc.geometry.dispose(); disc.geometry = new THREE.CircleGeometry(rad, 56).rotateX(-Math.PI / 2);
+      ring.geometry.dispose(); ring.geometry = new THREE.RingGeometry(rad, rad + 1.1, 56).rotateX(-Math.PI / 2);
+      disc.position.set(cx, -0.07, cz); ring.position.set(cx, -0.065, cz);
+    };
+    homeStage.fit(lotOf(layoutOf(S())).bbox);
+  }
   /** Keep the whole room between the top bar/chips and the tab bar. */
-  const homeInsets = () => { rig.buildInset = Math.min(0.6, Math.max(92, catalogue.isOpen ? catalogue.height + 14 : 0) / innerHeight); rig.buildTop = Math.min(0.24, (catalogue.isOpen ? 76 : 118) / innerHeight); };
+  const homeInsets = () => { rig.buildInset = Math.min(0.6, Math.max(92, catalogue.isOpen ? catalogue.height + 14 : 0) / innerHeight); homeTop = Math.min(0.24, (catalogue.isOpen ? 76 : 118) / innerHeight); applyTop(); };
   addEventListener('resize', () => { if (homeView && !build.active) homeInsets(); });
   function setHomeView(on) {
     if (on === homeView) return; homeView = on; homeStage.visible = on; atmo.homeLift = on; if (inInterior) { scene.background = new THREE.Color(on ? '#cfe6f3' : '#181a20'); lastEnvAt = 0; updateEnv(true); }
     if (on) {
-      rig.mode = 'build'; homeInsets(); rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true); document.body.classList.add('home-view');
+      rig.mode = 'build'; rig.setBuildFocus(null); homeInsets(); rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true); document.body.classList.add('home-view');
       shell.setChips([{ id: 'edit', icon: '✏️', label: 'Edit room' }, { id: 'paint', icon: '🎨', label: 'Paint & floors' }, { id: 'out', icon: '🚪', label: 'Go outside' }], (c) => { if (c === 'edit') build.start(); else if (c === 'paint') catalogue.open('design'); else exitInterior(); });
     } else {
       document.body.classList.remove('home-view'); interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.fov = 62; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); shell.setChips([]);
@@ -465,7 +554,7 @@ async function boot() {
   };
   const newLife = () => {
     hub.hide(); enterHubMode(false);
-    store.reset(); POL.ensurePolitics(store); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
+    store.reset(); dropStaleApartments(); wallMode = null; POL.ensurePolitics(store); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
     creator = true; gameMode = 'creator'; $('title').classList.remove('on'); rig.mode = 'creator'; rig.yaw = player.yaw + 0.5; rig.snap(player);
     const off = () => camera.setViewOffset(innerWidth, innerHeight, innerWidth * (innerWidth > 760 ? 0.17 : 0), innerWidth > 760 ? 0 : innerHeight * 0.18, innerWidth, innerHeight);
     off();
@@ -524,7 +613,7 @@ async function boot() {
     const c = clock(); hudClock.innerHTML = `${c.label} ${c.ampm} <small>${weather.icon} ${weather.temp}°${weather.live ? '' : ' · sim'}</small>`;
     shell.setClock(`<span aria-hidden="true">${(env?.night ?? 0) > 0.5 ? '🌙' : '☀️'}</span> ${c.date.toLocaleDateString('en-CA', { weekday: 'short', day: 'numeric', timeZone: 'America/Regina' })} · ${c.label} ${c.ampm} <small class="tb-weather">${weather.icon} ${weather.temp}°${weather.live ? '' : ' sim'}</small>`);
     // place
-    let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: 'Wheat City Lofts', gym: 'Prairie Fitness', cityhall: 'Regina City Hall' }[inInterior] : 'Regina';
+    let place = inInterior ? { market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: layoutOf(s).title.split(' · ')[0], gym: 'Prairie Fitness', cityhall: 'Regina City Hall' }[inInterior] : 'Regina';
     if (!inInterior) { let bd = 1e9; for (const d of DISTRICTS) { const k = Math.hypot(player.pos.x - d.x, player.pos.z - d.z) - d.r; if (k < bd && k < 0) { bd = k; place = d.name; } } }
     hudPlace.textContent = place;
     // destination
@@ -556,7 +645,7 @@ async function boot() {
     if (topic === 'phone' || topic === 'reset') { const on = S().phone.flashlight; flash.intensity = on ? 90 : 0; }
     if (topic === 'bank' || topic === 'inventory') renderMapCard();
     if (topic === 'ads' || topic === 'politics') ctx.refreshBillboards();
-    if (topic === 'home' && interior?.kind === 'apartment') interior.setHome(S().home);
+    if (topic === 'home' && interior?.kind === 'apartment' && interior.layout.id === layoutOf(S()).id) interior.setHome(S().home);   // upgradeHome commits before the new interior is attached
   });
 
   /* ---------- resize ---------- */
@@ -652,6 +741,10 @@ async function boot() {
       if (!inInterior) ped.update(dt, player.pos);
       const speedNorm = Math.min(1, player.speed / 7.2);
       rig.update(dt, input, player, { speedNorm, sensitivity: isTouch ? 0.9 : 1 });
+      if (inInterior === 'apartment' && interior.rooms.length > 1) {   // walking through a multi-room home: draw only the rooms near the player, and cut a partition that stands between the head and the camera
+        interior.setViewer(player.pos.x, player.pos.z);
+        if (rig.mode !== 'build') interior.setCameraCut(player.pos, camera.position);
+      }
       if (creator && rig.mode !== 'creator') rig.mode = 'creator';
     }
     // studio key light for the character creator / selfie so faces are always readable, even at night
@@ -681,6 +774,16 @@ async function boot() {
     store, G, player, rig, city, camera, scene, renderer, phone, panels, ctx, atmo,
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
+    // multi-room homes: the layout the save lives in, its rooms and lot (pure data), the move, and what the interior on screen is doing right now
+    get interior() { return interior; }, get layout() { return layoutOf(S()).id; }, get rooms() { return lotOf(layoutOf(S())).rooms; }, get lot() { return lotOf(layoutOf(S())); }, moveHome: (id) => moveHome(id),
+    interiorInfo: () => {
+      const i = interior; if (!i) return { kind: null, cached: Object.keys(interiors) };
+      const groups = i.roomGroups ?? null, calls = renderer.info.render.calls, tris = renderer.info.render.triangles;
+      return { kind: i.kind, layout: i.layout?.id ?? null, stateLayout: layoutOf(S()).id, wallMode: i.wallMode ?? null, overheadMode: i.overheadMode ?? null, viewer: i.viewerRoom ?? null,
+        playerRoom: i.layout ? roomAtFloor(i.layout, player.pos.x, player.pos.z)?.id ?? null : null, rooms: i.rooms?.map((r) => r.id) ?? null, visibleRooms: groups ? Object.keys(groups).filter((id) => groups[id].visible) : null,
+        yardVisible: i.yard ? !!i.yard.visible : null, cached: Object.keys(interiors), calls, tris, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures,
+        bounds: { ...i.bounds }, spawn: { ...i.spawn }, interactables: i.interactables.length, colliders: i.colliders.rects.length };
+    },
     stationTarget: () => { const t = interior?.task; if (!t || t.target < 0) return null; const st = interior.stations[t.target]; return { x: st.x, z: st.z }; },
     setTime: (iso) => { timeBase = Date.now(); timeOverride = iso ? new Date(iso).getTime() : null; updateEnv(true); }, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }),
     dbg: () => ({ mapOpen, mapOverview, camMode, creator, fading, homeView, inInterior, gameMode, panelsOpen: panels.open, phoneOpen: phone.isOpen, building: build.active, pos: [player.pos.x, player.pos.z], disableEvents: S().flags?.disableEvents, nCity: city.interactables.length, near: city.interactables.map((it) => [it.id, Math.round(Math.hypot(it.x - player.pos.x, it.z - player.pos.z)), it.radius, typeof it.enabled]).filter((r) => r[1] < 25) }),

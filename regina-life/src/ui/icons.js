@@ -20,6 +20,7 @@ export const ICON = {
   townhall: S('<path d="M3 20h18M5 20V10M19 20V10M9 20V10M15 20V10M12 3l9 5H3l9-5z"/>'),
   trips: S('<path d="M2 12l20-8-6 18-4-7-10-3z"/>'),
   radio: S('<rect x="3" y="8" width="18" height="12" rx="2"/><circle cx="15.5" cy="14" r="2.6"/><path d="M7 12h3M7 15h3M6 8l11-5"/>'),
+  homes: S('<path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/>'),
   send: S('<path d="M4 12l16-8-6 16-3-7-7-1z"/>'),
   back: S('<path d="M15 5l-7 7 7 7"/>'),
   plus: S('<path d="M12 5v14M5 12h14"/>'),
@@ -41,5 +42,5 @@ export const ICON = {
 export const APP_STYLE = {
   messages: ['#5bf17a', '#16b24b'], phone: ['#5bf17a', '#16b24b'], contacts: ['#a5adb8', '#6b7480'], maps: ['#5fd0ff', '#2f7cf6'],
   bank: ['#43d6a5', '#0b8f6e'], jobs: ['#ffb347', '#ef6c1a'], camera: ['#8d949e', '#4a5059'], photos: ['#ffd36b', '#ff6b8a'],
-  weather: ['#6bc1ff', '#2c6fd6'], calendar: ['#ffffff', '#e8e8ee'], inventory: ['#b88cff', '#6a3de8'], life: ['#ff7aa8', '#e8365f'], social: ['#8f7bff', '#5a3fe0'], townhall: ['#e6c25a', '#a8761c'], trips: ['#4fd0ff', '#1b7fc9'], radio: ['#ff9a6b', '#e05a2b'], news: ['#ffd36b', '#ff8a3d'], ads: ['#5de0c8', '#1a8f86'], settings: ['#9aa1ab', '#5b626d'],
+  weather: ['#6bc1ff', '#2c6fd6'], calendar: ['#ffffff', '#e8e8ee'], inventory: ['#b88cff', '#6a3de8'], life: ['#ff7aa8', '#e8365f'], social: ['#8f7bff', '#5a3fe0'], townhall: ['#e6c25a', '#a8761c'], trips: ['#4fd0ff', '#1b7fc9'], radio: ['#ff9a6b', '#e05a2b'], homes: ['#ff8a5c', '#c4402a'], news: ['#ffd36b', '#ff8a3d'], ads: ['#5de0c8', '#1a8f86'], settings: ['#9aa1ab', '#5b626d'],
 };

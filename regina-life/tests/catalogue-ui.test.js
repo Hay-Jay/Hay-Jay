@@ -112,7 +112,7 @@ describe('catalogue model: Design tab', () => {
     expect(walls.find((w) => w.key === 'cream')).toMatchObject({ kind: 'wall', owned: true, active: true, cost: 0, price: FD.WALL_PRICE, canAfford: true });
     expect(walls.find((w) => w.key === 'sage')).toMatchObject({ owned: false, active: false, cost: FD.WALL_PRICE, price: FD.WALL_PRICE, canAfford: false, shortBy: FD.WALL_PRICE });
     expect(floors.find((f) => f.key === 'oak')).toMatchObject({ kind: 'floor', owned: true, active: true, cost: 0 });
-    expect(floors.find((f) => f.key === 'slate')).toMatchObject({ owned: false, price: FD.FLOOR_PRICE, material: 'tile', color: FD.FLOORS.slate[2], cost: FD.FLOOR_PRICE });
+    expect(floors.find((f) => f.key === 'slate')).toMatchObject({ owned: false, price: FD.floorPrice('slate'), material: 'tile', color: FD.FLOORS.slate[2], cost: FD.floorPrice('slate') });   // the real price of that floor (the old flat FLOOR_PRICE was the pre-existing swatch price bug)
     expect(M.tabView(store.state, M.TAB_DESIGN, FD.WALL_PRICE).sections[0].cards.find((w) => w.key === 'sage')).toMatchObject({ canAfford: true, shortBy: 0 });
     expect(v.cards).toHaveLength(walls.length + floors.length);
   });
@@ -146,7 +146,7 @@ describe('catalogue model: actions', () => {
     expect(bal() - b0).toBe(Math.floor(def.price * FD.SELL_RATIO)); expect(M.sellPiece(store, 'chair').ok).toBe(false);
   });
   it('applyStyle: unaffordable first-time styles are refused early, owned ones are free', () => {
-    store.state.bank.balance = FD.FLOOR_PRICE - 1;
+    store.state.bank.balance = FD.floorPrice('walnut') - 1;   // walnut is a premium floor: the gap is measured against ITS price, not the cheapest one
     expect(M.applyStyle(store, 'floor', 'walnut')).toEqual({ ok: false, error: 'not-enough', shortBy: 1 }); expect(store.state.home.floor).toBe('oak');
     expect(M.applyStyle(store, 'floor', 'oak')).toMatchObject({ ok: true, paid: 0 });
     for (const bad of [['wall', 'constructor'], ['wall', '__proto__'], ['placed', 'oak'], ['floor', 'lava']]) expect(M.applyStyle(store, ...bad).ok, bad.join()).toBe(false);
@@ -479,7 +479,7 @@ describe('floor grid fade', () => {
 
 describe('BuildMode with the Catalogue', () => {
   let els, win, canvasEl, scene, camera, panels, audio, toasts, catalogue, build, layouts, body;
-  const mkEls = () => { els = {}; for (const id of ['build', 'b-hint', 'b-rot', 'b-del', 'b-buy', 'b-stored', 'b-stored-n', 'b-done']) els[id] = new El(id.startsWith('b-') && id !== 'b-hint' && id !== 'b-stored-n' ? 'button' : 'div'); els.build.hidden = true; els['b-stored'].hidden = true; };
+  const mkEls = () => { els = {}; for (const id of ['build', 'b-hint', 'b-rot', 'b-del', 'b-buy', 'b-stored', 'b-stored-n', 'b-done', 'b-walls', 'b-rooms']) els[id] = new El(id.startsWith('b-') && id !== 'b-hint' && id !== 'b-stored-n' && id !== 'b-rooms' ? 'button' : 'div'); els.build.hidden = true; els['b-stored'].hidden = true; els['b-walls'].hidden = true; els['b-rooms'].hidden = true; };
   beforeEach(() => {
     mkEls(); win = {}; body = new Set();
     globalThis.document = { getElementById: (id) => els[id], body: { classList: { add: (c) => body.add(c), remove: (c) => body.delete(c) } }, activeElement: null };
@@ -552,8 +552,12 @@ describe('BuildMode with the Catalogue', () => {
     catalogue.isOpen = false; build.layout(); expect(layouts.at(-1)).toBeCloseTo((100 + 14) / 800, 6); build.stop(); const n = layouts.length; build.layout(); expect(layouts).toHaveLength(n);
   });
   it('keeps the public API the integrator relies on', () => {
-    for (const m of ['start', 'stop', 'select', 'refresh', 'rotate', 'removeSel', 'click', 'layout', 'setCatalogue', 'openCatalogue']) expect(build[m], m).toBeTypeOf('function');
+    for (const m of ['start', 'stop', 'select', 'refresh', 'rotate', 'removeSel', 'click', 'layout', 'setCatalogue', 'openCatalogue', 'setLayout', 'setWallMode', 'cycleWalls', 'focusRoom']) expect(build[m], m).toBeTypeOf('function');
     expect(build.active).toBe(false); expect(build.state).toBe(store.state);
+  });
+  it('the Studio build bar is unchanged: the Walls button and the room strip stay hidden through a whole session', () => {
+    build.start(); expect(els['b-walls'].hidden).toBe(true); expect(els['b-rooms'].hidden).toBe(true); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); expect(els['b-rooms'].hidden).toBe(true); expect(build.focus).toBeNull();
+    expect(build.grid.rooms).toEqual([{ ...FD.ROOM, id: 'living' }]); build.stop(); expect(els['b-walls'].hidden).toBe(true);
   });
   it('select() of a stale piece (stored copy sold elsewhere) is dropped on refresh', () => {
     build.start(); H.buyFurniture(store, 'plant'); build.select({ type: 'plant', id: null }); expect(build.sel).toBeTruthy(); H.sellFurniture(store, 'plant'); build.refresh(); expect(build.sel).toBeNull(); expect(build.grid.target).toBe(0);

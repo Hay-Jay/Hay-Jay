@@ -109,13 +109,15 @@
   <div id="build" class="buildbar" hidden role="toolbar" aria-label="Redecorate your home">
     <p id="b-hint" class="b-hint">Tap Buy to shop · tap furniture to move it</p>
     <div class="b-actions">
-      <button id="b-buy" class="btn primary small" aria-haspopup="dialog">🛋️ Buy</button>
-      <button id="b-stored" class="btn small" hidden aria-label="Open the pieces in storage">📦 <b id="b-stored-n">0</b></button>
-      <button id="b-rot" class="btn small" disabled>↻ Rotate</button>
-      <button id="b-del" class="btn small" disabled>🗑 Store</button>
+      <button id="b-buy" class="btn primary small" aria-haspopup="dialog"><span class="b-ic" aria-hidden="true">🛋️</span> <span class="b-lb">Buy</span></button>
+      <button id="b-stored" class="btn small" hidden aria-label="Open the pieces in storage"><span class="b-ic" aria-hidden="true">📦</span> <b id="b-stored-n">0</b></button>
+      <button id="b-rot" class="btn small" disabled><span class="b-ic" aria-hidden="true">↻</span> <span class="b-lb">Rotate</span></button>
+      <button id="b-walls" class="btn small icon" aria-label="Walls: cutaway" hidden></button>
+      <button id="b-del" class="btn small" disabled><span class="b-ic" aria-hidden="true">🗑</span> <span class="b-lb">Store</span></button>
       <button id="b-done" class="btn small done">Done</button>
     </div>
   </div>
+  <div id="b-rooms" class="b-rooms" role="group" aria-label="Focus a room" hidden></div>
 
   <div id="panels"></div>
   <div id="phone" class="phone"></div>

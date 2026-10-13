@@ -4,7 +4,8 @@
  * Reads the furniture data DEFENSIVELY: CATEGORIES / sizeLabel / tierStars exist once the expanded catalogue lands and have local fallbacks.
  */
 import * as FD from '../data/furniture.js';
-import { itemDef, ownedCount, availableToPlace, ownedTypes, buyFurniture, sellFurniture, setStyle } from '../core/home.js';
+import { itemDef, ownedCount, availableToPlace, ownedTypes, buyFurniture, sellFurniture, setStyle, styleQuote, styleOf } from '../core/home.js';
+import { layoutOf } from '../data/homes.js';
 
 const X = { ...FD }; // a plain copy so optional exports can be missing without a build warning
 export const TAB_DESIGN = 'design', TAB_STORAGE = 'in-storage', TAB_MORE = 'more';
@@ -71,16 +72,26 @@ export function pieceCard(def, s, balance) {
     canAfford: balance >= price, shortBy: Math.max(0, price - balance), sellPrice: def.poster ? 0 : sellPriceOf(price), canSell: !def.poster,
   };
 }
-/** Wall/floor swatches: `price` is the first-time price (list), `cost` what applying it costs right now (0 once owned). */
-export function designCards(s, balance) {
-  const h = s.home ?? {}, ownedW = Array.isArray(h.walls) ? h.walls : ['cream'], ownedF = Array.isArray(h.floors) ? h.floors : ['oak'];
-  const mk = (kind, key, name, color, material, price, ownedList, cur) => {
-    const owned = ownedList.includes(key), cost = owned ? 0 : price;
-    return { kind, id: `${kind}:${key}`, key, name, color, material, price, owned, active: cur === key, cost, canAfford: balance >= cost, shortBy: Math.max(0, cost - balance) };
+/** The room the Design shelf is editing: a valid room id on a multi-room home, else null (= All rooms, the house default). */
+export const designRoom = (s, room) => { const L = layoutOf(s); return L.rooms.length > 1 && typeof room === 'string' && L.rooms.some((r) => r.id === room) ? room : null; };
+/** A room's display name on the current home, or null. */
+export const roomName = (s, id) => layoutOf(s).rooms.find((r) => r.id === id)?.name ?? null;
+/** The style every room shows for `kind`, or null when the rooms differ ("Mixed"). */
+const sharedStyle = (s, kind) => { const all = layoutOf(s).rooms.map((r) => styleOf(s, r.id)[kind]); return all.every((k) => k === all[0]) ? all[0] : null; };
+/**
+ * Wall/floor swatches: `price` is the list (first-time) price OF THAT STYLE and `cost` what applying it costs right now (0 once owned); both come from
+ * core/home.js styleQuote, the same numbers setStyle charges. `room` (null = All rooms) picks whose style counts as active: that room's own, or for
+ * All rooms the one every room shares (none when they differ).
+ */
+export function designCards(s, balance, room = null) {
+  const rid = designRoom(s, room), cur = (kind) => (rid ? styleOf(s, rid)[kind] : sharedStyle(s, kind));
+  const mk = (kind, key, name, color, material) => {
+    const q = styleQuote(s, kind, key), cost = q.cost;
+    return { kind, id: `${kind}:${key}`, key, name, color, material, price: q.price, owned: q.owned, active: cur(kind) === key, cost, canAfford: balance >= cost, shortBy: Math.max(0, cost - balance) };
   };
   return {
-    walls: Object.entries(X.WALLS ?? {}).map(([k, [n, c]]) => mk('wall', k, n, c, null, X.WALL_PRICE ?? 0, ownedW, h.wall)),
-    floors: Object.entries(X.FLOORS ?? {}).map(([k, [n, m, c]]) => mk('floor', k, n, c, m, X.FLOOR_PRICE ?? 0, ownedF, h.floor)),
+    walls: Object.entries(X.WALLS ?? {}).map(([k, [n, c]]) => mk('wall', k, n, c, null)),
+    floors: Object.entries(X.FLOORS ?? {}).map(([k, [n, m, c]]) => mk('floor', k, n, c, m)),
   };
 }
 /** Owned-but-unplaced pieces as cards (each with inStorage > 0). */
@@ -89,15 +100,19 @@ export function storageCards(s, balance) {
 }
 
 /** Everything the sheet draws for one tab: { id, label, emoji, kind, sections: [{ id, label, cards }], cards, empty }. */
-export function tabView(s, tabId, balance) {
+export function tabView(s, tabId, balance, opts = {}) {
   const tabs = tabList(s), tab = tabs.find((t) => t.id === tabId) ?? tabs.find((t) => t.id === defaultTab()) ?? tabs[0];
   const view = { id: tab.id, label: tab.label, emoji: tab.emoji, kind: tab.kind, sections: [], cards: [], empty: '' };
   if (tab.kind === 'design') {
-    const d = designCards(s, balance);
+    const rid = designRoom(s, opts?.room), d = designCards(s, balance, rid), L = layoutOf(s), multi = L.rooms.length > 1;
+    // a section's "from $X" is the cheapest priced style in it, read from the same quotes as the swatches (never a separate constant)
+    const from = (cards) => Math.min(...cards.map((c) => c.price).filter((p) => p > 0)), cheapest = (cards) => (Number.isFinite(from(cards)) ? from(cards) : 0);
     view.sections = [
-      { id: 'walls', label: 'Walls', price: X.WALL_PRICE ?? 0, cards: d.walls },
-      { id: 'floors', label: 'Floors', price: X.FLOOR_PRICE ?? 0, cards: d.floors },
+      { id: 'walls', label: 'Walls', price: cheapest(d.walls), mixed: !rid && multi && sharedStyle(s, 'wall') == null, cards: d.walls },
+      { id: 'floors', label: 'Floors', price: cheapest(d.floors), mixed: !rid && multi && sharedStyle(s, 'floor') == null, cards: d.floors },
     ];
+    view.room = rid;   // the room being edited (null = All rooms); `rooms` (the chip strip) exists only on multi-room homes and is not a section
+    if (multi) view.rooms = [{ id: 'all', label: 'All rooms', active: rid == null }, ...L.rooms.map((r) => ({ id: r.id, label: r.name, active: rid === r.id }))];
   } else if (tab.kind === 'storage') {
     view.sections = [{ id: 'storage', label: null, cards: storageCards(s, balance) }];
     view.empty = 'Nothing in storage. Pieces you buy and have not placed wait here.';
@@ -142,12 +157,11 @@ export function buyPiece(store, id) {
 }
 /** Sell one stored copy at the sell ratio. */
 export function sellPiece(store, id) { const r = sellFurniture(store, id); return r.ok ? { ...r, id, name: itemDef(id)?.name } : r; }
-/** Pay for (first time) and apply a wall paint / floor. */
-export function applyStyle(store, kind, key) {
+/** Pay for (first time) and apply a wall paint / floor to the whole house (room null) or to one room. The price is core/home.js styleQuote's and `paid` is what setStyle charged. */
+export function applyStyle(store, kind, key, room = null) {
   const table = kind === 'wall' ? X.WALLS : kind === 'floor' ? X.FLOORS : null, e = table && Object.prototype.hasOwnProperty.call(table, key) ? table[key] : null;
   if (!e) return { ok: false, error: 'Unknown style' };
-  const list = store.state.home?.[kind + 's'], owned = Array.isArray(list) ? list.includes(key) : (kind === 'wall' ? key === 'cream' : key === 'oak');
-  const price = kind === 'wall' ? X.WALL_PRICE : X.FLOOR_PRICE, bal = balanceOf(store);
-  if (!owned && bal < price) return { ok: false, error: 'not-enough', shortBy: price - bal };
-  const r = setStyle(store, kind, key); return r.ok ? { ok: true, kind, key, name: e[0], paid: owned ? 0 : price } : r;
+  const q = styleQuote(store.state, kind, key), bal = balanceOf(store);
+  if (!q.owned && bal < q.cost) return { ok: false, error: 'not-enough', shortBy: q.cost - bal };
+  const r = setStyle(store, kind, key, room); return r.ok ? { ok: true, kind, key, name: e[0], paid: r.paid } : r;
 }

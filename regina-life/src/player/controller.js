@@ -1,8 +1,18 @@
 import * as THREE from 'three';
 import { buildCharacter } from './character.js';
+import { PLAYER_R } from '../core/lot.js';
 
-const WALK = 3.1, RUN = 7.2, ACCEL = 14, RADIUS = 0.38;
+const WALK = 3.1, RUN = 7.2, ACCEL = 14;
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+const finite = (v) => typeof v === 'number' && Number.isFinite(v);
+/**
+ * Where a seated player stands up: the seat's `stand` spot ({x, z}, the standing spot of the use that sat them; the Studio sofa's is the spot in front of it)
+ * when it is given and finite, else the old "0.9 m south of the seat" fallback. Pure: returns a new {x, z}.
+ */
+export function standSpot(sitting, pos) {
+  const st = sitting?.stand;
+  return st && finite(st.x) && finite(st.z) ? { x: st.x, z: st.z } : { x: pos.x, z: pos.z + 0.9 };
+}
 
 /** Player locomotion: camera-relative movement, smooth turning, collision sliding, sit state. */
 export class PlayerController {
@@ -22,13 +32,22 @@ export class PlayerController {
   syncRoot() { const y = this.sitting?.y ?? 0; this.char.root.position.set(this.pos.x, y, this.pos.z); this.char.root.rotation.y = this.yaw; }
   setCarry(v) { this.carrying = v; this.char.motion({ carrying: v }); }
   gesture(n, d) { this.char.gesture(n, d); }
+  /** Sit on a seat: `s` = { x, z, yaw, y, stand?: { x, z } }. `stand` is where standUp() puts the player back (omitted: 0.9 m south of the seat, as before). */
   sitAt(s) { this.sitting = s; this.pos.x = s.x; this.pos.z = s.z; this.yaw = s.yaw; this.vel.set(0, 0); this.char.motion({ sitting: true, speed: 0 }); this.syncRoot(); }
-  standUp() { if (!this.sitting) return; this.sitting = null; this.char.motion({ sitting: false }); this.pos.z += 0.9; this.syncRoot(); }
+  /** Stand up at the seat's stand spot, then resolve against the collision grid (`grid`, else the one main.js assigned) and the room bounds so the player never lands inside a wall or piece. */
+  standUp(grid = this.grid) {
+    if (!this.sitting) return;
+    const at = standSpot(this.sitting, this.pos); this.sitting = null; this.char.motion({ sitting: false });
+    this.pos.x = at.x; this.pos.z = at.z;
+    if (grid) grid.resolve(this.pos, PLAYER_R);
+    if (this.bounds) { const b = this.bounds; this.pos.x = Math.min(b.x1, Math.max(b.x0, this.pos.x)); this.pos.z = Math.min(b.z1, Math.max(b.z0, this.pos.z)); }
+    this.vel.set(0, 0); this.syncRoot();
+  }
 
   update(dt, input, camYaw, grid, slowFactor = 1) {
     const mv = this.frozen ? { x: 0, y: 0, mag: 0 } : input.move;
     if (this.sitting) {
-      if (mv.mag > 0.3) this.standUp();
+      if (mv.mag > 0.3) this.standUp(grid);
       this.char.update(dt); this.syncRoot(); return;
     }
     // camera-relative direction (camera looks along -forward from yaw)
@@ -41,7 +60,7 @@ export class PlayerController {
     this.vel.x += (dx * target - this.vel.x) * k; this.vel.y += (dz * target - this.vel.y) * k;
     const sp = Math.hypot(this.vel.x, this.vel.y);
     this.pos.x += this.vel.x * dt; this.pos.z += this.vel.y * dt;
-    if (grid) grid.resolve(this.pos, RADIUS);
+    if (grid) grid.resolve(this.pos, PLAYER_R);
     if (this.bounds) { const b = this.bounds; this.pos.x = Math.min(b.x1, Math.max(b.x0, this.pos.x)); this.pos.z = Math.min(b.z1, Math.max(b.z0, this.pos.z)); }
     if (sp > 0.25) { const want = Math.atan2(this.vel.x, this.vel.y); this.yaw = wrap(this.yaw + wrap(want - this.yaw) * (1 - Math.exp(-12 * dt))); }
     this.speed = sp;

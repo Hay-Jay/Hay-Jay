@@ -1,4 +1,4 @@
-/* Compact build bar: a hint line plus Buy / (storage) / Rotate / Store / Done.
+/* Compact build bar: a hint line plus Buy / (storage) / Rotate / (Walls) / Store / Done, and (multi-room homes) a room focus strip top-left.
    Selectors start with #build.buildbar so they win over the legacy .buildbar rules in style.css whichever stylesheet loads last.
    Every theme token has a fallback, so the bar also looks right without theme.css. */
 #build.buildbar{width:min(94vw,520px);padding:10px 12px 12px;gap:8px;border:0;border-radius:var(--r-l,26px);background:var(--pill,rgba(255,255,255,.94));color:var(--c-ink,#12202a);
@@ -15,8 +15,33 @@
 #build .b-actions .btn.done{background:var(--c-ink,#12202a);color:#fff;box-shadow:none}
 #build .b-actions .btn[hidden]{display:none}
 #build .b-actions .btn:disabled{opacity:.4;pointer-events:none}
-#build #b-stored{flex:0 0 auto}
+#build .b-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:4px}
+#build #b-stored{flex:0 0 auto;min-width:44px}
+/* the Walls button: a fixed 44 px square icon button, shown only on homes with 2+ rooms */
+#build .b-actions .btn.icon{flex:0 0 44px;width:44px;min-width:44px;max-width:44px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+#build .b-actions .btn.icon svg{display:block;width:24px;height:24px;pointer-events:none}   /* the global svg{width:1em} rule would shrink it to the font size */
+#build .b-actions .btn.icon[data-mode="down"]{color:var(--leaf-d,#168f59)}
 #build #b-stored b{margin-left:2px;color:var(--leaf-d,#168f59)}
-@media (max-width:400px){#build .b-actions{gap:6px}#build .b-actions .btn{padding:0 6px;font-size:12px}}
+@media (max-width:400px){#build .b-actions{gap:6px}#build .b-actions .btn{padding:0 6px;font-size:12px}#build .b-actions .btn.icon{padding:0}}
+/* Multi-room homes add the Walls button, so on a phone the bar has six buttons: stack each one's icon over its label (still 44 px tall) instead of squeezing the words */
+@media (max-width:430px){
+  #build.has-walls .b-actions{gap:4px}
+  #build.has-walls .b-actions .btn:not(.icon){flex-direction:column;gap:1px;padding:3px 2px;font-size:10.5px;line-height:1.1}
+  #build.has-walls .b-actions .b-ic{font-size:17px;line-height:1}
+  #build.has-walls #b-stored{flex:0 0 44px;width:44px}
+}
+/* Room focus strip: floats top-left under the top bar, outside the crowded bottom bar. One scrollable row, every chip a 44 px tap target. */
+.b-rooms{position:fixed;z-index:41;left:max(10px,env(safe-area-inset-left,0px));top:calc(64px + var(--safe-t,0px));display:flex;gap:5px;flex-wrap:nowrap;max-width:calc(100vw - 20px - env(safe-area-inset-left,0px));
+  overflow-x:auto;scrollbar-width:none;padding:2px;margin:-2px;font-family:var(--body,system-ui,-apple-system,"Segoe UI",sans-serif);animation:bbRoomsIn .4s var(--spring,cubic-bezier(.34,1.56,.64,1)) both}
+.b-rooms::-webkit-scrollbar{display:none}
+.b-rooms[hidden]{display:none}
+.b-room{flex:0 0 auto;min-width:44px;min-height:44px;padding:0 9px;border:0;border-radius:var(--r-pill,999px);background:var(--pill,rgba(255,255,255,.94));color:var(--c-ink,#12202a);
+  box-shadow:0 6px 16px rgba(18,32,42,.2),0 0 0 1px var(--pill-line,rgba(18,32,42,.08));font:800 12.5px var(--body,system-ui,sans-serif);white-space:nowrap;cursor:pointer;
+  transition:transform .15s var(--spring,cubic-bezier(.34,1.56,.64,1)),background .2s,color .2s;-webkit-tap-highlight-color:transparent}
+.b-room:active{transform:scale(.95)}
+.b-room.on{background:linear-gradient(145deg,#31d68e,var(--leaf-d,#168f59));color:#fff;box-shadow:0 6px 16px rgba(22,143,89,.35)}
+.b-room:focus-visible,#build .b-actions .btn:focus-visible{outline:3px solid #12202a;outline-offset:2px}
+@keyframes bbRoomsIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+body:not(.building) .b-rooms{display:none}
 @keyframes bbRise{from{opacity:0;transform:translate(-50%,22px) scale(.97)}to{opacity:1;transform:translate(-50%,0)}}
-@media (prefers-reduced-motion:reduce){#build.buildbar{animation:none}#build .b-actions .btn{transition:none}}
+@media (prefers-reduced-motion:reduce){#build.buildbar,.b-rooms{animation:none}#build .b-actions .btn,.b-room{transition:none}}
