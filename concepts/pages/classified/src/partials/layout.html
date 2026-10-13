@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="{{title}}">
 <meta name="twitter:description" content="{{description}}">
 {{font_preload}}
-<script>window.MC = {root:'{{root}}', idx:'{{idx}}'};(function(){var d=document.documentElement;d.classList.add('js');try{if(localStorage.getItem('mc-neg')==='1')d.classList.add('neg')}catch(e){}window.__mcRv=setTimeout(function(){d.classList.add('rv-fail')},4000);addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation&&navigation.activation.navigationType==='traverse'){d.classList.add('vt-back');e.viewTransition.finished.then(function(){d.classList.remove('vt-back')},function(){d.classList.remove('vt-back')})}}catch(x){}})})()</script>
+<script>window.MC = {root:'{{root}}', idx:'{{idx}}', page:'{{key}}'};(function(){var d=document.documentElement;d.classList.add('js');try{if(localStorage.getItem('mc-declass')==='1')d.classList.add('declass')}catch(e){}window.__mcRv=setTimeout(function(){d.classList.add('rv-fail')},4000);addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation&&navigation.activation.navigationType==='traverse'){d.classList.add('vt-back');e.viewTransition.finished.then(function(){d.classList.remove('vt-back')},function(){d.classList.remove('vt-back')})}}catch(x){}})})()</script>
 <link rel="stylesheet" href="{{asset:css/base.css}}">
 <link rel="stylesheet" href="{{css_href}}">
 {{jsonld}}

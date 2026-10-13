@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
 <meta name="theme-color" content="#070707">
-<title>MONOCHROME® — Black, white and chrome. Wear the unknown.</title>
-<meta name="description" content="MONOCHROME® Issue 01, The Unknown: black, white and chrome clothing, rings and chains in small runs. 23 pieces in CAD, delivered to 29 countries including Nigeria and Canada.">
+<title>OPERATION: WEAR THE UNKNOWN — Mission briefing — MONOCHROME® Bureau</title>
+<meta name="description" content="Operation: Wear the Unknown. MONOCHROME® Division of Wearables issues black, white and chrome clothing, rings and chains in small runs. 23 assets in CAD, delivered to 29 countries including Nigeria and Canada.">
 <link rel="canonical" href="https://monochrome.com.ng/">
 
 <link rel="icon" href="assets/emblem.webp" type="image/webp">
@@ -14,16 +14,17 @@
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:site_name" content="MONOCHROME®">
 <meta property="og:type" content="website">
-<meta property="og:title" content="MONOCHROME® — Black, white and chrome. Wear the unknown.">
-<meta property="og:description" content="MONOCHROME® Issue 01, The Unknown: black, white and chrome clothing, rings and chains in small runs. 23 pieces in CAD, delivered to 29 countries including Nigeria and Canada.">
+<meta property="og:title" content="OPERATION: WEAR THE UNKNOWN — Mission briefing — MONOCHROME® Bureau">
+<meta property="og:description" content="Operation: Wear the Unknown. MONOCHROME® Division of Wearables issues black, white and chrome clothing, rings and chains in small runs. 23 assets in CAD, delivered to 29 countries including Nigeria and Canada.">
 <meta property="og:url" content="https://monochrome.com.ng/">
 <meta property="og:image" content="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1200">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MONOCHROME® — Black, white and chrome. Wear the unknown.">
-<meta name="twitter:description" content="MONOCHROME® Issue 01, The Unknown: black, white and chrome clothing, rings and chains in small runs. 23 pieces in CAD, delivered to 29 countries including Nigeria and Canada.">
-<link rel="preload" href="assets/fonts/BodoniModa-normal-400-900-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/DMMono-normal-400-latin.woff2" as="font" type="font/woff2" crossorigin>
-<script>window.MC = {root:'', idx:''};(function(){var d=document.documentElement;d.classList.add('js');try{if(localStorage.getItem('mc-neg')==='1')d.classList.add('neg')}catch(e){}window.__mcRv=setTimeout(function(){d.classList.add('rv-fail')},4000);addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation&&navigation.activation.navigationType==='traverse'){d.classList.add('vt-back');e.viewTransition.finished.then(function(){d.classList.remove('vt-back')},function(){d.classList.remove('vt-back')})}}catch(x){}})})()</script>
+<meta name="twitter:title" content="OPERATION: WEAR THE UNKNOWN — Mission briefing — MONOCHROME® Bureau">
+<meta name="twitter:description" content="Operation: Wear the Unknown. MONOCHROME® Division of Wearables issues black, white and chrome clothing, rings and chains in small runs. 23 assets in CAD, delivered to 29 countries including Nigeria and Canada.">
+<link rel="preload" href="assets/fonts/BigShouldersDisplay-normal-100-900-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/CourierPrime-normal-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/StardosStencil-normal-700-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>window.MC = {root:'', idx:'', page:'home'};(function(){var d=document.documentElement;d.classList.add('js');try{if(localStorage.getItem('mc-declass')==='1')d.classList.add('declass')}catch(e){}window.__mcRv=setTimeout(function(){d.classList.add('rv-fail')},4000);addEventListener('pagereveal',function(e){try{if(e.viewTransition&&navigation.activation&&navigation.activation.navigationType==='traverse'){d.classList.add('vt-back');e.viewTransition.finished.then(function(){d.classList.remove('vt-back')},function(){d.classList.remove('vt-back')})}}catch(x){}})})()</script>
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/home.css">
 <script type="application/ld+json">
@@ -35,31 +36,38 @@
 </head>
 <body class="pg-home">
 <a class="skip" href="#main">Skip to content</a>
-<!-- RUNNING HEAD: follows the tone (paper / ink) of the spread under it -->
-<header class="bar" id="bar">
-  <a class="bar-brand" href="./" aria-current="page" aria-label="MONOCHROME, the cover">
-    <img class="bar-emblem" src="assets/emblem.webp" alt="" width="22" height="24">
-    <span>MONOCHROME®</span><span class="bar-iss">ISSUE 01</span>
-  </a>
-  <nav class="bar-nav mono" aria-label="Primary"><a href="shop/"><span class="mono n-no" aria-hidden="true">02</span>Shop</a><a href="lookbook/"><span class="mono n-no" aria-hidden="true">03</span>Lookbook</a><a href="about/"><span class="mono n-no" aria-hidden="true">04</span>About</a><a href="shipping/"><span class="mono n-no" aria-hidden="true">05</span>Shipping</a><a href="faq/"><span class="mono n-no" aria-hidden="true">06</span>FAQ</a><a href="contact/"><span class="mono n-no" aria-hidden="true">07</span>Contact</a></nav>
-  <div class="bar-r">
-    <button class="bar-btn" id="invert" type="button" aria-pressed="false" title="Swap paper and ink"><span class="bar-dot" aria-hidden="true"></span><span class="bar-lbl">Invert</span></button>
-    <a class="bar-btn" id="menuBtn" href="#contents" aria-controls="menu" aria-expanded="false">Contents</a>
-    <a class="bar-btn" data-store="/cart" href="https://monochrome.com.ng/cart">Bag<span class="arr" aria-hidden="true"></span></a>
+<!-- RUNNING HEAD: the classification banner scrolls away, the dossier tab bar stays (position:sticky with a negative top) -->
+<header class="hdr" id="bar">
+  <div class="banner top" aria-hidden="true">
+    <span class="bn-l mono"><span class="ladder" role="img" aria-label="Clearance level 5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><span>Clearance L5</span></span>
+    <span class="bn-c">Top secret // Eyes only // Monochrome Bureau</span>
+    <span class="bn-r mono">Page 1 of 7</span>
+  </div>
+  <div class="bar">
+    <a class="bar-brand" href="./" aria-current="page" aria-label="MONOCHROME, mission briefing">
+      <img class="bar-emblem" src="assets/emblem.webp" alt="" width="26" height="28">
+      <span class="bar-name">MONOCHROME®</span><span class="bar-div mono">Div. of Wearables</span>
+    </a>
+    <nav class="tabs" aria-label="Primary"><a class="tab" href="./" aria-current="page"><span class="tab-no" aria-hidden="true">01</span><span class="tab-t">Briefing</span></a><a class="tab" href="shop/"><span class="tab-no" aria-hidden="true">02</span><span class="tab-t">Assets</span></a><a class="tab" href="lookbook/"><span class="tab-no" aria-hidden="true">03</span><span class="tab-t">Evidence</span></a><a class="tab" href="about/"><span class="tab-no" aria-hidden="true">04</span><span class="tab-t">Mission</span></a><a class="tab" href="shipping/"><span class="tab-no" aria-hidden="true">05</span><span class="tab-t">Routes</span></a><a class="tab" href="faq/"><span class="tab-no" aria-hidden="true">06</span><span class="tab-t">Debrief</span></a><a class="tab" href="contact/"><span class="tab-no" aria-hidden="true">07</span><span class="tab-t">Report in</span></a></nav>
+    <div class="bar-r">
+      <button class="bar-btn" id="declass" type="button" aria-pressed="false" title="Lift every redaction bar on every page"><span class="dc-ico" aria-hidden="true"></span><span class="bar-lbl">Declassify</span></button>
+      <a class="bar-btn" id="menuBtn" href="#contents" aria-controls="menu" aria-expanded="false"><span>Index</span></a>
+      <a class="bar-btn" data-store="/cart" href="https://monochrome.com.ng/cart">Bag<span class="arr" aria-hidden="true"></span></a>
+    </div>
   </div>
 </header>
 
-<!-- CONTENTS: opens over any page; also the command bar (find a page or a piece) -->
-<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Contents and search" hidden>
+<!-- FILE INDEX: opens over any page; also the command bar (search the archive for a page or an asset) -->
+<div class="menu dark" id="menu" role="dialog" aria-modal="true" aria-label="File index and search" hidden>
   <div class="menu-in">
-    <div class="menu-top"><p class="mono menu-kick">Contents — Issue 01 / The Unknown</p><button class="menu-x mono" type="button" data-close>Close<span>Esc</span></button></div>
+    <div class="menu-top"><p class="mono menu-kick">File index // Operation: Wear the Unknown</p><button class="menu-x mono" type="button" data-close>Close<span>Esc</span></button></div>
     <div class="menu-find">
-      <label class="mono" for="jump">Find a page or a piece <span class="menu-keys">/ to open anywhere</span></label>
+      <label class="mono" for="jump">Search the archive <span class="menu-keys">/ to open anywhere</span></label>
       <input id="jump" type="search" placeholder="shipping, hoodie, ring, nigeria…" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="jumpList" aria-autocomplete="list">
       <ul class="jump-list" id="jumpList" role="listbox" aria-label="Results" hidden></ul>
-      <p class="mono jump-none" id="jumpNone" hidden>Nothing in this issue matches that.</p>
+      <p class="mono jump-none" id="jumpNone" hidden>No file matches that. Try another keyword.</p>
     </div>
-    <nav aria-label="Contents"><ol class="menu-list"><li><a href="./" aria-current="page"><span class="mono">01</span><b>Cover</b><i class="mono">Issue 01</i></a></li><li><a href="shop/"><span class="mono">02</span><b>Shop</b><i class="mono">The Index</i></a></li><li><a href="lookbook/"><span class="mono">03</span><b>Lookbook</b><i class="mono">Lookbook</i></a></li><li><a href="about/"><span class="mono">04</span><b>About</b><i class="mono">The Formula</i></a></li><li><a href="shipping/"><span class="mono">05</span><b>Shipping</b><i class="mono">Distribution</i></a></li><li><a href="faq/"><span class="mono">06</span><b>FAQ</b><i class="mono">Letters</i></a></li><li><a href="contact/"><span class="mono">07</span><b>Contact</b><i class="mono">Colophon</i></a></li></ol></nav>
+    <nav aria-label="File index"><ol class="menu-list"><li><a href="./" aria-current="page"><span class="mono">01</span><b>Briefing</b><i class="mono">Mission briefing</i></a></li><li><a href="shop/"><span class="mono">02</span><b>Assets</b><i class="mono">Asset register</i></a></li><li><a href="lookbook/"><span class="mono">03</span><b>Evidence</b><i class="mono">Surveillance exhibits</i></a></li><li><a href="about/"><span class="mono">04</span><b>Mission</b><i class="mono">Mission and rules of engagement</i></a></li><li><a href="shipping/"><span class="mono">05</span><b>Routes</b><i class="mono">Extraction routes</i></a></li><li><a href="faq/"><span class="mono">06</span><b>Debrief</b><i class="mono">Debrief transcript</i></a></li><li><a href="contact/"><span class="mono">07</span><b>Report in</b><i class="mono">Secure channel</i></a></li></ol></nav>
     <div class="menu-foot mono">
       <a data-store="/cart" href="https://monochrome.com.ng/cart">Bag<span class="arr" aria-hidden="true"></span></a>
       <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca<span class="arr" aria-hidden="true"></span></a>
@@ -70,169 +78,216 @@
 </div>
 
 <main id="main">
-  <!-- 01 COVER ----------------------------------------------------------- -->
-  <section class="spread ink cover" id="top" data-tone="ink" aria-label="Cover">
-    <h1 class="mast" aria-label="Monochrome"><span class="m1" aria-hidden="true">Mono</span><span class="m2" aria-hidden="true">chrome</span><sup aria-hidden="true">®</sup></h1>
+  <!-- 01 BRIEFING COVER ---------------------------------------------------------------- -->
+  <section class="spread paper cover" id="top" aria-label="Mission briefing cover">
+    <div class="wrap">
+      <div class="filehead mono"><span class="fh-c"><b>File no.</b>MC-101</span><span class="fh-c"><b>Document</b>Mission briefing</span><span class="fh-c"><b>Page</b>1 of 7</span><span class="fh-c fh-clr"><b>Clearance</b><span class="ladder" role="img" aria-label="Clearance level 5 of 5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span><em>L5</em></span><span class="fh-bc"><svg class="bc" viewBox="0 0 160 28" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0h1v28h-1zM3 0h1v28h-1zM6 0h3v28h-3zM12 0h3v28h-3zM17 0h2v28h-2zM20 0h1v28h-1zM23 0h2v28h-2zM28 0h3v28h-3zM34 0h1v28h-1zM36 0h4v28h-4zM42 0h1v28h-1zM45 0h2v28h-2zM50 0h1v28h-1zM54 0h4v28h-4zM59 0h1v28h-1zM61 0h4v28h-4zM68 0h3v28h-3zM72 0h1v28h-1zM74 0h2v28h-2zM79 0h2v28h-2zM83 0h1v28h-1zM85 0h2v28h-2zM88 0h3v28h-3zM93 0h3v28h-3zM98 0h2v28h-2zM101 0h3v28h-3zM107 0h2v28h-2zM112 0h3v28h-3zM117 0h1v28h-1zM121 0h1v28h-1zM125 0h3v28h-3zM129 0h1v28h-1zM131 0h1v28h-1zM134 0h2v28h-2zM137 0h2v28h-2zM140 0h2v28h-2zM143 0h3v28h-3zM147 0h1v28h-1zM149 0h1v28h-1zM151 0h1v28h-1zM153 0h2v28h-2z"/></svg></span></div>
+      <div class="cv-grid">
+        <div class="cv-text">
+          <span class="stamp ts lg cv-ts" style="--r:-8deg" aria-hidden="true">Top secret</span>
+          <p class="memo mono">
+            <span><b>To:</b> Operative (that is you)</span>
+            <span><b>From:</b> Division of Wearables</span>
+            <span><b>Re:</b> Black, white and chrome</span>
+            <span><b>Handler:</b> <span class="redact" tabindex="0">Agent Chrome, Desk 7</span></span>
+          </p>
+          <h1 class="cv-h">
+            <span class="cv-op">Operation:</span>
+            <span class="tw" style="--n:8;--dl:.15s">Wear the</span>
+            <span class="tw caret" style="--n:7;--dl:.8s">Unknown</span>
+          </h1>
+          <p class="cv-lede">Your mission: get dressed in black, white and chrome. 23 assets are cleared for field use, made in small runs and built to mix, so whatever you pull from the file works with everything else you own. Delivery to 29 authorised zones, Nigeria and Canada included. This message will not self-destruct, but the stock might.</p>
+          <p class="cta-row">
+            <a class="btn" href="shop/">Accept the mission<i class="arr" aria-hidden="true"></i></a>
+            <a class="btn ghost" href="lookbook/">Review the evidence<i class="arr" aria-hidden="true"></i></a>
+          </p>
+        </div>
 
-    <div class="cv-num" aria-hidden="true">01</div>
-
-    <div class="cv-top mono" aria-hidden="true">
-      <span>Issue 01</span>
-      <img src="assets/emblem.webp" alt="" width="29" height="31">
-      <span class="ital">The Unknown</span>
+        <div class="cv-folder">
+          <div class="folder">
+            <div class="folder-tabs" aria-hidden="true"><span class="folder-tab mono">Op: Wear the Unknown</span><span class="folder-tab folder-tab2 mono">MC-004</span></div>
+            <div class="folder-body">
+              <span class="clip" aria-hidden="true"></span>
+              <figure class="xp cam-xp" id="coverPhoto">
+                <a class="ph-link" href="products/white-monochrome-jersey/" aria-label="Open White Monochrome Jersey"><img class="ph" fetchpriority="high" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1280" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=640 640w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=960 960w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1280 1280w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1800 1800w" sizes="(min-width:900px) 40vw, 80vw" width="3401" height="3401" alt="White Monochrome Jersey, photograph"></a>
+                <span class="cam" aria-hidden="true"><i class="cam-x"></i><span class="cam-tl"><b class="rec"></b>CAM 01</span><span class="cam-tr" data-clock>03:13:29</span><span class="cam-bl">N 15.7000 W 140.3000</span><span class="cam-br">Exhibit 01</span></span>
+              </figure>
+              <a class="etag" href="products/white-monochrome-jersey/"><span class="etag-k mono">Exhibit 01 / MC-004</span><b>White Monochrome Jersey</b><span class="mono">$44.99 CAD</span></a>
+              <span class="stamp eo white" style="--r:5deg" aria-hidden="true">Eyes only</span>
+            </div>
+          </div>
+          <p class="cv-cap mono"><span class="hint-fine">Hover the photograph to declassify the colour.</span><span class="hint-touch">Press and hold the photograph to declassify the colour.</span></p>
+        </div>
+      </div>
     </div>
+    <div class="ticker hazard" aria-hidden="true"><div class="ticker-t" data-ticker><div class="tk"><span>Wear the unknown</span><span>Do not cross</span><span>Operation: Wear the Unknown</span><span>Black / white / chrome</span><span>23 assets on file</span><span>Prices in CAD</span></div></div></div>
+  </section>
 
-    <figure class="cv-photo xp" id="coverPhoto">
-      <a class="ph-link" href="products/white-monochrome-jersey/" aria-label="Open White Monochrome Jersey"><img class="ph" fetchpriority="high" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1280" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=640 640w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=960 960w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1280 1280w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5498.jpg?v=1718934208&amp;width=1800 1800w" sizes="(min-width:900px) 44vw, 74vw" width="3401" height="3401" alt="White Monochrome Jersey, photograph"></a>
-    </figure>
-    <p class="cv-cap mono">Cover — <a href="products/white-monochrome-jersey/">White Monochrome Jersey</a>, $44.99 CAD. <span class="hint-fine">Hover the photograph to expose it.</span><span class="hint-touch">Press and hold the photograph to expose it.</span></p>
+  <!-- 02 OBJECTIVES --------------------------------------------------------------------- -->
+  <section class="spread paper objsec" id="objectives" aria-labelledby="objH">
+    <div class="wrap">
+      <header class="sec-h">
+        <p class="kick mono">§1 — Mission objectives</p>
+        <h2 class="h2 rv" id="objH">Your objectives</h2>
+        <p class="sec-sub rv">Six tasks, any order. Every one of them is a link. <span class="redact" tabindex="0">Agent Chrome is watching.</span></p>
+      </header>
+      <ol class="obj-list">
+        <li class="rv"><a class="obj" href="shop/"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 01</span><b class="ob-t">Acquire your equipment</b><span class="ob-d">The asset register: 23 assets across tops, bottoms, hardware and gift cards. Filter, sort, search.</span><span class="ob-go mono">Asset register<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="lookbook/"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 02</span><b class="ob-t">Review the surveillance</b><span class="ob-d">Twelve exhibits from the field, shot dark and filed in black and white.</span><span class="ob-go mono">Evidence wall<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="about/"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 03</span><b class="ob-t">Study the mission</b><span class="ob-d">Black, white and chrome. The objectives and the rules of engagement, in full.</span><span class="ob-go mono">Mission brief<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="shipping/"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 04</span><b class="ob-t">Plan your extraction</b><span class="ob-d">Delivery to 29 authorised zones. Rates calculated at checkout, returns explained.</span><span class="ob-go mono">Extraction routes<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="faq/"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 05</span><b class="ob-t">Get your answers</b><span class="ob-d">Sizing, shipping, gift cards and limited drops, answered in the debrief.</span><span class="ob-go mono">The debrief<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="contact/"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 06</span><b class="ob-t">Report in</b><span class="ob-d">Email, Instagram, or join the network for drop alerts.</span><span class="ob-go mono">Secure channel<i class="arr" aria-hidden="true"></i></span></a></li>
+      </ol>
+    </div>
+  </section>
 
-    <aside class="cv-lines" aria-label="In this issue">
-      <p class="mono cv-kick">In this issue</p>
-      <ul>
-        <li><a href="shop/?c=top"><b>Tops &amp; jerseys</b><span class="mono">p.02</span></a></li>
-        <li><a href="shop/?c=bottom"><b>Cargo, cut &amp; chained</b><span class="mono">p.02</span></a></li>
-        <li><a href="shop/?c=accessory"><b>Rings &amp; chains</b><span class="mono">p.02</span></a></li>
-        <li><a href="lookbook/"><b>The lookbook</b><span class="mono">p.03</span></a></li>
-        <li><a href="about/"><b>The formula</b><span class="mono">p.04</span></a></li>
+  <!-- 03 SELECTED ASSETS ------------------------------------------------------------------ -->
+  <section class="spread dark picks" id="assets" aria-labelledby="picksH">
+    <div class="wrap">
+      <header class="sec-h">
+        <p class="kick mono">§2 — Field equipment</p>
+        <h2 class="h2 rv" id="picksH">Selected assets</h2>
+        <p class="sec-sub rv">Five items pulled from the register. Open a file for every photograph, the sizes, and the colour it was shot in.</p>
+      </header>
+      <div class="board strip">
+        <div class="strip-row">
+<a class="card" style="--i:0;--rot:1.12deg" href="products/black-monochrome-jersey/">
+  <span class="card-hd mono" aria-hidden="true"><span>MC-005</span><span>Asset</span></span>
+  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="3197" height="3804" alt="Black monochrome Jersey"></div>
+  <div class="cap"><span class="no mono">MC-005</span><b>Black monochrome Jersey</b><span class="pr">$44.99 <small>CAD</small></span><span class="sz">S M L XXL</span></div>
+</a>
+<a class="card" style="--i:1;--rot:0.56deg" href="products/acid-washed-monochrome-hoodie/">
+  <span class="card-hd mono" aria-hidden="true"><span>MC-006</span><span>Asset</span></span>
+  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="3401" height="3401" alt="Acid-washed Monochrome Hoodie"></div>
+  <div class="cap"><span class="no mono">MC-006</span><b>Acid-washed Monochrome Hoodie</b><span class="pr">$34.99 <small>CAD</small></span><span class="sz">S M L XL XXL</span></div>
+</a>
+<a class="card" style="--i:2;--rot:0.28deg" href="products/monochrome-cargo-shorts-black/">
+  <span class="card-hd mono" aria-hidden="true"><span>MC-011</span><span>Asset</span></span>
+  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="5184" height="3456" alt="Monochrome cargo Shorts (Black)"></div>
+  <div class="cap"><span class="no mono">MC-011</span><b>Monochrome cargo Shorts (Black)</b><span class="pr">$34.99 <small>CAD</small></span><span class="sz">XS S M L XL</span></div>
+</a>
+<a class="card" style="--i:3;--rot:1.12deg" href="products/monochrome-pants-chain/">
+  <span class="card-hd mono" aria-hidden="true"><span>MC-014</span><span>Asset</span></span>
+  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="4024" height="3431" alt="Monochrome Pants chain"></div>
+  <div class="cap"><span class="no mono">MC-014</span><b>Monochrome Pants chain</b><span class="pr">$10.00 <small>CAD</small></span><span class="sz">One size</span></div>
+</a>
+<a class="card" style="--i:4;--rot:-0.56deg" href="products/royal-black/">
+  <span class="card-hd mono" aria-hidden="true"><span>MC-017</span><span>Asset</span></span>
+  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="5184" height="3456" alt="Royal Black Ring"></div>
+  <div class="cap"><span class="no mono">MC-017</span><b>Royal Black Ring</b><span class="pr">$8.99 <small>CAD</small></span><span class="sz">7 8 9 10 11 12 13</span></div>
+</a>
+        </div>
+      </div>
+      <p class="pk-end"><a class="btn-line mono" href="shop/">Open the complete register, 23 assets<span class="arr" aria-hidden="true"></span></a></p>
+    </div>
+  </section>
+
+  <!-- 04 INTEL SUMMARY --------------------------------------------------------------------- -->
+  <section class="spread paper intel" id="intel" aria-labelledby="intelH">
+    <div class="wrap">
+      <header class="sec-h">
+        <p class="kick mono">§3 — Intel summary</p>
+        <h2 class="h2 rv" id="intelH">Wear the <span class="strike-in">unknown</span></h2>
+      </header>
+      <ul class="stats" aria-label="This operation in numbers">
+        <li class="rv"><b class="num" data-to="23">23</b><span class="mono">Assets on file</span></li>
+        <li class="rv"><b class="num" data-to="2" data-pad="2">02</b><span class="mono">Tones. Black and white</span></li>
+        <li class="rv"><b class="num" data-to="29">29</b><span class="mono">Authorised delivery zones</span></li>
+        <li class="rv"><b class="num" data-to="0" data-pad="2">00</b><span class="mono">Colours. We checked</span></li>
       </ul>
-    </aside>
-
-    <aside class="cv-side" aria-hidden="true">
-      <span class="cv-strap mono">Wear the unknown</span>
-      <div class="cv-code"><i></i><span class="mono">CAD 5.99 – 59</span></div>
-    </aside>
-
-    <div class="cv-scroll mono" aria-hidden="true"><span>Turn the page</span><i></i></div>
-    <div class="ticker" aria-hidden="true"><div class="ticker-t" data-ticker><div class="tk"><span>Wear the unknown</span><span>Issue 01</span><span>Black / white / chrome</span><span>23 pieces</span><span>Prices in CAD</span><span>The Unknown</span></div></div></div>
-  </section>
-
-  <!-- 02 SELECTED PLATES ------------------------------------------------- -->
-  <section class="spread paper picks" id="plates" data-tone="paper" aria-labelledby="picksH">
-    <div class="bleed-num" aria-hidden="true" data-drift="-.1">02</div>
-    <div class="folio-v mono" aria-hidden="true">Monochrome® — Selected plates — Prices in CAD</div>
-    <div class="pk-head">
-      <p class="mono kicker rv">Selected plates — p.02</p>
-      <h2 class="display sm rv-lines" id="picksH"><span class="ln"><span>Selected </span></span><span class="ln"><span class="ital">plates<i class="stop">.</i></span></span></h2>
-      <p class="pk-sub rv">Five frames from the index. Open a plate for every photograph, the sizes, and the colour it was shot in.</p>
-    </div>
-    <div class="sheet-wrap strip">
-      <div class="strip-row">
-<a class="frame" style="--i:0;--ga:54deg;--gb:-53deg;--gy:-2px;--gc:-4deg" href="products/black-monochrome-jersey/">
-  <div class="film" aria-hidden="true"><span>MC-01 / 05</span><span>05A</span></div>
-  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5287.jpg?v=1718947150&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="3197" height="3804" alt="Black monochrome Jersey, photograph"></div>
-  <div class="cap"><span class="no mono">05</span><b>Black monochrome Jersey</b><span class="pr">$44.99 <small>CAD</small></span><span class="sz">S M L XXL</span></div>
-</a>
-<a class="frame" style="--i:1;--ga:52deg;--gb:-58deg;--gy:1px;--gc:7deg" href="products/acid-washed-monochrome-hoodie/">
-  <div class="film" aria-hidden="true"><span>MC-01 / 06</span><span>06A</span></div>
-  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5568.jpg?v=1718924892&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="3401" height="3401" alt="Acid-washed Monochrome Hoodie, photograph"></div>
-  <div class="cap"><span class="no mono">06</span><b>Acid-washed Monochrome Hoodie</b><span class="pr">$34.99 <small>CAD</small></span><span class="sz">S M L XL XXL</span></div>
-</a>
-<a class="frame" style="--i:2;--ga:51deg;--gb:-50deg;--gy:2px;--gc:-6deg" href="products/monochrome-cargo-shorts-black/">
-  <div class="film" aria-hidden="true"><span>MC-01 / 11</span><span>11A</span></div>
-  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5354.jpg?v=1718940526&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="5184" height="3456" alt="Monochrome cargo Shorts (Black), photograph"></div>
-  <div class="cap"><span class="no mono">11</span><b>Monochrome cargo Shorts (Black)</b><span class="pr">$34.99 <small>CAD</small></span><span class="sz">XS S M L XL</span></div>
-</a>
-<a class="frame" style="--i:3;--ga:54deg;--gb:-54deg;--gy:-3px;--gc:-7deg" href="products/monochrome-pants-chain/">
-  <div class="film" aria-hidden="true"><span>MC-01 / 14</span><span>14A</span></div>
-  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5081.jpg?v=1719291932&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="4024" height="3431" alt="Monochrome Pants chain, photograph"></div>
-  <div class="cap"><span class="no mono">14</span><b>Monochrome Pants chain</b><span class="pr">$10.00 <small>CAD</small></span><span class="sz">One size</span></div>
-</a>
-<a class="frame" style="--i:4;--ga:48deg;--gb:-58deg;--gy:-1px;--gc:-8deg" href="products/royal-black/">
-  <div class="film" aria-hidden="true"><span>MC-01 / 17</span><span>17A</span></div>
-  <div class="xp"><img class="ph" loading="lazy" decoding="async" draggable="false" src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=720" srcset="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=360 360w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=540 540w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=720 720w, https://cdn.shopify.com/s/files/1/0691/1252/9150/files/IMG_5054.jpg?v=1718947925&amp;width=1080 1080w" sizes="(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw" width="5184" height="3456" alt="Royal Black Ring, photograph"></div>
-  <div class="cap"><span class="no mono">17</span><b>Royal Black Ring</b><span class="pr">$8.99 <small>CAD</small></span><span class="sz">7 8 9 10 11 12 13</span></div>
-</a>
+      <div class="intel-memo">
+        <p class="rv"><span class="mono">Finding 1.</span> Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
+        <p class="rv"><span class="mono">Finding 2.</span> Made in small runs, so what you wear is not on everyone else. Hardware, objects and details that catch the light. <a class="mono link-line" href="about/">Read the full briefing<span class="arr" aria-hidden="true"></span></a></p>
+        <p class="rv mono intel-meta"><span>Price range: CAD 5.99 – 59</span><span>Chrome supplier: <span class="redact" tabindex="0">Classified. Obviously.</span></span><span>Tops 9 / Bottoms 2 / Hardware 11</span></p>
       </div>
     </div>
-    <p class="pk-end"><a class="mono link-line" href="shop/">The complete index, 23 pieces<span class="arr" aria-hidden="true"></span></a></p>
   </section>
 
-  <!-- 03 EDITOR'S NOTE (teaser for /about/) ---------------------------------- -->
-  <section class="spread ink teaser" id="note" data-tone="ink" aria-labelledby="noteH">
-    <div class="folio-v mono" aria-hidden="true">Monochrome® — Editor’s note — Issue 01</div>
-    <p class="mono kicker rv">Editor’s note — p.04</p>
-    <h2 class="pull rv" id="noteH"><span class="w">W</span>ear the <em>unknown<i class="stop">.</i></em></h2>
-    <div class="tz-body">
-      <p class="drop rv">Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
-      <p class="rv">Made in small runs, so what you wear is not on everyone else. Hardware, objects and details that catch the light. <a class="mono link-line" href="about/">Read the formula<span class="arr" aria-hidden="true"></span></a></p>
-    </div>
-    <ul class="stats" aria-label="This issue in numbers">
-      <li><b class="num" data-to="23">23</b><span class="mono">Pieces in this issue</span></li>
-      <li><b class="num" data-to="2" data-pad="2">02</b><span class="mono">Tones. Black and white</span></li>
-      <li><b class="num" data-to="29">29</b><span class="mono">Countries on the delivery list</span></li>
-      <li><b class="num" data-to="0" data-pad="2">00</b><span class="mono">Colours. We checked</span></li>
-    </ul>
-  </section>
-
-  <!-- 04 DISTRIBUTION (teaser for /shipping/) --------------------------------- -->
-  <section class="spread paper dist" id="distribution" data-tone="paper" aria-labelledby="distH">
-    <div class="bleed-num" aria-hidden="true" data-drift="-.1">05</div>
-    <div class="folio-v mono" aria-hidden="true">Monochrome® — Distribution — Prices in CAD</div>
-    <p class="mono kicker rv">Distribution — p.05</p>
-    <h2 class="display sm rv-lines" id="distH"><span class="ln"><span>Delivering to</span></span><span class="ln"><span class="ital">29 countries<i class="stop">.</i></span></span></h2>
-    <div class="dist-cells">
-      <a class="dist-cell dc-ng" href="shipping/"><span class="mono">Featured</span><b>Nigeria</b><i class="mono">Rate calculated at checkout</i></a>
-      <a class="dist-cell dc-ca" href="shipping/"><span class="mono">Home market</span><b>Canada</b><i class="mono">Free standard shipping</i></a>
-      <p class="dist-copy rv">Shipping across Africa, North America, Europe, Asia, Oceania and the Middle East. Rates are calculated at checkout from your address, so you see yours before you pay. <a class="mono link-line" href="shipping/">See the full list and the returns notes<span class="arr" aria-hidden="true"></span></a></p>
-    </div>
-    <div class="ticker" aria-hidden="true"><div class="ticker-t" data-ticker><div class="tk"><span>Delivering to</span><span>Nigeria</span><span>Canada</span><span>Australia</span><span>Austria</span><span>Belgium</span><span>Czechia</span><span>Denmark</span><span>Finland</span><span>France</span><span>Germany</span><span>Hong Kong SAR China</span><span>Ireland</span><span>Israel</span><span>Italy</span><span>Japan</span><span>Malaysia</span><span>Netherlands</span><span>New Zealand</span><span>Norway</span><span>Poland</span><span>Portugal</span><span>Singapore</span><span>South Korea</span><span>Spain</span><span>Sweden</span><span>Switzerland</span><span>United Arab Emirates</span><span>United Kingdom</span><span>United States</span></div></div></div>
-  </section>
-
-  <!-- 05 SUBSCRIBE ---------------------------------------------------------------- -->
-  <section class="spread ink subscribe" id="subscribe" data-tone="ink" aria-labelledby="subH">
-    <div class="bleed-num" aria-hidden="true" data-drift="-.1">06</div>
-    <div class="folio-v mono" aria-hidden="true">Monochrome® — Subscribe to the next issue</div>
-    <div class="sub-head">
-      <p class="mono kicker rv">Subscribe — p.07</p>
-      <h2 class="display sm rv-lines" id="subH"><span class="ln"><span>Next</span></span><span class="ln"><span class="ital">issue<i class="stop">.</i></span></span></h2>
-    </div>
-    <form class="news" method="post" action="https://monochrome.com.ng/contact#contact_form" target="_blank" rel="noopener">
-      <input type="hidden" name="form_type" value="customer">
-      <input type="hidden" name="utf8" value="✓">
-      <input type="hidden" name="contact[tags]" value="newsletter">
-      <label for="email-home" class="mono">Get drop alerts, first</label>
-      <div class="news-row">
-        <input id="email-home" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
-        <button class="send" type="submit">Notify me<span class="arr" aria-hidden="true"></span></button>
+  <!-- 05 ZONES (teaser for /shipping/) ----------------------------------------------------- -->
+  <section class="spread dark zones" id="zones" aria-labelledby="zonesH">
+    <div class="wrap zn-grid">
+      <div class="zn-text">
+        <p class="kick mono">§4 — Extraction routes</p>
+        <h2 class="h2 rv" id="zonesH">Delivering to 29 countries</h2>
+        <div class="dist-cells">
+          <a class="dist-cell dc-ng" href="shipping/"><span class="mono">Field office</span><b>Nigeria</b><i class="mono">Rate calculated at checkout</i></a>
+          <a class="dist-cell dc-ca" href="shipping/"><span class="mono">Home base</span><b>Canada</b><i class="mono">Free standard shipping</i></a>
+        </div>
+        <p class="dist-copy rv">Shipping across Africa, North America, Europe, Asia, Oceania and the Middle East. Rates are calculated at checkout from your address, so you see yours before you pay. <a class="mono link-line" href="shipping/">See the zones and the returns notes<span class="arr" aria-hidden="true"></span></a></p>
       </div>
-      <small class="mono news-note">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
-    </form>
+      <div class="radar" aria-hidden="true">
+  <svg viewBox="0 0 400 400" focusable="false"><g class="rd-ring"><circle cx="200" cy="200" r="190"/><circle cx="200" cy="200" r="142"/><circle cx="200" cy="200" r="95"/><circle cx="200" cy="200" r="48"/></g><g class="rd-axis"><path d="M200 6V394M6 200H394"/><path d="M63 63 337 337M337 63 63 337" class="rd-diag"/></g><g class="rd-tick"><line x1="200" y1="6" x2="200" y2="20" transform="rotate(0 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(5 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(10 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(15 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(20 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(25 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(30 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(35 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(40 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(45 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(50 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(55 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(60 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(65 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(70 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(75 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(80 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(85 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(90 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(95 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(100 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(105 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(110 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(115 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(120 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(125 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(130 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(135 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(140 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(145 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(150 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(155 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(160 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(165 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(170 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(175 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(180 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(185 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(190 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(195 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(200 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(205 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(210 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(215 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(220 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(225 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(230 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(235 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(240 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(245 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(250 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(255 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(260 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(265 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(270 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(275 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(280 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(285 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(290 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(295 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(300 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(305 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(310 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(315 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(320 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(325 200 200)"/><line x1="200" y1="6" x2="200" y2="20" transform="rotate(330 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(335 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(340 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(345 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(350 200 200)"/><line x1="200" y1="10" x2="200" y2="16" transform="rotate(355 200 200)"/></g><g class="rd-dots"><circle cx="316.2" cy="248.9" r="1.6"/><circle cx="322.5" cy="283.7" r="1.0"/><circle cx="252.6" cy="49.1" r="1.4"/><circle cx="239.6" cy="127.9" r="1.1"/><circle cx="175.8" cy="244.0" r="1.7"/><circle cx="274.8" cy="90.4" r="1.2"/><circle cx="251.9" cy="252.0" r="1.5"/><circle cx="317.1" cy="198.8" r="1.5"/><circle cx="159.0" cy="91.6" r="1.4"/><circle cx="56.7" cy="144.8" r="1.4"/><circle cx="52.4" cy="194.3" r="1.4"/><circle cx="104.0" cy="281.5" r="1.8"/><circle cx="51.9" cy="268.2" r="1.6"/><circle cx="154.3" cy="353.6" r="2.0"/><circle cx="243.1" cy="341.6" r="1.2"/><circle cx="50.8" cy="216.6" r="2.1"/><circle cx="39.1" cy="123.9" r="0.9"/><circle cx="348.7" cy="150.8" r="1.9"/><circle cx="168.7" cy="352.3" r="1.6"/><circle cx="142.3" cy="246.9" r="2.0"/><circle cx="168.1" cy="368.0" r="1.5"/><circle cx="154.3" cy="134.4" r="1.2"/><circle cx="251.0" cy="104.4" r="1.1"/><circle cx="243.3" cy="320.5" r="1.7"/><circle cx="280.8" cy="162.6" r="1.6"/><circle cx="166.8" cy="207.8" r="1.7"/><circle cx="242.6" cy="34.9" r="1.9"/><circle cx="88.4" cy="297.3" r="2.1"/><circle cx="134.2" cy="297.5" r="1.6"/><circle cx="213.1" cy="128.5" r="1.2"/><circle cx="113.8" cy="85.8" r="1.1"/><circle cx="306.7" cy="212.6" r="2.2"/><circle cx="343.3" cy="231.2" r="1.7"/><circle cx="203.5" cy="348.0" r="0.9"/><circle cx="144.7" cy="360.2" r="1.2"/><circle cx="48.2" cy="272.3" r="1.6"/><circle cx="72.5" cy="208.6" r="1.0"/><circle cx="318.1" cy="327.9" r="1.7"/><circle cx="340.6" cy="88.0" r="1.1"/><circle cx="126.3" cy="123.6" r="2.2"/><circle cx="226.4" cy="109.6" r="1.2"/><circle cx="102.6" cy="281.5" r="1.0"/><circle cx="88.7" cy="263.8" r="1.3"/><circle cx="186.3" cy="88.2" r="1.8"/><circle cx="304.6" cy="320.4" r="1.2"/><circle cx="329.4" cy="128.1" r="1.2"/><circle cx="78.2" cy="321.0" r="1.5"/><circle cx="277.2" cy="217.3" r="1.4"/><circle cx="322.2" cy="184.3" r="1.8"/><circle cx="191.6" cy="58.3" r="1.1"/><circle cx="258.0" cy="86.7" r="2.0"/><circle cx="85.6" cy="115.1" r="1.0"/><circle cx="353.0" cy="189.5" r="1.1"/><circle cx="317.9" cy="253.9" r="1.2"/><circle cx="121.4" cy="183.0" r="1.6"/><circle cx="96.8" cy="234.8" r="1.6"/><circle cx="290.3" cy="176.0" r="1.8"/><circle cx="55.2" cy="173.0" r="2.0"/><circle cx="287.9" cy="318.4" r="1.2"/><circle cx="170.9" cy="49.2" r="1.3"/><circle cx="167.7" cy="266.7" r="1.8"/><circle cx="273.4" cy="200.1" r="1.9"/><circle cx="67.0" cy="154.7" r="2.1"/><circle cx="110.9" cy="235.5" r="1.4"/><circle cx="282.7" cy="214.0" r="1.8"/><circle cx="231.3" cy="103.8" r="2.2"/><circle cx="260.3" cy="96.3" r="1.9"/><circle cx="156.8" cy="52.9" r="1.7"/><circle cx="257.3" cy="90.7" r="1.0"/><circle cx="218.3" cy="318.2" r="1.2"/></g><g class="rd-lbl"><text x="200" y="40" text-anchor="middle">N</text><text x="368" y="205" text-anchor="middle">E</text><text x="200" y="372" text-anchor="middle">S</text><text x="32" y="205" text-anchor="middle">W</text></g></svg>
+  <i class="rd-sweep"></i>
+  <span class="blip b-ng"><b>NG</b><em>Field office</em></span>
+  <span class="blip b-ca"><b>CA</b><em>Home base</em></span>
+</div>
+    </div>
+  </section>
+
+  <!-- 06 JOIN THE NETWORK ------------------------------------------------------------------- -->
+  <section class="spread paper subscribe" id="subscribe" aria-labelledby="subH">
+    <div class="wrap">
+      <div class="enlist">
+        <span class="tape tape-l" aria-hidden="true"></span><span class="tape tape-r" aria-hidden="true"></span>
+        <div class="enl-head">
+          <p class="kick mono">§5 — Recruitment form</p>
+          <h2 class="h2" id="subH">Join the network</h2>
+          <p class="sec-sub">Get drop alerts first. One email, your address, no field work required.</p>
+        </div>
+        <form class="news" method="post" action="https://monochrome.com.ng/contact#contact_form" target="_blank" rel="noopener">
+          <input type="hidden" name="form_type" value="customer">
+          <input type="hidden" name="utf8" value="✓">
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <label for="email-home" class="mono">Operative email address</label>
+          <div class="news-row">
+            <input id="email-home" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
+            <button class="send" type="submit">Join the network<span class="arr" aria-hidden="true"></span></button>
+          </div>
+          <small class="mono news-note">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
+        </form>
+        <span class="stamp pend" style="--r:-6deg" aria-hidden="true">Clearance pending</span>
+      </div>
+    </div>
   </section>
 
 </main>
-<footer class="spread ink foot" id="contents" data-tone="ink">
+<footer class="foot dark" id="contents">
   <div class="ticker" aria-hidden="true"><div class="ticker-t" data-ticker><div class="tk"><span>Delivering to</span><span>Nigeria</span><span>Canada</span><span>Australia</span><span>Austria</span><span>Belgium</span><span>Czechia</span><span>Denmark</span><span>Finland</span><span>France</span><span>Germany</span><span>Hong Kong SAR China</span><span>Ireland</span><span>Israel</span><span>Italy</span><span>Japan</span><span>Malaysia</span><span>Netherlands</span><span>New Zealand</span><span>Norway</span><span>Poland</span><span>Portugal</span><span>Singapore</span><span>South Korea</span><span>Spain</span><span>Sweden</span><span>Switzerland</span><span>United Arab Emirates</span><span>United Kingdom</span><span>United States</span></div></div></div>
-  <div class="foot-grid">
-    <div class="foot-brand">
-      <img class="emblem" src="assets/emblem.webp" alt="" width="72" height="77" loading="lazy">
-      <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="360" height="32" loading="lazy">
+  <div class="wrap">
+    <div class="foot-top">
+      <span class="ft-bc" aria-hidden="true"><svg class="bc" viewBox="0 0 220 34" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 0h1v34h-1zM2 0h3v34h-3zM8 0h1v34h-1zM11 0h3v34h-3zM15 0h2v34h-2zM20 0h4v34h-4zM27 0h3v34h-3zM31 0h4v34h-4zM36 0h1v34h-1zM39 0h2v34h-2zM42 0h2v34h-2zM47 0h4v34h-4zM54 0h1v34h-1zM56 0h3v34h-3zM60 0h2v34h-2zM64 0h1v34h-1zM67 0h2v34h-2zM72 0h3v34h-3zM77 0h1v34h-1zM79 0h2v34h-2zM82 0h1v34h-1zM85 0h1v34h-1zM89 0h1v34h-1zM92 0h3v34h-3zM98 0h2v34h-2zM103 0h3v34h-3zM108 0h3v34h-3zM114 0h3v34h-3zM119 0h1v34h-1zM121 0h3v34h-3zM125 0h4v34h-4zM131 0h1v34h-1zM133 0h4v34h-4zM139 0h1v34h-1zM141 0h3v34h-3zM145 0h3v34h-3zM150 0h2v34h-2zM153 0h1v34h-1zM157 0h2v34h-2zM160 0h3v34h-3zM165 0h1v34h-1zM169 0h3v34h-3zM173 0h1v34h-1zM175 0h2v34h-2zM180 0h4v34h-4zM185 0h1v34h-1zM187 0h4v34h-4zM192 0h1v34h-1zM196 0h4v34h-4zM203 0h4v34h-4zM210 0h3v34h-3z"/></svg></span>
+      <p class="mono ft-file"><b>File no.</b> MC-101 <span aria-hidden="true">//</span> <b>Page</b> 1 of 7 <span aria-hidden="true">//</span> <b>Clearance</b> L5</p>
     </div>
-    <div class="foot-col mono">
-      <p class="foot-h">Colophon</p>
-      <p>MONOCHROME® is a black, white and chrome clothing brand. Issue 01, The Unknown. Photographs from the Monochrome archive. Set in Bodoni Moda and DM Mono.</p>
-      <p class="foot-cad">Prices in CAD</p>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <img class="emblem" src="assets/emblem.webp" alt="" width="72" height="77" loading="lazy">
+        <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="360" height="32" loading="lazy">
+        <p class="mono">The Monochrome Bureau<br>Division of Wearables<br>Operation: Wear the Unknown</p>
+      </div>
+      <nav class="foot-col mono" aria-label="Footer">
+        <p class="foot-h">The dossier</p>
+        <a href="./" aria-current="page">Briefing</a><a href="shop/">Assets</a><a href="lookbook/">Evidence</a><a href="about/">Mission</a><a href="shipping/">Routes</a><a href="faq/">Debrief</a><a href="contact/">Report in</a>
+      </nav>
+      <nav class="foot-col mono" aria-label="Store policies">
+        <p class="foot-h">The store</p>
+        <a data-store="/cart" href="https://monochrome.com.ng/cart">Bag</a>
+        <a data-store="/policies/shipping-policy" href="https://monochrome.com.ng/policies/shipping-policy">Shipping policy</a>
+        <a data-store="/policies/refund-policy" href="https://monochrome.com.ng/policies/refund-policy">Refund policy</a>
+        <a data-store="/policies/privacy-policy" href="https://monochrome.com.ng/policies/privacy-policy">Privacy policy</a>
+        <a data-store="/policies/terms-of-service" href="https://monochrome.com.ng/policies/terms-of-service">Terms of service</a>
+      </nav>
+      <div class="foot-col mono">
+        <p class="foot-h">Secure lines</p>
+        <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca</a>
+        <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
+        <p class="foot-cad">Prices in CAD</p>
+      </div>
     </div>
-    <nav class="foot-col mono" aria-label="Footer">
-      <p class="foot-h">Contents</p>
-      <a href="./" aria-current="page">Cover</a><a href="shop/">Shop</a><a href="lookbook/">Lookbook</a><a href="about/">About</a><a href="shipping/">Shipping</a><a href="faq/">FAQ</a><a href="contact/">Contact</a>
-    </nav>
-    <nav class="foot-col mono" aria-label="Store policies">
-      <p class="foot-h">The store</p>
-      <a data-store="/cart" href="https://monochrome.com.ng/cart">Bag</a>
-      <a data-store="/policies/shipping-policy" href="https://monochrome.com.ng/policies/shipping-policy">Shipping policy</a>
-      <a data-store="/policies/refund-policy" href="https://monochrome.com.ng/policies/refund-policy">Refund policy</a>
-      <a data-store="/policies/privacy-policy" href="https://monochrome.com.ng/policies/privacy-policy">Privacy policy</a>
-      <a data-store="/policies/terms-of-service" href="https://monochrome.com.ng/policies/terms-of-service">Terms of service</a>
-    </nav>
-    <div class="foot-col mono">
-      <p class="foot-h">Contact</p>
-      <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca</a>
-      <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
-    </div>
+    <p class="foot-fic mono">A work of fiction. MONOCHROME® is a clothing brand and is not affiliated with any government agency.</p>
+    <p class="foot-legal mono"><span>© <span data-year>2026</span> MONOCHROME®. All rights reserved. Prices in CAD.</span><span class="folio">Page 1 of 7</span></p>
   </div>
-  <div class="foot-giant" aria-hidden="true">Monochrome</div>
-  <p class="foot-legal mono"><span>© <span data-year>2026</span> MONOCHROME®. All rights reserved. Prices in CAD.</span><span class="folio">p.01</span></p>
+  <div class="banner bottom" aria-hidden="true"><span class="bn-c">Top secret // Eyes only // Monochrome Bureau</span></div>
 </footer>
 
 <script src="config.js"></script>

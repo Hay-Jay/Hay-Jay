@@ -1,84 +1,68 @@
-/* SHIPPING — "Distribution": a printed table of countries (Nigeria and Canada picked out), returns notes as marginalia. */
-.dst-open { padding: clamp(100px, 16vh, 180px) var(--gut) clamp(40px, 7vh, 80px); overflow: clip; }
-.dst-h { font-size: clamp(2.6rem, 10.2vw, 11rem); }
-.dst-deck { max-width: 28em; margin-top: 5vh; font: italic 400 clamp(1.2rem, 2.2vw, 1.9rem)/1.3 var(--serif); }
-.dst-hl { display: grid; gap: 12px; margin-top: 8vh; }
-.hl { container-type: inline-size; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; min-height: 250px; padding: 18px 18px 22px; border: 1px solid var(--fg); }
-.hl b { font: 500 clamp(3rem, 19cqw, 10rem)/.86 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+/* SHIPPING — extraction routes: a radar scope with the two field offices, the manifest of authorised zones (a real table),
+   return-to-base notes, the extraction protocol and field-fit notes. */
+.rt-open { overflow: clip; padding-top: clamp(28px, 4vw, 52px); }
+.rt-grid { display: grid; gap: clamp(36px, 5vw, 64px); align-items: center; }
+.rt-text .h1 { font-size: clamp(3.8rem, 12.5vw, 10rem); }
+.rt-deck { max-width: 28em; margin-top: clamp(20px, 3vw, 32px); font: 400 clamp(1.15rem, 2vw, 1.55rem)/1.4 var(--type); }
+.dst-hl { display: grid; gap: 14px; margin-top: clamp(24px, 4vw, 40px); }
+.hl { display: grid; gap: 6px; padding: 16px 18px 18px; border: 2px solid var(--fg); }
 .hl .mono { color: var(--dim); }
-.hl p { max-width: 30ch; font: italic 400 1.2rem/1.35 var(--serif); }
-.hl p strong { font-weight: 600; }
-.hl-ng { background: var(--fg); color: var(--bg); }
-.hl-ng .mono { color: color-mix(in srgb, var(--bg) 64%, var(--fg)); }
+.hl b { font: 900 clamp(2.4rem, 5vw, 3.8rem)/.95 var(--head); text-transform: uppercase; }
+.hl p { color: var(--dim); }
+.hl strong { color: var(--fg); }
+.hl-ng { background: #f2f2f2; color: #0a0a0a; border-color: #f2f2f2; }
+.hl-ng .mono, .hl-ng p { color: #2a2a2a; }
+.hl-ng strong { color: #0a0a0a; }
+@media (min-width: 960px) { .rt-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); } .dst-hl { grid-template-columns: 1fr 1fr; } }
 
-.dst-table { padding: clamp(30px, 6vh, 70px) var(--gut) clamp(70px, 10vh, 120px); overflow: clip; }
-.dst-grid { display: grid; gap: 48px; }
-.tbl-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font: 500 clamp(1.6rem, 3.4vw, 2.8rem)/1.05 var(--serif); letter-spacing: -.03em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
-.tbl-h .mono { color: var(--dim); font-size: 11px; }
-.tbl-h em { text-transform: none; font-weight: 400; }
-.tbl-sub { margin-top: 10px; color: var(--dim); max-width: 70ch; }
-.tbl-wrap { margin-top: 22px; }
-.tbl { width: 100%; border-collapse: collapse; border-top: 3px double var(--fg); }
-.tbl thead th { text-align: left; font-weight: 400; color: var(--dim); padding: 10px 10px 10px 0; border-bottom: 1px solid var(--fg); }
-.tbl td, .tbl th { padding: 10px 10px 10px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
-.tbl tbody th { text-align: left; font: 500 clamp(1.15rem, 1.7vw, 1.6rem)/1.1 var(--serif); letter-spacing: -.02em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
-.tbl tbody th em { white-space: nowrap; font: italic 400 .62em/1 var(--serif); text-transform: none; letter-spacing: 0; margin-left: .7em; opacity: .85; }
-.tbl .c-no, .tbl .c-code { color: var(--dim); font-variant-numeric: tabular-nums; }
-.tbl tr.nigeria, .tbl tr.canada { background: var(--fg); color: var(--bg); }
-.tbl tr.nigeria > *, .tbl tr.canada > * { border-bottom-color: var(--bg); color: var(--bg); padding-left: 10px; }
-.tbl tr.nigeria .c-no, .tbl tr.canada .c-no { padding-left: 8px; }
-.tbl tr.nigeria .c-no, .tbl tr.canada .c-no, .tbl tr.nigeria .c-code, .tbl tr.canada .c-code { color: color-mix(in srgb, var(--bg) 70%, var(--fg)); }
-.tbl-foot { margin-top: 18px; color: var(--dim); }
-
-.dst-aside { align-self: start; border-top: 1px solid var(--fg); padding-top: 14px; }
-.dst-aside h2 { margin-top: 8px; font: 500 clamp(1.6rem, 2.6vw, 2.3rem)/1.05 var(--serif); letter-spacing: -.03em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
-.mg-k { color: var(--dim); }
-.mg-notes { margin-top: 18px; display: grid; gap: 0; }
-.mg-notes li { display: grid; grid-template-columns: 1.6rem 1fr; gap: 6px; padding: 12px 0; border-top: 1px solid var(--rule); }
-.mg-notes .mono { color: var(--dim); padding-top: .3em; }
-.mg-notes p { font: italic 400 1.08rem/1.45 var(--serif); }
-.mg-notes a { text-underline-offset: 4px; }
-.mg-links { margin-top: 18px; display: grid; gap: 4px; }
-.mg-links .link-line { margin-right: 14px; }
-
-.dst-steps { padding: clamp(70px, 11vh, 140px) var(--gut); overflow: clip; }
-.steps { display: grid; border-top: 1px solid var(--fg); margin-top: 4vh; }
-.steps li { container-type: inline-size; display: grid; grid-template-columns: auto 1fr; grid-template-areas: "n w" ". p"; column-gap: 14px; row-gap: 8px; padding: 22px 0 28px; border-bottom: 1px solid var(--rule); align-items: baseline; }
-.steps .mono { grid-area: n; color: var(--dim); }
-.steps b { grid-area: w; font: 500 clamp(2.8rem, 10vw, 7rem)/.9 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
-.steps p { grid-area: p; max-width: 30ch; color: var(--dim); font: italic 400 clamp(1.05rem, 1.5vw, 1.25rem)/1.4 var(--serif); }
-
-.dst-sizing { padding: clamp(80px, 12vh, 150px) var(--gut) clamp(70px, 11vh, 130px); overflow: clip; }
-.sz-list { margin-top: 8vh; border-top: 1px solid var(--fg); }
-.sz-list > div { display: grid; align-content: start; gap: 6px; padding: 16px 0 18px; border-bottom: 1px solid var(--rule); }
-.sz-list dt { color: var(--dim); }
-.sz-list dd { font: italic 400 clamp(1.15rem, 2vw, 1.6rem)/1.3 var(--serif); max-width: 30em; }
-.sz-foot { margin-top: 5vh; max-width: 30em; font: 400 1.15rem/1.5 var(--serif); }
-
-@media (min-width: 700px) {
-  .dst-hl { grid-template-columns: 1fr 1fr; }
-  .steps { grid-template-columns: repeat(3, 1fr); }
-  .steps li { grid-template-columns: 1fr; grid-template-areas: "n" "w" "p"; padding: 22px 20px 30px; border-bottom: 0; border-left: 1px solid var(--rule); row-gap: 14px; }
-  .steps li:first-child { border-left: 0; padding-left: 0; }
-  .steps b { font-size: clamp(2.2rem, 16cqw, 7rem); }
-  .sz-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--gut); }
-}
-@media (min-width: 1000px) {
-  .dst-grid { grid-template-columns: minmax(0, 1fr) minmax(260px, 22rem); gap: clamp(36px, 5vw, 90px); }
-  .dst-aside { position: sticky; top: calc(var(--bar) + 24px); }
-}
-@media (min-width: 900px) { .dst-open, .dst-table, .dst-steps, .dst-sizing { padding-left: calc(var(--gut) + 22px); } }
-
-/* phones: each table row becomes a two-line entry */
+.rt-table { overflow: clip; }
+.dst-grid { display: grid; gap: clamp(36px, 5vw, 64px); align-items: start; }
+.tbl-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; font: 900 clamp(2.2rem, 4.6vw, 3.8rem)/1 var(--head); text-transform: uppercase; }
+.tbl-h .mono { color: var(--dim); }
+.tbl-h em { font-style: normal; color: var(--dim); }
+.tbl-sub { margin: 12px 0 22px; color: var(--dim); max-width: 60em; font-weight: 400; text-transform: none; letter-spacing: .02em; font-size: 14px; }
+.tbl-wrap { border: 2px solid var(--fg); background: #f2f2f2; background-image: var(--grain-d); overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; min-width: 0; }
+.tbl th, .tbl td { padding: 11px 12px; text-align: left; border-bottom: 1px dotted var(--rule); vertical-align: baseline; }
+.tbl thead th { background: var(--fg); color: var(--bg); font-size: 11.5px; letter-spacing: .14em; border-bottom: 0; }
+.tbl tbody th { font: 800 1.35rem/1.1 var(--head); text-transform: uppercase; letter-spacing: .02em; }
+.tbl tbody th em { font: 700 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; font-style: normal; margin-left: 10px; border: 1.5px solid currentColor; padding: 2px 5px; vertical-align: 2px; white-space: nowrap; }
+.tbl .c-no { color: var(--dim); width: 3.4rem; }
+.tbl .c-rate { font-weight: 400; font-size: 12px; }
+.tbl tr.nigeria td, .tbl tr.nigeria th, .tbl tr.canada td, .tbl tr.canada th { background: var(--fg); color: var(--bg); border-bottom-color: var(--bg); }
+.tbl tr.nigeria .c-no, .tbl tr.canada .c-no { color: var(--bg); }
+.tbl-foot { margin-top: 16px; color: var(--dim); }
+.dst-aside { position: relative; padding: 30px 22px 24px; background: var(--paper2) var(--grain-d); border: 2px dashed var(--fg); box-shadow: 0 10px 24px rgba(0, 0, 0, .18); }
+.dst-aside .tape { left: 50%; top: -16px; margin-left: -46px; --tr: 3deg; }
+.mg-k { color: var(--dim); margin-bottom: 4px; }
+.dst-aside h2 { font: 900 clamp(2rem, 3.4vw, 2.8rem)/.95 var(--head); text-transform: uppercase; margin-bottom: 14px; }
+.mg-notes { counter-reset: n; display: grid; gap: 14px; }
+.mg-notes li { display: grid; grid-template-columns: 2.2rem 1fr; gap: 10px; }
+.mg-notes li > .mono { align-self: start; display: grid; place-items: center; width: 1.9rem; height: 1.9rem; background: var(--fg); color: var(--bg); }
+.mg-notes p { font-size: 15px; }
+.mg-notes a, .sz-foot a, .tbl-foot a, .mg-links a { text-underline-offset: 4px; }
+.mg-links { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--rule); line-height: 2.2; }
+@media (min-width: 960px) { .dst-grid { grid-template-columns: minmax(0, 1fr) 360px; } .dst-aside { position: sticky; top: calc(var(--bar) + 20px); } }
 @media (max-width: 699px) {
-  .tbl thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .tbl, .tbl tbody { display: block; }
-  .tbl tr { display: grid; grid-template-columns: 2.2rem minmax(0, 1fr) auto; grid-template-areas: "no name code" "no reg rate"; column-gap: 8px; row-gap: 2px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
-  .tbl td, .tbl th { padding: 0; border: 0; }
-  .tbl .c-no { grid-area: no; } .tbl .c-name { grid-area: name; } .tbl .c-code { grid-area: code; text-align: right; } .tbl .c-reg { grid-area: reg; color: var(--dim); } .tbl .c-rate { grid-area: rate; text-align: right; }
-  .tbl tr.nigeria, .tbl tr.canada { padding-inline: 8px; }
-  .tbl tr.nigeria > *, .tbl tr.canada > * { padding-left: 0; }
-  .tbl tr.nigeria .c-reg, .tbl tr.canada .c-reg { color: color-mix(in srgb, var(--bg) 70%, var(--fg)); }
-  .tbl-h .mono { font-size: 12px; }
-  .tbl tbody th { font-weight: 600; font-variation-settings: 'opsz' 12; letter-spacing: -.01em; }
+  .tbl .c-reg { display: none; }
+  .tbl th, .tbl td { padding: 10px 8px; }
+  .tbl tbody th em { display: block; margin: 6px 0 0; width: fit-content; }
+  .tbl tbody th { font-size: 1.25rem; }
 }
+
+.dst-steps { overflow: clip; }
+.dst-steps .kick { margin-bottom: clamp(20px, 3vw, 36px); }
+.steps { display: grid; gap: 0; counter-reset: s; border-top: 3px solid var(--fg); }
+.steps li { position: relative; display: grid; gap: 8px; padding: 22px 0 26px; border-bottom: 1px solid var(--rule); }
+.steps li > .mono { color: var(--dim); }
+.steps b { font: 900 clamp(2.6rem, 6vw, 4.6rem)/.9 var(--head); text-transform: uppercase; }
+.steps p { color: #cfcfcf; max-width: 28em; }
+@media (min-width: 900px) { .steps { grid-template-columns: repeat(3, 1fr); } .steps li { padding: 26px 26px 30px 0; border-bottom: 0; } .steps li + li { padding-left: 26px; border-left: 1px solid var(--rule); } }
+
+.dst-sizing { overflow: clip; }
+.sz-list { border-top: 3px solid var(--fg); }
+.sz-list > div { display: grid; gap: 4px 28px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.sz-list dt { color: var(--dim); }
+.sz-list dd { font: 400 clamp(1.05rem, 1.4vw, 1.25rem)/1.5 var(--type); max-width: 40em; }
+.sz-foot { margin-top: 26px; max-width: 40em; }
+@media (min-width: 800px) { .sz-list > div { grid-template-columns: 15rem 1fr; align-items: baseline; } }

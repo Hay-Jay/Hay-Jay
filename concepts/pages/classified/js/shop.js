@@ -1,4 +1,4 @@
-/* SHOP — the index: filter (?c=), sort (?s=), search (?q=) and view (?v=) on pre-rendered rows and frames.
+/* SHOP — the asset register: filter (?c=), sort (?s=), search (?q=) and view (?v=) on pre-rendered rows and cards.
    Everything is in the HTML already; this only re-orders and hides. */
 (() => {
   'use strict';
@@ -9,7 +9,7 @@
   if (!toc || !sheet) return;
 
   const CATS = ['top', 'bottom', 'accessory', 'gift'];
-  const NOUN = { all: ['piece', 'pieces'], top: ['top', 'tops'], bottom: ['bottom', 'bottoms'], accessory: ['object', 'objects'], gift: ['gift card', 'gift cards'] };
+  const NOUN = { all: ['asset', 'assets'], top: ['top', 'tops'], bottom: ['bottom', 'bottoms'], accessory: ['hardware asset', 'hardware assets'], gift: ['gift card', 'gift cards'] };
   const SORTS = {
     featured: (a, b) => a.f - b.f,
     new: (a, b) => b.av - a.av || b.pub - a.pub,
@@ -20,7 +20,7 @@
   const FRAME_SIZES = '(min-width:1500px) 20vw, (min-width:900px) 25vw, (min-width:700px) 33vw, 50vw';
 
   // model: one entry per piece, pointing at its row (index view) and its frame (contact sheet)
-  const rows = $$('.trow', toc), frames = $$('.frame', sheet);
+  const rows = $$('.trow', toc), frames = $$('.card', sheet);
   const model = rows.map(row => {
     const d = row.dataset;
     return { row, frame: frames.find(f => f.dataset.h === d.h), h: d.h, n: d.n, cat: d.cat, p: +d.p, pub: +d.pub, av: +d.av, f: +d.f };
@@ -50,11 +50,11 @@
   }
 
   // ---- render ------------------------------------------------------------------------
-  const BASE_TITLE = document.title, CAT_TITLE = { top: 'Tops', bottom: 'Bottoms', accessory: 'Objects', gift: 'Gift cards' };
+  const BASE_TITLE = document.title, CAT_TITLE = { top: 'Tops', bottom: 'Bottoms', accessory: 'Hardware', gift: 'Gift cards' };
   function apply() {
     const q = state.q.trim().toLowerCase();
     root.dataset.view = state.v;
-    document.title = state.c === 'all' ? BASE_TITLE : `${CAT_TITLE[state.c]} — The Index — MONOCHROME®`;
+    document.title = state.c === 'all' ? BASE_TITLE : `${CAT_TITLE[state.c]} — Asset Register — MONOCHROME® Bureau`;
     if (state.c === 'all') delete root.dataset.c; else root.dataset.c = state.c;
     $$('.filter').forEach(b => { const on = b.dataset.filter === state.c; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
     $$('.view').forEach(b => { const on = b.dataset.view === state.v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
@@ -77,7 +77,7 @@
       toc.appendChild(m.row); if (m.frame) sheet.appendChild(m.frame); // moving a node re-runs its entrance
       if (on) { const k = Math.min(i++, 14); m.row.style.setProperty('--i', k); if (m.frame) m.frame.style.setProperty('--i', k); }
     }
-    // the lead frame is larger while the sheet is in its natural order
+    // the lead card is larger while the sheet is in its natural order
     const lead = shown.length >= 8 && state.c === 'all' && !q && (state.s === 'featured' || state.s === 'new') ? shown[0] : null;
     for (const m of model) if (m.frame) {
       const feat = m === lead; m.frame.classList.toggle('feat', feat);
@@ -85,7 +85,7 @@
     }
     const n = shown.length, inStock = shown.filter(m => m.av).length;
     const noun = NOUN[state.c][n === 1 ? 0 : 1];
-    countEl.textContent = n ? `${n} ${noun}${q ? ` matching “${state.q.trim()}”` : ''} — ${inStock} in stock` : `0 ${NOUN[state.c][1]}${q ? ` matching “${state.q.trim()}”` : ''}`;
+    countEl.textContent = n ? `${n} ${noun} on file${q ? ` matching “${state.q.trim()}”` : ''} — ${inStock} in stock` : `0 ${NOUN[state.c][1]}${q ? ` matching “${state.q.trim()}”` : ''}`;
     emptyEl.hidden = n > 0;
     toc.hidden = !n; sheet.parentNode.hidden = false;
     if (!n) { toc.hidden = true; }
@@ -106,7 +106,7 @@
   // pages restored from the back/forward cache keep their state; a plain reload re-reads the URL
   addEventListener('pageshow', e => { if (e.persisted) { readUrl(); apply(); } });
 
-  // ---- pointer plate over index titles (desktop) ----------------------------------------------
+  // ---- pointer photo over register lines (desktop) ----------------------------------------------
   const P = { x: 0, y: 0, tx: 0, ty: 0, rot: 0, on: false, raf: 0, h: null, rowFor: null, minX: 0, rowL: 0, kb: false };
   let lastPt = { x: 0, y: 0 };
   function plateHide() {
@@ -157,7 +157,7 @@
     });
     toc.addEventListener('pointerleave', plateHide);
     addEventListener('scroll', () => { if (P.on && !P.kb) { const el = document.elementFromPoint(lastPt.x, lastPt.y); const row = el && el.closest && el.closest('.trow'); if (row) plateShow(row, lastPt.x, lastPt.y); else plateHide(); } }, { passive: true });
-    // keyboard focus shows the plate beside the row
+    // keyboard focus shows the photo beside the row
     toc.addEventListener('focusin', e => { const a = e.target.closest('.trow-a'); if (!a) return; P.kb = true; const r = a.getBoundingClientRect(); plateShow(a.parentNode, clamp(r.left + r.width * 0.66, 100, innerWidth - 100), clamp(r.top + r.height / 2, 120, innerHeight - 120)); });
     toc.addEventListener('focusout', e => { if (!toc.contains(e.relatedTarget)) plateHide(); });
     // warm the cache once the index is near
@@ -167,7 +167,7 @@
     }
   }
 
-  // ---- touch: tap a title to unfold its plate; "Open the piece" is the real link -----------------
+  // ---- touch: tap a line to unfold its photo; "Open the dossier" is the real link -----------------
   function unfoldRow(row) {
     const a = $('.trow-a', row), d = a.dataset;
     const open = row.classList.contains('open');
@@ -175,8 +175,8 @@
     if (!$('.t-more', row)) {
       row.insertAdjacentHTML('beforeend', `<div class="t-more"><div class="t-more-in"><div class="t-more-box">
         <div class="xp${d.zoom === '1' ? ' zoom' : ''}"><img class="ph" loading="lazy" decoding="async" draggable="false" src="${esc(safeUrl(sized(d.img, 700)))}" alt="${esc($('.t-name', row).firstChild.textContent)}"></div>
-        <dl class="mono"><div><dt>Section</dt><dd>${esc(d.catLabel)}</dd></div><div><dt>Price</dt><dd>${esc(d.price)} CAD</dd></div><div><dt>Sizes</dt><dd>${esc(d.sizes)}</dd></div>
-        <a class="t-open mono" href="${esc(a.getAttribute('href'))}">Open the piece</a></dl></div></div></div>`);
+        <dl class="mono"><div><dt>File no.</dt><dd>${esc(d.file)}</dd></div><div><dt>Class</dt><dd>${esc(d.catLabel)}</dd></div><div><dt>Price</dt><dd>${esc(d.price)} CAD</dd></div><div><dt>Sizes</dt><dd>${esc(d.sizes)}</dd></div>
+        <a class="t-open mono" href="${esc(a.getAttribute('href'))}">Open the dossier</a></dl></div></div></div>`);
     }
     requestAnimationFrame(() => { row.classList.toggle('open', !open); a.setAttribute('aria-expanded', String(!open)); });
   }

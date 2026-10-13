@@ -1,4 +1,4 @@
-/* LOOKBOOK — a horizontal film strip. Wide fine-pointer screens pin the strip and let the page scroll drive it sideways;
+/* EVIDENCE (the lookbook) — a horizontal evidence wall of surveillance exhibits. Wide fine-pointer screens pin the strip and let the page scroll drive it sideways;
    everything else gets a native, swipeable strip. Buttons and arrow keys work in both modes. */
 (() => {
   'use strict';
@@ -6,13 +6,14 @@
   const lbTrack = $('#lbTrack'), lbSec = $('#lookbook'), lbPin = $('#lbPin');
   if (!lbTrack) return;
   const lbFigs = $$('.lb-fig', lbTrack);
-  const lb = { pinned: false, travel: 0, run: 0, p: 0, cur: 0 };
+  const lb = { pinned: false, travel: 0, run: 0, p: 0, cur: 0, stick: 0 };
   const LB_PACE = 0.56; // page scroll needed per pixel of strip travel
   const lbNo = $('#lbNo'), lbBar = $('#lbBar'), lbHint = $('#lbHint'), prev = $('#lbPrev'), next = $('#lbNext');
   const N = lbFigs.length;
   const mq = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
 
-  const setNo = k => { lb.cur = k; const t = `Fig. ${pad(k + 1)} / ${pad(N)}`; if (lbNo.textContent !== t) lbNo.textContent = t; if (prev) prev.disabled = k <= 0; if (next) next.disabled = k >= N - 1; };
+  const L = k => String.fromCharCode(65 + k);
+  const setNo = k => { lb.cur = k; const t = `Exhibit ${L(k)} / ${L(N - 1)}`; if (lbNo.textContent !== t) lbNo.textContent = t; if (prev) prev.disabled = k <= 0; if (next) next.disabled = k >= N - 1; };
   function modeCheck() {
     const want = mq.matches && !reduce;
     lb.pinned = want;
@@ -23,8 +24,24 @@
     if (prev) prev.hidden = false; if (next) next.hidden = false;
     measure();
   }
+  // the evidence string: a thin line sagging from pin to pin, drawn into the track so it moves with the wall
+  let strings = null;
+  function drawStrings() {
+    if (!strings) { strings = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); strings.setAttribute('class', 'lb-string'); strings.setAttribute('aria-hidden', 'true'); strings.setAttribute('focusable', 'false'); lbTrack.insertBefore(strings, lbTrack.firstChild); }
+    const pts = lbFigs.map(f => [f.offsetLeft + f.offsetWidth / 2, f.offsetTop - 1]);
+    const w = lbTrack.scrollWidth, h = lbTrack.offsetHeight;
+    strings.setAttribute('width', w); strings.setAttribute('height', h); strings.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    let d = '';
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x1, y1] = pts[i], [x2, y2] = pts[i + 1], sag = 26 + Math.abs(x2 - x1) * 0.045;
+      d += `M${x1.toFixed(1)} ${y1.toFixed(1)}Q${((x1 + x2) / 2).toFixed(1)} ${(Math.max(y1, y2) + sag).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+    }
+    strings.innerHTML = `<path d="${d}"/>`;
+  }
   function measure() {
     lbFigs.forEach(f => { f._cx = f.offsetLeft + f.offsetWidth / 2; });
+    drawStrings();
+    lb.stick = lb.pinned ? (parseFloat(getComputedStyle(lbPin).top) || 0) : 0; // the pinned strip sticks below the running head
     if (!lb.pinned) { update(); return; }
     const last = lbTrack.lastElementChild;
     lb.travel = Math.max(0, last.offsetLeft + last.offsetWidth + parseFloat(getComputedStyle(lbTrack).paddingLeft) + 8 - innerWidth);
@@ -36,7 +53,7 @@
     let view0 = 0, w = innerWidth;
     if (lb.pinned) {
       const top = lbSec.getBoundingClientRect().top;
-      const p = lb.run > 0 ? clamp(-top / lb.run, 0, 1) : 0;
+      const p = lb.run > 0 ? clamp((lb.stick - top) / lb.run, 0, 1) : 0;
       lb.p = p; view0 = p * lb.travel;
       lbTrack.style.transform = `translate3d(${(-view0).toFixed(1)}px,0,0)`;
     } else {
@@ -65,7 +82,7 @@
     if (lb.pinned) {
       const p = clamp((f._cx - innerWidth / 2) / (lb.travel || 1), 0, 1);
       const secTop = scrollY + lbSec.getBoundingClientRect().top;
-      scrollTo({ top: secTop + p * lb.run, behavior });
+      scrollTo({ top: secTop - lb.stick + p * lb.run, behavior });
     } else {
       lbTrack.scrollTo({ left: f._cx - lbTrack.clientWidth / 2, behavior });
     }
@@ -86,7 +103,7 @@
     lbPin.scrollLeft = 0;
     const p = clamp((f._cx - innerWidth / 2) / (lb.travel || 1), 0, 1);
     const secTop = scrollY + lbSec.getBoundingClientRect().top;
-    scrollTo({ top: secTop + p * lb.run, behavior: 'auto' });
+    scrollTo({ top: secTop - lb.stick + p * lb.run, behavior: 'auto' });
   });
   (mq.addEventListener ? mq.addEventListener('change', modeCheck) : mq.addListener(modeCheck));
   addEventListener('resize', measure);

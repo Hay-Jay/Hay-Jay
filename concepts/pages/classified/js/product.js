@@ -1,5 +1,5 @@
-/* PRODUCT — a plate. The page is server-rendered; this adds the gallery stage, the option chips
-   (variant -> price, availability, cart permalink) and "Develop colour". */
+/* PRODUCT — an asset dossier. The page is server-rendered; this adds the gallery stage, the option chips
+   (variant -> price, availability, cart permalink, availability stamp) and "Declassify photo". */
 (() => {
   'use strict';
   const MC = window.MC, { $, $$, fmt, pad, esc } = MC;
@@ -11,7 +11,7 @@
   const sel = data.sel.slice();
   let chosen = false; // until the shopper picks something, a ranged price keeps its "From"
   const variantFor = () => data.variants.find(v => v.o.length === sel.length && v.o.every((o, i) => o === sel[i]));
-  const buy = $('#buy'), buyT = $('#buyT'), priceEl = $('#price'), stockEl = $('#stock');
+  const buy = $('#buy'), buyT = $('#buyT'), priceEl = $('#price'), stockEl = $('#stock'), stampEl = $('#stamp');
   function sync() {
     const v = variantFor();
     $$('.chip').forEach(ch => {
@@ -22,13 +22,14 @@
     $$('fieldset.opt').forEach(fs => { const b = $('legend b', fs); if (b) b.textContent = sel[+fs.dataset.o] || ''; });
     const can = !!(v && v.a);
     if (buy && buy.tagName === 'A') {
-      if (can) { buy.href = `${STORE}/cart/${v.id}:1`; buy.removeAttribute('aria-disabled'); buyT.textContent = 'Add to bag'; }
-      else { buy.removeAttribute('href'); buy.setAttribute('aria-disabled', 'true'); buyT.textContent = 'Sold out'; }
+      if (can) { buy.href = `${STORE}/cart/${v.id}:1`; buy.removeAttribute('aria-disabled'); buyT.textContent = 'Requisition: Add to bag'; }
+      else { buy.removeAttribute('href'); buy.setAttribute('aria-disabled', 'true'); buyT.textContent = 'Requisition denied: sold out'; }
     }
     if (priceEl) priceEl.innerHTML = `${esc(data.range && !chosen ? 'From ' + fmt(data.min) : fmt(v ? v.p : data.min))}<small>CAD</small>`;
     if (stockEl && data.variants.some(x => x.a)) {
       stockEl.classList.toggle('out', !can); stockEl.classList.toggle('in', can);
       $('span', stockEl).textContent = can ? 'In stock' : 'Sold out';
+      if (stampEl) { stampEl.classList.toggle('ok', can); stampEl.classList.toggle('oos', !can); stampEl.textContent = can ? 'Approved for field use' : 'Out of stock'; }
     }
   }
   // picking a value keeps the other choices when that variant exists and is in stock; otherwise the other choices
@@ -96,11 +97,12 @@
   addEventListener('scroll', () => { if (!pinRaf) pinRaf = requestAnimationFrame(pinCheck); }, { passive: true });
   pinCheck();
 
-  // ---- Develop colour: the keyboard- and touch-friendly twin of the lens -------------------------
-  const dev = $('#dev');
+  // ---- Declassify photo: the keyboard- and touch-friendly twin of the lens -------------------------
+  const dev = $('#dev'), devT = $('#devT');
   if (dev) dev.addEventListener('click', () => {
     const on = dev.getAttribute('aria-pressed') !== 'true';
     dev.setAttribute('aria-pressed', String(on));
+    if (devT) devT.textContent = on ? 'Re-classify photo' : 'Declassify photo';
     $$('.shot .xp').forEach(x => x.classList.toggle('dev', on));
     MC.lensKill();
   });

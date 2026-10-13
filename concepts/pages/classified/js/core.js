@@ -1,11 +1,12 @@
-/* MONOCHROME® — NEGATIVE (multi-page). Behaviour shared by every page:
-   links (MC.url), invert toggle, contents overlay + find, exposure lens, reveals, tickers, counters,
-   running-head tone, prefetch. Page-specific code lives in shop.js, product.js, lookbook.js, contact.js. */
+/* MONOCHROME® — CLASSIFIED (multi-page). Behaviour shared by every page (a work of fiction, see the footer):
+   links (MC.url), the DECLASSIFY toggle (redaction bars), stamps + reveals, the declassify lens on photographs,
+   live camera clocks, tickers, counters, the file index + search overlay, the once-per-session intro on the briefing,
+   prefetch. Page-specific code lives in shop.js, product.js and lookbook.js. */
 (() => {
   'use strict';
 
   // ---- Site helpers ----------------------------------------------------------
-  // window.MC = {root, idx} is written into every page's <head> by the generator:
+  // window.MC = {root, idx, page} is written into every page's <head> by the generator:
   // root is the relative path back to the site root ('', '../', '../../'), idx is '' (clean URLs) or 'index.html' (preview build).
   const MC = window.MC = window.MC || { root: '', idx: '' };
   clearTimeout(window.__mcRv); // core is running: the reveal failsafe is no longer needed
@@ -46,20 +47,20 @@
     if (img && img.tagName === 'IMG' && img.classList.contains('ph')) img.style.visibility = 'hidden';
   }, true);
 
-  // ---- Reveals (always released: observer + failsafe) -------------------------
-  const rvEls = $$('.rv, .rv-lines');
+  // ---- Reveals + stamps (always released: observer + failsafe) -------------------
+  // .rv fades up; .stamp thunks on when it comes into view. Both are an entrance, never a gate.
+  const rvEls = $$('.rv, .stamp');
   const rvIo = 'IntersectionObserver' in window
     ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); rvIo.unobserve(e.target); } }), { rootMargin: '0px 0px -5% 0px', threshold: 0.05 })
     : null;
   rvEls.forEach(el => (rvIo && !reduce) ? rvIo.observe(el) : el.classList.add('in'));
-  // the observer can lag behind a fast scroll, so the scroll position itself also releases whatever has come into view
   const releaseVisible = () => rvEls.forEach(el => {
     if (el.classList.contains('in')) return;
     const r = el.getBoundingClientRect();
     if (r.top < innerHeight * 0.96 && r.bottom > 0) el.classList.add('in');
   });
   // guaranteed fallback: whatever the visitor has not scrolled to is released a few seconds after load,
-  // so every page is complete at rest (the reveals are an entrance, never a gate)
+  // so every page is complete at rest
   const releaseAll = () => rvEls.forEach(el => el.classList.add('in'));
   setTimeout(releaseVisible, 1200);
   addEventListener('load', () => { setTimeout(releaseVisible, 400); setTimeout(releaseAll, 2600); });
@@ -108,37 +109,48 @@
     statEls.forEach(el => cio.observe(el));
   }
 
-  // ---- Running head: its tone follows the spread (paper or ink) under it ---------------
-  const bar = $('#bar');
-  const spreads = $$('.spread[data-tone]');
-  let toneRaf = 0, lastTone = null;
-  function toneUpdate() {
-    toneRaf = 0;
-    const probe = 23; let hit = null;
-    for (const s of spreads) { const r = s.getBoundingClientRect(); if (r.top <= probe && r.bottom > probe) { hit = s; break; } }
-    if (!hit) return;
-    const t = hit.classList.contains('paper') ? 'paper' : 'ink';
-    if (t !== lastTone) { lastTone = t; bar.classList.toggle('tone-paper', t === 'paper'); }
-  }
-  const toneQueue = () => { if (!toneRaf) toneRaf = requestAnimationFrame(toneUpdate); };
-  if (bar && spreads.length) { addEventListener('scroll', toneQueue, { passive: true }); addEventListener('resize', toneQueue); toneUpdate(); }
-
-  // ---- Paper / ink toggle: global, remembered ------------------------------------------
-  const inv = $('#invert');
-  if (inv) {
-    inv.setAttribute('aria-pressed', String(root.classList.contains('neg')));
-    inv.addEventListener('click', () => {
-      const on = root.classList.toggle('neg');
-      inv.setAttribute('aria-pressed', String(on));
-      try { localStorage.setItem('mc-neg', on ? '1' : '0'); } catch { /* storage blocked: the toggle still works for this page */ }
-    });
-    addEventListener('storage', e => {
-      if (e.key !== 'mc-neg') return;
-      const on = e.newValue === '1'; root.classList.toggle('neg', on); inv.setAttribute('aria-pressed', String(on));
-    });
+  // ---- Live camera clocks: HH:MM:SS counting up (static with reduced motion) ------------------------
+  const clocks = $$('[data-clock]');
+  if (clocks.length && !reduce) {
+    const parse = s => { const m = s.trim().match(/^(\d+):(\d+):(\d+)$/); return m ? (+m[1] * 3600 + +m[2] * 60 + +m[3]) : 0; };
+    clocks.forEach(c => { c._t = parse(c.textContent); });
+    setInterval(() => {
+      if (document.hidden) return;
+      clocks.forEach(c => { c._t = (c._t + 1) % 86400; c.textContent = `${pad(Math.floor(c._t / 3600))}:${pad(Math.floor(c._t / 60) % 60)}:${pad(c._t % 60)}`; });
+    }, 1000);
   }
 
-  // ---- Exposure lens: true colour under the pointer (hold on touch) ------------------------
+  // ---- DECLASSIFY: lift every redaction bar (remembered, guarded) -------------------------------------
+  // Redaction bars only ever cover decorative secondary text. Names, prices, sizes and availability are never redacted.
+  const dc = $('#declass');
+  const popStamp = () => {
+    if (reduce) return;
+    $$('.stamp-pop').forEach(n => n.remove());
+    const s = document.createElement('span');
+    s.className = 'stamp white stamp-pop in'; s.setAttribute('aria-hidden', 'true'); s.textContent = 'Declassified';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 1600);
+  };
+  function setDeclass(on, announce) {
+    root.classList.toggle('declass', on);
+    if (dc) dc.setAttribute('aria-pressed', String(on));
+    if (announce && on) popStamp();
+  }
+  if (dc) {
+    setDeclass(root.classList.contains('declass'), false);
+    dc.addEventListener('click', () => {
+      const on = !root.classList.contains('declass');
+      setDeclass(on, true);
+      try { localStorage.setItem('mc-declass', on ? '1' : '0'); } catch { /* storage blocked: the toggle still works for this page */ }
+    });
+    addEventListener('storage', e => { if (e.key === 'mc-declass') setDeclass(e.newValue === '1', false); });
+  }
+  // tap (or Enter / Space) on a single bar lifts or drops just that bar
+  document.addEventListener('click', e => { const r = e.target.closest && e.target.closest('.redact'); if (r) r.classList.toggle('lift'); });
+  document.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('redact')) { e.preventDefault(); e.target.classList.toggle('lift'); }
+  });
+
+  // ---- Declassify lens: true colour under the pointer (hold on touch) ----------------------------------
   const lensMap = new WeakMap();
   let lens = null, lastPt = { x: 0, y: 0 }, suppressClick = 0;
   function lensFor(xp) {
@@ -234,15 +246,7 @@
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.xp') && (tp || noHover())) e.preventDefault(); });
   document.addEventListener('click', e => { if (suppressClick > performance.now()) { e.preventDefault(); e.stopPropagation(); } }, true);
 
-  // ---- Drifting numerals -------------------------------------------------------------------
-  const drifts = $$('[data-drift]');
-  if (drifts.length && !reduce) {
-    let dRaf = 0;
-    const dr = () => { dRaf = 0; drifts.forEach(el => { const r = el.parentNode.getBoundingClientRect(); if (r.bottom < -200 || r.top > innerHeight + 200) return; el.style.transform = `translate3d(${(r.top * parseFloat(el.dataset.drift) * 1.4).toFixed(1)}px,0,0)`; }); };
-    addEventListener('scroll', () => { if (!dRaf) dRaf = requestAnimationFrame(dr); }, { passive: true }); dr();
-  }
-
-  // ---- Contents overlay + command bar (find a page or a piece) -------------------------------
+  // ---- File index overlay + command bar (search the archive for a page or an asset) -----------------------
   const menu = $('#menu'), menuBtn = $('#menuBtn'), jump = $('#jump'), jList = $('#jumpList'), jNone = $('#jumpNone');
   let menuT = 0, catalog = null, catPromise = null, jItems = [], jSel = -1;
   const menuOpen = () => !menu.hidden && menu.classList.contains('open');
@@ -262,18 +266,17 @@
     if (restore) menuBtn.focus({ preventScroll: true });
   }
   function pageEntries() {
-    const nav = $$('.menu-list a', menu).map(a => ({ type: 'Page', title: a.querySelector('b').textContent, href: a.getAttribute('href'), meta: a.querySelector('.mono:last-child') ? a.querySelector('i').textContent : '', kw: '' }));
+    const KW = ['briefing cover home operation mission', 'index store buy products collection register assets equipment shop', 'photos photographs film strip evidence exhibits surveillance lookbook', 'story brand formula briefing objectives rules engagement about', 'delivery nigeria canada countries returns refund distribution routes extraction shipping', 'questions help answers debrief faq transcript', 'email instagram report secure channel contact'];
+    const nav = $$('.menu-list a', menu).map((a, i) => ({ type: 'Page', title: a.querySelector('b').textContent, href: a.getAttribute('href'), meta: a.querySelector('i') ? a.querySelector('i').textContent : '', kw: KW[i] || '' }));
     const extra = [
-      ['Page', 'Tops', 'shop/?c=top', 'The Index', 'shirts tee jersey hoodie sweatshirt crop'],
-      ['Page', 'Bottoms', 'shop/?c=bottom', 'The Index', 'cargo shorts skirt pants'],
-      ['Page', 'Objects', 'shop/?c=accessory', 'The Index', 'rings chains necklace jewellery jewelry accessories'],
-      ['Page', 'Gift cards', 'shop/?c=gift', 'The Index', 'gift card voucher present'],
-      ['Page', 'Returns & exchanges', 'shipping/#returns', 'Distribution', 'refund return exchange policy'],
-      ['Page', 'Size guidance', 'shipping/#sizing', 'Distribution', 'size sizing fit measurements'],
-      ['Page', 'Subscribe', 'contact/#subscribe', 'Colophon', 'newsletter email drop alerts signup']
+      ['Page', 'Tops', 'shop/?c=top', 'Asset register', 'shirts tee jersey hoodie sweatshirt crop'],
+      ['Page', 'Bottoms', 'shop/?c=bottom', 'Asset register', 'cargo shorts skirt pants'],
+      ['Page', 'Hardware', 'shop/?c=accessory', 'Asset register', 'rings chains necklace jewellery jewelry accessories objects'],
+      ['Page', 'Gift cards', 'shop/?c=gift', 'Asset register', 'gift card voucher present'],
+      ['Page', 'Returns & exchanges', 'shipping/#returns', 'Extraction routes', 'refund return exchange policy'],
+      ['Page', 'Size guidance', 'shipping/#sizing', 'Extraction routes', 'size sizing fit measurements'],
+      ['Page', 'Join the network', 'contact/#subscribe', 'Report in', 'newsletter email drop alerts signup subscribe']
     ].map(([type, title, href, meta, kw]) => ({ type, title, href: MC.url(href), meta, kw }));
-    const kwMap = { shop: 'index store buy products collection', lookbook: 'photos photographs film strip', about: 'story brand formula', shipping: 'delivery nigeria canada countries returns refund distribution', faq: 'questions help letters answers', contact: 'email instagram colophon' };
-    nav.forEach(n => { const k = Object.keys(kwMap).find(x => n.title.toLowerCase() === x); if (k) n.kw = kwMap[k]; });
     const ext = [
       { type: 'Store', title: 'Bag', href: STORE + '/cart', meta: 'Opens the store', kw: 'cart checkout' },
       { type: 'Social', title: '@monochrome.ca', href: 'https://www.instagram.com/monochrome.ca/', meta: 'Instagram', kw: 'instagram social' },
@@ -286,7 +289,7 @@
     catPromise = new Promise(resolve => {
       const done = () => {
         const D = window.MONOCHROME_DATA;
-        const prods = D ? D.products.map((p, i) => ({ type: 'Piece', title: p.title.trim(), href: MC.url(`products/${p.handle}/`), meta: (p.priceMax > p.price ? 'From ' : '') + MC.fmt(p.price) + (p.available ? '' : ' — sold out'), kw: `${p.handle} ${p.category} ${p.type || ''} ${p.sizes.join(' ')}`.toLowerCase() })) : [];
+        const prods = D ? D.products.map(p => ({ type: 'Asset', title: p.title.trim(), href: MC.url(`products/${p.handle}/`), meta: (p.priceMax > p.price ? 'From ' : '') + MC.fmt(p.price) + (p.available ? '' : ' — sold out'), kw: `${p.handle} ${p.category} ${p.type || ''} ${p.sizes.join(' ')}`.toLowerCase() })) : [];
         catalog = [...pageEntries(), ...prods]; resolve(catalog);
         if (jump && jump.value) renderJump();
       };
@@ -353,9 +356,30 @@
       if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === '/') { e.preventDefault(); openMenu(true); }
       else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openMenu(true); }
     });
-    // arriving through a link that opens the contents overlay (#contents on pages with no JS is the footer)
     menuBtn.addEventListener('pointerenter', () => { loadCatalog(); }, { once: true });
   }
+
+  // ---- Intro: IDENTITY VERIFIED / CLEARANCE GRANTED. Briefing page only, once per session, skippable, never blocks ------
+  // The overlay ignores the pointer (pointer-events: none) so nothing underneath is ever blocked; any key, tap, click or scroll
+  // dismisses it, it removes itself after a few seconds, and it is not created at all with reduced motion.
+  function intro() {
+    if (reduce || MC.page !== 'home' || location.hash) return;
+    try {
+      if (sessionStorage.getItem('mc-intro') === '1') return;
+      sessionStorage.setItem('mc-intro', '1');
+    } catch { return; } // no storage, no way to keep it to once per session: skip it
+    const arcs = [[10, 14], [17, 22], [24, 30], [31, 38], [38, 46], [45, 54]].map(([rx, ry], i) => `<ellipse cx="60" cy="76" rx="${rx}" ry="${ry}" style="--i:${i}"/>`).join('');
+    const el = document.createElement('div');
+    el.className = 'intro'; el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `<div class="in-box"><svg class="in-fp" viewBox="0 0 120 152" focusable="false"><g>${arcs}</g><path d="M60 22v108M36 40c10-8 38-8 48 0M32 112c14 10 42 10 56 0" /></svg><i class="in-scan"></i>
+      <p class="in-l1">Identity <b>verified</b></p><p class="in-l2">Clearance <b>granted</b></p><p class="in-l3">Welcome, operative.</p><i class="in-bar"></i><span class="in-skip">Press any key to skip</span></div>`;
+    document.body.appendChild(el);
+    let gone = false;
+    const off = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 500); ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => removeEventListener(t, off, true)); };
+    ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => addEventListener(t, off, { capture: true, passive: true }));
+    setTimeout(off, 2900);
+  }
+  intro();
 
   // ---- Instant prefetch: warm the page under the pointer / finger / focus -----------------------
   const warmed = new Set();
