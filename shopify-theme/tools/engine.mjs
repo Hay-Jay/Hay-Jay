@@ -160,6 +160,10 @@ export class Shop {
       globals: {}
     });
 
+    // app blocks ({% render block %}) cannot render here: they become a visible comment
+    const base = liquid.options.fs, fix = t => t.replace(/\{%-?\s*render\s+block\s*-?%\}/g, '<!-- app block -->');
+    liquid.options.fs = { ...base, readFile: async f => fix(await base.readFile(f)), readFileSync: f => fix(base.readFileSync(f)) };
+
     // ---- filters
     const f = (n, fn) => liquid.registerFilter(n, fn);
     const asset = n => `/cdn/shop/t/1/assets/${n}?v=1`;

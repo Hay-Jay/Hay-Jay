@@ -1,0 +1,83 @@
+{%- liquid
+  if section.settings.product != blank
+    assign mag = section.settings.product
+  else
+    capture mag_handle
+      render 'mc-magazine'
+    endcapture
+    if mag_handle != blank
+      assign mag = all_products[mag_handle]
+    endif
+  endif
+-%}
+{%- if mag and mag.available -%}
+  {%- liquid
+    capture facts
+      render 'mc-magfacts', product: mag
+    endcapture
+    assign fp = facts | split: '~'
+    assign vol = fp[0]
+    assign issue = fp[1]
+    assign pages = fp[2]
+    assign blurb = fp[3]
+    assign mtitle = mag.title | remove: 'MONOCHROME Magazine — ' | remove: ' (Print)' | strip
+    assign line = 'Print'
+    if vol != blank
+      assign line = line | append: ' — Vol. ' | append: vol
+    endif
+    if issue != blank
+      assign line = line | append: ' — Issue ' | append: issue
+    endif
+    if pages != blank
+      assign line = line | append: ' — ' | append: pages | append: ' pages'
+    endif
+    assign variant = mag.selected_or_first_available_variant
+    capture fno
+      render 'mc-fileno', product: mag
+    endcapture
+    capture raw
+      render 'mc-countries'
+    endcapture
+    assign countries = raw | split: ';'
+    assign ng_listed = false
+    if raw contains '|NG|'
+      assign ng_listed = true
+    endif
+  -%}
+<!-- INCOMING INTEL: the magazine -------------------------------------------------------------- -->
+<section class="spread dark mag" id="vision" aria-labelledby="magH">
+  <div class="wrap mag-grid">
+    <div class="mag-copy">
+      <p class="kick mono"><b class="rec" aria-hidden="true"></b> {{ section.settings.kicker | escape }}</p>
+      <h2 class="h2 rv" id="magH">{{ mtitle | escape }}</h2>
+      <p class="mag-sub mono">{{ line | escape }}</p>
+      <p class="mag-blurb rv">{{ blurb | escape }}</p>
+      <p class="mag-cta">
+        <a class="btn" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">{{ section.settings.button | escape }}<i class="arr" aria-hidden="true"></i></a>
+        <a class="btn ghost" href="{{ mag.url }}">Open the file</a>
+      </p>
+      <p class="mag-note mono"><span>{{ variant.price | money }} CAD</span><span>Printed copy</span><span>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria included{% endif %}. Rate calculated at checkout</span></p>
+    </div>
+    <figure class="mag-fig">
+      <a class="mag-cover" href="{{ mag.url }}" aria-label="Open {{ mag.title | strip | escape }}">
+        <span class="mag-clip clip" aria-hidden="true"></span>
+        {% render 'mc-img', image: mag.featured_image, alt: mag.title, class: 'mag-img', sizes: '(min-width:900px) 34vw, 78vw', widths: '480,720,1080' %}
+        <span class="stamp white sm mag-stamp" style="--r:-9deg" aria-hidden="true">New intel</span>
+      </a>
+      <figcaption class="mono">Exhibit M / {{ fno }}. The one file we declassified in full colour.</figcaption>
+    </figure>
+  </div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Magazine (The Vision Issue)",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Magazine product", "info": "Leave empty to use the first available product of type Magazine." },
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "Incoming transmission" },
+    { "type": "text", "id": "button", "label": "Order button", "default": "Requisition a copy" }
+  ],
+  "presets": [{ "name": "Magazine (The Vision Issue)" }]
+}
+{% endschema %}

@@ -1,0 +1,72 @@
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign n_pieces = collections['all'].products_count
+  assign n_top = 0
+  assign n_bottom = 0
+  assign n_acc = 0
+  assign lo = 0
+  assign hi = 0
+  for p in collections['all'].products
+    capture cls
+      render 'mc-class', product: p
+    endcapture
+    case cls
+      when 'top'
+        assign n_top = n_top | plus: 1
+      when 'bottom'
+        assign n_bottom = n_bottom | plus: 1
+      when 'accessory'
+        assign n_acc = n_acc | plus: 1
+    endcase
+    if cls != 'gift'
+      if lo == 0 or p.price_min < lo
+        assign lo = p.price_min
+      endif
+      if p.price_max > hi
+        assign hi = p.price_max
+      endif
+    endif
+  endfor
+  assign lo_t = lo | money_without_currency | remove: '.00'
+  assign hi_t = hi | money_without_currency | remove: '.00'
+-%}
+<!-- 04 INTEL SUMMARY --------------------------------------------------------------------- -->
+<section class="spread paper intel" id="intel" aria-labelledby="intelH">
+  <div class="wrap">
+    <header class="sec-h">
+      <p class="kick mono">{{ section.settings.kicker | escape }}</p>
+      <h2 class="h2 rv" id="intelH">{{ section.settings.heading_a | escape }} <span class="strike-in">{{ section.settings.heading_b | escape }}</span></h2>
+    </header>
+    <ul class="stats" aria-label="This operation in numbers">
+      <li class="rv"><b class="num" data-to="{{ n_pieces }}">{{ n_pieces }}</b><span class="mono">Assets on file</span></li>
+      <li class="rv"><b class="num" data-to="2" data-pad="2">02</b><span class="mono">Tones. Black and white</span></li>
+      <li class="rv"><b class="num" data-to="{{ countries.size }}">{{ countries.size }}</b><span class="mono">Authorised delivery zones</span></li>
+      <li class="rv"><b class="num" data-to="0" data-pad="2">00</b><span class="mono">Colours. We checked</span></li>
+    </ul>
+    <div class="intel-memo">
+      <p class="rv"><span class="mono">Finding 1.</span> {{ section.settings.finding_1 | escape }}</p>
+      <p class="rv"><span class="mono">Finding 2.</span> {{ section.settings.finding_2 | escape }} <a class="mono link-line" href="{{ section.settings.link_url | default: '/pages/about' }}">{{ section.settings.link_text | escape }}<span class="arr" aria-hidden="true"></span></a></p>
+      <p class="rv mono intel-meta"><span>Price range: CAD {{ lo_t }} – {{ hi_t }}</span><span>Chrome supplier: <span class="redact" tabindex="0">{{ section.settings.redacted | escape }}</span></span><span>Tops {{ n_top }} / Bottoms {{ n_bottom }} / Hardware {{ n_acc }}</span></p>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Intel summary",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§3 — Intel summary" },
+    { "type": "text", "id": "heading_a", "label": "Heading", "default": "Wear the" },
+    { "type": "text", "id": "heading_b", "label": "Heading (struck through when it scrolls in)", "default": "unknown" },
+    { "type": "textarea", "id": "finding_1", "label": "Finding 1", "default": "Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own." },
+    { "type": "textarea", "id": "finding_2", "label": "Finding 2", "default": "Made in small runs, so what you wear is not on everyone else. Hardware, objects and details that catch the light." },
+    { "type": "text", "id": "link_text", "label": "Link text", "default": "Read the full briefing" },
+    { "type": "url", "id": "link_url", "label": "Link" },
+    { "type": "text", "id": "redacted", "label": "Redacted joke", "default": "Classified. Obviously." }
+  ],
+  "presets": [{ "name": "Intel summary" }]
+}
+{% endschema %}

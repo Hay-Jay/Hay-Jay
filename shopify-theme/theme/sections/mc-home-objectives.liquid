@@ -1,0 +1,48 @@
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign n_pieces = collections['all'].products_count
+-%}
+<!-- 02 OBJECTIVES --------------------------------------------------------------------- -->
+<section class="spread paper objsec" id="objectives" aria-labelledby="objH">
+  <div class="wrap">
+    <header class="sec-h">
+      <p class="kick mono">{{ section.settings.kicker | escape }}</p>
+      <h2 class="h2 rv" id="objH">{{ section.settings.heading | escape }}</h2>
+      <p class="sec-sub rv">{{ section.settings.sub | escape }} <span class="redact" tabindex="0">{{ section.settings.redacted | escape }}</span></p>
+    </header>
+    <ol class="obj-list">
+      {%- for block in section.blocks -%}
+        <li class="rv" {{ block.shopify_attributes }}><a class="obj" href="{{ block.settings.url | default: '/' }}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective {{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><b class="ob-t">{{ block.settings.title | escape }}</b><span class="ob-d">{{ block.settings.text | replace: '{pieces}', n_pieces | replace: '{countries}', countries.size | escape }}</span><span class="ob-go mono">{{ block.settings.link_text | escape }}<i class="arr" aria-hidden="true"></i></span></a></li>
+      {%- endfor -%}
+    </ol>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Mission objectives",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§2 — Mission objectives" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Your objectives" },
+    { "type": "text", "id": "sub", "label": "Intro", "default": "Six tasks, any order. Every one of them is a link." },
+    { "type": "text", "id": "redacted", "label": "Redacted joke", "default": "Agent Chrome is watching." }
+  ],
+  "blocks": [
+    {
+      "type": "objective",
+      "name": "Objective",
+      "limit": 10,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Acquire your equipment" },
+        { "type": "textarea", "id": "text", "label": "Text ({pieces}, {countries} = live numbers)", "default": "The asset register: {pieces} assets across tops, bottoms, hardware and gift cards. Filter, sort, search." },
+        { "type": "text", "id": "link_text", "label": "Link text", "default": "Asset register" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Mission objectives" }]
+}
+{% endschema %}
