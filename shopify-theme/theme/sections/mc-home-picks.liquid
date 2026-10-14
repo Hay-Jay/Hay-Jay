@@ -1,3 +1,4 @@
+{%- assign tk_pieces = '{pieces}' -%}
 {%- liquid
   capture ord
     render 'mc-order'
@@ -21,7 +22,7 @@
         {%- endfor -%}
       </div>
     </div>
-    <p class="pk-end"><a class="btn-line mono" href="{{ routes.all_products_collection_url }}">{{ section.settings.link_text | replace: '{pieces}', n_pieces | escape }}<span class="arr" aria-hidden="true"></span></a></p>
+    <p class="pk-end"><a class="btn-line mono" href="{{ routes.all_products_collection_url }}">{{ section.settings.link_text | replace: tk_pieces, n_pieces | escape }}<span class="arr" aria-hidden="true"></span></a></p>
   </div>
 </section>
 

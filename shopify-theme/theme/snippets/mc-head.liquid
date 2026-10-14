@@ -1,3 +1,4 @@
+{%- assign tk_search_term_string = '{search_term_string}' -%}
 {%- comment -%} <title>, description, canonical, social tags, structured data for the whole site. Param: key (page key from the layout). {%- endcomment -%}
 {%- liquid
   assign site_name = 'MONOCHROME®'
@@ -52,6 +53,6 @@
 </script>
 <script type="application/ld+json">
 { "@context": "https://schema.org", "@type": "WebSite", "name": "MONOCHROME®", "url": {{ shop.url | append: '/' | json }},
-  "potentialAction": { "@type": "SearchAction", "target": {{ shop.url | append: '/search?q=' | append: '{search_term_string}' | json }}, "query-input": "required name=search_term_string" } }
+  "potentialAction": { "@type": "SearchAction", "target": {{ shop.url | append: '/search?q=' | append: tk_search_term_string | json }}, "query-input": "required name=search_term_string" } }
 </script>
 {%- endif %}

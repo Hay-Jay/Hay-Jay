@@ -1,3 +1,5 @@
+{%- assign tk_countries = '{countries}' -%}
+{%- assign tk_pieces = '{pieces}' -%}
 {%- liquid
   capture raw
     render 'mc-countries'
@@ -15,7 +17,7 @@
     </header>
     <ol class="obj-list">
       {%- for block in section.blocks -%}
-        <li class="rv" {{ block.shopify_attributes }}><a class="obj" href="{{ block.settings.url | default: '/' }}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective {{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><b class="ob-t">{{ block.settings.title | escape }}</b><span class="ob-d">{{ block.settings.text | replace: '{pieces}', n_pieces | replace: '{countries}', countries.size | escape }}</span><span class="ob-go mono">{{ block.settings.link_text | escape }}<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv" {{ block.shopify_attributes }}><a class="obj" href="{{ block.settings.url | default: '/' }}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective {{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><b class="ob-t">{{ block.settings.title | escape }}</b><span class="ob-d">{{ block.settings.text | replace: tk_pieces, n_pieces | replace: tk_countries, countries.size | escape }}</span><span class="ob-go mono">{{ block.settings.link_text | escape }}<i class="arr" aria-hidden="true"></i></span></a></li>
       {%- endfor -%}
     </ol>
   </div>

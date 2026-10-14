@@ -1,3 +1,4 @@
+{%- assign tk_countries = '{countries}' -%}
 {%- liquid
   capture raw
     render 'mc-countries'
@@ -13,7 +14,7 @@
     </header>
     <ol class="objs">
       {%- for block in section.blocks -%}
-        <li class="rv" {{ block.shopify_attributes }}><span class="ob-n">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><div><b>{{ block.settings.title | escape }}</b><p>{{ block.settings.text | replace: '{countries}', countries.size | escape }}</p></div><i class="tick" aria-hidden="true"></i></li>
+        <li class="rv" {{ block.shopify_attributes }}><span class="ob-n">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><div><b>{{ block.settings.title | escape }}</b><p>{{ block.settings.text | replace: tk_countries, countries.size | escape }}</p></div><i class="tick" aria-hidden="true"></i></li>
       {%- endfor -%}
     </ol>
   </div>

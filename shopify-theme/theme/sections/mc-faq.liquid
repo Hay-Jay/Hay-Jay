@@ -1,3 +1,5 @@
+{%- assign tk_countries = '{countries}' -%}
+{%- assign tk_giftamounts = '{giftamounts}' -%}
 {%- liquid
   capture raw
     render 'mc-countries'
@@ -31,7 +33,7 @@
       <div class="faq-list">
         {%- for block in section.blocks -%}
           {%- assign qn = forloop.index | prepend: '0' | slice: -2, 2 -%}
-          <details{% if forloop.first %} open{% endif %} {{ block.shopify_attributes }}><summary><span class="mono q-no">Q.{{ qn }}</span><b>{{ block.settings.question | escape }}</b><i class="pm" aria-hidden="true"></i></summary><div class="ans"><span class="mono a-lbl" aria-hidden="true">A.{{ qn }}</span>{{ block.settings.answer | replace: '{countries}', countries.size | replace: '{giftamounts}', gift_amounts }}</div></details>
+          <details{% if forloop.first %} open{% endif %} {{ block.shopify_attributes }}><summary><span class="mono q-no">Q.{{ qn }}</span><b>{{ block.settings.question | escape }}</b><i class="pm" aria-hidden="true"></i></summary><div class="ans"><span class="mono a-lbl" aria-hidden="true">A.{{ qn }}</span>{{ block.settings.answer | replace: tk_countries, countries.size | replace: tk_giftamounts, gift_amounts }}</div></details>
         {%- endfor -%}
       </div>
       <div class="fq-foot">
