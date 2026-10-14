@@ -194,6 +194,8 @@ export class Shop {
     f('within', (u, col) => `/collections/${col.handle}${u}`);
     f('default_errors', () => 'Please check the form.');
     f('url_param_escape', s => encodeURIComponent(s));
+    // Shopify's Ruby Liquid divides integers as integers (7 | divided_by: 2 is 3); LiquidJS would give 3.5
+    f('divided_by', (a, b) => { const isInt = v => /^-?\d+$/.test(String(v).trim()); const x = Number(a), y = Number(b); if (!y) throw new Error('divided by 0'); return isInt(a) && isInt(b) ? Math.floor(x / y) : x / y; });
     f('format_code', c => String(c || '').replace(/(.{4})/g, '$1 ').trim());
     f('payment_button', () => '<div class="shopify-payment-button"><button class="shopify-payment-button__button" type="button">Buy it now</button></div>');
     f('payment_terms', () => '');
