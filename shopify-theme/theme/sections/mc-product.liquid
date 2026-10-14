@@ -154,13 +154,13 @@
             {%- endfor -%}
           </div>
         {%- endif -%}
-        {%- for block in section.blocks -%}
+        <div class="pl-buy">
+          {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when '@app' -%}
               <div class="pl-app" {{ block.shopify_attributes }}>{% render block %}</div>
           {%- endcase -%}
         {%- endfor -%}
-        <div class="pl-buy">
           <div class="pl-qtyrow">
             <label class="mono opt-name" for="qty-{{ section.id }}">Quantity</label>
             <div class="qty pl-qty" data-pqty>

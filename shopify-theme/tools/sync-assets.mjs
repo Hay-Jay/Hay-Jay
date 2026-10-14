@@ -68,6 +68,12 @@ core = patch(core, [
       // the live catalogue: /collections/all?view=catalog (templates/collection.catalog.liquid), so it is always current
       fetch(MC.catalogUrl || '/collections/all?view=catalog', { headers: { Accept: 'application/json' } }).then(r => r.json()).then(done).catch(() => done([]));`],
   [`    const wait = noHover() ? 12 : 9;`, `    const wait = (+MC.magpopDelay || 9) + (noHover() ? 3 : 0);`],
+  // never warm a URL that changes something: cart permalinks and /cart/change links edit the bag on a GET, logout signs out
+  [`      u.hash = '';
+      if (u.href === location.href.split('#')[0] || warmed.has(u.href)) return;`,
+   `      u.hash = '';
+      if (['/cart/', '/account/logout', '/checkout', '/challenge', '/password'].some(x => u.pathname.startsWith(x)) || a.hasAttribute('data-no-warm')) return;
+      if (u.href === location.href.split('#')[0] || warmed.has(u.href)) return;`],
   [`    if (reduce || MC.page !== 'home' || location.hash) return;`, `    if (reduce || MC.page !== 'home' || location.hash || MC.intro === false) return;`],
 ], 'core.js');
 // never over the open bag

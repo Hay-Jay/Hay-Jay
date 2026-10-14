@@ -10,7 +10,8 @@ button.buy:disabled .arr { display: none; }
 .pl-qty { grid-template-columns: 44px 54px 44px; }
 .pl-err[hidden], .pl-pay[hidden], .pl-alert[hidden] { display: none; }
 .pl-pay { margin-top: 10px; }
-.pl-app { margin: 6px 0; }
+.pl-app { margin: 0 0 6px; }
+.pl-app:empty { display: none; }
 .pl-desc.rte p { margin: 0 0 .7em; }
 .pl-desc.rte p:last-child { margin-bottom: 0; }
 .pl-desc.rte ul, .pl-desc.rte ol { margin: 0 0 .7em 1.2em; padding: 0; list-style: disc; }

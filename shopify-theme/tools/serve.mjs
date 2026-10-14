@@ -21,6 +21,15 @@ const body = req => new Promise(r => { const c = []; req.on('data', d => c.push(
 const parseBody = (buf, type) => {
   const s = buf.toString('utf8');
   if (/json/.test(type || '')) { try { return JSON.parse(s); } catch { return {}; } }
+  const bd = /multipart\/form-data;\s*boundary=(?:"([^"]+)"|([^;]+))/.exec(type || '');
+  if (bd) {
+    const o = {};
+    for (const part of s.split('--' + (bd[1] || bd[2]))) {
+      const m = /name="([^"]+)"[^\r\n]*\r\n(?:[^\r\n]+\r\n)*\r\n([\s\S]*)\r\n$/.exec(part); if (!m) continue;
+      if (m[1].endsWith('[]')) (o[m[1]] ||= []).push(m[2]); else o[m[1]] = m[2];
+    }
+    return o;
+  }
   const o = {}; for (const [k, v] of new URLSearchParams(s)) { if (k.endsWith('[]')) (o[k] ||= []).push(v); else o[k] = v; } return o;
 };
 const props = o => { const p = {}; for (const [k, v] of Object.entries(o)) { const m = /^properties\[(.+)\]$/.exec(k); if (m) p[m[1]] = v; } return p; };
@@ -83,6 +92,8 @@ async function route(req, res) {
     if (query.sections || query.section_id) {
       if (query.sections) {
         const out = {};
+        const [base, ...rest] = tpl.split('.');
+        shop.query = query; shop.liquid.options.globals = shop.globals({ ...opts, template: { name: base, suffix: rest.join('.') } });
         for (const s of String(query.sections).split(',')) out[s] = await shop.renderSectionFile(s, s, null, {}, { global: true });
         return json(200, out);
       }

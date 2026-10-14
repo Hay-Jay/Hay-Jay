@@ -195,7 +195,7 @@ export class Shop {
     f('default_errors', () => 'Please check the form.');
     f('url_param_escape', s => encodeURIComponent(s));
     // Shopify's Ruby Liquid divides integers as integers (7 | divided_by: 2 is 3); LiquidJS would give 3.5
-    f('divided_by', (a, b) => { const isInt = v => /^-?\d+$/.test(String(v).trim()); const x = Number(a), y = Number(b); if (!y) throw new Error('divided by 0'); return isInt(a) && isInt(b) ? Math.floor(x / y) : x / y; });
+    f('divided_by', function (a, b) { const t = this.token && this.token.args && this.token.args[0]; const raw = t && t.getText ? t.getText() : String(b); const isInt = v => /^-?\d+$/.test(String(v).trim()); const x = Number(a), y = Number(b); if (!y) throw new Error('divided by 0'); return isInt(a) && isInt(raw) ? Math.floor(x / y) : x / y; });
     f('format_code', c => String(c || '').replace(/(.{4})/g, '$1 ').trim());
     f('payment_button', () => '<div class="shopify-payment-button"><button class="shopify-payment-button__button" type="button">Buy it now</button></div>');
     f('payment_terms', () => '');
@@ -400,7 +400,7 @@ export class Shop {
         content += await this.renderSectionFile(s.type, sid, s, g, {});
       }
     } else if (existsSync(liqFile)) {
-      content = await this.liquid.renderFile(`templates/${name}`, {});
+      content = await this.liquid.renderFile(`templates/${name}.liquid`, {});
       if (this.layoutOverride !== undefined) layout = this.layoutOverride;
     } else {
       this.warnings.error('template', `template ${name} not found`);

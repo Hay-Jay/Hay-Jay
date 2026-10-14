@@ -483,6 +483,7 @@
       const u = new URL(a.href, location.href);
       if (!/^https?:$/.test(u.protocol) || u.origin !== location.origin) return; // file:// cannot prefetch
       u.hash = '';
+      if (['/cart/', '/account/logout', '/checkout', '/challenge', '/password'].some(x => u.pathname.startsWith(x)) || a.hasAttribute('data-no-warm')) return;
       if (u.href === location.href.split('#')[0] || warmed.has(u.href)) return;
       warmed.add(u.href);
       const l = document.createElement('link'); l.rel = 'prefetch'; l.as = 'document'; l.href = u.href; document.head.appendChild(l);
