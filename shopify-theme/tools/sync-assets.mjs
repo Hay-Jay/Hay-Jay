@@ -77,7 +77,7 @@ core = patch(core, [
   [`    if (reduce || MC.page !== 'home' || location.hash) return;`, `    if (reduce || MC.page !== 'home' || location.hash || MC.intro === false) return;`],
   // money is in the shopper's currency (Shopify Markets converts from CAD); the layout passes its code as MC.currency
   [`  MC.fmt = v => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(v);`,
-   `  MC.fmt = v => { const c = MC.currency || 'CAD'; try { return new Intl.NumberFormat('en-CA', { style: 'currency', currency: c, currencyDisplay: 'narrowSymbol' }).format(v); } catch { return Number(v).toFixed(2) + ' ' + c; } };`],
+   `  MC.fmt = v => { const c = MC.currency || 'CAD'; try { return new Intl.NumberFormat('en', { style: 'currency', currency: c, currencyDisplay: 'narrowSymbol' }).format(v); } catch { return Number(v).toFixed(2) + ' ' + c; } };`],
   // Shopify image URLs are protocol-relative (//monochrome.com.ng/cdn/...): size them too, never download the original
   [`  MC.sized = (src, w) => !/^https?:/.test(src) ? src : \`\${src}\${src.includes('?') ? '&' : '?'}width=\${w}\`;`,
    `  MC.sized = (src, w) => { if (!/^(https?:)?\\/\\//.test(src)) return src; try { const u = new URL(src, location.href); u.searchParams.set('width', w); return u.href; } catch { return src; } };`],

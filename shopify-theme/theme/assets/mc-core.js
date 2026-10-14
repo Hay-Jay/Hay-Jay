@@ -25,7 +25,7 @@
   const $ = MC.$ = (s, r = document) => r.querySelector(s);
   const $$ = MC.$$ = (s, r = document) => [...r.querySelectorAll(s)];
   MC.esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  MC.fmt = v => { const c = MC.currency || 'CAD'; try { return new Intl.NumberFormat('en-CA', { style: 'currency', currency: c, currencyDisplay: 'narrowSymbol' }).format(v); } catch { return Number(v).toFixed(2) + ' ' + c; } };
+  MC.fmt = v => { const c = MC.currency || 'CAD'; try { return new Intl.NumberFormat('en', { style: 'currency', currency: c, currencyDisplay: 'narrowSymbol' }).format(v); } catch { return Number(v).toFixed(2) + ' ' + c; } };
   MC.clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   MC.pad = n => String(n).padStart(2, '0');
   MC.sized = (src, w) => { if (!/^(https?:)?\/\//.test(src)) return src; try { const u = new URL(src, location.href); u.searchParams.set('width', w); return u.href; } catch { return src; } };
