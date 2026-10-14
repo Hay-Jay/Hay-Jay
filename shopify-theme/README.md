@@ -18,6 +18,7 @@ This is the "Monochrome Bureau" dossier design, built as a real Shopify theme. E
 | A page's text | Shown on pages that have no section of their own, such as the model-ambassador team page. |
 | Gift card denominations | Shown on the gift card dossier and quoted in the FAQ. |
 | Policies (Settings → Policies) | Linked from the footer and shown in the dossier style. |
+| Markets and currencies (Settings → Markets) | Prices show in the shopper's currency with its code (USD, EUR, CAD...), exactly as Shopify converts them and as checkout will charge. Turn off local currencies in Markets to show CAD everywhere. |
 
 ## Editing the site (Online Store → Themes → Customize)
 
@@ -44,6 +45,8 @@ Every text on the site can be edited in the theme editor. Click any section in t
 ## Apps kept from the old theme
 
 - Inbox live chat, Shopify Forms (the 10% off sign-up), Easify product options and Klarna messaging still work.
+- The chat button steps aside while the bag, the magazine pop-up or the menu is open, and on phones while the pinned "Add to bag" button is showing.
+- The magazine pop-up never opens on top of the Forms sign-up. If the sign-up shows first, the magazine waits for a later page.
 - Their settings are under **App embeds** in the theme editor, or in the app itself.
 
 ## For developers
@@ -51,11 +54,13 @@ Every text on the site can be edited in the theme editor. Click any section in t
 ```
 cd shopify-theme/tools && npm install          # once
 node serve.mjs                                  # local emulator with the store's catalogue on http://localhost:9292
-node e2e.mjs                                    # 41 browser checks against the emulator
+node e2e.mjs                                    # 42 browser checks against the emulator
 node check.mjs                                  # Shopify theme-check
 ruby liquid-check.rb && node limits.mjs         # Shopify's own Liquid parser + upload limits theme-check misses
 node pack.mjs                                   # runs the two checks above, writes dist/monochrome-classified.zip
 THEME_ID=<id> node live-crawl.mjs --w 1440,390  # every page of the real store on an unpublished theme, via its preview link
+THEME_ID=<id> node live-fixes.mjs               # re-checks the issues found on the real store (currency, pop-ups, buy bar...)
+node upload-plan.mjs remote.json                # which files differ from the uploaded theme, as themeFilesUpsert batches
 ```
 
 - `sync-assets.mjs` copies CSS and JS from the prototype (`concepts/pages/classified`) into `theme/assets/` and applies the theme patches. Edit the prototype or `tools/theme-css/`, then sync.
@@ -65,3 +70,5 @@ THEME_ID=<id> node live-crawl.mjs --w 1440,390  # every page of the real store o
   - A `{{ }}` output ends at the first `}`.
   - Liquid won't compare a number with text.
   - `all_products[...]` stops after 20 handles per page.
+  - Shopify Markets converts prices, so never print a fixed currency code; use `cart.currency.iso_code`.
+  - A collection URL fetched with `Accept: application/json` returns 404.
