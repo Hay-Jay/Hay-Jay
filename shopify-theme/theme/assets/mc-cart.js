@@ -35,7 +35,8 @@
     clearTimeout(hideT); lastFocus = document.activeElement;
     drawer.hidden = false; void drawer.offsetWidth;
     drawer.classList.add('open'); root.classList.add('drawer-lock'); MC.drawerOpen = true;
-    setTimeout(() => { const f = $('.dr-go, .dr-empty .btn', drawer) || panel; if (f) f.focus({ preventScroll: true }); }, reduce ? 0 : 60);
+    const focusIn = () => { const f = $('.dr-go, .dr-empty .btn', drawer) || panel; if (f) f.focus({ preventScroll: true }); };
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(focusIn, reduce ? 0 : 60)));
   }
   function close(restore = true) {
     if (!drawer || !isOpen()) return;
@@ -58,16 +59,33 @@
   }
 
   // ---- refreshing what the shopper sees -----------------------------------------------------------
+  // which control had focus (line number + kind), so it can be found again in the re-rendered markup
+  function focusKey(scope) {
+    const a = document.activeElement; if (!a || !scope || !scope.contains(a)) return null;
+    const ln = a.closest('.ln');
+    const sel = a.matches('[data-q="1"]') ? '[data-q="1"]' : a.matches('[data-q="-1"]') ? '[data-q="-1"]' : a.matches('[data-remove]') ? '[data-remove]' : a.matches('[data-line-qty]') ? '[data-line-qty]' : null;
+    return { line: ln ? ln.dataset.line : null, sel };
+  }
+  function restoreFocus(scope, k, fallback) {
+    if (!k || !scope) return;
+    const el = (k.line && k.sel && $(`.ln[data-line="${k.line}"] ${k.sel}`, scope)) || $('.ln .ln-t', scope) || $(fallback, scope);
+    if (el) { if (el.matches('h1, h2')) el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true }); }
+  }
+  const cartHost = () => { const m = $('#cartMain'); return m ? m.closest('.shopify-section') : null; };
   async function refresh() {
     const jobs = [];
     if (drawer) jobs.push(fetch(`${R.home || '/'}?sections=mc-cart-drawer`, { headers: { Accept: 'application/json' } }).then(r => r.json()).then(d => {
-      if (d && d['mc-cart-drawer']) { const keep = document.activeElement && panel.contains(document.activeElement) ? document.activeElement.getAttribute('data-line-qty') : null; panel.innerHTML = d['mc-cart-drawer']; if (keep !== null) { const el = $(`[data-line-qty][data-line="${keep}"]`, panel); if (el) el.focus({ preventScroll: true }); } }
+      if (d && d['mc-cart-drawer']) { const k = focusKey(panel); panel.innerHTML = d['mc-cart-drawer']; restoreFocus(panel, k, '.dr-go, .dr-empty .btn, .dr-x'); }
     }));
-    const page = $('#shopify-section-main');
-    if (MC.page === 'cart' && page) jobs.push(fetch(`${CART}?section_id=main`).then(r => r.text()).then(html => {
-      const t = document.createElement('template'); t.innerHTML = html.trim(); const next = t.content.firstElementChild;
-      if (next) { const had = document.activeElement && page.contains(document.activeElement); page.replaceWith(next); if (had) { const h = $('#cartH'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } }
-    }));
+    const page = MC.page === 'cart' ? cartHost() : null;
+    if (page) {
+      const sid = page.id.replace(/^shopify-section-/, '');
+      jobs.push(fetch(`${CART}?section_id=${encodeURIComponent(sid)}`).then(r => { if (!r.ok) throw new Error('section ' + r.status); return r.text(); }).then(html => {
+        const t = document.createElement('template'); t.innerHTML = html.trim(); const next = t.content.firstElementChild;
+        if (!next || !next.querySelector('#cartMain')) throw new Error('section markup');
+        const k = focusKey(page); page.replaceWith(next); restoreFocus(next, k, '#cartH');
+      }).catch(() => { location.reload(); }));
+    }
     await Promise.all(jobs);
   }
 
@@ -98,8 +116,8 @@
       setCount(cart.item_count);
       await refresh();
       return cart;
-    } catch (e) { row.forEach(r => r.classList.remove('is-busy')); showError(e.message); return null; }
-    finally { busy = false; }
+    } catch (e) { showError(e.message); return null; }
+    finally { busy = false; row.forEach(r => r.classList.remove('is-busy')); }
   }
   MC.cart = { add, change, open, close, refresh, setCount, isOpen };
 
@@ -120,9 +138,18 @@
       finally { ad.classList.remove('mc-add-pending'); }
     }
   });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const inp = e.target.closest && e.target.closest('[data-line-qty]');
+    if (inp) { e.preventDefault(); inp.blur(); }
+  });
   document.addEventListener('change', e => {
     const inp = e.target.closest('[data-line-qty]');
     if (inp) change(inp.dataset.line, inp.value);
   });
-  window.addEventListener('pageshow', e => { if (e.persisted) getJson('/cart.js').then(c => setCount(c.item_count)).catch(() => {}); });
+  window.addEventListener('pageshow', e => {
+    const nav = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+    if (!e.persisted && !(nav && nav.type === 'back_forward')) return;
+    getJson('/cart.js').then(c => { setCount(c.item_count); return refresh(); }).catch(() => {});
+  });
 })();

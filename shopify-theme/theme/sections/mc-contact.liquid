@@ -9,11 +9,9 @@
     assign title = page.title
   endif
   assign tw = title | split: ' '
-  assign first = tw[0]
-  assign rest = title | remove_first: first | strip
-  if rest == blank
-    assign rest = first
-    assign first = ''
+  assign is_contact = true
+  if page != blank and page.handle != 'contact'
+    assign is_contact = false
   endif
 -%}
 <!-- 07 REPORT IN ------------------------------------------------------------------------------ -->
@@ -23,7 +21,8 @@
     <div class="ct-grid">
       <div class="ct-term">
         <p class="kick mono">Secure channel — standing by</p>
-        <h1 class="h1" id="colH">{% if first != blank %}<span class="tw" style="--n:{{ first | size }};--dl:.1s">{{ first | escape }}</span> {% endif %}<span class="tw caret" style="--n:{{ rest | size }};--dl:.55s">{{ rest | escape }}</span></h1>
+        {%- comment -%} one typing span per word, so long page titles ("Model signup form") wrap instead of running into the lines {%- endcomment -%}
+        <h1 class="h1" id="colH">{% for w in tw %}<span class="tw{% if forloop.last %} caret{% endif %}" style="--n:{{ w | size }};--dl:{{ forloop.index0 | times: 0.45 | plus: 0.1 }}s">{{ w | escape }}</span>{% unless forloop.last %} {% endunless %}{% endfor %}</h1>
         <pre class="term" aria-hidden="true">&gt; OPENING CHANNEL ........ OK
 &gt; OPERATIVE .............. YOU
 &gt; STATUS ................. STANDING BY
@@ -54,7 +53,7 @@
       <span class="tape tape-l" aria-hidden="true"></span><span class="tape tape-r" aria-hidden="true"></span>
       <div class="enl-head">
         <p class="kick mono">Message form</p>
-        <h2 class="h2" id="msgH">{{ section.settings.form_heading | escape }}</h2>
+        <h2 class="h2" id="msgH">{% if is_contact %}{{ section.settings.form_heading | escape }}{% else %}{{ page.title | escape }}{% endif %}</h2>
       </div>
       {%- form 'contact', id: 'contactForm', class: 'news ct-form' -%}
         {%- if form.posted_successfully? -%}
@@ -64,6 +63,9 @@
           <div class="ct-fields">
             <label class="ct-f"><span class="mono">Your name</span><input type="text" name="contact[name]" autocomplete="name" value="{{ form.name }}"></label>
             <label class="ct-f"><span class="mono">Email address</span><input type="email" name="contact[email]" required autocomplete="email" placeholder="you@email.com" value="{{ form.email }}"></label>
+            {%- unless is_contact -%}
+              <label class="ct-f"><span class="mono">Phone number</span><input type="tel" name="contact[phone]" autocomplete="tel" value="{{ form.phone }}"></label>
+            {%- endunless -%}
             <label class="ct-f ct-f-wide"><span class="mono">Message</span><textarea name="contact[body]" rows="5" required>{{ form.body }}</textarea></label>
           </div>
           <button class="send" type="submit">Send the message<span class="arr" aria-hidden="true"></span></button>

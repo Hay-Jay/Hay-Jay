@@ -405,7 +405,8 @@ export class Shop {
       if (t.layout !== undefined) layout = t.layout === false ? null : t.layout;
       for (const sid of t.order || Object.keys(t.sections || {})) {
         const s = t.sections[sid]; if (!s) continue;
-        content += await this.renderSectionFile(s.type, sid, s, g, {});
+        // Shopify names JSON-template sections template--<template id>__<key>; scripts must not assume 'main'
+        content += await this.renderSectionFile(s.type, `template--1__${sid}`, s, g, {});
       }
     } else if (existsSync(liqFile)) {
       content = await this.liquid.renderFile(`templates/${name}.liquid`, {});

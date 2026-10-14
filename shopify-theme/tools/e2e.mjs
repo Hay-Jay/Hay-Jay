@@ -75,6 +75,13 @@ ok('the magazine is added once', (await (await fetch(BASE + '/cart.js')).json())
 // 6. cart page: change and remove
 await T('6. cart page: change and remove', async () => {
 await p2.goto(BASE + '/cart'); await p2.waitForTimeout(600);
+// + on the cart page re-renders the page (Shopify section ids are template--<id>__main, never just 'main')
+const q0 = +(await p2.inputValue('.cart-lines .ln [data-line-qty]'));
+await p2.click('.cart-lines .ln [data-q="1"]'); await p2.waitForTimeout(1200);
+ok('cart page: + updates the page', +(await p2.inputValue('.cart-lines .ln [data-line-qty]')) === q0 + 1 && !(await p2.$('.cart-lines .ln.is-busy')), `${q0} -> ${await p2.inputValue('.cart-lines .ln [data-line-qty]')}`);
+ok('cart page: focus stays on the + button', await p2.evaluate(() => !!document.activeElement && document.activeElement.matches('[data-q="1"]')));
+await p2.fill('.cart-lines .ln [data-line-qty]', '1'); await p2.press('.cart-lines .ln [data-line-qty]', 'Enter'); await p2.waitForTimeout(1200);
+ok('cart page: Enter in a quantity box updates, never checks out', new URL(p2.url()).pathname === '/cart' && (await p2.inputValue('.cart-lines .ln [data-line-qty]')) === '1', p2.url());
 const n1 = await p2.$$eval('.cart-lines .ln', l => l.length);
 await p2.hover('.cart-lines .ln [data-remove]'); await p2.waitForTimeout(500);
 ok('hovering remove does not change the bag', (await p2.$$eval('.cart-lines .ln', l => l.length)) === n1 && (await (await fetch(BASE + '/cart.js')).json()).items.length === n1);
@@ -82,6 +89,9 @@ await p2.click('.cart-lines .ln [data-remove]'); await p2.waitForTimeout(1000);
 const n2 = await p2.$$eval('.cart-lines .ln', l => l.length);
 ok('cart page: remove a line', n2 === n1 - 1, `${n1} -> ${n2}`);
 ok('cart page: no console errors', !p2.errs.length, p2.errs.join(' | '));
+await fetch(BASE + '/cart/clear.js'); await p2.goto(BASE + '/cart'); await p2.waitForTimeout(500);
+const cols = await p2.$eval('.cart-picks .sheet', e => getComputedStyle(e).gridTemplateColumns.split(' ').length).catch(() => 0);
+ok('empty bag: suggestions sit in a 4-column grid', cols === 4, String(cols));
 });
 // 7. popup appears on the home page (fast-forward: delay 9s)
 let p3;

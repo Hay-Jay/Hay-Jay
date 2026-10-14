@@ -7,8 +7,10 @@
   assign level = pkp[2]
   assign nav_url = pkp[4]
   assign docno = 100 | plus: folio | prepend: 'MC-'
-  if folio == '0'
+  if pkp[0] == '404'
     assign docno = 'MC-404'
+  elsif template.suffix == 'portfolio'
+    assign docno = 'MC-108'
   endif
   if template.name == 'product'
     capture docno
@@ -62,10 +64,10 @@
       <nav class="foot-col mono" aria-label="Store policies">
         <p class="foot-h">The store</p>
         <a href="{{ routes.cart_url }}">Bag</a>
-        <a href="{{ fh_policy_ship }}">Shipping policy</a>
-        <a href="{{ fh_policy_refund }}">Refund policy</a>
-        <a href="{{ fh_policy_privacy }}">Privacy policy</a>
-        <a href="{{ fh_policy_terms }}">Terms of service</a>
+        {%- if shop.shipping_policy.body != blank %}<a href="{{ fh_policy_ship }}">Shipping policy</a>{% endif -%}
+        {%- if shop.refund_policy.body != blank %}<a href="{{ fh_policy_refund }}">Refund policy</a>{% endif -%}
+        {%- if shop.privacy_policy.body != blank %}<a href="{{ fh_policy_privacy }}">Privacy policy</a>{% endif -%}
+        {%- if shop.terms_of_service.body != blank %}<a href="{{ fh_policy_terms }}">Terms of service</a>{% endif -%}
       </nav>
       <div class="foot-col mono">
         <p class="foot-h">Secure lines</p>

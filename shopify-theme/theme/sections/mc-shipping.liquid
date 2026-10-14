@@ -1,3 +1,5 @@
+{%- comment -%} dropped from the returns notes while Settings > Policies > Shipping policy is empty {%- endcomment -%}
+{%- assign ship_clause = ' and the <a href="{shipping}">shipping policy</a>' -%}
 {%- assign tk_refund = '{refund}' -%}
 {%- assign tk_shipping = '{shipping}' -%}
 {%- liquid
@@ -66,7 +68,9 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'return_note' -%}
             {%- assign rn = rn | plus: 1 -%}
-            <li {{ block.shopify_attributes }}><span class="mono">{{ rn }}</span>{{ block.settings.text | replace: tk_refund, pol_refund | replace: tk_shipping, pol_ship }}</li>
+            {%- assign note = block.settings.text -%}
+            {%- if shop.shipping_policy.body == blank -%}{%- assign note = note | replace: ship_clause, '' -%}{%- endif -%}
+            <li {{ block.shopify_attributes }}><span class="mono">{{ rn }}</span>{{ note | replace: tk_refund, pol_refund | replace: tk_shipping, pol_ship }}</li>
           {%- endif -%}
         {%- endfor -%}
       </ol>

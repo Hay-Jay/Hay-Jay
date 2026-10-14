@@ -29,5 +29,8 @@
 .cart-empty-t { font: 900 clamp(2.4rem, 6vw, 4.6rem)/.92 var(--head); text-transform: uppercase; margin: 0; }
 .cart-empty-s { max-width: 34em; margin: 0; color: var(--dim); }
 .cart-picks { margin-top: 10px; }
+/* the suggestion cards on an empty bag (the register's .sheet grid lives in mc-shop.css, not loaded here) */
+.cart-picks .sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 1.8vw, 24px); padding: 26px 0 22px; }
+@media (min-width: 960px) { .cart-picks .sheet { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (min-width: 960px) { .cart-grid { grid-template-columns: minmax(0, 1fr) 400px; } .cart-sum { position: sticky; top: calc(var(--bar) + 24px); } }
 @media (max-width: 699px) { .cart-lines .ln { grid-template-columns: 84px minmax(0, 1fr); gap: 14px; } .cs-go { font-size: 1.25rem; } }

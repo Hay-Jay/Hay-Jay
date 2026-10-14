@@ -87,8 +87,9 @@ html.drawer-lock { overflow: hidden; }
 /* ---- the store's apps next to the theme's overlays -------------------------------------------------------- */
 /* The Inbox chat launcher floats bottom-right above everything; it steps aside while the bag, the magazine pop-up or the
    file index is open, and on phones while the pinned "Add to bag" bar is showing (it is back as soon as those close). */
-html.drawer-lock shopify-chat, html.mp-open shopify-chat, html.menu-up shopify-chat { visibility: hidden !important; }
-@media (max-width: 899px) { html.buy-pin:has(.pl-buy .buy:not(:disabled)) shopify-chat { visibility: hidden !important; } }
+/* display, not visibility: the widget's own button sets visibility: visible inside its shadow root and would show through */
+html.drawer-lock shopify-chat, html.mp-open shopify-chat, html.menu-up shopify-chat { display: none !important; }
+@media (max-width: 899px) { html.buy-pin:has(.pl-buy .buy:not(:disabled)) shopify-chat { display: none !important; } }
 
 /* ---- app blocks section (Klarna messaging and the like) ---------------------------------------------------- */
 .spread.mc-apps-sec { padding-block: 4px 18px; }
@@ -97,3 +98,15 @@ html.drawer-lock shopify-chat, html.mp-open shopify-chat, html.menu-up shopify-c
 
 /* ---- Shopify's policy pages: long links (https://www.shopify.com/legal/...) wrap instead of widening the page on phones -- */
 .shopify-policy__container, .rte { overflow-wrap: anywhere; }
+
+/* ---- cart lines: discounts say what they are ---------------------------------------------------------------- */
+.ln-was { margin-right: .35em; color: var(--dim); font-size: .72em; text-decoration-thickness: 2px; }
+.ln-disc { color: var(--dim); }
+
+/* ---- without JavaScript: the typed quantity and "Update quantities" do the work, so the +/- buttons and the
+   wallet placeholders (they need scripts) are not shown --------------------------------------------------------- */
+html:not(.js) .qty [data-q], html:not(.js) .cs-pay { display: none; }
+html:not(.js) .qty { grid-template-columns: 72px; }
+
+/* ---- phones have no Esc key ---------------------------------------------------------------------------------- */
+@media (hover: none), (max-width: 699px) { .dr-x span { display: none; } }

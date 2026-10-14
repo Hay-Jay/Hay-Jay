@@ -5,15 +5,21 @@
     render 'mc-countries'
   endcapture
   assign countries = raw | split: ';'
-  assign gift_amounts = ''
+  # gift card face values are the variant names ("$10.00", "$25.00" ...), set in CAD; the answer text adds " CAD"
+  assign amts = ''
   for p in collections['all'].products
     if p.gift_card?
       for v in p.variants
-        assign gift_amounts = gift_amounts | append: v.price | money | append: ', '
+        if v.title == 'Default Title'
+          assign amt = v.price | money
+        else
+          assign amt = v.title
+        endif
+        assign amts = amts | append: amt | append: '|'
       endfor
     endif
   endfor
-  assign gift_amounts = gift_amounts | remove_last: ', '
+  assign gift_amounts = amts | split: '|' | join: ', ' | replace_last: ', ', ' and '
   assign nq = section.blocks.size
 -%}
 <!-- 06 THE DEBRIEF ------------------------------------------------------------------------ -->
@@ -44,7 +50,7 @@
   </div>
 </section>
 <script type="application/ld+json">
-{ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{% for block in section.blocks %}{ "@type": "Question", "name": {{ block.settings.question | json }}, "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | strip_newlines | json }} } }{% unless forloop.last %},{% endunless %}{% endfor %}] }
+{ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{% for block in section.blocks %}{ "@type": "Question", "name": {{ block.settings.question | json }}, "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | replace: tk_countries, countries.size | replace: tk_giftamounts, gift_amounts | strip_html | strip_newlines | json }} } }{% unless forloop.last %},{% endunless %}{% endfor %}] }
 </script>
 
 {% schema %}

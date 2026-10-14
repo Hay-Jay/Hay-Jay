@@ -57,3 +57,10 @@
 .shopify-policy__container { max-width: 52em; }
 .shopify-policy__title h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/.9 var(--head); text-transform: uppercase; margin: 0 0 1em; }
 .shopify-policy__body { font-size: 1.05rem; }
+
+/* Shopify's policy pages (no section of their own): room under the header, a readable column */
+.shopify-policy__container { max-width: 52em; margin: 0 auto; padding: clamp(36px, 6vw, 72px) var(--gut) clamp(56px, 8vw, 96px); }
+.shopify-policy__title h1 { line-height: .95; }
+/* plain pages and the personnel file reuse the register's head (its styles live in mc-shop.css, not loaded here) */
+.reg-head { display: grid; gap: 22px; margin-bottom: clamp(22px, 3.4vw, 40px); }
+.reg-title .h1 { font-size: clamp(3.6rem, 12vw, 9.6rem); }

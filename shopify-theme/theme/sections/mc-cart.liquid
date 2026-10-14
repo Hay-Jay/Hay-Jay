@@ -1,5 +1,13 @@
 {%- liquid
   assign n = cart.item_count
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign ng_listed = false
+  if raw contains '|NG|'
+    assign ng_listed = true
+  endif
 -%}
 <section class="spread paper cart" id="cartMain" aria-labelledby="cartH">
   <div class="wrap">
@@ -29,6 +37,8 @@
       </div></div>
     {%- else -%}
       <form action="{{ routes.cart_url }}" method="post" id="cart-form" class="cart-form">
+        {%- comment -%} first submit button, so Enter in a quantity box (no JavaScript) updates instead of checking out {%- endcomment -%}
+        <button class="sr-only" type="submit" name="update" tabindex="-1" aria-hidden="true">Update quantities</button>
         <div class="cart-grid">
           <div class="cart-main">
             <p class="mono cart-count">{{ n }} {% if n == 1 %}asset{% else %}assets{% endif %} on the manifest</p>
@@ -58,7 +68,7 @@
             {%- endif -%}
             <ul class="cs-trust mono">
               <li>Secure checkout on the Monochrome store</li>
-              <li>Delivered to 29 countries, Nigeria and Canada included</li>
+              <li>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria and Canada included{% endif %}</li>
               <li>All prices in {{ cart.currency.iso_code }}</li>
             </ul>
             <span class="stamp ok" style="--r:-5deg" aria-hidden="true">Approved for field use</span>

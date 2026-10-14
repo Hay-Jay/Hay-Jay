@@ -3,11 +3,12 @@
   folio = page number in the 7-page dossier (0 = none), level = clearance 1-5, navurl = the nav item to highlight.
 {%- endcomment -%}
 {%- liquid
+  # anything not listed below (policies, plain pages) is an unnumbered document that highlights no tab
   assign key = 'page'
-  assign folio = 7
+  assign folio = 0
   assign level = 1
-  assign doc = 'Secure channel'
-  assign nav = '/pages/contact'
+  assign doc = 'Document'
+  assign nav = '-'
   case template.name
     when 'index'
       assign key = 'home'
@@ -77,8 +78,15 @@
           assign level = 2
           assign doc = 'Debrief transcript'
           assign nav = '/pages/faq'
-        else
+        when 'contact'
           assign key = 'contact'
+          assign folio = 7
+          assign level = 1
+          assign doc = 'Secure channel'
+          assign nav = '/pages/contact'
+        when 'portfolio'
+          assign level = 4
+          assign doc = 'Personnel file'
       endcase
   endcase
 -%}
