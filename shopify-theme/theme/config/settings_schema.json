@@ -47,8 +47,9 @@
       {
         "type": "checkbox",
         "id": "intro_enable",
-        "label": "Play the short 'identity verified' intro once per visit on the home page",
-        "default": true
+        "label": "Play the 'identity verified' intro on the home page",
+        "default": true,
+        "info": "Plays once per visit and can be skipped with any key or tap."
       }
     ]
   },
@@ -65,19 +66,19 @@
         "type": "url",
         "id": "social_instagram",
         "label": "Instagram",
-        "default": "https://www.instagram.com/monochrome.ca/"
+        "info": "Leave empty to hide this link."
       },
       {
         "type": "url",
         "id": "social_tiktok",
         "label": "TikTok",
-        "default": "https://www.tiktok.com/@monochrome.ca"
+        "info": "Leave empty to hide this link."
       },
       {
         "type": "url",
         "id": "social_snapchat",
         "label": "Snapchat",
-        "default": "https://snapchat.com/monochrome.ca"
+        "info": "Leave empty to hide this link."
       }
     ]
   },
@@ -147,8 +148,9 @@
       {
         "type": "checkbox",
         "id": "cart_dynamic_buttons",
-        "label": "Show accelerated checkout buttons (Shop Pay, PayPal...) on product pages and the cart",
-        "default": true
+        "label": "Show express checkout buttons on product pages",
+        "default": true,
+        "info": "Shop Pay, PayPal and the other wallets you turned on in Settings > Payments."
       }
     ]
   }

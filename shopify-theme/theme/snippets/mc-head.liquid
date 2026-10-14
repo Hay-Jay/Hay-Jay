@@ -49,7 +49,7 @@
 {%- endif %}
 {%- if template.name == 'index' %}
 <script type="application/ld+json">
-{ "@context": "https://schema.org", "@type": "Organization", "name": "MONOCHROME", "url": {{ shop.url | append: '/' | json }}, "logo": {{ og_abs | json }}, "sameAs": [{{ settings.social_instagram | json }}], "email": {{ settings.contact_email | json }} }
+{ "@context": "https://schema.org", "@type": "Organization", "name": "MONOCHROME", "url": {{ shop.url | append: '/' | json }}, "logo": {{ og_abs | json }}, "sameAs": [{% if settings.social_instagram != blank %}{{ settings.social_instagram | json }}{% endif %}], "email": {{ settings.contact_email | json }} }
 </script>
 <script type="application/ld+json">
 { "@context": "https://schema.org", "@type": "WebSite", "name": "MONOCHROME®", "url": {{ shop.url | append: '/' | json }},
