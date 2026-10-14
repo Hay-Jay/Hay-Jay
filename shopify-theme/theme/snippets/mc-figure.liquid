@@ -10,6 +10,6 @@
 <figure class="ab-fig ab-fig-{{ letter }} rv">
   <span class="tape" aria-hidden="true"></span>
   <a class="xp{% if zoom %} zoom{% endif %} cam-xp" href="{{ product.url }}" aria-label="Open {{ product.title | strip | escape }}">{% render 'mc-img', image: pic, alt: product.title, sizes: '(min-width:900px) 34vw, 86vw', widths: '480,720,1080,1400' %}{% render 'mc-cam', n: cam, ex: ex %}</a>
-  <figcaption class="mono"><span>{{ ex }} — {{ product.title | strip | escape }}</span><span>{{ product.price | money }} CAD</span></figcaption>
+  <figcaption class="mono"><span>{{ ex }} — {{ product.title | strip | escape }}</span><span>{{ product.price | money }} {{ cart.currency.iso_code }}</span></figcaption>
 </figure>
 {%- endif -%}

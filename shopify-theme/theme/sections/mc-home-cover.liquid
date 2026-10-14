@@ -1,3 +1,4 @@
+{%- assign tk_currency = '{currency}' -%}
 {%- liquid
   capture raw
     render 'mc-countries'
@@ -24,7 +25,7 @@
   if mag_handle != blank and section.settings.ticker_mag != blank
     assign words = words | append: '|' | append: section.settings.ticker_mag
   endif
-  assign words = words | append: '|' | append: section.settings.ticker_b | replace: '{pieces}', n_pieces
+  assign words = words | append: '|' | append: section.settings.ticker_b | replace: '{pieces}', n_pieces | replace: tk_currency, cart.currency.iso_code
 -%}
 <!-- 01 BRIEFING COVER ---------------------------------------------------------------- -->
 <section class="spread paper cover" id="top" aria-label="Mission briefing cover">
@@ -58,7 +59,7 @@
               <a class="ph-link" href="{{ cover.url }}" aria-label="Open {{ cover.title | strip | escape }}">{% render 'mc-img', image: pic, alt: cover.title, sizes: '(min-width:900px) 40vw, 80vw', widths: '640,960,1280,1800', eager: true %}</a>
               {% render 'mc-cam', n: 1, ex: 'Exhibit 01', live: true %}
             </figure>
-            <a class="etag" href="{{ cover.url }}"><span class="etag-k mono">Exhibit 01 / {{ fno }}</span><b>{{ cover.title | strip | escape }}</b><span class="mono">{{ cover.price | money }} CAD</span></a>
+            <a class="etag" href="{{ cover.url }}"><span class="etag-k mono">Exhibit 01 / {{ fno }}</span><b>{{ cover.title | strip | escape }}</b><span class="mono">{{ cover.price | money }} {{ cart.currency.iso_code }}</span></a>
             <span class="stamp eo white" style="--r:5deg" aria-hidden="true">Eyes only</span>
           </div>
         </div>
@@ -93,7 +94,7 @@
     { "type": "header", "content": "Hazard tape" },
     { "type": "text", "id": "ticker_a", "label": "Tape, first words (separate with |)", "default": "Wear the unknown|Do not cross|Operation: Wear the Unknown|Black / white / chrome" },
     { "type": "text", "id": "ticker_mag", "label": "Tape, magazine word (only while the magazine is on sale)", "default": "New intel: the Vision Issue" },
-    { "type": "text", "id": "ticker_b", "label": "Tape, last words ({pieces} = live count)", "default": "{pieces} assets on file|Prices in CAD" }
+    { "type": "text", "id": "ticker_b", "label": "Tape, last words", "info": "{pieces} = live count, {currency} = the shopper's currency", "default": "{pieces} assets on file|Prices in {currency}" }
   ],
   "presets": [{ "name": "Cover (briefing)" }]
 }

@@ -175,7 +175,7 @@
     if (!$('.t-more', row)) {
       row.insertAdjacentHTML('beforeend', `<div class="t-more"><div class="t-more-in"><div class="t-more-box">
         <div class="xp${d.zoom === '1' ? ' zoom' : ''}"><img class="ph" loading="lazy" decoding="async" draggable="false" src="${esc(safeUrl(sized(d.img, 700)))}" alt="${esc($('.t-name', row).firstChild.textContent)}"></div>
-        <dl class="mono"><div><dt>File no.</dt><dd>${esc(d.file)}</dd></div><div><dt>Class</dt><dd>${esc(d.catLabel)}</dd></div><div><dt>Price</dt><dd>${esc(d.price)} CAD</dd></div><div><dt>Sizes</dt><dd>${esc(d.sizes)}</dd></div>
+        <dl class="mono"><div><dt>File no.</dt><dd>${esc(d.file)}</dd></div><div><dt>Class</dt><dd>${esc(d.catLabel)}</dd></div><div><dt>Price</dt><dd>${esc(d.price)} ${esc(window.MC.currency || '')}</dd></div><div><dt>Sizes</dt><dd>${esc(d.sizes)}</dd></div>
         <a class="t-open mono" href="${esc(a.getAttribute('href'))}">Open the dossier</a></dl></div></div></div>`);
     }
     requestAnimationFrame(() => { row.classList.toggle('open', !open); a.setAttribute('aria-expanded', String(!open)); });

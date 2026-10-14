@@ -35,7 +35,7 @@
           "type": "qa",
           "settings": {
             "question": "Which currency are prices in?",
-            "answer": "<p>All prices on this site are in Canadian dollars (CAD), the store’s base currency. Your card issuer converts at checkout if your card is in another currency.</p>"
+            "answer": "<p>Prices are set in Canadian dollars (CAD), the store’s base currency. If you shop from another country, prices are shown in your local currency where possible, and checkout charges the amount you see.</p>"
           }
         },
         "q6": {

@@ -30,7 +30,7 @@
             assign cam_n = li | plus: 2
             assign ex = 'Exhibit ' | append: ltr
           -%}
-          <a class="lb-fig" href="{{ p.url }}" style="--k:{{ k }};--ar:{{ block.settings.ratio }};--mt:{{ block.settings.offset }}vh;--tilt:{{ tilt }}deg" aria-label="Exhibit {{ ltr }}, {{ p.title | strip | escape }}, {{ pt | escape }} CAD. Open the asset dossier" {{ block.shopify_attributes }}>
+          <a class="lb-fig" href="{{ p.url }}" style="--k:{{ k }};--ar:{{ block.settings.ratio }};--mt:{{ block.settings.offset }}vh;--tilt:{{ tilt }}deg" aria-label="Exhibit {{ ltr }}, {{ p.title | strip | escape }}, {{ pt | escape }} {{ cart.currency.iso_code }}. Open the asset dossier" {{ block.shopify_attributes }}>
             <span class="lb-pin-dot" aria-hidden="true"></span>
             <span class="lb-no" aria-hidden="true">{{ ltr }}</span>
             <div class="xp">{% render 'mc-img', image: pic, alt: p.title, sizes: '(min-width:900px) 50vh, 70vw', widths: '480,720,1000,1400', eager: forloop.first %}{% render 'mc-cam', n: cam_n, ex: ex %}</div>

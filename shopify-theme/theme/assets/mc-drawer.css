@@ -79,3 +79,21 @@
 }
 @media (prefers-reduced-motion: reduce) { .drawer, .dr-back, .dr-panel { transition: none; } }
 @media (max-width: 899px) and (max-height: 520px) and (orientation: landscape) { .dr-panel { max-height: 100svh; } }
+
+/* ---- the bag locks the page behind it -------------------------------------------------------------------- */
+html.drawer-lock { overflow: hidden; }
+.dr-panel { overscroll-behavior: contain; }
+
+/* ---- the store's apps next to the theme's overlays -------------------------------------------------------- */
+/* The Inbox chat launcher floats bottom-right above everything; it steps aside while the bag, the magazine pop-up or the
+   file index is open, and on phones while the pinned "Add to bag" bar is showing (it is back as soon as those close). */
+html.drawer-lock shopify-chat, html.mp-open shopify-chat, html.menu-up shopify-chat { visibility: hidden !important; }
+@media (max-width: 899px) { html.buy-pin:has(.pl-buy .buy:not(:disabled)) shopify-chat { visibility: hidden !important; } }
+
+/* ---- app blocks section (Klarna messaging and the like) ---------------------------------------------------- */
+.spread.mc-apps-sec { padding-block: 4px 18px; }
+.mc-apps { padding-block: 10px; }
+.mc-apps:empty { display: none; }
+
+/* ---- Shopify's policy pages: long links (https://www.shopify.com/legal/...) wrap instead of widening the page on phones -- */
+.shopify-policy__container, .rte { overflow-wrap: anywhere; }

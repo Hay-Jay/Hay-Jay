@@ -41,7 +41,7 @@
           "type": "objective",
           "settings": {
             "title": "Deliver.",
-            "text": "The store’s address is Regina, Saskatchewan, Canada, and it delivers to {countries} countries, Nigeria and Canada among them. The full list is on the Extraction routes page. Prices are in Canadian dollars."
+            "text": "The store’s address is Regina, Saskatchewan, Canada, and it delivers to {countries} countries, Nigeria and Canada among them. The full list is on the Extraction routes page. Prices are set in Canadian dollars."
           }
         }
       },

@@ -19,7 +19,7 @@
         <p class="kick mono">Gift card — clearance granted</p>
         <h1 class="h1">{{ gift_card.initial_value | money }}</h1>
         {%- if gift_card.enabled == false or gift_card.expired -%}<span class="stamp oos" style="--r:-6deg">{% if gift_card.expired %}Expired{% else %}Disabled{% endif %}</span>{%- endif -%}
-        <p class="mono">Balance: {{ gift_card.balance | money }} CAD</p>
+        <p class="mono">Balance: {{ gift_card.balance | money }} {{ gift_card.currency }}</p>
         <p class="gc-code" id="GiftCardDigits">{{ gift_card.code | format_code }}</p>
         {%- if gift_card.pass_url -%}<p><a class="btn" href="{{ gift_card.pass_url }}">Add to Apple Wallet<i class="arr" aria-hidden="true"></i></a></p>{%- endif -%}
         <p><a class="btn ghost" href="{{ shop.url }}">Use it in the store<i class="arr" aria-hidden="true"></i></a></p>

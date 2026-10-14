@@ -42,7 +42,7 @@
           <aside class="cart-sum" aria-label="Order summary">
             <span class="tape" aria-hidden="true"></span>
             <p class="mono mg-k">Manifest total</p>
-            <p class="cs-total"><b>{{ cart.total_price | money }}</b><small>CAD</small></p>
+            <p class="cs-total"><b>{{ cart.total_price | money }}</b><small>{{ cart.currency.iso_code }}</small></p>
             {%- if cart.total_discount > 0 -%}
               <p class="mono cs-save">Discounts applied: −{{ cart.total_discount | money }}</p>
             {%- endif -%}
@@ -59,7 +59,7 @@
             <ul class="cs-trust mono">
               <li>Secure checkout on the Monochrome store</li>
               <li>Delivered to 29 countries, Nigeria and Canada included</li>
-              <li>All prices in CAD</li>
+              <li>All prices in {{ cart.currency.iso_code }}</li>
             </ul>
             <span class="stamp ok" style="--r:-5deg" aria-hidden="true">Approved for field use</span>
           </aside>

@@ -49,7 +49,7 @@
     <div class="intel-memo">
       <p class="rv"><span class="mono">Finding 1.</span> {{ section.settings.finding_1 | escape }}</p>
       <p class="rv"><span class="mono">Finding 2.</span> {{ section.settings.finding_2 | escape }} <a class="mono link-line" href="{{ section.settings.link_url | default: '/pages/about' }}">{{ section.settings.link_text | escape }}<span class="arr" aria-hidden="true"></span></a></p>
-      <p class="rv mono intel-meta"><span>Price range: CAD {{ lo_t }} – {{ hi_t }}</span><span>Chrome supplier: <span class="redact" tabindex="0">{{ section.settings.redacted | escape }}</span></span><span>Tops {{ n_top }} / Bottoms {{ n_bottom }} / Hardware {{ n_acc }}</span></p>
+      <p class="rv mono intel-meta"><span>Price range: {{ cart.currency.iso_code }} {{ lo_t }} – {{ hi_t }}</span><span>Chrome supplier: <span class="redact" tabindex="0">{{ section.settings.redacted | escape }}</span></span><span>Tops {{ n_top }} / Bottoms {{ n_bottom }} / Hardware {{ n_acc }}</span></p>
     </div>
   </div>
 </section>

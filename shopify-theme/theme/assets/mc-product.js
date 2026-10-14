@@ -3,7 +3,7 @@
    "Declassify photo". Without JavaScript the form posts to /cart/add and every option is a native <select>. */
 (() => {
   'use strict';
-  const MC = window.MC, { $, $$, fmt, pad, esc } = MC;
+  const MC = window.MC, { $, $$, pad, esc } = MC;
   const dataEl = $('#pdata'); if (!dataEl) return;
   const data = JSON.parse(dataEl.textContent);
   const form = $('form.pl-form');
@@ -65,7 +65,8 @@
     if (buy) { buy.disabled = !can; buy.setAttribute('aria-disabled', String(!can)); if (buyT) buyT.textContent = can ? 'Requisition: Add to bag' : 'Requisition denied: sold out'; }
     if (alertLink) alertLink.hidden = can;
     if (pay) pay.hidden = !can;
-    if (priceEl) priceEl.innerHTML = `${esc(data.range && !chosen ? 'From ' + fmt(data.min) : fmt(v ? v.p : data.min))}<small>CAD</small>`;
+    // prices come formatted by Shopify in the shopper's currency (Markets may convert from CAD)
+    if (priceEl) priceEl.innerHTML = `${esc(data.range && !chosen ? 'From ' + data.from : (v ? v.m : data.from))}<small>${esc(data.cur || MC.currency || '')}</small>`;
     if (stockEl && data.variants.some(x => x.a)) {
       stockEl.classList.toggle('out', !can); stockEl.classList.toggle('in', can);
       $('span', stockEl).textContent = can ? 'In stock' : 'Sold out';

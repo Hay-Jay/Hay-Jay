@@ -33,7 +33,11 @@
     endif
     assign sentences = blurb | split: '. '
     if sentences.size > 1
-      assign short = sentences[0] | append: '. ' | append: sentences[1] | append: '.'
+      assign short = sentences[0] | append: '. ' | append: sentences[1]
+      assign last_char = short | slice: -1, 1
+      unless last_char == '.' or last_char == '!' or last_char == '?'
+        assign short = short | append: '.'
+      endunless
     else
       assign short = blurb
     endif
@@ -51,7 +55,7 @@
         <h2 class="mp-t" id="magpopT">{{ mtitle | escape }}</h2>
         <p class="mp-meta mono">{{ line | escape }}</p>
         <p class="mp-line">{{ short | escape }}</p>
-        <p class="mp-price mono"><b>{{ variant.price | money }}</b> CAD <span>Printed copy</span></p>
+        <p class="mp-price mono"><b>{{ variant.price | money }}</b> {{ cart.currency.iso_code }} <span>Printed copy</span></p>
         <p class="mp-cta">
           <a class="btn" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">Order your copy<i class="arr" aria-hidden="true"></i></a>
           <a class="btn ghost" href="{{ mag.url }}">Read the brief</a>

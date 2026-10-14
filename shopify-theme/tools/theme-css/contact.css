@@ -17,4 +17,3 @@
 .shopify-policy__container { max-width: 52em; }
 .shopify-policy__title h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/.9 var(--head); text-transform: uppercase; margin: 0 0 1em; }
 .shopify-policy__body { font-size: 1.05rem; }
-.mc-apps { padding-block: 10px; }

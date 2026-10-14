@@ -73,11 +73,11 @@
         {%- if settings.social_tiktok != blank %}<a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener">TikTok</a>{% endif -%}
         {%- if settings.social_snapchat != blank %}<a href="{{ settings.social_snapchat }}" target="_blank" rel="noopener">Snapchat</a>{% endif -%}
         <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
-        <p class="foot-cad">Prices in CAD</p>
+        <p class="foot-cad">Prices in {{ cart.currency.iso_code }}</p>
       </div>
     </div>
     <p class="foot-fic mono">{{ settings.fiction_line | escape }}</p>
-    <p class="foot-legal mono"><span>© {{ 'now' | date: '%Y' }} MONOCHROME®. All rights reserved. Prices in CAD.</span>{% if folio != '0' %}<span class="folio">Page {{ folio }} of 7</span>{% endif %}</p>
+    <p class="foot-legal mono"><span>© {{ 'now' | date: '%Y' }} MONOCHROME®. All rights reserved. Prices in {{ cart.currency.iso_code }}.</span>{% if folio != '0' %}<span class="folio">Page {{ folio }} of 7</span>{% endif %}</p>
   </div>
   <div class="banner bottom" aria-hidden="true"><span class="bn-c">{{ settings.banner_mark | escape }}</span></div>
 </footer>

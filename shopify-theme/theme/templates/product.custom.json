@@ -2,14 +2,6 @@
   "sections": {
     "main": {
       "type": "mc-product",
-      "blocks": {},
-      "block_order": [],
-      "settings": {
-        "show_dynamic": true
-      }
-    },
-    "apps": {
-      "type": "mc-apps",
       "blocks": {
         "klarna": {
           "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
@@ -27,11 +19,12 @@
       "block_order": [
         "klarna"
       ],
-      "settings": {}
+      "settings": {
+        "show_dynamic": true
+      }
     }
   },
   "order": [
-    "main",
-    "apps"
+    "main"
   ]
 }

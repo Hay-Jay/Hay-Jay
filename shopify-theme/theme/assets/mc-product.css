@@ -150,13 +150,15 @@ button.buy { width: 100%; cursor: pointer; text-align: left; }
 button.buy:hover:not(:disabled) { background-color: var(--bg); color: var(--fg); }
 button.buy:disabled { cursor: not-allowed; background: transparent; color: var(--fg); border-style: dashed; justify-content: center; }
 button.buy:disabled .arr { display: none; }
-.pl-buy .pl-qtyrow { margin-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-.pl-buy .pl-qtyrow .opt-name { margin: 0; }
+.pl-qtyrow { margin: 8px 0 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pl-qtyrow .opt-name { margin: 0; }
 .pl-qty { grid-template-columns: 44px 54px 44px; }
 .pl-err[hidden], .pl-pay[hidden], .pl-alert[hidden] { display: none; }
-.pl-pay { margin-top: 10px; }
+.pl-pay { margin-top: 12px; }
 .pl-app { margin: 0 0 6px; }
 .pl-app:empty { display: none; }
+/* Easify injects an empty wrapper on products without an option set */
+.pl-app:has(.easify-product-options):not(:has(.tpo_has-option-set)) { display: none; }
 .pl-desc.rte p { margin: 0 0 .7em; }
 .pl-desc.rte p:last-child { margin-bottom: 0; }
 .pl-desc.rte ul, .pl-desc.rte ol { margin: 0 0 .7em 1.2em; padding: 0; list-style: disc; }
@@ -164,4 +166,5 @@ button.buy:disabled .arr { display: none; }
 html:not(.js) .chips { display: none; }
 .pl-select { width: 100%; min-height: 50px; border: 2px solid var(--fg); background: #f4f4f4; color: var(--fg); font: 700 16px var(--mono); padding: 0 12px; border-radius: 0; }
 .pl-buy:has(.buy:disabled) { position: static !important; margin: 0; padding: 0; border-top: 0; background: none; }
-@media (max-width: 899px) { .pl-buy:has(.buy:disabled) .pl-qtyrow { display: none; } }
+/* sold out: no quantity to choose */
+.pl-form:has(.buy:disabled) .pl-qtyrow { display: none; }

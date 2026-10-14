@@ -56,7 +56,7 @@
         <a class="btn" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">{{ section.settings.button | escape }}<i class="arr" aria-hidden="true"></i></a>
         <a class="btn ghost" href="{{ mag.url }}">Open the file</a>
       </p>
-      <p class="mag-note mono"><span>{{ variant.price | money }} CAD</span><span>Printed copy</span><span>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria included{% endif %}. Rate calculated at checkout</span></p>
+      <p class="mag-note mono"><span>{{ variant.price | money }} {{ cart.currency.iso_code }}</span><span>Printed copy</span><span>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria included{% endif %}. Rate calculated at checkout</span></p>
     </div>
     <figure class="mag-fig">
       <a class="mag-cover" href="{{ mag.url }}" aria-label="Open {{ mag.title | strip | escape }}">

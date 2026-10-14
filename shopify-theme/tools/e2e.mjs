@@ -59,6 +59,11 @@ let p2;
 await T('5. magazine from home section', async () => {
 p2 = await page();
 await p2.goto(BASE + '/'); await p2.waitForTimeout(800);
+// the intro covers the first visit for ~3 s: a click on it only skips it, it never reaches the page underneath
+const introUp = await p2.$('.intro') !== null;
+if (introUp) { const c0i = (await (await fetch(BASE + '/cart.js')).json()).item_count; await p2.mouse.click(720, 450); await p2.waitForTimeout(600);
+  ok('a click on the intro skips it without following the link underneath', (await (await fetch(BASE + '/cart.js')).json()).item_count === c0i && new URL(p2.url()).pathname === '/'); }
+await p2.waitForSelector('.intro', { state: 'detached', timeout: 5000 }).catch(() => {});
 const c0 = (await (await fetch(BASE + '/cart.js')).json()).item_count;
 await p2.hover('#vision [data-mc-add]'); await p2.waitForTimeout(500);
 ok('hovering an add link does not change the bag', (await (await fetch(BASE + '/cart.js')).json()).item_count === c0);

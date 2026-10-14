@@ -4,14 +4,26 @@
   assign site_name = 'MONOCHROME®'
   if template.name == 'index'
     assign ttl = 'OPERATION: WEAR THE UNKNOWN — Mission briefing — MONOCHROME® Bureau'
-    assign desc = page_description | default: 'Operation: Wear the Unknown. MONOCHROME® Division of Wearables issues black, white and chrome clothing, rings and chains in small runs. Prices in CAD, delivered to countries including Nigeria and Canada.'
+    assign desc = page_description | default: 'Operation: Wear the Unknown. MONOCHROME® Division of Wearables issues black, white and chrome clothing, rings and chains in small runs, delivered to countries including Nigeria and Canada.'
   else
     assign ttl = page_title
+    if template.name == 'collection'
+      # the register keeps one name; filters in mc-shop.js prefix it with the class ("Tops — Asset Register — ...")
+      if collection.handle == 'all'
+        assign ttl = 'Asset Register'
+      else
+        assign ttl = collection.title | append: ' — Asset Register'
+      endif
+    endif
     if current_page != 1
       assign ttl = ttl | append: ' — Page ' | append: current_page
     endif
-    assign ttl = ttl | append: ' — ' | append: site_name
-    assign desc = page_description | default: shop.description | default: 'MONOCHROME® is a black, white and chrome clothing brand. Prices in CAD, delivered to countries including Nigeria and Canada.'
+    if template.name == 'collection'
+      assign ttl = ttl | append: ' — MONOCHROME® Bureau'
+    else
+      assign ttl = ttl | append: ' — ' | append: site_name
+    endif
+    assign desc = page_description | default: shop.description | default: 'MONOCHROME® is a black, white and chrome clothing brand, delivered to countries including Nigeria and Canada.'
   endif
   if template.name == 'product' and product.featured_image
     assign og_src = product.featured_image | image_url: width: 1200
@@ -28,7 +40,7 @@
     assign og_abs = og_src | prepend: 'https:'
   endif
 -%}
-<title>{{ ttl | strip | escape }}</title>
+<title>{{ ttl | strip | escape_once }}</title>
 <meta name="description" content="{{ desc | strip_html | strip_newlines | strip | escape }}">
 <link rel="canonical" href="{{ canonical_url }}">
 {%- if template.name == 'search' or template.name contains 'customers' or template.name == 'cart' %}
@@ -36,12 +48,12 @@
 {%- endif %}
 <meta property="og:site_name" content="{{ site_name }}">
 <meta property="og:type" content="{% if template.name == 'product' %}product{% else %}website{% endif %}">
-<meta property="og:title" content="{{ ttl | strip | escape }}">
+<meta property="og:title" content="{{ ttl | strip | escape_once }}">
 <meta property="og:description" content="{{ desc | strip_html | strip_newlines | strip | escape }}">
 <meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:image" content="{{ og_abs }}">
 <meta name="twitter:card" content="{% if template.name == 'product' or template.name == 'collection' %}summary_large_image{% else %}summary{% endif %}">
-<meta name="twitter:title" content="{{ ttl | strip | escape }}">
+<meta name="twitter:title" content="{{ ttl | strip | escape_once }}">
 <meta name="twitter:description" content="{{ desc | strip_html | strip_newlines | strip | escape }}">
 {%- if template.name == 'product' %}
 <meta property="product:price:amount" content="{{ product.price | money_without_currency | strip }}">

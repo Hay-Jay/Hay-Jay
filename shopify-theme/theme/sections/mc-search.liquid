@@ -19,6 +19,7 @@
     {%- if search.performed -%}
       <p class="count mono" role="status">{{ search.results_count }} {% if search.results_count == 1 %}file{% else %}files{% endif %} match “{{ search.terms | escape }}”</p>
       {%- paginate search.results by 24 -%}
+        {%- if search.results_count > 0 -%}
         <div class="board"><div class="sheet" id="sheet">
           {%- for item in search.results -%}
             {%- if item.object_type == 'product' or item.price -%}
@@ -34,6 +35,7 @@
             <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
             {%- if paginate.next %} <a class="link-line" href="{{ paginate.next.url }}">Next</a>{% endif -%}
           </nav>
+        {%- endif -%}
         {%- endif -%}
       {%- endpaginate -%}
       {%- if search.results_count == 0 -%}

@@ -25,10 +25,10 @@
   const $ = MC.$ = (s, r = document) => r.querySelector(s);
   const $$ = MC.$$ = (s, r = document) => [...r.querySelectorAll(s)];
   MC.esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  MC.fmt = v => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(v);
+  MC.fmt = v => { const c = MC.currency || 'CAD'; try { return new Intl.NumberFormat('en-CA', { style: 'currency', currency: c, currencyDisplay: 'narrowSymbol' }).format(v); } catch { return Number(v).toFixed(2) + ' ' + c; } };
   MC.clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   MC.pad = n => String(n).padStart(2, '0');
-  MC.sized = (src, w) => !/^https?:/.test(src) ? src : `${src}${src.includes('?') ? '&' : '?'}width=${w}`;
+  MC.sized = (src, w) => { if (!/^(https?:)?\/\//.test(src)) return src; try { const u = new URL(src, location.href); u.searchParams.set('width', w); return u.href; } catch { return src; } };
   MC.safeUrl = u => { try { return encodeURI(decodeURI(new URL(u, document.baseURI).href)); } catch { return ''; } };
   MC.reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   MC.fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -252,7 +252,7 @@
   const menuOpen = () => !menu.hidden && menu.classList.contains('open');
   function openMenu(focusFind) {
     clearTimeout(menuT); menu.hidden = false; menuBtn.setAttribute('aria-expanded', 'true');
-    root.style.overflow = 'hidden';
+    root.style.overflow = 'hidden'; root.classList.add('menu-up');
     loadCatalog();
     requestAnimationFrame(() => requestAnimationFrame(() => {
       menu.classList.add('open');
@@ -261,7 +261,7 @@
   }
   function closeMenu(restore = true) {
     menu.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
-    root.style.overflow = '';
+    root.style.overflow = ''; root.classList.remove('menu-up');
     menuT = setTimeout(() => { menu.hidden = true; }, reduce ? 0 : 620);
     if (restore) menuBtn.focus({ preventScroll: true });
   }
@@ -294,7 +294,7 @@
         if (jump && jump.value) renderJump();
       };
       // the live catalogue: /collections/all?view=catalog (templates/collection.catalog.liquid), so it is always current
-      fetch(MC.catalogUrl || '/collections/all?view=catalog', { headers: { Accept: 'application/json' } }).then(r => r.json()).then(done).catch(() => done([]));
+      fetch(MC.catalogUrl || '/collections/all?view=catalog', { credentials: 'same-origin' }).then(r => r.ok ? r.text() : '[]').then(t => done(JSON.parse(t))).catch(() => done([]));
     });
     return catPromise;
   }
@@ -415,17 +415,27 @@
     let seconds = 0, shown = false, exit = false, back = null;
     const isOpen = () => mp.classList.contains('open');
     MC.popupOpen = isOpen;
+    const foreign = () => {
+      const fe = document.querySelector('shopify-forms-embed'), ov = fe && fe.shadowRoot && fe.shadowRoot.querySelector('[data-layout="overlay"]');
+      if (ov) { const r = ov.getBoundingClientRect(), cs = getComputedStyle(ov); if (r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden') return true; }
+      const el = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+      return !!(el && (el.closest('shopify-forms-embed, shopify-chat') || (el.closest('[aria-modal="true"]') && !el.closest('#magpop, #menu, #mcDrawer'))));
+    };
     const ready = () => !shown && !document.hidden && !root.style.overflow && !MC.drawerOpen && !$('.intro') && !(menu && menuOpen()) &&
       !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName));
     function show() {
       shown = true; back = document.activeElement;
       try { localStorage.setItem(KEY, String(Date.now())); } catch { /* storage blocked */ }
-      mp.hidden = false; root.style.overflow = 'hidden';
+      mp.hidden = false; root.style.overflow = 'hidden'; root.classList.add('mp-open');
+      const watch = setInterval(() => {
+        if (!isOpen() && shown && mp.hidden) { clearInterval(watch); return; }
+        if (isOpen() && foreign()) { clearInterval(watch); hide(); try { localStorage.removeItem(KEY); } catch { /* storage blocked */ } }
+      }, 600);
       requestAnimationFrame(() => requestAnimationFrame(() => { mp.classList.add('open'); card.focus({ preventScroll: true }); }));
     }
     function hide() {
       if (!isOpen()) return;
-      mp.classList.remove('open'); root.style.overflow = '';
+      mp.classList.remove('open'); root.style.overflow = ''; root.classList.remove('mp-open');
       setTimeout(() => { mp.hidden = true; }, reduce ? 0 : 320);
       if (back && back.focus) try { back.focus({ preventScroll: true }); } catch { /* element gone */ }
     }
@@ -433,7 +443,7 @@
     document.addEventListener('keydown', e => {
       if (!isOpen()) return;
       if (e.key === 'Escape') { e.preventDefault(); hide(); return; }
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab' || foreign()) return;
       const f = $$('a[href],button:not(:disabled)', mp).filter(x => x.offsetParent !== null && x.tabIndex !== -1);
       if (!f.length) return;
       const a = f[0], z = f[f.length - 1];
@@ -444,6 +454,7 @@
     const wait = (+MC.magpopDelay || 9) + (noHover() ? 3 : 0);
     const iv = setInterval(() => {
       if (document.hidden) return;
+      if (foreign()) { clearInterval(iv); return; }
       seconds++;
       const depth = (scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight);
       if ((seconds >= wait || (seconds >= 4 && depth > 0.6) || exit) && ready()) { clearInterval(iv); show(); }
@@ -464,10 +475,13 @@
     const el = document.createElement('div');
     el.className = 'intro'; el.setAttribute('aria-hidden', 'true');
     el.innerHTML = `<div class="in-box"><svg class="in-fp" viewBox="0 0 120 152" focusable="false"><g>${arcs}</g><path d="M60 22v108M36 40c10-8 38-8 48 0M32 112c14 10 42 10 56 0" /></svg><i class="in-scan"></i>
-      <p class="in-l1">Identity <b>verified</b></p><p class="in-l2">Clearance <b>granted</b></p><p class="in-l3">Welcome, operative.</p><i class="in-bar"></i><span class="in-skip">Press any key to skip</span></div>`;
+      <p class="in-l1">Identity <b>verified</b></p><p class="in-l2">Clearance <b>granted</b></p><p class="in-l3">Welcome, operative.</p><i class="in-bar"></i><span class="in-skip">${noHover() ? 'Tap anywhere to skip' : 'Press any key to skip'}</span></div>`;
     document.body.appendChild(el);
     let gone = false;
-    const off = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 500); ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => removeEventListener(t, off, true)); };
+    const off = e => {
+      if (gone) return; gone = true;
+      if (e && (e.type === 'pointerdown' || e.type === 'touchstart')) { const eat = ev => { ev.preventDefault(); ev.stopPropagation(); }; addEventListener('click', eat, { capture: true, once: true }); setTimeout(() => removeEventListener('click', eat, true), 800); }
+      el.classList.add('out'); setTimeout(() => el.remove(), 500); ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => removeEventListener(t, off, true)); };
     ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => addEventListener(t, off, { capture: true, passive: true }));
     setTimeout(off, 2900);
   }

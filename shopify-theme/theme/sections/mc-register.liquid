@@ -58,7 +58,7 @@
       <div class="reg-title">
         <p class="kick mono">{% if is_all %}Division of Wearables — Field equipment{% else %}{{ collection.title | escape }}{% endif %}</p>
         <h1 class="h1" id="indexH"><span class="tw caret" style="--n:14">{{ section.settings.heading | escape }}</span></h1>
-        <p class="reg-sub">Every item of field equipment cleared for issue, indexed by file number. <span class="hint-fine">Hover a line for the surveillance photo, click to open the dossier.</span><span class="hint-touch">Tap a line for the photo, then open the dossier.</span> All prices are in Canadian dollars (CAD).</p>
+        <p class="reg-sub">Every item of field equipment cleared for issue, indexed by file number. <span class="hint-fine">Hover a line for the surveillance photo, click to open the dossier.</span><span class="hint-touch">Tap a line for the photo, then open the dossier.</span> {% if cart.currency.iso_code == 'CAD' %}All prices are in Canadian dollars (CAD).{% else %}Prices are shown in {{ cart.currency.iso_code }}, converted from Canadian dollars.{% endif %}</p>
       </div>
       <div class="reg-side mono" aria-hidden="true">
         <p><b>Authorised by</b><span class="redact">Director of Wearables</span></p>
@@ -70,11 +70,11 @@
     <div class="toolbar" role="group" aria-label="Filter and sort the register">
       <div class="filters" id="filters">
         <button class="filter on" data-filter="all" type="button" aria-pressed="true">All assets<sup>{{ n_shown }}</sup></button>
-        <button class="filter" data-filter="top" type="button" aria-pressed="false">Tops<sup>{{ c_top }}</sup></button>
-        <button class="filter" data-filter="bottom" type="button" aria-pressed="false">Bottoms<sup>{{ c_bottom }}</sup></button>
-        <button class="filter" data-filter="accessory" type="button" aria-pressed="false">Hardware<sup>{{ c_acc }}</sup></button>
-        <button class="filter" data-filter="gift" type="button" aria-pressed="false">Gift cards<sup>{{ c_gift }}</sup></button>
-        <button class="filter" data-filter="print" type="button" aria-pressed="false">Print<sup>{{ c_print }}</sup></button>
+        {%- if c_top > 0 %}<button class="filter" data-filter="top" type="button" aria-pressed="false">Tops<sup>{{ c_top }}</sup></button>{% endif %}
+        {%- if c_bottom > 0 %}<button class="filter" data-filter="bottom" type="button" aria-pressed="false">Bottoms<sup>{{ c_bottom }}</sup></button>{% endif %}
+        {%- if c_acc > 0 %}<button class="filter" data-filter="accessory" type="button" aria-pressed="false">Hardware<sup>{{ c_acc }}</sup></button>{% endif %}
+        {%- if c_gift > 0 %}<button class="filter" data-filter="gift" type="button" aria-pressed="false">Gift cards<sup>{{ c_gift }}</sup></button>{% endif %}
+        {%- if c_print > 0 %}<button class="filter" data-filter="print" type="button" aria-pressed="false">Print<sup>{{ c_print }}</sup></button>{% endif %}
       </div>
       <div class="tb-r">
         <label class="findwrap mono"><span class="sr-only">Search the register</span><input id="q" type="search" placeholder="Search the register" data-hints="{{ hints | escape }}" autocomplete="off" spellcheck="false" aria-controls="toc sheet"></label>

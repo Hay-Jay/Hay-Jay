@@ -69,7 +69,7 @@
       <a href="{{ routes.cart_url }}">Bag<span class="arr" aria-hidden="true"></span></a>
       {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">@monochrome.ca<span class="arr" aria-hidden="true"></span></a>{% endif -%}
       <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
-      <span>Prices in CAD</span>
+      <span>Prices in {{ cart.currency.iso_code }}</span>
     </div>
   </div>
 </div>

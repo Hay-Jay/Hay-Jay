@@ -87,7 +87,7 @@
         <div><dt class="mono">Set in</dt><dd>Big Shoulders, Special Elite, Courier Prime &amp; Stardos Stencil</dd></div>
         <div><dt class="mono">Headquarters</dt><dd>{{ section.settings.hq | escape }}</dd></div>
         <div><dt class="mono">Delivers to</dt><dd>{{ countries.size }} countries</dd></div>
-        <div><dt class="mono">Prices</dt><dd>Canadian dollars (CAD)</dd></div>
+        <div><dt class="mono">Prices</dt><dd>{% if cart.currency.iso_code == 'CAD' %}Canadian dollars (CAD){% else %}{{ cart.currency.iso_code }}, converted from Canadian dollars{% endif %}</dd></div>
         <div><dt class="mono">Director</dt><dd><span class="redact" tabindex="0">You, eventually</span></dd></div>
       </dl>
     </div>

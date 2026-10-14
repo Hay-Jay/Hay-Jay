@@ -19,7 +19,7 @@
     {%- endfor -%}
   </ol>
   <div class="dr-foot">
-    <p class="dr-sub"><span class="mono">Subtotal</span><b>{{ cart.total_price | money }}<small>CAD</small></b></p>
+    <p class="dr-sub"><span class="mono">Subtotal</span><b>{{ cart.total_price | money }}<small>{{ cart.currency.iso_code }}</small></b></p>
     {%- if cart.total_discount > 0 -%}
       <p class="mono dr-save">Discounts applied: −{{ cart.total_discount | money }}</p>
     {%- endif -%}
