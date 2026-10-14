@@ -79,9 +79,17 @@ export class Shop {
     const m = this.collectionDrops;
     return new Proxy(m, { get: (t, k) => typeof k === 'string' ? (t.get(k) || { handle: k, title: k, url: `/collections/${k}`, products: [], products_count: 0, 'empty?': true, image: null }) : undefined });
   }
+  /** all_products[handle]: like Shopify, only 20 different handles per page render; the 21st and later are errors. */
   allProductsProxy() {
-    const m = this.productDrops;
-    return new Proxy(m, { get: (t, k) => typeof k === 'string' ? (t.get(k) || null) : undefined });
+    const m = this.productDrops, seen = new Set();
+    return new Proxy(m, { get: (t, k) => {
+      if (typeof k !== 'string') return undefined;
+      if (!seen.has(k)) {
+        seen.add(k);
+        if (seen.size > 20) { this.warnings.error('liquid', `all_products: more than 20 different handles on one page (Shopify returns an error from '${k}' on)`); return null; }
+      }
+      return t.get(k) || null;
+    } });
   }
 
   cartDrop() {

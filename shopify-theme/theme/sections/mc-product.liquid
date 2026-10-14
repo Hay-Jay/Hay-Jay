@@ -64,8 +64,12 @@
   endfor
   assign prev_i = pos | plus: n_total | minus: 1 | modulo: n_total
   assign next_i = pos | plus: 1 | modulo: n_total
-  assign prev_p = all_products[order_list[prev_i]]
-  assign next_p = all_products[order_list[next_i]]
+  # all_products[] stops after 20 handles per page, so products are looked up in the catalogue list instead
+  assign everything = collections['all'].products
+  assign prev_h = order_list[prev_i]
+  assign next_h = order_list[next_i]
+  assign prev_p = everything | where: 'handle', prev_h | first
+  assign next_p = everything | where: 'handle', next_h | first
   capture prev_no
     render 'mc-fileno', product: prev_p, order: ord
   endcapture
@@ -205,7 +209,7 @@
   assign rel_other_sold = ''
   for h in order_list
     if h != product.handle
-      assign q = all_products[h]
+      assign q = everything | where: 'handle', h | first
       capture qc
         render 'mc-class', product: q
       endcapture
@@ -235,7 +239,8 @@
     </header>
     <div class="board strip"><div class="strip-row rel-row">
       {%- for h in rel_list limit: 4 -%}
-        {% render 'mc-card', product: all_products[h], i: forloop.index0, order: ord, sizes: '(min-width:1100px) 22vw, (min-width:700px) 33vw, 50vw' %}
+        {%- assign q = everything | where: 'handle', h | first -%}
+        {% render 'mc-card', product: q, i: forloop.index0, order: ord, sizes: '(min-width:1100px) 22vw, (min-width:700px) 33vw, 50vw' %}
       {%- endfor -%}
     </div></div>
     <nav class="turn mono" aria-label="Turn the page">
