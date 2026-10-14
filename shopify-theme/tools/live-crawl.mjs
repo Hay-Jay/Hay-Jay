@@ -25,21 +25,26 @@ const paths = [
 ].filter(p => !ONLY || p.includes(ONLY));
 await api.close();
 
-const report = [];
+const report = []; let noise = 0;
 for (const w of WIDTHS) {
   const ctx = await previewContext(b, { w, h: w < 700 ? 844 : 900 });
   for (const path of paths) {
     let p;
     try {
       p = await open(ctx, path, { wait: 900 });
-      p.errs = p.errs.filter(e => !/monorail|Failed to fetch.*shopify_pay|preview-bar|web-pixels/i.test(e));
-      const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth).catch(() => 0);
+      // other people's scripts the store loads on every theme (apps, Shop Pay, analytics): counted, not listed
+      const NOISE = /monorail|shopify_pay|preview-bar|web-pixels|teelaunch\.com|shop\.app|Failed to load resource|customer-authentication/i;
+      const json = path.includes('view=catalog'), missing = path === '/nope-not-a-page';
+      const over = json ? 0 : await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth).catch(() => 0);
+      const errs = p.errs.filter(e => !(missing && /^http 404 .*nope-not-a-page/.test(e)));
+      noise += errs.filter(e => NOISE.test(e)).length;
       const issues = [];
-      if (!p.themeOk && !path.includes('view=catalog')) issues.push('not on preview theme');
-      if (p.status >= 400 && path !== '/nope-not-a-page') issues.push('status ' + p.status);
+      if (!p.themeOk && !json && !path.startsWith('/account')) issues.push('not on preview theme');
+      if (p.status >= 400 && !missing) issues.push('status ' + p.status);
+      if (missing && p.status !== 404) issues.push('missing page answered ' + p.status);
       if (p.liquidErrors.length) issues.push(...new Set(p.liquidErrors.map(e => e.replace(/=""/g, '').replace(/\s+/g, ' ').slice(0, 160))));
       if (over > 1) issues.push(`scrolls sideways by ${over}px`);
-      issues.push(...new Set(p.errs.map(e => e.slice(0, 220))));
+      issues.push(...new Set(errs.filter(e => !NOISE.test(e)).map(e => e.slice(0, 220))));
       report.push({ w, path, issues });
       console.log(`${issues.length ? 'FAIL' : 'ok  '} ${w} ${path}${issues.length ? '\n     ' + issues.join('\n     ') : ''}`);
       if (OUT) await p.screenshot({ path: join(OUT, `${w}${path.replace(/[^\w]+/g, '_')}.png`), fullPage: true }).catch(() => {});
@@ -50,4 +55,4 @@ for (const w of WIDTHS) {
 }
 await b.close();
 const failing = report.filter(r => r.issues.length);
-console.log(`-- ${report.length - failing.length}/${report.length} clean`);
+console.log(`-- ${report.length - failing.length}/${report.length} clean (${noise} third-party script messages set aside)`);

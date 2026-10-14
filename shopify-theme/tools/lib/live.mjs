@@ -13,10 +13,11 @@ export async function launch() {
   });
 }
 
-/** A browser context already on the preview theme. Phone sizes get touch and a mobile user agent. */
-export async function previewContext(browser, { w = 1440, h = 900, js = true } = {}) {
+/** A browser context already on the preview theme. Phone sizes get touch and a mobile user agent; reduce: true skips the intro
+ *  and the scroll reveals (for full-page screenshots). */
+export async function previewContext(browser, { w = 1440, h = 900, js = true, reduce = false } = {}) {
   const phone = w < 700;
-  const ctx = await browser.newContext({ viewport: { width: w, height: h }, javaScriptEnabled: js, hasTouch: phone, isMobile: phone, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ viewport: { width: w, height: h }, javaScriptEnabled: js, hasTouch: phone, isMobile: phone, deviceScaleFactor: 1, reducedMotion: reduce ? 'reduce' : 'no-preference' });
   const p = await ctx.newPage();
   await p.goto(`${STORE}/?preview_theme_id=${THEME_ID}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await p.close();
@@ -28,7 +29,7 @@ export async function open(ctx, path, { wait = 1200 } = {}) {
   const p = await ctx.newPage(); p.setDefaultTimeout(15000); p.errs = [];
   p.on('pageerror', e => p.errs.push('pageerror: ' + e.message));
   p.on('console', m => { if (m.type() === 'error') p.errs.push('console: ' + m.text()); });
-  p.on('response', r => { if (r.status() >= 400 && new URL(r.url()).host.endsWith('monochrome.com.ng')) p.errs.push(`http ${r.status()} ${r.url()}`); });
+  p.on('response', r => { if (r.status() >= 400) p.errs.push(`http ${r.status()} ${r.url().slice(0, 160)}`); });
   const sep = path.includes('?') ? '&' : '?';
   const res = await p.goto(`${STORE}${path}${sep}preview_theme_id=${THEME_ID}`, { waitUntil: 'load', timeout: 60000 });
   p.status = res ? res.status() : 0;
