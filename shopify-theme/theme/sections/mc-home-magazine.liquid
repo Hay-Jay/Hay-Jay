@@ -18,7 +18,7 @@
     assign fp = facts | split: '~'
     assign vol = fp[0]
     assign issue = fp[1]
-    assign pages = fp[2]
+    assign mag_pages = fp[2]
     assign blurb = fp[3]
     assign mtitle = mag.title | remove: 'MONOCHROME Magazine — ' | remove: ' (Print)' | strip
     assign line = 'Print'
@@ -28,8 +28,8 @@
     if issue != blank
       assign line = line | append: ' — Issue ' | append: issue
     endif
-    if pages != blank
-      assign line = line | append: ' — ' | append: pages | append: ' pages'
+    if mag_pages != blank
+      assign line = line | append: ' — ' | append: mag_pages | append: ' pages'
     endif
     assign variant = mag.selected_or_first_available_variant
     capture fno
