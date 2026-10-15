@@ -28,6 +28,17 @@ In **Online Store → Themes**, the old theme moves into the library when the ne
 
 In this repository, the git tags `previous-style-static-site` and `before-shopify-theme` mark the earlier states of the code.
 
+## Things in your store settings worth a look
+
+Testing on the real store turned these up. They are store content or settings, not the theme, and none of them blocks publishing.
+
+- **Shipping policy is empty** (Settings → Policies). The new site hides links to it until it has text. Once you fill it in, the links appear in the footer and on the Shipping page.
+- **Refund policy vs. the returns notes.** The refund policy says "no returns", but the Shipping page and FAQ (copied from the approved design) say to contact you if something doesn't fit. Pick one rule. Either edit the "Returns note" blocks on the Shipping page and FAQ question 6 in Customize, or update the policy.
+- **Meet the team page.** Two names have broken links: "Okonkwo Princess" (missing `https://`) and "Blessing Odaware" (the link is text, not a URL). Fix them in Online Store → Pages → MEET THE TEAM.
+- **Prices in other currencies.** Shopify Markets shows visitors prices in their own currency (a US visitor sees USD). The site labels them correctly. To show CAD to everyone, turn off local currencies in Settings → Markets.
+- **Selling past zero stock** is switched on for most products, so several show negative stock in admin. Only the compass necklace actually shows as sold out. That is a per-product inventory setting.
+- **Old app script.** An old size-chart app (teelaunch) still tries to load a missing script on every page, the current site included. It does nothing visible. Removing the app's leftover script tag (or reinstalling and uninstalling the app) clears it.
+
 ## Checkout
 
 Shopify's checkout and payment pages can't be themed from here on the Basic plan. `docs/CHECKOUT.md` has the colours, fonts and logo to set in the checkout editor, which takes about five minutes.
