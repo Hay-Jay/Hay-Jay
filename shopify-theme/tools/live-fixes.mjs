@@ -38,7 +38,7 @@ await T('product', async () => {
   await p.mouse.wheel(0, 600); await p.waitForTimeout(800);
   const h = await p.$eval('.pl-buy', e => e.getBoundingClientRect().height);
   ok('phone pinned buy bar is short', h < 130, `${Math.round(h)}px`);
-  const chatHidden = await p.evaluate(() => { const c = document.querySelector('shopify-chat'); return !c || getComputedStyle(c).visibility === 'hidden'; });
+  const chatHidden = await p.evaluate(() => { const c = document.querySelector('shopify-chat'); return !c || getComputedStyle(c).display === 'none'; });
   ok('chat launcher steps aside while the buy bar is pinned (phone)', chatHidden);
   const inForm = await p.evaluate(() => [...document.querySelectorAll('.pl-app')].map(a => !!a.closest('form')));
   ok('app blocks render inside the product form', inForm.length >= 1 && inForm.every(Boolean), JSON.stringify(inForm));
@@ -61,11 +61,11 @@ await T('bag', async () => {
   await p.evaluate(() => document.querySelectorAll('shopify-forms-embed').forEach(e => e.remove())); // the store's sign-up pop-up, closed as a shopper would
   await p.click('#buy'); await p.waitForSelector('#mcDrawer.open', { timeout: 8000 });
   await p.waitForTimeout(500);
-  const st = await p.evaluate(() => ({ lock: getComputedStyle(document.documentElement).overflow, chat: (() => { const c = document.querySelector('shopify-chat'); return c ? getComputedStyle(c).visibility : 'none'; })() }));
+  const st = await p.evaluate(() => ({ lock: getComputedStyle(document.documentElement).overflow, chat: (() => { const c = document.querySelector('shopify-chat'); return c ? getComputedStyle(c).display : 'none'; })() }));
   ok('open bag locks page scroll', st.lock === 'hidden', st.lock);
-  ok('chat launcher hidden behind the open bag', st.chat === 'hidden' || st.chat === 'none', st.chat);
+  ok('chat launcher hidden behind the open bag', st.chat === 'none', st.chat);
   await p.keyboard.press('Escape'); await p.waitForTimeout(600);
-  ok('chat launcher back after closing the bag', await p.evaluate(() => { const c = document.querySelector('shopify-chat'); return !c || getComputedStyle(c).visibility !== 'hidden'; }));
+  ok('chat launcher back after closing the bag', await p.evaluate(() => { const c = document.querySelector('shopify-chat'); return !c || getComputedStyle(c).display !== 'none'; }));
   await p.evaluate(() => fetch('/cart/clear.js', { method: 'POST' }));
   await ctx.close();
 });
@@ -109,6 +109,56 @@ await T('policy', async () => {
   const p = await open(ctx, '/policies/privacy-policy');
   const over = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   ok('privacy policy fits a phone', over <= 1, `${over}px`);
+  await ctx.close();
+});
+// round 2: cart page, chat over the bag, content pages
+const noForms = p => p.evaluate(() => document.querySelectorAll('shopify-forms-embed').forEach(e => e.remove()));
+await T('cart page', async () => {
+  const ctx = await previewContext(b, { w: 1440, reduce: true });
+  const p = await open(ctx, '/products/monochrome-sweatshirt', { wait: 2000 }); await noForms(p);
+  await p.click('#buy'); await p.waitForSelector('#mcDrawer.open', { timeout: 8000 }); await p.waitForTimeout(600);
+  const hit = await p.evaluate(() => { const g = document.querySelector('.dr-go'); if (!g) return 'no button'; const r = g.getBoundingClientRect(); return [0.5, 0.7, 0.9].map(f => { const el = document.elementFromPoint(r.x + r.width * f, r.y + r.height / 2); return el && el.closest('.dr-go') ? 'ok' : (el ? el.tagName : 'none'); }).join(','); });
+  ok('nothing covers "Proceed to checkout" in the open bag', hit === 'ok,ok,ok', hit);
+  const c = await open(ctx, '/cart', { wait: 1500 }); await noForms(c);
+  const q0 = +(await c.inputValue('.cart-lines .ln [data-line-qty]'));
+  await c.click('.cart-lines .ln [data-q="1"]'); await c.waitForTimeout(2500);
+  const q1 = +(await c.inputValue('.cart-lines .ln [data-line-qty]'));
+  ok('cart page: + updates the page', q1 === q0 + 1 && !(await c.$('.cart-lines .ln.is-busy')), `${q0} -> ${q1}`);
+  await c.fill('.cart-lines .ln [data-line-qty]', '1'); await c.press('.cart-lines .ln [data-line-qty]', 'Enter'); await c.waitForTimeout(2500);
+  ok('cart page: Enter updates and stays on the cart', new URL(c.url()).pathname === '/cart' && (await c.inputValue('.cart-lines .ln [data-line-qty]')) === '1', c.url());
+  await c.click('.cart-lines .ln [data-remove]'); await c.waitForTimeout(2500);
+  ok('cart page: remove empties the page', (await c.$$('.cart-lines .ln')).length === 0 && !!(await c.$('.cart-empty')));
+  const cols = await c.$eval('.cart-picks .sheet', e => getComputedStyle(e).gridTemplateColumns.split(' ').length).catch(() => 0);
+  ok('empty bag: suggestions in a grid', cols === 4, String(cols));
+  await ctx.close();
+});
+await T('history', async () => {
+  const ctx = await previewContext(b, { w: 1440, reduce: true });
+  const a = await open(ctx, '/collections/all', { wait: 1500 });
+  await a.goto(a.url().replace('/collections/all', '/products/flat-signet-ring')); await a.waitForTimeout(2000); await noForms(a);
+  await a.click('#buy'); await a.waitForSelector('#mcDrawer.open', { timeout: 8000 }); await a.waitForTimeout(500);
+  await a.goBack(); await a.waitForTimeout(2500);
+  const n = await a.evaluate(async () => [document.querySelector('[data-cart-count]').textContent.trim(), (await (await fetch('/cart.js')).json()).item_count]);
+  ok('Back keeps the bag count right', String(n[0]) === String(n[1]), JSON.stringify(n));
+  await a.evaluate(() => fetch('/cart/clear.js', { method: 'POST' }));
+  await ctx.close();
+});
+await T('content', async () => {
+  const ctx = await previewContext(b, { w: 1440, reduce: true });
+  const f = await open(ctx, '/pages/faq');
+  const faq = await f.textContent('body');
+  ok('FAQ gift card amounts', /\$10\.00, \$25\.00, \$50\.00 and \$100\.00 CAD/.test(faq), (faq.match(/these amounts: .{0,50}/) || [''])[0]);
+  const ld = await f.$$eval('script[type="application/ld+json"]', s => s.map(x => x.textContent).join(' '));
+  ok('FAQ structured data has no placeholders', !/\{countries\}|\{giftamounts\}/.test(ld));
+  const m = await open(ctx, '/pages/model');
+  const w = await m.evaluate(() => { const h = document.querySelector('#colH'), l = document.querySelector('.ct-lines'); const r = [...h.querySelectorAll('.tw')].map(t => t.getBoundingClientRect().right); return { right: Math.max(...r), lines: l.getBoundingClientRect().left }; });
+  ok('model signup title does not run into the lines', w.right <= w.lines + 1, JSON.stringify(w));
+  ok('model signup has a phone field', !!(await m.$('input[name="contact[phone]"]')));
+  const pol = await open(ctx, '/policies/refund-policy');
+  const gap = await pol.evaluate(() => { const h = document.querySelector('.shopify-policy__title h1'), hd = document.querySelector('.hdr'); return Math.round(h.getBoundingClientRect().top - hd.getBoundingClientRect().bottom); });
+  ok('policy title has room under the header', gap >= 24, gap + 'px');
+  ok('policy page does not mark "Report in" as current', !(await pol.$('a[aria-current="page"][href*="/pages/contact"]')));
+  ok('footer does not link the empty shipping policy', !(await pol.$('footer a[href*="shipping-policy"], .foot a[href*="shipping-policy"]')));
   await ctx.close();
 });
 await b.close();

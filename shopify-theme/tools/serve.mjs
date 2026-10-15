@@ -63,7 +63,8 @@ async function route(req, res) {
   if ((path === '/cart/change.js' || path === '/cart/update.js') && req.method === 'POST') {
     const b = parseBody(await body(req), req.headers['content-type']);
     if (b.line !== undefined) { const i = +b.line - 1; if (shop.cart.items[i]) { if (+b.quantity <= 0) shop.cart.items.splice(i, 1); else shop.cart.items[i].quantity = +b.quantity; } }
-    else if (b.id !== undefined) { const i = shop.cart.items.findIndex(x => x.variant_id === +b.id); if (i >= 0) { if (+b.quantity <= 0) shop.cart.items.splice(i, 1); else shop.cart.items[i].quantity = +b.quantity; } }
+    // id is a line item key ('variant:hash', what the theme sends) or a variant id, as on Shopify
+    else if (b.id !== undefined) { const keys = shop.cartDrop().items.map(x => String(x.key)); const i = String(b.id).includes(':') ? keys.indexOf(String(b.id)) : shop.cart.items.findIndex(x => x.variant_id === +b.id); if (i >= 0) { if (+b.quantity <= 0) shop.cart.items.splice(i, 1); else shop.cart.items[i].quantity = +b.quantity; } }
     return json(200, cartJson());
   }
   if (path === '/cart/clear.js') { shop.cart.items = []; return json(200, cartJson()); }

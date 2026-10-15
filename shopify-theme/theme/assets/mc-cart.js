@@ -112,7 +112,9 @@
     if (busy) return null; busy = true;
     const row = $$(`.ln[data-line="${line}"]`); row.forEach(r => r.classList.add('is-busy'));
     try {
-      const cart = await getJson(R.cartChange ? R.cartChange + '.js' : '/cart/change.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ line: +line, quantity: Math.max(0, +quantity || 0) }) });
+      // the line's own key, not its position: automatic discounts can split or merge lines, which shifts positions
+      const key = row.length && row[0].dataset.key, qty = Math.max(0, +quantity || 0);
+      const cart = await getJson(R.cartChange ? R.cartChange + '.js' : '/cart/change.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(key ? { id: key, quantity: qty } : { line: +line, quantity: qty }) });
       setCount(cart.item_count);
       await refresh();
       return cart;
