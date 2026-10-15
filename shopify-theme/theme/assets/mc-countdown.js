@@ -35,7 +35,8 @@
     const stillBtn = $('[data-cd-still]');
     const applyStill = () => {
       cd.classList.toggle('is-still', still);
-      if (stillBtn) { stillBtn.setAttribute('aria-pressed', String(still)); const l = stillBtn.querySelector('[data-l]'); if (l) l.textContent = still ? 'Resume motion' : 'Pause motion'; }
+      document.documentElement.classList.toggle('mc-still', still);   // the footer tape on this page stops too
+      if (stillBtn) stillBtn.setAttribute('aria-pressed', String(still));
     };
     applyStill();
     on(stillBtn, 'click', () => {
@@ -47,8 +48,8 @@
 
     // ---- time: the server's epoch is the source of truth; the visitor's clock is corrected if it is far off ------------------
     const num = v => { const n = Number(v); return Number.isFinite(n) && n > 0 ? n * 1000 : NaN; };
-    const LAUNCH = num(cd.dataset.launchS) || Date.parse(cd.dataset.launch);
-    const START = num(cd.dataset.startS) || Date.parse(cd.dataset.start);
+    // the server only passes a launch it has checked (0 = none); the page never guesses one of its own
+    const LAUNCH = num(cd.dataset.launchS), START = num(cd.dataset.startS);
     const hasLaunch = Number.isFinite(LAUNCH);
     let skew = 0;
     const now = () => Date.now() + skew;
@@ -89,6 +90,7 @@
     const MILESTONES = [86400, 43200, 21600, 10800, 3600, 1800, 600, 300, 60, 10];
     const phrase = total => {
       if (total <= 0) return 'The issue is declassified.';
+      if (total <= 10) return `${plural(total, 'second')} until the launch.`;
       if (total < 60) return 'Less than a minute until the launch.';
       const d = Math.floor(total / 86400), h = Math.floor(total / 3600) % 24, m = Math.floor(total / 60) % 60;
       const parts = [d && plural(d, 'day'), h && plural(h, 'hour'), m && plural(m, 'minute')].filter(Boolean);
@@ -269,8 +271,14 @@
     }
 
     // ---- peek: hover (mouse), press and hold (touch) or Enter (keyboard) opens a sharp lens on the sealed cover ----------------------
+    const sealBag = on_ => {
+      if (!bag) return;
+      if (on_) { bag.setAttribute('role', 'button'); bag.tabIndex = 0; bag.setAttribute('aria-pressed', 'false'); bag.setAttribute('aria-label', 'Peek at the sealed cover'); bag.setAttribute('aria-describedby', 'cdPeekHint'); }
+      else { ['role', 'tabindex', 'aria-pressed', 'aria-label', 'aria-describedby'].forEach(a => bag.removeAttribute(a)); bag.classList.remove('peek'); }
+    };
+    sealBag(!live);
     if (bag) {
-      const setPeek = v => { bag.classList.toggle('peek', v); bag.setAttribute('aria-pressed', String(v)); };
+      const setPeek = v => { if (live) v = false; bag.classList.toggle('peek', v); if (bag.hasAttribute('aria-pressed')) bag.setAttribute('aria-pressed', String(v)); };
       const lens = e => { const r = bag.querySelector('.cd-cover').getBoundingClientRect(); bag.style.setProperty('--lx', `${((e.clientX - r.left) / r.width) * 100}%`); bag.style.setProperty('--ly', `${((e.clientY - r.top) / r.height) * 100}%`); };
       let hold = 0;
       // the sharp copy is the same file as the blurred one (same srcset), so the first peek never shows an empty lens
@@ -281,10 +289,12 @@
       ['pointerup', 'pointercancel'].forEach(t => on(bag, t, e => { if (e.pointerType !== 'mouse') { clearTimeout(hold); setPeek(false); } }));
       on(bag, 'contextmenu', e => e.preventDefault());
       on(bag, 'keydown', e => {
+        if (live) return;
         if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); bag.style.setProperty('--lx', '50%'); bag.style.setProperty('--ly', '45%'); setPeek(!bag.classList.contains('peek')); }
         else if (e.key === 'Escape') setPeek(false);
       });
       on(bag, 'blur', () => setPeek(false));
+      on(bag, 'click', e => { if (e.detail === 0 && !live) { bag.style.setProperty('--lx', '50%'); bag.style.setProperty('--ly', '45%'); setPeek(!bag.classList.contains('peek')); } });
       offs.push(() => clearTimeout(hold));
     }
 
@@ -316,8 +326,11 @@
         `SUMMARY:${icsText(title)}`, `DESCRIPTION:${icsText('Declassification of The Vision Issue. ' + url)}`, `URL:${url}`,
         'BEGIN:VALARM', 'TRIGGER:-PT15M', 'ACTION:DISPLAY', 'DESCRIPTION:The Vision Issue drops in 15 minutes', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR']
         .map(fold).join('\r\n') + '\r\n';
-      const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      if (ios) { location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(body); return; }   // iOS opens it in Calendar
+      const ua = navigator.userAgent;
+      const ios = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const inApp = /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|Bytedance|Snapchat|Twitter|Line\/|; wv\)/.test(ua) || (ios && /CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(ua));
+      if (inApp && gcal) { toast('Opening Google Calendar'); location.href = gcal.href; return; }   // these browsers can't save a calendar file
+      if (ios) { location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(body); return; }   // Safari on iOS opens it in Calendar
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([body], { type: 'text/calendar;charset=utf-8' })); a.download = 'monochrome-vision-issue.ics';
       document.body.appendChild(a); a.click();
@@ -361,6 +374,8 @@
       const btn = $('.cd-buy'), bl = $('[data-cd-buy-l]');
       if (bl && btn && !btn.disabled) bl.textContent = 'Requisition a copy';
       $$('[data-live]').forEach(el => { el.textContent = el.dataset.live; });
+      if (bag && bag === document.activeElement) bag.blur();
+      sealBag(false);
       if (say) say.textContent = 'The issue is declassified.';
       scramble(900);
     }

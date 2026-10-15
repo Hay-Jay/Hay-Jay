@@ -43,6 +43,33 @@
   assign launch_raw = section.settings.launch | strip
   assign launch_s = launch_raw | date: '%s' | plus: 0
   assign start_s = section.settings.start | strip | date: '%s' | plus: 0
+  # text Shopify can't read comes back as typed, and plus: 0 keeps its leading year (2026): that is not a moment, so no launch
+  if launch_s < 1000000000
+    assign launch_s = 0
+  endif
+  if start_s < 1000000000
+    assign start_s = 0
+  endif
+  # Shopify also reads sloppy text ("Saturday 12:00") as some other moment, so the editor checks the shape the words rely on
+  assign launch_shape_ok = false
+  if launch_raw.size == 25
+    assign c4 = launch_raw | slice: 4, 1
+    assign c7 = launch_raw | slice: 7, 1
+    assign c10 = launch_raw | slice: 10, 1
+    assign c13 = launch_raw | slice: 13, 1
+    assign c16 = launch_raw | slice: 16, 1
+    assign c19 = launch_raw | slice: 19, 1
+    assign c22 = launch_raw | slice: 22, 1
+    if c4 == '-' and c7 == '-' and c10 == 'T' and c13 == ':' and c16 == ':' and c22 == ':'
+      if c19 == '+' or c19 == '-'
+        assign launch_shape_ok = true
+      endif
+    endif
+  endif
+  # anything else stays sealed (no clock) rather than declassifying at a moment nobody meant; the editor says why
+  unless launch_shape_ok
+    assign launch_s = 0
+  endunless
   assign now_s = 'now' | date: '%s' | plus: 0
   assign left_s = 0
   if launch_s > now_s
@@ -140,10 +167,11 @@
   assign live_sub = section.settings.live_sub | default: sub
   assign sig_h = section.settings.signup_heading
   assign live_sig_h = section.settings.live_signup_heading | default: sig_h
+  assign live_note = section.settings.live_signup_note | default: section.settings.signup_note
   assign tape = section.settings.tape | replace: tk_day, l_weekday
   assign tk_pages_phrase = ', {pages} pages'
 -%}
-<section class="cd{% if is_live %} is-live{% endif %}" id="cd" aria-labelledby="cdH"
+<section class="cd{% if is_live %} is-live{% endif %}{% if launch_s == 0 %} no-launch{% endif %}" id="cd" aria-labelledby="cdH"
   data-launch="{{ launch_raw | escape }}" data-launch-s="{{ launch_s }}" data-start="{{ section.settings.start | escape }}" data-start-s="{{ start_s }}"
   data-title="{{ section.settings.calendar_title | default: 'MONOCHROME — The Vision Issue drops' | escape }}"
   data-url="{{ canonical_url }}">
@@ -158,9 +186,9 @@
     </span>
   </div>
 
-  {%- if request.design_mode and launch_s == 0 -%}
-    <p class="wrap cd-warn mono">Shopify can't read the launch moment "{{ launch_raw | escape }}". Use this form: 2026-10-17T12:00:00-06:00.</p>
-  {%- endif -%}
+  {%- if request.design_mode -%}{%- unless launch_s > 0 and launch_shape_ok -%}
+    <p class="wrap cd-warn mono">The launch moment "{{ launch_raw | escape }}" isn't in the form the countdown needs, so the clock is off. Write it like this: 2026-10-17T12:00:00-06:00 (date, T, time, offset; Regina is -06:00).</p>
+  {%- endunless -%}{%- endif -%}
 
   <div class="wrap cd-grid">
     <div class="cd-main">
@@ -246,14 +274,14 @@
         {%- form 'customer', id: 'cd-signal', class: 'news cd-form' -%}
           <input type="hidden" name="contact[tags]" value="newsletter, vision-issue">
           {%- if form.posted_successfully? -%}
-            <p class="cd-ok" role="status" tabindex="-1"><span class="stamp white">Clearance pending</span><span>You are on the list. The signal goes out the moment it is declassified.</span></p>
+            <p class="cd-ok" role="status" tabindex="-1"><span class="stamp white">Clearance pending</span><span data-live="You are on the list for the next transmission.">{% if is_live %}You are on the list for the next transmission.{% else %}You are on the list. The signal goes out the moment it is declassified.{% endif %}</span></p>
           {%- else -%}
             <label for="cd-signal-email" class="sr-only">Email address</label>
             <div class="news-row">
               <input id="cd-signal-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}" aria-describedby="cd-signal-note"{% if form.errors %} aria-invalid="true"{% endif %}>
               <button class="send" type="submit">Request clearance<span class="arr" aria-hidden="true"></span></button>
             </div>
-            {%- if form.errors -%}<small class="mono news-note" id="cd-signal-note" role="alert">{{ form.errors | default_errors }}</small>{%- else -%}<small class="mono news-note" id="cd-signal-note">{{ section.settings.signup_note | escape }}</small>{%- endif -%}
+            {%- if form.errors -%}<small class="mono news-note" id="cd-signal-note" role="alert">{{ form.errors | default_errors }}</small>{%- else -%}<small class="mono news-note" id="cd-signal-note" data-live="{{ live_note | escape }}">{% if is_live %}{{ live_note | escape }}{% else %}{{ section.settings.signup_note | escape }}{% endif %}</small>{%- endif -%}
           {%- endif -%}
         {%- endform -%}
         <div class="cd-acts mono">
@@ -267,7 +295,7 @@
 
     <aside class="cd-ev" aria-label="Evidence">
       <svg class="cd-orbit" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><ellipse cx="300" cy="300" rx="286" ry="112" /><ellipse cx="300" cy="300" rx="236" ry="262" /><circle class="cd-sat" r="7"><animateMotion dur="9s" repeatCount="indefinite" path="M14,300 a286,112 0 1,0 572,0 a286,112 0 1,0 -572,0" /></circle></svg>
-      <div class="cd-bag" data-cd-bag role="button" tabindex="0" aria-pressed="false" aria-label="Peek at the sealed cover" aria-describedby="cdPeekHint" style="--blur: {{ blur }}px">
+      <div class="cd-bag" data-cd-bag style="--blur: {{ blur }}px">
         <i class="cd-zip" aria-hidden="true"></i>
         <div class="cd-cover">
           {%- if mag.featured_image -%}
@@ -337,6 +365,7 @@
     { "type": "text", "id": "signup_heading", "label": "Signup heading", "default": "Get the launch signal" },
     { "type": "text", "id": "live_signup_heading", "label": "Signup heading after the launch", "default": "Get the next transmission" },
     { "type": "text", "id": "signup_note", "label": "Signup small print", "default": "One email the moment it is declassified." },
+    { "type": "text", "id": "live_signup_note", "label": "Signup small print after the launch", "default": "One email when the next transmission drops." },
     { "type": "text", "id": "calendar_title", "label": "Calendar event title", "default": "MONOCHROME — The Vision Issue drops" },
     { "type": "text", "id": "tape", "label": "Tape (separate with |)", "info": "{day} becomes the launch weekday.", "default": "The Vision Issue|Declassified {day}|Do not cross|Enter the orbit|Eyes only" }
   ],
