@@ -1,6 +1,6 @@
 # MONOCHROME — new site launch film
 
-`monochrome-launch-9x16-web.mp4` is a 24-second vertical film (1080×1920, 30 fps, H.264, about 14 Mbit/s) for Instagram Reels, TikTok and Snapchat Stories. It has no soundtrack, so add a sound in the app when you post.
+`monochrome-launch-9x16.mp4` is a 24-second vertical film (1080×1920, 30 fps, H.264, about 8 Mbit/s, 25 MB) for Instagram Reels, TikTok and Snapchat Stories. It has no soundtrack, so add a sound in the app when you post.
 
 | Time | Scene |
 |---|---|
@@ -19,8 +19,8 @@ To change a price, product or line, edit `CARDS` or the text in `index.html`, th
 cd marketing/launch-video
 ln -s ../../shopify-theme/tools/node_modules node_modules   # once
 node render.mjs --out monochrome-launch-9x16-master.mp4                     # about 5 minutes
-ffmpeg -i monochrome-launch-9x16-master.mp4 -c:v libx264 -preset slow -crf 20 -maxrate 14M -bufsize 28M \
-  -pix_fmt yuv420p -movflags +faststart -an monochrome-launch-9x16-web.mp4  # the upload-size file
+ffmpeg -i monochrome-launch-9x16-master.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 8M -bufsize 16M \
+  -pix_fmt yuv420p -movflags +faststart -an monochrome-launch-9x16.mp4      # the upload-size file
 ```
 
 `node render.mjs --frames 60,300,600` writes single stills for checking.
