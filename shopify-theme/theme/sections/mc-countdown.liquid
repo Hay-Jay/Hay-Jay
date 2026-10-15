@@ -95,8 +95,28 @@
 
       <div class="cd-cta">
         {%- if mag != blank and variant -%}
-          <a class="btn cd-buy" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}"{% unless is_live or section.settings.preorder %} hidden{% endunless %}>
-            <span data-cd-buy-l>{%- if is_live -%}Requisition a copy{%- else -%}Reserve a copy{%- endif -%}</span> — {{ variant.price | money }} {{ cart.currency.iso_code }}<i class="arr" aria-hidden="true"></i></a>
+          {%- liquid
+            assign show_buy = false
+            if is_live or section.settings.preorder
+              assign show_buy = true
+            endif
+            assign launch_day = section.settings.launch | date: '%A %-d %B'
+            assign po_note = section.settings.preorder_note | strip
+            if po_note == blank
+              assign po_note = 'Ships from ' | append: launch_day
+            endif
+          -%}
+          <div class="cd-buywrap"{% unless show_buy %} hidden{% endunless %}>
+            {%- form 'product', mag, class: 'cd-buyform' -%}
+              <input type="hidden" name="id" value="{{ variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              {%- unless is_live -%}<input type="hidden" name="properties[Pre-order]" value="{{ po_note | escape }}" data-cd-po>{%- endunless -%}
+              <button class="btn cd-buy" type="submit"{% unless variant.available %} disabled{% endunless %}>
+                <span data-cd-buy-l>{%- if variant.available == false -%}Out of stock{%- elsif is_live -%}Requisition a copy{%- else -%}Pre-order a copy{%- endif -%}</span> — {{ variant.price | money }} {{ cart.currency.iso_code }}<i class="arr" aria-hidden="true"></i>
+              </button>
+            {%- endform -%}
+            {%- unless is_live -%}{%- if variant.available -%}<p class="cd-po-note mono" data-cd-po><b>Pre-order</b> {{ po_note | escape }}</p>{%- endif -%}{%- endunless -%}
+          </div>
           <a class="btn ghost cd-file" href="{{ mag.url }}"{% unless is_live %} hidden{% endunless %}>Open the file<i class="arr" aria-hidden="true"></i></a>
         {%- endif -%}
       </div>
@@ -148,6 +168,7 @@
         {%- if issue != blank -%}<div><dt>Issue</dt><dd>{{ issue }}</dd></div>{%- endif -%}
         {%- if pages != blank -%}<div><dt>Pages</dt><dd>{{ pages }}</dd></div>{%- endif -%}
         <div><dt>Format</dt><dd>Printed copy</dd></div>
+        {%- if variant and section.settings.preorder and is_live == false and variant.available -%}<div data-cd-po><dt>Pre-orders</dt><dd>Open</dd></div>{%- endif -%}
         {%- if variant -%}<div><dt>Price on release</dt><dd>{{ variant.price | money }} {{ cart.currency.iso_code }}</dd></div>{%- endif -%}
         <div><dt>Delivery</dt><dd>{{ countries.size }} countries</dd></div>
       </dl>
@@ -179,7 +200,8 @@
     { "type": "text", "id": "start", "label": "Countdown started", "info": "Same format. The decryption bar and cover blur run from here to the launch.", "default": "2026-10-12T00:00:00-06:00" },
     { "type": "textarea", "id": "cities", "label": "Launch time in these cities", "info": "One per line: name|time zone (e.g. Lagos|Africa/Lagos).", "default": "Regina|America/Regina\nLagos|Africa/Lagos\nToronto|America/Toronto\nLondon|Europe/London" },
     { "type": "product", "id": "product", "label": "Magazine product", "info": "Empty: the magazine from Theme settings, else the first print product." },
-    { "type": "checkbox", "id": "preorder", "label": "Sell copies before the launch", "default": false },
+    { "type": "checkbox", "id": "preorder", "label": "Take pre-orders before the launch", "info": "Shows a pre-order button. Bag and order lines are marked Pre-order.", "default": true },
+    { "type": "text", "id": "preorder_note", "label": "Pre-order note on the bag line and order", "info": "Leave blank for: Ships from (launch day)" },
     { "type": "header", "content": "Words" },
     { "type": "text", "id": "kicker", "label": "Small heading", "default": "Intercepted — The Vision Issue" },
     { "type": "text", "id": "headline", "label": "Headline", "default": "Enter the orbit" },

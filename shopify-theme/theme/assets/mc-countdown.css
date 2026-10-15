@@ -73,6 +73,15 @@
 
 .cd-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
 .cd-cta [hidden] { display: none; }
+.cd-buywrap { display: flex; flex-direction: column; gap: 10px; }
+.cd-buyform { margin: 0; }
+@media (max-width: 560px) { .cd-buywrap { flex: 1 1 100%; } .cd-buy { width: 100%; } }
+.cd-buy { cursor: pointer; }
+.cd-buy:disabled { cursor: not-allowed; background: transparent; color: #ececec; border-style: dashed; }
+.cd-buy:disabled .arr { display: none; }
+.cd-buy.mc-add-pending { opacity: .6; pointer-events: none; }
+.cd-po-note { margin: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #b4b4b4; }
+.cd-po-note b { display: inline-block; margin-right: 8px; padding: 2px 6px 1px; border: 1px solid currentColor; color: #ececec; font-weight: 700; }
 .cd .btn { background: #ececec; color: #0a0a0a; border-color: #ececec; }
 .cd .btn.ghost { background: transparent; color: #ececec; }
 

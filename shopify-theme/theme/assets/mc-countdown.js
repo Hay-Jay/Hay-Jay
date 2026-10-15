@@ -180,12 +180,28 @@
     try { await navigator.clipboard.writeText(url); toast('Link copied'); } catch { toast(url); }
   });
 
+  // ---- pre-order / buy: into the bag without leaving the page (the form still posts to /cart/add without JS) ---------------------------
+  const buyForm = $('.cd-buyform');
+  if (buyForm) buyForm.addEventListener('submit', async e => {
+    const MC = window.MC;
+    if (!MC || !MC.cart || !MC.cart.add) return;
+    e.preventDefault();
+    const btn = buyForm.querySelector('.cd-buy');
+    if (!btn || btn.disabled || btn.classList.contains('mc-add-pending')) return;
+    btn.classList.add('mc-add-pending');
+    try { await MC.cart.add(new FormData(buyForm)); }
+    catch { buyForm.submit(); }
+    finally { btn.classList.remove('mc-add-pending'); }
+  });
+
   // ---- zero: declassified ---------------------------------------------------------------------------------------------------------------
   function declassify() {
     live = true;
     cd.classList.add('is-live');
     $$('.cd-cta [hidden]').forEach(el => { el.hidden = false; });
-    const bl = $('[data-cd-buy-l]'); if (bl) bl.textContent = 'Requisition a copy';
+    $$('[data-cd-po]').forEach(el => el.remove());
+    const btn = $('.cd-buy'), bl = $('[data-cd-buy-l]');
+    if (bl && btn && !btn.disabled) bl.textContent = 'Requisition a copy';
     scramble(900);
   }
 
