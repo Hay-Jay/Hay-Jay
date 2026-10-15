@@ -1,0 +1,50 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-countdown",
+      "blocks": {
+        "l1": {
+          "type": "line",
+          "settings": {
+            "text": "Package intercepted at Regina HQ. Contents: one magazine, {pages} pages."
+          }
+        },
+        "l2": {
+          "type": "line",
+          "settings": {
+            "text": "Cover photograph authenticated. Subject: meet the dream team."
+          }
+        },
+        "l3": {
+          "type": "line",
+          "settings": {
+            "text": "Field office Lagos reports in. Delivery cleared for {countries} countries."
+          }
+        },
+        "l4": {
+          "type": "line",
+          "settings": {
+            "text": "Style, play, culture. Pages decrypting one by one."
+          }
+        },
+        "l5": {
+          "type": "line",
+          "settings": {
+            "text": "Instruction: do not open the evidence bag before the clock runs out."
+          }
+        }
+      },
+      "block_order": [
+        "l1",
+        "l2",
+        "l3",
+        "l4",
+        "l5"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

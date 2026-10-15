@@ -1,0 +1,200 @@
+{%- comment -%}
+  Priority transmission: the countdown to a magazine launch. The page is one dark, full-bleed section: a decrypting headline, a
+  split-flap T-minus clock, the cover sealed in an evidence bag (blurred, clearing as the date nears; press and hold to peek), an
+  intercepted-transmissions log, the launch-signal signup (Shopify customer form, tags newsletter + vision-issue), add-to-calendar and
+  share. At zero it declassifies itself (mc-countdown.js) and offers the magazine; after the date the server renders that state too.
+{%- endcomment -%}
+{%- assign tk_countries = '{countries}' -%}
+{%- assign tk_pages = '{pages}' -%}
+{%- liquid
+  assign mag = section.settings.product | default: settings.magpop_product
+  if mag == blank
+    for p in collections['all'].products
+      capture pc
+        render 'mc-class', product: p
+      endcapture
+      if pc == 'print'
+        assign mag = p
+        break
+      endif
+    endfor
+  endif
+  if mag != blank
+    capture facts
+      render 'mc-magfacts', product: mag
+    endcapture
+    assign fp = facts | split: '~'
+    assign vol = fp[0]
+    assign issue = fp[1]
+    assign pages = fp[2]
+    assign variant = mag.selected_or_first_available_variant
+    capture fno
+      render 'mc-fileno', product: mag
+    endcapture
+  endif
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign launch_s = section.settings.launch | date: '%s' | plus: 0
+  assign now_s = 'now' | date: '%s' | plus: 0
+  assign is_live = false
+  if launch_s > 0 and now_s >= launch_s
+    assign is_live = true
+  endif
+  assign headline = section.settings.headline | default: 'Enter the orbit'
+  assign tk_pages_phrase = ', {pages} pages'
+-%}
+<section class="cd{% if is_live %} is-live{% endif %}" id="cd" aria-labelledby="cdH"
+  data-launch="{{ section.settings.launch | escape }}" data-start="{{ section.settings.start | escape }}"
+  data-cities="{{ section.settings.cities | newline_to_br | strip_newlines | replace: '<br />', ';' | escape }}"
+  data-title="{{ section.settings.calendar_title | default: 'MONOCHROME — The Vision Issue drops' | escape }}"
+  data-url="{{ shop.url | append: request.path }}">
+  <i class="cd-noise" aria-hidden="true"></i><i class="cd-scan" aria-hidden="true"></i>
+
+  <div class="cd-top mono" aria-hidden="true">
+    <span><b class="cd-rec"></b>Priority transmission</span>
+    <span class="cd-top-m">Level 5 // Eyes only // Monochrome Bureau</span>
+    <span data-cd-utc>UTC --:--:--</span>
+  </div>
+
+  <div class="wrap cd-grid">
+    <div class="cd-main">
+      <p class="kick mono cd-kick">{{ section.settings.kicker | escape }}</p>
+      <h1 class="cd-h" id="cdH"><span class="sr-only">{{ headline | escape }}</span><span class="cd-hx" data-scramble aria-hidden="true">{{ headline | escape }}</span></h1>
+      <p class="cd-sub">{{ section.settings.sub | escape }}</p>
+
+      <div class="cd-clock-wrap">
+        <div class="cd-clock" data-cd-clock role="timer" aria-label="Time until the launch">
+          {%- for u in (1..4) -%}
+            {%- case u -%}{%- when 1 -%}{%- assign lbl = 'Days' -%}{%- assign key = 'd' -%}{%- when 2 -%}{%- assign lbl = 'Hours' -%}{%- assign key = 'h' -%}{%- when 3 -%}{%- assign lbl = 'Minutes' -%}{%- assign key = 'm' -%}{%- else -%}{%- assign lbl = 'Seconds' -%}{%- assign key = 's' -%}{%- endcase -%}
+            <div class="cd-u" data-u="{{ key }}">
+              <div class="cd-digits"><span class="fd" data-d="0"><b class="t">0</b><b class="b">0</b><b class="ft">0</b><b class="fb">0</b></span><span class="fd" data-d="1"><b class="t">0</b><b class="b">0</b><b class="ft">0</b><b class="fb">0</b></span></div>
+              <span class="cd-ul mono">{{ lbl }}</span>
+            </div>
+            {%- unless forloop.last -%}<span class="cd-colon" aria-hidden="true"><i></i><i></i></span>{%- endunless -%}
+          {%- endfor -%}
+        </div>
+        <p class="cd-sr" data-cd-sr aria-live="polite"></p>
+        <div class="cd-live-banner">
+          <span class="stamp white lg cd-dstamp">Declassified</span>
+          <p class="cd-live-h">{{ section.settings.live_heading | escape }}</p>
+        </div>
+      </div>
+
+      <p class="cd-when mono">
+        <span class="cd-when-k">Declassification</span>
+        <b data-cd-local>{{ section.settings.launch_label | escape }}</b>
+        <span class="cd-cities" data-cd-cities></span>
+      </p>
+
+      <div class="cd-prog" aria-hidden="true">
+        <span class="mono">Decryption</span><i><b data-cd-bar></b></i><em class="mono" data-cd-pct>--%</em>
+      </div>
+      <canvas class="cd-scope" data-cd-scope width="900" height="90" aria-hidden="true"></canvas>
+
+      <div class="cd-cta">
+        {%- if mag != blank and variant -%}
+          <a class="btn cd-buy" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}"{% unless is_live or section.settings.preorder %} hidden{% endunless %}>
+            <span data-cd-buy-l>{%- if is_live -%}Requisition a copy{%- else -%}Reserve a copy{%- endif -%}</span> — {{ variant.price | money }} {{ cart.currency.iso_code }}<i class="arr" aria-hidden="true"></i></a>
+          <a class="btn ghost cd-file" href="{{ mag.url }}"{% unless is_live %} hidden{% endunless %}>Open the file<i class="arr" aria-hidden="true"></i></a>
+        {%- endif -%}
+      </div>
+
+      <div class="cd-signal" id="signal">
+        <p class="cd-sig-h mono">{{ section.settings.signup_heading | escape }}</p>
+        {%- form 'customer', id: 'cd-signal', class: 'news cd-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter, vision-issue">
+          {%- if form.posted_successfully? -%}
+            <p class="cd-ok" role="status"><span class="stamp white">Clearance pending</span> You are on the list. The signal goes out the moment it is declassified.</p>
+          {%- else -%}
+            <label for="cd-signal-email" class="sr-only">Email address</label>
+            <div class="news-row">
+              <input id="cd-signal-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}"{% if form.errors %} aria-invalid="true"{% endif %}>
+              <button class="send" type="submit">Request clearance<span class="arr" aria-hidden="true"></span></button>
+            </div>
+            {%- if form.errors -%}<small class="mono news-note" role="alert">{{ form.errors | default_errors }}</small>{%- else -%}<small class="mono news-note">{{ section.settings.signup_note | escape }}</small>{%- endif -%}
+          {%- endif -%}
+        {%- endform -%}
+        <div class="cd-acts mono">
+          <button type="button" class="cd-act" data-cd-ics>Add to calendar</button>
+          <a class="cd-act" data-cd-gcal href="https://calendar.google.com/calendar/render" target="_blank" rel="noopener">Google Calendar</a>
+          <button type="button" class="cd-act" data-cd-share>Forward this transmission</button>
+          <span class="cd-toast" data-cd-toast role="status"></span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="cd-ev" aria-label="Evidence">
+      <svg class="cd-orbit" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><ellipse cx="300" cy="300" rx="286" ry="112" /><ellipse cx="300" cy="300" rx="236" ry="262" /><circle class="cd-sat" r="7"><animateMotion dur="9s" repeatCount="indefinite" path="M14,300 a286,112 0 1,0 572,0 a286,112 0 1,0 -572,0" /></circle></svg>
+      <div class="cd-bag" data-cd-bag tabindex="0" aria-label="The cover, sealed. Press and hold to peek.">
+        <i class="cd-zip" aria-hidden="true"></i>
+        <div class="cd-cover">
+          {%- if mag.featured_image -%}
+            {% render 'mc-img', image: mag.featured_image, alt: mag.title, class: 'cd-c-blur', widths: '400,600,800', sizes: '(min-width: 900px) 34vw, 80vw' %}
+            {% render 'mc-img', image: mag.featured_image, alt: '', class: 'cd-c-sharp', widths: '400,600,800,1100', sizes: '(min-width: 900px) 34vw, 80vw' %}
+          {%- endif -%}
+          <i class="cd-laser" aria-hidden="true"></i>
+          <span class="cd-redact r1" aria-hidden="true"></span><span class="cd-redact r2" aria-hidden="true"></span><span class="cd-redact r3" aria-hidden="true"></span>
+          <span class="stamp white lg cd-cstamp" aria-hidden="true">Classified</span>
+        </div>
+        <i class="cd-sheen" aria-hidden="true"></i>
+        <span class="cd-tag mono"><b>Evidence {{ fno | strip }}</b>Sealed until {{ section.settings.launch | date: '%d.%m — %H:%M' }}</span>
+      </div>
+      <p class="cd-peek mono" aria-hidden="true"><span class="hint-fine">Hover the bag to peek</span><span class="hint-touch">Press and hold the bag to peek</span></p>
+      <dl class="cd-facts mono">
+        <div><dt>Publication</dt><dd>MONOCHROME Magazine</dd></div>
+        {%- if vol != blank -%}<div><dt>Volume</dt><dd>{{ vol }}</dd></div>{%- endif -%}
+        {%- if issue != blank -%}<div><dt>Issue</dt><dd>{{ issue }}</dd></div>{%- endif -%}
+        {%- if pages != blank -%}<div><dt>Pages</dt><dd>{{ pages }}</dd></div>{%- endif -%}
+        <div><dt>Format</dt><dd>Printed copy</dd></div>
+        {%- if variant -%}<div><dt>Price on release</dt><dd>{{ variant.price | money }} {{ cart.currency.iso_code }}</dd></div>{%- endif -%}
+        <div><dt>Delivery</dt><dd>{{ countries.size }} countries</dd></div>
+      </dl>
+    </aside>
+  </div>
+
+  <div class="wrap cd-log-wrap">
+    <div class="cd-log" aria-label="Intercepted transmissions">
+      <p class="cd-log-h mono"><span>Intercepted transmissions</span><span data-cd-chan>CH 07 // 4.2 MHz</span></p>
+      <ol class="cd-lines mono" data-cd-log>
+        {%- for block in section.blocks -%}
+          {%- assign line = block.settings.text | replace: tk_countries, countries.size -%}
+          {%- if pages == blank -%}{%- assign line = line | replace: tk_pages_phrase, '' | replace: tk_pages, '' -%}{%- else -%}{%- assign line = line | replace: tk_pages, pages -%}{%- endif -%}
+          <li {{ block.shopify_attributes }} data-line="{{ line | escape }}">{{ line | escape }}</li>
+        {%- endfor -%}
+      </ol>
+    </div>
+  </div>
+
+  {% render 'mc-ticker', words: section.settings.tape, cls: 'hazard cd-tape' %}
+</section>
+
+{% schema %}
+{
+  "name": "Countdown (launch)",
+  "settings": [
+    { "type": "text", "id": "launch", "label": "Launch moment", "info": "Date, time and UTC offset. Regina is -06:00 all year: 2026-10-17T12:00:00-06:00", "default": "2026-10-17T12:00:00-06:00" },
+    { "type": "text", "id": "launch_label", "label": "Launch, in words (shown before the script runs)", "default": "Saturday 17 October, 12:00 Regina time" },
+    { "type": "text", "id": "start", "label": "Countdown started", "info": "Same format. The decryption bar and cover blur run from here to the launch.", "default": "2026-10-12T00:00:00-06:00" },
+    { "type": "textarea", "id": "cities", "label": "Launch time in these cities", "info": "One per line: name|time zone (e.g. Lagos|Africa/Lagos).", "default": "Regina|America/Regina\nLagos|Africa/Lagos\nToronto|America/Toronto\nLondon|Europe/London" },
+    { "type": "product", "id": "product", "label": "Magazine product", "info": "Empty: the magazine from Theme settings, else the first print product." },
+    { "type": "checkbox", "id": "preorder", "label": "Sell copies before the launch", "default": false },
+    { "type": "header", "content": "Words" },
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "Intercepted — The Vision Issue" },
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Enter the orbit" },
+    { "type": "textarea", "id": "sub", "label": "Intro", "default": "MONOCHROME Magazine, Volume 001. The first issue is sealed in evidence until the clock runs out." },
+    { "type": "text", "id": "live_heading", "label": "Heading after the launch", "default": "The Vision Issue is out" },
+    { "type": "text", "id": "signup_heading", "label": "Signup heading", "default": "Get the launch signal" },
+    { "type": "text", "id": "signup_note", "label": "Signup small print", "default": "One email the moment it is declassified." },
+    { "type": "text", "id": "calendar_title", "label": "Calendar event title", "default": "MONOCHROME — The Vision Issue drops" },
+    { "type": "text", "id": "tape", "label": "Tape (separate with |)", "default": "The Vision Issue|Declassified Saturday|Do not cross|Enter the orbit|Eyes only" }
+  ],
+  "blocks": [
+    { "type": "line", "name": "Transmission", "settings": [
+      { "type": "text", "id": "text", "label": "Line", "info": "{countries} and {pages} are filled in from the store." }
+    ] }
+  ],
+  "presets": [{ "name": "Countdown (launch)" }]
+}
+{% endschema %}

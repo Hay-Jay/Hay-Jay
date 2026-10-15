@@ -9,8 +9,8 @@ import { parseArgs, DEFAULT_THEME_DIR, FIXTURES_DIR } from './lib/util.mjs';
 const args = parseArgs(process.argv.slice(2));
 const PORT = +(args.port || 9292);
 const MIME = { '.css': 'text/css', '.js': 'text/javascript', '.webp': 'image/webp', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json' };
-const PAGE_SUFFIX = { about: 'about', lookbook: 'lookbook', shipping: 'shipping', faq: 'faq', contact: 'contact', model: 'contact', 'model-ambassador': 'portfolio' };
-const PAGE_TITLES = { about: 'Mission', lookbook: 'Evidence', shipping: 'Routes', faq: 'Debrief', contact: 'Contact', model: 'Model signup form', 'model-ambassador': 'MEET THE TEAM' };
+const PAGE_SUFFIX = { 'vision-issue': 'vision-issue', about: 'about', lookbook: 'lookbook', shipping: 'shipping', faq: 'faq', contact: 'contact', model: 'contact', 'model-ambassador': 'portfolio' };
+const PAGE_TITLES = { 'vision-issue': 'The Vision Issue — countdown', about: 'Mission', lookbook: 'Evidence', shipping: 'Routes', faq: 'Debrief', contact: 'Contact', model: 'Model signup form', 'model-ambassador': 'MEET THE TEAM' };
 const TEAM = '<p><em><strong>MANAGEMENT</strong></em></p><p>Deji - C.E.O</p><p>Ayodele - C.E.O.</p><p>Jide - CREATIVE DIRECTOR</p><p><em><strong>MODELS/AMBASSADOR</strong></em></p><p>Okonkwo Princess</p><p>Freida Moses</p>';
 
 const shop = new Shop();
