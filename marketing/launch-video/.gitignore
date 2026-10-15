@@ -1,3 +1,6 @@
 node_modules
 still-*.png
 *-master.mp4
+audio/*.wav
+audio/__pycache__
+monochrome-launch-9x16-sfx-only.mp4
