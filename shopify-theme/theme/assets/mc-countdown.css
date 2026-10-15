@@ -42,7 +42,11 @@
 .cd-ul { font-size: clamp(11px, 1vw, 12px); letter-spacing: .24em; color: #ababab; }
 .cd-colon { display: grid; gap: clamp(8px, 2.4cqw, 18px); padding-top: clamp(14px, 6cqw, 40px); }
 .cd-colon i { width: clamp(5px, .7vw, 8px); height: clamp(5px, .7vw, 8px); background: #d6d6d6; animation: cd-blink 1s steps(2) infinite; }
-.fd { --h: clamp(44px, 12vw, 104px); --h: clamp(40px, calc((100cqw - 120px) / 5.4), 112px); --w: calc(var(--h) * .66); position: relative; width: var(--w); height: var(--h); perspective: 600px; font: 900 calc(var(--h) * .82)/var(--h) var(--head); color: #f4f4f4; text-align: center; }
+.fd { --h: clamp(40px, calc(17vw - 22px), 112px); --w: calc(var(--h) * .66); position: relative; width: var(--w); height: var(--h); perspective: 600px; font: 900 calc(var(--h) * .82)/var(--h) var(--head); color: #f4f4f4; text-align: center; }
+/* the flap height follows the clock's own width where container units work (Safari 16+); before that, the viewport stands in for it
+   (a custom property is not checked when parsed, so an unsupported cqw value here would blank the whole clock on iOS 15) */
+@media (min-width: 960px) { .fd { --h: clamp(40px, calc(9.26vw - 31.5px), 112px); } }
+@supports (width: 1cqw) { .fd { --h: clamp(40px, calc((100cqw - 120px) / 5.4), 112px); } }
 .fd b { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; font: inherit; line-height: var(--h);
   background: linear-gradient(180deg, #262626, #161616); border: 1px solid #333; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08); }
 .fd .t, .fd .ft { top: 0; border-radius: 6px 6px 0 0; border-bottom: 0; }
