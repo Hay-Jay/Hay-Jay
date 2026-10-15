@@ -55,6 +55,15 @@
       <p class="mag-cta">
         <a class="btn" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">{{ section.settings.button | escape }}<i class="arr" aria-hidden="true"></i></a>
         <a class="btn ghost" href="{{ mag.url }}">Open the file</a>
+        {%- liquid
+          assign cd_page = section.settings.countdown_page
+          if cd_page == blank
+            assign cd_page = pages['vision-issue']
+          endif
+        -%}
+        {%- if section.settings.countdown_link and cd_page != blank and cd_page.url != blank -%}
+          <a class="btn-line mono mag-cd" href="{{ cd_page.url }}">{{ section.settings.countdown_label | escape }}<i class="arr" aria-hidden="true"></i></a>
+        {%- endif -%}
       </p>
       <p class="mag-note mono"><span>{{ variant.price | money }} {{ cart.currency.iso_code }}</span><span>Printed copy</span><span>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria included{% endif %}. Rate calculated at checkout</span></p>
     </div>
@@ -76,7 +85,10 @@
   "settings": [
     { "type": "product", "id": "product", "label": "Magazine product", "info": "Leave empty to use the first available product of type Magazine." },
     { "type": "text", "id": "kicker", "label": "Small heading", "default": "Incoming transmission" },
-    { "type": "text", "id": "button", "label": "Order button", "default": "Requisition a copy" }
+    { "type": "text", "id": "button", "label": "Order button", "default": "Requisition a copy" },
+    { "type": "checkbox", "id": "countdown_link", "label": "Link to the launch countdown", "info": "Untick once the launch is over.", "default": true },
+    { "type": "page", "id": "countdown_page", "label": "Countdown page", "info": "Empty: the page with the handle vision-issue, if it exists." },
+    { "type": "text", "id": "countdown_label", "label": "Countdown link text", "default": "Watch the countdown" }
   ],
   "presets": [{ "name": "Magazine (Vision Issue)" }]
 }
