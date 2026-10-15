@@ -39,6 +39,16 @@ Testing on the real store turned these up. They are store content or settings, n
 - **Selling past zero stock** is switched on for most products, so several show negative stock in admin. Only the compass necklace actually shows as sold out. That is a per-product inventory setting.
 - **Old app script.** An old size-chart app (teelaunch) still tries to load a missing script on every page, the current site included. It does nothing visible. Removing the app's leftover script tag (or reinstalling and uninstalling the app) clears it.
 
+## The Vision Issue countdown
+
+A launch countdown for the magazine lives at **/pages/vision-issue** (page "The Vision Issue", template `page.vision-issue`). It goes live with the new theme. Until then, preview it at https://monochrome.com.ng/pages/vision-issue?preview_theme_id=189220749566.
+
+- **Launch moment:** Saturday 17 October 2026, 12:00 Regina time (19:00 Lagos, 14:00 Toronto, 19:00 London). At zero the page declassifies itself: the cover unseals and the button becomes a normal purchase.
+- **Pre-orders** are on. Before the launch the button reads "Pre-order a copy", and the bag line and the order say "Pre-order: Ships from Saturday 17 October". Payment is taken at checkout as usual. To charge later instead, you would need a pre-order app.
+- **Sign-ups** from the "Request clearance" box become customers tagged `newsletter` and `vision-issue`. Filter Customers by the `vision-issue` tag to email them on launch day.
+- **To change anything** (the date, cities, wording, the log lines, pre-orders on or off, the pre-order note), open Customize, choose the page template "vision-issue" and click the countdown section. The date format is `2026-10-17T12:00:00-06:00`. Regina is `-06:00` all year.
+- The old theme shows only the page's short text at this address. Nothing links to it there.
+
 ## Checkout
 
 Shopify's checkout and payment pages can't be themed from here on the Basic plan. `docs/CHECKOUT.md` has the colours, fonts and logo to set in the checkout editor, which takes about five minutes.
