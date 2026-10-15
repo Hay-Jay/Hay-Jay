@@ -25,7 +25,29 @@
     endif
     assign desc = page_description | default: shop.description | default: 'MONOCHROME® is a black, white and chrome clothing brand, delivered to countries including Nigeria and Canada.'
   endif
-  if template.name == 'product' and product.featured_image
+  assign og_large = false
+  if template.name == 'page' and template.suffix == 'vision-issue'
+    # the countdown gets shared: its link preview shows the magazine cover (already public on the product page)
+    assign og_mag = settings.magpop_product
+    if og_mag == blank
+      for p in collections['all'].products
+        capture pc
+          render 'mc-class', product: p
+        endcapture
+        if pc == 'print'
+          assign og_mag = p
+          break
+        endif
+      endfor
+    endif
+    if og_mag.featured_image
+      assign og_src = og_mag.featured_image | image_url: width: 1200, format: 'pjpg'
+      assign og_large = true
+    endif
+  endif
+  if og_src != blank
+    # set above
+  elsif template.name == 'product' and product.featured_image
     assign og_src = product.featured_image | image_url: width: 1200
   elsif template.name == 'collection' and collection.image
     assign og_src = collection.image | image_url: width: 1200
@@ -52,7 +74,7 @@
 <meta property="og:description" content="{{ desc | strip_html | strip_newlines | strip | escape }}">
 <meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:image" content="{{ og_abs }}">
-<meta name="twitter:card" content="{% if template.name == 'product' or template.name == 'collection' %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:card" content="{% if og_large or template.name == 'product' or template.name == 'collection' %}summary_large_image{% else %}summary{% endif %}">
 <meta name="twitter:title" content="{{ ttl | strip | escape_once }}">
 <meta name="twitter:description" content="{{ desc | strip_html | strip_newlines | strip | escape }}">
 {%- if template.name == 'product' %}

@@ -15,6 +15,8 @@ img { -webkit-touch-callout: none; }
 /* ---- the running head ------------------------------------------------------------------------------------- */
 @media (max-width: 520px) { .banner { font-size: 10.5px; letter-spacing: .1em; } }
 @media (max-width: 359px) { .banner { letter-spacing: .05em; } }
+/* 320px phones: the wordmark and both header buttons fit side by side */
+@media (max-width: 359px) { .bar-word { width: 112px; } .bar-btn { padding: 0 7px; min-width: 44px; letter-spacing: .06em; } .bar-btn .arr { display: none; } }
 @media (max-width: 699px) {
   /* the white box in the header was a lone switch: it now lives in the file index with a label, where thumbs can read it */
   .bar #declass { display: none; }
