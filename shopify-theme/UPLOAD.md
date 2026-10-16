@@ -2,7 +2,7 @@
 
 ## Already done in your Shopify admin
 
-- **New theme uploaded, not published**: "MONOCHROME Classified (new site)", theme id 189220749566. Your current live theme ("Updated copy of Dawn") is untouched, and customers still see it.
+- **New theme published on 16 October 2026**: "MONOCHROME Classified (new site)", theme id 189220749566, is the live theme. The old one ("Updated copy of Dawn") is in the theme library, unchanged.
 - **Backup of the current look**: "PREVIOUS STYLE - backup of the live Dawn theme …" is an exact copy of the live theme, kept in the theme library.
 - **Four pages created** for the new site's sections: `about`, `lookbook`, `shipping` and `faq`. Each uses the matching template (`page.about`, `page.lookbook` …). On the old theme they only show one short line of text, and nothing links to them there.
 - Your existing pages `contact`, `model` and `model-ambassador` keep their templates. The new theme has a version of each.
