@@ -44,7 +44,7 @@ Testing on the real store turned these up. They are store content or settings, n
 A launch countdown for the magazine lives at **/pages/vision-issue** (page "The Vision Issue", template `page.vision-issue`). It goes live with the new theme. Until then, preview it at https://monochrome.com.ng/pages/vision-issue?preview_theme_id=189220749566.
 
 - **Launch moment:** Sunday 18 October 2026, 12:00 Regina time (19:00 Lagos, 14:00 Toronto, 19:00 London). It was moved from Saturday 17 October on 17 October. At zero the page declassifies itself: the cover unseals and the button becomes a normal purchase.
-  - The live theme is edited in Customize: page template "vision-issue" → countdown section → **Launch moment** `2026-10-18T12:00:00-06:00` → Save. Apps can't write to the live theme, so this one is done by hand. The page's own text (Online Store → Pages → The Vision Issue) already says Sunday 18 October.
+  - On 17 October the theme was unpublished for a few minutes so the new date could be uploaded (apps can't write to a live theme), then published again. The template now sets the launch moment explicitly, and the page's own text (Online Store → Pages → The Vision Issue) says Sunday 18 October.
 - **Pre-orders** are on. Before the launch the button reads "Pre-order a copy", and the bag line and the order say "Pre-order: Ships from Sunday 18 October". Payment is taken at checkout as usual. To charge later instead, you would need a pre-order app.
 - **Sign-ups** from the "Request clearance" box become email subscribers tagged `newsletter` and `vision-issue`.
 - **The launch email doesn't send itself.** Schedule it in Shopify Email (Marketing → Create campaign) for Sunday 18 October, 12:00 Regina time. If it was already scheduled for Saturday, move it.
