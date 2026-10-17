@@ -94,13 +94,13 @@ else:
         return lowE[i0:i1].mean() + 1e-12 if i1 > i0 else 1e-12
     cand = [b for b in beats if b >= DROP and b + DUR - DROP <= len(x) / SR]
     drop_t = max(cand, key=lambda b: np.log(e(b, b + BAR) / e(b - BAR, b)))
-# the analysis frames smear the attack by a few tens of ms: snap the drop to the kick's actual attack within 70 ms
-low = np.abs(sg.sosfilt(sg.butter(4, 180, 'lp', fs=SR, output='sos'), x.mean(axis=1)))
-w = int(0.002 * SR)
-envl = np.convolve(low, np.ones(w) / w, mode='same')
-j0, j1 = int((drop_t - 0.07) * SR), int((drop_t + 0.07) * SR)
-rise = np.diff(envl[j0:j1])
-drop_t = (j0 + int(np.argmax(np.convolve(rise, np.ones(w), mode='same')))) / SR
+# the analysis frames lead the attack by a few tens of ms: snap the drop to the sharpest transient (the kick's click and the hats,
+# above 2.5 kHz) within 60 ms. The 808 is no use for this: it swells, so its steepest rise wanders from beat to beat.
+hi = np.abs(sg.sosfilt(sg.butter(4, 2500, 'hp', fs=SR, output='sos'), x.mean(axis=1)))
+w = int(0.001 * SR)
+envh = np.convolve(hi, np.ones(w) / w, mode='same')
+j0, j1 = int((drop_t - 0.06) * SR), int((drop_t + 0.06) * SR)
+drop_t = (j0 + int(np.argmax(np.diff(envh[j0:j1])))) / SR
 start = drop_t - DROP                                                 # the song time at the film's frame 0
 
 n = int(DUR * SR)
