@@ -376,11 +376,11 @@ const land = (el, t, at, base = '') => {
   el.style.transform = `${base} scale(${lerp(1.16, 1, k)})`;
   el.style.filter = t < at ? 'none' : `blur(${((1 - k) * 14).toFixed(1)}px) drop-shadow(0 10px 0 rgba(0,0,0,.6))`;
 };
-// a stamp thump: big and faint, then slammed down with a small shake
+// a stamp thump: it comes down big and faint over the 0.1 s before its beat and hits the paper on the beat, with a small shake
 const thump = (el, t, at, rot, base = '') => {
-  const k = seg(t, at, at + 0.1), s = lerp(1.9, 1, easeIn(k)), o = clamp(.4 + k * 1.6);
-  const shake = t > at + 0.1 && t < at + 0.26 ? (rnd(t * 97) - .5) * 12 : 0;
-  el.style.opacity = t < at ? 0 : o;
+  const k = seg(t, at - 0.1, at), s = lerp(1.9, 1, easeIn(k)), o = clamp(.25 + k * .5) + (t >= at ? 1 : 0);
+  const shake = t >= at && t < at + 0.16 ? (rnd(t * 97) - .5) * 14 : 0;
+  el.style.opacity = t < at - 0.1 ? 0 : clamp(o);
   el.style.transform = `${base} translate(${shake}px, ${shake * .6}px) rotate(${rot}deg) scale(${s})`;
 };
 const ticker = (el, text, t, speed) => { if (!el.textContent) el.textContent = (text + '   //   ').repeat(8); el.style.transform = `translate(${-(t * speed) % 1900}px, -50%)`; };

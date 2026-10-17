@@ -53,7 +53,7 @@ cd marketing/countdown-sunday
 ln -s ../../shopify-theme/tools/node_modules node_modules                 # once
 node ../../shopify-theme/tools/serve.mjs --port 9292 &                    # only to re-take the phone screenshots
 node capture-site.mjs                                                     # then stop the server
-node render.mjs --out countdown-sunday-9x16-master.mp4                    # about 5 minutes
+node render.mjs --out countdown-sunday-9x16-master.mp4                    # about 10 minutes
 python3 audio/make_audio.py
 ffmpeg -i countdown-sunday-9x16-master.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 8M -bufsize 16M -pix_fmt yuv420p -an silent.mp4
 audio/master.sh silent.mp4 countdown-sunday-9x16.mp4
