@@ -43,13 +43,14 @@ Testing on the real store turned these up. They are store content or settings, n
 
 A launch countdown for the magazine lives at **/pages/vision-issue** (page "The Vision Issue", template `page.vision-issue`). It goes live with the new theme. Until then, preview it at https://monochrome.com.ng/pages/vision-issue?preview_theme_id=189220749566.
 
-- **Launch moment:** Saturday 17 October 2026, 12:00 Regina time (19:00 Lagos, 14:00 Toronto, 19:00 London). At zero the page declassifies itself: the cover unseals and the button becomes a normal purchase.
-- **Pre-orders** are on. Before the launch the button reads "Pre-order a copy", and the bag line and the order say "Pre-order: Ships from Saturday 17 October". Payment is taken at checkout as usual. To charge later instead, you would need a pre-order app.
+- **Launch moment:** Sunday 18 October 2026, 12:00 Regina time (19:00 Lagos, 14:00 Toronto, 19:00 London). It was moved from Saturday 17 October on 17 October. At zero the page declassifies itself: the cover unseals and the button becomes a normal purchase.
+  - The live theme is edited in Customize: page template "vision-issue" → countdown section → **Launch moment** `2026-10-18T12:00:00-06:00` → Save. Apps can't write to the live theme, so this one is done by hand. The page's own text (Online Store → Pages → The Vision Issue) already says Sunday 18 October.
+- **Pre-orders** are on. Before the launch the button reads "Pre-order a copy", and the bag line and the order say "Pre-order: Ships from Sunday 18 October". Payment is taken at checkout as usual. To charge later instead, you would need a pre-order app.
 - **Sign-ups** from the "Request clearance" box become email subscribers tagged `newsletter` and `vision-issue`.
-- **The launch email doesn't send itself.** Schedule it in Shopify Email (Marketing → Create campaign) for Saturday 17 October, 12:00 Regina time.
+- **The launch email doesn't send itself.** Schedule it in Shopify Email (Marketing → Create campaign) for Sunday 18 October, 12:00 Regina time. If it was already scheduled for Saturday, move it.
   - Send it to all email subscribers rather than only the `vision-issue` tag. Someone who was already a customer may not pick up the new tag when they sign up again.
 - **To change anything** (the date, cities, wording, the log lines, pre-orders on or off, the pre-order note), open Customize, choose the page template "vision-issue" and click the countdown section.
-  - The date format is `2026-10-17T12:00:00-06:00`. Regina is `-06:00` all year.
+  - The date format is `2026-10-18T12:00:00-06:00`. Regina is `-06:00` all year.
   - The launch line ("Saturday 17 October, 12:00 Regina time"), the evidence tag and the "Declassified Saturday" tape all follow the date and the first city, so moving the launch only needs the one setting.
 - **At zero**, without a reload, the page switches: the intro and signup heading change, the calendar links go, the pre-order mark is dropped, and the buy button becomes a normal purchase.
 - **Visitors can pause the animation** with the button in the top bar. Phones and computers set to reduce motion get a still page automatically.

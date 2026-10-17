@@ -187,7 +187,7 @@
   </div>
 
   {%- if request.design_mode -%}{%- unless launch_s > 0 and launch_shape_ok -%}
-    <p class="wrap cd-warn mono">The launch moment "{{ launch_raw | escape }}" isn't in the form the countdown needs, so the clock is off. Write it like this: 2026-10-17T12:00:00-06:00 (date, T, time, offset; Regina is -06:00).</p>
+    <p class="wrap cd-warn mono">The launch moment "{{ launch_raw | escape }}" isn't in the form the countdown needs, so the clock is off. Write it like this: 2026-10-18T12:00:00-06:00 (date, T, time, offset; Regina is -06:00).</p>
   {%- endunless -%}{%- endif -%}
 
   <div class="wrap cd-grid">
@@ -349,8 +349,8 @@
 {
   "name": "Countdown (launch)",
   "settings": [
-    { "type": "text", "id": "launch", "label": "Launch moment", "info": "Date, time and UTC offset. Regina is -06:00 all year: 2026-10-17T12:00:00-06:00", "default": "2026-10-17T12:00:00-06:00" },
-    { "type": "text", "id": "launch_label", "label": "Launch, in words (shown before the script runs)", "info": "Leave blank to build it from the launch moment and the first city, e.g. Saturday 17 October, 12:00 Regina time." },
+    { "type": "text", "id": "launch", "label": "Launch moment", "info": "Date, time and UTC offset. Regina is -06:00 all year: 2026-10-18T12:00:00-06:00", "default": "2026-10-18T12:00:00-06:00" },
+    { "type": "text", "id": "launch_label", "label": "Launch, in words (shown before the script runs)", "info": "Leave blank to build it from the launch moment and the first city, e.g. Sunday 18 October, 12:00 Regina time." },
     { "type": "text", "id": "start", "label": "Countdown started", "info": "Same format. The decryption bar and cover blur run from here to the launch.", "default": "2026-10-12T00:00:00-06:00" },
     { "type": "textarea", "id": "cities", "label": "Launch time in these cities", "info": "One per line: name|time zone (e.g. Lagos|Africa/Lagos). Put the launch city first.", "default": "Regina|America/Regina\nLagos|Africa/Lagos\nToronto|America/Toronto\nLondon|Europe/London" },
     { "type": "product", "id": "product", "label": "Magazine product", "info": "Empty: the magazine from Theme settings, else the first print product." },
