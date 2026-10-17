@@ -2,19 +2,21 @@
 grid (120 BPM, a beat is 0.5 s and a bar 2 s; bar 1 is the drop at 2.0 s, the final hit is bar 12 at 24.0 s), under the same sound
 effects as the trap version.
 
-Everything here is synthesised and written for this film: the log-drum bass line, the chords (Am9 - Fmaj9 - Dm9 - E7sus/E7), the
+Everything here is synthesised and written for this film: the log-drum bass line, the chords (Am9 - Fmaj9 - Dm7 - E7sus/E7), the
 kalimba motif and the whistle hook. Nothing is taken from, or modelled on, any real song (no samples, stems, melodies or vocals).
 
     python3 audio/make_audio.py         # first: the trap version, which also writes the effects (audio/sfx.wav, audio/events.json)
     python3 audio/make_audio_afro.py    # music.wav, sfx.wav, mix-premaster.wav, events.json in audio/afro/
 
 The effects are the trap version's audio/sfx.wav, unchanged (same events, same timings). The music ducks under the slams, stamps,
-impacts and booms with the same shape M.finish() uses for the trap mix, but the ducking is done here: it has a short attack, and at
-the two payoffs (the drop at 2.0 and the final hit at 24.0) it dips only lightly, so the music lands with the impact and is the
-loudest it gets there. It also dips 2.5 dB under the riffle's page flaps and the split-flap board's clacks.
+impacts and booms with the same shape M.finish() uses for the trap mix, but the ducking is done here, with a short smooth attack
+(no clicks). At the two payoffs (the drop at 2.0 and the final hit at 24.0) it does not duck at all: a harder kick and log-drum
+note, a sub drop, a clap and a doubled crash land with the boom, and those are the two loudest moments of the music, 3 dB or more
+over anything in the bar before. It also dips 2.5 dB under the riffle's page flaps and the split-flap board's clacks.
 
-The mix is built for phone speakers as well as headphones: the keys, pad and congas are kept out of the 250-500 Hz box, the bus
-has a little presence at 2-3 kHz, and the log drum carries a saturated mid band so it is still heard without its sub.
+The mix is built for phone speakers as well as headphones: the keys (rootless voicings), pad and congas are kept out of the
+250-500 Hz box, the bus has a little presence at 2-3 kHz, the whistle lead has some flute body and sits under the groove, and the
+log drum carries a saturated mid band so it is still heard on a speaker that plays nothing of its fundamental.
 """
 import json
 import os
@@ -36,7 +38,7 @@ tt, hz, place, bt, lp, hp, bp = M.tt, M.hz, M.place, M.bt, M.lp, M.hp, M.bp
 R = np.random.default_rng(1810)          # humanising (velocities), separate from the kit's noise generator
 SWING = 0.016                            # the off-16ths sit 16 ms late: a light afro-house swing
 MUSIC_OVER_SFX = 3.0                     # the music sits this many LU above the effects, after ducking (the trap mix: 3.1)
-LOG_DRIVE, LOG_GRIT = 5.0, 1.6           # the log drum's parallel saturated band: drive and level (it ends up about 6 dB under the dry tone)
+LOG_DRIVE, LOG_GRIT = 5.0, 1.6           # the log drum's parallel saturated mid band: drive and level
 HITS = (2.0, 24.0)                       # the two payoffs: the drop (THE VISION ISSUE) and the final hit (monochrome.com.ng)
 
 
@@ -104,8 +106,8 @@ def log_line(notes):
     """The log drum: one monophonic line. notes: (t, midi, length s, glide_from_midi or None, bend semitones over the tail, vel
     [, body: >1 holds the note longer, for the two payoffs]).
     A pitched, hollow tone (fundamental plus a 2nd and 3rd harmonic that ring for about 0.2 s), a short upward pitch blip for the
-    knock, a woody click on top, and glides between notes. A saturated copy, band-passed to 650-2000 Hz, runs in parallel under
-    the dry tone so the line still reads on a phone speaker, which plays nothing of the 55-90 Hz fundamental."""
+    knock, a woody click on top, and glides between notes. A saturated copy, band-passed to 750-1800 Hz, runs in parallel under
+    the dry tone so the line still reads on a phone speaker, which plays nothing of the 55-165 Hz fundamental."""
     f = np.full(N, hz(33))
     amp = np.zeros(N)
     harm = np.zeros(N)
@@ -144,9 +146,9 @@ def log_line(notes):
     raw = np.sin(ph) + harm * (0.62 * np.sin(2 * ph + 0.4) + 0.34 * np.sin(3 * ph + 0.9))
     y = np.tanh(2.1 * raw * amp) / np.tanh(2.1)
     y = hp(y, 32, order=2)
-    y = y + 0.2 * bp(y, 400, 1200)                                           # a little mid, above the low-mid mud
-    grit = bp(np.tanh(LOG_DRIVE * y + 0.25) - np.tanh(0.25), 650, 2000, order=2)  # the parallel saturated band (odd and even harmonics)
-    grit = grit * lp(np.clip(175.0 / f, 1.0, 3.2), 40)                       # a low note has fewer harmonics up there: lift it (A1 x3.2)
+    y = y + 0.12 * bp(y, 400, 1200)                                          # a little mid, above the low-mid mud
+    grit = bp(np.tanh(LOG_DRIVE * y + 0.25) - np.tanh(0.25), 750, 1800, order=2)  # the parallel saturated band (odd and even harmonics)
+    grit = grit * lp(np.clip((175.0 / f) ** 1.4, 1.0, 5.2), 40)              # a low note has fewer harmonics up there: lift it (A1 x5)
     y = lp(y + LOG_GRIT * grit, 3800)
     return M.pan2(y, 0) + knock
 
@@ -284,9 +286,10 @@ def whistle_line(notes):
 HALF = {0: ('Am', 'Am'), 1: ('Am', 'Am'), 2: ('F', 'F'), 3: ('Dm', 'Dm'), 4: ('Esus', 'E7'), 5: ('Am', 'Am'), 6: ('F', 'F'),
         7: ('Dm', 'Dm'), 8: ('Esus', 'E7'), 9: ('Am', 'Am'), 10: ('F', 'F'), 11: ('Dm', 'E7'), 12: ('Am', 'Am')}
 LOGR = {'Am': 33, 'F': 41, 'Dm': 38, 'Esus': 40, 'E7': 40}                   # log drum roots: A1, F2, D2, E2
-EPV = {'Am': [60, 64, 67, 71], 'F': [57, 60, 64, 67], 'Dm': [57, 60, 64, 65],                  # rootless (the log drum has the root):
-       'Esus': [57, 59, 62, 64], 'E7': [56, 59, 62, 65]}                                         # Am9, Fmaj9, Dm9, E7sus4, E7(b9)
-PADV = {'Am': [57, 64, 67, 72], 'F': [53, 60, 64, 69], 'Dm': [50, 57, 65, 69], 'Esus': [52, 59, 64, 69], 'E7': [52, 59, 62, 68]}
+EPV = {'Am': [60, 64, 67, 71], 'F': [57, 60, 64, 67], 'Dm': [53, 57, 60, 65],                  # rootless (the log drum has the root):
+       'Esus': [57, 59, 62, 64], 'E7': [56, 59, 62, 65]}                                         # Am9 C E G B, Fmaj9 A C E G, Dm7 F A C F,
+                                                                                                 # E7sus4 A B D E, E7(b9) G# B D F
+PADV = {'Am': [57, 64, 67, 72], 'F': [53, 60, 64, 69], 'Dm': [50, 57, 62, 69], 'Esus': [52, 59, 64, 69], 'E7': [52, 59, 62, 68]}
 KAL = {'Am': [69, 72, 76, 79, 81], 'F': [69, 72, 76, 77, 81], 'Dm': [69, 72, 74, 77, 81], 'Esus': [69, 71, 74, 76, 81],
        'E7': [68, 71, 74, 76, 80]}
 
@@ -432,8 +435,8 @@ for bar in range(1, LAST):
             place(lead_dbl, at(bar, s), pluck(hz(m - 12), 0.8, 0.45), 1.0, pan=0.05)
 
 # three fills, each different: into the drop (below, in the cold open), into the 77 file, and into the end card (after the 21.5 slam)
-fill(4, 'call', 0.5)
-fill(10, 'flams', 0.38, flam=True)
+fill(4, 'call', 0.75)
+fill(10, 'flams', 0.6, flam=True)
 
 # ---- the cold open (bar 0, 0-2 s): filtered keys, kalimba and pad, shakers creeping in, a log-drum hit with VOL. 001 at 1.0 -----
 intro = M.buf()
@@ -477,10 +480,12 @@ stem['lead'] = whistle_line(leadnotes) + lead_dbl * 0.3
 
 
 def duck_shape(depth, tau, attack, hold=0.0):
-    """A sidechain dip: down by depth over attack seconds (no step in the waveform), held for hold seconds, back up with time
-    constant tau, and long enough (7 tau) that it ends within a fraction of a percent of unity."""
+    """A sidechain dip: down by depth over attack seconds on a raised-cosine curve (no step and no corner in the gain, so no
+    click), held for hold seconds, back up with time constant tau, and long enough (7 tau) that it ends within a fraction of a
+    percent of unity."""
     x = tt(int((hold + max(0.25, 7 * tau)) * SR))
-    return 1 - depth * np.minimum(1, x / attack) * np.exp(-np.maximum(x - hold, 0) / tau)
+    ramp = 0.5 - 0.5 * np.cos(np.pi * np.minimum(1, x / attack))
+    return 1 - depth * ramp * np.exp(-np.maximum(x - hold, 0) / tau)
 
 
 def duck_curve(depth, tau, times, attack=0.004):
@@ -508,7 +513,7 @@ rv = M.reverb_ir(1.7, seed=11)
 room = M.reverb_ir(0.55, damp=7000, seed=7)
 lfo = np.sin(2 * np.pi * 4.2 * tline)                                          # tine piano auto-pan
 stem['keys'] = stem['keys'] * np.stack([1 + 0.22 * lfo, 1 - 0.22 * lfo], axis=1)
-stem['keys'] = shelf(hp(stem['keys'] + intro, 230), 400, -3, 'low')             # the keys stay above the log drum and the congas
+stem['keys'] = shelf(hp(stem['keys'] + intro, 230), 500, -3, 'low')             # the keys stay above the log drum and the congas
 stem['keys'] = stem['keys'] + 0.4 * bp(stem['keys'], 1800, 4500)                 # presence, for phone speakers
 stem['kal'] = stem['kal'] + 0.3 * bp(stem['kal'], 1800, 4500)
 stem['keys'] = stem['keys'] + M.conv_stereo(stem['keys'], rv) * 0.26
@@ -520,15 +525,17 @@ stem['pad'] = hp(lp(stem['pad'], 1700), 250) + air * (np.abs(stem['pad']).max() 
 stem['pad'] = stem['pad'] + M.conv_stereo(stem['pad'], rv) * 0.2
 
 # fx: a soft riser into the drop and into the end card, a reverse cymbal into the drop and the final hit, crashes on the big changes
-# (the riser into the drop sits 3 dB lower than it did, so the build tops out under the drop; the payoffs get a doubled crash)
+# (the riser into the drop is kept low, so the build tops out well under the drop; the payoffs get a doubled crash and a clap,
+# and the crash into the end card at 22.0 is kept light so the final hit at 24.0 stands over it)
 for a, b, g in ((0.35, 1.95, 0.21), (21.1, 21.97, 0.24)):
     place(stem['fx'], a, M.riser(a, b, g), 1.0)
 for tp, d, g in ((2.0, 1.0, 0.32), (24.0, 0.9, 0.3)):
     place(stem['fx'], tp - d, M.rev_cym(d), g)
-for tc, g in ((2.0, 0.8), (10.0, 0.6), (18.0, 0.6), (22.0, 0.45), (24.0, 0.9)):
+for tc, g in ((2.0, 1.1), (10.0, 0.6), (18.0, 0.6), (22.0, 0.3), (24.0, 1.2)):
     place(stem['fx'], tc, M.crash(), g)
     if is_hit(tc):
         place(stem['fx'], tc + 0.009, M.crash()[:, ::-1], g)
+        place(stem['fx'], tc, hp(M.clap(), 300), 0.5, pan=-0.05)
 
 # ---- the balance -------------------------------------------------------------------------------------------------------------
 GAIN = {'kick': 0.78, 'log': 0.4, 'perc': 1.1, 'keys': 0.19, 'kal': 0.23, 'pad': 0.55, 'lead': 0.13, 'fx': 0.55}
@@ -577,12 +584,12 @@ with open(os.path.join(HERE, 'events.json')) as fh:
 M.EVENTS.extend(meta['events'])
 
 # the music ducks under the big effects with finish()'s shape (down 0.45, back up with a 0.14 s time constant), here with a 3 ms
-# attack and a tail that runs out to unity; at the two payoffs only a light dip, so the music hits with the impact, not under it
+# attack and a tail that runs out to unity; not at the two payoffs, where the music hits with the impact, not under it
 DUCK_KINDS = ('slam', 'stamp', 'impact', 'boom', 'clock')
 duck = np.ones(N)
 for e in M.EVENTS:
-    if e['kind'].startswith(DUCK_KINDS):
-        c = duck_shape(0.15 if is_hit(e['t']) else 0.45, 0.14, 0.003)
+    if e['kind'].startswith(DUCK_KINDS) and not is_hit(e['t']):
+        c = duck_shape(0.45, 0.14, 0.003)
         i = int(e['t'] * SR)
         n = min(len(c), N - i)
         duck[i:i + n] = np.minimum(duck[i:i + n], c[:n])
@@ -600,7 +607,11 @@ m_sum = sum(music.values())
 L_music, L_sfx = lufs(m_sum), lufs(sfx)
 music_gain = 10 ** ((L_sfx + MUSIC_OVER_SFX - L_music) / 20)
 pk = float(np.max(np.abs(m_sum * music_gain + sfx)))
-scale = min(1.0, 0.98 / pk)                                                   # keep the sum out of finish()'s soft clipper
+scale = min(1.0, 0.98 / pk)                                                   # the sum goes into finish()'s soft clipper under 0.98
+# finish() normalises its soft-clipped mix to 0.89 and writes the music stem with the same gain: keep that stem under 0.98 too
+pm = float(np.max(np.abs(m_sum * music_gain)))
+while pm * scale * 0.89 / float(np.max(np.abs(np.tanh(1.05 * scale * (m_sum * music_gain + sfx))))) * 1.05 > 0.98:
+    scale *= 0.98
 print('loudness (LUFS) of each stem in the music bus:')
 for k, v in music.items():
     print(f'  {k:5s} {lufs(v):6.1f}   peak {np.max(np.abs(v)):.3f}')

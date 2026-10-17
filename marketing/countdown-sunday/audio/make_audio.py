@@ -67,7 +67,7 @@ for h, m, v, ln in PIANO:
 # ---- the choir: a wordless 'aah' swelling through the intro; stabs and a quiet bed after the drop; a big C major at the end -------
 for i, (a, b, c) in enumerate(INTRO):
     d = T(b) - T(a) + 0.45
-    vel = (.3, .46, .56, .72, .82, .9)[i]
+    vel = (.3, .46, .56, .66, .62, .68)[i]
     place(choir, T(a) - (0.0 if i == 0 else 0.25), M.aah_pad(VOICE[c], d + (0 if i == 0 else 0.25), vel, attack=2.2 if i == 0 else .35, release=.45, seed=30 + i))
 for a, b, c in MAIN:
     if c in ('C',) or 24 <= a < 28:
@@ -120,7 +120,7 @@ for h0, kind in BARS:
         if kind == 'thin':
             place(drums, T(h), CL, 0.45)
         else:
-            place(drums, T(h), SN, 0.62); place(drums, T(h), CL, 0.5); place(drums, T(h), ST, 0.55)
+            place(drums, T(h), SN, 0.8); place(drums, T(h), CL, 0.68); place(drums, T(h), ST, 0.55)
     if kind != 'thin':
         for k in range(16):
             h = h0 + k * .25
@@ -145,7 +145,7 @@ place(drums, T(32), K, 1.0); kicks.append(T(32))
 notes808.append((T(32), 36, DUR - T(32), 48))
 for h in (12, 16, 20, 28, 32):
     place(fx, T(h), M.crash(), 1.0 if h in (12, 32) else 0.7)
-bass = M.pan2(M.line_808(sorted(set(notes808)), drive=1.8, decay=0.9), 0)
+bass = M.pan2(M.line_808(sorted(set(notes808)), drive=3.2, decay=0.9), 0)
 
 # intro sub: the roots, very low, under the strings
 sub = np.zeros(N)
@@ -157,8 +157,8 @@ sub *= np.clip(np.arange(N) / SR / T(11.5), 0, 1) ** 1.5
 bass += M.pan2(sub * 0.35, 0)
 
 # risers and reverse cymbals into the drop, the end card and the final hit
-place(fx, T(10), M.riser(T(10), T(11.5), .22), 1.0)
-place(fx, T(11.5) - T(1.6), M.rev_cym(T(1.6)), .35)
+place(fx, T(10), M.riser(T(10), T(11.5), .13), 1.0)
+place(fx, T(11.5) - T(1.6), M.rev_cym(T(1.6)), .2)
 place(fx, T(27), M.riser(T(27), T(28), .22), 1.0)
 place(fx, T(28) - .8, M.rev_cym(.8), .3)
 place(fx, T(31), M.riser(T(31), T(31.75), .3), 1.0)
@@ -185,11 +185,11 @@ strings = M.hp(strings, 60)
 
 tline = tt(N)
 # under the phone: the beat goes thin and dark
-cut = np.where((tline >= T(24)) & (tline < T(28)), 1800.0, 20000.0)
+cut = np.where((tline >= T(24)) & (tline < T(28)), 3500.0, 20000.0)
 cut = np.convolve(cut, np.ones(int(.04 * SR)) / int(.04 * SR), mode='same')
 drums = M.sweep_lp(drums, cut)
-music = {'drums': drums * 1.5, 'bass': bass * 1.0, 'keys': keys * 0.5, 'choir': choir * 0.62, 'strings': strings * 0.5,
-         'brass': brass * 0.75, 'lead': lead * 0.36, 'fx': fx * 0.8}
+music = {'drums': drums * 1.15, 'bass': bass * 0.8, 'keys': keys * 0.4, 'choir': choir * 0.48, 'strings': strings * 0.4,
+         'brass': brass * 0.85, 'lead': lead * 0.3, 'fx': fx * 0.62}
 
 
 def gate(a, b, ramp=0.008):
@@ -217,9 +217,10 @@ for k_, v in music.items():
 S, S2 = M.buf(), M.buf()
 
 
-def P(t, sig, g=1.0, pan=0.0, alt=None, g2=None):
-    """Both mixes (alt: a different sound for the effects-only cut; None there means the same one)."""
-    place(S, fr(t), sig, g, pan)
+def P(t, sig, g=1.0, pan=0.0, alt=None, g2=None, exact=False):
+    """Both mixes (alt: a different sound for the effects-only cut; None there means the same one).
+    exact: in the film's mix the sound starts on the beat itself (t), with the music's kick, up to a frame before its picture."""
+    place(S, t if exact else fr(t), sig, g, pan)
     place(S2, fr(t), sig if alt is None else alt, g if g2 is None else g2, pan)
 
 
@@ -238,14 +239,22 @@ def typing(text, t0, t1, vel=0.22, name='', key=M.typewriter_key):
     ev(t0, 'typing', name or text)
 
 
+def knock(v, f0=240.0):
+    """A short mid-range knock (a damped sine and a puff of band-passed noise) laid on the heartbeat's sub thump."""
+    n = int(.09 * SR); x = tt(n)
+    body = np.sin(2 * np.pi * f0 * x * (1 + .25 * np.exp(-x / .01))) * np.exp(-x / .032)
+    puff = M.bp(M.noise(n), 300, 900) * np.exp(-x / .012) * .5
+    return (body + puff) * v
+
+
 # ---- the heartbeat: lub on the half-time beat, dub a sixteenth later; it speeds up with the montage ------------------------------
 for h in TL['heart']:
     v = 0.62 if h < 10 else 0.56
-    P(E(h), M.heartbeat(v), 0.9); ev(E(h), 'heart', f'lub, hb {h}')
+    P(E(h), M.heartbeat(v), 0.9); P(E(h), knock(v), 0.22); ev(E(h), 'heart', f'lub, hb {h}')
     if h < TL['dub_until']:
-        P(E(h + .25), M.heartbeat(v, dub=True), 0.9)
+        P(E(h + .25), M.heartbeat(v, dub=True), 0.9); P(E(h + .25), knock(v * .8, 300.0), 0.18)
     if h < 4:
-        PF(E(h) + .03, M.beep(1046.5, .07, .6), 0.06)          # the monitor's blip (C6), only under the film's own music
+        P(E(h) + .03, M.beep(1046.5, .07, .6), 0.06, g2=0.035)  # the monitor's blip (C6), quieter in the effects-only cut
 
 # ---- cold open --------------------------------------------------------------------------------------------------------------------
 C = TL['cold']
@@ -274,12 +283,12 @@ for h, p in TL['flashes']:
 
 # ---- the drop: a white flash, the clock slams in at 24:00:00 -----------------------------------------------------------------------
 CK = TL['clock']
-P(E(12), M.boom(1.0, 1.7), 0.7, alt=M.heart_boom(1.0, .7), g2=0.85); P(E(12), M.zap(), 0.22)
+P(T(12), M.boom(1.0, 1.7), 0.7, alt=M.heart_boom(1.0, .7), g2=0.85, exact=True); P(T(12), M.zap(), 0.22, exact=True)
 ev(E(12), 'boom', 'the drop: white flash')
-P(E(12), M.flap_clack(1.0, heavy=True), 0.9); ev(E(12), 'clock', 'the clock slams in at 24:00:00')
+P(T(12), M.flap_clack(1.0, heavy=True), 0.9, exact=True); ev(E(12), 'clock', 'the clock slams in at 24:00:00')
 P(E(12), M.whoosh(.35, .08, 3000, 500), 0.3, pan=-.4); ev(E(12), 'whoosh', 'the tape runs in')
 typing('The Vision Issue', T(CK['kicker'][0]), T(CK['kicker'][0]) + .25, 0.16, 'The Vision Issue', key=M.sfx_click)
-typing('Declassified in', T(CK['kicker'][0]) + .2, T(CK['kicker'][1]), 0.16, 'Declassified in', key=M.sfx_click)
+typing('Vol. 001 // Eyes only', T(CK['kicker'][0]) + .2, T(CK['kicker'][1]), 0.16, 'Vol. 001 // Eyes only', key=M.sfx_click)
 for h, w, g in ((CK['tminus'], 'T-MINUS', .66), (CK['hours'], '24 HOURS', .66), (CK['date'], 'SUNDAY 18 OCTOBER / 12:00 REGINA', .5)):
     P(E(h), M.slam(), g); ev(E(h), 'slam', w)
 P(E(CK['fly'][0]), M.whoosh(.45, .4, 500, 4200), 0.3); ev(E(CK['fly'][0]), 'whoosh', 'the clock flies up into the corner')
@@ -306,7 +315,7 @@ for n in range(1, 40):
 # ---- the sealed cover ---------------------------------------------------------------------------------------------------------
 B = TL['bag']
 P(E(B['land']) - .2, M.whoosh(.25, .2, 300, 3200), 0.3)
-P(E(B['land']), M.stamp_thump(.9), 0.6); P(E(B['land']), M.boom(.4, .8), 0.25, alt=M.heart_boom(.4, .35), g2=.3)
+P(T(B['land']), M.stamp_thump(.9), 0.6, exact=True); P(T(B['land']), M.boom(.4, .8), 0.25, alt=M.heart_boom(.4, .35), g2=.3, exact=True)
 ev(E(B['land']), 'impact', 'the evidence bag slams down')
 for h in B['bars']:
     P(E(h), M.whoosh(.14, .08, 1800, 6000), 0.24); ev(E(h), 'swish', 'a redaction bar')
@@ -335,15 +344,15 @@ P(E(PH['stamp2']), M.stamp_thump(), 0.62); ev(E(PH['stamp2']), 'stamp', 'PRE-ORD
 
 # ---- the end card ---------------------------------------------------------------------------------------------------------------
 EN = TL['end']
-P(E(EN['tomorrow']), M.boom(.85, 1.2), 0.5, alt=M.heart_boom(.85, .5), g2=0.6); P(E(EN['tomorrow']), M.zap(), 0.2)
+P(T(EN['tomorrow']), M.boom(.85, 1.2), 0.5, alt=M.heart_boom(.85, .5), g2=0.6, exact=True); P(T(EN['tomorrow']), M.zap(), 0.2, exact=True)
 ev(E(EN['tomorrow']), 'boom', 'end card')
-P(E(EN['tomorrow']), M.slam(), 0.66); ev(E(EN['tomorrow']), 'slam', 'TOMORROW.')
+P(T(EN['tomorrow']), M.slam(), 0.66, exact=True); ev(E(EN['tomorrow']), 'slam', 'TOMORROW.')
 PF(E(EN['tomorrow']) + .03, M.shimmer(.45, f0=2000, f1=5200), 0.16)
 P(E(EN['clock']), M.flap_clack(1.0, heavy=True), 0.55); ev(E(EN['clock']), 'clock', 'the end-card clock appears, still running')
 P(E(EN['date']), M.slam(.7), 0.45); ev(E(EN['date']), 'slam', 'Sunday 18 October · 12:00 Regina')
 P(E(EN['url']), M.slam(), 0.6); ev(E(EN['url']), 'slam', 'monochrome.com.ng')
-P(E(EN['hit']), M.boom(1.0, 1.9), 0.7, alt=M.heart_boom(1.0, .75), g2=0.9); P(E(EN['hit']), M.slam(), 0.7)
-P(E(EN['hit']), M.zap(), 0.2); PF(E(EN['hit']), M.crash(), 0.6)
+P(T(EN['hit']), M.boom(1.0, 1.9), 0.7, alt=M.heart_boom(1.0, .75), g2=0.9, exact=True); P(T(EN['hit']), M.slam(), 0.7, exact=True)
+P(T(EN['hit']), M.zap(), 0.2, exact=True)               # the music's own crash is the only one (two crashes a frame apart comb)
 ev(E(EN['hit']), 'boom', 'the final hit: pre-orders open — $10 CAD')
 P(E(EN['ships']) - .1, M.whoosh(.4, .3, 500, 3000), 0.16); ev(E(EN['ships']), 'swish', 'ships to 29 countries')
 PF(E(EN['sheen'][0]), M.shimmer(.7, f0=2200, f1=6000), 0.12); PF(E(EN['sheen'][1]), M.shimmer(.7, f0=2200, f1=6000), 0.1)
@@ -369,7 +378,8 @@ if os.environ.get('MC_LEVELS'):             # balance check: K-weighted loudness
         i_, j_ = int(T(a_) * SR), int(min(T(b_), DUR) * SR)
         print(f'{n_:9s} ' + ''.join(f'{lufs(v[i_:j_] * (0.55 if k in music else 1)):9.1f}' for k, v in buses.items()))
 
-peak = M.finish(music, S, HERE, extra={
+# into finish() about 4 dB lower than its default, so its tanh only rounds the very tops; master.sh's limiter does the rest cleanly
+peak = M.finish(music, S * 0.6, HERE, music_gain=0.33, extra={
     'film': 'countdown-sunday: 842 frames at 30 fps; cut on 154 BPM (77 half-time): hb = 0.779221 s, the drop at hb 12 = 9.3506 s, final hit hb 32 = 24.9351 s',
     'hb': HB, 'clock': 'reads 24:00:00 at the drop (9.3506 s) and loses a second per second; clack on each whole second while a clock is on screen'},
     duck_kinds=('slam', 'stamp', 'impact', 'boom', 'clock'))

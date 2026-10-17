@@ -152,7 +152,7 @@
   #bag .zip { position: absolute; left: 0; right: 0; top: 0; height: 48px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 3px, rgba(255,255,255,.12) 3px 9px); border-bottom: 3px solid rgba(255,255,255,.45); }
   #bag .seal { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 2px, transparent 2px 7px); }
   #bag .cover { position: absolute; left: 30px; top: 64px; width: 600px; height: 776px; overflow: hidden; background: #111; }
-  #bag .cover > img { position: absolute; left: -24px; top: -24px; width: 648px; height: 824px; filter: grayscale(1) blur(16px) brightness(.72) contrast(1.15); }
+  #bag .cover > img { position: absolute; left: -24px; top: -24px; width: 648px; height: 824px; filter: grayscale(1) blur(7px) brightness(.72) contrast(1.15); }
   #bag .red { position: absolute; height: 58px; background: #050505; transform-origin: 0 50%; box-shadow: 0 2px 0 rgba(255,255,255,.06); }
   #bag .laser { position: absolute; left: 0; right: 0; height: 5px; background: #ff5a4f; box-shadow: 0 0 22px 7px rgba(255,59,48,.7); display: none; }
   #bag .laserband { position: absolute; left: 0; right: 0; height: 160px; background: linear-gradient(180deg, transparent, rgba(255,59,48,.18)); display: none; }
@@ -160,7 +160,7 @@
                   background: linear-gradient(118deg, transparent 18%, rgba(255,255,255,.16) 24%, transparent 31%, transparent 58%, rgba(255,255,255,.1) 64%, transparent 70%),
                               linear-gradient(180deg, rgba(255,255,255,.08), transparent 30%, transparent 80%, rgba(255,255,255,.06)); }
   #bgStamp { position: absolute; left: 40px; top: 330px; color: #ececec; font-size: 104px; background: rgba(0,0,0,.35); }
-  #tag { left: 350px; top: 1238px; width: 640px; height: 250px; transform-origin: 40px 125px; }
+  #tag { left: 350px; top: 1222px; width: 640px; height: 250px; transform-origin: 40px 125px; }
   #tag .card { position: absolute; inset: 0; background: #e8e8e8; color: #0a0a0a; clip-path: polygon(70px 0, 100% 0, 100% 100%, 70px 100%, 0 70%, 0 30%); box-shadow: 0 18px 30px rgba(0,0,0,.6); }
   #tag .card::after { content: ""; position: absolute; inset: 0; background: url(assets/grain-d.png); opacity: .5; }
   #tag .hole { position: absolute; left: 26px; top: 107px; width: 36px; height: 36px; border-radius: 50%; background: #151515; box-shadow: 0 0 0 7px #bdbdbd; }
@@ -187,7 +187,7 @@
 
   /* PHONE */
   #phKick { left: 60px; top: 246px; }
-  #phTitle { left: 56px; top: 292px; font-size: 140px; }
+  #phTitle { left: 64px; top: 292px; font-size: 140px; }
   #phone { left: 274px; top: 428px; width: 532px; height: 1112px; border-radius: 70px; background: #0a0a0a; padding: 18px; box-shadow: 0 40px 80px rgba(0,0,0,.45), inset 0 0 0 3px #3a3a3a; }
   #phone .screen { position: relative; width: 496px; height: 1076px; border-radius: 54px; overflow: hidden; background: #000; }
   #phone .island { position: absolute; left: 50%; top: 12px; width: 132px; height: 34px; margin-left: -66px; border-radius: 17px; background: #000; z-index: 5; box-shadow: 0 0 0 2px #1a1a1a; }
@@ -378,7 +378,7 @@ const land = (el, t, at, base = '') => {
 };
 // a stamp thump: it comes down big and faint over the 0.1 s before its beat and hits the paper on the beat, with a small shake
 const thump = (el, t, at, rot, base = '') => {
-  const k = seg(t, at - 0.1, at), s = lerp(1.9, 1, easeIn(k)), o = clamp(.25 + k * .5) + (t >= at ? 1 : 0);
+  const k = seg(t, at - 0.1, at), s = lerp(1.5, 1, easeIn(k)), o = clamp(.25 + k * .5) + (t >= at ? 1 : 0);
   const shake = t >= at && t < at + 0.16 ? (rnd(t * 97) - .5) * 14 : 0;
   el.style.opacity = t < at - 0.1 ? 0 : clamp(o);
   el.style.transform = `${base} translate(${shake}px, ${shake * .6}px) rotate(${rot}deg) scale(${s})`;
@@ -470,7 +470,7 @@ function render(t) {
   // flashes on the cuts and the big hits
   let fl = 0;
   for (const [h, kind] of TL.cuts) { const a = E(h); if (kind === 'drop') fl = Math.max(fl, decay(t, a, .2)); else if (kind === 'hit') fl = Math.max(fl, .9 * decay(t, a, .22)); else if (kind === 'hard') fl = Math.max(fl, .6 * decay(t, a, .1)); }
-  for (const [h] of FLASHES) fl = Math.max(fl, .8 * decay(t, E(h), .08));
+  for (const [h] of FLASHES) fl = Math.max(fl, .22 * decay(t, E(h), .08));   // soft: at most 3 bright flashes a second
   $('flash').style.opacity = fl.toFixed(3);
 
   // the camera: a gentle gate weave on every frame, a heartbeat breath in the emotional part, a shake on the big hits
@@ -527,7 +527,7 @@ function render(t) {
   // TEAM ----------------------------------------------------------------------------------------------------------
   if (sc === 'sc-team') {
     const [p0, p1] = TL.team.pull, k = easeIO(seg(t, E(p0), E(p1)));
-    const s = lerp(1.5, 1, k) * (1 + .02 * seg(t, E(p1), E(8))), cx = lerp(270, 540, k), cy = lerp(240, 960, k);
+    const s = lerp(1.5, .69, k) * (1 + .02 * seg(t, E(p1), E(8))), cx = lerp(270, 540, k), cy = lerp(240, 1105, k);
     $('grid').style.transform = `translate(${(540 - cx * s).toFixed(1)}px, ${(960 - cy * s).toFixed(1)}px) scale(${s.toFixed(4)})`;
     CELLS.forEach(([, , h], i) => {
       const c = $('cell' + i), at = E(h), lk = t < at ? 0 : easeOut(seg(t, at, at + .4));
@@ -573,7 +573,7 @@ function render(t) {
     let cur = 0; FLASHES.forEach(([h], i) => { if (t >= E(h)) cur = i; });
     FLASHES.forEach(([h, p], i) => {
       const el = $('pg' + i); show(el, i === cur);
-      if (i === cur) { const k = easeOut(seg(t, E(h), E(h) + .22)); el.style.transform = `scale(${lerp(1.14, 1, k).toFixed(4)}) rotate(${((i % 2 ? 1 : -1) * 1.2 * (1 - k)).toFixed(2)}deg)`; el.style.filter = `brightness(${lerp(1.4, .78, k).toFixed(3)})`; }
+      if (i === cur) { const k = easeOut(seg(t, E(h), E(h) + .22)); el.style.transform = `scale(${lerp(1.14, 1, k).toFixed(4)}) rotate(${((i % 2 ? 1 : -1) * 1.2 * (1 - k)).toFixed(2)}deg)`; el.style.filter = `brightness(${lerp(1.05, .78, k).toFixed(3)})`; }
     });
     txt($('pgNo'), `Page ${FLASHES[cur][1]} / 20`);
     const at = E(TL.words[3].hb);
@@ -591,7 +591,7 @@ function render(t) {
     $('bigclock').style.transform = tr;
     setClock($('bigclock'), t);
     type($('ckKick'), 'The Vision Issue', seg(t, T(C.kicker[0]), T(C.kicker[0]) + .25));
-    type($('ckSub'), 'Declassified in', seg(t, T(C.kicker[0]) + .2, T(C.kicker[1])));
+    type($('ckSub'), 'Vol. 001 // Eyes only', seg(t, T(C.kicker[0]) + .2, T(C.kicker[1])));
     slam($('ckTminus'), t, E(C.tminus), 1.45); sheen($('ckTminus'), t, E(C.tminus) + .1, E(C.tminus) + .7);
     slam($('ckHours'), t, E(C.hours), 1.45); sheen($('ckHours'), t, E(C.hours) + .1, E(C.hours) + .7);
     slam($('ckDay'), t, E(C.date), 1.3); slam($('ckWhen'), t, E(C.date), 1.2);
@@ -651,8 +651,8 @@ function render(t) {
   if (sc === 'sc-phone') {
     const P = TL.phone, a = E(24), l = t - a, S = 496 / 390;   // CSS px of the page -> px on the phone screen
     const pk = easeOut(seg(t, a, E(P.land))), bounce = t > E(P.land) && t < E(P.land) + .3 ? Math.sin((t - E(P.land)) / .3 * Math.PI) * -10 : 0;
-    $('phone').style.transform = `translateY(${(lerp(1300, 0, pk) + bounce).toFixed(1)}px) rotate(${lerp(7, 0, pk).toFixed(2)}deg)`;
-    $('phTitle').style.opacity = seg(l, .02, .25); $('phKick').style.opacity = seg(l, .02, .25);
+    $('phone').style.transform = `translateY(${(lerp(800, 0, pk) + bounce).toFixed(1)}px) rotate(${lerp(7, 0, pk).toFixed(2)}deg)`;
+    $('phTitle').style.opacity = seg(l, 0, .08); $('phKick').style.opacity = seg(l, 0, .08);
     const buy = SITE.pos.buy, y = 300 * easeIO(seg(t, E(P.scroll1[0]), E(P.scroll1[1]))) + 860 * easeIO(seg(t, E(P.scroll2[0]), E(P.scroll2[1])));
     $('scr').style.transform = `translateY(${(-y * S).toFixed(1)}px)`;
     // the page's own clock ticks with the film's: the screenshot of second SS shows while the film's clock reads 23:59:SS
@@ -670,10 +670,10 @@ function render(t) {
   // END CARD ---------------------------------------------------------------------------------------------------------
   if (sc === 'sc-end') {
     const N = TL.end, a = E(N.tomorrow), l = t - a;
-    const breathe = 1 + .028 * easeIO(seg(t, E(N.hit), DUR)) + .004 * Math.sin((t - E(N.hit)) * Math.PI * 2 / (2 * HB)) * seg(t, E(N.hit), E(N.hit) + 1);
+    const breathe = 1 + .015 * easeIO(seg(t, E(N.hit), DUR)) + .004 * Math.sin((t - E(N.hit)) * Math.PI * 2 / (2 * HB)) * seg(t, E(N.hit), E(N.hit) + 1);
     $('sc-end').style.transform = `scale(${breathe.toFixed(4)})`;
     $('enWord').style.clipPath = `inset(0 ${(100 - easeIO(seg(l, .02, .4)) * 100).toFixed(2)}% 0 0)`;
-    slam($('enTom'), t, a, 1.5, .09);
+    slam($('enTom'), t, a, 1.3, .09);
     let sa = a + .12; for (const s of N.sheen) if (t >= E(s)) sa = E(s);
     sheen($('enTom'), t, sa, sa + .8);
     const ck = easeOut(seg(t, E(N.clock), E(N.clock) + .14)); $('endclock').style.opacity = t < E(N.clock) ? 0 : ck; $('endclock').style.transform = `scale(${lerp(1.2, 1, ck).toFixed(4)})`;
@@ -708,7 +708,7 @@ function fitAll() {
   withScene('sc-bag', () => fit($('bgKick'), 960));
   withScene('sc-cities', () => { let m = 400; for (const c of CITIES) { $('city').textContent = c.name; $('city').style.fontSize = '270px'; m = Math.min(m, fit($('city'), 960)); } $('city').style.fontSize = m + 'px'; });
   withScene('sc-phone', () => fit($('phTitle'), 960));
-  withScene('sc-end', () => { fit($('enTom'), 960); fit($('enUrl'), 940); fit($('enDate'), 960); });
+  withScene('sc-end', () => { fit($('enTom'), 930); fit($('enUrl'), 940); fit($('enDate'), 960); });
   // where the big clock has to go to become the HUD clock
   const hud = $('hud'), hw = hud.style.display; hud.style.display = 'flex';
   const big = withScene('sc-clock', () => { const b = $('bigclock'), tr = b.style.transform; b.style.transform = 'none'; const r = b.getBoundingClientRect(); b.style.transform = tr; return r; });

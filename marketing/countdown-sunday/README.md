@@ -12,7 +12,7 @@ It is the countdown promo the client liked (the split-flap clock, the evidence b
 | Time | Beat | On screen |
 |---|---|---|
 | 0–3.1 s | bar 1 | Regina HQ. Black, grain, a heartbeat on a monitor (one beat per half-time beat). Typed: *Some things are worth the wait.* |
-| 3.1–6.2 s | bar 2 | The team from page 05: seven portraits light up one by one, one per eighth note, as the camera pulls back. ONE TEAM. lands at 4.68 s. |
+| 3.1–6.2 s | bar 2 | The team from page 05: seven portraits and the group shot light up one by one, one per eighth note, as the camera pulls back until the whole grid is on screen. ONE TEAM. lands at 4.68 s. |
 | 6.2–7.0 s | bar 3 | ONE NIGHT.: the fashion show stage (page 13). |
 | 7.0–7.8 s | | ONE VISION.: the 77 File (page 08). |
 | 7.8–9.0 s | | TWENTY PAGES.: the montage speeds up, with pages 04, 16, 15, 06 and 03 on eighths, then sixteenths. The heartbeat speeds up. |
@@ -46,7 +46,8 @@ The song itself is not in either file, because it is licensed through the app's 
   - a thin bar under the phone, then Ab, Bb and a final C major hit with a long tail.
 
   The effects-only mix leaves out the monitor blips, beeps, hums, shimmers and the crash, and uses short sub hits in place of long booms. Everything is synthesised with `../lib/mcsound.py`. There are no samples, no recordings and nothing taken from any real song.
-- **`audio/master.sh`** brings each mix to -14 LUFS with a true peak of -1 dBTP or lower, measured on the encoded file.
+- **`audio/master.sh`** sets one static gain for the whole film, then limits the peaks, so the quiet heartbeat opening stays quiet and the drop and the final hit stay the loudest moments. (ffmpeg's loudnorm, used before, fell back to a slow gain ride that flattened the arc.) The film's cut is mastered to -14 LUFS. The effects-only cut is mastered to -15.5 LUFS, so its hits stay on top of the heartbeat; it plays under a song anyway. Both peak at -1 dBTP or lower, measured on the encoded file.
+- **On a phone speaker** the heartbeat carries a soft knock in the mids, and the drop has a grittier 808, so both still read without bass.
 
 ```
 cd marketing/countdown-sunday
@@ -57,7 +58,7 @@ node render.mjs --out countdown-sunday-9x16-master.mp4                    # abou
 python3 audio/make_audio.py
 ffmpeg -i countdown-sunday-9x16-master.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 8M -bufsize 16M -pix_fmt yuv420p -an silent.mp4
 audio/master.sh silent.mp4 countdown-sunday-9x16.mp4
-audio/master.sh silent.mp4 countdown-sunday-9x16-sfx-only.mp4 audio/sfx-only-premaster.wav
+audio/master.sh silent.mp4 countdown-sunday-9x16-sfx-only.mp4 audio/sfx-only-premaster.wav -15.5
 rm silent.mp4
 ```
 

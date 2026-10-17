@@ -6,7 +6,7 @@ window.TL = {
             ["clock", 12, 16], ["bag", 16, 20], ["cities", 20, 24], ["phone", 24, 28], ["end", 28, 37]],
  "heart": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10.5, 11, 11.25],
  "dub_until": 10,
- "cold": {"label": [0.15, 0.85], "sub": [0.85, 1.25], "line": [1, 3], "text": "Some things are worth the wait.", "out": [3.5, 4]},
+ "cold": {"label": [0.15, 0.85], "sub": [0.85, 1.25], "line": [0.25, 2.5], "text": "Some things are worth the wait.", "out": [3.5, 4]},
  "team": {"cells": [["deji", "01 / Deji", 4], ["light", "02 / Light", 4.5], ["goodness", "03 / Goodness", 5], ["grace", "04 / Grace", 5.5],
                     ["jide", "05 / Jide", 6], ["princess", "06 / Princess", 6.5], ["zudu", "07 / Zudu", 7], ["group", "Meet the dream team", 7.5]],
           "pull": [4, 7.5]},

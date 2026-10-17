@@ -17,6 +17,11 @@
    "note": "Regina HQ \u2014 incoming"
   },
   {
+   "t": 0.2,
+   "kind": "typing",
+   "note": "Some things are worth the wait."
+  },
+  {
    "t": 0.667,
    "kind": "typing",
    "note": "Monochrome Bureau // Vol. 001"
@@ -25,11 +30,6 @@
    "t": 0.8,
    "kind": "heart",
    "note": "lub, hb 1"
-  },
-  {
-   "t": 0.8,
-   "kind": "typing",
-   "note": "Some things are worth the wait."
   },
   {
    "t": 1.567,
@@ -204,7 +204,7 @@
   {
    "t": 9.6,
    "kind": "typing",
-   "note": "Declassified in"
+   "note": "Vol. 001 // Eyes only"
   },
   {
    "t": 10.133,
