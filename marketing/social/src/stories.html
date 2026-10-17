@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MONOCHROME — The Vision Issue, launch Stories (9:16)</title>
+<!--
+  Four Instagram / TikTok Story frames for the launch of The Vision Issue (Sunday 18 October 2026, 12:00 Regina).
+  stories.html?s=1 … ?s=4 shows one frame at 1080×1920; render.mjs writes them as PNG into the folder above.
+  The Story apps cover roughly the top 250 px and the bottom 420 px, so everything that matters sits inside
+  y 250–1500 and x 60–1020 (the corner brackets mark that box). The dashed "sticker here" slots are where the
+  client places Instagram's Countdown or Link sticker; they are drawn so they still look intentional if left bare.
+  The stamp's worn-ink mask is injected by render.mjs as a data: URI (Chromium blocks mask images from file://).
+  The Monochrome Bureau is a fiction: no real agency's name, seal or wording appears here.
+-->
+<style>
+  @font-face { font-family: 'Big Shoulders Display'; font-weight: 100 900; src: url(../../countdown-xo/assets/mc-font-big-shoulders-display.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 400; src: url(../../countdown-xo/assets/mc-font-courier-prime-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 700; src: url(../../countdown-xo/assets/mc-font-courier-prime-700.woff2) format('woff2'); }
+  @font-face { font-family: 'Special Elite'; font-weight: 400; src: url(../../countdown-xo/assets/mc-font-special-elite-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Stardos Stencil'; font-weight: 700; src: url(../../countdown-xo/assets/mc-font-stardos-stencil-700.woff2) format('woff2'); }
+  :root {
+    --ink: #0a0a0a; --paper: #e4e4e2; --fg: #ececec; --dim: #a8a8a8; --red: #ff3b30; --stampred: #e0281c;
+    --head: 'Big Shoulders Display', Impact, sans-serif; --mono: 'Courier Prime', 'Courier New', monospace;
+    --type: 'Special Elite', 'Courier Prime', monospace; --stamp: 'Stardos Stencil', Impact, sans-serif;
+    --distress: none;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: #000; overflow: hidden; }
+  .story { position: relative; width: 1080px; height: 1920px; overflow: hidden; display: none; color: var(--fg); font-family: var(--mono); isolation: isolate; }
+  .story.on { display: block; }
+  .dark { background: radial-gradient(120% 70% at 50% 30%, #1d1d1d 0%, #0c0c0c 52%, #050505 100%); }
+  .paper { background: radial-gradient(110% 80% at 50% 40%, #efefed 0%, #e2e2df 60%, #cfcfcc 100%); color: var(--ink); }
+  .abs { position: absolute; }
+
+  /* ---- the shared parts ---- */
+  .grain { position: absolute; inset: 0; pointer-events: none; background: url(../../countdown-xo/assets/grain-l.png); background-size: 512px; opacity: .5; z-index: 40; }
+  .paper .grain { background-image: url(../../countdown-xo/assets/grain-d.png); opacity: .55; }
+  .scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.09) 0 2px, transparent 2px 5px); z-index: 41; }
+  .paper .scan { background: repeating-linear-gradient(0deg, rgba(0,0,0,.025) 0 2px, transparent 2px 5px); }
+  .vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.5) 100%); z-index: 39; }
+  .paper .vig { background: radial-gradient(ellipse at 50% 45%, transparent 60%, rgba(0,0,0,.16) 100%); }
+
+  .hdr { left: 60px; right: 60px; top: 262px; display: flex; justify-content: space-between; align-items: center; font: 700 34px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+  .hdr .l { display: flex; align-items: center; gap: 20px; }
+  .hdr .r { font-size: 28px; letter-spacing: .18em; color: var(--dim); }
+  .paper .hdr .r { color: #555; }
+  .sub { left: 60px; right: 60px; top: 316px; font: 700 26px/1 var(--mono); letter-spacing: .2em; color: var(--dim); text-transform: uppercase; white-space: nowrap; }
+  .paper .sub { color: #555; }
+  .rule { left: 60px; right: 60px; top: 362px; height: 2px; background: rgba(255,255,255,.22); }
+  .paper .rule { background: rgba(0,0,0,.25); }
+  .rec { display: inline-block; width: 24px; height: 24px; border-radius: 50%; background: var(--red); box-shadow: 0 0 18px 4px rgba(255,59,48,.55); }
+  .corner { position: absolute; width: 64px; height: 64px; border: 6px solid rgba(236,236,236,.7); z-index: 5; }
+  .paper .corner { border-color: rgba(10,10,10,.7); }
+  .c1 { left: 60px; top: 392px; border-right: 0; border-bottom: 0; } .c2 { right: 60px; top: 392px; border-left: 0; border-bottom: 0; }
+  .c3 { left: 60px; top: 1436px; border-right: 0; border-top: 0; } .c4 { right: 60px; top: 1436px; border-left: 0; border-top: 0; }
+
+  .head { font-family: var(--head); font-weight: 900; text-transform: uppercase; line-height: .86; letter-spacing: .005em; white-space: nowrap; }
+  .mono { font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; white-space: nowrap; }
+  .typed { font-family: var(--type); text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+  .chrome { color: transparent; -webkit-background-clip: text; background-clip: text;
+            background-image: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.9) 47%, transparent 56%),
+                              linear-gradient(180deg, #ffffff 0%, #e4e4e4 24%, #8d8d8d 47%, #3a3a3a 50%, #b9b9b9 55%, #ffffff 74%, #a0a0a0 100%);
+            background-size: 100% 100%, 100% 100%; background-repeat: no-repeat; }
+  .drop { filter: drop-shadow(0 10px 0 rgba(0,0,0,.6)); }
+  .kick { font: 700 30px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+  .kick::before { content: ""; display: inline-block; width: 48px; height: 13px; background: currentColor; margin-right: 18px; vertical-align: 4px; }
+  .stamp { font-family: var(--stamp); text-transform: uppercase; letter-spacing: .08em; border: 8px solid currentColor; padding: .1em .34em .02em; line-height: 1; white-space: nowrap;
+           -webkit-mask-image: var(--distress); mask-image: var(--distress); -webkit-mask-size: 420px; mask-size: 420px; }
+  .tape { position: absolute; left: -40px; right: -40px; height: 84px; overflow: hidden; background: repeating-linear-gradient(-45deg, #0a0a0a 0 32px, #ececec 32px 64px); z-index: 6; }
+  .tape .band { position: absolute; left: 0; right: 0; top: 15px; bottom: 15px; background: #0a0a0a; display: flex; align-items: center; justify-content: center; gap: 0;
+                color: #ececec; font: 700 28px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; white-space: nowrap; }
+
+  /* the sticker slot: a dashed attachment area, labelled for the client */
+  .slot { border: 4px dashed rgba(236,236,236,.55); border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; background: rgba(255,255,255,.035); }
+  .paper .slot { border-color: rgba(10,10,10,.5); background: rgba(0,0,0,.03); }
+  .slot .t { font: 700 30px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: rgba(236,236,236,.8); white-space: nowrap; }
+  .slot .s { font: 400 24px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(236,236,236,.5); white-space: nowrap; }
+  .paper .slot .t { color: rgba(10,10,10,.75); } .paper .slot .s { color: rgba(10,10,10,.5); }
+  .slot .pin { position: absolute; top: -17px; left: 50%; margin-left: -110px; width: 220px; height: 30px; background: #070707; color: rgba(236,236,236,.7); font: 700 20px/30px var(--mono); letter-spacing: .24em; text-transform: uppercase; text-align: center; }
+  .paper .slot .pin { background: #e3e3e0; color: rgba(10,10,10,.65); }
+
+  /* the evidence bag (as in the countdown film) */
+  .bag { position: absolute; }
+  .bag .pouch { position: absolute; inset: 0; border-radius: 12px; background: rgba(255,255,255,.07); box-shadow: 0 40px 80px rgba(0,0,0,.8), inset 0 0 0 2px rgba(255,255,255,.3); overflow: hidden; }
+  .bag .zip { position: absolute; left: 0; right: 0; top: 0; height: 46px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 3px, rgba(255,255,255,.12) 3px 9px); border-bottom: 3px solid rgba(255,255,255,.45); }
+  .bag .seal { position: absolute; left: 0; right: 0; bottom: 0; height: 24px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 2px, transparent 2px 7px); }
+  .bag .strip { position: absolute; left: 0; right: 0; top: 54px; height: 40px; display: flex; align-items: center; padding: 0 22px; justify-content: space-between; background: #e8e8e8; color: #0a0a0a; font: 700 19px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+  .bag .strip b { color: var(--stampred); }
+  .bag .cover { position: absolute; overflow: hidden; background: #111; box-shadow: 0 6px 18px rgba(0,0,0,.55); }
+  .bag .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bag .plastic { position: absolute; inset: 0; pointer-events: none;
+                  background: linear-gradient(118deg, transparent 16%, rgba(255,255,255,.17) 23%, transparent 31%, transparent 60%, rgba(255,255,255,.1) 66%, transparent 72%),
+                              linear-gradient(180deg, rgba(255,255,255,.1), transparent 30%, transparent 80%, rgba(255,255,255,.07)); }
+  .bag .wrinkle { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(77deg, transparent 48%, rgba(255,255,255,.07) 50%, transparent 52%), linear-gradient(-71deg, transparent 70%, rgba(0,0,0,.12) 72%, transparent 75%); }
+
+  /* the luggage tag */
+  .tag { position: absolute; }
+  .tag .card { position: absolute; inset: 0; background: #e8e8e8; color: #0a0a0a; clip-path: polygon(64px 0, 100% 0, 100% 100%, 64px 100%, 0 70%, 0 30%); }
+  .tag .card::after { content: ""; position: absolute; inset: 0; background: url(../../countdown-xo/assets/grain-d.png); opacity: .5; }
+  .tag .shadow { position: absolute; inset: 0; filter: drop-shadow(0 18px 24px rgba(0,0,0,.6)); }
+  .tag .hole { position: absolute; left: 24px; width: 32px; height: 32px; border-radius: 50%; background: #151515; box-shadow: 0 0 0 7px #bdbdbd; }
+  .tag .txt { position: absolute; left: 88px; right: 22px; }
+  .tag .t1 { font: 900 50px/1 var(--head); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; }
+  .tag .t2 { margin-top: 14px; font: 700 23px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #333; white-space: nowrap; }
+  .tag .t3 { margin-top: 10px; font: 700 30px/1 var(--mono); letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; }
+
+  /* ================= 01: T-minus 24 hours ================= */
+  #s1 .tm { left: 0; right: 0; top: 400px; text-align: center; font-size: 140px; }
+  #s1 .n24 { left: 0; right: 0; top: 566px; text-align: center; font-size: 436px; line-height: .8; }
+  #s1 .hrs { left: 0; right: 0; top: 944px; text-align: center; font-size: 140px; }
+  #s1 .what { left: 0; right: 0; top: 1092px; text-align: center; font-size: 46px; }
+  #s1 .when { left: 0; right: 0; top: 1146px; text-align: center; font: 700 30px/1 var(--mono); letter-spacing: .14em; color: var(--dim); }
+  #s1 .slot { left: 100px; right: 100px; top: 1204px; height: 230px; }
+  #s1 .side { top: 760px; font: 700 22px/1 var(--mono); letter-spacing: .3em; text-transform: uppercase; color: rgba(236,236,236,.42); white-space: nowrap; }
+  #s1 .side.l { left: 92px; transform: translate(-50%, -50%) rotate(-90deg); } #s1 .side.r { left: 988px; transform: translate(-50%, -50%) rotate(90deg); }
+  #s1 .wave { left: 60px; right: 60px; top: 1528px; height: 70px; }
+  #s1 .wave polyline { fill: none; stroke: rgba(230,230,230,.55); stroke-width: 3; stroke-linejoin: round; }
+  #s1 .url { left: 0; right: 0; top: 1630px; text-align: center; font: 700 26px/1 var(--mono); letter-spacing: .24em; color: rgba(236,236,236,.5); }
+
+  /* ================= 02: pre-orders open ================= */
+  #s2 .bag { left: 256px; top: 398px; width: 568px; height: 772px; transform: rotate(-2.2deg); }
+  #s2 .bag .cover { left: 34px; top: 108px; width: 500px; height: 627px; }
+  #s2 .bag .cover img { filter: grayscale(1) contrast(1.06) brightness(.9); }
+  #s2 .cls { left: 146px; top: 742px; color: #ececec; font-size: 84px; background: rgba(0,0,0,.45); transform: rotate(-9deg); z-index: 4; }
+  #s2 .tag { left: 620px; top: 1016px; width: 370px; height: 166px; transform: rotate(-7deg); transform-origin: 32px 83px; z-index: 5; }
+  #s2 .tag .hole { top: 67px; } #s2 .tag .txt { top: 24px; }
+  #s2 .string { left: 0; top: 0; width: 1080px; height: 1920px; z-index: 6; pointer-events: none; }
+  #s2 .string path { fill: none; stroke: #cfcfcf; stroke-width: 4; stroke-linecap: round; }
+  #s2 .h1 { left: 0; right: 0; top: 1214px; text-align: center; font-size: 132px; }
+  #s2 .price { left: 0; right: 0; top: 1330px; display: flex; justify-content: center; align-items: center; gap: 24px; font: 700 28px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; color: #d6d6d6; }
+  #s2 .price b { font: 800 50px/1 var(--head); letter-spacing: .02em; background: #ececec; color: #070707; padding: 10px 18px 6px; }
+  #s2 .slot { left: 230px; right: 230px; top: 1404px; height: 104px; flex-direction: row; gap: 18px; }
+  #s2 .slot .arrow { font: 900 46px/1 var(--head); color: rgba(236,236,236,.75); }
+  #s2 .tape { top: 1560px; transform: rotate(-2deg); }
+
+  /* ================= 03: declassified, out now ================= */
+  #s3 .folder { left: 96px; top: 404px; width: 888px; height: 736px; background: linear-gradient(180deg, #d8d8d5, #cdcdca); box-shadow: 0 24px 50px rgba(0,0,0,.22), inset 0 0 0 2px rgba(0,0,0,.08); transform: rotate(1.2deg); }
+  #s3 .folder::before { content: ""; position: absolute; left: 40px; top: -46px; width: 300px; height: 50px; background: #d8d8d5; border-radius: 14px 14px 0 0; box-shadow: inset 0 2px 0 rgba(255,255,255,.4); }
+  #s3 .folder .ft { position: absolute; left: 62px; top: -34px; font: 700 22px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #3a3a3a; white-space: nowrap; }
+  #s3 .folder .lines { position: absolute; right: 44px; top: 70px; width: 300px; }
+  #s3 .folder .lines p { font: 700 21px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #444; padding: 14px 0 12px; border-bottom: 2px solid rgba(0,0,0,.22); white-space: nowrap; }
+  #s3 .folder .lines p span { font-family: var(--type); font-weight: 400; letter-spacing: .02em; color: #0a0a0a; font-size: 27px; margin-left: 8px; }
+  #s3 .folder .lines .x { text-decoration: line-through; text-decoration-thickness: 3px; color: #777; }
+  #s3 .photo { left: 140px; top: 452px; width: 466px; height: 603px; background: #fff; padding: 14px 14px 14px; box-shadow: 0 18px 30px rgba(0,0,0,.35); transform: rotate(-3deg); }
+  #s3 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #s3 .clip { left: 186px; top: 404px; width: 70px; height: 170px; transform: rotate(-3deg); z-index: 3; }
+  #s3 .decl { left: 330px; top: 905px; color: var(--stampred); font-size: 74px; border-width: 9px; transform: rotate(-8deg); z-index: 4; background: rgba(232,232,229,.78); }
+  #s3 .decl2 { color: var(--stampred); }
+  #s3 .out { left: 0; right: 0; top: 1166px; text-align: center; font-size: 210px; color: var(--ink); }
+  #s3 .line { left: 0; right: 0; top: 1350px; text-align: center; font: 700 29px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: #2a2a2a; white-space: nowrap; }
+  #s3 .slot { left: 230px; right: 230px; top: 1410px; height: 104px; flex-direction: row; gap: 18px; }
+  #s3 .slot .arrow { font: 900 46px/1 var(--head); color: rgba(10,10,10,.7); }
+  #s3 .tape { top: 1600px; transform: rotate(2deg); }
+
+  /* ================= 04: the four cities, today ================= */
+  #s4 .orbit { left: 0; top: 380px; width: 1080px; height: 560px; }
+  #s4 .orbit ellipse { fill: none; stroke: rgba(255,255,255,.22); stroke-width: 3; }
+  #s4 .orbit .o2 { stroke-dasharray: 6 14; stroke: rgba(255,255,255,.32); }
+  #s4 .today { left: 0; right: 0; top: 496px; text-align: center; font-size: 330px; }
+  #s4 .date { left: 0; right: 0; top: 806px; text-align: center; font-size: 42px; }
+  #s4 .list { left: 60px; right: 60px; top: 896px; }
+  #s4 .row { position: relative; display: flex; align-items: center; height: 116px; padding: 0 26px; border-top: 2px solid rgba(255,255,255,.2); }
+  #s4 .row:last-child { border-bottom: 2px solid rgba(255,255,255,.2); }
+  #s4 .row .c { font: 900 84px/1 var(--head); text-transform: uppercase; letter-spacing: .01em; padding-top: 6px; }
+  #s4 .row .z { font: 700 21px/1.25 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--dim); margin-left: 22px; white-space: nowrap; }
+  #s4 .row .dots { flex: 1; border-bottom: 4px dotted rgba(255,255,255,.32); margin: 0 22px; transform: translateY(14px); }
+  #s4 .row .t { font: 900 84px/1 var(--head); padding-top: 6px; }
+  #s4 .row.on { background: #ececec; color: #0a0a0a; border-top-color: #ececec; }
+  #s4 .row.on .z { color: #444; }
+  #s4 .row.on .dots { border-bottom-color: rgba(0,0,0,.4); }
+  #s4 .foot { left: 0; right: 0; top: 1392px; text-align: center; font: 700 26px/1.6 var(--mono); letter-spacing: .14em; white-space: nowrap; color: #d0d0d0; }
+  #s4 .tape { top: 1556px; transform: rotate(-2deg); }
+</style>
+</head>
+<body>
+
+<!-- ======================= 01 · Saturday 12:00 · T-minus 24 hours + Countdown sticker ======================= -->
+<section class="story dark" id="s1">
+  <div class="abs hdr"><span class="l"><i class="rec"></i>Priority transmission</span><span class="r">T−24:00:00</span></div>
+  <p class="abs sub">Incoming — Monochrome Bureau</p>
+  <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+  <p class="abs head tm">T-minus</p>
+  <p class="abs head n24 chrome drop">24</p>
+  <p class="abs head hrs">Hours</p>
+  <p class="abs side l">File MC-016 // Eyes only</p><p class="abs side r">Vol. 001 // Enter the orbit</p>
+  <p class="abs typed what">The Vision Issue — declassified</p>
+  <p class="abs when">SUNDAY 18 OCTOBER · 12:00 REGINA</p>
+  <div class="abs slot"><span class="pin">Attach here</span>
+    <span class="t">[ Countdown sticker here ]</span>
+    <span class="s">Set to Sun 18 Oct · 12:00</span></div>
+  <svg class="abs wave" viewBox="0 0 960 70" preserveAspectRatio="none" aria-hidden="true"><polyline id="wave1" points=""/></svg>
+  <p class="abs url">MONOCHROME.COM.NG // VOL. 001</p>
+  <i class="vig"></i><i class="scan"></i><i class="grain"></i>
+</section>
+
+<!-- ======================= 02 · Saturday · pre-orders open + Link sticker (countdown page) ======================= -->
+<section class="story dark" id="s2">
+  <div class="abs hdr"><span class="l"><i class="rec"></i>Exhibit A</span><span class="r">The Vision Issue</span></div>
+  <p class="abs sub">Vol. 001 — Sealed in evidence</p>
+  <div class="bag" id="bag2"><div class="pouch">
+    <div class="cover"><img src="../../countdown-xo/assets/mag-01.jpg" alt="The Vision Issue cover"></div>
+    <i class="zip"></i><div class="strip"><span>Evidence · MC-016</span><b>Do not open</b></div><i class="seal"></i>
+    <div class="plastic"></div><div class="wrinkle"></div></div></div>
+  <span class="abs stamp cls">Classified</span>
+  <svg class="abs string" viewBox="0 0 1080 1920" aria-hidden="true"><circle cx="806" cy="992" r="9" fill="none" stroke="#bdbdbd" stroke-width="5"/><path d="M 806 992 C 790 1040, 700 1040, 662 1094"/></svg>
+  <div class="tag"><div class="shadow"><div class="card"><i class="hole"></i>
+    <div class="txt"><p class="t1">Sealed until</p><p class="t2">Sunday 18.10</p><p class="t3">12:00 Regina</p></div></div></div></div>
+  <p class="abs head h1 chrome drop">Pre-orders open</p>
+  <p class="abs price"><b>$10 CAD</b> · printed copy · ships to 29 countries</p>
+  <div class="abs slot"><span class="t">[ Link sticker here ]</span><span class="arrow">↗</span></div>
+  <div class="tape"><div class="band">Pre-order now &nbsp;//&nbsp; Ships from Sunday 18 October &nbsp;//&nbsp; Pre-order now &nbsp;//&nbsp; Ships from</div></div>
+  <i class="vig"></i><i class="scan"></i><i class="grain"></i>
+</section>
+
+<!-- ======================= 03 · Sunday 12:00 · declassified, out now + Link sticker (product page) ======================= -->
+<section class="story paper" id="s3">
+  <div class="abs hdr"><span class="l"><i class="rec"></i>Declassified</span><span class="r">18.10 · 12:00</span></div>
+  <p class="abs sub">File MC-016 — The Vision Issue</p>
+  <div class="abs folder"><span class="ft">Vol. 001 // Open</span>
+    <div class="lines">
+      <p>Subject <span>The Vision Issue</span></p>
+      <p>Pages <span>20</span></p>
+      <p>Format <span>Printed copy</span></p>
+      <p>Price <span>$10 CAD</span></p>
+      <p>Cleared for <span>29 countries</span></p>
+      <p>Status <span class="x">Sealed</span> <span>Open</span></p>
+    </div></div>
+  <div class="abs photo"><img src="../../countdown-xo/assets/mag-01.jpg" alt="The Vision Issue cover"></div>
+  <svg class="abs clip" viewBox="0 0 70 170" aria-hidden="true">
+    <defs><linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#6d6d6d"/><stop offset=".45" stop-color="#f4f4f4"/><stop offset=".6" stop-color="#9a9a9a"/><stop offset="1" stop-color="#4a4a4a"/></linearGradient></defs>
+    <path d="M 20 150 L 20 30 A 15 15 0 0 1 50 30 L 50 140 A 10 10 0 0 1 30 140 L 30 50" fill="none" stroke="url(#steel)" stroke-width="7" stroke-linecap="round"/>
+  </svg>
+  <span class="abs stamp decl">Declassified</span>
+  <p class="abs head out">Out now</p>
+  <p class="abs line">The Vision Issue · $10 CAD · 29 countries</p>
+  <div class="abs slot"><span class="t">[ Link sticker here ]</span><span class="arrow">↗</span></div>
+  <div class="tape"><div class="band">Declassified &nbsp;//&nbsp; Out now &nbsp;//&nbsp; Enter the orbit &nbsp;//&nbsp; Declassified &nbsp;//&nbsp; Out now</div></div>
+  <i class="vig"></i><i class="scan"></i><i class="grain"></i>
+</section>
+
+<!-- ======================= 04 · Sunday morning · the launch in four cities, today ======================= -->
+<section class="story dark" id="s4">
+  <div class="abs hdr"><span class="l"><i class="rec"></i>The drop</span><span class="r">Sun 18.10</span></div>
+  <p class="abs sub">Synchronise your clocks</p>
+  <svg class="abs orbit" viewBox="0 0 1080 560" aria-hidden="true">
+    <ellipse class="o1" cx="540" cy="280" rx="490" ry="150" transform="rotate(-9 540 280)"/>
+    <ellipse class="o2" cx="540" cy="280" rx="430" ry="104" transform="rotate(7 540 280)"/>
+    <defs><radialGradient id="ball" cx="35%" cy="35%"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#9a9a9a"/><stop offset="1" stop-color="#2a2a2a"/></radialGradient></defs>
+    <circle cx="986" cy="210" r="24" fill="url(#ball)"/>
+  </svg>
+  <p class="abs head today chrome drop">Today</p>
+  <p class="abs typed date">The Vision Issue — declassified at</p>
+  <div class="abs list">
+    <div class="row on"><span class="c">Regina</span><span class="z">HQ<br>UTC−6</span><i class="dots"></i><span class="t">12:00</span></div>
+    <div class="row"><span class="c">Lagos</span><span class="z">Field office<br>UTC+1</span><i class="dots"></i><span class="t">19:00</span></div>
+    <div class="row"><span class="c">Toronto</span><span class="z">UTC−4</span><i class="dots"></i><span class="t">14:00</span></div>
+    <div class="row"><span class="c">London</span><span class="z">UTC+1</span><i class="dots"></i><span class="t">19:00</span></div>
+  </div>
+  <p class="abs foot">SUNDAY 18 OCTOBER · MONOCHROME.COM.NG<br>$10 CAD · SHIPS TO 29 COUNTRIES</p>
+  <div class="tape"><div class="band">Sunday 18 October &nbsp;//&nbsp; 12:00 Regina &nbsp;//&nbsp; Enter the orbit &nbsp;//&nbsp; Sunday 18 October</div></div>
+  <i class="vig"></i><i class="scan"></i><i class="grain"></i>
+</section>
+
+<script>
+  // which frame: ?s=1..4 (default 1)
+  const n = +(new URLSearchParams(location.search).get('s') || 1);
+  document.getElementById('s' + n).classList.add('on');
+  // a fixed "signal" line under story 01 (seeded, so every render is identical)
+  const rnd = i => { const x = Math.sin(i * 12.9898) * 43758.5453; return x - Math.floor(x); };
+  const pts = [];
+  for (let i = 0; i <= 120; i++) { const x = i * 8, env = Math.sin(Math.PI * i / 120); pts.push(`${x},${(35 + (rnd(i + 3) - .5) * 60 * env * (i % 9 === 0 ? 1.6 : .7)).toFixed(1)}`); }
+  document.getElementById('wave1').setAttribute('points', pts.join(' '));
+</script>
+</body>
+</html>
