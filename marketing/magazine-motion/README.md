@@ -4,9 +4,16 @@ A 26-second vertical motion ad (1080×1920, 30 fps, H.264 + AAC) for Reels, TikT
 
 | File | Use |
 |---|---|
-| `magazine-motion-9x16.mp4` | Launch day and after. It ends on **OUT NOW · Requisition your copy · monochrome.com.ng**. |
-| `magazine-motion-9x16-preorder.mp4` | Before the launch. It ends on **PRE-ORDER NOW · Reserve your copy · monochrome.com.ng · Out Saturday 17 October · 12:00 Regina**, with the price and shipping line under it. |
+| `magazine-motion-9x16.mp4` | Launch day and after. It ends on **OUT NOW · Requisition your copy · monochrome.com.ng**. Trap soundtrack. |
+| `magazine-motion-9x16-preorder.mp4` | Before the launch. It ends on **PRE-ORDER NOW · Reserve your copy · monochrome.com.ng · Out Sunday 18 October · 12:00 Regina**, with the price and shipping line under it. Trap soundtrack. |
+| `magazine-motion-9x16-afro.mp4` | The out-now cut with the afro soundtrack (an original afro-house / amapiano-style instrumental, see below) under the same effects. |
+| `magazine-motion-9x16-preorder-afro.mp4` | The pre-order cut with the afro soundtrack. |
 | `magazine-motion-9x16-sfx-only.mp4` | The out-now cut with sound effects only, for posting with a licensed track from the app. |
+| `magazine-motion-9x16-preorder-sfx-only.mp4` | The pre-order cut with sound effects only, for the same use. |
+
+The launch is **Sunday 18 October 2026 at 12:00 Regina** (18:00 UTC, 19:00 Lagos, 14:00 Toronto, 19:00 London).
+
+**About the afro version.** The client asked for Rema's "TEA" under the ad. We can't use that recording or its instrumental, and we can't recreate it, so the afro version is an original afro-house / amapiano-style track written for this film: a log-drum bass line, four-on-the-floor kick, shakers, congas and a whistle-style hook. No part of it comes from "TEA" or any other song. To use "TEA" itself, post one of the effects-only cuts and add the song inside Instagram or TikTok, if the app offers it to the account. Business accounts often get only a commercial-use library, which may not include it.
 
 | Time | On screen |
 |---|---|
@@ -34,6 +41,13 @@ All the photos and pages are the client's own, from the PDF. They are cropped, m
   - the same backbeat and sixteenth hats as the countdown promo, on new chords (C#m – A – E – B), with a new lead riff and new bell lines
   - effects placed on the film's frames: a flap for every page in the riffle, a clack for every split-flap tile, whooshes on the spins and zooms, slams on the words, ticks on the counters and shutters on the camera roll
   - instruments and effects from `../lib/mcsound.py`; everything is synthesised, with no samples and no vocals.
+- **`audio/make_audio_afro.py`** writes the afro soundtrack into `audio/afro/`, on the same grid and under the same effects:
+  - an original afro-house / amapiano-style instrumental at 120 BPM in A minor (Am9 – Fmaj9 – Dm9 – E7sus/E7, one chord per section)
+  - a synthesised log drum playing its own bass line, with a woody knock and glides; a short four-on-the-floor kick ducks it, so the kick lands first and the log drum follows
+  - shakers in swung sixteenths, open hats on the off-beats, congas, bongos, rim and clave, and a soft clap on 2 and 4
+  - tine electric-piano chords, a kalimba/marimba motif, an airy pad, and a whistle-style hook on the drop, the orbit, the 77 file, the camera roll and the end card
+  - it follows the film: a filtered cold open that builds into the drop at 2.0, a busier riffle, a percussive split-flap board, thinner facts, the full band on the end card, the final hit at 24.0 and a tail to 26.0
+  - the effects are the trap version's `audio/sfx.wav` and `audio/events.json`, unchanged, so run `make_audio.py` first. The music is ducked under the slams and impacts just as in the trap mix and sits about 3.5 LU above the effects.
 - **`audio/master.sh`** brings the mix to -14 LUFS and puts it on the film. AAC overshoots on sharp clacks and clicks, so the script measures the encoded file and goes again until it reads -1 dBTP or less and within 0.25 LU of -14 LUFS. It lowers the limiter for a high peak and adds gain for a quiet cut, such as the effects-only one.
 
 ```
@@ -41,14 +55,19 @@ cd marketing/magazine-motion
 ln -s ../../shopify-theme/tools/node_modules node_modules                 # once
 node render.mjs --out magazine-motion-9x16-master.mp4                     # about 7 minutes
 node render.mjs --variant preorder --out magazine-motion-9x16-preorder-master.mp4
-python3 audio/make_audio.py                                               # needs numpy and scipy
+python3 audio/make_audio.py                                               # trap mix + effects; needs numpy and scipy
+python3 audio/make_audio_afro.py                                          # afro mix, into audio/afro/ (after make_audio.py)
 for v in "" -preorder; do
   ffmpeg -i magazine-motion-9x16$v-master.mp4 -c:v libx264 -preset slow -crf 22 -maxrate 8M -bufsize 16M -pix_fmt yuv420p -an silent$v.mp4
   audio/master.sh silent$v.mp4 magazine-motion-9x16$v.mp4
+  audio/master.sh silent$v.mp4 magazine-motion-9x16$v-afro.mp4 audio/afro/mix-premaster.wav
+  audio/master.sh silent$v.mp4 magazine-motion-9x16$v-sfx-only.mp4 audio/sfx.wav
 done
-audio/master.sh silent.mp4 magazine-motion-9x16-sfx-only.mp4 audio/sfx.wav
+rm silent*.mp4
 ```
+
+To put a new soundtrack on an existing cut without rendering again, take its picture with `ffmpeg -i magazine-motion-9x16.mp4 -map 0:v -c copy -an silent.mp4` and master onto that.
 
 `node render.mjs --frames 60,300,120-129` writes single stills for checking (add `--stilldir` to put them elsewhere). Add `?variant=preorder` to preview the pre-order end card in a browser, and press space to play.
 
-**Before posting:** the client's cover (page 01) reads "REGINA / OCT 2025", and the launch is 17 October 2026. The film shows the cover large in the drop, the orbit and the end card. Ask the client to confirm the year or send a corrected cover. If they send one, replace `assets/mag/01.jpg` and `assets/mag/md/01.jpg` (and `sm/01.jpg`), then render again.
+**Before posting:** the client's cover (page 01) reads "REGINA / OCT 2025", and the launch is 18 October 2026. The film shows the cover large in the drop, the orbit and the end card. Ask the client to confirm the year or send a corrected cover. If they send one, replace `assets/mag/01.jpg` and `assets/mag/md/01.jpg` (and `sm/01.jpg`), then render again.

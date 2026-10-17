@@ -4,3 +4,4 @@ still-*.png
 audio/*.wav
 audio/__pycache__
 *-sfx-only.mp4
+audio/afro/*.wav

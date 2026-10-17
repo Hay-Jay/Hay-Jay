@@ -1,0 +1,435 @@
+{
+ "bpm": 154,
+ "bar1": 0.0,
+ "duration": 28.066666666666666,
+ "film": "countdown-sunday: 842 frames at 30 fps; cut on 154 BPM (77 half-time): hb = 0.779221 s, the drop at hb 12 = 9.3506 s, final hit hb 32 = 24.9351 s",
+ "hb": 0.7792207792207793,
+ "clock": "reads 24:00:00 at the drop (9.3506 s) and loses a second per second; clack on each whole second while a clock is on screen",
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "heart",
+   "note": "lub, hb 0"
+  },
+  {
+   "t": 0.133,
+   "kind": "typing",
+   "note": "Regina HQ \u2014 incoming"
+  },
+  {
+   "t": 0.667,
+   "kind": "typing",
+   "note": "Monochrome Bureau // Vol. 001"
+  },
+  {
+   "t": 0.8,
+   "kind": "heart",
+   "note": "lub, hb 1"
+  },
+  {
+   "t": 0.8,
+   "kind": "typing",
+   "note": "Some things are worth the wait."
+  },
+  {
+   "t": 1.567,
+   "kind": "heart",
+   "note": "lub, hb 2"
+  },
+  {
+   "t": 2.367,
+   "kind": "heart",
+   "note": "lub, hb 3"
+  },
+  {
+   "t": 2.733,
+   "kind": "swish",
+   "note": "the line goes out of focus"
+  },
+  {
+   "t": 3.133,
+   "kind": "heart",
+   "note": "lub, hb 4"
+  },
+  {
+   "t": 3.133,
+   "kind": "shutter",
+   "note": "01 / Deji lights up"
+  },
+  {
+   "t": 3.533,
+   "kind": "shutter",
+   "note": "02 / Light lights up"
+  },
+  {
+   "t": 3.9,
+   "kind": "heart",
+   "note": "lub, hb 5"
+  },
+  {
+   "t": 3.9,
+   "kind": "shutter",
+   "note": "03 / Goodness lights up"
+  },
+  {
+   "t": 4.3,
+   "kind": "shutter",
+   "note": "04 / Grace lights up"
+  },
+  {
+   "t": 4.7,
+   "kind": "heart",
+   "note": "lub, hb 6"
+  },
+  {
+   "t": 4.7,
+   "kind": "shutter",
+   "note": "05 / Jide lights up"
+  },
+  {
+   "t": 4.7,
+   "kind": "impact",
+   "note": "One team."
+  },
+  {
+   "t": 5.067,
+   "kind": "shutter",
+   "note": "06 / Princess lights up"
+  },
+  {
+   "t": 5.467,
+   "kind": "heart",
+   "note": "lub, hb 7"
+  },
+  {
+   "t": 5.467,
+   "kind": "shutter",
+   "note": "07 / Zudu lights up"
+  },
+  {
+   "t": 5.867,
+   "kind": "shutter",
+   "note": "Meet the dream team lights up"
+  },
+  {
+   "t": 6.267,
+   "kind": "heart",
+   "note": "lub, hb 8"
+  },
+  {
+   "t": 6.267,
+   "kind": "impact",
+   "note": "One night."
+  },
+  {
+   "t": 7.033,
+   "kind": "heart",
+   "note": "lub, hb 9"
+  },
+  {
+   "t": 7.033,
+   "kind": "impact",
+   "note": "One vision."
+  },
+  {
+   "t": 7.8,
+   "kind": "heart",
+   "note": "lub, hb 10"
+  },
+  {
+   "t": 7.8,
+   "kind": "slam",
+   "note": "Twenty pages."
+  },
+  {
+   "t": 7.8,
+   "kind": "shutter",
+   "note": "page 04 flashes"
+  },
+  {
+   "t": 8.2,
+   "kind": "heart",
+   "note": "lub, hb 10.5"
+  },
+  {
+   "t": 8.2,
+   "kind": "shutter",
+   "note": "page 16 flashes"
+  },
+  {
+   "t": 8.6,
+   "kind": "heart",
+   "note": "lub, hb 11"
+  },
+  {
+   "t": 8.6,
+   "kind": "shutter",
+   "note": "page 15 flashes"
+  },
+  {
+   "t": 8.767,
+   "kind": "heart",
+   "note": "lub, hb 11.25"
+  },
+  {
+   "t": 8.767,
+   "kind": "shutter",
+   "note": "page 06 flashes"
+  },
+  {
+   "t": 8.867,
+   "kind": "shutter",
+   "note": "page 03 flashes"
+  },
+  {
+   "t": 9.367,
+   "kind": "boom",
+   "note": "the drop: white flash"
+  },
+  {
+   "t": 9.367,
+   "kind": "clock",
+   "note": "the clock slams in at 24:00:00"
+  },
+  {
+   "t": 9.367,
+   "kind": "whoosh",
+   "note": "the tape runs in"
+  },
+  {
+   "t": 9.4,
+   "kind": "typing",
+   "note": "The Vision Issue"
+  },
+  {
+   "t": 9.6,
+   "kind": "typing",
+   "note": "Declassified in"
+  },
+  {
+   "t": 10.133,
+   "kind": "slam",
+   "note": "T-MINUS"
+  },
+  {
+   "t": 10.367,
+   "kind": "tick",
+   "note": "big clock: 86399 s left"
+  },
+  {
+   "t": 10.933,
+   "kind": "slam",
+   "note": "24 HOURS"
+  },
+  {
+   "t": 11.367,
+   "kind": "tick",
+   "note": "big clock: 86398 s left"
+  },
+  {
+   "t": 11.7,
+   "kind": "slam",
+   "note": "SUNDAY 18 OCTOBER / 12:00 REGINA"
+  },
+  {
+   "t": 12.1,
+   "kind": "whoosh",
+   "note": "the clock flies up into the corner"
+  },
+  {
+   "t": 12.367,
+   "kind": "tick",
+   "note": "big clock: 86397 s left"
+  },
+  {
+   "t": 12.5,
+   "kind": "impact",
+   "note": "the evidence bag slams down"
+  },
+  {
+   "t": 12.867,
+   "kind": "swish",
+   "note": "a redaction bar"
+  },
+  {
+   "t": 13.067,
+   "kind": "swish",
+   "note": "a redaction bar"
+  },
+  {
+   "t": 13.267,
+   "kind": "swish",
+   "note": "a redaction bar"
+  },
+  {
+   "t": 13.267,
+   "kind": "scan",
+   "note": "laser scan"
+  },
+  {
+   "t": 13.367,
+   "kind": "tick",
+   "note": "corner clock: 86396 s left"
+  },
+  {
+   "t": 14.033,
+   "kind": "stamp",
+   "note": "CLASSIFIED"
+  },
+  {
+   "t": 14.367,
+   "kind": "tick",
+   "note": "corner clock: 86395 s left"
+  },
+  {
+   "t": 14.833,
+   "kind": "card",
+   "note": "the tag lands: sealed until 18.10, 12:00 Regina"
+  },
+  {
+   "t": 15.367,
+   "kind": "tick",
+   "note": "corner clock: 86394 s left"
+  },
+  {
+   "t": 15.6,
+   "kind": "slam",
+   "note": "Regina Sun 12:00"
+  },
+  {
+   "t": 16.367,
+   "kind": "tick",
+   "note": "corner clock: 86393 s left"
+  },
+  {
+   "t": 16.367,
+   "kind": "slam",
+   "note": "Lagos Sun 19:00"
+  },
+  {
+   "t": 17.167,
+   "kind": "slam",
+   "note": "Toronto Sun 14:00"
+  },
+  {
+   "t": 17.367,
+   "kind": "tick",
+   "note": "corner clock: 86392 s left"
+  },
+  {
+   "t": 17.933,
+   "kind": "slam",
+   "note": "London Sun 19:00"
+  },
+  {
+   "t": 18.367,
+   "kind": "tick",
+   "note": "corner clock: 86391 s left"
+  },
+  {
+   "t": 18.733,
+   "kind": "whoosh",
+   "note": "the phone rises in"
+  },
+  {
+   "t": 18.9,
+   "kind": "card",
+   "note": "the phone lands"
+  },
+  {
+   "t": 19.367,
+   "kind": "tick",
+   "note": "the page's clock on the phone: 86390 s left"
+  },
+  {
+   "t": 19.5,
+   "kind": "stamp",
+   "note": "LIVE NOW"
+  },
+  {
+   "t": 19.5,
+   "kind": "swipe",
+   "note": "scroll to the clock"
+  },
+  {
+   "t": 20.267,
+   "kind": "tap",
+   "note": "tap: pre-order a copy"
+  },
+  {
+   "t": 20.367,
+   "kind": "tick",
+   "note": "the page's clock on the phone: 86389 s left"
+  },
+  {
+   "t": 21.067,
+   "kind": "swipe",
+   "note": "scroll to the bag"
+  },
+  {
+   "t": 21.067,
+   "kind": "stamp",
+   "note": "PRE-ORDERS OPEN"
+  },
+  {
+   "t": 21.833,
+   "kind": "boom",
+   "note": "end card"
+  },
+  {
+   "t": 21.833,
+   "kind": "slam",
+   "note": "TOMORROW."
+  },
+  {
+   "t": 22.6,
+   "kind": "clock",
+   "note": "the end-card clock appears, still running"
+  },
+  {
+   "t": 23.367,
+   "kind": "tick",
+   "note": "end-card clock: 86386 s left"
+  },
+  {
+   "t": 23.4,
+   "kind": "slam",
+   "note": "Sunday 18 October \u00b7 12:00 Regina"
+  },
+  {
+   "t": 24.167,
+   "kind": "slam",
+   "note": "monochrome.com.ng"
+  },
+  {
+   "t": 24.367,
+   "kind": "tick",
+   "note": "end-card clock: 86385 s left"
+  },
+  {
+   "t": 24.967,
+   "kind": "boom",
+   "note": "the final hit: pre-orders open \u2014 $10 CAD"
+  },
+  {
+   "t": 25.367,
+   "kind": "tick",
+   "note": "end-card clock: 86384 s left"
+  },
+  {
+   "t": 25.733,
+   "kind": "swish",
+   "note": "ships to 29 countries"
+  },
+  {
+   "t": 26.367,
+   "kind": "tick",
+   "note": "end-card clock: 86383 s left"
+  },
+  {
+   "t": 27.367,
+   "kind": "tick",
+   "note": "end-card clock: 86382 s left"
+  }
+ ]
+}

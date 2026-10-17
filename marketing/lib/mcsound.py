@@ -722,3 +722,130 @@ def finish(music, sfx, outdir, extra=None, music_gain=0.55, duck_kinds=('slam', 
     with open(os.path.join(outdir, 'events.json'), 'w') as fh:
         json.dump({'bpm': BPM, 'bar1': T0, 'duration': DUR, **(extra or {}), 'events': sorted(EVENTS, key=lambda e: e['t'])}, fh, indent=1)
     return peak
+
+
+# ======================================================================================================================================
+# CINEMATIC INSTRUMENTS (added for countdown-sunday; nothing above this line changed)
+# ======================================================================================================================================
+def heartbeat(vel=1.0, dub=False):
+    """One heart sound: 'lub' (lower, longer) or 'dub' (a little higher and shorter). A soft low thump, no click."""
+    n = int(0.34 * SR)
+    t = tt(n)
+    f0 = 64.0 if dub else 50.0
+    f = f0 * (1 + 0.7 * np.exp(-t * 32))
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * (1 - np.exp(-t * 260)) * np.exp(-t * (17 if dub else 11))
+    thud = lp(noise(n), 160) * (1 - np.exp(-t * 300)) * np.exp(-t * 38) * 0.9
+    return np.tanh(1.5 * (body + thud)) * vel * (0.72 if dub else 1.0)
+
+
+def felt_piano(f, dur=2.6, vel=1.0, bright=1.0):
+    """A felt-damped upright: slightly inharmonic partials from two detuned strings, a soft hammer, dark and close."""
+    n = int(dur * SR)
+    t = tt(n)
+    y = np.zeros(n)
+    B = 0.00011
+    for det in (-0.0006, 0.0007):
+        for k in range(1, 11):
+            fk = f * (1 + det) * k * np.sqrt(1 + B * k * k)
+            if fk > 9000:
+                break
+            amp = (1 / k ** 1.25) * np.exp(-k * 0.32 / bright)
+            y += amp * np.sin(2 * np.pi * fk * t + 0.37 * k) * np.exp(-t * (0.75 + 0.42 * k) * (1 + f / 2500))
+    hammer = lp(noise(n), 700) * np.exp(-t * 110) * 0.18
+    y = (y * 0.5 + hammer) * np.minimum(1, t / 0.005)
+    y = lp(y, 1800 * bright + f * 1.5)
+    rel = int(min(0.25, dur * 0.3) * SR)
+    y[-rel:] *= np.linspace(1, 0, rel)
+    return y * vel
+
+
+FORMANT_A = ((780, 95, 1.0), (1150, 110, 0.55), (2850, 160, 0.22), (3800, 220, 0.14))   # an open 'aah'
+
+
+def aah_pad(midis, dur, vel=1.0, attack=0.5, release=0.6, voices=4, vowel=FORMANT_A, seed=11):
+    """A wordless choir 'aah': detuned saws with a slow vibrato, through vowel formants; two independent sides for width."""
+    n = int(dur * SR)
+    t = tt(n)
+    r = np.random.default_rng(seed)
+    out = np.zeros((n, 2))
+    vib_on = np.clip((t - 0.25) / 0.6, 0, 1)
+    for side in range(2):
+        src = np.zeros(n)
+        for m in midis:
+            for v in range(voices):
+                cents = (v - (voices - 1) / 2) * 7 + r.uniform(-3, 3)
+                vib = 1 + 0.0028 * vib_on * np.sin(2 * np.pi * (4.9 + r.uniform(-.4, .4)) * t + r.uniform(0, 6.3))
+                src += saw(hz(m) * 2 ** (cents / 1200) * vib, n, phase0=r.random())
+        src /= max(1, len(midis) * voices) ** 0.5
+        breath = bp(noise(n), 900, 3200) * 0.05
+        y = sum(g * bp(src + breath, max(60, f - bw), f + bw) for f, bw, g in vowel)
+        out[:, side] = y
+    env = np.minimum(1, t / max(attack, 1e-3)) * np.minimum(1, (n - np.arange(n)) / max(1, release * SR))
+    return out * env[:, None] * vel
+
+
+def string_pad(midis, dur, vel=1.0, attack=0.35, release=0.5, cutoff=2200, seed=12):
+    """A string section (sustained): detuned saws, a slow bow vibrato, low-passed; stereo."""
+    n = int(dur * SR)
+    t = tt(n)
+    r = np.random.default_rng(seed)
+    out = np.zeros((n, 2))
+    for side in range(2):
+        src = np.zeros(n)
+        for m in midis:
+            for v in range(3):
+                vib = 1 + 0.0035 * np.clip(t / 0.5, 0, 1) * np.sin(2 * np.pi * (5.3 + r.uniform(-.5, .5)) * t + r.uniform(0, 6.3))
+                src += saw(hz(m) * 2 ** ((v - 1) * 6 / 1200 + r.uniform(-2, 2) / 1200) * vib, n, phase0=r.random())
+        out[:, side] = lp(hp(src, 70), cutoff, order=2) / max(1, len(midis) * 3) ** 0.5
+    env = np.minimum(1, t / max(attack, 1e-3)) * np.minimum(1, (n - np.arange(n)) / max(1, release * SR))
+    return out * env[:, None] * vel
+
+
+def brass_stab(midis, dur=0.42, vel=1.0, seed=13):
+    """A short brass-like stab: saws whose filter opens fast and closes, a breathy edge; stereo."""
+    n = int(dur * SR)
+    t = tt(n)
+    r = np.random.default_rng(seed)
+    out = np.zeros((n, 2))
+    for side in range(2):
+        src = np.zeros(n)
+        for m in midis:
+            for v in range(3):
+                src += saw(hz(m) * 2 ** (((v - 1) * 9 + r.uniform(-3, 3)) / 1200), n, phase0=r.random())
+        src /= max(1, len(midis) * 3) ** 0.5
+        fc = 700 + 4200 * np.exp(-t / 0.07) * np.minimum(1, t / 0.012)
+        out[:, side] = sweep_lp(src[:, None], fc, block=128)[:, 0]
+    env = np.minimum(1, t / 0.008) * np.exp(-t / (dur * 0.45))
+    rel = int(0.03 * SR)
+    env[-rel:] *= np.linspace(1, 0, rel)
+    return np.tanh(out * env[:, None] * 1.6) * vel
+
+
+def stomp(vel=1.0):
+    """A stadium stomp: a low, wide thud with a little floor rattle."""
+    n = int(0.42 * SR)
+    t = tt(n)
+    f = 46 + 60 * np.exp(-t * 28)
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 9)
+    floor = bp(noise(n), 120, 900) * np.exp(-t * 26) * 0.7
+    return np.tanh(1.6 * (body + floor)) * vel
+
+
+def snare_big(vel=1.0, dur=0.5):
+    """A big hip-hop snare: a tuned body and a wide noise crack."""
+    n = int(dur * SR)
+    t = tt(n)
+    body = (np.sin(2 * np.pi * 185 * t) + 0.5 * np.sin(2 * np.pi * 330 * t)) * np.exp(-t * 30) * 0.6
+    crack = bp(noise(n), 1400, 9000) * np.exp(-t * 16) * 0.8
+    snap = hp(noise(n), 4000) * np.exp(-t * 80) * 0.4
+    return np.tanh(1.5 * (body + crack + snap)) * vel
+
+
+def heart_boom(vel=1.0, dur=0.6):
+    """A tight sub hit (no long tail): for effects that must sit under somebody else's song."""
+    n = int(dur * SR)
+    t = tt(n)
+    f = 44 + 70 * np.exp(-t * 22)
+    sub = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 7.5)
+    crack = bp(noise(n), 250, 5000) * np.exp(-t * 45) * 0.7
+    return np.tanh(1.5 * (sub + crack)) * vel

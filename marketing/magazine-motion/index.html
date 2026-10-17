@@ -399,7 +399,7 @@
 // ---------------------------------------------------------------- the film's facts and variant
 const VARIANT = new URLSearchParams(location.search).get('variant') === 'preorder' ? 'preorder' : 'out';
 const END = VARIANT === 'preorder'
-  ? { big: 'Pre-order now', btn: 'Reserve your copy', date: 'Out Saturday 17 October · 12:00 Regina', info: '$10 CAD · Ships to 29 countries' }
+  ? { big: 'Pre-order now', btn: 'Reserve your copy', date: 'Out Sunday 18 October · 12:00 Regina', info: '$10 CAD · Ships to 29 countries' }
   : { big: 'Out now', btn: 'Requisition your copy', date: '', info: '$10 CAD · Ships to 29 countries' };
 if (VARIANT === 'preorder') document.getElementById('stage').classList.add('pre');
 const DUR = 26, FPS = 30;
