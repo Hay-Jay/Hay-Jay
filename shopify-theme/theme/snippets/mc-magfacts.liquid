@@ -1,0 +1,22 @@
+{%- comment -%}
+  Facts about a magazine listing. Params: product. Output: "vol~issue~pages~blurb" ("~" separated; empty parts when the description has no
+  "<strong>Volume 001 · Issue 01 · 20 pages</strong>" line). The blurb is the text before that line.
+{%- endcomment -%}
+{%- liquid
+  assign vol = ''
+  assign issue = ''
+  assign pages = ''
+  assign d = product.description
+  assign halves = d | split: '<strong>'
+  # paragraphs and line breaks become spaces before the tags go, so sentences never run together ('culture.Meet')
+  assign blurb = halves[0] | replace: '</p>', ' </p>' | replace: '<br>', ' ' | replace: '<br/>', ' ' | replace: '<br />', ' ' | strip_html | strip_newlines | replace: '  ', ' ' | replace: '  ', ' ' | strip
+  if halves.size > 1
+    assign meta = halves[1] | split: '</strong>' | first | split: ' · '
+    if meta.size > 2
+      assign vol = meta[0] | remove: 'Volume' | strip
+      assign issue = meta[1] | remove: 'Issue' | strip
+      assign pages = meta[2] | split: ' ' | first
+    endif
+  endif
+-%}
+{{- vol }}~{{ issue }}~{{ pages }}~{{ blurb -}}

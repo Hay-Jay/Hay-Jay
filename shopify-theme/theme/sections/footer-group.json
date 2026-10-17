@@ -1,0 +1,73 @@
+{
+  "name": "Dossier footer",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "mc-footer",
+      "blocks": {
+        "link-1": {
+          "type": "link",
+          "settings": {
+            "label": "Briefing",
+            "url": "/"
+          }
+        },
+        "link-2": {
+          "type": "link",
+          "settings": {
+            "label": "Assets",
+            "url": "/collections/all"
+          }
+        },
+        "link-3": {
+          "type": "link",
+          "settings": {
+            "label": "Evidence",
+            "url": "/pages/lookbook"
+          }
+        },
+        "link-4": {
+          "type": "link",
+          "settings": {
+            "label": "Mission",
+            "url": "/pages/about"
+          }
+        },
+        "link-5": {
+          "type": "link",
+          "settings": {
+            "label": "Routes",
+            "url": "/pages/shipping"
+          }
+        },
+        "link-6": {
+          "type": "link",
+          "settings": {
+            "label": "Debrief",
+            "url": "/pages/faq"
+          }
+        },
+        "link-7": {
+          "type": "link",
+          "settings": {
+            "label": "Report in",
+            "url": "/pages/contact"
+          }
+        }
+      },
+      "block_order": [
+        "link-1",
+        "link-2",
+        "link-3",
+        "link-4",
+        "link-5",
+        "link-6",
+        "link-7"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

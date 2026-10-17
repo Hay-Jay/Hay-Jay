@@ -1,0 +1,65 @@
+{%- comment -%}
+  Register row (index view). Params: product, i (0-based position), order (output of mc-order)
+{%- endcomment -%}
+{%- liquid
+  capture cls
+    render 'mc-class', product: product
+  endcapture
+  capture fno
+    render 'mc-fileno', product: product, order: order
+  endcapture
+  capture fnum
+    render 'mc-fileno', product: product, order: order, plain: true
+  endcapture
+  capture sz
+    render 'mc-sizes', product: product, cls: cls
+  endcapture
+  capture lead
+    render 'mc-lead', product: product
+  endcapture
+  capture ptxt
+    render 'mc-price', product: product
+  endcapture
+  assign pn = lead | plus: 0 | minus: 1
+  assign pic = product.images[pn] | default: product.featured_image
+  assign colh = product.collections | map: 'handle'
+  assign is_new = false
+  if colh contains 'new-arrivals'
+    assign is_new = true
+  endif
+  assign num = fnum | plus: 0
+  assign pos = i | default: 0
+  if pos > 14
+    assign pos = 14
+  endif
+  case cls
+    when 'top'
+      assign plural = 'Tops'
+      assign label = 'Top'
+    when 'bottom'
+      assign plural = 'Bottoms'
+      assign label = 'Bottom'
+    when 'accessory'
+      assign plural = 'Hardware'
+      assign label = 'Hardware'
+    when 'gift'
+      assign plural = 'Gift cards'
+      assign label = 'Gift card'
+    else
+      assign plural = 'Print'
+      assign label = 'Print'
+  endcase
+  assign hay = product.title | strip | append: ' ' | append: product.type | append: ' ' | append: plural | append: ' ' | append: fno | downcase | escape
+  assign is_ring = 0
+  if cls == 'accessory' and product.handle contains 'ring'
+    assign is_ring = 1
+  endif
+-%}
+<li class="trow{% unless product.available %} sold{% endunless %}" style="--i:{{ pos }}" data-h="{{ product.handle }}" data-n="{{ hay }}" data-cat="{{ cls }}" data-p="{{ product.price | divided_by: 100.0 }}" data-pub="{{ product.published_at | date: '%s' }}" data-av="{% if product.available %}1{% else %}0{% endif %}" data-no="{{ num }}" data-f="{{ num | minus: 1 }}">
+  <a class="trow-a" href="{{ product.url }}" data-img="{{ pic | image_url: width: 720 }}" data-zoom="{{ is_ring }}" data-cap="{{ fno }} — {{ label }} — {{ ptxt | escape }} {{ cart.currency.iso_code }}{% unless product.available %} — Sold out{% endunless %}" data-sizes="{{ sz | escape }}" data-cat-label="{{ label }}" data-price="{{ ptxt | escape }}" data-file="{{ fno }}">
+    <span class="t-no mono">{{ fno }}</span>
+    <span class="t-name">{{ product.title | strip | escape }}{% if is_new %}<em>new</em>{% endif %}</span>
+    <span class="t-meta mono"><span class="t-cat">{{ label }}</span><span class="t-sz">{{ sz | escape }}</span>{% if product.available %}<span class="t-ok">Approved</span>{% else %}<span class="t-st">Sold out</span>{% endif %}</span>
+    <span class="t-price mono{% unless product.available %} t-sold{% endunless %}">{{ ptxt }}<small>{{ cart.currency.iso_code }}</small></span>
+  </a>
+</li>

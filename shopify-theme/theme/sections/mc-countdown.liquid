@@ -1,0 +1,381 @@
+{%- comment -%}
+  Priority transmission: the countdown to a magazine launch. The page is one dark, full-bleed section: a decrypting headline, a
+  split-flap T-minus clock, the cover sealed in an evidence bag (blurred, clearing as the date nears; press and hold to peek), an
+  intercepted-transmissions log, the launch-signal signup (Shopify customer form, tags newsletter + vision-issue), add-to-calendar,
+  share and pre-orders. At zero it declassifies itself (mc-countdown.js); after the date the server renders that state too.
+  The server renders the real remaining time and progress, so the page reads right before the script runs and without it.
+{%- endcomment -%}
+{%- assign tk_countries = '{countries}' -%}
+{%- assign tk_pages = '{pages}' -%}
+{%- assign tk_day = '{day}' -%}
+{%- liquid
+  assign mag = section.settings.product | default: settings.magpop_product
+  if mag == blank
+    for p in collections['all'].products
+      capture pc
+        render 'mc-class', product: p
+      endcapture
+      if pc == 'print'
+        assign mag = p
+        break
+      endif
+    endfor
+  endif
+  if mag != blank
+    capture facts
+      render 'mc-magfacts', product: mag
+    endcapture
+    assign fp = facts | split: '~'
+    assign vol = fp[0]
+    assign issue = fp[1]
+    assign pages = fp[2]
+    assign variant = mag.selected_or_first_available_variant
+    capture fno
+      render 'mc-fileno', product: mag
+    endcapture
+  endif
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+
+  # ---- time: epochs for the script, the wall clock as typed (already in the launch city's time) for the words
+  assign launch_raw = section.settings.launch | strip
+  assign launch_s = launch_raw | date: '%s' | plus: 0
+  assign start_s = section.settings.start | strip | date: '%s' | plus: 0
+  # text Shopify can't read comes back as typed, and plus: 0 keeps its leading year (2026): that is not a moment, so no launch
+  if launch_s < 1000000000
+    assign launch_s = 0
+  endif
+  if start_s < 1000000000
+    assign start_s = 0
+  endif
+  # Shopify also reads sloppy text ("Saturday 12:00") as some other moment, so the editor checks the shape the words rely on
+  assign launch_shape_ok = false
+  if launch_raw.size == 25
+    assign c4 = launch_raw | slice: 4, 1
+    assign c7 = launch_raw | slice: 7, 1
+    assign c10 = launch_raw | slice: 10, 1
+    assign c13 = launch_raw | slice: 13, 1
+    assign c16 = launch_raw | slice: 16, 1
+    assign c19 = launch_raw | slice: 19, 1
+    assign c22 = launch_raw | slice: 22, 1
+    if c4 == '-' and c7 == '-' and c10 == 'T' and c13 == ':' and c16 == ':' and c22 == ':'
+      if c19 == '+' or c19 == '-'
+        assign launch_shape_ok = true
+      endif
+    endif
+  endif
+  # anything else stays sealed (no clock) rather than declassifying at a moment nobody meant; the editor says why
+  unless launch_shape_ok
+    assign launch_s = 0
+  endunless
+  assign now_s = 'now' | date: '%s' | plus: 0
+  assign left_s = 0
+  if launch_s > now_s
+    assign left_s = launch_s | minus: now_s
+  endif
+  assign is_live = false
+  if launch_s > 0 and left_s == 0
+    assign is_live = true
+  endif
+  assign city_lines = section.settings.cities | newline_to_br | split: '<br />'
+  assign zone = city_lines.first | split: '|' | first | strip
+  if launch_raw.size >= 16 and launch_raw contains 'T'
+    assign l_date = launch_raw | slice: 0, 10
+    assign l_hm = launch_raw | slice: 11, 5
+    assign l_dm = launch_raw | slice: 8, 2
+    assign l_mm = launch_raw | slice: 5, 2
+    assign l_dm = l_dm | append: '.' | append: l_mm
+  else
+    assign l_date = launch_raw
+    assign l_hm = launch_raw | date: '%H:%M'
+    assign l_dm = launch_raw | date: '%d.%m'
+  endif
+  assign l_weekday = l_date | date: '%A'
+  assign l_day = l_date | date: '%A %-d %B'
+  assign label = section.settings.launch_label | strip
+  if label == blank
+    assign label = l_day | append: ', ' | append: l_hm
+    if zone != blank
+      assign label = label | append: ' ' | append: zone | append: ' time'
+    endif
+  endif
+  assign tag_when = l_dm | append: ' — ' | append: l_hm
+  if zone != blank
+    assign tag_when = tag_when | append: ' ' | append: zone
+  endif
+
+  # ---- the clock as it stands now (the script takes over within a second)
+  assign d0 = left_s | divided_by: 86400 | floor
+  assign h0 = left_s | modulo: 86400 | divided_by: 3600 | floor
+  assign m0 = left_s | modulo: 3600 | divided_by: 60 | floor
+  assign s0 = left_s | modulo: 60 | floor
+  assign k_pct = 0
+  if is_live
+    assign k_pct = 100
+  elsif start_s > 0 and launch_s > start_s and now_s > start_s
+    assign span = launch_s | minus: start_s
+    assign done = now_s | minus: start_s
+    assign k_pct = done | times: 100 | divided_by: span | floor | at_most: 100
+  endif
+  assign blur = k_pct | times: 0.13 | minus: 16 | times: -1 | round: 1
+
+  # ---- the sentence a screen reader gets
+  if is_live
+    assign sr_text = 'The issue is declassified.'
+  elsif left_s < 60
+    assign sr_text = 'Less than a minute until the launch.'
+  else
+    assign sr_parts = ''
+    if d0 > 0
+      assign sr_parts = sr_parts | append: d0 | append: ' day'
+      if d0 != 1
+        assign sr_parts = sr_parts | append: 's'
+      endif
+      assign sr_parts = sr_parts | append: '|'
+    endif
+    if h0 > 0
+      assign sr_parts = sr_parts | append: h0 | append: ' hour'
+      if h0 != 1
+        assign sr_parts = sr_parts | append: 's'
+      endif
+      assign sr_parts = sr_parts | append: '|'
+    endif
+    if m0 > 0
+      assign sr_parts = sr_parts | append: m0 | append: ' minute'
+      if m0 != 1
+        assign sr_parts = sr_parts | append: 's'
+      endif
+    endif
+    assign sr_list = sr_parts | split: '|'
+    assign sr_text = ''
+    for part in sr_list
+      if forloop.first
+        assign sr_text = part
+      elsif forloop.last
+        assign sr_text = sr_text | append: ' and ' | append: part
+      else
+        assign sr_text = sr_text | append: ', ' | append: part
+      endif
+    endfor
+    assign sr_text = sr_text | append: ' until the launch.'
+  endif
+
+  assign headline = section.settings.headline | default: 'Enter the orbit'
+  assign sub = section.settings.sub
+  assign live_sub = section.settings.live_sub | default: sub
+  assign sig_h = section.settings.signup_heading
+  assign live_sig_h = section.settings.live_signup_heading | default: sig_h
+  assign live_note = section.settings.live_signup_note | default: section.settings.signup_note
+  assign tape = section.settings.tape | replace: tk_day, l_weekday
+  assign tk_pages_phrase = ', {pages} pages'
+-%}
+<section class="cd{% if is_live %} is-live{% endif %}{% if launch_s == 0 %} no-launch{% endif %}" id="cd" aria-labelledby="cdH"
+  data-launch="{{ launch_raw | escape }}" data-launch-s="{{ launch_s }}" data-start="{{ section.settings.start | escape }}" data-start-s="{{ start_s }}"
+  data-title="{{ section.settings.calendar_title | default: 'MONOCHROME — The Vision Issue drops' | escape }}"
+  data-url="{{ canonical_url }}">
+  <i class="cd-noise" aria-hidden="true"></i><i class="cd-scan" aria-hidden="true"></i>
+
+  <div class="cd-top mono">
+    <span aria-hidden="true"><b class="cd-rec"></b>Priority transmission</span>
+    <span class="cd-top-m" aria-hidden="true">Level 5 // Eyes only // Monochrome Bureau</span>
+    <span class="cd-top-r">
+      <span data-cd-utc aria-hidden="true">UTC --:--:--</span>
+      <button type="button" class="cd-still" data-cd-still aria-pressed="false"><i aria-hidden="true"></i><span data-l>Pause motion</span></button>
+    </span>
+  </div>
+
+  {%- if request.design_mode -%}{%- unless launch_s > 0 and launch_shape_ok -%}
+    <p class="wrap cd-warn mono">The launch moment "{{ launch_raw | escape }}" isn't in the form the countdown needs, so the clock is off. Write it like this: 2026-10-18T12:00:00-06:00 (date, T, time, offset; Regina is -06:00).</p>
+  {%- endunless -%}{%- endif -%}
+
+  <div class="wrap cd-grid">
+    <div class="cd-main">
+      <p class="kick mono cd-kick">{{ section.settings.kicker | escape }}</p>
+      <h1 class="cd-h" id="cdH"><span class="sr-only">{{ headline | escape }}</span><span class="cd-hx" data-scramble aria-hidden="true">{{ headline | escape }}</span></h1>
+      <p class="cd-sub" data-live="{{ live_sub | escape }}">{% if is_live %}{{ live_sub | escape }}{% else %}{{ sub | escape }}{% endif %}</p>
+
+      <div class="cd-clock-wrap">
+        <div class="cd-clock" data-cd-clock aria-hidden="true">
+          {%- for u in (1..4) -%}
+            {%- case u -%}
+              {%- when 1 -%}{%- assign lbl = 'Days' -%}{%- assign key = 'd' -%}{%- assign val = d0 -%}
+              {%- when 2 -%}{%- assign lbl = 'Hours' -%}{%- assign key = 'h' -%}{%- assign val = h0 -%}
+              {%- when 3 -%}{%- assign lbl = 'Minutes' -%}{%- assign key = 'm' -%}{%- assign val = m0 -%}
+              {%- else -%}{%- assign lbl = 'Seconds' -%}{%- assign key = 's' -%}{%- assign val = s0 -%}
+            {%- endcase -%}
+            {%- assign vs = val | prepend: '0' -%}
+            {%- if val < 10 -%}{%- assign vs = vs | slice: -2, 2 -%}{%- else -%}{%- assign vs = val | append: '' -%}{%- endif -%}
+            {%- assign chars = vs | split: '' -%}
+            <div class="cd-u" data-u="{{ key }}">
+              <div class="cd-digits">
+                {%- for ch in chars -%}<span class="fd"><b class="t">{{ ch }}</b><b class="b">{{ ch }}</b><b class="ft">{{ ch }}</b><b class="fb">{{ ch }}</b></span>{%- endfor -%}
+              </div>
+              <span class="cd-ul mono">{{ lbl }}</span>
+            </div>
+            {%- unless forloop.last -%}<span class="cd-colon"><i></i><i></i></span>{%- endunless -%}
+          {%- endfor -%}
+        </div>
+        <p class="sr-only" data-cd-sr>{{ sr_text }}</p>
+        <p class="sr-only" data-cd-say aria-live="polite"></p>
+        <div class="cd-live-banner">
+          <span class="stamp white cd-dstamp">Declassified</span>
+          <h2 class="cd-live-h">{{ section.settings.live_heading | escape }}</h2>
+        </div>
+      </div>
+
+      <p class="cd-when mono">
+        <span class="cd-when-k">Declassification</span>
+        <b data-cd-local>{{ label | escape }}</b>
+        <span class="cd-cities" data-cd-cities>
+          {%- for cl in city_lines -%}
+            {%- assign cp = cl | strip | split: '|' -%}
+            {%- if cp.size == 2 -%}<span data-tz="{{ cp[1] | strip | escape }}">{{ cp[0] | strip | escape }} <b>--- --:--</b></span>{%- endif -%}
+          {%- endfor -%}
+        </span>
+      </p>
+
+      <div class="cd-prog" aria-hidden="true">
+        <span class="mono">Decryption</span><i><b data-cd-bar style="width: {{ k_pct }}%"></b></i><em class="mono" data-cd-pct>{{ k_pct }}%</em>
+      </div>
+      <canvas class="cd-scope" data-cd-scope width="900" height="90" aria-hidden="true"></canvas>
+
+      <div class="cd-cta">
+        {%- if mag != blank and variant -%}
+          {%- liquid
+            assign show_buy = false
+            if is_live or section.settings.preorder
+              assign show_buy = true
+            endif
+            assign po_note = section.settings.preorder_note | strip
+            if po_note == blank
+              assign po_note = 'Ships from ' | append: l_day
+            endif
+          -%}
+          <div class="cd-buywrap"{% unless show_buy %} hidden{% endunless %}>
+            {%- form 'product', mag, class: 'cd-buyform' -%}
+              <input type="hidden" name="id" value="{{ variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              {%- unless is_live -%}<input type="hidden" name="properties[Pre-order]" value="{{ po_note | escape }}" data-cd-po>{%- endunless -%}
+              <button class="btn cd-buy" type="submit"{% unless variant.available %} disabled{% endunless %}>
+                <span data-cd-buy-l>{%- if variant.available == false -%}Out of stock{%- elsif is_live -%}Requisition a copy{%- else -%}Pre-order a copy{%- endif -%}</span>
+                <span class="cd-price">— {{ variant.price | money }} {{ cart.currency.iso_code }}<i class="arr" aria-hidden="true"></i></span>
+              </button>
+            {%- endform -%}
+            {%- unless is_live -%}{%- if variant.available -%}<p class="cd-po-note mono" data-cd-po><b>Pre-order</b><span>{{ po_note | escape }}</span></p>{%- endif -%}{%- endunless -%}
+          </div>
+          <a class="btn ghost cd-file" href="{{ mag.url }}"{% unless is_live %} hidden{% endunless %}>Open the file<i class="arr" aria-hidden="true"></i></a>
+        {%- endif -%}
+      </div>
+
+      <div class="cd-signal" id="signal">
+        <h2 class="cd-sig-h mono" data-live="{{ live_sig_h | escape }}">{% if is_live %}{{ live_sig_h | escape }}{% else %}{{ sig_h | escape }}{% endif %}</h2>
+        {%- form 'customer', id: 'cd-signal', class: 'news cd-form' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter, vision-issue">
+          {%- if form.posted_successfully? -%}
+            <p class="cd-ok" role="status" tabindex="-1"><span class="stamp white">Clearance pending</span><span data-live="You are on the list for the next transmission.">{% if is_live %}You are on the list for the next transmission.{% else %}You are on the list. The signal goes out the moment it is declassified.{% endif %}</span></p>
+          {%- else -%}
+            <label for="cd-signal-email" class="sr-only">Email address</label>
+            <div class="news-row">
+              <input id="cd-signal-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}" aria-describedby="cd-signal-note"{% if form.errors %} aria-invalid="true"{% endif %}>
+              <button class="send" type="submit">Request clearance<span class="arr" aria-hidden="true"></span></button>
+            </div>
+            {%- if form.errors -%}<small class="mono news-note" id="cd-signal-note" role="alert">{{ form.errors | default_errors }}</small>{%- else -%}<small class="mono news-note" id="cd-signal-note" data-live="{{ live_note | escape }}">{% if is_live %}{{ live_note | escape }}{% else %}{{ section.settings.signup_note | escape }}{% endif %}</small>{%- endif -%}
+          {%- endif -%}
+        {%- endform -%}
+        <div class="cd-acts mono">
+          <button type="button" class="cd-act" data-cd-ics>Add to calendar</button>
+          <a class="cd-act" data-cd-gcal href="https://calendar.google.com/calendar/render" target="_blank" rel="noopener">Google Calendar<span class="sr-only"> (opens in a new tab)</span></a>
+          <button type="button" class="cd-act" data-cd-share>Forward this transmission</button>
+          <span class="cd-toast" data-cd-toast role="status"></span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="cd-ev" aria-label="Evidence">
+      <svg class="cd-orbit" viewBox="0 0 600 600" aria-hidden="true" focusable="false"><ellipse cx="300" cy="300" rx="286" ry="112" /><ellipse cx="300" cy="300" rx="236" ry="262" /><circle class="cd-sat" r="7"><animateMotion dur="9s" repeatCount="indefinite" path="M14,300 a286,112 0 1,0 572,0 a286,112 0 1,0 -572,0" /></circle></svg>
+      <div class="cd-bag" data-cd-bag style="--blur: {{ blur }}px">
+        <i class="cd-zip" aria-hidden="true"></i>
+        <div class="cd-cover">
+          {%- if mag.featured_image -%}
+            {%- comment -%} the same file twice (same widths and sizes): the sharp copy behind the lens never needs a second download {%- endcomment -%}
+            {% render 'mc-img', image: mag.featured_image, alt: mag.title, class: 'cd-c-blur', widths: '400,600,800,1100', sizes: '(min-width: 960px) 34vw, 80vw', lazy: false %}
+            {% render 'mc-img', image: mag.featured_image, alt: '', class: 'cd-c-sharp', widths: '400,600,800,1100', sizes: '(min-width: 960px) 34vw, 80vw', lazy: false %}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'cd-ph' }}
+          {%- endif -%}
+          <i class="cd-laser" aria-hidden="true"></i>
+          <span class="cd-redact r1" aria-hidden="true"></span><span class="cd-redact r2" aria-hidden="true"></span><span class="cd-redact r3" aria-hidden="true"></span>
+          <span class="stamp white cd-cstamp" aria-hidden="true">Classified</span>
+        </div>
+        <i class="cd-sheen" aria-hidden="true"></i>
+        <span class="cd-tag mono"><b>Evidence {{ fno | strip }}</b><span data-live="Declassified {{ tag_when | escape }}">{% if is_live %}Declassified{% else %}Sealed until{% endif %} {{ tag_when | escape }}</span></span>
+      </div>
+      <p class="cd-peek mono" id="cdPeekHint"><span class="hint-fine">Hover the bag to peek</span><span class="hint-touch">Press and hold the bag to peek</span><span class="sr-only">, or press Enter</span></p>
+      <dl class="cd-facts mono">
+        <div><dt>Publication</dt><dd>MONOCHROME Magazine</dd></div>
+        {%- if vol != blank -%}<div><dt>Volume</dt><dd>{{ vol }}</dd></div>{%- endif -%}
+        {%- if issue != blank -%}<div><dt>Issue</dt><dd>{{ issue }}</dd></div>{%- endif -%}
+        {%- if pages != blank -%}<div><dt>Pages</dt><dd>{{ pages }}</dd></div>{%- endif -%}
+        <div><dt>Format</dt><dd>Printed copy</dd></div>
+        {%- if variant and section.settings.preorder and is_live == false and variant.available -%}<div data-cd-po><dt>Pre-orders</dt><dd>Open</dd></div>{%- endif -%}
+        {%- if variant -%}<div><dt>Price on release</dt><dd>{{ variant.price | money }} {{ cart.currency.iso_code }}</dd></div>{%- endif -%}
+        <div><dt>Delivery</dt><dd>{{ countries.size }} countries</dd></div>
+      </dl>
+    </aside>
+  </div>
+
+  {%- capture log_sr -%}{%- endcapture -%}
+  {%- capture log_vis -%}{%- endcapture -%}
+  {%- for block in section.blocks -%}
+    {%- assign line = block.settings.text | replace: tk_countries, countries.size -%}
+    {%- if pages == blank -%}{%- assign line = line | replace: tk_pages_phrase, '' | replace: tk_pages, '' -%}{%- else -%}{%- assign line = line | replace: tk_pages, pages -%}{%- endif -%}
+    {%- capture log_sr -%}{{ log_sr }}<li>{{ line | escape }}</li>{%- endcapture -%}
+    {%- capture log_vis -%}{{ log_vis }}<li {{ block.shopify_attributes }} data-line="{{ line | escape }}"><span class="ts">--:--:--</span>&gt; <span class="tx">{{ line | escape }}</span></li>{%- endcapture -%}
+  {%- endfor -%}
+  <div class="wrap cd-log-wrap">
+    <section class="cd-log" aria-labelledby="cdLogH">
+      <h2 class="cd-log-h mono" id="cdLogH"><span>Intercepted transmissions</span><span data-cd-chan aria-hidden="true">CH 07 // 4.2 MHz</span></h2>
+      <ol class="sr-only">{{ log_sr }}</ol>
+      <ol class="cd-lines mono" data-cd-log aria-hidden="true">{{ log_vis }}</ol>
+    </section>
+  </div>
+
+  {% render 'mc-ticker', words: tape, cls: 'hazard cd-tape' %}
+</section>
+
+{% schema %}
+{
+  "name": "Countdown (launch)",
+  "settings": [
+    { "type": "text", "id": "launch", "label": "Launch moment", "info": "Date, time and UTC offset. Regina is -06:00 all year: 2026-10-18T12:00:00-06:00", "default": "2026-10-18T12:00:00-06:00" },
+    { "type": "text", "id": "launch_label", "label": "Launch, in words (shown before the script runs)", "info": "Leave blank to build it from the launch moment and the first city, e.g. Sunday 18 October, 12:00 Regina time." },
+    { "type": "text", "id": "start", "label": "Countdown started", "info": "Same format. The decryption bar and cover blur run from here to the launch.", "default": "2026-10-12T00:00:00-06:00" },
+    { "type": "textarea", "id": "cities", "label": "Launch time in these cities", "info": "One per line: name|time zone (e.g. Lagos|Africa/Lagos). Put the launch city first.", "default": "Regina|America/Regina\nLagos|Africa/Lagos\nToronto|America/Toronto\nLondon|Europe/London" },
+    { "type": "product", "id": "product", "label": "Magazine product", "info": "Empty: the magazine from Theme settings, else the first print product." },
+    { "type": "checkbox", "id": "preorder", "label": "Take pre-orders before the launch", "info": "Shows a pre-order button. Bag and order lines are marked Pre-order.", "default": true },
+    { "type": "text", "id": "preorder_note", "label": "Pre-order note on the bag line and order", "info": "Leave blank for: Ships from (launch day)" },
+    { "type": "header", "content": "Words" },
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "Intercepted — The Vision Issue" },
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Enter the orbit" },
+    { "type": "textarea", "id": "sub", "label": "Intro", "default": "MONOCHROME Magazine, Volume 001. The first issue is sealed in evidence until the clock runs out." },
+    { "type": "textarea", "id": "live_sub", "label": "Intro after the launch", "default": "MONOCHROME Magazine, Volume 001. The first issue is declassified and in print." },
+    { "type": "text", "id": "live_heading", "label": "Heading after the launch", "default": "The Vision Issue is out" },
+    { "type": "text", "id": "signup_heading", "label": "Signup heading", "default": "Get the launch signal" },
+    { "type": "text", "id": "live_signup_heading", "label": "Signup heading after the launch", "default": "Get the next transmission" },
+    { "type": "text", "id": "signup_note", "label": "Signup small print", "default": "One email the moment it is declassified." },
+    { "type": "text", "id": "live_signup_note", "label": "Signup small print after the launch", "default": "One email when the next transmission drops." },
+    { "type": "text", "id": "calendar_title", "label": "Calendar event title", "default": "MONOCHROME — The Vision Issue drops" },
+    { "type": "text", "id": "tape", "label": "Tape (separate with |)", "info": "{day} becomes the launch weekday.", "default": "The Vision Issue|Declassified {day}|Do not cross|Enter the orbit|Eyes only" }
+  ],
+  "blocks": [
+    { "type": "line", "name": "Transmission", "settings": [
+      { "type": "text", "id": "text", "label": "Line", "info": "{countries} and {pages} are filled in from the store." }
+    ] }
+  ],
+  "limit": 1,
+  "enabled_on": { "templates": ["page"] },
+  "presets": [{ "name": "Countdown (launch)", "blocks": [{ "type": "line", "settings": { "text": "Package intercepted. Contents: one magazine." } }, { "type": "line", "settings": { "text": "Instruction: do not open the evidence bag before the clock runs out." } }] }]
+}
+{% endschema %}

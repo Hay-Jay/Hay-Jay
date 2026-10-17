@@ -1,0 +1,68 @@
+{%- comment -%}
+  The magazine order pop-up (markup only; timing and memory are in mc-core.js, it never shows without JavaScript).
+  Rendered by layout/theme.liquid on the home page, the register and the lookbook/about/shipping/faq pages. No params.
+{%- endcomment -%}
+{%- liquid
+  capture mag_handle
+    render 'mc-magazine'
+  endcapture
+  if mag_handle != blank
+    assign mag = all_products[mag_handle]
+  endif
+-%}
+{%- if mag and mag.available -%}
+  {%- liquid
+    capture facts
+      render 'mc-magfacts', product: mag
+    endcapture
+    assign fp = facts | split: '~'
+    assign vol = fp[0]
+    assign issue = fp[1]
+    assign pages = fp[2]
+    assign blurb = fp[3]
+    assign mtitle = mag.title | remove: 'MONOCHROME Magazine — ' | remove: ' (Print)' | strip
+    assign line = 'Print'
+    if vol != blank
+      assign line = line | append: ' — Vol. ' | append: vol
+    endif
+    if issue != blank
+      assign line = line | append: ' — Issue ' | append: issue
+    endif
+    if pages != blank
+      assign line = line | append: ' — ' | append: pages | append: ' pages'
+    endif
+    assign sentences = blurb | split: '. '
+    if sentences.size > 1
+      assign short = sentences[0] | append: '. ' | append: sentences[1]
+      assign last_char = short | slice: -1, 1
+      unless last_char == '.' or last_char == '!' or last_char == '?'
+        assign short = short | append: '.'
+      endunless
+    else
+      assign short = blurb
+    endif
+    assign variant = mag.selected_or_first_available_variant
+    assign cover = mag.featured_image
+  -%}
+<aside class="magpop" id="magpop" role="dialog" aria-modal="true" aria-labelledby="magpopT" data-key="{{ mag.handle }}" hidden>
+  <div class="mp-back" data-close></div>
+  <div class="mp-card paper" tabindex="-1">
+    <button class="mp-x mono" type="button" data-close aria-label="Close this message">Close<span>Esc</span></button>
+    <p class="mp-kick mono"><b class="rec" aria-hidden="true"></b> Incoming transmission — new intel</p>
+    <div class="mp-body">
+      <a class="mp-cover" href="{{ mag.url }}" tabindex="-1" aria-hidden="true">{% render 'mc-img', image: cover, alt: '', class: 'mp-img', sizes: '(min-width:700px) 260px, 38vw', widths: '260,400,640' %}</a>
+      <div class="mp-copy">
+        <h2 class="mp-t" id="magpopT">{{ mtitle | escape }}</h2>
+        <p class="mp-meta mono">{{ line | escape }}</p>
+        <p class="mp-line">{{ short | escape }}</p>
+        <p class="mp-price mono"><b>{{ variant.price | money }}</b> {{ cart.currency.iso_code }} <span>Printed copy</span></p>
+        <p class="mp-cta">
+          <a class="btn" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">Order your copy<i class="arr" aria-hidden="true"></i></a>
+          <a class="btn ghost" href="{{ mag.url }}">Read the brief</a>
+        </p>
+        <button class="mp-later mono" type="button" data-close>Not now</button>
+      </div>
+    </div>
+  </div>
+</aside>
+{%- endif -%}

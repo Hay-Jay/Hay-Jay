@@ -1,0 +1,36 @@
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+-%}
+<!-- 05 ZONES (teaser for the shipping page) ----------------------------------------------------- -->
+<section class="spread dark zones" id="zones" aria-labelledby="zonesH">
+  <div class="wrap zn-grid">
+    <div class="zn-text">
+      <p class="kick mono">{{ section.settings.kicker | escape }}</p>
+      <h2 class="h2 rv" id="zonesH">Delivering to {{ countries.size }} countries</h2>
+      <div class="dist-cells">
+        <a class="dist-cell dc-ng" href="{{ section.settings.link_url | default: '/pages/shipping' }}"><span class="mono">Field office</span><b>Nigeria</b><i class="mono">{{ section.settings.ng_note | escape }}</i></a>
+        <a class="dist-cell dc-ca" href="{{ section.settings.link_url | default: '/pages/shipping' }}"><span class="mono">Home base</span><b>Canada</b><i class="mono">{{ section.settings.ca_note | escape }}</i></a>
+      </div>
+      <p class="dist-copy rv">{{ section.settings.copy | escape }} <a class="mono link-line" href="{{ section.settings.link_url | default: '/pages/shipping' }}">{{ section.settings.link_text | escape }}<span class="arr" aria-hidden="true"></span></a></p>
+    </div>
+    {% render 'mc-radar' %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Delivery zones",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§4 — Extraction routes" },
+    { "type": "text", "id": "ng_note", "label": "Nigeria note", "default": "Rate calculated at checkout" },
+    { "type": "text", "id": "ca_note", "label": "Canada note", "default": "Free standard shipping" },
+    { "type": "textarea", "id": "copy", "label": "Text", "default": "Shipping across Africa, North America, Europe, Asia, Oceania and the Middle East. Rates are calculated at checkout from your address, so you see yours before you pay." },
+    { "type": "text", "id": "link_text", "label": "Link text", "default": "See the zones and the returns notes" },
+    { "type": "url", "id": "link_url", "label": "Link" }
+  ],
+  "presets": [{ "name": "Delivery zones" }]
+}
+{% endschema %}

@@ -1,0 +1,38 @@
+<!-- RULES OF ENGAGEMENT ------------------------------------------------------------------------- -->
+<section class="spread paper ab-roe" aria-labelledby="roeH">
+  <div class="wrap roe-grid">
+    <div class="roe-main">
+      <header class="sec-h">
+        <p class="kick mono">§3 — Rules of engagement</p>
+        <h2 class="h2 rv" id="roeH">{{ section.settings.heading | escape }}</h2>
+      </header>
+      <ol class="rules">
+        {%- for block in section.blocks -%}
+          <li class="rv" {{ block.shopify_attributes }}><span class="r-n mono">Rule {{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><b>{{ block.settings.title | escape }}</b><p>{{ block.settings.text | escape }}</p></li>
+        {%- endfor -%}
+      </ol>
+    </div>
+    {% render 'mc-figure', product: section.settings.figure_b, photo: section.settings.figure_b_photo, letter: 'b', cam: 9, zoom: true %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About: rules",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Rules of engagement" },
+    { "type": "product", "id": "figure_b", "label": "Exhibit B product" },
+    { "type": "range", "id": "figure_b_photo", "label": "Exhibit B photo number", "min": 1, "max": 12, "step": 1, "default": 1 }
+  ],
+  "blocks": [
+    {
+      "type": "rule", "name": "Rule", "limit": 10,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Rule", "default": "No colour of the month." },
+        { "type": "textarea", "id": "text", "label": "Explanation", "default": "No seasonal palette, no trend colour." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "About: rules" }]
+}
+{% endschema %}

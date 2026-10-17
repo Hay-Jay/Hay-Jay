@@ -1,0 +1,11 @@
+<section class="spread paper ct-open pf" aria-labelledby="pfH">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-108', doc: 'Personnel file', page: 7, level: 4 %}
+    <header class="reg-head"><div class="reg-title"><p class="kick mono">Division of Wearables — Personnel</p><h1 class="h1" id="pfH">{{ page.title | escape }}</h1></div></header>
+    <div class="pf-body rte">{{ page.content }}</div>
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Personnel file", "settings": [], "presets": [{ "name": "Personnel file" }] }
+{% endschema %}

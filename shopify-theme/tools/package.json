@@ -1,0 +1,25 @@
+{
+  "name": "monochrome-theme-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local Shopify emulator, linter, screenshot and parity tools for the MONOCHROME theme. Never uploaded to Shopify.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node tests/run.mjs",
+    "lint": "node lint.mjs",
+    "serve": "node serve.mjs",
+    "pack": "node pack.mjs"
+  },
+  "dependencies": {
+    "liquidjs": "^10.20.0"
+  },
+  "devDependencies": {
+    "@shopify/theme-check-node": "^3.30.1",
+    "pixelmatch": "^8.0.0",
+    "playwright-core": "^1.56.1",
+    "pngjs": "^7.0.0"
+  }
+}

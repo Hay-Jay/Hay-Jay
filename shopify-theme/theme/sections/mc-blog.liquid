@@ -1,0 +1,19 @@
+<section class="spread paper reg" aria-labelledby="blogH">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-110', doc: 'Dispatches', page: 7, level: 2 %}
+    <header class="reg-head"><div class="reg-title"><p class="kick mono">Division of Wearables — Dispatches</p><h1 class="h1" id="blogH">{{ blog.title | escape }}</h1></div></header>
+    {%- paginate blog.articles by 12 -%}
+      <ol class="toc" style="display:block">
+        {%- for article in blog.articles -%}
+          <li class="trow"><a class="trow-a" href="{{ article.url }}"><span class="t-no mono">{{ article.published_at | date: '%b %d' }}</span><span class="t-name">{{ article.title | escape }}</span><span class="t-meta mono"><span class="t-cat">{{ article.author | escape }}</span></span><span class="t-price mono">Read</span></a></li>
+        {%- endfor -%}
+      </ol>
+      {%- if paginate.pages > 1 -%}
+        <nav class="mono reg-end">{%- if paginate.previous -%}<a class="link-line" href="{{ paginate.previous.url }}">Previous</a> {% endif -%}<span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>{%- if paginate.next %} <a class="link-line" href="{{ paginate.next.url }}">Next</a>{% endif -%}</nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "Dispatches (blog)", "settings": [] }
+{% endschema %}

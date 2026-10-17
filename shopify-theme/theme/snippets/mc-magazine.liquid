@@ -1,0 +1,21 @@
+{%- comment -%}
+  The magazine product's handle: settings.magpop_product, otherwise the first available product of class print. No params. Output: the handle (or nothing).
+{%- endcomment -%}
+{%- liquid
+  assign found = ''
+  if settings.magpop_product != blank
+    assign found = settings.magpop_product.handle
+  else
+    for p in collections['all'].products
+      if p.available and found == ''
+        capture pc
+          render 'mc-class', product: p
+        endcapture
+        if pc == 'print'
+          assign found = p.handle
+        endif
+      endif
+    endfor
+  endif
+-%}
+{{- found -}}

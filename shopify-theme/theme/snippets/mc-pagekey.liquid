@@ -1,0 +1,96 @@
+{%- comment -%}
+  Which dossier page this is. No params. Output: key~folio~level~doc~navurl
+  folio = page number in the 7-page dossier (0 = none), level = clearance 1-5, navurl = the nav item to highlight.
+{%- endcomment -%}
+{%- liquid
+  # anything not listed below (policies, plain pages) is an unnumbered document that highlights no tab
+  assign key = 'page'
+  assign folio = 0
+  assign level = 1
+  assign doc = 'Document'
+  assign nav = '-'
+  case template.name
+    when 'index'
+      assign key = 'home'
+      assign folio = 1
+      assign level = 5
+      assign doc = 'Mission briefing'
+      assign nav = '/'
+    when 'collection'
+      assign key = 'shop'
+      assign folio = 2
+      assign level = 3
+      assign doc = 'Asset register'
+      assign nav = routes.all_products_collection_url
+    when 'list-collections'
+      assign key = 'shop'
+      assign folio = 2
+      assign level = 3
+      assign doc = 'Asset register'
+      assign nav = routes.all_products_collection_url
+    when 'search'
+      assign key = 'shop'
+      assign folio = 2
+      assign level = 3
+      assign doc = 'Search results'
+      assign nav = routes.all_products_collection_url
+    when 'product'
+      assign key = 'product'
+      assign folio = 2
+      assign level = 4
+      assign doc = 'Asset dossier'
+      assign nav = routes.all_products_collection_url
+    when 'cart'
+      assign key = 'cart'
+      assign folio = 2
+      assign level = 3
+      assign doc = 'Requisition manifest'
+      assign nav = routes.all_products_collection_url
+    when '404'
+      assign key = '404'
+      assign folio = 0
+      assign level = 0
+      assign doc = 'File not found'
+      assign nav = '-'
+    when 'page'
+      case template.suffix
+        when 'lookbook'
+          assign key = 'lookbook'
+          assign folio = 3
+          assign level = 4
+          assign doc = 'Surveillance exhibits'
+          assign nav = '/pages/lookbook'
+        when 'about'
+          assign key = 'about'
+          assign folio = 4
+          assign level = 5
+          assign doc = 'Mission and rules of engagement'
+          assign nav = '/pages/about'
+        when 'shipping'
+          assign key = 'shipping'
+          assign folio = 5
+          assign level = 3
+          assign doc = 'Extraction routes'
+          assign nav = '/pages/shipping'
+        when 'faq'
+          assign key = 'faq'
+          assign folio = 6
+          assign level = 2
+          assign doc = 'Debrief transcript'
+          assign nav = '/pages/faq'
+        when 'contact'
+          assign key = 'contact'
+          assign folio = 7
+          assign level = 1
+          assign doc = 'Secure channel'
+          assign nav = '/pages/contact'
+        when 'portfolio'
+          assign level = 4
+          assign doc = 'Personnel file'
+        when 'vision-issue'
+          assign level = 5
+          assign doc = 'Priority transmission'
+      endcase
+  endcase
+-%}
+{{- key }}~{{ folio }}~{{ level }}~{{ doc }}~{{ nav -}}

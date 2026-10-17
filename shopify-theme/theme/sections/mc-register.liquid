@@ -1,0 +1,155 @@
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+  assign order_list = ord | split: ','
+  capture hints
+    render 'mc-hints'
+  endcapture
+  assign n_total = collection.products_count
+  assign is_all = false
+  if collection.handle == 'all'
+    assign is_all = true
+  endif
+-%}
+<script>(function(){try{var q=new URLSearchParams(location.search),c=q.get('c'),d=document.documentElement;if(/^(top|bottom|accessory|gift|print)$/.test(c))d.dataset.c=c;var v=q.get('v');if(v!=='sheet'&&v!=='index')v=matchMedia('(hover: none), (max-width: 699px)').matches?'sheet':'index';d.dataset.view=v}catch(e){}})()</script>
+{%- paginate collection.products by 50 -%}
+  {%- liquid
+    assign shown = ''
+    assign n_stock = 0
+    assign c_top = 0
+    assign c_bottom = 0
+    assign c_acc = 0
+    assign c_gift = 0
+    assign c_print = 0
+    for p in collection.products
+      assign shown = shown | append: p.handle | append: ','
+      if p.available
+        assign n_stock = n_stock | plus: 1
+      endif
+      capture cls
+        render 'mc-class', product: p
+      endcapture
+      case cls
+        when 'top'
+          assign c_top = c_top | plus: 1
+        when 'bottom'
+          assign c_bottom = c_bottom | plus: 1
+        when 'accessory'
+          assign c_acc = c_acc | plus: 1
+        when 'gift'
+          assign c_gift = c_gift | plus: 1
+        when 'print'
+          assign c_print = c_print | plus: 1
+      endcase
+    endfor
+    assign shown_list = shown | remove_last: ',' | split: ','
+    assign n_shown = shown_list.size
+    assign feat = false
+    if n_shown >= 8
+      assign feat = true
+    endif
+  -%}
+<!-- ASSET REGISTER ----------------------------------------------------------- -->
+<section class="spread paper reg" id="index" aria-labelledby="indexH">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-102', doc: 'Asset register', page: 2, level: 3, extra: ' — assets' %}
+    <header class="reg-head">
+      <div class="reg-title">
+        <p class="kick mono">{% if is_all %}Division of Wearables — Field equipment{% else %}{{ collection.title | escape }}{% endif %}</p>
+        <h1 class="h1" id="indexH"><span class="tw caret" style="--n:14">{{ section.settings.heading | escape }}</span></h1>
+        <p class="reg-sub">Every item of field equipment cleared for issue, indexed by file number. <span class="hint-fine">Hover a line for the surveillance photo, click to open the dossier.</span><span class="hint-touch">Tap a line for the photo, then open the dossier.</span> {% if cart.currency.iso_code == 'CAD' %}All prices are in Canadian dollars (CAD).{% else %}Prices are shown in {{ cart.currency.iso_code }}, converted from Canadian dollars.{% endif %}</p>
+      </div>
+      <div class="reg-side mono" aria-hidden="true">
+        <p><b>Authorised by</b><span class="redact">Director of Wearables</span></p>
+        <p><b>Assets on file</b>{{ n_total }}</p>
+        <span class="stamp ts" style="--r:-7deg">Top secret</span>
+      </div>
+    </header>
+
+    <div class="toolbar" role="group" aria-label="Filter and sort the register">
+      <div class="filters" id="filters">
+        <button class="filter on" data-filter="all" type="button" aria-pressed="true">All assets<sup>{{ n_shown }}</sup></button>
+        {%- if c_top > 0 %}<button class="filter" data-filter="top" type="button" aria-pressed="false">Tops<sup>{{ c_top }}</sup></button>{% endif %}
+        {%- if c_bottom > 0 %}<button class="filter" data-filter="bottom" type="button" aria-pressed="false">Bottoms<sup>{{ c_bottom }}</sup></button>{% endif %}
+        {%- if c_acc > 0 %}<button class="filter" data-filter="accessory" type="button" aria-pressed="false">Hardware<sup>{{ c_acc }}</sup></button>{% endif %}
+        {%- if c_gift > 0 %}<button class="filter" data-filter="gift" type="button" aria-pressed="false">Gift cards<sup>{{ c_gift }}</sup></button>{% endif %}
+        {%- if c_print > 0 %}<button class="filter" data-filter="print" type="button" aria-pressed="false">Print<sup>{{ c_print }}</sup></button>{% endif %}
+      </div>
+      <div class="tb-r">
+        <label class="findwrap mono"><span class="sr-only">Search the register</span><input id="q" type="search" placeholder="Search the register" data-hints="{{ hints | escape }}" autocomplete="off" spellcheck="false" aria-controls="toc sheet"></label>
+        <label class="sortwrap mono"><span>Sort</span>
+          <select id="sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option></select>
+        </label>
+        <div class="views" role="group" aria-label="View as">
+          <button class="view" data-view="index" type="button" aria-pressed="false">Register</button>
+          <button class="view" data-view="sheet" type="button" aria-pressed="false">Photo<span class="v-x"> sheet</span></button>
+        </div>
+      </div>
+    </div>
+    <p class="count mono" id="count" role="status" aria-live="polite">{{ n_shown }} assets on file — {{ n_stock }} in stock</p>
+    <div class="empty-state" id="empty" hidden>
+      <p class="mono">File not found.</p>
+      <p>No asset in this section matches. <button class="link-line mono" type="button" id="emptyReset">Show the whole register</button>.</p>
+    </div>
+
+    <ol class="toc" id="toc">
+      {%- assign i = 0 -%}
+      {%- comment -%} products come from this page of the collection: all_products[] stops after 20 handles per page {%- endcomment -%}
+      {%- for h in order_list -%}
+        {%- assign p = collection.products | where: 'handle', h | first -%}
+        {%- if p -%}
+          {% render 'mc-row', product: p, i: i, order: ord %}
+          {%- assign i = i | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+    <div class="board sheet-wrap" id="sheetWrap">
+      <div class="sheet" id="sheet">
+        {%- assign i = 0 -%}
+        {%- for h in order_list -%}
+          {%- assign p = collection.products | where: 'handle', h | first -%}
+          {%- if p -%}
+            {%- if feat and i == 0 -%}
+              {% render 'mc-card', product: p, i: i, order: ord, feat: true, data: true, widths: '360,540,720,1080,1400', sizes: '(min-width:700px) 50vw, 100vw' %}
+            {%- else -%}
+              {% render 'mc-card', product: p, i: i, order: ord, data: true, widths: '360,540,720,1080,1400' %}
+            {%- endif -%}
+            {%- assign i = i | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="mono reg-end" aria-label="Pages of the register">
+        {%- if paginate.previous -%}<a class="link-line" href="{{ paginate.previous.url }}">Previous page</a> {% endif -%}
+        <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+        {%- if paginate.next %} <a class="link-line" href="{{ paginate.next.url }}">Next page<span class="arr" aria-hidden="true"></span></a>{% endif -%}
+      </nav>
+    {%- endif -%}
+    {%- unless is_all -%}
+      <p class="reg-end"><a class="mono link-line" href="{{ routes.all_products_collection_url }}">View the complete register<span class="arr" aria-hidden="true"></span></a></p>
+    {%- endunless -%}
+  </div>
+</section>
+
+<!-- floating photo that follows the pointer over register lines (desktop) -->
+<div class="plate" id="plate" aria-hidden="true"><div class="plate-in"><img alt="" id="plateImg" width="560" height="700" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><i class="plate-x"></i></div><span class="plate-cap mono" id="plateCap"></span></div>
+
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "CollectionPage", "name": "Asset Register", "url": {{ shop.url | append: collection.url | json }},
+  "mainEntity": { "@type": "ItemList", "numberOfItems": {{ n_shown }}, "itemListElement": [
+    {%- for p in collection.products -%}{ "@type": "ListItem", "position": {{ forloop.index }}, "url": {{ shop.url | append: p.url | json }}, "name": {{ p.title | strip | json }} }{% unless forloop.last %},{% endunless %}{%- endfor -%}
+  ] } }
+</script>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Asset register",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading (14 characters fit the typing effect best)", "default": "Asset register" }
+  ]
+}
+{% endschema %}

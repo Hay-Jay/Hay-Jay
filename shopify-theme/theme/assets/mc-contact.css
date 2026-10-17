@@ -1,0 +1,66 @@
+/* CONTACT — report in: a dark secure-channel terminal with three lines, then the bureau particulars and the recruitment form.
+   Also styles the 404 (file not found / access denied). */
+.ct-open { overflow: clip; padding-top: clamp(28px, 4vw, 52px); }
+.ct-grid { display: grid; gap: clamp(36px, 5vw, 64px); align-items: start; }
+.ct-term .h1 { font-size: clamp(4rem, 14vw, 11rem); }
+.term { margin: clamp(22px, 3vw, 34px) 0 0; padding: 18px 20px; border: 2px solid var(--fg); background: rgba(255, 255, 255, .04); font: 700 clamp(12px, 1.5vw, 14.5px)/1.9 var(--mono); letter-spacing: .08em; white-space: pre-wrap; overflow-wrap: anywhere; color: #e4e4e4; position: relative; }
+.term::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 3px); }
+.co-deck { max-width: 28em; margin-top: 22px; font: 400 clamp(1.1rem, 1.8vw, 1.4rem)/1.4 var(--type); color: #d8d8d8; }
+.ct-open .cn-links b { font-size: clamp(2rem, 5.6vw, 3.6rem); }
+@media (min-width: 960px) { .ct-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .ct-open .cn-links b { white-space: nowrap; font-size: clamp(1.9rem, 3.2vw, 3.2rem); } }
+
+.ct-seal { display: none; }
+@media (min-width: 960px) { .ct-seal { display: block; padding: 56px 0 0 12%; } }
+.ct-file { overflow: clip; }
+.ct-file-grid { display: grid; gap: clamp(40px, 6vw, 72px); align-items: start; }
+.co-list { border-top: 4px double var(--fg); }
+.co-list > div { display: grid; grid-template-columns: 8.6rem minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px dotted var(--rule); align-items: baseline; }
+.co-list dt { color: var(--dim); }
+.co-list dd { font: 800 clamp(1.2rem, 1.8vw, 1.5rem)/1.1 var(--head); text-transform: uppercase; letter-spacing: .02em; overflow-wrap: anywhere; }
+@media (min-width: 900px) { .ct-file-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); } }
+@media (max-width: 599px) { .co-list > div { grid-template-columns: 1fr; gap: 2px; } }
+
+/* 404 */
+.lost { min-height: calc(100svh - 80px); display: grid; align-items: center; overflow: clip; }
+.lost-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: center; }
+.lost-in { max-width: 62rem; width: 100%; }
+.lost-emblem { width: 76px; height: auto; margin-bottom: 20px; mix-blend-mode: screen; }
+.lost .h1 { font-size: clamp(4rem, 15vw, 11rem); margin: 6px 0 24px; }
+.lost-copy { max-width: 32em; margin-bottom: 28px; font: 400 clamp(1.1rem, 1.8vw, 1.35rem)/1.45 var(--type); color: #d8d8d8; }
+.lost-links { border-top: 3px solid var(--fg); }
+.lost-links a { display: grid; grid-template-columns: 5rem 1fr auto; align-items: baseline; gap: 10px; padding: 14px 0; min-height: 44px; border-bottom: 1px solid var(--rule); text-decoration: none; transition: background .2s, color .2s; }
+.lost-links b { font: 900 clamp(1.7rem, 4.2vw, 2.8rem)/1 var(--head); text-transform: uppercase; letter-spacing: .01em; }
+.lost-links .mono { color: var(--dim); }
+.lost-links a:hover, .lost-links a:focus-visible { background: var(--fg); color: #0a0a0a; padding-inline: 10px; }
+.lost-links a:hover .mono, .lost-links a:focus-visible .mono { color: #0a0a0a; }
+.lost-links .arr { width: 22px; height: 22px; margin: 0; align-self: center; }
+.lost-stamp { justify-self: start; order: -1; }
+.lost-stamp .stamp { font-size: clamp(2.2rem, 11vw, 4.6rem); white-space: normal; text-align: center; max-width: 5.4em; line-height: 1.02; }
+@media (min-width: 1000px) { .lost-wrap { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); } .lost-stamp { order: 0; justify-self: center; } .lost-stamp .stamp { font-size: clamp(3rem, 5.4vw, 5.6rem); } }
+
+
+/* ---- theme additions: message form, personnel file, generic page body ------------------------------------------------------ */
+.ct-msg { max-width: 860px; }
+.ct-fields { display: grid; gap: 14px; margin-bottom: 18px; }
+@media (min-width: 700px) { .ct-fields { grid-template-columns: 1fr 1fr; } .ct-f-wide { grid-column: 1 / -1; } }
+.ct-f { display: grid; gap: 6px; color: var(--dim); }
+.ct-f input, .ct-f textarea { width: 100%; min-width: 0; background: #f5f5f5; border: 2px solid var(--fg); border-radius: 0; color: var(--fg); font: 400 16px/1.4 var(--type); padding: 12px 14px; box-shadow: inset 3px 3px 0 rgba(0, 0, 0, .14); outline-offset: 4px; }
+.ct-f textarea { resize: vertical; min-height: 140px; }
+.ct-ok { margin: 0; font: 400 1.2rem/1.4 var(--type); }
+.ct-form-sec { padding-top: clamp(30px, 5vw, 60px); }
+.rte p { margin: 0 0 1em; }
+.rte a { text-underline-offset: 4px; }
+.pf-body { max-width: 44em; font: 400 1.15rem/1.6 var(--type); }
+.pf-body p { margin: 0 0 .6em; }
+.pg-body { max-width: 52em; }
+.pg-body h2, .pg-body h3 { font-family: var(--head); text-transform: uppercase; }
+.shopify-policy__container { max-width: 52em; }
+.shopify-policy__title h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/.9 var(--head); text-transform: uppercase; margin: 0 0 1em; }
+.shopify-policy__body { font-size: 1.05rem; }
+
+/* Shopify's policy pages (no section of their own): room under the header, a readable column */
+.shopify-policy__container { max-width: 52em; margin: 0 auto; padding: clamp(36px, 6vw, 72px) var(--gut) clamp(56px, 8vw, 96px); }
+.shopify-policy__title h1 { line-height: .95; }
+/* plain pages and the personnel file reuse the register's head (its styles live in mc-shop.css, not loaded here) */
+.reg-head { display: grid; gap: 22px; margin-bottom: clamp(22px, 3.4vw, 40px); }
+.reg-title .h1 { font-size: clamp(3.6rem, 12vw, 9.6rem); }

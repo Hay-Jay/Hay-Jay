@@ -1,0 +1,12 @@
+<section class="spread paper ct-open" aria-labelledby="artH">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-110', doc: 'Dispatch', page: 7, level: 2 %}
+    <header class="reg-head"><div class="reg-title"><p class="kick mono">{{ article.published_at | date: '%b %d, %Y' }} — {{ article.author | escape }}</p><h1 class="h1" id="artH">{{ article.title | escape }}</h1></div></header>
+    {%- if article.image -%}<figure class="ab-fig"><img src="{{ article.image | image_url: width: 1200 }}" alt="{{ article.image.alt | escape }}" width="{{ article.image.width }}" height="{{ article.image.height }}" loading="lazy"></figure>{%- endif -%}
+    <div class="pf-body rte">{{ article.content }}</div>
+    <p><a class="link-line mono" href="{{ blog.url }}">Back to the dispatches</a></p>
+  </div>
+</section>
+{% schema %}
+{ "name": "Dispatch (article)", "settings": [] }
+{% endschema %}

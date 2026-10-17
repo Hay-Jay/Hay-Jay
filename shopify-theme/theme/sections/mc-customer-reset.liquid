@@ -1,0 +1,15 @@
+<section class="spread paper cu" aria-labelledby="cuH">
+  <div class="wrap cu-wrap">
+    {% render 'mc-filehead', file: 'MC-109', doc: 'Password reset', page: 7, level: 2 %}
+    <h1 class="h1" id="cuH">New password</h1>
+    {%- form 'reset_customer_password', class: 'cu-form news' -%}
+      {%- if form.errors -%}<p class="mono news-note" role="alert">{{ form.errors | default_errors }}</p>{%- endif -%}
+      <label class="mono" for="RpP">Password</label><input type="password" name="customer[password]" id="RpP" autocomplete="new-password" required>
+      <label class="mono" for="RpC">Confirm password</label><input type="password" name="customer[password_confirmation]" id="RpC" autocomplete="new-password" required>
+      <button class="send" type="submit">Reset<span class="arr" aria-hidden="true"></span></button>
+    {%- endform -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "Reset password", "settings": [] }
+{% endschema %}

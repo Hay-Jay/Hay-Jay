@@ -1,0 +1,112 @@
+/* MONOCHROME® — Shopify additions loaded on every page: sticky header wrapper, the bag count, the slide-in bag (cart drawer), shared cart-line styles. */
+
+/* the header lives in a section-group wrapper, so the wrapper is the sticky element (the prototype made .hdr itself sticky) */
+.shopify-section-group-header-group { position: sticky; top: -24px; z-index: 60; view-transition-name: bar; }
+.shopify-section-group-header-group .hdr { position: static; top: auto; view-transition-name: none; }
+.hdr { --fg: #efefef; }
+
+/* bag count in the header */
+.bar-bag { position: relative; }
+.bag-n { display: inline-grid; place-items: center; min-width: 1.5em; height: 1.5em; margin-left: .55em; padding: 0 .3em; background: #efefef; color: #0a0a0a; font: 800 11px/1 var(--mono); letter-spacing: 0; border-radius: 99px; }
+.bag-n[hidden] { display: none; }
+.bar-bag:hover .bag-n { background: #0a0a0a; color: #efefef; }
+.shopify-section-mc-cart-drawer, #shopify-section-mc-cart-drawer { display: contents; }
+.mc-add-pending { opacity: .6; pointer-events: none; }
+
+/* ---- the bag: a manifest that slides in from the right (a bottom sheet on phones) -------------------------------------- */
+.drawer { position: fixed; inset: 0; z-index: 130; visibility: hidden; pointer-events: none; transition: visibility 0s .45s; }
+.drawer.open { visibility: visible; pointer-events: auto; transition: visibility 0s; }
+.drawer[hidden] { display: none; }
+.dr-back { position: absolute; inset: 0; background: rgba(0, 0, 0, .66); opacity: 0; transition: opacity .35s; }
+.drawer.open .dr-back { opacity: 1; }
+.dr-panel {
+  position: absolute; right: 0; top: 0; bottom: 0; width: min(100%, 480px); display: flex; flex-direction: column; outline: none;
+  color: #0a0a0a; --bg: var(--paper); --fg: #0a0a0a; --dim: #454545; --rule: rgba(0, 0, 0, .38); --soft: rgba(0, 0, 0, .07);
+  background-color: var(--paper); background-image: var(--grain-d), repeating-linear-gradient(90deg, rgba(0, 0, 0, .014) 0 1px, transparent 1px 9px);
+  border-left: 3px solid #000; box-shadow: -14px 0 0 rgba(0, 0, 0, .45);
+  transform: translateX(100%); transition: transform .45s var(--ease);
+}
+.drawer.open .dr-panel { transform: none; }
+.dr-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px 16px; background: #0d0d0d; color: #efefef; border-bottom: 4px solid #0a0a0a; background-image: var(--grain-l); }
+.dr-kick { display: flex; align-items: center; gap: 8px; color: #b9b9b9; margin: 0 0 6px; }
+.dr-t { font: 900 2.2rem/.9 var(--head); text-transform: uppercase; letter-spacing: .01em; margin: 0; }
+.dr-n { display: inline-block; vertical-align: .25em; margin-left: .35em; padding: .2em .5em; background: #efefef; color: #0a0a0a; font: 800 12px/1 var(--mono); letter-spacing: .06em; }
+.dr-x { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; background: #efefef; color: #0a0a0a; flex: none; }
+.dr-x span { opacity: .55; }
+.dr-lines { flex: 1; overflow: auto; overscroll-behavior: contain; padding: 0 20px; margin: 0; }
+.dr-foot { padding: 14px 20px calc(18px + env(safe-area-inset-bottom, 0px)); border-top: 3px solid #0a0a0a; background: rgba(0, 0, 0, .04); display: grid; gap: 10px; }
+.dr-sub { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; }
+.dr-sub b { font: 900 2.1rem/1 var(--head); letter-spacing: .02em; }
+.dr-sub small { margin-left: .4em; font: 700 11px/1 var(--mono); letter-spacing: .1em; color: var(--dim); }
+.dr-note, .dr-save { margin: 0; color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: .03em; font-size: 13px; }
+.dr-form { margin: 0; }
+.dr-go { width: 100%; justify-content: space-between; min-height: 56px; }
+.dr-full { justify-self: start; }
+.dr-empty { flex: 1; display: grid; align-content: center; justify-items: start; gap: 12px; padding: 28px 24px; }
+.dr-empty .stamp { margin-bottom: 10px; }
+.dr-empty-t { font: 900 2.4rem/.95 var(--head); text-transform: uppercase; margin: 0; }
+.dr-empty-s { margin: 0; color: var(--dim); }
+
+/* ---- cart lines: the same markup in the drawer and on the cart page ---------------------------------------------------- */
+.ln { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.ln-img { display: block; aspect-ratio: 4 / 5; border: 1px solid #0a0a0a; background: #111; overflow: hidden; box-shadow: 0 4px 10px rgba(0, 0, 0, .28); }
+.ln-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.12); }
+.ln-body { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.ln-no { margin: 0; color: var(--dim); }
+.ln-t { font: 900 1.45rem/1 var(--head); text-transform: uppercase; letter-spacing: .01em; text-decoration: none; overflow-wrap: anywhere; }
+.ln-t:hover { text-decoration: underline; text-underline-offset: 4px; }
+.ln-opt, .ln-prop { margin: 0; color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: .03em; font-size: 13px; }
+.ln-prop { color: #0a0a0a; border-left: 3px solid #0a0a0a; padding-left: 8px; }
+.ln-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 14px; margin-top: 8px; }
+.ln-price { font: 900 1.6rem/1 var(--head); letter-spacing: .02em; }
+.ln-price small { margin-left: .4em; font: 700 10.5px/1 var(--mono); letter-spacing: .1em; color: var(--dim); }
+.ln-rm { justify-self: start; min-height: 44px; display: inline-flex; align-items: center; color: var(--dim); text-decoration: underline; text-underline-offset: 4px; text-transform: none; letter-spacing: .03em; font-weight: 400; font-size: 13px; }
+.ln-rm:hover { color: #0a0a0a; }
+.ln.is-busy { opacity: .5; pointer-events: none; }
+.qty { display: inline-grid; grid-template-columns: 44px 54px 44px; border: 2px solid #0a0a0a; background: #f4f4f4; }
+.qty button { min-height: 44px; font: 800 1.35rem/1 var(--head); color: #0a0a0a; }
+.qty button:hover { background: #0a0a0a; color: #f4f4f4; }
+.qty input { width: 100%; min-width: 0; border: 0; border-inline: 2px solid #0a0a0a; border-radius: 0; text-align: center; background: transparent; color: #0a0a0a; font: 700 16px/1 var(--mono); padding: 0; -moz-appearance: textfield; appearance: textfield; }
+.qty input::-webkit-outer-spin-button, .qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.cart-err { margin: 10px 0 0; padding: 10px 12px; border: 2px dashed #0a0a0a; background: #f4f4f4; color: #0a0a0a; }
+
+@media (max-width: 699px) {
+  .dr-panel { top: auto; width: 100%; max-height: min(92svh, 760px); border-left: 0; border-top: 3px solid #000; box-shadow: 0 -10px 0 rgba(0, 0, 0, .45); transform: translateY(100%); }
+  .drawer.open .dr-panel { transform: none; }
+  .dr-head { padding-top: 14px; }
+  .dr-t { font-size: 1.9rem; }
+  .ln { grid-template-columns: 76px minmax(0, 1fr); gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .drawer, .dr-back, .dr-panel { transition: none; } }
+@media (max-width: 899px) and (max-height: 520px) and (orientation: landscape) { .dr-panel { max-height: 100svh; } }
+
+/* ---- the bag locks the page behind it -------------------------------------------------------------------- */
+html.drawer-lock { overflow: hidden; }
+.dr-panel { overscroll-behavior: contain; }
+
+/* ---- the store's apps next to the theme's overlays -------------------------------------------------------- */
+/* The Inbox chat launcher floats bottom-right above everything; it steps aside while the bag, the magazine pop-up or the
+   file index is open, and on phones while the pinned "Add to bag" bar is showing (it is back as soon as those close). */
+/* display, not visibility: the widget's own button sets visibility: visible inside its shadow root and would show through */
+html.drawer-lock shopify-chat, html.mp-open shopify-chat, html.menu-up shopify-chat { display: none !important; }
+@media (max-width: 899px) { html.buy-pin:has(.pl-buy .buy:not(:disabled)) shopify-chat { display: none !important; } }
+
+/* ---- app blocks section (Klarna messaging and the like) ---------------------------------------------------- */
+.spread.mc-apps-sec { padding-block: 4px 18px; }
+.mc-apps { padding-block: 10px; }
+.mc-apps:empty { display: none; }
+
+/* ---- Shopify's policy pages: long links (https://www.shopify.com/legal/...) wrap instead of widening the page on phones -- */
+.shopify-policy__container, .rte { overflow-wrap: anywhere; }
+
+/* ---- cart lines: discounts say what they are ---------------------------------------------------------------- */
+.ln-was { margin-right: .35em; color: var(--dim); font-size: .72em; text-decoration-thickness: 2px; }
+.ln-disc { color: var(--dim); }
+
+/* ---- without JavaScript: the typed quantity and "Update quantities" do the work, so the +/- buttons and the
+   wallet placeholders (they need scripts) are not shown --------------------------------------------------------- */
+html:not(.js) .qty [data-q], html:not(.js) .cs-pay { display: none; }
+html:not(.js) .qty { grid-template-columns: 72px; }
+
+/* ---- phones have no Esc key ---------------------------------------------------------------------------------- */
+@media (hover: none), (max-width: 699px) { .dr-x span { display: none; } }

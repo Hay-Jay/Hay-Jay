@@ -1,0 +1,9 @@
+node_modules
+still-*.png
+*-master.mp4
+audio/*.wav
+audio/__pycache__
+silent*.mp4
+# the song is the client's licensed copy: never committed, and neither is the cut that carries it
+audio/song.*
+*-song.mp4
