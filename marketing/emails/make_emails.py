@@ -203,8 +203,38 @@ e3 = (head('Final transmission — The Vision Issue', 'The Vision Issue is out. 
       + tape('End of transmission &nbsp;//&nbsp; Enter the orbit', c)
       + foot() + tail())
 
+# ---- E4: a thank-you for magazine buyers, with their code (dark) -------------------------------------------------------------------
+SHOP = 'https://monochrome.com.ng/collections/all'
+
+
+def code_box(code, note, c):
+    return f'''<tr><td class="px" style="padding:10px 40px 6px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+    <td align="center" style="border:2px dashed {c['fg']};padding:22px 16px 18px;">
+      <div style="font:bold 12px/16px {MONO};letter-spacing:4px;text-transform:uppercase;color:{c['dim']};">Your clearance code</div>
+      <div style="padding:10px 0 8px;font:bold 46px/50px {HEAD};letter-spacing:6px;color:{c['fg']};">{code}</div>
+      <div style="font:14px/21px {MONO};color:{c['body']};">{note}</div>
+    </td></tr></table>
+</td></tr>
+'''
+
+
+c = DARK
+e4 = (head('Clearance granted — thank you', 'Thank you for reading The Vision Issue. Your code: VISION10.', c)
+      + topbar('Clearance granted', 'File MC-016', c)
+      + mark(c)
+      + image('e3-file.jpg', 600, 498, 'The Vision Issue file, stamped DECLASSIFIED.', c, SHOP)
+      + text(f'''<p style="margin:0 0 16px;font-weight:bold;color:#ececec;letter-spacing:2px;text-transform:uppercase;">{AGENT}</p>
+<p style="margin:0 0 16px;">Thank you for requisitioning The Vision Issue. You were one of the first to open the file, and that means a lot to everyone in it.</p>
+<p style="margin:0;">As thanks, here's 10% off your next MONOCHROME order.</p>''', c)
+      + code_box('VISION10', '10% off your next order &middot; one use &middot; until 30 November', c)
+      + button('Shop the collection', SHOP, c)
+      + link_line(f'<a href="{IG}" target="_blank" style="color:#ececec;text-decoration:underline;">Post your copy and tag @monochrome.ca</a>', c)
+      + tape('Clearance granted &nbsp;//&nbsp; VISION10', c)
+      + foot() + tail())
+
 os.makedirs(os.path.join(HERE, 'src'), exist_ok=True)
-for name, html in (('01-t-minus-24', e1), ('02-declassified', e2), ('03-final-transmission', e3)):
+for name, html in (('01-t-minus-24', e1), ('02-declassified', e2), ('03-final-transmission', e3), ('04-thank-you', e4)):
     p = os.path.join(HERE, 'src', name + '.html')
     open(p, 'w', encoding='utf-8').write(html)
     print(name, len(html.encode()) // 1024, 'KB')

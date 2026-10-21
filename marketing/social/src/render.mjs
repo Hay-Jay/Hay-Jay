@@ -8,8 +8,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const OUT = resolve(here, arg('out', '..'));
-const ONLY = arg('only', '1,2,3,4').split(',').map(Number);
-const NAMES = { 1: 'story-01-24-hours', 2: 'story-02-pre-order', 3: 'story-03-declassified', 4: 'story-04-cities' };
+const ONLY = arg('only', '1,2,3,4,5').split(',').map(Number);
+const NAMES = { 1: 'story-01-24-hours', 2: 'story-02-pre-order', 3: 'story-03-declassified', 4: 'story-04-cities', 5: 'story-05-free-with-jersey' };
 // the stamp's worn-ink mask, inlined: Chromium refuses mask images loaded from file://
 const DISTRESS = 'data:image/png;base64,' + readFileSync(join(here, '../../countdown-xo/assets/distress.png')).toString('base64');
 
