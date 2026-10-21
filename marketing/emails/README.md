@@ -49,8 +49,29 @@ The images come from the launch Stories (`../social/src/stories.html`; `?s=3&p=0
 
 ## Order confirmation (Shopify notification)
 
-`notifications/order-confirmation.liquid` replaces Shopify's own order confirmation email with one in the same dossier style. It shows the order number as the file number, every item with its photo, size, discounts and a struck-through price when it's free, then the totals, the delivery and billing details and a *View your order* button. Orders that include The Vision Issue also get the VISION10 box.
+**The file to paste is `notifications/dist/order-confirmation.liquid`.** It replaces Shopify's own order confirmation email. The Bureau logs the order as evidence:
+- A red RECEIVED stamp lands on "Bagged. Tagged. Yours.", next to a typed memo (To: Agent Ada (that is you) · Status: ~~Pending~~ Confirmed · Motive: ████ Declassified: excellent taste).
+- A case plate with the order number, total and destination, and the *View your order* button, all on the first screen.
+- Each item as a sealed evidence bag holding its photo, with a taped exhibit tag (variant, quantity, value, discounts).
+- A torn thermal evidence receipt for the totals.
+- The VISION10 slip, for orders that include The Vision Issue.
+- The address as a camera field card.
+- An honest chain-of-custody log, where only "Requisition received" is ticked.
+- A signed sign-off, and DO NOT CROSS tape.
 
-To install it: Shopify admin → **Settings → Notifications → Customer notifications → Order confirmation → Edit code**. Select everything in the code box, paste the file in, click **Preview**, then **Save**. **Revert to default** on the same screen brings Shopify's version back. The subject line can stay as it is or become `Requisition {{ name }} received`.
+Pickup orders, digital-only orders, pending payments, shipping discounts, duties and tips each get their own wording and rows.
 
-`node notifications/preview.mjs` renders it with a sample order (a jersey plus the free magazine) into `previews/`.
+**To install:**
+1. Shopify admin → **Settings → Notifications → Customer notifications → Order confirmation → Edit code**.
+2. Select everything in the code box and paste the file in.
+3. Click **Preview**, then **Save**.
+
+**Revert to default** on the same screen brings Shopify's version back. Optional subject line: `Requisition {{ name }} received`.
+
+**How it's made:**
+- `notifications/order-confirmation.liquid` is the source. Its images are written as `__NIMG__/oc-*.png|gif`.
+- `notifications/make_images.mjs` renders the images into `notifications/img/`, using the theme's fonts.
+- The images are uploaded to Shopify (Content → Files, named `order-email-oc-…`), and their URLs go in `notifications/img-urls.json`.
+- `python3 notifications/build.py` writes `notifications/dist/` with those URLs filled in.
+- `node notifications/preview.mjs [file] [--noimg]` renders a template with three sample orders (full, minimal pickup, big with discounts) at 600 and 375 into `previews/`.
+- `notifications/variants/` keeps the three design directions it was chosen from: case file, evidence locker and secure transmission.
