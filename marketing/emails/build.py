@@ -15,6 +15,6 @@ os.makedirs(os.path.join(HERE, 'dist'), exist_ok=True)
 for name in sorted(os.listdir(os.path.join(HERE, 'src'))):
     html = open(os.path.join(HERE, 'src', name), encoding='utf-8').read()
     html = re.sub(r'__IMG__/([\w.-]+)', lambda m: f'{base}/{m.group(1)}' if base else urls[m.group(1)], html)
-    assert '__IMG__' not in html and '{{ unsubscribe_url }}' in html and '{{ open_tracking }}' in html, name
+    assert '__IMG__' not in html and '{{ unsubscribe_url }}' in html and '{{ open_tracking_block }}' in html, name
     open(os.path.join(HERE, 'dist', name), 'w', encoding='utf-8').write(html)
     print('dist/' + name, len(html.encode()) // 1024, 'KB')

@@ -34,7 +34,7 @@ Three emails in the Monochrome Bureau dossier style, ready to import into **Shop
 
 ### If Shopify flags anything
 
-- The code uses `{{ unsubscribe_url }}` for the unsubscribe link and `{{ open_tracking }}`, which Shopify requires. If the editor asks for `{{ unsubscribe_link }}` instead, replace the one occurrence in the footer.
+- The code uses `{{ unsubscribe_url }}` for the unsubscribe link and `{{ open_tracking_block }}` for open tracking (Shopify asked for this name), both of which Shopify requires. If the editor asks for `{{ unsubscribe_link }}` instead, replace the one occurrence in the footer.
 - The greeting reads "Agent Ada," using the subscriber's first name, or just "Agent," when there isn't one.
 
 ## How they're made

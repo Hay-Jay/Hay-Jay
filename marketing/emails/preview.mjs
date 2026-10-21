@@ -10,7 +10,7 @@ for (const f of readdirSync(join(here, 'src')).filter(f => f.endsWith('.html')))
   // Liquid as Shopify would fill it for a subscriber called Ada
   const html = readFileSync(join(here, 'src', f), 'utf8').replaceAll('__IMG__', pathToFileURL(join(here, 'img')).href)
     .replace(/Agent\{% if customer\.first_name != blank %\} \{\{ customer\.first_name \}\}\{% endif %\},/g, 'Agent Ada,')
-    .replaceAll('{{ unsubscribe_url }}', '#unsubscribe').replaceAll('{{ open_tracking }}', '');
+    .replaceAll('{{ unsubscribe_url }}', '#unsubscribe').replaceAll('{{ open_tracking_block }}', '');
   const tmp = join(here, 'previews', '_' + f); writeFileSync(tmp, html);
   for (const [w, tag, noimg] of [[640, '600', false], [375, '375', false], [640, 'noimg', true]]) {
     const p = await b.newPage({ viewport: { width: w, height: 900 } });

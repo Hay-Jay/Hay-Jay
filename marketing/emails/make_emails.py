@@ -143,7 +143,7 @@ def tail():
     return '''</table>
 </td></tr>
 </table>
-{{ open_tracking }}
+{{ open_tracking_block }}
 </body>
 </html>
 '''
