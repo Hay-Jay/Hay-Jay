@@ -1,0 +1,17 @@
+{%- comment -%} Camera overlay on a photograph. Params: n (number), ex (exhibit label), rec (default true), live (true = ticking clock). {%- endcomment -%}
+{%- liquid
+  assign hh = n | times: 7 | modulo: 5 | plus: 1 | prepend: '0' | slice: -2, 2
+  assign mm = n | times: 13 | modulo: 60 | prepend: '0' | slice: -2, 2
+  assign ss = n | times: 29 | modulo: 60 | prepend: '0' | slice: -2, 2
+  assign lat_t = n | times: 37 | modulo: 180
+  assign lon_t = n | times: 53 | modulo: 150
+  assign lat_i = lat_t | divided_by: 10 | plus: 12
+  assign lat_f = lat_t | modulo: 10
+  assign lon_i = lon_t | divided_by: 10 | plus: 135
+  assign lon_f = lon_t | modulo: 10
+  assign cam_no = n | prepend: '0' | slice: -2, 2
+  if n >= 10
+    assign cam_no = n
+  endif
+-%}
+<span class="cam" aria-hidden="true"><i class="cam-x"></i><span class="cam-tl">{% unless rec == false %}<b class="rec"></b>{% endunless %}CAM {{ cam_no }}</span><span class="cam-tr"{% if live %} data-clock{% endif %}>{{ hh }}:{{ mm }}:{{ ss }}</span><span class="cam-bl">N {{ lat_i }}.{{ lat_f }}000 W {{ lon_i }}.{{ lon_f }}000</span><span class="cam-br">{{ ex | escape }}</span></span>

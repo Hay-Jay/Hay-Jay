@@ -1,0 +1,40 @@
+{%- comment -%} One cart line (cart page and drawer). Params: item, i (1-based line number), compact (true in the drawer). {%- endcomment -%}
+{%- liquid
+  capture fno
+    render 'mc-fileno', product: item.product
+  endcapture
+-%}
+<li class="ln" data-line="{{ i }}" data-key="{{ item.key }}">
+  <a class="ln-img" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- if item.image -%}
+      {% render 'mc-img', image: item.image, alt: '', class: 'ln-ph', widths: '160,240,360', sizes: '96px' %}
+    {%- endif -%}
+  </a>
+  <div class="ln-body">
+    <p class="ln-no mono">{{ fno }}</p>
+    <a class="ln-t" href="{{ item.url }}">{{ item.product.title | strip | escape }}</a>
+    {%- unless item.product.has_only_default_variant -%}
+      <p class="ln-opt mono">
+        {%- for o in item.options_with_values -%}{{ o.name | escape }}: {{ o.value | escape }}{% unless forloop.last %} · {% endunless %}{%- endfor -%}
+      </p>
+    {%- endunless -%}
+    {%- for p in item.properties -%}
+      {%- assign pk = p.first | slice: 0 -%}
+      {%- if pk != '_' and p.last != blank -%}
+        <p class="ln-prop mono">{{ p.first | escape }}: {{ p.last | escape }}</p>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- for a in item.line_level_discount_allocations -%}
+      <p class="ln-prop ln-disc mono">{{ a.discount_application.title | escape }}: −{{ a.amount | money }}</p>
+    {%- endfor -%}
+    <div class="ln-row">
+      <div class="qty" data-qty>
+        <button type="button" data-q="-1" aria-label="Fewer: {{ item.product.title | strip | escape }}">−</button>
+        <input type="number" name="updates[]" min="0" value="{{ item.quantity }}" inputmode="numeric" data-line-qty data-line="{{ i }}" aria-label="Quantity: {{ item.product.title | strip | escape }}">
+        <button type="button" data-q="1" aria-label="More: {{ item.product.title | strip | escape }}">+</button>
+      </div>
+      <span class="ln-price">{%- if item.original_line_price != item.final_line_price -%}<s class="ln-was">{{ item.original_line_price | money }}</s> {% endif -%}{{ item.final_line_price | money }}<small>{{ cart.currency.iso_code }}</small></span>
+    </div>
+    <a class="ln-rm mono" href="{{ routes.cart_change_url }}?line={{ i }}&quantity=0" data-remove data-line="{{ i }}">Strike from the manifest</a>
+  </div>
+</li>

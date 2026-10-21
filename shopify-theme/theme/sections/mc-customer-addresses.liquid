@@ -1,0 +1,20 @@
+<section class="spread paper cu" aria-labelledby="cuH">
+  <div class="wrap cu-wrap">
+    {% render 'mc-filehead', file: 'MC-109', doc: 'Addresses', page: 7, level: 3 %}
+    <h1 class="h1" id="cuH">Addresses</h1>
+    {%- for address in customer.addresses -%}
+      <address class="cu-addr">{{ address | format_address }}<br>{{ address.address1 | escape }} {{ address.city | escape }} {{ address.country | escape }}</address>
+    {%- endfor -%}
+    {%- form 'customer_address', customer.new_address, class: 'cu-form news' -%}
+      <h2 class="h2">Add an address</h2>
+      <label class="mono" for="AdA1">Address</label><input type="text" id="AdA1" name="address[address1]" autocomplete="address-line1">
+      <label class="mono" for="AdCity">City</label><input type="text" id="AdCity" name="address[city]" autocomplete="address-level2">
+      <label class="mono" for="AdZip">Postal code</label><input type="text" id="AdZip" name="address[zip]" autocomplete="postal-code">
+      <button class="send" type="submit">Save<span class="arr" aria-hidden="true"></span></button>
+    {%- endform -%}
+    <p><a class="link-line mono" href="{{ routes.account_url }}">Back to your file</a></p>
+  </div>
+</section>
+{% schema %}
+{ "name": "Addresses", "settings": [] }
+{% endschema %}

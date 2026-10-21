@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MONOCHROME Magazine — The Vision Issue launch ad (9:16)</title>
+<!--
+  A 27-second vertical ad for Reels / TikTok / Stories that sells MONOCHROME Magazine, Volume 001, The Vision Issue.
+  The magazine pages are the client's own PDF pages, untouched: they are only cropped, framed, moved, turned, lit and blurred.
+  Every frame is a pure function of time: render(t) sets the whole stage for second t, and render.mjs steps t at 30 fps,
+  screenshots each frame and pipes them to ffmpeg. The schedule (shots, page turns, captions, cards) lives in timeline.js,
+  which the soundtrack script reads too. Add ?variant=preorder for the pre-order end card. Press space to preview live.
+-->
+<style>
+  @font-face { font-family: 'Big Shoulders Display'; font-weight: 100 900; src: url(assets/mc-font-big-shoulders-display.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 400; src: url(assets/mc-font-courier-prime-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 700; src: url(assets/mc-font-courier-prime-700.woff2) format('woff2'); }
+  @font-face { font-family: 'Special Elite'; font-weight: 400; src: url(assets/mc-font-special-elite-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Stardos Stencil'; font-weight: 700; src: url(assets/mc-font-stardos-stencil-700.woff2) format('woff2'); }
+  :root {
+    --ink: #0a0a0a; --paper: #e6e6e6; --fg: #ececec; --dim: #a3a3a3;
+    --head: 'Big Shoulders Display', Impact, sans-serif; --mono: 'Courier Prime', 'Courier New', monospace;
+    --type: 'Special Elite', 'Courier Prime', monospace; --stamp: 'Stardos Stencil', Impact, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #050505; color: var(--fg); font-family: var(--mono); }
+  .scene { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .dark { background: #070707; color: var(--fg); }
+  .paper { background: var(--paper); color: var(--ink); }
+  .abs { position: absolute; }
+  .mono { font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; }
+  .head { font-family: var(--head); font-weight: 900; text-transform: uppercase; line-height: .86; letter-spacing: .005em; }
+  .stamp { font-family: var(--stamp); text-transform: uppercase; letter-spacing: .08em; border: 7px solid currentColor; padding: .08em .32em .02em; line-height: 1; white-space: nowrap; }
+  /* chrome type: a horizon-line chrome gradient clipped to the letters, with a light band that sweeps across */
+  .chrome { color: transparent; -webkit-background-clip: text; background-clip: text; background-repeat: no-repeat;
+            background-image: linear-gradient(100deg, rgba(255,255,255,0) 44%, rgba(255,255,255,1) 50%, rgba(255,255,255,0) 56%),
+                              linear-gradient(180deg, #ffffff 0%, #d6d6d6 26%, #8f8f8f 45%, #2a2a2a 50%, #a3a3a3 55%, #f5f5f5 74%, #9c9c9c 100%);
+            background-size: 320% 100%, 100% 100%; background-position: 100% 0, 0 0; }
+  .tape { position: absolute; left: 0; right: 0; height: 92px; overflow: hidden; display: flex; align-items: center;
+          background: repeating-linear-gradient(-45deg, #0a0a0a 0 34px, #ececec 34px 68px); }
+  .tape .band { position: absolute; left: 0; right: 0; top: 18px; bottom: 18px; background: #0a0a0a; }
+  .tape .run { position: absolute; top: 50%; white-space: nowrap; transform: translateY(-50%); color: #ececec; font: 700 30px/1 var(--mono); letter-spacing: .26em; text-transform: uppercase; }
+  .tape.light .band { background: #ececec; } .tape.light .run { color: #0a0a0a; }
+  #grain { position: absolute; inset: 0; pointer-events: none; background-size: 512px 512px; opacity: .55; }
+  #scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, transparent 2px 5px); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.42) 100%); }
+
+  /* ---- the magazine: a 3D book in page pixels (1445 x 1870), framed by a camera ---------------------------------------------------- */
+  #amb { position: absolute; inset: 0; background: #060606; }
+  #amb img { position: absolute; left: -15%; top: -12%; width: 130%; height: 124%; object-fit: cover; filter: blur(46px) grayscale(1) brightness(.3); }
+  #amb i { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 42%, rgba(255,255,255,.07), transparent 62%); }
+  #bookwrap { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 540px 960px; }
+  #book { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; transform-origin: 0 0; transform-style: preserve-3d; }
+  #book .edge { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; }
+  #book .pg { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; overflow: hidden; background: #111; }
+  #book .pg img { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; }
+  #book .pg .spine { position: absolute; left: 0; top: 0; bottom: 0; width: 90px; background: linear-gradient(90deg, rgba(0,0,0,.42), rgba(0,0,0,0)); }
+  #cast { position: absolute; inset: 0; }
+  #leftpg { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; transform-origin: 0 50%; transform: translateZ(1px) rotateY(-180deg);
+            background: linear-gradient(90deg, #191919, #0c0c0c 70%, #050505); }
+  #leaf { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; transform-style: preserve-3d; transform: translateZ(2px); }
+  #leaf .sf, #leaf .sb { position: absolute; left: 0; top: 0; height: 1870px; overflow: hidden; transform-origin: 0 50%; backface-visibility: hidden; }
+  #leaf .sf img { position: absolute; top: 0; width: 1445px; height: 1870px; }
+  #leaf .sf i { position: absolute; inset: 0; }
+  #leaf .sb { background: linear-gradient(90deg, #121212, #1c1c1c); }
+  #glossbox { position: absolute; left: 0; top: 0; width: 1445px; height: 1870px; overflow: hidden; transform: translateZ(3px); pointer-events: none; }
+  #glossband { position: absolute; top: -400px; height: 2670px; width: 520px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.34) 45%, rgba(255,255,255,.5) 50%, rgba(255,255,255,.34) 55%, rgba(255,255,255,0)); }
+
+  /* REC viewfinder on the camera-roll cuts */
+  #vf { position: absolute; left: 60px; top: 236px; width: 960px; height: 1290px; display: none; color: #fff; font: 700 30px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; text-shadow: 0 2px 6px rgba(0,0,0,.8); }
+  #vf i.c { position: absolute; width: 70px; height: 70px; border: 6px solid #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+  #vf .c1 { left: 0; top: 0; border-right: 0; border-bottom: 0; } #vf .c2 { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+  #vf .c3 { left: 0; bottom: 0; border-right: 0; border-top: 0; } #vf .c4 { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+  #vf .l { position: absolute; left: 92px; top: 20px; } #vf .r { position: absolute; right: 92px; top: 20px; }
+  #vf .b { position: absolute; left: 92px; bottom: 20px; } #vf .br { position: absolute; right: 92px; bottom: 20px; }
+  #vf .dot { display: inline-block; width: 22px; height: 22px; border-radius: 50%; background: #ff3b30; margin-right: 12px; vertical-align: -2px; }
+
+  /* captions: few words, big, chrome on black slabs */
+  .cap { position: absolute; left: 60px; right: 60px; display: none; }
+  .cap.top { top: 232px; }
+  .cap.bottom { bottom: 384px; }
+  .cap .kick { margin-bottom: 14px; }
+  .cap .kick span { display: inline-block; background: #ececec; color: #070707; font: 700 30px/1 var(--mono); letter-spacing: .22em; text-transform: uppercase; padding: 10px 16px 8px; }
+  .cap .ln { display: block; line-height: 0; margin-top: 10px; }
+  .cap .slab { display: inline-block; background: #070707; padding: 22px 26px 8px; box-shadow: 0 18px 40px rgba(0,0,0,.55); transform-origin: 0 60%; }
+  .cap .slab .head { display: block; font-size: 150px; white-space: nowrap; }
+  .cap .chips { display: flex; gap: 18px; margin-top: 18px; }
+  .cap .chips span { font-size: 56px; color: #ececec; background: rgba(7,7,7,.88); border-width: 6px; }
+  .cap .sub { display: block; margin-top: 14px; background: #070707; color: #ececec; font: 700 44px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 16px 22px 12px; white-space: nowrap; }   /* full width: no page text runs on beside it */
+
+  #coverstamp { left: 0; right: 0; margin: 0 auto; width: max-content; top: 1428px; color: #ececec; font-size: 66px; background: rgba(7,7,7,.75); }
+
+  /* title card */
+  #tbg { position: absolute; left: -10%; top: -6%; width: 120%; height: 112%; object-fit: cover; filter: blur(16px) grayscale(1) brightness(.3) contrast(1.1); }
+  #title .tape { top: 0; }
+  #tkick { left: 0; right: 0; top: 446px; text-align: center; font-size: 34px; letter-spacing: .34em; color: #d6d6d6; }
+  #title h1 { position: absolute; left: 60px; right: 60px; top: 520px; text-align: center; }
+  #title h1 span { display: block; white-space: nowrap; filter: drop-shadow(0 14px 26px rgba(0,0,0,.7)); }
+  #tw0 { font-size: 190px; } #tw1, #tw2 { font-size: 360px; }
+  #tstamp { right: 84px; top: 1330px; color: #ececec; font-size: 74px; background: rgba(7,7,7,.6); }
+
+  /* facts card */
+  #facts .tape { top: auto; bottom: 0; }
+  #fhead { left: 60px; right: 60px; top: 236px; display: flex; justify-content: space-between; font-size: 30px; border-bottom: 6px solid var(--ink); padding-bottom: 16px; }
+  #frows { position: absolute; left: 60px; right: 60px; top: 318px; }
+  #frows .row { display: flex; align-items: center; gap: 26px; border-bottom: 4px solid var(--ink); padding: 18px 0 12px; transform-origin: 0 50%; }
+  #frows .row .n { font-size: 30px; width: 64px; flex: none; align-self: flex-start; margin-top: 16px; }
+  #frows .row .v { font-size: 140px; white-space: nowrap; }
+  #frows .row.inv { background: var(--ink); color: #ececec; margin: 0 -24px; padding-left: 24px; padding-right: 24px; }
+  #fstamp { right: 70px; top: 1300px; color: var(--ink); font-size: 84px; background: rgba(230,230,230,.55); }
+
+  /* end card */
+  #eamb { position: absolute; left: -15%; top: -10%; width: 130%; height: 120%; object-fit: cover; filter: blur(40px) grayscale(1) brightness(.22); }
+  #ecol { position: absolute; left: 60px; right: 60px; top: 232px; bottom: 384px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; }
+  #ecover { position: relative; width: 410px; height: 530px; flex: none; box-shadow: 0 34px 70px rgba(0,0,0,.75), 0 0 0 2px rgba(255,255,255,.12); overflow: hidden; }
+  #ecover img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #ecover i { position: absolute; top: -200px; height: 930px; width: 220px; background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,.5) 50%, rgba(255,255,255,0)); }
+  #ehead { font-size: 210px; white-space: nowrap; filter: drop-shadow(0 12px 24px rgba(0,0,0,.7)); }
+  #edate { font: 700 50px/1 var(--head); letter-spacing: .04em; text-transform: uppercase; color: #ececec; white-space: nowrap; }
+  #ecta { font: 800 56px/1 var(--head); text-transform: uppercase; background: #ececec; color: #070707; padding: 22px 34px 16px; display: flex; gap: 40px; white-space: nowrap; }
+  #eurl { font-size: 128px; white-space: nowrap; color: #f2f2f2; }
+  #eword { width: 720px; mix-blend-mode: screen; flex: none; }
+  #end .tape { top: auto; bottom: 0; }
+</style>
+<script src="timeline.js"></script>
+</head>
+<body>
+<div id="stage">
+
+  <!-- the magazine (all page shots: the opening strobe, the cover, the flip-through and the detail push-ins) -->
+  <section class="scene" id="bookscene">
+    <div id="amb"><img id="ambimg" alt=""><i></i></div>
+    <div id="bookwrap"><div id="book">
+      <div id="edges"></div>
+      <div class="pg" id="under"><img id="underimg" alt=""><i class="spine"></i><i id="cast"></i></div>
+      <div id="leftpg"></div>
+      <div id="leaf"></div>
+      <div id="glossbox"><i id="glossband" class="abs"></i></div>
+    </div></div>
+  </section>
+
+  <!-- 0.8–2.4 title card -->
+  <section class="scene dark" id="title">
+    <img id="tbg" src="assets/mag/page-01.jpg" alt="">
+    <div class="tape"><i class="band"></i><span class="run" id="trun"></span></div>
+    <p class="abs mono" id="tkick">Monochrome magazine</p>
+    <h1><span class="head chrome" id="tw0">The</span><span class="head chrome" id="tw1">Vision</span><span class="head chrome" id="tw2">Issue</span></h1>
+    <span class="abs stamp" id="tstamp">Vol. 001</span>
+  </section>
+
+  <!-- 20.0–23.2 facts card -->
+  <section class="scene paper" id="facts">
+    <div class="abs mono" id="fhead"><span>The Vision Issue</span><span>File MC-V001</span></div>
+    <div id="frows"></div>
+    <span class="abs stamp" id="fstamp">In print</span>
+    <div class="tape light"><i class="band"></i><span class="run" id="frun"></span></div>
+  </section>
+
+  <!-- 23.2–27.2 end card -->
+  <section class="scene dark" id="end">
+    <img id="eamb" src="assets/mag/page-01.jpg" alt="">
+    <div id="ecol">
+      <div id="ecover"><img src="assets/mag/page-01.jpg" alt="MONOCHROME Magazine, The Vision Issue, cover"><i id="esweep"></i></div>
+      <h2 class="head chrome" id="ehead"></h2>
+      <p id="edate"></p>
+      <div id="ecta"><span>Requisition your copy</span><span>↗</span></div>
+      <p class="head" id="eurl">monochrome.com.ng</p>
+      <img id="eword" src="assets/wordmark-white.webp" alt="MONOCHROME">
+    </div>
+    <div class="tape"><i class="band"></i><span class="run" id="erun"></span></div>
+  </section>
+
+  <div id="caps"></div>
+  <span class="abs stamp" id="coverstamp">First issue</span>
+  <div id="vf"><i class="c c1"></i><i class="c c2"></i><i class="c c3"></i><i class="c c4"></i>
+    <span class="l"><span class="dot" id="vfdot"></span>Rec</span><span class="r" id="vftc">00:15:00</span>
+    <span class="b">Camera roll</span><span class="br">P.16</span></div>
+
+  <div id="vignette"></div>
+  <div id="scan"></div>
+  <div id="grain"></div>
+  <div id="flash"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- schedule (timeline.js) and variant
+const TL = window.TL;
+const VARIANT = new URLSearchParams(location.search).get('variant') === 'preorder' ? 'preorder' : 'out';
+const V = TL.variants[VARIANT];
+const DUR = TL.dur, TURN = TL.turn, PW = 1445, PH = 1870, NS = 6, SW = PW / NS;
+const page = n => `assets/mag/page-${n}.jpg`;
+
+// ---------------------------------------------------------------- helpers (as in the launch film)
+const $ = id => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeIn = k => k * k * k;
+const easeIO = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const back = k => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const EASE = { lin: k => k, io: easeIO, out: easeOut, in: easeIn, back };
+const rnd = n => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+// a stamp thump: big and faint, then slammed down with a small shake
+const thump = (el, t, at, rot) => {
+  const k = seg(t, at, at + 0.16), s = lerp(1.9, 1, easeIn(k)), o = clamp(k * 1.6);
+  const shake = t > at + 0.16 && t < at + 0.32 ? (rnd(t * 97) - .5) * 10 : 0;
+  el.style.opacity = t < at ? 0 : o;
+  el.style.transform = `translate(${shake}px, ${shake * .6}px) rotate(${rot}deg) scale(${s})`;
+};
+// a word slam: lands in 0.12 s from 1.45x, then shakes for a few frames
+const slam = (el, t, at, rot = 0, from = 1.45) => {
+  const k = seg(t, at, at + 0.12), sh = t > at + 0.12 && t < at + 0.26 ? (rnd(t * 61) - .5) * 14 : 0;
+  el.style.opacity = t < at ? 0 : clamp(k * 3);
+  el.style.transform = `translate(${sh}px, ${sh * .4}px) rotate(${rot}deg) scale(${lerp(from, 1, easeIn(k))})`;
+};
+// the chrome light band crossing a .chrome element between a and a + d
+const sweep = (el, t, a, d = .55) => { const k = seg(t, a, a + d); el.style.backgroundPosition = `${k > 0 && k < 1 ? lerp(84, 16, easeIO(k)) : 100}% 0, 0 0`; };
+const ticker = (el, text, t, speed) => { if (!el.textContent) el.textContent = (text + '   //   ').repeat(8); el.style.transform = `translate(${-(t * speed) % 1400}px, -50%)`; };
+const setSrc = (img, src) => { if (img.getAttribute('src') !== src) img.setAttribute('src', src); };
+
+// ---------------------------------------------------------------- build the dynamic bits once
+(function build() {
+  // the page stack behind the top page: thin paper edges to the right and below
+  $('edges').innerHTML = [5, 4, 3, 2, 1].map(i => `<i class="edge" style="transform:translate3d(${i * 5}px,${i * 4}px,${-i}px);background:${i % 2 ? '#c9c9c9' : '#2a2a2a'};${i === 5 ? 'box-shadow:0 50px 110px rgba(0,0,0,.85)' : ''}"></i>`).join('');
+  // the turning leaf: six strips (front + back) so the paper can bend as it turns
+  let h = '';
+  for (let i = 0; i < NS; i++) h += `<div class="sf" id="sf${i}" style="width:${SW + 1.5}px"><img id="si${i}" style="left:${-i * SW}px" alt=""><i id="ss${i}"></i></div><div class="sb" id="sb${i}" style="width:${SW + 1.5}px"></div>`;
+  $('leaf').innerHTML = h;
+  // captions
+  $('caps').innerHTML = TL.captions.map(c => `
+    <div class="cap ${c.pos}" id="${c.id}">
+      <p class="kick"><span id="${c.id}k">${c.kick}</span></p>
+      ${c.lines.map((l, i) => `<div class="ln"><span class="slab" id="${c.id}s${i}"><span class="head chrome" id="${c.id}l${i}">${l}</span></span></div>`).join('')}
+      ${c.chips ? `<div class="chips">${c.chips.map((x, i) => `<span class="stamp" id="${c.id}c${i}">${x[0]}</span>`).join('')}</div>` : ''}
+      ${c.sub ? `<span class="sub" id="${c.id}sub">${c.sub[0]}</span>` : ''}
+    </div>`).join('');
+  // facts rows (the price row is inverted)
+  $('frows').innerHTML = TL.facts.rows.map((r, i) => {
+    const two = r[0].startsWith('Ships to') ? r[0].replace('Ships to ', 'Ships to<br>') : r[0];
+    return `<div class="row${r[0].startsWith('$') ? ' inv' : ''}" id="fr${i}"><span class="n mono">0${i + 1}</span><span class="v head">${two}</span></div>`;
+  }).join('');
+  // end card: the variant's words
+  $('ehead').textContent = V.head;
+  $('ecta').firstElementChild.textContent = V.cta;
+  $('edate').textContent = V.date; $('edate').style.display = V.date ? 'block' : 'none';
+  // preload every page as a decoded image so no frame waits for one
+  const pre = new Set(); TL.shots.forEach(s => (s.pages || []).forEach(p => pre.add(page(p))));
+  pre.forEach(src => { const im = new Image(); im.src = src; im.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;left:-10px'; document.body.appendChild(im); });
+})();
+
+// ---------------------------------------------------------------- camera and book
+function camAt(sh, t) {
+  const K = sh.cam; let a = K[0], b = K[0], k = 0;
+  if (t >= K[K.length - 1][0]) { a = b = K[K.length - 1]; }
+  else for (let i = 0; i < K.length - 1; i++) if (t >= K[i][0] && t < K[i + 1][0]) { a = K[i]; b = K[i + 1]; k = (EASE[b[7] || 'io'])(seg(t, a[0], b[0])); break; }
+  return { cx: lerp(a[1], b[1], k), cy: lerp(a[2], b[2], k), w: Math.exp(lerp(Math.log(a[3]), Math.log(b[3]), k)), rx: lerp(a[4], b[4], k), ry: lerp(a[5], b[5], k), rz: lerp(a[6], b[6], k) };
+}
+
+function renderBook(sh, t) {
+  const c = camAt(sh, t), s = 1080 / c.w;
+  $('book').style.transform = `translate(540px,960px) scale3d(${s},${s},${s}) rotateX(${c.rx}deg) rotateY(${c.ry}deg) rotateZ(${c.rz}deg) translate(${-c.cx}px,${-c.cy}px)`;
+  const turns = sh.turns || [];
+  let done = 0, j = -1, kk = 0;
+  turns.forEach((e, i) => { if (t >= e) done = i + 1; else if (t >= e - TURN) { j = i; kk = (t - (e - TURN)) / TURN; } });
+  const top = j >= 0 ? sh.pages[j + 1] : sh.pages[done];
+  setSrc($('underimg'), page(top));
+  setSrc($('ambimg'), page(top));
+  $('leftpg').style.display = done > 0 || j >= 0 ? 'block' : 'none';
+  const leaf = $('leaf');
+  if (j < 0) { leaf.style.display = 'none'; $('cast').style.background = 'none'; }
+  else {
+    leaf.style.display = 'block';
+    const th = -180 * (0.5 - 0.5 * Math.cos(Math.PI * kk));           // the page lifts, flies and lands
+    const bend = 7 * Math.sin(Math.PI * kk);                            // the free edge trails behind
+    let x = 0, z = 0;
+    for (let i = 0; i < NS; i++) {
+      const a = th + bend * i, r = a * Math.PI / 180;
+      setSrc($('si' + i), page(sh.pages[j]));
+      const tf = `translate3d(${x}px,0,${z}px) rotateY(${a}deg)`;
+      $('sf' + i).style.transform = tf; $('sf' + i).style.left = '0px';
+      $('sb' + i).style.transform = `${tf} translateX(${SW + 1.5}px) rotateY(180deg)`;
+      // light: darker as the strip turns away from the lamp, a glint as it passes about 30 degrees
+      const deg = -a, d = deg <= 90 ? .5 * (1 - Math.cos(deg * Math.PI / 180)) : .9, g = deg <= 90 ? .26 * Math.exp(-(((deg - 32) / 13) ** 2)) : 0;
+      $('ss' + i).style.background = `linear-gradient(rgba(255,255,255,${g.toFixed(3)}),rgba(255,255,255,${g.toFixed(3)})), rgba(0,0,0,${d.toFixed(3)})`;
+      x += SW * Math.cos(r); z -= SW * Math.sin(r);
+    }
+    // the shadow the lifted page throws on the page below
+    const A = .55 * Math.sin(-th * Math.PI / 180), X = Math.max(0, PW * Math.cos(th * Math.PI / 180));
+    $('cast').style.background = `linear-gradient(90deg, rgba(0,0,0,${A.toFixed(3)}) 0px, rgba(0,0,0,${(A * .9).toFixed(3)}) ${X}px, rgba(0,0,0,0) ${X + 60 + 300 * Math.abs(Math.sin(th * Math.PI / 180))}px)`;
+  }
+  // a light sweep across the glossy cover
+  let gx = -900;
+  for (const a of sh.sweeps || []) { const k = seg(t, a, a + .6); if (k > 0 && k < 1) gx = lerp(-700, PW + 200, easeIO(k)); }
+  $('glossband').style.transform = `translateX(${gx}px) rotate(14deg)`;
+  $('glossbox').style.display = j < 0 ? 'block' : 'none';
+}
+
+// ---------------------------------------------------------------- the timeline
+const SHOTS = TL.shots;
+const FLASH = { strobe: .5, drop: .85, slam: .8, zap: .7, shutter: .6 };
+
+function render(t) {
+  const f = Math.round(t * 30);
+  let sh = SHOTS[0]; for (const s of SHOTS) if (t >= s.t0) sh = s;
+  const scene = sh.scene || 'bookscene';
+  for (const id of ['bookscene', 'title', 'facts', 'end']) $(id).style.display = id === scene ? 'block' : 'none';
+  // film grain moves every frame; dark grain on the paper card
+  const gr = $('grain'); gr.style.backgroundImage = `url(assets/${scene === 'facts' ? 'grain-d' : 'grain-l'}.png)`;
+  gr.style.backgroundPosition = `${Math.floor(rnd(f) * 512)}px ${Math.floor(rnd(f + 7) * 512)}px`;
+  // a flash on every cut
+  let fl = 0; for (const s of SHOTS) { const d = t - s.t0; if (s.t0 > 0 && d >= 0 && d < 0.12) fl = Math.max(fl, FLASH[s.cut] * (1 - d / .12)); }
+  // the last hit on the end card
+  const dl = t - TL.end.last; if (dl >= 0 && dl < .2) fl = Math.max(fl, .35 * (1 - dl / .2));
+  $('flash').style.opacity = fl;
+
+  if (scene === 'bookscene') renderBook(sh, t);
+
+  // captions -----------------------------------------------------------------------------------------------
+  for (const c of TL.captions) {
+    const on = t >= c.t0 && t < c.t1, el = $(c.id); el.style.display = on ? 'block' : 'none';
+    if (!on) continue;
+    const kk = easeOut(seg(t, c.t0, c.t0 + .14)); $(c.id + 'k').style.transform = `translateX(${lerp(-60, 0, kk)}px)`; $(c.id + 'k').style.opacity = kk;
+    c.lines.forEach((l, i) => { slam($(c.id + 's' + i), t, c.t0 + i * .2, i % 2 ? .6 : -.8); sweep($(c.id + 'l' + i), t, c.t0 + .3 + i * .2); });
+    (c.chips || []).forEach((x, i) => thump($(c.id + 'c' + i), t, x[1], [-4, 3, -2][i % 3]));
+    if (c.sub) { const k = easeOut(seg(t, c.sub[1], c.sub[1] + .16)); const s = $(c.id + 'sub'); s.style.opacity = k > 0 ? 1 : 0; s.style.clipPath = `inset(0 ${100 - k * 100}% 0 0)`; }
+  }
+
+  // the cover stamp (bookA) ------------------------------------------------------------------------------------
+  if (t >= TL.cover.stamp && t < 5.6) { $('coverstamp').style.display = 'block'; thump($('coverstamp'), t, TL.cover.stamp, -4); } else $('coverstamp').style.display = 'none';
+
+  // REC viewfinder on the camera-roll cuts ---------------------------------------------------------------------
+  $('vf').style.display = sh.rec ? 'block' : 'none';
+  if (sh.rec) { $('vfdot').style.opacity = Math.floor(t * 5) % 2 ? .2 : 1; $('vftc').textContent = `00:15:${String(Math.floor((t % 1) * 30)).padStart(2, '0')}`; }
+
+  // title card ---------------------------------------------------------------------------------------------------
+  if (scene === 'title') {
+    const l = t - sh.t0;
+    $('tbg').style.transform = `scale(${lerp(1.06, 1.16, l / 1.6)})`;
+    ticker($('trun'), 'Monochrome Magazine // Volume 001 // The Vision Issue // Now in print', l, 260);
+    $('tkick').style.opacity = easeOut(seg(l, 0, .2));
+    TL.title.words.forEach((w, i) => slam($('tw' + i), t, w[1], 0, i ? 1.6 : 1.4));
+    sweep($('tw1'), t, 1.85); sweep($('tw2'), t, 1.95);
+    thump($('tstamp'), t, TL.title.stamp, -7);
+  }
+
+  // facts card ---------------------------------------------------------------------------------------------------
+  if (scene === 'facts') {
+    const l = t - sh.t0;
+    $('fhead').style.opacity = easeOut(seg(l, 0, .15));
+    TL.facts.rows.forEach((r, i) => {
+      const el = $('fr' + i), k = seg(t, r[1], r[1] + .12), sh2 = t > r[1] + .12 && t < r[1] + .24 ? (rnd(t * 53) - .5) * 12 : 0;
+      el.style.opacity = t < r[1] ? 0 : 1;
+      el.style.transform = `translate(${lerp(-80, 0, easeOut(k)) + sh2}px, 0) scale(${lerp(1.18, 1, easeIn(k))})`;
+    });
+    thump($('fstamp'), t, TL.facts.stamp, -9);
+    ticker($('frun'), 'The Vision Issue // Volume 001 // 20 pages // Printed copy // $10 CAD // Ships to 29 countries', l, 260);
+  }
+
+  // end card -----------------------------------------------------------------------------------------------------
+  if (scene === 'end') {
+    const E = TL.end, l = t - sh.t0;
+    $('eamb').style.transform = `scale(${lerp(1.05, 1.12, l / 4)})`;
+    const ck = seg(t, E.cover, E.cover + .32);
+    $('ecover').style.transform = `translateY(${lerp(-260, 0, back(ck))}px) rotate(${lerp(-12, -3, easeOut(ck))}deg) scale(${lerp(1.2, 1, easeOut(ck))})`;
+    $('ecover').style.opacity = clamp(ck * 4);
+    slam($('ehead'), t, E.head, 0, 1.5); sweep($('ehead'), t, E.sweep, .6);
+    if (V.date) { const k = easeOut(seg(t, E.head + .2, E.head + .36)); $('edate').style.clipPath = `inset(0 ${100 - k * 100}% 0 0)`; }
+    const tk = easeOut(seg(t, E.cta, E.cta + .2)); $('ecta').style.opacity = tk; $('ecta').style.transform = `translateY(${lerp(50, 0, tk)}px)`;
+    slam($('eurl'), t, E.url, 0, 1.3);
+    $('eword').style.clipPath = `inset(0 ${100 - easeIO(seg(t, E.word, E.word + .4)) * 100}% 0 0)`;
+    // the light sweeps across the cover, and glints again on the last hit
+    let gx = -300; for (const a of [E.sweep, E.last]) { const k = seg(t, a, a + .5); if (k > 0 && k < 1) gx = lerp(-260, 450, easeIO(k)); }
+    $('esweep').style.transform = `translateX(${gx}px) rotate(14deg)`;
+    ticker($('erun'), V.tape + ' // $10 CAD // Ships to 29 countries', l, 220);
+  }
+}
+
+// big type shrinks until it fits the frame (measured once the fonts have loaded)
+function fitAll() {
+  const show = (id, on) => { const el = $(id); const was = el.style.display; el.style.display = on ? 'block' : was; return () => { el.style.display = was; }; };
+  const fitGroup = (els, max, start) => {
+    let fs = start; const set = () => els.forEach(e => { e.style.fontSize = fs + 'px'; });
+    set(); while (Math.max(...els.map(e => e.scrollWidth)) > max && fs > 30) { fs -= 2; set(); }
+    return fs;
+  };
+  let undo = show('title', true); fitGroup([$('tw1'), $('tw2')], 960, 360); undo();
+  for (const c of TL.captions) {
+    const u = show(c.id, true), u2 = show(c.pos === 'top' ? 'caps' : 'caps', true);
+    fitGroup(c.lines.map((l, i) => $(c.id + 'l' + i)), 900, 150); u2(); u();
+  }
+  undo = show('facts', true); fitGroup([...document.querySelectorAll('#frows .v')], 960 - 90, 140); undo();
+  undo = show('end', true);
+  fitGroup([$('ehead')], 960, 210); fitGroup([$('eurl')], 960, 128); if (V.date) fitGroup([$('edate')], 960, 50);
+  undo();
+}
+window.fitAll = fitAll;
+window.render = render; window.DUR = DUR;
+document.fonts.ready.then(() => { fitAll(); render(0); });
+render(0);
+// live preview: space plays it in real time
+let playing = false, t0 = 0;
+addEventListener('keydown', e => { if (e.code !== 'Space') return; playing = !playing; t0 = performance.now(); const loop = now => { if (!playing) return; const t = ((now - t0) / 1000) % DUR; render(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>

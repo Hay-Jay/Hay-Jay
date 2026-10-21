@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-search",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

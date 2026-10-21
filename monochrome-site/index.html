@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>MONOCHROME® — Wear the Unknown</title>
+<meta name="description" content="MONOCHROME® is a black, white and chrome clothing brand. Shop tops, bottoms, rings and chains, and follow the next drop.">
+<link rel="canonical" href="https://monochrome.com.ng/">
+<link rel="icon" href="assets/emblem.webp" type="image/webp">
+<link rel="apple-touch-icon" href="assets/emblem.webp">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:title" content="MONOCHROME® — Wear the Unknown">
+<meta property="og:description" content="Black, white and chrome. Shop the latest pieces from Monochrome.">
+<meta property="og:url" content="https://monochrome.com.ng/">
+<meta property="og:image" content="https://monochrome.com.ng/assets/emblem.webp">
+<meta name="twitter:card" content="summary">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"MONOCHROME","url":"https://monochrome.com.ng/","logo":"https://monochrome.com.ng/assets/emblem.webp","sameAs":["https://www.instagram.com/monochrome.ca/"]}
+</script>
+</head>
+<body>
+<div class="loader" id="loader" aria-hidden="true"><img src="assets/emblem.webp" alt="" width="96" height="103"><span id="loadPct">0</span></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="Monochrome — home">
+    <img class="emblem" src="assets/emblem.webp" alt="" width="32" height="34">
+    <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="140" height="13">
+  </a>
+  <nav class="links" aria-label="Primary">
+    <a href="#about">About</a>
+    <a href="#drop">The Drop</a>
+    <a href="#shop">Shop</a>
+    <a href="#events">Events</a>
+    <a href="#faq">FAQ</a>
+    <a href="#connect">Contact</a>
+  </nav>
+  <a class="pill bag" data-store="/cart">Bag ↗</a>
+</header>
+
+<main id="main">
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <span class="eyebrow">MONOCHROME® / BLACK · WHITE · CHROME</span>
+      <h1 aria-label="Wear the unknown."><span class="ln"><span>WEAR</span></span><span class="ln"><span>THE</span></span><span class="ln"><span class="outline">UNKNOWN.</span></span></h1>
+      <p>Clothing and objects built in two tones and one finish. See the latest drop, shop what is in stock, and check out on the store.</p>
+      <div class="actions">
+        <a class="btn solid" href="#shop">Shop all</a>
+        <a class="btn ghost" href="#drop">See the drop ↓</a>
+      </div>
+    </div>
+    <div class="portal" aria-hidden="true">
+      <div class="ring"></div><div class="ring r2"></div>
+      <img src="assets/emblem.webp" alt="" width="299" height="322">
+    </div>
+    <div class="marquee" aria-hidden="true">
+      <div class="track">
+        <span>MONOCHROME®</span><span>WEAR THE UNKNOWN</span><span>BLACK / WHITE / CHROME</span><span>NEW DROPS</span>
+        <span>MONOCHROME®</span><span>WEAR THE UNKNOWN</span><span>BLACK / WHITE / CHROME</span><span>NEW DROPS</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="sec-head"><span class="eyebrow">01 / THE BRAND</span><h2>NO COLOUR.<br>NO NOISE.</h2></div>
+    <div class="about-grid">
+      <p class="lead">Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
+      <ul class="pillars">
+        <li><b>01</b><span>Two tones</span><small>A strict palette so every piece mixes with every other piece.</small></li>
+        <li><b>02</b><span>Made in small runs</span><small>Limited drops, so what you wear is not on everyone else.</small></li>
+        <li><b>03</b><span>Chrome finish</span><small>Hardware, objects and details that catch the light.</small></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- THE DROP -->
+  <section class="section drop" id="drop">
+    <div class="sec-head split">
+      <div><span class="eyebrow">02 / THE DROP</span><h2>FRESH<br>OFF THE LINE.</h2></div>
+      <p>New arrivals and the pieces people reach for first. Drag, scroll or use the arrows.</p>
+    </div>
+    <div class="rail-wrap">
+      <div class="rail" id="rail" tabindex="0" aria-label="Featured pieces"></div>
+    </div>
+    <div class="rail-ctl">
+      <div class="rail-bar" aria-hidden="true"><i id="railBar"></i></div>
+      <div class="rail-btns"><button id="railPrev" type="button" aria-label="Previous piece">←</button><button id="railNext" type="button" aria-label="Next piece">→</button></div>
+    </div>
+  </section>
+
+  <!-- SHOP -->
+  <section class="section store" id="shop">
+    <div class="sec-head split">
+      <div><span class="eyebrow">03 / THE STORE</span><h2>IN STOCK<br>NOW.</h2></div>
+      <p>Every piece from the Monochrome store. Tap one to see sizes and check out. Prices are in Canadian dollars.</p>
+    </div>
+    <div class="toolbar">
+      <div class="filters" role="tablist" aria-label="Filter products">
+        <button class="filter on" data-filter="all" type="button">All</button>
+        <button class="filter" data-filter="top" type="button">Tops</button>
+        <button class="filter" data-filter="bottom" type="button">Bottoms</button>
+        <button class="filter" data-filter="accessory" type="button">Objects</button>
+        <button class="filter" data-filter="gift" type="button">Gift cards</button>
+      </div>
+      <div class="sortwrap"><label for="sort" class="eyebrow">SORT</label>
+        <select id="sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></div>
+    </div>
+    <p class="count" id="count" aria-live="polite"></p>
+    <div class="products" id="products" aria-live="polite"></div>
+    <div class="center"><a class="btn solid" data-store="/collections/all">View complete store ↗</a></div>
+  </section>
+
+  <div class="bigword" id="bigword" aria-hidden="true"><span>MONOCHROME</span><span>✦ CHROME ✦</span><span>MONOCHROME</span><span>✦ CHROME ✦</span></div>
+
+  <!-- EVENTS -->
+  <section class="section events" id="events">
+    <div class="sec-head"><span class="eyebrow">04 / ARCHIVE</span><h2>LIVE.<br>IN CHROME.</h2></div>
+    <a class="event" href="https://www.eventbrite.ca/e/monochrome-fashion-show-2025-black-white-chrome-tickets-1571923969909" target="_blank" rel="noopener">
+      <span class="eyebrow">EVENT</span>
+      <strong>Monochrome Fashion Show 2025</strong>
+      <span>Black · White · Chrome</span>
+      <b>View event ↗</b>
+    </a>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section faq" id="faq">
+    <div class="sec-head"><span class="eyebrow">05 / HELP</span><h2>QUESTIONS.<br>ANSWERED.</h2></div>
+    <div class="faq-list">
+      <details><summary>Where do I buy?</summary><p>Every piece is sold through the Monochrome store. Tap any product on this page to open its store page, pick your size and check out there.</p></details>
+      <details><summary>How does sizing work?</summary><p>Fits are true to size with a relaxed cut on tops. If you are between sizes, go up. Each product page lists its measurements; message us if you want a recommendation.</p></details>
+      <details><summary>Shipping and delivery</summary><p>Orders ship from the store after checkout. Delivery time and cost are calculated at checkout based on your address. You will get a tracking update by email once your order leaves.</p></details>
+      <details><summary>Returns and exchanges</summary><p>If something does not fit, contact us soon after your order arrives with your order number. Items should be unworn and in original condition. Final terms are shown in the store policies.</p></details>
+      <details><summary>Are drops limited?</summary><p>Yes. Pieces are made in small runs and some do not return. Join the drop alerts below to hear about new releases first.</p></details>
+      <details><summary>Custom orders and collaborations</summary><p>Interested in custom pieces, a collab or a bulk order? Email us with the details and we will get back to you.</p></details>
+    </div>
+  </section>
+
+  <!-- CONNECT -->
+  <section class="section connect" id="connect">
+    <div class="sec-head"><span class="eyebrow">06 / CONNECT</span><h2>STAY IN<br>ORBIT.</h2></div>
+    <div class="connect-grid">
+      <form class="news" id="news" method="post" target="_blank" rel="noopener">
+        <input type="hidden" name="form_type" value="customer">
+        <input type="hidden" name="utf8" value="✓">
+        <input type="hidden" name="contact[tags]" value="newsletter">
+        <label for="email" class="eyebrow">GET DROP ALERTS</label>
+        <div class="row">
+          <input id="email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
+          <button class="btn solid" type="submit">Notify me</button>
+        </div>
+        <small id="newsNote">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
+      </form>
+      <a class="social" href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener"><div><span>INSTAGRAM</span><strong>@monochrome.ca</strong></div><b>↗</b></a>
+      <a class="social" href="mailto:info.mccanada@gmail.com"><div><span>EMAIL</span><strong>Contact us</strong></div><b>↗</b></a>
+      <a class="social" data-store="/"><div><span>STORE</span><strong>monochrome.com.ng</strong></div><b>↗</b></a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <img class="emblem" src="assets/emblem.webp" alt="" width="72" height="77">
+  <img class="word" src="assets/wordmark.webp" alt="Monochrome" width="360" height="32">
+  <nav class="foot-links" aria-label="Footer"><a href="#shop">Shop</a><a href="#drop">The Drop</a><a href="#faq">FAQ</a><a data-store="/policies/shipping-policy">Shipping</a><a data-store="/policies/refund-policy">Returns</a><a data-store="/policies/privacy-policy">Privacy</a></nav>
+  <p>© <span id="year">2026</span> MONOCHROME®. All rights reserved.</p>
+</footer>
+
+
+<div class="pdp" id="pdp" role="dialog" aria-modal="true" aria-labelledby="pdpTitle" hidden>
+  <div class="pdp-back" data-close></div>
+  <div class="pdp-panel">
+    <button class="pdp-x" type="button" data-close aria-label="Close product">✕</button>
+    <div class="pdp-gallery">
+      <div class="pdp-main"><img id="pdpImg" alt=""><span class="pdp-count" id="pdpCount"></span></div>
+      <div class="pdp-thumbs" id="pdpThumbs"></div>
+    </div>
+    <div class="pdp-info">
+      <span class="eyebrow" id="pdpType"></span>
+      <h3 id="pdpTitle"></h3>
+      <p class="pdp-price" id="pdpPrice"></p>
+      <p class="pdp-desc" id="pdpDesc"></p>
+      <div id="pdpOpts"></div>
+      <a class="btn solid pdp-buy" id="pdpBuy" target="_blank" rel="noopener">Add to bag ↗</a>
+      <a class="pdp-link" id="pdpPage" target="_blank" rel="noopener">View on the store ↗</a>
+      <small>Prices in CAD. Checkout happens on the Monochrome store.</small>
+    </div>
+  </div>
+</div>
+
+<nav class="dock" aria-label="Quick links">
+  <a href="#drop">Drop</a><a href="#shop">Shop all</a><a data-store="/cart">Bag</a>
+</nav>
+
+<script src="config.js"></script>
+<script src="data/products.js"></script>
+<script src="main.js"></script>
+<script type="module" src="hero3d.js"></script>
+</body>
+</html>

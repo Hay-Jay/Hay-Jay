@@ -1,0 +1,40 @@
+/* CONTACT — the colophon / masthead page, with the newsletter as a "subscribe" coupon. Also styles the 404. */
+.colophon { padding: clamp(100px, 16vh, 180px) var(--gut) clamp(60px, 9vh, 110px); overflow: clip; }
+.co-deck { max-width: 24em; margin-top: 4vh; font: italic 400 clamp(1.2rem, 2.2vw, 1.9rem)/1.3 var(--serif); }
+.co-grid { display: grid; gap: 7vh; margin-top: 8vh; }
+.co-list { border-top: 3px double var(--fg); }
+.co-list > div { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.co-list dt { color: var(--dim); }
+.co-list dd { font: 500 clamp(1.15rem, 1.8vw, 1.6rem)/1.15 var(--serif); letter-spacing: -.02em; font-variation-settings: 'opsz' 30; }
+.co-list dd em { font-weight: 400; }
+.colophon .cn-links b { font-size: clamp(1.6rem, 5.6vw, 3rem); }
+
+.coupon-spread { padding: clamp(84px, 12vh, 150px) var(--gut) clamp(80px, 12vh, 150px); overflow: clip; }
+.coupon { position: relative; margin-top: 3vh; background: var(--bg); color: var(--fg); padding: 38px clamp(18px, 4vw, 60px) clamp(28px, 5vw, 56px); border: 2px dashed var(--fg); outline: 1px solid var(--bg); outline-offset: -8px; --dim: color-mix(in srgb, var(--fg) 70%, var(--bg)); }
+.coupon::before, .coupon::after { content: ""; position: absolute; top: 50%; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); transform: translateY(-50%); }
+.coupon::before { left: -17px; } .coupon::after { right: -17px; }
+.cut { position: absolute; left: 22px; top: -1px; transform: translateY(-50%); background: var(--ink); color: var(--paper); padding: 4px 10px; display: inline-flex; gap: 8px; align-items: center; }
+.cut i { font-style: normal; font-size: 1.3em; }
+.coupon-in { display: grid; gap: 4vh; }
+.coupon-h { font: 500 clamp(3.4rem, 13vw, 9rem)/.84 var(--serif); letter-spacing: -.045em; text-transform: uppercase; font-variation-settings: 'opsz' 22; }
+.coupon-h em { text-transform: none; font-weight: 400; display: block; padding-left: .8em; font-variation-settings: 'opsz' 14; }
+.coupon .news { align-self: end; }
+@media (min-width: 900px) {
+  .colophon, .coupon-spread { padding-left: calc(var(--gut) + 22px); }
+  .co-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6vw; align-items: start; }
+  .coupon-in { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 5vw; align-items: end; }
+  .colophon .cn-links b { white-space: nowrap; font-size: clamp(1.5rem, 2.6vw, 2.6rem); }
+}
+
+/* 404 */
+.lost { min-height: 100svh; display: grid; place-items: center; text-align: left; padding: calc(var(--bar) + 40px) var(--gut) 60px; overflow: clip; }
+.lost-in { max-width: 62rem; width: 100%; }
+.lost-emblem { width: 72px; height: auto; margin-bottom: 24px; mix-blend-mode: screen; }
+.lost .display { margin: 18px 0 32px; font-size: clamp(3rem, 13vw, 9rem); }
+.lost .display .ln.ital { text-transform: none; font-weight: 400; padding-left: .5em; font-style: italic; }
+.lost .mono { color: var(--dim); }
+.lost-links { border-top: 1px solid var(--fg); }
+.lost-links a { display: grid; grid-template-columns: 3rem 1fr auto; align-items: baseline; gap: 10px; padding: 14px 0; min-height: 44px; border-bottom: 1px solid var(--rule); text-decoration: none; }
+.lost-links b { font: 500 clamp(1.5rem, 4vw, 2.6rem)/1.05 var(--serif); letter-spacing: -.03em; text-transform: uppercase; font-variation-settings: 'opsz' 30; }
+.lost-links a:hover b, .lost-links a:focus-visible b { font-style: italic; }
+.lost-links .arr { width: 22px; height: 22px; margin: 0; align-self: center; }

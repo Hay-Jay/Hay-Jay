@@ -1,0 +1,80 @@
+{
+  "name": "Dossier header",
+  "type": "header",
+  "sections": {
+    "header": {
+      "type": "mc-header",
+      "blocks": {
+        "nav-1": {
+          "type": "nav",
+          "settings": {
+            "label": "Briefing",
+            "url": "/",
+            "doc": "Mission briefing"
+          }
+        },
+        "nav-2": {
+          "type": "nav",
+          "settings": {
+            "label": "Assets",
+            "url": "/collections/all",
+            "doc": "Asset register"
+          }
+        },
+        "nav-3": {
+          "type": "nav",
+          "settings": {
+            "label": "Evidence",
+            "url": "/pages/lookbook",
+            "doc": "Surveillance exhibits"
+          }
+        },
+        "nav-4": {
+          "type": "nav",
+          "settings": {
+            "label": "Mission",
+            "url": "/pages/about",
+            "doc": "Mission and rules of engagement"
+          }
+        },
+        "nav-5": {
+          "type": "nav",
+          "settings": {
+            "label": "Routes",
+            "url": "/pages/shipping",
+            "doc": "Extraction routes"
+          }
+        },
+        "nav-6": {
+          "type": "nav",
+          "settings": {
+            "label": "Debrief",
+            "url": "/pages/faq",
+            "doc": "Debrief transcript"
+          }
+        },
+        "nav-7": {
+          "type": "nav",
+          "settings": {
+            "label": "Report in",
+            "url": "/pages/contact",
+            "doc": "Secure channel"
+          }
+        }
+      },
+      "block_order": [
+        "nav-1",
+        "nav-2",
+        "nav-3",
+        "nav-4",
+        "nav-5",
+        "nav-6",
+        "nav-7"
+      ],
+      "settings": {}
+    }
+  },
+  "order": [
+    "header"
+  ]
+}

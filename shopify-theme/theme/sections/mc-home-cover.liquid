@@ -1,0 +1,101 @@
+{%- assign tk_currency = '{currency}' -%}
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign n_countries = countries.size
+  assign n_pieces = collections['all'].products_count
+  assign cover = section.settings.cover_product
+  if cover == blank
+    assign cover = collections['all'].products.first
+  endif
+  assign photo_i = section.settings.cover_photo | minus: 1
+  assign pic = cover.images[photo_i] | default: cover.featured_image
+  capture fno
+    render 'mc-fileno', product: cover
+  endcapture
+  assign lede = section.settings.lede | replace: '{pieces}', n_pieces | replace: '{countries}', n_countries
+  assign l1 = section.settings.line_1 | strip
+  assign l2 = section.settings.line_2 | strip
+  assign words = section.settings.ticker_a
+  capture mag_handle
+    render 'mc-magazine'
+  endcapture
+  if mag_handle != blank and section.settings.ticker_mag != blank
+    assign words = words | append: '|' | append: section.settings.ticker_mag
+  endif
+  assign words = words | append: '|' | append: section.settings.ticker_b | replace: '{pieces}', n_pieces | replace: tk_currency, cart.currency.iso_code
+-%}
+<!-- 01 BRIEFING COVER ---------------------------------------------------------------- -->
+<section class="spread paper cover" id="top" aria-label="Mission briefing cover">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-101', doc: 'Mission briefing', page: 1, level: 5 %}
+    <div class="cv-grid">
+      <div class="cv-text">
+        <span class="stamp ts lg cv-ts" style="--r:-8deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>
+        <p class="memo mono">
+          <span><b>To:</b> {{ section.settings.memo_to | escape }}</span>
+          <span><b>Handler:</b> <span class="redact" tabindex="0">{{ section.settings.memo_handler | escape }}</span></span>
+        </p>
+        <h1 class="cv-h">
+          <span class="cv-op">{{ section.settings.op_label | escape }}</span>
+          <span class="tw" style="--n:{{ l1 | size }};--dl:.15s">{{ l1 | escape }}</span>
+          <span class="tw caret" style="--n:{{ l2 | size }};--dl:.8s">{{ l2 | escape }}</span>
+        </h1>
+        <p class="cv-lede">{{ lede | escape }}</p>
+        <p class="cta-row">
+          {%- if section.settings.btn_1_label != blank -%}<a class="btn" href="{{ section.settings.btn_1_url | default: routes.all_products_collection_url }}">{{ section.settings.btn_1_label | escape }}<i class="arr" aria-hidden="true"></i></a>{%- endif -%}
+          {%- if section.settings.btn_2_label != blank -%}<a class="btn ghost" href="{{ section.settings.btn_2_url | default: '/pages/lookbook' }}">{{ section.settings.btn_2_label | escape }}<i class="arr" aria-hidden="true"></i></a>{%- endif -%}
+        </p>
+      </div>
+      {%- if cover != blank and pic != blank -%}
+      <div class="cv-folder">
+        <div class="folder">
+          <div class="folder-tabs" aria-hidden="true"><span class="folder-tab mono">{{ section.settings.tab_text | escape }}</span><span class="folder-tab folder-tab2 mono">{{ fno }}</span></div>
+          <div class="folder-body">
+            <span class="clip" aria-hidden="true"></span>
+            <figure class="xp cam-xp" id="coverPhoto">
+              <a class="ph-link" href="{{ cover.url }}" aria-label="Open {{ cover.title | strip | escape }}">{% render 'mc-img', image: pic, alt: cover.title, sizes: '(min-width:900px) 40vw, 80vw', widths: '640,960,1280,1800', eager: true %}</a>
+              {% render 'mc-cam', n: 1, ex: 'Exhibit 01', live: true %}
+            </figure>
+            <a class="etag" href="{{ cover.url }}"><span class="etag-k mono">Exhibit 01 / {{ fno }}</span><b>{{ cover.title | strip | escape }}</b><span class="mono">{{ cover.price | money }} {{ cart.currency.iso_code }}</span></a>
+            <span class="stamp eo white" style="--r:5deg" aria-hidden="true">Eyes only</span>
+          </div>
+        </div>
+        <p class="cv-cap mono"><span class="hint-fine">Hover the photograph to declassify the colour.</span><span class="hint-touch">Press and hold the photograph to declassify the colour.</span></p>
+      </div>
+      {%- endif -%}
+    </div>
+  </div>
+  {% render 'mc-ticker', words: words, cls: 'hazard' %}
+</section>
+
+{% schema %}
+{
+  "name": "Cover (briefing)",
+  "settings": [
+    { "type": "header", "content": "Cover photograph" },
+    { "type": "product", "id": "cover_product", "label": "Product", "info": "The product whose photo sits in the folder. Leave empty to use the first product." },
+    { "type": "range", "id": "cover_photo", "label": "Photo number", "min": 1, "max": 12, "step": 1, "default": 1, "info": "1 = the product's main (first) photo." },
+    { "type": "header", "content": "Words" },
+    { "type": "text", "id": "stamp", "label": "Stamp", "default": "Top secret" },
+    { "type": "text", "id": "memo_to", "label": "Memo: To", "default": "Operative (that is you)" },
+    { "type": "text", "id": "memo_handler", "label": "Memo: Handler (hidden behind a redaction bar)", "default": "Agent Chrome, Desk 7" },
+    { "type": "text", "id": "op_label", "label": "Small heading", "default": "Operation:" },
+    { "type": "text", "id": "line_1", "label": "Headline, line 1", "default": "Wear the" },
+    { "type": "text", "id": "line_2", "label": "Headline, line 2", "default": "Unknown" },
+    { "type": "textarea", "id": "lede", "label": "Short intro", "info": "{pieces} and {countries} are replaced with live numbers.", "default": "Black, white and chrome clothing, made in small runs. {pieces} pieces on file, delivered to {countries} countries, Nigeria and Canada included." },
+    { "type": "text", "id": "btn_1_label", "label": "Button 1", "default": "Shop the register" },
+    { "type": "url", "id": "btn_1_url", "label": "Button 1 link" },
+    { "type": "text", "id": "btn_2_label", "label": "Button 2", "default": "Review the evidence" },
+    { "type": "url", "id": "btn_2_url", "label": "Button 2 link" },
+    { "type": "text", "id": "tab_text", "label": "Folder tab", "default": "Op: Wear the Unknown" },
+    { "type": "header", "content": "Hazard tape" },
+    { "type": "text", "id": "ticker_a", "label": "Tape, first words (separate with |)", "default": "Wear the unknown|Do not cross|Operation: Wear the Unknown|Black / white / chrome" },
+    { "type": "text", "id": "ticker_mag", "label": "Tape, magazine word (only while the magazine is on sale)", "default": "New intel: the Vision Issue" },
+    { "type": "text", "id": "ticker_b", "label": "Tape, last words", "info": "{pieces} = live count, {currency} = the shopper's currency", "default": "{pieces} assets on file|Prices in {currency}" }
+  ],
+  "presets": [{ "name": "Cover (briefing)" }]
+}
+{% endschema %}

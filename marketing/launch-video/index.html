@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MONOCHROME — new site launch film (9:16)</title>
+<!--
+  A 24-second vertical film for Reels / TikTok / Stories, drawn with the site's own type, textures and photographs.
+  Every frame is a pure function of time: render(t) in the script below sets the whole stage for second t, and
+  render.mjs steps t at 30 fps, screenshots each frame and pipes them to ffmpeg. Open this file in a browser and
+  press space to preview it in real time.
+-->
+<style>
+  @font-face { font-family: 'Big Shoulders Display'; font-weight: 100 900; src: url(assets/mc-font-big-shoulders-display.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 400; src: url(assets/mc-font-courier-prime-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 700; src: url(assets/mc-font-courier-prime-700.woff2) format('woff2'); }
+  @font-face { font-family: 'Special Elite'; font-weight: 400; src: url(assets/mc-font-special-elite-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Stardos Stencil'; font-weight: 700; src: url(assets/mc-font-stardos-stencil-700.woff2) format('woff2'); }
+  :root {
+    --ink: #0a0a0a; --coal: #151515; --paper: #e6e6e6; --paper2: #d9d9d9; --fg: #ececec; --dim: #a3a3a3;
+    --head: 'Big Shoulders Display', Impact, sans-serif; --mono: 'Courier Prime', 'Courier New', monospace;
+    --type: 'Special Elite', 'Courier Prime', monospace; --stamp: 'Stardos Stencil', Impact, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #050505; color: var(--fg); font-family: var(--mono); }
+  .scene { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .dark { background: #070707; color: var(--fg); }
+  .paper { background: var(--paper); color: var(--ink); }
+  .abs { position: absolute; }
+  .mono { font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; }
+  .head { font-family: var(--head); font-weight: 900; text-transform: uppercase; line-height: .86; letter-spacing: .005em; }
+  .caret { display: inline-block; width: .42em; height: .78em; background: currentColor; margin-left: .06em; vertical-align: -.02em; }
+  .stamp { font-family: var(--stamp); text-transform: uppercase; letter-spacing: .08em; border: 7px solid currentColor; padding: .08em .32em .02em; line-height: 1; }
+  .chip { display: inline-block; padding: .14em .5em .1em; }
+  .chip.inv { background: var(--fg); color: #070707; }
+  .tape { position: absolute; left: 0; right: 0; height: 92px; overflow: hidden; display: flex; align-items: center;
+          background: repeating-linear-gradient(-45deg, #0a0a0a 0 34px, #ececec 34px 68px); }
+  .tape .band { position: absolute; left: 0; right: 0; top: 18px; bottom: 18px; background: #0a0a0a; }
+  .tape .run { position: absolute; top: 50%; white-space: nowrap; transform: translateY(-50%); color: #ececec; font: 700 30px/1 var(--mono); letter-spacing: .26em; text-transform: uppercase; }
+  .tape.light .band { background: #ececec; } .tape.light .run { color: #0a0a0a; }
+  #grain { position: absolute; inset: 0; pointer-events: none; background-size: 512px 512px; opacity: .55; mix-blend-mode: normal; }
+  #scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, transparent 2px 5px); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.42) 100%); }
+
+  /* S1 terminal */
+  #s1 .fp { left: 380px; top: 520px; width: 320px; height: 405px; }
+  #s1 .fp path, #s1 .fp ellipse { fill: none; stroke: #e6e6e6; stroke-width: 3.2; stroke-linecap: round; }
+  #s1 .scanbar { left: 330px; width: 420px; height: 6px; background: #fff; box-shadow: 0 0 26px 8px rgba(255,255,255,.55); }
+  #s1 .lines { left: 0; right: 0; top: 1030px; text-align: center; font: 700 40px/1 var(--mono); letter-spacing: .3em; text-transform: uppercase; }
+  #s1 .lines p { height: 72px; }
+  #s1 .lines b { display: inline-block; background: #ececec; color: #070707; padding: 6px 14px 4px; margin-left: 10px; }
+  #s1 .bar { left: 290px; width: 500px; top: 1290px; height: 6px; background: rgba(255,255,255,.18); }
+  #s1 .bar i { display: block; height: 100%; width: 0; background: #ececec; }
+  #s1 .foot { left: 0; right: 0; bottom: 120px; text-align: center; color: var(--dim); font-size: 24px; }
+
+  /* S2 identity */
+  #s2 .tape { top: 0; }
+  #s2 .emblem { left: 390px; top: 470px; width: 300px; height: 323px; mix-blend-mode: screen; }
+  #s2 .sheen { left: 360px; top: 450px; width: 360px; height: 360px; mix-blend-mode: overlay; background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.95) 50%, transparent 60%); }
+  #s2 .word { left: 70px; top: 930px; width: 940px; mix-blend-mode: screen; }
+  #s2 .div { left: 0; right: 0; top: 1060px; text-align: center; color: var(--dim); font-size: 28px; letter-spacing: .42em; }
+  #s2 .trio { left: 0; right: 0; top: 1220px; display: flex; flex-direction: column; align-items: center; gap: 26px; }
+  #s2 .trio span { font: 900 104px/1 var(--head); text-transform: uppercase; padding: 10px 34px 4px; border: 5px solid #ececec; }
+  #s2 .trio .w { background: #ececec; color: #070707; }
+  #s2 .trio .c { border: 0; color: #0a0a0a; background: linear-gradient(100deg, #6d6d6d 0%, #f7f7f7 28%, #9c9c9c 46%, #ffffff 62%, #7b7b7b 100%); }
+  #s2 .tape.btm { top: auto; bottom: 0; }
+
+  /* S3 mission briefing */
+  #s3 .filehead { left: 60px; right: 60px; top: 110px; display: grid; grid-template-columns: 1fr 1.5fr; border: 4px solid var(--ink); }
+  #s3 .filehead div { padding: 16px 20px 14px; border-right: 4px solid var(--ink); border-bottom: 4px solid var(--ink); font: 700 25px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .12em; }
+  #s3 .filehead div:nth-child(2n) { border-right: 0; } #s3 .filehead div:nth-child(n+3) { border-bottom: 0; }
+  #s3 .filehead b { display: block; font-size: 19px; color: #444; letter-spacing: .2em; }
+  #s3 .ladder { display: inline-flex; gap: 5px; vertical-align: -2px; margin-right: 10px; }
+  #s3 .ladder i { width: 9px; background: var(--ink); }
+  #s3 .memo { left: 60px; top: 420px; font: 700 27px/1.6 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+  #s3 .memo .bar { display: inline-block; width: 330px; height: 26px; background: var(--ink); vertical-align: -4px; margin-left: 10px; }
+  #s3 .op { left: 56px; top: 560px; font: 400 88px/1 var(--type); text-transform: uppercase; }
+  #s3 .h1 { left: 46px; top: 660px; font-size: 300px; transform-origin: 0 50%; white-space: nowrap; }
+  #s3 .stamp { right: 34px; top: 500px; color: var(--ink); font-size: 64px; transform: rotate(-8deg); background: rgba(230,230,230,.4); }
+  #s3 .lede { left: 60px; right: 60px; top: 1120px; font: 400 40px/1.55 var(--mono); }
+  #s3 .cta { left: 60px; right: 60px; top: 1330px; display: grid; gap: 20px; }
+  #s3 .cta div { font: 800 46px/1 var(--head); text-transform: uppercase; letter-spacing: .02em; padding: 26px 30px 22px; border: 4px solid var(--ink); display: flex; justify-content: space-between; }
+  #s3 .cta .fill { background: var(--ink); color: #ececec; }
+  #s3 .tape { bottom: 70px; }
+
+  /* S4 evidence board */
+  #s4 .kick { left: 60px; top: 96px; font-size: 26px; color: #bdbdbd; }
+  #s4 .kick::before { content: ""; display: inline-block; width: 52px; height: 14px; background: #ececec; margin-right: 18px; vertical-align: 2px; }
+  #s4 .title { left: 56px; top: 150px; font-size: 168px; color: #f1f1f1; white-space: nowrap; }
+  #s4 .board { left: 40px; right: 40px; top: 360px; bottom: 120px; border: 3px solid rgba(255,255,255,.22); }
+  #s4 .board .lbl { position: absolute; left: 26px; top: 18px; font-size: 21px; color: #9a9a9a; }
+  #s4 .board .lbl.r { left: auto; right: 26px; }
+  #s4 .card { left: 130px; top: 470px; width: 820px; height: 1220px; background: #ececec; color: #0a0a0a; padding: 26px 28px; box-shadow: 0 30px 60px rgba(0,0,0,.55); transform-origin: 50% 0; }
+  #s4 .card .top { display: flex; justify-content: space-between; font: 700 26px/1 var(--mono); letter-spacing: .18em; margin-bottom: 18px; }
+  #s4 .card .ph { position: relative; height: 860px; overflow: hidden; background: #111; }
+  #s4 .card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #s4 .card .ph .bw { filter: grayscale(1) contrast(1.12) brightness(.96); }
+  #s4 .card .cam { position: absolute; inset: 22px; border: 0; color: #fff; font: 700 24px/1 var(--mono); letter-spacing: .14em; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  #s4 .card .cam i { position: absolute; width: 46px; height: 46px; border: 4px solid #fff; }
+  #s4 .card .cam .c1 { left: 0; top: 0; border-right: 0; border-bottom: 0; } #s4 .card .cam .c2 { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+  #s4 .card .cam .c3 { left: 0; bottom: 0; border-right: 0; border-top: 0; } #s4 .card .cam .c4 { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+  #s4 .card .cam .l { position: absolute; left: 62px; top: 14px; } #s4 .card .cam .r { position: absolute; right: 62px; top: 14px; }
+  #s4 .card .cam .b { position: absolute; left: 62px; bottom: 14px; } #s4 .card .cam .br { position: absolute; right: 62px; bottom: 14px; }
+  #s4 .card .cam .dot { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #ff3b30; margin-right: 10px; vertical-align: -1px; }
+  #s4 .card .name { font: 900 82px/.9 var(--head); text-transform: uppercase; margin-top: 24px; }
+  #s4 .card .meta { display: flex; justify-content: space-between; align-items: baseline; margin-top: 16px; font: 700 34px/1 var(--mono); letter-spacing: .08em; }
+  #s4 .card .meta small { font-size: 22px; color: #555; margin-left: 8px; letter-spacing: .14em; }
+  #s4 .card .sz { color: #444; font-size: 26px; letter-spacing: .3em; }
+  #s4 .card .pin { position: absolute; left: 50%; top: -16px; width: 36px; height: 36px; margin-left: -18px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff, #8d8d8d 60%, #3a3a3a); box-shadow: 0 4px 6px rgba(0,0,0,.5); }
+  #s4 .card .dc { position: absolute; right: 30px; bottom: 30px; color: #fff; font-size: 52px; border-color: #fff; transform: rotate(-7deg); background: rgba(0,0,0,.25); }
+  #s4 .hint { left: 0; right: 0; bottom: 140px; text-align: center; font-size: 24px; color: #bdbdbd; }
+
+  /* S5 the new site on a phone */
+  #s5 .kick { left: 60px; top: 92px; font-size: 26px; }
+  #s5 .kick::before { content: ""; display: inline-block; width: 52px; height: 14px; background: var(--ink); margin-right: 18px; vertical-align: 2px; }
+  #s5 .title { left: 56px; top: 140px; font-size: 176px; white-space: nowrap; }
+  #s5 .phone { left: 240px; top: 380px; width: 600px; height: 1274px; border-radius: 74px; background: #0a0a0a; padding: 20px; box-shadow: 0 40px 80px rgba(0,0,0,.45), inset 0 0 0 3px #3a3a3a; }
+  #s5 .screen { position: relative; width: 560px; height: 1234px; border-radius: 56px; overflow: hidden; background: #e6e6e6; }
+  #s5 .screen img { position: absolute; left: 0; top: 0; width: 560px; }
+  #s5 .notch { position: absolute; left: 50%; top: 14px; width: 150px; height: 40px; margin-left: -75px; border-radius: 20px; background: #0a0a0a; z-index: 3; }
+  #s5 .tap { position: absolute; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; border: 6px solid rgba(10,10,10,.85); z-index: 4; }
+  #s5 .step { left: 60px; right: 60px; top: 1700px; display: flex; align-items: baseline; gap: 24px; font: 700 34px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+  #s5 .step b { font: 900 70px/1 var(--head); }
+  #s5 .stamp { right: 30px; top: 352px; color: var(--ink); font-size: 32px; white-space: nowrap; transform: rotate(9deg); background: rgba(230,230,230,.85); }
+
+  /* S6 end card */
+  #s6 .emblem { left: 430px; top: 330px; width: 220px; height: 237px; mix-blend-mode: screen; }
+  #s6 .word { left: 70px; top: 640px; width: 940px; mix-blend-mode: screen; }
+  #s6 .stamp { left: 0; right: 0; margin: 0 auto; top: 820px; width: max-content; white-space: nowrap; color: #ececec; font-size: 78px; transform: rotate(-6deg); }
+  #s6 .url { left: 0; right: 0; top: 1030px; text-align: center; font-size: 220px; white-space: nowrap; }
+  #s6 .url span { display: inline-block; }
+  #s6 .info { left: 0; right: 0; top: 1240px; text-align: center; font: 700 30px/1.7 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #cfcfcf; }
+  #s6 .shop { left: 150px; right: 150px; top: 1430px; font: 800 52px/1 var(--head); text-transform: uppercase; background: #ececec; color: #070707; padding: 30px 36px 24px; display: flex; justify-content: space-between; }
+  #s6 .tape { bottom: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- S1 0.0–2.4  terminal: identity verified -->
+  <section class="scene dark" id="s1">
+    <svg class="abs fp" viewBox="0 0 120 152" aria-hidden="true">
+      <g id="arcs"></g>
+      <path id="fpCore" d="M60 22v108M36 40c10-8 38-8 48 0M32 112c14 10 42 10 56 0" />
+    </svg>
+    <i class="abs scanbar" id="scanbar"></i>
+    <div class="abs lines">
+      <p id="l1"></p><p id="l2"></p><p id="l3" style="color:#a3a3a3"></p>
+    </div>
+    <div class="abs bar"><i id="bar1"></i></div>
+    <p class="abs foot mono">Monochrome Bureau — secure terminal</p>
+  </section>
+
+  <!-- S2 2.4–4.8  identity: emblem, wordmark, black / white / chrome -->
+  <section class="scene dark" id="s2">
+    <div class="tape" id="s2tape"><i class="band"></i><span class="run" id="s2run"></span></div>
+    <img class="abs emblem" id="s2emb" src="assets/emblem.webp" alt="">
+    <i class="abs sheen" id="s2sheen"></i>
+    <img class="abs word" id="s2word" src="assets/wordmark-white.webp" alt="MONOCHROME">
+    <p class="abs div mono" id="s2div"></p>
+    <div class="abs trio"><span id="t1">Black</span><span class="w" id="t2">White</span><span class="c" id="t3">Chrome</span></div>
+  </section>
+
+  <!-- S3 4.8–8.4  mission briefing -->
+  <section class="scene paper" id="s3">
+    <div class="abs filehead" id="s3fh">
+      <div><b>File no.</b>MC-101</div><div><b>Document</b>Mission briefing</div>
+      <div><b>Page</b>1 of 7</div><div><b>Clearance</b><span class="ladder"><i style="height:10px"></i><i style="height:14px"></i><i style="height:18px"></i><i style="height:22px"></i><i style="height:26px"></i></span>L5</div>
+    </div>
+    <p class="abs memo" id="s3memo">To: operative (that is you)<br>Handler: <span class="bar"></span></p>
+    <p class="abs op" id="s3op"></p>
+    <h1 class="abs head h1"><span id="s3a" style="display:block">Wear the</span><span id="s3b" style="display:block">Unknown<i class="caret" id="s3caret"></i></span></h1>
+    <span class="abs stamp" id="s3stamp">Top secret</span>
+    <p class="abs lede" id="s3lede"></p>
+    <div class="abs cta" id="s3cta"><div class="fill"><span>Shop the register</span><span>↗</span></div><div><span>Review the evidence</span><span>↗</span></div></div>
+    <div class="tape light" id="s3tape"><i class="band"></i><span class="run" id="s3run"></span></div>
+  </section>
+
+  <!-- S4 8.4–15.0  evidence board: four assets, each declassified -->
+  <section class="scene dark" id="s4" style="background:#121212">
+    <p class="abs kick mono">§1 — Field equipment</p>
+    <h2 class="abs head title">Selected assets</h2>
+    <div class="abs board"><span class="lbl mono">Evidence board // pinned</span><span class="lbl r mono" id="s4count">01 / 04</span></div>
+    <div id="cards"></div>
+    <p class="abs hint mono" id="s4hint">Press and hold to declassify the colour</p>
+  </section>
+
+  <!-- S5 15.0–20.6  the new site -->
+  <section class="scene paper" id="s5">
+    <p class="abs kick mono">New intel — now declassified</p>
+    <h2 class="abs head title">The new site</h2>
+    <div class="abs phone" id="phone"><div class="screen"><i class="notch"></i>
+      <img id="scr-home" src="assets/site-home.jpg" alt=""><img id="scr-register" src="assets/site-register.jpg" alt="">
+      <img id="scr-product" src="assets/site-product.jpg" alt=""><img id="scr-bag" src="assets/site-bag.jpg" alt="">
+      <i class="tap" id="tap"></i></div></div>
+    <span class="abs stamp" id="s5stamp">Approved for field use</span>
+    <div class="abs step" id="step"><b id="stepN">01</b><span id="stepT"></span></div>
+  </section>
+
+  <!-- S6 20.6–24.0  end card -->
+  <section class="scene dark" id="s6">
+    <img class="abs emblem" id="s6emb" src="assets/emblem.webp" alt="">
+    <img class="abs word" id="s6word" src="assets/wordmark-white.webp" alt="MONOCHROME">
+    <span class="abs stamp" id="s6stamp">New site — now live</span>
+    <p class="abs head url"><span id="s6url">monochrome.com.ng</span></p>
+    <p class="abs info" id="s6info">Ships to 29 countries<br>Nigeria &amp; Canada included<br>@monochrome.ca</p>
+    <div class="abs shop" id="s6shop"><span>Shop the register</span><span>↗</span></div>
+    <div class="tape" id="s6tape"><i class="band"></i><span class="run" id="s6run"></span></div>
+  </section>
+
+  <div id="vignette"></div>
+  <div id="scan"></div>
+  <div id="grain"></div>
+  <div id="flash"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- the film's facts (from the live store)
+const CARDS = [
+  { no: 'MC-004', name: 'White Monochrome Jersey', price: '$44.99', sizes: 'S  M  XL', img: 'assets/white-jersey.jpg', pos: '50% 30%', cam: 'CAM 01' },
+  { no: 'MC-005', name: 'Black Monochrome Jersey', price: '$44.99', sizes: 'S  M  L  XXL', img: 'assets/black-jersey.jpg', pos: '50% 22%', cam: 'CAM 02' },
+  { no: 'MC-006', name: 'Acid-washed Monochrome Hoodie', price: '$34.99', sizes: 'S  M  L  XL  XXL', img: 'assets/hoodie.jpg', pos: '50% 36%', cam: 'CAM 03' },
+  { no: 'MC-001', name: 'Monochrome Sweatshirt', price: '$34.99', sizes: 'S  M  L  XL  2XL', img: 'assets/sweatshirt.jpg', pos: '53% 50%', cam: 'CAM 04' },
+];
+const DUR = 24;
+
+// ---------------------------------------------------------------- helpers
+const $ = id => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeIn = k => k * k * k;
+const easeIO = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const back = k => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const type = (el, text, k) => { const n = Math.round(text.length * clamp(k)); el.textContent = text.slice(0, n); };
+const rnd = n => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+// a stamp thump: big and faint, then slammed down with a small shake
+const thump = (el, t, at, rot) => {
+  const k = seg(t, at, at + 0.16), s = lerp(1.9, 1, easeIn(k)), o = clamp(k * 1.6);
+  const shake = t > at + 0.16 && t < at + 0.32 ? (rnd(t * 97) - .5) * 10 : 0;
+  el.style.opacity = t < at ? 0 : o;
+  el.style.transform = `translate(${shake}px, ${shake * .6}px) rotate(${rot}deg) scale(${s})`;
+};
+const ticker = (el, text, t, speed) => { if (!el.textContent) el.textContent = (text + '   //   ').repeat(8); el.style.transform = `translate(${-(t * speed) % 1400}px, -50%)`; };
+
+// ---------------------------------------------------------------- build the dynamic bits once
+(function build() {
+  const g = $('arcs');
+  [[10, 14], [17, 22], [24, 30], [31, 38], [38, 46], [45, 54]].forEach(([rx, ry], i) => {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    e.setAttribute('cx', 60); e.setAttribute('cy', 76); e.setAttribute('rx', rx); e.setAttribute('ry', ry); e.dataset.i = i;
+    g.appendChild(e);
+  });
+  $('cards').innerHTML = CARDS.map((c, i) => `
+    <article class="abs card" id="card${i}">
+      <i class="pin"></i>
+      <div class="top"><span>${c.no}</span><span>Asset</span></div>
+      <div class="ph"><img class="bw" src="${c.img}" style="object-position:${c.pos}" alt=""><img class="col" id="col${i}" src="${c.img}" style="object-position:${c.pos}" alt="">
+        <div class="cam"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+          <span class="l"><span class="dot" id="dot${i}"></span>${c.cam}</span><span class="r" id="tc${i}">00:00:00</span>
+          <span class="b">Exhibit ${String(i + 1).padStart(2, '0')}</span><span class="br">${c.no}</span></div>
+        <span class="stamp dc" id="dc${i}">Declassified</span></div>
+      <p class="name">${c.name}</p>
+      <p class="meta"><span>${c.price}<small>CAD</small></span><span class="sz">${c.sizes}</span></p>
+    </article>`).join('');
+})();
+
+// ---------------------------------------------------------------- the timeline
+const SCENES = [['s1', 0, 2.4], ['s2', 2.4, 4.8], ['s3', 4.8, 8.4], ['s4', 8.4, 15.0], ['s5', 15.0, 20.6], ['s6', 20.6, DUR + 1]];
+const CUTS = SCENES.slice(1).map(s => s[1]);
+
+function render(t) {
+  for (const [id, a, b] of SCENES) $(id).style.display = t >= a && t < b ? 'block' : 'none';
+  const f = Math.round(t * 30);
+  // film grain moves every frame; light grain on dark scenes, dark grain on paper
+  const onPaper = (t >= 4.8 && t < 8.4) || (t >= 15 && t < 20.6);
+  const gr = $('grain'); gr.style.backgroundImage = `url(assets/${onPaper ? 'grain-d' : 'grain-l'}.png)`;
+  gr.style.backgroundPosition = `${Math.floor(rnd(f) * 512)}px ${Math.floor(rnd(f + 7) * 512)}px`;
+  // a two-frame flash on every cut
+  let fl = 0; for (const c of CUTS) { const d = t - c; if (d >= 0 && d < 0.12) fl = Math.max(fl, .75 * (1 - d / .12)); }
+  $('flash').style.opacity = fl;
+
+  // S1 terminal ------------------------------------------------------------------
+  if (t < 2.4) {
+    document.querySelectorAll('#arcs ellipse').forEach(e => {
+      const i = +e.dataset.i, len = 2 * Math.PI * Math.sqrt((e.rx.baseVal.value ** 2 + e.ry.baseVal.value ** 2) / 2);
+      const k = easeOut(seg(t, 0.05 + i * 0.09, 0.55 + i * 0.09));
+      e.style.strokeDasharray = len; e.style.strokeDashoffset = len * (1 - k);
+    });
+    const core = $('fpCore'); core.style.strokeDasharray = 400; core.style.strokeDashoffset = 400 * (1 - easeOut(seg(t, .4, 1.2)));
+    const sb = $('scanbar'), sk = seg(t, .1, 1.3); sb.style.top = `${lerp(520, 925, (Math.sin(sk * Math.PI * 1.5 - Math.PI / 2) + 1) / 2)}px`; sb.style.opacity = t < 1.4 ? .9 : Math.max(0, 1 - (t - 1.4) * 4);
+    $('l1').innerHTML = t < .7 ? '' : `Identity${t > .95 ? '<b>Verified</b>' : ''}`;
+    $('l2').innerHTML = t < 1.1 ? '' : `Clearance${t > 1.35 ? '<b>Granted</b>' : ''}`;
+    type($('l3'), 'Welcome, operative.', seg(t, 1.5, 2.0));
+    $('bar1').style.width = `${easeIO(seg(t, 0, 2.25)) * 100}%`;
+  }
+
+  // S2 identity ------------------------------------------------------------------
+  if (t >= 2.4 && t < 4.8) {
+    const l = t - 2.4;
+    ticker($('s2run'), 'Top secret // Eyes only // Monochrome Bureau', l, 260);
+    const ek = easeOut(seg(l, 0, .6)); $('s2emb').style.opacity = ek; $('s2emb').style.transform = `rotate(${lerp(-140, 0, ek)}deg) scale(${lerp(.4, 1, ek)})`;
+    const sh = seg(l, .5, 1.1); $('s2sheen').style.opacity = sh > 0 && sh < 1 ? 1 : 0; $('s2sheen').style.transform = `translateX(${lerp(-260, 260, sh)}px)`;
+    const wk = easeIO(seg(l, .3, .85)); $('s2word').style.clipPath = `inset(0 ${100 - wk * 100}% 0 0)`;
+    type($('s2div'), 'Division of wearables', seg(l, .75, 1.3));
+    [['t1', 1.15], ['t2', 1.4], ['t3', 1.65]].forEach(([id, a]) => {
+      const k = seg(l, a, a + .22); const el = $(id);
+      el.style.opacity = k > 0 ? 1 : 0; el.style.transform = `scale(${lerp(1.5, 1, easeIn(k))}) rotate(${id === 't2' ? 1.5 : id === 't3' ? -1.2 : -.8}deg)`;
+    });
+    // the chrome chip shimmers
+    const c = seg(l, 1.9, 2.4); $('t3').style.backgroundPosition = `${lerp(-200, 200, c)}px 0`; $('t3').style.backgroundSize = '200% 100%';
+  }
+
+  // S3 mission briefing -------------------------------------------------------------
+  if (t >= 4.8 && t < 8.4) {
+    const l = t - 4.8;
+    $('s3fh').style.opacity = easeOut(seg(l, 0, .25)); $('s3fh').style.transform = `translateY(${lerp(-30, 0, easeOut(seg(l, 0, .25)))}px)`;
+    $('s3memo').style.opacity = seg(l, .12, .3);
+    type($('s3op'), 'Operation:', seg(l, .15, .55));
+    [['s3a', .6], ['s3b', .92]].forEach(([id, a]) => {
+      const k = seg(l, a, a + .12), el = $(id); const sh = l > a + .12 && l < a + .26 ? (rnd(l * 61) - .5) * 14 : 0;
+      el.style.opacity = k > 0 ? 1 : 0; el.style.transform = `translate(${sh}px,0) scale(${lerp(1.35, 1, easeIn(k))})`; el.style.transformOrigin = '0 60%';
+    });
+    $('s3caret').style.opacity = l > 1.05 && Math.floor(l * 2.4) % 2 === 0 ? 1 : 0;
+    thump($('s3stamp'), l, 1.3, -8);
+    type($('s3lede'), 'Black, white and chrome clothing, made in small runs. 24 pieces on file.', seg(l, 1.6, 2.7));
+    const ck = easeOut(seg(l, 2.6, 2.95)); $('s3cta').style.opacity = ck; $('s3cta').style.transform = `translateY(${lerp(40, 0, ck)}px)`;
+    ticker($('s3run'), 'Wear the unknown // Do not cross // Operation: wear the unknown // Black / white / chrome', l, 300);
+  }
+
+  // S4 evidence board -------------------------------------------------------------
+  if (t >= 8.4 && t < 15) {
+    const l = t - 8.4, SLOT = 1.6, START = .12;
+    CARDS.forEach((c, i) => {
+      const el = $('card' + i), a = START + i * SLOT, k = seg(l, a, a + .38), side = i % 2 ? 1 : -1;
+      if (l < a) { el.style.display = 'none'; return; }
+      el.style.display = 'block';
+      const ke = back(k);
+      const restRot = [-2.4, 2.1, -1.4, 2.6][i];
+      let x = lerp(side * 1100, 0, ke), y = lerp(80, 0, easeOut(k)), r = lerp(side * 18, restRot, easeOut(k)), s = 1;
+      // older cards slide down the pile and dim as the next one lands
+      const older = Math.max(0, Math.min(3, (l - (a + SLOT)) / SLOT + 1)) - 1;
+      if (older > 0) { const o = Math.min(1, older); s = 1 - .06 * o; y += 40 * o; x += side * 26 * o; r += side * 3 * o; el.style.filter = `brightness(${1 - .55 * o})`; } else el.style.filter = 'none';
+      el.style.zIndex = 10 + i;
+      el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg) scale(${s})`;
+      // declassify: the colour opens from the centre of the photograph
+      const ck = easeIO(seg(l, a + .62, a + 1.12));
+      $('col' + i).style.clipPath = `circle(${ck * 75}% at 50% 45%)`;
+      thump($('dc' + i), l, a + 1.05, -7);
+      $('dot' + i).style.opacity = Math.floor(l * 2.2) % 2 === 0 ? 1 : .15;
+      const secs = 13 + i * 7 + Math.floor(l * 2); $('tc' + i).textContent = `03:${String(10 + i * 4).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+    });
+    const cur = Math.min(CARDS.length, 1 + Math.floor(Math.max(0, l - START) / SLOT));
+    $('s4count').textContent = `${String(cur).padStart(2, '0')} / ${String(CARDS.length).padStart(2, '0')}`;
+    $('s4hint').style.opacity = seg(l, .5, .8) * (1 - seg(l, 6.3, 6.6));
+  }
+
+  // S5 the new site ----------------------------------------------------------------
+  if (t >= 15 && t < 20.6) {
+    const l = t - 15;
+    const pk = easeOut(seg(l, 0, .45)); $('phone').style.transform = `translateY(${lerp(500, 0, pk)}px) rotate(${lerp(6, 0, pk)}deg)`;
+    const SCALE = 560 / 1170;
+    const show = (id, on) => { $(id).style.display = on ? 'block' : 'none'; };
+    // home: scroll past the briefing to the selected assets
+    show('scr-home', l < 1.75); $('scr-home').style.transform = `translateY(${-easeIO(seg(l, .35, 1.7)) * 1500}px)`;
+    // register: the photo sheet
+    show('scr-register', l >= 1.75 && l < 3.2); $('scr-register').style.transform = `translateY(${-easeIO(seg(l, 1.85, 3.1)) * 1150}px)`;
+    // product dossier, scrolled until "Requisition: add to bag" (y 4900 of the 3x screenshot) sits low on the screen, then a tap on it
+    const BTN = 4900 * SCALE;
+    show('scr-product', l >= 3.2 && l < 4.45); const ps = easeIO(seg(l, 3.25, 3.85)) * (BTN - 880); $('scr-product').style.transform = `translateY(${-ps}px)`;
+    const tapAt = 3.95, tk = seg(l, tapAt, tapAt + .4); const tap = $('tap');
+    tap.style.display = l >= tapAt && l < tapAt + .45 ? 'block' : 'none';
+    tap.style.left = '280px'; tap.style.top = `${BTN - ps}px`; tap.style.transform = `scale(${lerp(.4, 1.5, easeOut(tk))})`; tap.style.opacity = 1 - tk;
+    // the bag slides up
+    show('scr-bag', l >= 4.45); $('scr-bag').style.transform = `translateY(${lerp(400, 0, easeOut(seg(l, 4.45, 4.75)))}px)`; $('scr-bag').style.opacity = easeOut(seg(l, 4.45, 4.6));
+    const steps = [[0, '01', 'Browse the briefing'], [1.75, '02', 'Search the register'], [3.2, '03', 'Open the dossier'], [4.45, '04', 'Requisition: add to bag']];
+    let st = steps[0]; for (const s of steps) if (l >= s[0]) st = s;
+    $('stepN').textContent = st[1]; type($('stepT'), st[2], seg(l, st[0] + .05, st[0] + .45));
+    thump($('s5stamp'), l, .7, 9);
+  }
+
+  // S6 end card --------------------------------------------------------------------
+  if (t >= 20.6) {
+    const l = t - 20.6;
+    const ek = easeOut(seg(l, 0, .45)); $('s6emb').style.opacity = ek; $('s6emb').style.transform = `rotate(${lerp(90, 0, ek)}deg) scale(${lerp(.6, 1, ek)})`;
+    $('s6word').style.clipPath = `inset(0 ${100 - easeIO(seg(l, .1, .6)) * 100}% 0 0)`;
+    thump($('s6stamp'), l, .7, -6);
+    const uk = seg(l, 1.05, 1.17); $('s6url').parentNode.style.opacity = uk > 0 ? 1 : 0; $('s6url').parentNode.style.transform = `scale(${lerp(1.3, 1, easeIn(uk))})`;
+    $('s6info').style.opacity = easeOut(seg(l, 1.4, 1.8));
+    const sk = easeOut(seg(l, 1.75, 2.1)); $('s6shop').style.opacity = sk; $('s6shop').style.transform = `translateY(${lerp(40, 0, sk)}px)`;
+    ticker($('s6run'), 'Top secret // Eyes only // Monochrome Bureau // Wear the unknown', l, 220);
+  }
+}
+// big type shrinks until it fits the frame (measured once the fonts have loaded)
+function fitAll() {
+  const fit = (el, max) => { let fs = parseFloat(getComputedStyle(el).fontSize); el.style.fontSize = fs + 'px'; while (el.scrollWidth > max && fs > 40) { fs -= 2; el.style.fontSize = fs + 'px'; } return fs; };
+  const h1 = document.querySelector('#s3 .h1'); const shown = $('s3').style.display; $('s3').style.display = 'block';
+  // both headline lines share one size: the wider line decides
+  let fs = 300; h1.style.fontSize = fs + 'px';
+  const wide = () => Math.max($('s3a').scrollWidth, $('s3b').scrollWidth);
+  while (wide() > 980 && fs > 60) { fs -= 2; h1.style.fontSize = fs + 'px'; }
+  $('s3').style.display = shown;
+  for (const [sc, sel, max] of [['s4', '#s4 .title', 970], ['s5', '#s5 .title', 970], ['s6', '#s6url', 960]]) {
+    const was = $(sc).style.display; $(sc).style.display = 'block'; fit(document.querySelector(sel), max); $(sc).style.display = was;
+  }
+}
+window.fitAll = fitAll;
+window.render = render; window.DUR = DUR;
+document.fonts.ready.then(() => { fitAll(); render(0); });
+render(0);
+// live preview: space plays it in real time
+let playing = false, t0 = 0;
+addEventListener('keydown', e => { if (e.code !== 'Space') return; playing = !playing; t0 = performance.now(); const loop = now => { if (!playing) return; const t = ((now - t0) / 1000) % DUR; render(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>

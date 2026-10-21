@@ -1,0 +1,3 @@
+{%- comment -%} Clearance meter. Params: n (1-5, number or text). {%- endcomment -%}
+{%- assign nn = n | plus: 0 -%}
+<span class="ladder" role="img" aria-label="Clearance level {{ nn }} of 5">{%- for i in (1..5) -%}<i{% if i <= nn %} class="on"{% endif %}></i>{%- endfor -%}</span>

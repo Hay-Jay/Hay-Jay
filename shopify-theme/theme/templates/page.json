@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-main-page",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,13 @@
+<!-- RUNNING HEAD: follows the tone (paper / ink) of the spread under it -->
+<header class="bar{{bar_tone}}" id="bar">
+  <a class="bar-brand" href="{{href:}}"{{nav_home_current}} aria-label="MONOCHROME, the cover">
+    <img class="bar-emblem" src="{{asset:assets/emblem.webp}}" alt="" width="22" height="24">
+    <span>MONOCHROME®</span><span class="bar-iss">ISSUE 01</span>
+  </a>
+  <nav class="bar-nav mono" aria-label="Primary">{{nav_bar}}</nav>
+  <div class="bar-r">
+    <button class="bar-btn" id="invert" type="button" aria-pressed="false" title="Swap paper and ink"><span class="bar-dot" aria-hidden="true"></span><span class="bar-lbl">Invert</span></button>
+    <a class="bar-btn" id="menuBtn" href="#contents" aria-controls="menu" aria-expanded="false">Contents</a>
+    <a class="bar-btn" data-store="/cart" href="{{store_cart}}">Bag<span class="arr" aria-hidden="true"></span></a>
+  </div>
+</header>

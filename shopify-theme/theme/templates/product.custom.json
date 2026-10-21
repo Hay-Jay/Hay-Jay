@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-product",
+      "blocks": {
+        "klarna": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "credit-promotion-auto-size",
+            "locale_option": "geolocation",
+            "locale_fallback": "",
+            "theme": "dark",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        }
+      },
+      "block_order": [
+        "klarna"
+      ],
+      "settings": {
+        "show_dynamic": true
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

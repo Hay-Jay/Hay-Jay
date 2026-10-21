@@ -1,0 +1,51 @@
+{%- assign tk_pieces = '{pieces}' -%}
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+  assign n_pieces = collections['all'].products_count
+-%}
+<!-- 03 SELECTED ASSETS ------------------------------------------------------------------ -->
+<section class="spread dark picks" id="assets" aria-labelledby="picksH">
+  <div class="wrap">
+    <header class="sec-h">
+      <p class="kick mono">{{ section.settings.kicker | escape }}</p>
+      <h2 class="h2 rv" id="picksH">{{ section.settings.heading | escape }}</h2>
+      <p class="sec-sub rv">{{ section.settings.sub | escape }}</p>
+    </header>
+    <div class="board strip">
+      <div class="strip-row">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.product != blank -%}
+            <div {{ block.shopify_attributes }} style="display: contents">{% render 'mc-card', product: block.settings.product, i: forloop.index0, photo: block.settings.photo, order: ord, sizes: '(min-width:1100px) 19vw, (min-width:700px) 30vw, 60vw' %}</div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+    <p class="pk-end"><a class="btn-line mono" href="{{ routes.all_products_collection_url }}">{{ section.settings.link_text | replace: tk_pieces, n_pieces | escape }}<span class="arr" aria-hidden="true"></span></a></p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Selected assets",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§1 — Field equipment" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Selected assets" },
+    { "type": "textarea", "id": "sub", "label": "Intro", "default": "Pulled from the register. Open a file for the photographs, sizes and colour." },
+    { "type": "text", "id": "link_text", "label": "Link under the board ({pieces} = live count)", "default": "Open the complete register, {pieces} assets" }
+  ],
+  "blocks": [
+    {
+      "type": "pick",
+      "name": "Asset",
+      "limit": 12,
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "range", "id": "photo", "label": "Photo number", "min": 1, "max": 12, "step": 1, "default": 1, "info": "Which photograph of the product to show (1 = first)." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Selected assets", "blocks": [{ "type": "pick" }, { "type": "pick" }, { "type": "pick" }] }]
+}
+{% endschema %}

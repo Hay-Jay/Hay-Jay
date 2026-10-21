@@ -1,0 +1,176 @@
+{
+  "sections": {
+    "cover": {
+      "type": "mc-home-cover",
+      "settings": {
+        "cover_product": "white-monochrome-jersey",
+        "cover_photo": 1
+      }
+    },
+    "picks": {
+      "type": "mc-home-picks",
+      "blocks": {
+        "pick-1": {
+          "type": "pick",
+          "settings": {
+            "product": "black-monochrome-jersey",
+            "photo": 4
+          }
+        },
+        "pick-2": {
+          "type": "pick",
+          "settings": {
+            "product": "acid-washed-monochrome-hoodie",
+            "photo": 6
+          }
+        },
+        "pick-3": {
+          "type": "pick",
+          "settings": {
+            "product": "monochrome-cargo-shorts-black",
+            "photo": 1
+          }
+        },
+        "pick-4": {
+          "type": "pick",
+          "settings": {
+            "product": "monochrome-pants-chain",
+            "photo": 2
+          }
+        },
+        "pick-5": {
+          "type": "pick",
+          "settings": {
+            "product": "royal-black",
+            "photo": 1
+          }
+        }
+      },
+      "block_order": [
+        "pick-1",
+        "pick-2",
+        "pick-3",
+        "pick-4",
+        "pick-5"
+      ],
+      "settings": {}
+    },
+    "apps": {
+      "type": "mc-apps",
+      "blocks": {
+        "klarna": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "top-strip-promotion-badge",
+            "theme": "default",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        }
+      },
+      "block_order": [
+        "klarna"
+      ],
+      "settings": {}
+    },
+    "magazine": {
+      "type": "mc-home-magazine",
+      "settings": {}
+    },
+    "objectives": {
+      "type": "mc-home-objectives",
+      "blocks": {
+        "obj-1": {
+          "type": "objective",
+          "settings": {
+            "title": "Acquire your equipment",
+            "text": "The asset register: {pieces} assets across tops, bottoms, hardware and gift cards. Filter, sort, search.",
+            "link_text": "Asset register",
+            "url": "/collections/all"
+          }
+        },
+        "obj-2": {
+          "type": "objective",
+          "settings": {
+            "title": "Review the surveillance",
+            "text": "Twelve exhibits from the field, shot dark and filed in black and white.",
+            "link_text": "Evidence wall",
+            "url": "/pages/lookbook"
+          }
+        },
+        "obj-3": {
+          "type": "objective",
+          "settings": {
+            "title": "Study the mission",
+            "text": "Black, white and chrome. The objectives and the rules of engagement, in full.",
+            "link_text": "Mission brief",
+            "url": "/pages/about"
+          }
+        },
+        "obj-4": {
+          "type": "objective",
+          "settings": {
+            "title": "Plan your extraction",
+            "text": "Delivery to {countries} authorised zones. Rates calculated at checkout, returns explained.",
+            "link_text": "Extraction routes",
+            "url": "/pages/shipping"
+          }
+        },
+        "obj-5": {
+          "type": "objective",
+          "settings": {
+            "title": "Get your answers",
+            "text": "Sizing, shipping, gift cards and limited drops, answered in the debrief.",
+            "link_text": "The debrief",
+            "url": "/pages/faq"
+          }
+        },
+        "obj-6": {
+          "type": "objective",
+          "settings": {
+            "title": "Report in",
+            "text": "Email, Instagram, or join the network for drop alerts.",
+            "link_text": "Secure channel",
+            "url": "/pages/contact"
+          }
+        }
+      },
+      "block_order": [
+        "obj-1",
+        "obj-2",
+        "obj-3",
+        "obj-4",
+        "obj-5",
+        "obj-6"
+      ],
+      "settings": {}
+    },
+    "intel": {
+      "type": "mc-home-intel",
+      "settings": {
+        "link_url": "/pages/about"
+      }
+    },
+    "zones": {
+      "type": "mc-home-zones",
+      "settings": {
+        "link_url": "/pages/shipping"
+      }
+    },
+    "subscribe": {
+      "type": "mc-home-subscribe",
+      "settings": {}
+    }
+  },
+  "order": [
+    "cover",
+    "picks",
+    "apps",
+    "magazine",
+    "objectives",
+    "intel",
+    "zones",
+    "subscribe"
+  ]
+}

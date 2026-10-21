@@ -1,0 +1,22 @@
+<section class="spread paper cu" aria-labelledby="cuH">
+  <div class="wrap cu-wrap">
+    {% render 'mc-filehead', file: 'MC-109', doc: 'Operative enlistment', page: 7, level: 2 %}
+    <h1 class="h1" id="cuH">Create an account</h1>
+    {%- form 'create_customer', novalidate: 'novalidate', class: 'cu-form news' -%}
+      {%- if form.errors -%}<p class="mono news-note" role="alert">{{ form.errors | default_errors }}</p>{%- endif -%}
+      <label class="mono" for="CuFirst">First name</label>
+      <input type="text" name="customer[first_name]" id="CuFirst" autocomplete="given-name">
+      <label class="mono" for="CuLast">Last name</label>
+      <input type="text" name="customer[last_name]" id="CuLast" autocomplete="family-name">
+      <label class="mono" for="CuEmail">Email</label>
+      <input type="email" name="customer[email]" id="CuEmail" autocomplete="email" required>
+      <label class="mono" for="CuPass">Password</label>
+      <input type="password" name="customer[password]" id="CuPass" autocomplete="new-password" required>
+      <button class="send" type="submit">Create<span class="arr" aria-hidden="true"></span></button>
+    {%- endform -%}
+    <p class="mono">Already enlisted? <a class="link-line" href="{{ routes.account_login_url }}">Sign in</a></p>
+  </div>
+</section>
+{% schema %}
+{ "name": "Create account", "settings": [] }
+{% endschema %}

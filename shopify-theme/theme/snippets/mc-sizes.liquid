@@ -1,0 +1,20 @@
+{%- comment -%} Size line of a card/row. Params: product, cls (output of mc-class). Output e.g. S M L XL {%- endcomment -%}
+{%- liquid
+  assign out = ''
+  for opt in product.options_with_values
+    assign nm = opt.name | downcase
+    if nm contains 'size' and out == ''
+      assign out = opt.values | slice: 0, 7 | join: ' ' | upcase
+    endif
+  endfor
+  if out == ''
+    if cls == 'gift'
+      assign out = 'Choose amount'
+    elsif cls == 'print'
+      assign out = 'Single issue'
+    else
+      assign out = 'One size'
+    endif
+  endif
+-%}
+{{- out -}}

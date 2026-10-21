@@ -1,0 +1,7 @@
+node_modules
+still-*.png
+*-master.mp4
+audio/*.wav
+audio/__pycache__
+*-sfx-only.mp4
+audio/afro/*.wav

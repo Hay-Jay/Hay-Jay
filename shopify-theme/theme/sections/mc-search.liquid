@@ -1,0 +1,50 @@
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+-%}
+<section class="spread paper reg" aria-labelledby="searchH">
+  <div class="wrap">
+    {% render 'mc-filehead', file: 'MC-102', doc: 'Search results', page: 2, level: 3 %}
+    <header class="reg-head">
+      <div class="reg-title">
+        <p class="kick mono">Division of Wearables — Search</p>
+        <h1 class="h1" id="searchH"><span class="tw caret" style="--n:7">Search</span></h1>
+        <form class="toolbar" action="{{ routes.search_url }}" method="get" role="search" style="margin-top:20px">
+          <label class="findwrap mono" style="flex:1"><span class="sr-only">Search the register</span><input name="q" type="search" value="{{ search.terms | escape }}" placeholder="Search the register" autocomplete="off" style="width:100%"></label>
+          <button class="btn" type="submit" style="margin-left:8px">Search<i class="arr" aria-hidden="true"></i></button>
+        </form>
+      </div>
+    </header>
+    {%- if search.performed -%}
+      <p class="count mono" role="status">{{ search.results_count }} {% if search.results_count == 1 %}file{% else %}files{% endif %} match “{{ search.terms | escape }}”</p>
+      {%- paginate search.results by 24 -%}
+        {%- if search.results_count > 0 -%}
+        <div class="board"><div class="sheet" id="sheet">
+          {%- for item in search.results -%}
+            {%- if item.object_type == 'product' or item.price -%}
+              {% render 'mc-card', product: item, i: forloop.index0, order: ord %}
+            {%- else -%}
+              <a class="card" href="{{ item.url }}"><div class="cap"><span class="no mono">Page</span><b>{{ item.title | escape }}</b></div></a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div></div>
+        {%- if paginate.pages > 1 -%}
+          <nav class="mono reg-end" aria-label="Pages">
+            {%- if paginate.previous -%}<a class="link-line" href="{{ paginate.previous.url }}">Previous</a> {% endif -%}
+            <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+            {%- if paginate.next %} <a class="link-line" href="{{ paginate.next.url }}">Next</a>{% endif -%}
+          </nav>
+        {%- endif -%}
+        {%- endif -%}
+      {%- endpaginate -%}
+      {%- if search.results_count == 0 -%}
+        <div class="empty-state"><p class="mono">File not found.</p><p>No asset matches. <a class="link-line mono" href="{{ routes.all_products_collection_url }}">Open the whole register</a>.</p></div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{ "name": "Search results", "settings": [] }
+{% endschema %}

@@ -1,0 +1,35 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-product",
+      "blocks": {
+        "easify": {
+          "type": "shopify://apps/easify-options/blocks/easify-product-options/d2288b18-c1ba-42f5-b3b3-26c75c8820bf",
+          "settings": {}
+        },
+        "klarna": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "credit-promotion-auto-size",
+            "locale_option": "geolocation",
+            "locale_fallback": "",
+            "theme": "dark",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        }
+      },
+      "block_order": [
+        "easify",
+        "klarna"
+      ],
+      "settings": {
+        "show_dynamic": true
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,142 @@
+  <!-- 01 BRIEFING COVER ---------------------------------------------------------------- -->
+  <section class="spread paper cover" id="top" aria-label="Mission briefing cover">
+    <div class="wrap">
+      {{filehead}}
+      <div class="cv-grid">
+        <div class="cv-text">
+          <span class="stamp ts lg cv-ts" style="--r:-8deg" aria-hidden="true">Top secret</span>
+          <p class="memo mono">
+            <span><b>To:</b> Operative (that is you)</span>
+            <span><b>Handler:</b> <span class="redact" tabindex="0">Agent Chrome, Desk 7</span></span>
+          </p>
+          <h1 class="cv-h">
+            <span class="cv-op">Operation:</span>
+            <span class="tw" style="--n:8;--dl:.15s">Wear the</span>
+            <span class="tw caret" style="--n:7;--dl:.8s">Unknown</span>
+          </h1>
+          <p class="cv-lede">Black, white and chrome clothing, made in small runs. {{pieces}} pieces on file, delivered to {{countries}} countries, Nigeria and Canada included.</p>
+          <p class="cta-row">
+            <a class="btn" href="{{href:shop/}}">Shop the register<i class="arr" aria-hidden="true"></i></a>
+            <a class="btn ghost" href="{{href:lookbook/}}">Review the evidence<i class="arr" aria-hidden="true"></i></a>
+          </p>
+        </div>
+
+        <div class="cv-folder">
+          <div class="folder">
+            <div class="folder-tabs" aria-hidden="true"><span class="folder-tab mono">Op: Wear the Unknown</span><span class="folder-tab folder-tab2 mono">{{cover_file}}</span></div>
+            <div class="folder-body">
+              <span class="clip" aria-hidden="true"></span>
+              <figure class="xp cam-xp" id="coverPhoto">
+                <a class="ph-link" href="{{cover_href}}" aria-label="Open {{cover_name}}">{{cover_img}}</a>
+                {{cover_cam}}
+              </figure>
+              <a class="etag" href="{{cover_href}}"><span class="etag-k mono">Exhibit 01 / {{cover_file}}</span><b>{{cover_name}}</b><span class="mono">{{cover_price}} CAD</span></a>
+              <span class="stamp eo white" style="--r:5deg" aria-hidden="true">Eyes only</span>
+            </div>
+          </div>
+          <p class="cv-cap mono"><span class="hint-fine">Hover the photograph to declassify the colour.</span><span class="hint-touch">Press and hold the photograph to declassify the colour.</span></p>
+        </div>
+      </div>
+    </div>
+    {{ticker_cover}}
+  </section>
+
+  <!-- 03 SELECTED ASSETS ------------------------------------------------------------------ -->
+  <section class="spread dark picks" id="assets" aria-labelledby="picksH">
+    <div class="wrap">
+      <header class="sec-h">
+        <p class="kick mono">§1 — Field equipment</p>
+        <h2 class="h2 rv" id="picksH">Selected assets</h2>
+        <p class="sec-sub rv">Pulled from the register. Open a file for the photographs, sizes and colour.</p>
+      </header>
+      <div class="board strip">
+        <div class="strip-row">
+{{pick_cards}}
+        </div>
+      </div>
+      <p class="pk-end"><a class="btn-line mono" href="{{href:shop/}}">Open the complete register, {{pieces}} assets<span class="arr" aria-hidden="true"></span></a></p>
+    </div>
+  </section>
+
+{{mag_section}}
+  <!-- 02 OBJECTIVES --------------------------------------------------------------------- -->
+  <section class="spread paper objsec" id="objectives" aria-labelledby="objH">
+    <div class="wrap">
+      <header class="sec-h">
+        <p class="kick mono">§2 — Mission objectives</p>
+        <h2 class="h2 rv" id="objH">Your objectives</h2>
+        <p class="sec-sub rv">Six tasks, any order. Every one of them is a link. <span class="redact" tabindex="0">Agent Chrome is watching.</span></p>
+      </header>
+      <ol class="obj-list">
+        <li class="rv"><a class="obj" href="{{href:shop/}}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 01</span><b class="ob-t">Acquire your equipment</b><span class="ob-d">The asset register: {{pieces}} assets across tops, bottoms, hardware and gift cards. Filter, sort, search.</span><span class="ob-go mono">Asset register<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="{{href:lookbook/}}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 02</span><b class="ob-t">Review the surveillance</b><span class="ob-d">Twelve exhibits from the field, shot dark and filed in black and white.</span><span class="ob-go mono">Evidence wall<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="{{href:about/}}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 03</span><b class="ob-t">Study the mission</b><span class="ob-d">Black, white and chrome. The objectives and the rules of engagement, in full.</span><span class="ob-go mono">Mission brief<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="{{href:shipping/}}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 04</span><b class="ob-t">Plan your extraction</b><span class="ob-d">Delivery to {{countries}} authorised zones. Rates calculated at checkout, returns explained.</span><span class="ob-go mono">Extraction routes<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="{{href:faq/}}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 05</span><b class="ob-t">Get your answers</b><span class="ob-d">Sizing, shipping, gift cards and limited drops, answered in the debrief.</span><span class="ob-go mono">The debrief<i class="arr" aria-hidden="true"></i></span></a></li>
+        <li class="rv"><a class="obj" href="{{href:contact/}}"><span class="ob-box" aria-hidden="true"></span><span class="ob-no mono">Objective 06</span><b class="ob-t">Report in</b><span class="ob-d">Email, Instagram, or join the network for drop alerts.</span><span class="ob-go mono">Secure channel<i class="arr" aria-hidden="true"></i></span></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 04 INTEL SUMMARY --------------------------------------------------------------------- -->
+  <section class="spread paper intel" id="intel" aria-labelledby="intelH">
+    <div class="wrap">
+      <header class="sec-h">
+        <p class="kick mono">§3 — Intel summary</p>
+        <h2 class="h2 rv" id="intelH">Wear the <span class="strike-in">unknown</span></h2>
+      </header>
+      <ul class="stats" aria-label="This operation in numbers">
+        <li class="rv"><b class="num" data-to="{{pieces}}">{{pieces}}</b><span class="mono">Assets on file</span></li>
+        <li class="rv"><b class="num" data-to="2" data-pad="2">02</b><span class="mono">Tones. Black and white</span></li>
+        <li class="rv"><b class="num" data-to="{{countries}}">{{countries}}</b><span class="mono">Authorised delivery zones</span></li>
+        <li class="rv"><b class="num" data-to="0" data-pad="2">00</b><span class="mono">Colours. We checked</span></li>
+      </ul>
+      <div class="intel-memo">
+        <p class="rv"><span class="mono">Finding 1.</span> Monochrome strips fashion down to contrast: black, white and a liquid chrome edge. Every piece is made to stand on its own and to be worn with everything else you own.</p>
+        <p class="rv"><span class="mono">Finding 2.</span> Made in small runs, so what you wear is not on everyone else. Hardware, objects and details that catch the light. <a class="mono link-line" href="{{href:about/}}">Read the full briefing<span class="arr" aria-hidden="true"></span></a></p>
+        <p class="rv mono intel-meta"><span>Price range: {{price_span}}</span><span>Chrome supplier: <span class="redact" tabindex="0">Classified. Obviously.</span></span><span>Tops {{n_tops}} / Bottoms {{n_bottoms}} / Hardware {{n_hardware}}</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 ZONES (teaser for /shipping/) ----------------------------------------------------- -->
+  <section class="spread dark zones" id="zones" aria-labelledby="zonesH">
+    <div class="wrap zn-grid">
+      <div class="zn-text">
+        <p class="kick mono">§4 — Extraction routes</p>
+        <h2 class="h2 rv" id="zonesH">Delivering to {{countries}} countries</h2>
+        <div class="dist-cells">
+          <a class="dist-cell dc-ng" href="{{href:shipping/}}"><span class="mono">Field office</span><b>Nigeria</b><i class="mono">Rate calculated at checkout</i></a>
+          <a class="dist-cell dc-ca" href="{{href:shipping/}}"><span class="mono">Home base</span><b>Canada</b><i class="mono">Free standard shipping</i></a>
+        </div>
+        <p class="dist-copy rv">Shipping across Africa, North America, Europe, Asia, Oceania and the Middle East. Rates are calculated at checkout from your address, so you see yours before you pay. <a class="mono link-line" href="{{href:shipping/}}">See the zones and the returns notes<span class="arr" aria-hidden="true"></span></a></p>
+      </div>
+      {{radar}}
+    </div>
+  </section>
+
+  <!-- 06 JOIN THE NETWORK ------------------------------------------------------------------- -->
+  <section class="spread paper subscribe" id="subscribe" aria-labelledby="subH">
+    <div class="wrap">
+      <div class="enlist">
+        <span class="tape tape-l" aria-hidden="true"></span><span class="tape tape-r" aria-hidden="true"></span>
+        <div class="enl-head">
+          <p class="kick mono">§5 — Recruitment form</p>
+          <h2 class="h2" id="subH">Join the network</h2>
+          <p class="sec-sub">Get drop alerts first. One email, your address, no field work required.</p>
+        </div>
+        <form class="news" method="post" action="{{news_action}}" target="_blank" rel="noopener">
+          <input type="hidden" name="form_type" value="customer">
+          <input type="hidden" name="utf8" value="✓">
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <label for="email-home" class="mono">Operative email address</label>
+          <div class="news-row">
+            <input id="email-home" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
+            <button class="send" type="submit">Join the network<span class="arr" aria-hidden="true"></span></button>
+          </div>
+          <small class="mono news-note">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
+        </form>
+        <span class="stamp pend" style="--r:-6deg" aria-hidden="true">Clearance pending</span>
+      </div>
+    </div>
+  </section>
