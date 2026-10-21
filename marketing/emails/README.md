@@ -46,3 +46,11 @@ Three emails in the Monochrome Bureau dossier style, ready to import into **Shop
 The layout uses tables only, with inline styles and table-cell buttons. Live text uses web-safe fonts (Impact for headings, Courier New for the dossier text); every image has a width, height and alt text, and the cells have dark backgrounds so the emails still read with images off. Each email's HTML is about 10 KB, well under Gmail's 102 KB clipping limit.
 
 The images come from the launch Stories (`../social/src/stories.html`; `?s=3&p=0..1` draws the stamp animation's frames) and from the countdown film's clock (`../countdown-xo`).
+
+## Order confirmation (Shopify notification)
+
+`notifications/order-confirmation.liquid` replaces Shopify's own order confirmation email with one in the same dossier style. It shows the order number as the file number, every item with its photo, size, discounts and a struck-through price when it's free, then the totals, the delivery and billing details and a *View your order* button. Orders that include The Vision Issue also get the VISION10 box.
+
+To install it: Shopify admin → **Settings → Notifications → Customer notifications → Order confirmation → Edit code**. Select everything in the code box, paste the file in, click **Preview**, then **Save**. **Revert to default** on the same screen brings Shopify's version back. The subject line can stay as it is or become `Requisition {{ name }} received`.
+
+`node notifications/preview.mjs` renders it with a sample order (a jersey plus the free magazine) into `previews/`.

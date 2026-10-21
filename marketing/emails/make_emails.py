@@ -126,7 +126,7 @@ def foot():
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
     <tr><td align="center" style="padding:0 0 18px;"><a href="{HOME}" target="_blank"><img src="__IMG__/wordmark-white.png" width="150" height="14" alt="MONOCHROME" style="display:block;width:150px;height:auto;border:0;color:#ececec;font:bold 16px {HEAD};letter-spacing:3px;"></a></td></tr>
     <tr><td align="center" style="padding:0 0 16px;font:bold 12px/20px {MONO};letter-spacing:3px;text-transform:uppercase;">
-      <a href="{IG}" target="_blank" style="color:#ececec;text-decoration:none;">Instagram</a>&nbsp;&nbsp;<span style="color:#555555;">//</span>&nbsp;&nbsp;<a href="{TT}" target="_blank" style="color:#ececec;text-decoration:none;">TikTok</a>&nbsp;&nbsp;<span style="color:#555555;">//</span>&nbsp;&nbsp;<a href="{HOME}" target="_blank" style="color:#ececec;text-decoration:none;">monochrome.com.ng</a>
+      <a href="{IG}" target="_blank" style="color:#ececec;text-decoration:none;">Instagram</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="{TT}" target="_blank" style="color:#ececec;text-decoration:none;">TikTok</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="{HOME}" target="_blank" style="color:#ececec;text-decoration:none;">monochrome.com.ng</a>
     </td></tr>
     <tr><td align="center" style="font:12px/19px {MONO};color:#8a8a8a;">
       MONOCHROME&reg; &middot; Regina, Canada<br>

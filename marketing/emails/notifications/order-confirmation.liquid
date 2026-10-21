@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<title>Order {{ order_name }} confirmed</title>
+<style>
+  body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  a { text-decoration: none; }
+  @media only screen and (max-width: 620px) {
+    .wrap { width: 100% !important; }
+    .px { padding-left: 22px !important; padding-right: 22px !important; }
+    .col { display: block !important; width: 100% !important; padding: 0 0 18px !important; }
+    .h1 { font-size: 38px !important; line-height: 40px !important; }
+    .ls { letter-spacing: 1px !important; font-size: 11px !important; }
+  }
+</style>
+</head>
+{%- comment -%}
+  MONOCHROME order confirmation, Monochrome Bureau dossier style. Settings → Notifications → Order confirmation → Edit code:
+  replace everything with this file. "Revert to default" in the same screen brings Shopify's own back.
+  The VISION10 box shows only when the order contains The Vision Issue (product 15418664059134).
+{%- endcomment -%}
+{%- assign mono = "'Courier New', Courier, monospace" -%}
+{%- assign head = "Impact, 'Arial Narrow Bold', 'Arial Black', Arial, sans-serif" -%}
+{%- assign got_issue = false -%}
+{%- for line in line_items -%}{%- if line.product_id == 15418664059134 -%}{%- assign got_issue = true -%}{%- endif -%}{%- endfor -%}
+<body style="margin:0;padding:0;background:#050505;">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">Requisition {{ order_name }} received. We'll email you when it ships.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#050505" style="background:#050505;">
+<tr><td align="center" style="padding:24px 8px;">
+<table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#0c0c0c" style="width:600px;max-width:600px;background:#0c0c0c;border:1px solid #2a2a2a;">
+
+  <!-- top bar -->
+  <tr><td class="px" style="padding:18px 28px 14px;border-bottom:1px solid #2a2a2a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td class="ls" style="font:bold 12px/16px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#ececec;"><span style="color:#ff3b30;">&#9679;</span>&nbsp; Order confirmed</td>
+      <td class="ls" align="right" style="font:bold 12px/16px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#8a8a8a;">File {{ order_name }}</td>
+    </tr></table>
+  </td></tr>
+
+  <!-- wordmark -->
+  <tr><td align="center" style="padding:30px 28px 22px;">
+    <a href="{{ shop.url }}" target="_blank"><img src="https://cdn.shopify.com/s/files/1/0691/1252/9150/files/vision-issue-email-wordmark-white.png?v=1792256459" width="220" height="20" alt="{{ shop.name }}" style="display:block;width:220px;height:auto;border:0;color:#ececec;font:bold 20px {{ head }};letter-spacing:4px;"></a>
+  </td></tr>
+
+  <!-- headline and message -->
+  <tr><td class="px h1" style="padding:6px 40px 6px;font:bold 46px/46px {{ head }};letter-spacing:1px;text-transform:uppercase;color:#ececec;">Requisition<br>received.</td></tr>
+  <tr><td class="px" style="padding:18px 40px 4px;">
+    <span style="display:inline-block;border:3px solid #ff3b30;padding:5px 12px 3px;font:bold 15px/18px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#ff3b30;">Approved</span>
+  </td></tr>
+  <tr><td class="px" style="padding:20px 40px 6px;font:16px/26px {{ mono }};color:#cfcfcf;">
+    <p style="margin:0 0 14px;font-weight:bold;color:#ececec;letter-spacing:2px;text-transform:uppercase;">Agent{% if customer.first_name != blank %} {{ customer.first_name }}{% endif %},</p>
+    <p style="margin:0;">Thank you for your order. We're getting it ready{% if requires_shipping %} and we'll email you the moment it ships{% endif %}.</p>
+  </td></tr>
+
+  <!-- buttons -->
+  <tr><td class="px" style="padding:26px 40px 8px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="center" bgcolor="#ececec" style="background:#ececec;">
+        <a href="{{ order_status_url }}" target="_blank" style="display:block;padding:18px 20px;font:bold 20px/24px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">View your order&nbsp;&nbsp;&#8599;</a>
+      </td></tr></table>
+  </td></tr>
+  <tr><td class="px" align="center" style="padding:10px 40px 26px;font:bold 12px/18px {{ mono }};letter-spacing:2px;text-transform:uppercase;">
+    <a href="{{ shop.url }}" target="_blank" style="color:#ececec;text-decoration:underline;">Back to the store</a>
+  </td></tr>
+
+  {%- if got_issue %}
+  <!-- the thank-you code, only for orders with The Vision Issue -->
+  <tr><td class="px" style="padding:0 40px 28px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="center" style="border:2px dashed #ececec;padding:20px 16px 16px;">
+        <div style="font:bold 12px/16px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#8a8a8a;">Thank you for reading The Vision Issue</div>
+        <div style="padding:10px 0 8px;font:bold 42px/46px {{ head }};letter-spacing:6px;color:#ececec;">VISION10</div>
+        <div style="font:14px/21px {{ mono }};color:#cfcfcf;">10% off your next order &middot; one use</div>
+      </td></tr></table>
+  </td></tr>
+  {%- endif %}
+
+  <!-- order summary -->
+  <tr><td class="px" style="padding:6px 40px 10px;font:bold 12px/16px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#8a8a8a;border-top:1px solid #2a2a2a;padding-top:26px;">Evidence list</td></tr>
+  <tr><td class="px" style="padding:0 40px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    {%- for line in subtotal_line_items %}
+      <tr>
+        <td width="68" valign="top" style="padding:12px 14px 12px 0;border-bottom:1px dashed #2a2a2a;">
+          {%- if line.image %}<img src="{{ line | img_url: 'compact_cropped' }}" width="60" height="60" alt="" style="display:block;width:60px;height:60px;border:1px solid #2a2a2a;background:#151515;">{% endif -%}
+        </td>
+        <td valign="top" style="padding:12px 0;border-bottom:1px dashed #2a2a2a;font:15px/21px {{ mono }};color:#ececec;">
+          <span style="font-weight:bold;">{{ line.product.title | default: line.title }}</span>{% if line.quantity > 1 %} &times; {{ line.quantity }}{% endif %}
+          {%- if line.variant.title != 'Default Title' and line.variant.title != blank %}<br><span style="font-size:13px;color:#8a8a8a;text-transform:uppercase;letter-spacing:1px;">{{ line.variant.title }}</span>{% endif -%}
+          {%- for p in line.properties -%}{%- assign c0 = p.first | slice: 0 -%}{%- unless p.last == blank or c0 == '_' -%}<br><span style="font-size:13px;color:#8a8a8a;">{{ p.first }}: {{ p.last }}</span>{%- endunless -%}{%- endfor -%}
+          {%- for allocation in line.discount_allocations -%}{%- if allocation.discount_application.target_selection != 'all' -%}<br><span style="font-size:13px;color:#ff3b30;text-transform:uppercase;letter-spacing:1px;">{{ allocation.discount_application.title }} (&minus;{{ allocation.amount | money }})</span>{%- endif -%}{%- endfor -%}
+        </td>
+        <td align="right" valign="top" style="padding:12px 0 12px 12px;border-bottom:1px dashed #2a2a2a;font:bold 16px/21px {{ head }};letter-spacing:1px;color:#ececec;white-space:nowrap;">
+          {%- if line.original_line_price != line.final_line_price %}<span style="font:13px {{ mono }};color:#8a8a8a;text-decoration:line-through;">{{ line.original_line_price | money }}</span><br>{% endif -%}
+          {%- if line.final_line_price > 0 %}{{ line.final_line_price | money }}{% else %}Free{% endif -%}
+        </td>
+      </tr>
+    {%- endfor %}
+    </table>
+  </td></tr>
+
+  <!-- totals -->
+  <tr><td class="px" style="padding:14px 40px 28px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font:14px/20px {{ mono }};color:#cfcfcf;">
+      <tr><td style="padding:5px 0;letter-spacing:2px;text-transform:uppercase;">Subtotal</td><td align="right" style="padding:5px 0;">{{ subtotal_price | money }}</td></tr>
+      {%- for discount_application in discount_applications -%}{%- if discount_application.target_selection == 'all' and discount_application.target_type == 'line_item' %}
+      <tr><td style="padding:5px 0;letter-spacing:2px;text-transform:uppercase;color:#ff3b30;">Discount{% if discount_application.title != blank %} ({{ discount_application.title }}){% endif %}</td><td align="right" style="padding:5px 0;color:#ff3b30;">&minus;{{ discount_application.total_allocated_amount | money }}</td></tr>
+      {%- endif -%}{%- endfor %}
+      {%- if requires_shipping %}
+      <tr><td style="padding:5px 0;letter-spacing:2px;text-transform:uppercase;">Shipping</td><td align="right" style="padding:5px 0;">{% if shipping_price > 0 %}{{ shipping_price | money }}{% else %}Free{% endif %}</td></tr>
+      {%- endif %}
+      {%- if tax_price > 0 %}
+      <tr><td style="padding:5px 0;letter-spacing:2px;text-transform:uppercase;">Taxes</td><td align="right" style="padding:5px 0;">{{ tax_price | money }}</td></tr>
+      {%- endif %}
+      <tr><td style="padding:14px 0 0;border-top:2px solid #ececec;font:bold 20px/24px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#ececec;">Total</td>
+          <td align="right" style="padding:14px 0 0;border-top:2px solid #ececec;font:bold 22px/24px {{ head }};letter-spacing:1px;color:#ececec;">{{ total_price | money_with_currency }}</td></tr>
+    </table>
+  </td></tr>
+
+  <!-- where it goes -->
+  <tr><td class="px" style="padding:24px 40px 30px;border-top:1px solid #2a2a2a;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      {%- if shipping_address %}
+      <td class="col" width="50%" valign="top" style="padding:0 16px 0 0;font:14px/21px {{ mono }};color:#cfcfcf;">
+        <div style="font:bold 12px/16px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#8a8a8a;padding-bottom:8px;">Extraction point</div>
+        {{ shipping_address.name }}<br>{{ shipping_address.address1 }}{% if shipping_address.address2 != blank %}<br>{{ shipping_address.address2 }}{% endif %}<br>{{ shipping_address.city }}{% if shipping_address.province_code != blank %} {{ shipping_address.province_code }}{% endif %} {{ shipping_address.zip }}<br>{{ shipping_address.country }}
+      </td>
+      {%- endif %}
+      <td class="col" width="50%" valign="top" style="padding:0;font:14px/21px {{ mono }};color:#cfcfcf;">
+        {%- if shipping_method %}
+        <div style="font:bold 12px/16px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#8a8a8a;padding-bottom:8px;">Route</div>
+        {{ shipping_method.title }}<br><br>
+        {%- endif %}
+        {%- if billing_address %}
+        <div style="font:bold 12px/16px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#8a8a8a;padding-bottom:8px;">Billing</div>
+        {{ billing_address.name }}<br>{{ billing_address.city }}{% if billing_address.province_code != blank %} {{ billing_address.province_code }}{% endif %}, {{ billing_address.country }}
+        {%- endif %}
+      </td>
+    </tr></table>
+  </td></tr>
+
+  <!-- tape -->
+  <tr><td class="ls" align="center" bgcolor="#ececec" style="background:#ececec;padding:12px 10px;font:bold 12px/16px {{ mono }};letter-spacing:4px;text-transform:uppercase;color:#0a0a0a;">Requisition approved &nbsp;//&nbsp; File {{ order_name }}</td></tr>
+
+  <!-- footer -->
+  <tr><td class="px" bgcolor="#080808" style="background:#080808;padding:28px 40px 32px;" align="center">
+    <div style="font:14px/22px {{ mono }};color:#cfcfcf;padding-bottom:14px;">Questions? Reply to this email or write to <a href="mailto:{{ shop.email }}" style="color:#ececec;text-decoration:underline;">{{ shop.email }}</a></div>
+    <div style="font:bold 12px/20px {{ mono }};letter-spacing:3px;text-transform:uppercase;padding-bottom:14px;">
+      <a href="https://www.instagram.com/monochrome.ca/" target="_blank" style="color:#ececec;text-decoration:none;">Instagram</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="https://www.tiktok.com/@monochrome.ca" target="_blank" style="color:#ececec;text-decoration:none;">TikTok</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="{{ shop.url }}" target="_blank" style="color:#ececec;text-decoration:none;">monochrome.com.ng</a>
+    </div>
+    <div style="font:12px/19px {{ mono }};color:#8a8a8a;">MONOCHROME&reg; &middot; Regina, Canada<br>The Monochrome Bureau is a work of fiction. MONOCHROME&reg; is a clothing brand.</div>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
