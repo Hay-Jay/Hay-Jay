@@ -348,7 +348,9 @@ const settingsApp = app('settings', 'Settings', (body, ctx) => {
       <h4 class="sec">Game</h4><div class="list">
         <label class="row"><div class="grow"><b>Graphics quality</b><p>Auto adapts to your device</p></div><select data-s="quality">${['auto', 'low', 'medium', 'high'].map((q) => `<option ${st.quality === q ? 'selected' : ''}>${q}</option>`).join('')}</select></label>
         <label class="row"><div class="grow"><b>Time of day</b><p>Live follows the real Regina clock</p></div><select data-s="timeMode"><option value="live" ${st.timeMode === 'live' ? 'selected' : ''}>Live Regina</option><option value="fast" ${st.timeMode === 'fast' ? 'selected' : ''}>Fast (1 min = 1 hr)</option></select></label>
-        <label class="row sw"><div class="grow"><b>Auto-centre camera</b></div><input type="checkbox" data-s="autoCenter" ${st.autoCenter !== false ? 'checked' : ''}></label></div>
+        <label class="row sw"><div class="grow"><b>Auto-centre camera</b></div><input type="checkbox" data-s="autoCenter" ${st.autoCenter !== false ? 'checked' : ''}></label>
+        <label class="row sw"><div class="grow"><b>Ambient sound</b><p>Wind, birds, rain and the city hum</p></div><input type="checkbox" data-s="ambience" ${st.ambience !== false ? 'checked' : ''}></label>
+        <label class="row sw"><div class="grow"><b>Quiet mode</b><p>No surprise life events</p></div><input type="checkbox" data-s="quiet" ${st.quiet ? 'checked' : ''}></label></div>
       <h4 class="sec">Controls</h4><div class="list ctl"><p><b>Move</b> WASD / arrows · <b>Run</b> Shift · <b>Look</b> drag · <b>Zoom</b> wheel</p><p><b>Interact</b> E · <b>Phone</b> P · <b>Map</b> M · <b>Outfit</b> C · <b>Photo mode</b> V</p><p>Touch: left stick moves, drag the right side to look, pinch to zoom.</p></div>
       <h4 class="sec">About</h4><div class="list ctl"><p>Prairie Dollars are a <b>fictional</b> in-game currency with no real-world value. No real money is ever charged.</p><p>Weather: <b>Open-Meteo</b> live data when reachable, otherwise a clearly-labelled simulation. Map/coordinates are approximate and stylised.</p><p>Single-player build · all progress saved on this device.</p></div>
       <button class="btn danger wide" data-act="reset">${confirmReset ? 'Tap again to erase save & restart' : 'Erase save & start over'}</button></div>`;
@@ -484,12 +486,12 @@ const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
 
 /* ================= SOCIAL (friends by @username — NPC residents) ================= */
 const socialApp = app('social', 'Social', (body, ctx, phone) => {
-  const { store } = ctx; let tab = 'friends', sel = null, q = '', msg = '';
+  const { store } = ctx; let tab = SOC.friendIds(store.state).length ? 'friends' : 'find', sel = null, q = '', msg = '';   // no friends yet: open on your neighbours, not an empty list
   const bar = (v) => `<div class="progress thin"><i style="width:${Math.round(v)}%"></i></div>`;
   const resAv = (r, big) => `<div class="avatar ${big ? 'big' : ''}" style="background:${r.color}">${r.emoji}</div>`;
   const list = () => {
     const s = store.state, ids = SOC.friendIds(s);
-    body.innerHTML = `${nav('Social')}<div class="seg"><button class="${tab === 'friends' ? 'on' : ''}" data-tab="friends">Friends ${ids.length}</button><button class="${tab === 'find' ? 'on' : ''}" data-tab="find">Find @username</button></div><div class="scroll">${tab === 'friends'
+    body.innerHTML = `${nav('Social')}<div class="seg"><button class="${tab === 'friends' ? 'on' : ''}" data-tab="friends">Friends ${ids.length}</button><button class="${tab === 'find' ? 'on' : ''}" data-tab="find">Neighbours</button></div><div class="scroll">${tab === 'friends'
       ? (ids.length ? `<div class="list">${ids.map((id) => { const r = RES_BY_ID[id], f = s.friends[id]; return `<button class="row" data-f="${id}">${resAv(r)}<div class="grow"><b>${esc(r.name)} ${s.partner === id ? '💛' : ''}</b><p>${esc(r.handle)} · ${SOC.relName(f.level)}</p>${bar(f.level)}</div></button>`; }).join('')}</div>` : '<p class="empty big">No friends yet.<br>Search an @username in “Find”.</p>')
       : `<div class="form"><label>Search by @username or name<input id="soq" value="${esc(q)}" placeholder="@tobi.rgn" autocomplete="off"></label><p class="err">${esc(msg)}</p></div><div class="list">${(q ? SOC.searchResidents(q) : RESIDENTS).filter((r) => !s.friends[r.id]).map((r) => `<div class="row">${resAv(r)}<div class="grow"><b>${esc(r.name)}</b><p>${esc(r.handle)} · ${esc(r.job)}</p></div><button class="btn small primary" data-add="${r.id}">Add</button></div>`).join('') || '<p class="empty">No matches</p>'}</div>
         <p class="fine pad">Everyone here is an <b>NPC resident</b>. Friends with real players (by @username) arrive with the multiplayer server.</p>`}</div>`;

@@ -69,6 +69,14 @@ export class Panels {
     p.querySelector('[data-wake]').onclick = () => this.close();
   }
 
+  /** Why you feel this way (core/moodlets.js): each reason with its sign. */
+  moodlets(list, mood) {
+    const p = this._show(`<div class="ev-ic">${mood.face}</div><h3>Feeling ${esc(mood.label.toLowerCase())}</h3>
+      <div class="ml-list">${list.length ? list.map((m) => `<div class="ml ${m.v > 0 ? 'up' : m.v < 0 ? 'down' : ''}"><span>${m.icon}</span><b>${esc(m.text)}</b><i>${m.v > 0 ? '+' + m.v : m.v < 0 ? m.v : '·'}</i></div>`).join('') : '<p class="pm">Nothing in particular. Just another day in Regina.</p>'}</div>
+      <div class="pbtns"><button class="btn primary" data-ok>Got it</button></div>`, 'menu moodlets');
+    p.querySelector('[data-ok]').onclick = () => this.close();
+  }
+
   /** Timed activity with a progress bar (input is blocked while a panel is open). */
   progress(label, secs, onDone, { stop = true } = {}) {
     const p = this._show(`<h3>${esc(label)}</h3><div class="prog"><i></i></div>${stop ? '<div class="pbtns"><button class="btn" data-stop>Stop</button></div>' : ''}`, 'menu prog-panel', { dismissable: false });

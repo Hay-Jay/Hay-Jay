@@ -149,4 +149,48 @@ body.shell-on.touch-mode #hud .needs span{font-size:12px}
 .gn-tomorrow{display:grid;gap:2px;padding:12px;border-radius:var(--r-m);background:linear-gradient(145deg,#eaf5fd,#fff3e0);animation:jRise .5s var(--spring) both}
 .gn-tomorrow small{color:var(--c-ink-3);font-weight:700} .gn-tomorrow b{font:600 17px var(--head)}
 .gn-next{margin:10px 0 0;font-weight:700;color:#9a6b00;animation:jRise .5s var(--spring) both}
-.panel.goodnight .btn.primary{background:linear-gradient(145deg,#ffd257,#f2a900);color:#3a2600;border:0;font-size:16px;padding:12px 20px;border-radius:var(--r-m);margin-top:12px}
+#panels .panel.goodnight .btn.primary{background:linear-gradient(145deg,#ffd257,#f2a900);color:#3a2600;border:0;font-size:16px;padding:12px 20px;border-radius:var(--r-m);margin-top:12px}
+
+/* ---------- one design system (docs/AMAZING.md D9): the old dark-glass panels (creator, shops, wardrobe, menus) in the bright prairie skin ---------- */
+#panels{background:rgba(18,32,42,.28);backdrop-filter:blur(2px)}
+#panels .panel{background:var(--paper);color:var(--c-ink);border:0;border-radius:var(--r-l);box-shadow:var(--shadow-3)}
+#panels .panel h3{font-family:var(--head);font-weight:600;color:var(--c-ink)}
+#panels .panel .pm{color:var(--c-ink-2)}
+#panels .panel .fine,#panels .panel .muted,#panels .panel small,#panels .panel .empty{color:var(--c-ink-3)}
+#panels .panel .btn{background:#eef2f5;color:var(--c-ink);border:0;border-radius:var(--r-m);font-weight:800;box-shadow:none}
+#panels .panel .btn:hover{background:#e3e9ee}
+#panels .panel .btn.primary{background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff;box-shadow:0 6px 16px rgba(22,143,89,.3)}
+#panels .panel .btn.danger{background:#ffe6e3;color:#c2352b}
+#panels .panel .btn:disabled{opacity:.5}
+#panels .panel .x{background:#eef2f5;border:0;color:var(--c-ink)}
+#panels .panel .pill{background:#eef7f2;color:var(--leaf-d);border:0;font-weight:800}
+#panels .panel .item{background:#f6f8fa;border:0;box-shadow:0 0 0 1px var(--pill-line)}
+#panels .panel .item b{color:var(--c-ink)} #panels .panel .item em{color:var(--leaf-d)}
+#panels .panel .buy span{color:var(--leaf-d)} #panels .panel .buy s{color:var(--c-ink-3)}
+#panels .panel .tabs button{border:0;background:#eef2f5;color:var(--c-ink-2)}
+#panels .panel .tabs button.on{background:var(--c-ink);color:#fff}
+#panels .panel .cbody h4{color:var(--c-ink-3)}
+#panels .panel .sw{border-color:rgba(18,32,42,.15)} #panels .panel .sw.on{border-color:#fff;box-shadow:0 0 0 3px var(--leaf)}
+#panels .panel .chips-sel button{border:0;background:#eef2f5;color:var(--c-ink)} #panels .panel .chips-sel button.on{background:var(--leaf);color:#fff}
+#panels .panel .namef{color:var(--c-ink-3);font-weight:700}
+#panels .panel .namef input,#panels .panel .form input,#panels .panel .form select{background:#fbfdfe;border:1.5px solid rgba(18,32,42,.15);color:var(--c-ink)}
+#panels .panel .swatch.big{border:0;box-shadow:inset 0 0 0 1px rgba(18,32,42,.08)}
+#panels .panel .ev-ic{filter:drop-shadow(0 6px 10px rgba(18,32,42,.15))}
+#panels .panel.char.side{background:rgba(255,255,255,.96);backdrop-filter:blur(10px)}
+#panels:has(.panel.side){background:linear-gradient(90deg,transparent 40%,rgba(18,32,42,.18))}
+#panels .panel .btn.eat{padding:3px 9px;font-size:11px;margin-left:4px;background:var(--leaf-l);color:var(--leaf-d)}
+/* why you feel this way */
+.ml-list{display:grid;gap:6px;margin:12px 0 14px;text-align:left}
+.ml{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;background:#f3f6f8;font-size:14px}
+.ml.up{background:var(--leaf-l)} .ml.down{background:#ffecea}
+.ml i{font-style:normal;font-weight:800;color:var(--c-ink-3)} .ml.up i{color:var(--leaf-d)} .ml.down i{color:#c2352b}
+.tb-mood{cursor:pointer}
+/* place cards: who is here now (labelled NPCs) */
+.pc-here{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
+.pc-here>small{width:100%;font:800 11px var(--body);color:var(--c-ink-3);text-transform:uppercase;letter-spacing:.08em}
+.pc-npc{display:flex;align-items:center;gap:8px;border:0;border-radius:14px;padding:6px 10px 6px 6px;background:#f2f5f7;text-align:left;cursor:pointer;font:600 12px var(--body);color:var(--c-ink)}
+.pc-npc .pc-av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px}
+.pc-npc em{font-style:normal;font-size:9.5px;font-weight:800;color:#fff;background:var(--c-ink-3);border-radius:6px;padding:1px 5px;margin-left:2px}
+.pc-npc small{display:block;color:var(--c-ink-3);font-size:11px}
+#panels .panel.char .pbtns{background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.98) 38%)}
+#panels .panel.menu.moodlets{text-align:center}

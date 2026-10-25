@@ -14,17 +14,31 @@ export class FirstDay {
     this.el = document.createElement('section'); this.el.className = 'fday'; this.el.hidden = true; this.el.setAttribute('aria-label', 'First day in Regina');
     document.body.appendChild(this.el);
     this.el.addEventListener('click', (e) => {
-      if (e.target.closest('[data-go]')) { const st = onboardingStatus(this.store.state).next; if (st) this.onGo?.(st); return; }
+      if (e.target.closest('[data-go]')) { const st = this.graduated ? this.todoNext : onboardingStatus(this.store.state).next; if (st) this.onGo?.(st); return; }
       if (e.target.closest('header')) {   // phones: the card shows just the next step until you open it; wider screens: fold the list away
         if (matchMedia('(max-width:520px)').matches) { this.el.classList.toggle('open'); return; }
         const o = (this.store.state.onboarding ||= {}); o.min = !o.min; this.store.commit('onboarding'); this.render(true);
       }
     });
   }
+  /** True once the First day card is finished and celebrated: the card turns into Today in Regina. */
+  get graduated() { const st = onboardingStatus(this.store.state); return st.complete && st.bonus && !!this.store.state.onboarding?.seenDone; }
+  /** Today in Regina (core/todo.js): the same card, three small tasks a day. `td` = todoStatus(). */
+  renderTodo(td, visible = true) {
+    const hidden = !!this.store.state.onboarding?.hidden; this.el.hidden = !visible || hidden; if (this.el.hidden) return;
+    const sig = `todo|${td.day}|${td.count}|${td.tasks.map((t) => t.progress).join()}|${this.store.state.onboarding?.min}`; if (sig === this.sig) return; this.sig = sig;
+    const next = td.tasks.find((t) => !t.done), min = !!this.store.state.onboarding?.min; this.todoNext = next ?? null;
+    this.el.classList.toggle('min', min);
+    this.el.innerHTML = `<header role="button" tabindex="0"><span aria-hidden="true">☀️</span><b>${td.complete ? 'Today: all done!' : 'Today in Regina'}</b><small>${td.count}/3</small></header>
+      <div class="fbar"><i style="width:${(td.count / 3) * 100}%"></i></div>
+      <ol>${td.tasks.map((t) => `<li class="${t.done ? 'done' : ''} ${next === t ? 'next' : ''}"><span class="ck">${t.done ? '✓' : ''}</span><span>${t.icon} ${esc(t.title)}${t.n > 1 && !t.done ? ` (${t.progress}/${t.n})` : ''}</span>${next === t ? '<button data-go>Go</button>' : t.done ? '' : '<span class="rw">+P$4</span>'}</li>`).join('')}</ol>
+      ${td.complete ? '<p class="fhint" style="margin:6px 4px 0;color:var(--c-ink-3);font-size:11.5px">New ones tomorrow. Missing a day never costs you anything.</p>' : ''}`;
+  }
   /** Draw (only when something changed). `visible` is the game's say: in play, not in the title or the creator. */
   render(force = false, visible = true) {
     const st = onboardingStatus(this.store.state);
     const show = visible && !st.hidden && !(st.complete && st.bonus && this.store.state.onboarding?.seenDone);
+    if (!show && this.graduated) return;   // Today in Regina draws itself (renderTodo)
     this.el.hidden = !show; if (!show) return;
     const sig = `${st.count}|${st.min}|${st.complete}`; if (!force && sig === this.sig) return; this.sig = sig;
     this.el.classList.toggle('min', st.min);

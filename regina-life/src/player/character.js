@@ -70,7 +70,7 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
   mesh(torsoGeo(0), skin, spine);
   const neckJ = joint(spine, 0, 0.52, 0);
   mesh(new THREE.CylinderGeometry(0.046, 0.052, 0.12, seg(14)), skin, neckJ, 0, 0.03, 0);
-  const headJ = joint(neckJ, 0, 0.11, 0.0);
+  const headJ = joint(neckJ, 0, 0.11, 0.0); headJ.scale.setScalar(1.12);   // a slightly bigger head reads as a friendly cozy-game character and stays readable from the dollhouse camera
   const shoulderY = 0.46, shoulderX = 0.205 * body.sh;
 
   /* ---------- head with face-shape deformation ---------- */
@@ -207,8 +207,8 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
   const arms = [];
   for (const s of [-1, 1]) {
     const sh = joint(spine, s * shoulderX, shoulderY, 0);
-    mesh(new THREE.SphereGeometry(body.arm * 1.35, seg(12), seg(10)), skin, sh);
-    mesh(new THREE.SphereGeometry(body.arm * 1.35 + thick + 0.004, seg(14), seg(10)), fabric, sh).scale.set(1.05, 1, 1); // shoulder cap so tops cover the joint
+    mesh(new THREE.SphereGeometry(body.arm * 1.12, seg(12), seg(10)), skin, sh);
+    mesh(new THREE.SphereGeometry(body.arm * 1.12 + thick + 0.004, seg(14), seg(10)), fabric, sh).scale.set(1.08, 0.82, 1); // shoulder cap so tops cover the joint (flatter: no puffy ball shoulders)
     const uLen = 0.27, fLen = 0.25;
     mesh(new THREE.CapsuleGeometry(body.arm, uLen - 0.06, 6, seg(12)), skin, sh, 0, -uLen / 2, 0);
     // sleeve upper

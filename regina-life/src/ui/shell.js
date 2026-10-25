@@ -22,13 +22,14 @@ export function moodOf(needs) {
  * (Home · Buy · Map · Phone). It owns no game rules: it shows state and reports taps through onTab / onWallet.
  */
 export class Shell {
-  constructor({ onTab, onWallet }) {
-    this.onTab = onTab; this.onWallet = onWallet; this.tab = 'home'; this.shown = 0; this.target = 0; this.raf = 0;
+  constructor({ onTab, onWallet, onMood }) {
+    this.onTab = onTab; this.onWallet = onWallet; this.onMood = onMood; this.tab = 'home'; this.shown = 0; this.target = 0; this.raf = 0;
     this.root = document.getElementById('shell'); this.clock = document.getElementById('tb-clock'); this.mood = document.getElementById('tb-mood'); this.money = document.getElementById('tb-money'); this.plus = document.getElementById('tb-plus');
     this.nav = document.getElementById('navbar'); this.chips = document.getElementById('chiprow');
     this.nav.innerHTML = TABS.map(([id, label]) => `<button type="button" data-tab="${id}" aria-label="${label}"><span class="ni">${TAB_ICON[id]}</span><span class="nl">${label}</span><b class="nbadge" hidden></b></button>`).join('<i class="nsep" aria-hidden="true"></i>');
     this.nav.addEventListener('click', (e) => { const b = e.target.closest('[data-tab]'); if (b) this.onTab?.(b.dataset.tab); });
     this.plus.addEventListener('click', () => this.onWallet?.());
+    this.mood.setAttribute('role', 'button'); this.mood.tabIndex = 0; this.mood.title = 'Why you feel this way'; this.mood.addEventListener('click', () => this.onMood?.());
     this.setTab('home');
   }
   show(on) { this.root.hidden = !on; document.body.classList.toggle('shell-on', !!on); }

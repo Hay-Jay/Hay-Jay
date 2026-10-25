@@ -575,8 +575,11 @@ export function buildCity({ quality = 'high' } = {}) {
       groundTex.needsUpdate = false;
       ground.material.color.set('#ffffff').lerp(new THREE.Color(season === 'winter' ? '#e7edf2' : season === 'autumn' ? '#d9c79a' : '#ffffff'), season === 'winter' ? Math.max(0.55, snow) : season === 'autumn' ? 0.55 : 0);
       if (snow > 0.05 || season === 'winter') { ground.material.color.lerp(new THREE.Color('#f4f8fb'), Math.max(snow, season === 'winter' ? 0.7 : 0)); }
-      mats.lawn.color.set('#ffffff').lerp(new THREE.Color('#f1f6fa'), Math.max(snow, season === 'winter' ? 0.7 : 0));
-      mats.roof.color.set('#ffffff').lerp(new THREE.Color('#dfe7ee'), Math.max(snow, season === 'winter' ? 0.6 : 0) * 0.8);
+      const cover = Math.max(snow, season === 'winter' ? 0.7 : 0);
+      mats.lawn.color.set('#ffffff').lerp(new THREE.Color('#f1f6fa'), cover);
+      mats.roof.color.set('#ffffff').lerp(new THREE.Color('#f4f8fb'), cover * 0.9);
+      mats.pave.color.set('#ffffff').lerp(new THREE.Color('#eef3f7'), cover * 0.6);   // packed snow on the sidewalks
+      lakeMesh.material.color.set(cover > 0.5 ? '#e3eef4' : '#4b9cc4'); lakeMesh.material.opacity = cover > 0.5 ? 1 : 0.94; lakeMesh.material.roughness = cover > 0.5 ? 0.6 : 0.2;   // Wascana freezes
     },
     update(dt, cam) {
       rotateBoards(dt, cam); state.lastChunkCheck += dt;

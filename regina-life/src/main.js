@@ -7,11 +7,16 @@ import * as G from './core/game.js';
 import { fmtMoney } from './core/ledger.js';
 import { reginaClock, seasonOf, sunTimes, hoursLabel } from './core/time.js';
 import { dayTally } from './core/goodnight.js';
+import { moodlets } from './core/moodlets.js';
+import { residentsAt } from './core/routines.js';
+import { RES_BY_ID } from './data/residents.js';
+import { CLOTHES } from './data/catalog.js';
 import { fetchWeather, simulateWeather } from './core/weather.js';
 import { CONTACTS } from './data/contacts.js';
 import { JOBS } from './data/jobs.js';
 import { buildCity } from './world/city.js';
 import { Atmosphere } from './world/sky.js';
+import { glowTexture } from './world/textures.js';
 import { buildInterior } from './world/interiors.js';
 import { Pedestrians } from './world/npcs.js';
 import { DISTRICTS, POIS, poiById } from './world/cityData.js';
@@ -23,6 +28,7 @@ import { Panels } from './ui/panels.js';
 import { MapView } from './ui/map.js';
 import { Audio } from './ui/audio.js';
 import { makeJuice } from './ui/juice.js';
+import { Ambience } from './ui/ambience.js';
 import { ICON } from './ui/icons.js';
 import { Hub } from './ui/hub.js';
 import { rollEvent, resolveEvent, choiceAvailable, EVENT_BY_ID } from './core/events.js';
@@ -47,6 +53,7 @@ import { dailyStatus, claimDaily, REWARD_CENTS } from './core/daily.js';
 import { updateOnboarding } from './core/onboarding.js';
 import { gigConditions, startGig, gigStep, finishGig, abandonGig, currentStep, sanitizeGigs, GIG_REACH } from './core/gigs.js';
 import { FirstDay } from './ui/firstday.js';
+import { todoStatus, updateTodo, TODO_PAY, TODO_BONUS } from './core/todo.js';
 import { muralNames } from './core/sponsors.js';
 import { PUMPKIN, PUMPKIN_AREA, pumpkinOn, pumpkinSoon, pumpkinSpots, startHunt, findPumpkin, endHunt, huntToday } from './core/festivals.js';
 import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
@@ -115,6 +122,8 @@ async function boot() {
   const player = new PlayerController(scene, S().player.look);
   const rig = new CameraRig(camera); rig.grid = city.colliders;
   const audio = new Audio(() => S().phone.volume);
+  const amb = new Ambience(audio, { enabled: () => S().settings.ambience !== false });   // the soundscape starts on the first tap or key (browser rule)
+  for (const ev of ['pointerdown', 'keydown']) addEventListener(ev, () => amb.start(), { once: true });
   const studio = new THREE.DirectionalLight('#fff0dc', 0); scene.add(studio, studio.target);
   const flash = new THREE.SpotLight('#fff3dc', 0, 45, 0.45, 0.5, 1.3); flash.position.set(0, 1.5, 0); scene.add(flash, flash.target);
 
@@ -132,7 +141,8 @@ async function boot() {
     const now = performance.now(), fast = S().settings.timeMode === 'fast';
     if (!force && now - lastEnvAt < (fast ? 400 : 4000)) return; lastEnvAt = now;
     env = atmo.setTime(virtualNow(), weather); city.setEnvironment(env);
-    if (env.season !== lastSeason) { city.recolorTrees(env.season); lastSeason = env.season; }
+    const treeSeason = (env.snow ?? 0) > 0.5 ? 'winter' : env.season;   // a November snowfall strips the elms too
+    if (treeSeason !== lastSeason) { city.recolorTrees(treeSeason); lastSeason = treeSeason; }
     renderer.toneMappingExposure = atmo.exposureBase ?? 1;
     if (homeView && inInterior) { scene.background = homeSky(); homeStage.tint?.(env.night ?? 0); }
   };
@@ -345,11 +355,11 @@ async function boot() {
     if (kind !== 'apartment') G.tally(S(), 'visits');
   }
   async function exitInterior() {
-    if (fading || !inInterior) return; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
+    if (fading || !inInterior) return; const wasHome = inInterior === 'apartment'; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
     interior.group.userData.tvOff?.(); scene.remove(interior.group); interior = null; inInterior = null;
     city.group.visible = true; ped.setVisible(true); setIndoor(false);
     player.bounds = null; player.grid = city.colliders; rig.grid = city.colliders; rig.indoor = false; rig.bounds = null; rig.targetDist = 6; rig.pitch = 0.28;
-    const d = lastDoor; const out = d ? { x: d.x, z: d.z, yaw: Math.atan2(d.nx, d.nz) } : { x: city.spawn.x, z: city.spawn.z, yaw: 0 };
+    const d = wasHome && HOME_DOORS[layoutOf(S()).id] ? homeDoor() : lastDoor ?? (wasHome ? homeDoor() : null); const out = d ? { x: d.x, z: d.z, yaw: Math.atan2(d.nx, d.nz) } : { x: city.spawn.x, z: city.spawn.z, yaw: 0 };
     player.teleport(out.x + d.nx * 0.8, out.z + d.nz * 0.8, out.yaw); rig.snapBehind(out.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
   }
@@ -501,6 +511,40 @@ async function boot() {
     G.receiveMessage(store, 'dani', k === 0 ? 'The Pumpkin Walk is ON in Victoria Park! 🎃 Nine carved pumpkins, 90 seconds. Bet you can\'t find them all.' : `Pumpkin Walk in Victoria Park in ${k} day${k > 1 ? 's' : ''} (29 to 31 Oct)! 🎃 They hide nine carved pumpkins. Wanna go?`);
   };
 
+  /* ---------- breath in the cold: little puffs at your mouth below 0 °C (docs/AMAZING.md D10) ---------- */
+  const breathTex = glowTexture(), puffMat = () => new THREE.SpriteMaterial({ map: breathTex, color: '#ffffff', transparent: true, opacity: 0, depthWrite: false });
+  const puffs = Array.from({ length: 5 }, () => { const sp = new THREE.Sprite(puffMat()); sp.visible = false; sp.userData.t = 9; scene.add(sp); return sp; });
+  let puffT = 0, puffI = 0;
+  const updateBreath = (dt) => {
+    const cold = gameMode === 'play' && !inInterior && (weather.temp ?? 10) < 0;
+    puffT -= dt;
+    if (cold && puffT <= 0) {
+      puffT = 1.4 + Math.random() * 0.8; const sp = puffs[puffI++ % puffs.length], fx = Math.sin(player.yaw), fz = Math.cos(player.yaw), hy = player.sitting ? 1.2 : 1.6;
+      sp.position.set(player.pos.x + fx * 0.22, hy, player.pos.z + fz * 0.22); sp.userData.t = 0; sp.userData.v = [fx * 0.25, 0.18, fz * 0.25]; sp.visible = true;
+    }
+    for (const sp of puffs) {
+      if (!sp.visible) continue; const t = (sp.userData.t += dt), k = t / 1.3;
+      if (k >= 1) { sp.visible = false; continue; }
+      sp.position.x += sp.userData.v[0] * dt; sp.position.y += sp.userData.v[1] * dt; sp.position.z += sp.userData.v[2] * dt;
+      sp.scale.setScalar(0.12 + k * 0.45); sp.material.opacity = Math.sin(Math.PI * k) * (weather.temp < -15 ? 0.75 : 0.55);
+    }
+  };
+
+  /* ---------- your home's front door: the Lofts for the Studio and the One-bedroom, a house by the lake for the Bungalow ---------- */
+  const HOME_DOORS = { bungalow: { x: 165, z: 762, nx: 0, nz: 1, name: 'Lakeview Bungalow (Home)' } };
+  function homeDoor() { const d = HOME_DOORS[layoutOf(S()).id]; return d ?? { x: poiById.lofts.x, z: poiById.lofts.z, nx: 0, nz: -1, name: 'Dewdney Lofts (Home)' }; }   // the Lofts door faces north, onto Victoria Ave
+  const homeSign = new THREE.Group(); homeSign.visible = false; scene.add(homeSign);
+  {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.1, 0.12), new THREE.MeshStandardMaterial({ color: '#5b4330' })); post.position.y = 0.55;
+    const box = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.36, 0.34), new THREE.MeshStandardMaterial({ color: '#c8714d', roughness: 0.6 })); box.position.y = 1.25;
+    const flag = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.08), new THREE.MeshStandardMaterial({ color: '#ffc83d' })); flag.position.set(0.27, 1.38, 0);
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96; const g = cv.getContext('2d'); g.fillStyle = '#fffaf0'; g.fillRect(0, 0, 256, 96); g.fillStyle = '#12202a'; g.font = '800 44px "Plus Jakarta Sans",system-ui,sans-serif'; g.textAlign = 'center'; g.fillText('🏡 HOME', 128, 64);
+    const tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace; const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.45), new THREE.MeshBasicMaterial({ map: tx })); sign.position.set(0, 1.9, 0);
+    homeSign.add(post, box, flag, sign);
+  }
+  /** The house door as an interactable (outdoors, Bungalow only: the Lofts door is part of the city). */
+  const homeDoorInteractable = () => { const d = HOME_DOORS[layoutOf(S()).id]; return d ? { id: 'door_home', kind: 'door', enter: 'apartment', x: d.x, z: d.z, nx: d.nx, nz: d.nz, radius: 3.2, label: `Go home: ${d.name.replace(' (Home)', '')}` } : null; };
+
   /* ---------- map ---------- */
   function openFullMap() {
     if (creator || build.active) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
@@ -560,6 +604,7 @@ async function boot() {
       for (const it of city.interactables) consider(it, it.label);
       const gst = currentStep(S()); if (gst) consider({ id: 'gig', kind: 'gig', x: gst.spot.x, z: gst.spot.z, radius: GIG_REACH, label: gst.label, run: () => doGigStep() }, gst.label);
       for (const it of pumpkinInteractables()) consider(it, it.label);
+      const hdi = homeDoorInteractable(); if (hdi) consider(hdi, hdi.label);
       const n = ped.nearest(player.pos, 2.4); if (n) { const d = Math.hypot(n.x - player.pos.x, n.z - player.pos.z) / 2.4; if (d < bd) best = { npc: n, label: 'Say hi' }; }
     }
     return best;
@@ -572,7 +617,10 @@ async function boot() {
     if (!target || creator || panels.open || mapOpen || camMode || fading) return;
     if (target.npc) { const n = target.npc; const msg = ped.greet(n, { px: player.pos.x, pz: player.pos.z, temp: weather.temp, night: env?.night > 0.6 }); player.gesture('wave', 1.4); toast(`🗣️ “${msg}”`, 'info'); S().needs.mood = Math.min(100, S().needs.mood + 1.5); return; }
     const it = target.it;
-    if (it.kind === 'door') { enterInterior(it.enter, it); return; }
+    if (it.kind === 'door') {
+      if (it.id === 'door_lofts' && layoutOf(S()).id === 'bungalow') { const hd = homeDoor(); setDestination({ id: 'home', name: hd.name, x: hd.x, z: hd.z }); toast('You moved out! Your bungalow is by the lake. Follow the arrow.', 'info'); return; }
+      enterInterior(it.enter, it); return;
+    }
     if (it.kind === 'billboard') {   // a real sponsor on screen right now: say who it is and offer their site through the leaving-the-game screen
       const b = city.billboards.find((x) => x.id === it.boardId), a = b?.slots[b.slot % Math.max(1, b.slots.length)];
       if (a?.sponsored) { leaveFor(a); return; }
@@ -624,9 +672,21 @@ async function boot() {
   input.on('wardrobe', openOutfit); $('b-wardrobe').onclick = openOutfit;
 
   /* ---------- app shell: Home · Buy · Map · Phone ---------- */
-  const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet() });
+  const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet(), onMood: () => {
+    if (gameMode !== 'play') return; const s = S(), top = CLOTHES[s.player.look.top], head = CLOTHES[s.player.look.head];
+    panels.moodlets(moodlets(s, { temp: weather.temp, kind: weather.kind, night: env?.night ?? 0, home: inInterior === 'apartment', cozy: H.homeBonuses(s).mood ?? 0,
+      paidToday: dayTally(s, Date.now()).top.filter((x) => /Payroll|Odd job/.test(x.memo)).reduce((a, x) => a + x.amount, 0), outfitWarm: ['jacket', 'hoodie', 'sweater'].includes(top?.style) && head?.style === 'toque' }), moodOf(s.needs));
+  } });
   /* ---------- First day in Regina: the checklist card a new player always sees (core/onboarding.js has the rules) ---------- */
   const firstDay = new FirstDay({ store, onGo: (st) => {
+    if (st.stat) {   // a Today in Regina task
+      if (st.stat === 'gigs') { phone.open(); phone.openApp('gigs'); }
+      else if (st.stat === 'visits') goTab('map');
+      else if (st.stat === 'eaten') { if (Object.keys(S().inventory).length && inInterior === 'apartment') panels.fridge(); else if (Object.keys(S().inventory).length) goTab('home'); else { setDestination(poiById.market); if (inInterior) exitInterior(); } }
+      else if (st.stat === 'shifts') { const j = S().job.active, pl = j ? POIS.find((p) => p.enter === JOBS[j.id].place) : null; if (pl) { setDestination(pl); if (inInterior && inInterior !== pl.enter) exitInterior(); } }
+      else goTab('home');
+      return;
+    }
     if (st.id === 'gift') openWallet();
     else if (st.id === 'job') { goTab('home').then(() => { phone.open(); phone.openApp('jobs'); }); }
     else if (st.id === 'eat') { if (Object.keys(S().inventory).length) { if (inInterior === 'apartment') panels.fridge(); else goTab('home'); } else { setDestination(poiById.market); if (inInterior) exitInterior(); toast('Prairie Corner Market is across Victoria Ave. Follow the arrow!', 'info'); } }
@@ -642,7 +702,12 @@ async function boot() {
       r.fresh.forEach((st, i) => setTimeout(() => { juice.floater(`✓ ${st.title}`, firstDay.el, 'good'); juice.pay(st.reward, firstDay.el); audio.chime('gain'); }, i * 450));
       if (r.finished) setTimeout(() => { juice.confetti(90); audio.chime('fanfare'); toast('First day in Regina: done! Here is a little bonus. Regina is yours.', 'good'); setTimeout(() => { S().onboarding.seenDone = true; store.commit('onboarding'); firstDay.render(true, true); }, 7000); }, r.fresh.length * 450 + 200);
     }
-    firstDay.render(false, play);
+    if (firstDay.graduated) {   // after the First day: Today in Regina, three small tasks a day (core/todo.js)
+      if (play) { const snowDay = (env?.snow ?? 0) > 0.5, r = updateTodo(store, Date.now(), { snow: snowDay });
+        r.fresh.forEach((k, i) => setTimeout(() => { juice.floater(`✓ ${k.title}`, firstDay.el, 'good'); juice.pay(TODO_PAY, firstDay.el); }, i * 450));
+        if (r.finished) setTimeout(() => { juice.pay(TODO_BONUS, firstDay.el, 'all three!'); audio.chime('fanfare'); juice.confetti(40); }, r.fresh.length * 450 + 200);
+        firstDay.renderTodo(todoStatus(store, Date.now(), { snow: snowDay }), true); } else firstDay.renderTodo({ day: '', tasks: [], count: 0 }, false);
+    } else firstDay.render(false, play);
     const fdb = firstDay.el.hidden ? 0 : Math.round(firstDay.el.getBoundingClientRect().bottom); if (fdb !== lastFdBottom) { lastFdBottom = fdb; if (homeView && !build.active) homeInsets(); }
     const want = play ? firstDay.next?.tab ?? null : null;
     if (want !== lastHintTab) { document.querySelectorAll('#navbar button').forEach((b) => b.classList.toggle('hint-pulse', !!want && b.dataset.tab === want)); lastHintTab = want; }
@@ -699,7 +764,7 @@ async function boot() {
     phone.close(); panels.close(); if (mapOpen) closeMap(); if (mapOverview) closeMapOverview();
     if (inInterior === 'apartment') { setHomeView(!homeView); return; }
     if (inInterior) await exitInterior();
-    const door = poiById.lofts; await enterInterior('apartment', { x: door.x, z: door.z, nx: 0, nz: 1 }); setHomeView(true);
+    await enterInterior('apartment', homeDoor()); setHomeView(true);
   }
   async function goTab(t) {
     if (creator || camMode || fading || gameMode !== 'play') return;
@@ -748,13 +813,27 @@ async function boot() {
     if (!ovPick) { el.innerHTML = `<div class="pc-head"><span class="pc-ico">📍</span><div><h3>You are here</h3><small>${esc(inInterior ? 'Indoors' : 'Out and about in Regina')}</small></div></div>`; return; }
     const p = ovPick, d = Math.hypot(p.x - player.pos.x, p.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)), dist = d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m', here = d < 40;
     el.innerHTML = `<div class="pc-head"><span class="pc-ico">${p.emoji}</span><div><h3>${esc(p.name.replace(/ \(Home\)/, ''))}</h3><small>${esc(p.area ?? 'Regina')} · ${here ? 'you are here' : dist + ' away'}</small></div><span class="pc-tag ${p.state === 'open' ? 'open' : ''}">${p.state === 'open' ? '● Open now' : 'Visit & explore'}</span></div>
-      <p class="pc-blurb">${esc(p.blurb)}</p><div class="pc-acts">${(p.acts ?? []).map((a) => { const id = actId(a); return id ? `<button class="pc-act" data-act="${id}">${esc(a)}</button>` : `<span class="${/\(soon\)/.test(a) ? 'soon' : ''}">${esc(a)}</span>`; }).join('')}</div>
+      <p class="pc-blurb">${esc(p.blurb)}</p>${hereNow(p.id)}<div class="pc-acts">${(p.acts ?? []).map((a) => { const id = actId(a); return id ? `<button class="pc-act" data-act="${id}">${esc(a)}</button>` : `<span class="${/\(soon\)/.test(a) ? 'soon' : ''}">${esc(a)}</span>`; }).join('')}</div>
       <div class="pc-go"><button class="gobtn primary" data-go="walk" ${here ? 'disabled' : ''}><b>🚶 Walk</b><small>${here ? 'Already here' : `Free · about ${mins} min`}</small></button><button class="gobtn" data-go="cab" ${here || fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)} · instant</small></button></div>`;
   }
   /** Place-card chips you can actually do (docs/AMAZING.md G6): an activity id, 'photo', or 'enter' (go inside). Null = a "soon" label. */
   const ACT_IDS = { 'Read on a bench': 'bench', 'People-watch': 'people', 'Hear the buskers': 'buskers', 'Window shop': 'window', 'Watch the geese': 'geese', 'Walk the shoreline': 'shore', 'Watch the sunset': 'sky', 'Walk the grounds': 'grounds', 'Take a photo': 'photo', 'Buy groceries': 'enter', 'Bakery & deli': 'enter', 'Work a shift': 'enter', 'Try on outfits': 'enter', 'Toques & accessories': 'enter', 'Vote': 'enter', 'Meet the mayor': 'enter', 'Hand out flyers': 'enter', 'Treadmill': 'enter', 'Weights': 'enter', 'Yoga': 'enter', 'Take a trip': 'trip' };
+  /** Residents at this place right now (core/routines.js), always labelled NPC: tap to say hi (and meet them the first time). */
+  function hereNow(placeId) {
+    const c = clock(), here = residentsAt(placeId, { weekday: new Date(Date.UTC(c.year, c.month - 1, c.day)).getUTCDay(), hour: c.hour, kind: weather.kind });
+    if (!here.length) return '';
+    return `<div class="pc-here"><small>Here now</small>${here.map(({ res, doing }) => `<button class="pc-npc" data-npc="${res.id}"><span class="pc-av" style="background:${res.color}">${res.emoji}</span><span><b>${esc(res.name.split(' ')[0])}</b> <em>NPC</em><small>${esc(doing)}</small></span></button>`).join('')}</div>`;
+  }
   function actId(label) { const k = String(label).replace(/^\P{L}+/u, '').trim(); return ACT_IDS[k] ?? null; }
   $('ov-card').addEventListener('click', (e) => {
+    const nb = e.target.closest('[data-npc]');
+    if (nb && ovPick) {   // say hi to a resident who is here now (walk over first if you are not)
+      const p = ovPick, id = nb.dataset.npc, res = RES_BY_ID[id];
+      if (Math.hypot(p.x - player.pos.x, p.z - player.pos.z) > 70) { closeMapOverview(); setDestination(p); toast(`${res.name.split(' ')[0]} is at ${p.name.replace(/ \(Home\)/, '')}. Follow the arrow!`, 'info'); return; }
+      if (!S().friends?.[id]) { const r = SOC.addFriend(store, id); if (r.ok) { audio.chime('gain'); juice.floater(`👋 You met ${res.name.split(' ')[0]}!`, nb, 'good'); toast(`${res.name} (NPC) is now your friend. Say hi in Messages any time.`, 'good'); renderPlaceCard({}, p.id); } else toast(r.error, 'info'); }
+      else { SOC.chat(store, id); audio.chime('pop'); toast(`${res.emoji} ${res.name.split(' ')[0]}: “${res.lines[Math.floor(Math.random() * res.lines.length)]}”`, 'info'); }
+      return;
+    }
     const ab = e.target.closest('[data-act]');
     if (ab && ovPick && !ovPick.board) {   // do it here if you are here; otherwise walk there first
       const p = ovPick, id = ab.dataset.act, near = Math.hypot(p.x - player.pos.x, p.z - player.pos.z) < 70;
@@ -984,16 +1063,20 @@ async function boot() {
     phone.tick(); tickFirstDay(); if ((Date.now() / 1000 | 0) % 30 === 0) tellFestival();
   }, 1000);
   setInterval(() => { if (gameMode === 'play') { phone.tick(); } }, 30000);
+  setInterval(() => {   // the soundscape follows where you are, the hour, the season and the real wind
+    const c = clock(); amb.update({ outdoors: !inInterior, night: env?.night ?? 0, season: env?.season ?? seasonOf(c.month), hour: c.hour, kind: weather.kind, wind: weather.wind, temp: weather.temp ?? 10,
+      downtown: Math.abs(player.pos.x) < 700 && Math.abs(player.pos.z) < 800, volume: gameMode === 'play' || gameMode === 'title' ? S().phone.volume : 0 });
+  }, 1000);
 
   /* ---------- main loop ---------- */
-  const clockT = new THREE.Clock(); let fpsAcc = 0, fpsN = 0, lowT = 0, highT = 0, titleT = 0;
+  const clockT = new THREE.Timer(); let fpsAcc = 0, fpsN = 0, lowT = 0, highT = 0, titleT = 0;   // THREE.Clock is deprecated in r186
   const tmp = new THREE.Vector3();
   const beacon = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 90, 24, 1, true), new THREE.MeshBasicMaterial({ color: '#ffb347', transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false }));
   beacon.visible = false; scene.add(beacon);
 
   const loop = () => {
     requestAnimationFrame(loop);
-    const dt = Math.min(0.05, clockT.getDelta());
+    clockT.update(); const dt = Math.min(0.05, clockT.getDelta());
     // adaptive quality
     fpsAcc += dt; fpsN++;
     if (fpsAcc > 2) {
@@ -1035,7 +1118,8 @@ async function boot() {
     // destination beacon
     const dst = S().destination; beacon.visible = !!dst && !inInterior && gameMode === 'play';
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
-    updateGigWorld(dt); updatePumpkins();
+    updateGigWorld(dt); updatePumpkins(); updateBreath(dt);
+    { const hd = HOME_DOORS[layoutOf(S()).id]; homeSign.visible = !!hd && !inInterior; if (hd) { homeSign.position.set(hd.x + 1.6, 0, hd.z); homeSign.rotation.y = Math.PI; } }
     // interaction prompt
     if (gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
     // in the dollhouse the prompt floats over the thing you can use, like a speech bubble, instead of sitting on the room

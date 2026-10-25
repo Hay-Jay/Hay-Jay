@@ -94,6 +94,35 @@ generated procedurally — no third-party art assets, so there are no asset lice
 * **Multi-room homes** — move up from the Studio to a **One-bedroom** ($1,500) and a **Bungalow** ($5,000 total: bathroom, den, garage with a car and a Storage shelf, and a fenced yard) from the phone's **Homes** app. Nothing you own is ever lost: pieces that still fit stay where they are, the rest wait in storage. Each room has its own paint and floor (Design shelf room chips); build mode shows a cutaway with a Walls button and a room focus strip so decorating works on a phone. Rules are server-portable (`core/lot.js`, `core/move.js`); design and decisions in [`docs/HOMES.md`](docs/HOMES.md). No rent yet.
 * **Compact island Regina** — neighbourhoods ring downtown, green belts between, beach and sea around. Everything is original, fictional and offline-first.
 
+## What's new in Milestone 6: "make it amazing" (in progress)
+
+The plan, the research behind it and the money tracks are in [`docs/AMAZING.md`](docs/AMAZING.md).
+
+* **A bright city** — the sky now goes through tone mapping and colour space (night is dusk-blue, never black), light roads and sidewalks,
+  sky-blue glass, toy-town roofs, boulevard elms, soft shadows and anti-aliasing on phones. Street brightness roughly doubled.
+* **A living dollhouse** — New life and Continue start at Home, in a 3/4 view you can turn and zoom, with real day and night inside. Tap a piece
+  of furniture and you walk over and use it; the prompt floats over the object.
+* **Every action answers back** — floating "+22 Fun" and "+$66", coins flying into your wallet, chimes, confetti for firsts, material thuds
+  when furniture lands, readable need bars, and a "why you feel this way" list behind the mood pill.
+* **First day in Regina** — a six-step card (gift, place a piece, eat, visit, get a job, first shift) with small rewards, then **Today in Regina**:
+  three small tasks a day. No random events for a new player's first 10 minutes, then at most one every 5 minutes (or none in Quiet mode).
+* **Ways to earn** — the **Odd Jobs** app: snow shovelling when it really snows, raking in autumn, grocery runs with a tip, dog walks (with a pup),
+  flyers and busking on Scarth Street. Payday now feels like payday. The **daily gift** is seven stamps that never reset.
+* **Regina** — **Victoria Park** on its real block (paths, fountain, elms, benches you can use), a **Pumpkin Walk** hunt on 29–31 October,
+  residents with routines ("Here now" on place cards), real winter (snow cover that follows the weather, a frozen Wascana, breath in the cold),
+  a soundscape that follows the real wind, and a **Goodnight** card with tomorrow's forecast.
+* **Supporting the game** — an [Advertise page](advertise.html) where a real Regina business can preview its ad on an in-game billboard
+  (founding prices, ad rules, booking through the owner), labelled **Sponsored** billboard rows with a leaving-the-game screen, and a
+  **Supporters' Mural** in Victoria Park. Real money never enters the game or buys anything in it.
+
+### Owner: adding a sponsor or a supporter
+
+No payment code runs in the game. After an advertiser pays you (invoice or payment link) and you have reviewed the ad, add a row to `SPONSORED`
+in [`src/data/sponsors.js`](src/data/sponsors.js) (board id, business, a line of up to 40 characters, an https link, a theme, `from` and `to`
+Regina dates) and push to `main`: it goes live on the next deploy and comes off by itself after `to`. Supporters who want their name on the mural
+go in `SUPPORTERS`. Set `CONTACT_URL` (how advertisers reach you) and `SUPPORT_URL` (your support page) to turn on those buttons; until then the
+pages say "opens soon". Rows are validated (`core/sponsors.js`, tested): a bad row is skipped, never shown.
+
 ## Economy & anti-exploit (important)
 
 Money only moves through `src/core/ledger.js`: integer cents, positive/limited amounts, no overdrafts, idempotency keys,

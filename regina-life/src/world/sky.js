@@ -74,7 +74,7 @@ export class Atmosphere {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     this.precip = kind === 'rain'
       ? new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: '#b9cde6', transparent: true, opacity: 0.45, fog: true }))
-      : new THREE.Points(g, new THREE.PointsMaterial({ color: '#ffffff', size: 0.16, transparent: true, opacity: 0.9, depthWrite: false }));
+      : new THREE.Points(g, new THREE.PointsMaterial({ color: '#ffffff', map: glowTexture(), size: 0.42, transparent: true, opacity: 0.95, depthWrite: false, alphaTest: 0.01 }));   // soft, readable flakes (they were 16 cm specks)
     this.precip.frustumCulled = false; this.scene.add(this.precip);
   }
 
@@ -134,7 +134,9 @@ export class Atmosphere {
     const pk = kind === 'rain' || kind === 'storm' || kind === 'drizzle' ? 'rain' : kind === 'snow' ? 'snow' : 'none';
     if (pk !== this.precipKind) this._makePrecip(pk);
     // snow cover: sticks in winter or after snowfall
-    const snow = season === 'winter' ? 1 : (kind === 'snow' ? 0.6 : 0);
+    // snow on the ground follows Regina, not the calendar's tidy seasons: a snowfall, deep winter, or a cold snap in November or March (docs/AMAZING.md D10)
+    const coldMonth = [11, 12, 1, 2, 3].includes(clock.month), t0 = weather?.temp ?? 5;
+    const snow = kind === 'snow' ? 1 : season === 'winter' ? (t0 > 4 ? 0.6 : 1) : coldMonth && t0 < -3 ? 0.75 : 0;
     this.env = { night, sunAlt: alt, season, snow, cloud, kind, dusk, phase: night > 0.85 ? 'night' : night > 0.15 ? 'twilight' : 'day', temp: weather?.temp };
     this.exposureBase = 1.0 + night * 0.12;
     if (this.hubLift) { // home-screen map: keep it readable whatever the hour

@@ -19,6 +19,7 @@ import { EVENT_BY_ID } from './events.js';
 import { validDaily } from './daily.js';
 import { sanitizeOnboarding } from './onboarding.js';
 import { sanitizeGigs } from './gigs.js';
+import { sanitizeTodo } from './todo.js';
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const arr = (v) => (Array.isArray(v) ? v : []);
@@ -98,6 +99,7 @@ export function sanitize(s, now = Date.now()) {
   s.stats = stats;
   s.onboarding = sanitizeOnboarding(s.onboarding);
   s.gigs = sanitizeGigs(s.gigs);
+  s.todo = sanitizeTodo(s.todo);
   s.festivals = isObj(s.festivals) ? { ...(isObj(s.festivals.pumpkinHunt) ? { pumpkinHunt: s.festivals.pumpkinHunt } : {}), ...(Array.isArray(s.festivals.told) ? { told: s.festivals.told.filter((x) => typeof x === 'string').slice(-20) } : {}) } : {};
   s.diary = arr(s.diary).filter((d) => isObj(d) && Number.isFinite(d.t) && typeof d.text === 'string').map((d) => ({ t: d.t, icon: str(d.icon).slice(0, 4), text: d.text.slice(0, 140) })).slice(0, 200);
   return s;
