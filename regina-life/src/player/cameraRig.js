@@ -19,6 +19,42 @@ export function buildFrame(bbox, { aspect = 1, inset = 0, top = 0, fovDeg = 46 }
   const y = Math.max((hd + 0.4) / (th * f), (hw + 0.5) / (th * aspect));
   return { x: cx, y, z: cz + 2 + 0.06 * y, lookX: cx, lookZ: cz + 0.2 };
 }
+/**
+ * The Home view's "living dollhouse" camera: the home seen in 3/4 from `pitch` radians above the horizon and `yaw` radians round from the south
+ * (positive = from the south-east). At zoom 1 the distance is the smallest one at which every corner of the home's box (floor to wall top, `wallH`)
+ * projects inside the free part of the screen (between the `top` and `inset` bars, with a small margin): the same promise buildFrame makes for the
+ * straight-down view, kept for any aspect and any turn. `zoom` scales that distance; zooming in past 0.85 drifts the look point towards `focus` (the
+ * player), so the wheel or a pinch takes you to your character. Pure; returns { x, y, z, lookX, lookY, lookZ, fit }.
+ */
+export const ORBIT = Object.freeze({ yaw: 0.32, pitch: 0.95, zoom: 1, minYaw: -0.85, maxYaw: 0.85, minPitch: 0.6, maxPitch: 1.3, minZoom: 0.38, maxZoom: 1.25 });
+export function orbitFit(bbox, { aspect = 1, inset = 0, top = 0, fovDeg = 46, yaw = ORBIT.yaw, pitch = ORBIT.pitch, wallH = 2.6, margin = 0.94 } = {}) {
+  const cx = (bbox.x0 + bbox.x1) / 2, cz = (bbox.z0 + bbox.z1) / 2, ly = 0.6, f = THREE.MathUtils.clamp(1 - inset - top, 0.15, 1);
+  const tv = Math.tan(THREE.MathUtils.degToRad(fovDeg / 2)), th = tv * aspect, cp = Math.cos(pitch);
+  const dir = [Math.sin(yaw) * cp, Math.sin(pitch), Math.cos(yaw) * cp];                       // from the look point towards the camera
+  const fw = [-dir[0], -dir[1], -dir[2]], rl = Math.hypot(fw[2], fw[0]), rt = [-fw[2] / rl, 0, fw[0] / rl];   // right = forward x up
+  const up = [rt[1] * fw[2] - rt[2] * fw[1], rt[2] * fw[0] - rt[0] * fw[2], rt[0] * fw[1] - rt[1] * fw[0]];
+  // the walls on the camera's side are cut to 0.9 m (world/homeWalls.js cutSidesFor: the south one, plus east or west once the view turns), so a corner where
+  // both walls are cut only needs its low top in view: framing the full 2.6 m there would leave a band of empty lawn
+  const cutE = yaw > 0.12, cutW = yaw < -0.12;
+  const pts = []; for (const x of [bbox.x0, bbox.x1]) for (const z of [bbox.z0, bbox.z1]) {
+    const low = z === bbox.z1 && ((x === bbox.x1 && cutE) || (x === bbox.x0 && cutW)), h = low ? Math.min(wallH, 0.9) : wallH;
+    for (const y of [0, h]) pts.push([x - cx, y - ly, z - cz]);
+  }
+  const fits = (d) => pts.every((p) => {
+    const v = [p[0] - dir[0] * d, p[1] - dir[1] * d, p[2] - dir[2] * d], depth = v[0] * fw[0] + v[1] * fw[1] + v[2] * fw[2]; if (depth <= 0.1) return false;
+    const sx = (v[0] * rt[0] + v[1] * rt[1] + v[2] * rt[2]) / (depth * th), sy = (v[0] * up[0] + v[1] * up[1] + v[2] * up[2]) / (depth * tv);
+    return Math.abs(sx) <= margin && Math.abs(sy) <= f * margin;
+  });
+  let lo = 1, hi = 400; for (let i = 0; i < 32; i++) { const mid = (lo + hi) / 2; if (fits(mid)) hi = mid; else lo = mid; }
+  return hi;
+}
+export function orbitFrame(bbox, { aspect = 1, inset = 0, top = 0, fovDeg = 46, yaw = ORBIT.yaw, pitch = ORBIT.pitch, zoom = ORBIT.zoom, focus = null, fit = null } = {}) {
+  const d0 = fit ?? orbitFit(bbox, { aspect, inset, top, fovDeg, yaw, pitch }), d = d0 * zoom;
+  const cx = (bbox.x0 + bbox.x1) / 2, cz = (bbox.z0 + bbox.z1) / 2, k = focus ? THREE.MathUtils.clamp((0.85 - zoom) / 0.4, 0, 1) : 0;
+  const lx = cx + (focus ? (focus.x - cx) * k : 0), lz = cz + (focus ? (focus.z - cz) * k : 0), ly = 0.6 + 0.5 * k;
+  const cp = Math.cos(pitch);
+  return { x: lx + Math.sin(yaw) * cp * d, y: ly + Math.sin(pitch) * d, z: lz + Math.cos(yaw) * cp * d, lookX: lx, lookY: ly, lookZ: lz, fit: d0 };
+}
 /** The Studio's floor rect: the build frame until a layout says otherwise (so Studio behaviour and tests do not change). */
 const STUDIO_BBOX = () => ({ ...lotOf(STUDIO).bbox });
 
@@ -33,7 +69,17 @@ export class CameraRig {
     this.mode = 'follow'; this.autoCenter = true; this.indoor = false; this.bounds = null; this.grid = null;
     this.shoulder = 0.42; this.fov = 62; this.idle = 0; this.orbitSpin = 0;
     this.buildBBox = STUDIO_BBOX(); this.buildFocus = null; this.buildLook = new THREE.Vector3(0, 0, 0.2);
+    this.orbit = false; this.resetOrbit(); this.spinHold = 0;   // orbit: the Home view's 3/4 camera (build mode proper stays top-down for precise placing)
     this._v = new THREE.Vector3();
+  }
+  resetOrbit() { this.orbitYaw = ORBIT.yaw; this.orbitPitch = ORBIT.pitch; this.orbitZoom = ORBIT.zoom; }
+  /** The overhead camera's goal right now: the top-down build frame, or the orbiting 3/4 dollhouse view. */
+  _goal(player) {
+    if (!this.orbit) { const fr = this._frame(); return { x: fr.x, y: fr.y, z: fr.z, lookX: fr.lookX, lookY: 0, lookZ: fr.lookZ }; }
+    const box = this.buildFocus ?? this.buildBBox, o = { aspect: this.camera.aspect, inset: this.buildInset || 0, top: this.buildTop || 0, yaw: this.orbitYaw, pitch: this.orbitPitch };
+    const key = `${box.x0},${box.z0},${box.x1},${box.z1}|${o.aspect.toFixed(3)}|${o.inset.toFixed(3)}|${o.top.toFixed(3)}|${o.yaw.toFixed(3)}|${o.pitch.toFixed(3)}`;
+    if (this._fitKey !== key) { this._fitKey = key; this._fit = orbitFit(box, o); }   // the fit only changes when the frame, the bars or the turn do
+    return orbitFrame(box, { ...o, zoom: this.orbitZoom, focus: player?.pos ?? null, fit: this._fit });
   }
   /** The floor rect the overhead view frames (the union of the home's room floor rects: lotOf(layout).bbox). Defaults to the Studio's. */
   setBuildFrame(bbox) { this.buildBBox = bbox ? { x0: bbox.x0, z0: bbox.z0, x1: bbox.x1, z1: bbox.z1 } : STUDIO_BBOX(); }
@@ -47,13 +93,20 @@ export class CameraRig {
   /** Camera height that fits the home (or the focused room) into the part of the screen the bars/sheet do not cover. */
   _buildHeight() { return this._frame().y; }
   /** Jump the overhead camera straight to where it is easing to (tests and screenshots use it so a slow frame rate cannot leave it mid-glide). */
-  snapBuild() { if (this.mode !== 'build') return; const fr = this._frame(); this.pos.set(fr.x, fr.y, fr.z); this.buildLook.set(fr.lookX, 0, fr.lookZ); this.fov = 46; }
+  snapBuild(player) { if (this.mode !== 'build') return; const g = this._goal(player); this.pos.set(g.x, g.y, g.z); this.buildLook.set(g.lookX, g.lookY, g.lookZ); this.fov = 46; }
   update(dt, input, player, { speedNorm = 0, sensitivity = 1 } = {}) {
     if (this.mode === 'build') {           // overhead "dollhouse" view for the home editor
-      input.consumeLook(); input.consumeZoom();
+      const l = input.consumeLook(), zm = input.consumeZoom();
+      if (this.orbit) {                     // Home view: drag to turn the dollhouse, wheel or pinch to zoom (the playtests found the camera ignored the mouse)
+        const C = THREE.MathUtils.clamp;
+        this.orbitYaw = C(this.orbitYaw - l.dx * 0.0042 * sensitivity, ORBIT.minYaw, ORBIT.maxYaw);
+        this.orbitPitch = C(this.orbitPitch + l.dy * 0.003 * sensitivity, ORBIT.minPitch, ORBIT.maxPitch);
+        if (zm) this.orbitZoom = C(this.orbitZoom * Math.exp(zm * 0.12), ORBIT.minZoom, ORBIT.maxZoom);
+        this.yaw = this.orbitYaw;           // walking stays camera-relative: "up" walks away from the camera
+      }
       // fit the whole home (or the focused room) into the part of the screen the build bar does not cover
-      const fr = this._frame(), top = this.buildTop || 0, k = 1 - Math.exp(-dt * 6);
-      this.pos.lerp(this._v.set(fr.x, fr.y, fr.z), k); this.buildLook.lerp(this._v.set(fr.lookX, 0, fr.lookZ), k);
+      const g = this._goal(player), top = this.buildTop || 0, k = 1 - Math.exp(-dt * 6);
+      this.pos.lerp(this._v.set(g.x, g.y, g.z), k); this.buildLook.lerp(this._v.set(g.lookX, g.lookY, g.lookZ), k);
       this.camera.position.copy(this.pos); this.camera.lookAt(this.buildLook);
       const W = innerWidth, H = innerHeight, y = Math.round((((this.buildInset || 0) - top) * H) / 2), key = `${W}x${H}:${y}`;
       if (this._vo !== key) { this._vo = key; this.camera.setViewOffset(W, H, 0, y, W, H); }
@@ -64,7 +117,7 @@ export class CameraRig {
     this.yaw -= l.dx * 0.0046 * sensitivity; this.pitch += l.dy * 0.0036 * sensitivity;
     this.pitch = THREE.MathUtils.clamp(this.pitch, -0.25, 1.25);
     if (z) this.targetDist = THREE.MathUtils.clamp(this.targetDist + z, this.minDist, this.indoor ? 5.5 : this.maxDist);
-    if (this.mode === 'creator') { this.targetDist = 2.35; this.pitch = 0.06; if (!l.dx) this.yaw += dt * 0.35; }
+    if (this.mode === 'creator') { this.targetDist = 2.35; this.pitch = 0.06; this.spinHold -= dt; if (!l.dx && this.spinHold <= 0) this.yaw += dt * 0.35; }   // a slow turntable that waits while you drag it round yourself
     if (this.mode === 'selfie') { this.targetDist = 1.9; }
     // gentle auto-recentre while running forward and not touching the camera
     if (this.autoCenter && this.mode === 'follow' && speedNorm > 0.2 && input.idleLookMs > 1800 && !player.sitting) {

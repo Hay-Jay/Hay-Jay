@@ -18,7 +18,7 @@ import { lotOf } from '../core/lot.js';
 import { tileTexture, woodTexture } from './textures.js';
 import { furnitureModel } from './furnitureModels.js';
 import { FIXTURE_BUILDERS, FIXTURE_META } from './homeKinds.js';
-import { WALL_MODES, applyWallMode, buildWallExtras, sideOfNormal, sideOfPoint } from './homeWalls.js';
+import { WALL_MODES, CUT_SIDES, applyWallMode, buildWallExtras, sideOfNormal, sideOfPoint } from './homeWalls.js';
 import { buildYard } from './homeYard.js';
 
 const EPS = 1e-6, T = WALL_T;
@@ -374,13 +374,19 @@ export function buildHome(layout, kit) {
     const show = mode === 'walk' && viewer ? nearby(viewer) : null;
     for (const r of geo.rooms) roomGroups[r.id].visible = !show || show.has(r.id);
   };
+  let cutSides = CUT_SIDES;   // the exterior walls 'cut' lowers: the south one, plus the east or west one the Home view's orbiting camera looks over
   const apply = (m) => {
     mode = m; const walk = m === 'walk'; resetCut();
     for (const c of parts.ceilings) c.visible = walk;
     for (const c of parts.ceilFixtures) c.visible = walk;
     if (parts.yard) parts.yard.visible = !walk;
     roomVisibility();
-    applyWallMode(parts, m);   // B2: 'cut' and 'down'; it must also restore full walls for 'walk' and 'up'
+    applyWallMode(parts, m, cutSides);   // B2: 'cut' and 'down'; it must also restore full walls for 'walk' and 'up'
+  };
+  /** Which exterior sides the 'cut' mode lowers (['S'] by default). Re-applies only when it changed and the cutaway is showing. */
+  const setCutSides = (sides) => {
+    const next = Array.isArray(sides) && sides.length ? sides : CUT_SIDES;
+    if (next.join() === cutSides.join()) return; cutSides = next; if (mode === 'cut') applyWallMode(parts, mode, cutSides);
   };
   const setWallMode = (m) => {
     if (!WALL_MODES.includes(m)) return;
@@ -467,7 +473,7 @@ export function buildHome(layout, kit) {
 
   return {
     layout, rooms: geo.rooms, bounds: geo.bounds, spawn: { ...geo.entry.spawn }, exit: { ...geo.entry.exit }, roomGroups, yard: parts.yard, parts, lot: geo,
-    setHome, setOverhead, setWallMode, setViewer, setCameraCut, setRoomLights, roomLightsOn: (id) => !!lit[id]?.on,
+    setHome, setOverhead, setWallMode, setCutSides, setViewer, setCameraCut, setRoomLights, roomLightsOn: (id) => !!lit[id]?.on,
     get wallMode() { return mode; }, get overheadMode() { return pick; }, get viewerRoom() { return viewer; },
     dispose,
   };

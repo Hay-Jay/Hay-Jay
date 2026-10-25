@@ -38,17 +38,22 @@ export function sideOfPoint(bbox, x, z) {
  * How tall the wall described by `tag` ({ role, side }) stands in `mode`, in metres: CEIL_H full, CUT_H lowered, 0 hidden.
  * This is the one place the rules of the four modes live.
  */
-export function wallHeightIn(mode, tag) {
+export function wallHeightIn(mode, tag, cutSides = CUT_SIDES) {
   if (mode === 'down') return 0;
   if (mode !== 'cut') return CEIL_H;
   const role = tag?.role, side = tag?.side ?? null;
   if (role === 'lintel') return 0;                                   // a lintel over a doorway has nothing to hold up at 0.9 m
-  if (role === 'partition' || (role === 'exterior' && side === 'S')) return CUT_H;
+  if (role === 'partition' || (role === 'exterior' && cutSides.includes(side))) return CUT_H;
   return CEIL_H;
 }
+/** The exterior sides 'cut' lowers by default: the south wall, the one nearest the overhead camera. The Home view's 3/4 camera can orbit, and then also cuts
+ *  the east or west wall it looks over (`cutSidesFor`). */
+export const CUT_SIDES = Object.freeze(['S']);
+/** The exterior sides to lower for a dollhouse camera `yaw` radians round from the south (positive = towards the east). */
+export function cutSidesFor(yaw = 0) { return yaw > 0.12 ? ['S', 'E'] : yaw < -0.12 ? ['S', 'W'] : ['S']; }
 
 /** Height of the wall an opening (window, door, sign...) is mounted on: a partition when it has no side, else the exterior wall of that side. */
-const hostHeight = (mode, tag) => wallHeightIn(mode, { role: tag?.side ? 'exterior' : 'partition', side: tag?.side ?? null });
+const hostHeight = (mode, tag, cutSides) => wallHeightIn(mode, { role: tag?.side ? 'exterior' : 'partition', side: tag?.side ?? null }, cutSides);
 
 /**
  * Squash a floor-standing piece so it ends at `h` metres. It is scaled about the floor (y = 0), so a mesh whose origin is its centre (the front door)
@@ -60,16 +65,16 @@ function lowerTo(m, h, fullH) {
 }
 const heightOf = (m) => { const t = m.userData.wall?.height ?? m.geometry?.parameters?.height; if (t) return t; m.geometry?.computeBoundingBox?.(); return m.geometry?.boundingBox?.max.y ?? 1; };
 
-export function applyWallMode(parts, mode) {
+export function applyWallMode(parts, mode, cutSides = CUT_SIDES) {
   if (!parts || !WALL_MODES.includes(mode)) return;
   const walk = mode === 'walk';
   for (const m of parts.walls || []) {
-    const h = wallHeightIn(mode, m.userData.wall); m.visible = h > 0; m.scale.y = h > 0 ? h / CEIL_H : 1;   // the box's origin is at its base, so scale.y lowers it
+    const h = wallHeightIn(mode, m.userData.wall, cutSides); m.visible = h > 0; m.scale.y = h > 0 ? h / CEIL_H : 1;   // the box's origin is at its base, so scale.y lowers it
   }
-  for (const m of parts.lintels || []) { const h = wallHeightIn(mode, m.userData.wall); m.visible = h > 0; m.scale.y = 1; }
+  for (const m of parts.lintels || []) { const h = wallHeightIn(mode, m.userData.wall, cutSides); m.visible = h > 0; m.scale.y = 1; }
   for (const m of parts.trims || []) m.visible = mode !== 'down';           // skirting hugs the wall bases: no walls, no skirting
   for (const m of parts.openings || []) {
-    const tag = m.userData.wall, h = hostHeight(mode, tag);
+    const tag = m.userData.wall, h = hostHeight(mode, tag, cutSides);
     if (tag?.role === 'door') { m.visible = h > 0; lowerTo(m, h, heightOf(m)); } else m.visible = h >= CEIL_H;
   }
   for (const c of parts.ceilings || []) c.visible = walk;

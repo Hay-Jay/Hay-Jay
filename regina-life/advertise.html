@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#bfe3f5">
+  <meta name="description" content="Put your Regina business on a billboard in Regina Life, a cozy life game set in Regina, Saskatchewan. Founding advertiser rates, real links, clearly labelled.">
+  <title>Advertise in Regina Life</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2322b573'/%3E%3Cpath d='M12 46V28l10-8 10 8v18M32 46V18l10-8 10 8v28' fill='none' stroke='%23fff' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+</head>
+<body class="adv">
+  <header class="adv-hero">
+    <a class="adv-back" href="./">← Back to the game</a>
+    <h1><span>Your Regina business,</span> <b>on a billboard in Regina Life</b></h1>
+    <p>Regina Life is a free, cozy life game set in a bright, toy-sized Regina, with real Regina time and weather. Its billboards rotate ads from real local businesses, each clearly labelled <em>Sponsored</em> and linked to your website.</p>
+  </header>
+
+  <main>
+    <section class="adv-card adv-try">
+      <h2>Try your ad</h2>
+      <p class="muted">Type it in and watch it on a board in the game. Nothing is sent anywhere.</p>
+      <div class="adv-try-grid">
+        <div class="adv-board"><canvas id="adv-preview" width="768" height="384" aria-label="Billboard preview"></canvas><i class="adv-pole l"></i><i class="adv-pole r"></i></div>
+        <form id="adv-form" class="adv-form" autocomplete="off">
+          <label>Business name<input id="adv-biz" maxlength="60" placeholder="Your business" value=""></label>
+          <label>Your line (up to 40 characters)<input id="adv-text" maxlength="40" placeholder="Warm bannock, cold mornings" value=""></label>
+          <label>Website<input id="adv-url" maxlength="200" placeholder="https://yourbusiness.ca" inputmode="url"></label>
+          <fieldset><legend>Colours</legend><div id="adv-themes" class="adv-themes"></div></fieldset>
+          <label class="adv-check"><input id="adv-founding" type="checkbox" checked> Founding sponsor badge</label>
+          <p id="adv-url-note" class="muted small"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="adv-card">
+      <h2>Prices</h2>
+      <div id="adv-tiers" class="adv-tiers"></div>
+      <p class="muted small">Prices are in Canadian dollars for 7 days. Each board shares its screen time with a few other ads, so every ad gets a fair turn. Bookings are reviewed by a person before they go live.</p>
+    </section>
+
+    <section class="adv-card">
+      <h2>How it works</h2>
+      <ol class="adv-steps">
+        <li><b>Send us your ad.</b> Your business name, your line, your link and the board size you want.</li>
+        <li><b>We review it</b> against the ad rules below and reply with an invoice or a payment link.</li>
+        <li><b>It goes live</b> for 7 days on your boards, labelled <em>Sponsored</em> with your website's name. Players who tap it see a "you're leaving the game" screen first.</li>
+      </ol>
+      <div id="adv-contact" class="adv-contact"></div>
+    </section>
+
+    <section class="adv-card">
+      <h2>Straight talk</h2>
+      <ul class="adv-honest">
+        <li><b>We're new.</b> We don't publish audience numbers yet, and we won't make them up. Founding rates reflect that.</li>
+        <li><b>Your money never touches the game's money.</b> Prairie Dollars are fictional and can't be bought with your ad spend, and ads never change how the game plays.</li>
+        <li><b>No ad trackers.</b> The game has no ad tracking, and your ad's link is a plain link to your site.</li>
+      </ul>
+    </section>
+
+    <section class="adv-card">
+      <h2>Ad rules</h2>
+      <ul class="adv-rules">
+        <li>Real, legal Canadian businesses and community groups only.</li>
+        <li>No political or election ads, no alcohol, cannabis, tobacco, vaping, gambling or adult content, and nothing aimed at kids.</li>
+        <li>Your own words and your own brand: no other company's marks, no misleading claims (we follow the spirit of Ad Standards Canada's code).</li>
+        <li>Links must be https and go to your own site.</li>
+        <li>We may decline any ad. If we do, you pay nothing.</li>
+      </ul>
+    </section>
+
+    <section class="adv-card adv-support" id="support">
+      <h2>Love the game? Support it</h2>
+      <p>Regina Life is free, and it will stay free. If you'd like to help keep it growing, you can support it directly. Supporters who want to can have their name painted on the <b>Supporters' Mural</b> in the game's Victoria Park. It's a thank-you, not a perk: support never buys anything in the game.</p>
+      <div id="adv-support"></div>
+      <div id="adv-mural" class="adv-mural"></div>
+    </section>
+  </main>
+
+  <footer class="adv-foot">Regina Life is an independent game, not affiliated with the City of Regina or any business shown in it. Prairie Dollars are fictional. <a href="./">Play Regina Life</a></footer>
+  <script type="module" src="/src/advertise.js"></script>
+</body>
+</html>

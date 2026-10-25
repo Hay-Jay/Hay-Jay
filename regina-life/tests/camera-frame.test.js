@@ -1,7 +1,7 @@
 /** The overhead build camera: the pure buildFrame(), the rig's frame/focus state, and a real projection check that the whole home fits the free screen. */
 import { describe, it, expect, afterEach } from 'vitest';
 import * as THREE from 'three';
-import { CameraRig, buildFrame } from '../src/player/cameraRig.js';
+import { CameraRig, buildFrame, orbitFrame } from '../src/player/cameraRig.js';
 import { lotOf } from '../src/core/lot.js';
 import { HOMES, STUDIO } from '../src/data/homes.js';
 
@@ -126,5 +126,38 @@ describe('CameraRig: build frame and focus', () => {
     const rig = mk(), player = { pos: new THREE.Vector3(), sitting: null }; rig.snapBuild(); for (let i = 0; i < 60; i++) rig.update(1 / 60, input, player);
     rig.camera.updateMatrixWorld(true); const v = new THREE.Vector3(0, 0, 0.2).project(rig.camera), py = ((1 - v.y) / 2) * 680;
     expect(py).toBeCloseTo((0.15 * 680 + (1 - 0.18) * 680) / 2, 0); expect(v.x).toBeCloseTo(0, 6);
+  });
+});
+
+describe('orbitFrame: the Home view\'s 3/4 dollhouse camera', () => {
+  it('every home, every screen, every turn: all eight corners of the home (floor and wall tops) project inside the free band', () => {
+    for (const id of ['studio', 'onebed', 'bungalow']) {
+      const bbox = lotOf(HOMES[id]).bbox;
+      for (const [W, H] of SCREENS) for (const [inset, top] of [[0.055, 0.15], [0.22, 0.12], [0.6, 0.1]]) for (const yaw of [-0.85, -0.3, 0, 0.32, 0.85]) for (const pitch of [0.6, 0.95, 1.3]) {
+        const o = orbitFrame(bbox, { aspect: W / H, inset, top, yaw, pitch }), cam = new THREE.PerspectiveCamera(46, W / H, 0.1, 600);
+        cam.position.set(o.x, o.y, o.z); cam.lookAt(o.lookX, o.lookY, o.lookZ); cam.setViewOffset(W, H, 0, Math.round(((inset - top) * H) / 2), W, H); cam.updateProjectionMatrix(); cam.updateMatrixWorld(true);
+        for (const x of [bbox.x0, bbox.x1]) for (const z of [bbox.z0, bbox.z1]) for (const y of [0, 2.6]) {
+          const v = new THREE.Vector3(x, y, z).project(cam), px = ((v.x + 1) / 2) * W, py = ((1 - v.y) / 2) * H, tag = `${id} ${W}x${H} bars ${inset}/${top} yaw ${yaw} pitch ${pitch} corner ${x},${y},${z}`;
+          expect(px, tag).toBeGreaterThanOrEqual(-1); expect(px, tag).toBeLessThanOrEqual(W + 1);
+          expect(py, tag).toBeGreaterThanOrEqual(top * H - 2); expect(py, tag).toBeLessThanOrEqual((1 - inset) * H + 2);
+        }
+      }
+    }
+  });
+  it('the fit is tight (not miles away): some corner is near an edge', () => {
+    const bbox = lotOf(STUDIO).bbox, W = 390, H = 780, o = orbitFrame(bbox, { aspect: W / H, inset: 0.12, top: 0.15 }), far = orbitFrame(bbox, { aspect: W / H, inset: 0.12, top: 0.15, fit: o.fit * 1.2 });
+    expect(Math.hypot(far.x - far.lookX, far.y - far.lookY, far.z - far.lookZ)).toBeGreaterThan(Math.hypot(o.x - o.lookX, o.y - o.lookY, o.z - o.lookZ));
+    expect(o.fit).toBeLessThan(60); expect(o.fit).toBeGreaterThan(8);
+  });
+  it('zooming in drifts the look point to the player; zoom 1 looks at the middle of the home', () => {
+    const bbox = lotOf(HOMES.bungalow).bbox, cx = (bbox.x0 + bbox.x1) / 2, p = { x: 3, z: 2 };
+    expect(orbitFrame(bbox, { aspect: 1.6, focus: p }).lookX).toBeCloseTo(cx, 9);
+    const near = orbitFrame(bbox, { aspect: 1.6, focus: p, zoom: 0.4 }); expect(near.lookX).toBeCloseTo(3, 6); expect(near.lookZ).toBeCloseTo(2, 6);
+  });
+  it('the rig uses it only in orbit mode; build mode stays straight down', () => {
+    const rig = new CameraRig(new THREE.PerspectiveCamera(46, 1.6, 0.1, 400)); rig.mode = 'build'; globalThis.innerWidth = 1100; globalThis.innerHeight = 680;
+    rig.snapBuild(); expect(rig.buildLook.y).toBe(0); const down = rig.pos.clone();
+    rig.orbit = true; rig.snapBuild({ pos: new THREE.Vector3() }); expect(rig.buildLook.y).toBeCloseTo(0.6, 6); expect(rig.pos.distanceTo(down)).toBeGreaterThan(1);
+    delete globalThis.innerWidth; delete globalThis.innerHeight;
   });
 });

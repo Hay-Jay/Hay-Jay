@@ -94,7 +94,7 @@ export const FIXTURE_KINDS = {
  */
 export const STUDIO = {
   id: 'studio', name: 'Studio', tier: 0, price: 0, maxPlaced: MAX_PLACED,
-  title: 'Wheat City Lofts · Unit 204',
+  title: 'Dewdney Lofts · Unit 204',
   blurb: 'One big room: a kitchen along the wall, a bed in the corner, a sofa and TV. Where everyone starts.',
   rooms: [{ id: 'living', name: 'Studio', type: 'living', floor: { x0: -4.5, z0: -5.5, x1: 4.5, z1: 5.5 } }],
   walls: [

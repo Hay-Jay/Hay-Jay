@@ -20,13 +20,15 @@ describe('daily reward', () => {
     for (let i = 0; i < 9; i++) days.push(claimDaily(s, T0 + i * DAY).day);
     expect(days).toEqual([1, 2, 3, 4, 5, 6, 7, 1, 2]);
   });
-  it('missing a day resets the streak', () => {
-    const s = mk(); claimDaily(s, T0); claimDaily(s, T0 + DAY); expect(claimDaily(s, T0 + 4 * DAY).day).toBe(1);
+  it('missing days never resets the card: the next visit fills the next stamp', () => {
+    const s = mk(); claimDaily(s, T0); claimDaily(s, T0 + DAY); expect(claimDaily(s, T0 + 4 * DAY).day).toBe(3);
+    expect(dailyStatus(s.state, T0 + 40 * DAY)).toMatchObject({ ready: true, day: 4, streak: 3 });   // even after a long break
   });
   it('status reports what is ready and never a negative or huge amount', () => {
     const s = mk(); expect(dailyStatus(s.state, T0)).toMatchObject({ ready: true, day: 1 });
     claimDaily(s, T0); expect(dailyStatus(s.state, T0)).toMatchObject({ ready: false, amount: 0 });
-    expect(Math.max(...REWARD_CENTS)).toBeLessThanOrEqual(2500);
+    expect(Math.max(...REWARD_CENTS)).toBeLessThanOrEqual(3000); expect(Math.min(...REWARD_CENTS)).toBeGreaterThan(0);
+    expect(REWARD_CENTS.reduce((a, b) => a + b, 0)).toBeLessThan(132000 / 10);   // a full card is under a tenth of a casual week's pay (ECONOMY: P$1,320)
   });
   it('uses the Regina calendar day (CST has no daylight saving)', () => {
     expect(dayKey(Date.parse('2026-10-09T05:30:00Z'))).toBe('2026-10-08'); expect(dayKey(Date.parse('2026-10-09T06:30:00Z'))).toBe('2026-10-09');

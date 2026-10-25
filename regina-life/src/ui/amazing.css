@@ -1,0 +1,196 @@
+/* ============================================================================
+   M6 "make it amazing" layer (docs/AMAZING.md): the bright loading screen, the title hero,
+   the juice kit (floaters, coins, confetti), the First day card, the daily stamp card,
+   readable needs and the non-blocking event card. Loaded last; tokens come from theme.css.
+   ========================================================================== */
+
+/* ---------- loading: the game's own sky, not the old dark navy (Habbo lesson: the wrapper must look like the game) ---------- */
+#loading{background:linear-gradient(180deg,#8fcdea 0%,#bfe3f5 52%,#fff1d6 100%)}
+#loading .load-bg{background:none;overflow:hidden}
+.lb-sun{position:absolute;left:50%;top:58%;width:220px;height:220px;margin-left:-110px;border-radius:50%;background:radial-gradient(circle,#fff6d8 0,#ffd27a 45%,rgba(255,200,110,0) 70%);animation:sunrise 2.4s var(--ease) both}
+.lb-cloud{position:absolute;height:46px;border-radius:40px;background:#fff;opacity:.85;filter:blur(.3px);box-shadow:30px -14px 0 4px #fff,64px 0 0 -4px #fff}
+.lb-cloud.c1{width:120px;top:18%;left:-160px;animation:drift 26s linear infinite}
+.lb-cloud.c2{width:90px;top:30%;left:-140px;animation:drift 34s linear 6s infinite;opacity:.7}
+.lb-hills{position:absolute;left:-10%;right:-10%;bottom:-40px;height:42%;background:radial-gradient(120% 90% at 30% 100%,#8cc66b 0 58%,transparent 59%),radial-gradient(110% 80% at 80% 100%,#a9d47c 0 55%,transparent 56%),linear-gradient(transparent 62%,#7fb85f 62%)}
+#loading .load-in{color:var(--c-ink);background:rgba(255,255,255,.72);border-radius:var(--r-l);padding:26px 22px 18px;box-shadow:var(--shadow-2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#loading .logo{font-family:var(--head);font-weight:600;letter-spacing:.18em;color:var(--c-ink)}
+#loading .logo b{background:linear-gradient(135deg,#ff9f1c,#ff6b5e);-webkit-background-clip:text;background-clip:text;letter-spacing:.16em}
+#loading .tag{color:var(--c-ink-2)} #loading .load-txt{color:var(--c-ink-2);font-weight:700} #loading .load-tip{color:var(--c-ink-3)}
+#loading .bar-l{background:rgba(18,32,42,.1);height:8px;border-radius:8px} #loading .bar-l i{background:linear-gradient(90deg,var(--leaf),var(--wheat));border-radius:8px}
+@keyframes sunrise{from{transform:translateY(70px) scale(.85);opacity:.4}to{transform:none;opacity:1}}
+@keyframes drift{to{transform:translateX(calc(100vw + 340px))}}
+
+/* ---------- title hero ---------- */
+.hero-logo{margin:2px 0 0;font-family:var(--head);font-weight:600;font-size:clamp(38px,6.4vw,70px);line-height:1;letter-spacing:.12em;color:#fff;text-shadow:0 3px 0 rgba(18,32,42,.25),0 10px 30px rgba(18,32,42,.35);display:flex;gap:.3em;align-items:baseline;animation:heroIn .9s var(--spring) .15s both;pointer-events:none!important}
+.hero-logo b{font-weight:700;color:var(--wheat);text-shadow:0 3px 0 #c97f00,0 10px 30px rgba(18,32,42,.35)}
+.hero-tag{margin:0;font:700 14px var(--body);color:#fff;text-shadow:0 1px 6px rgba(18,32,42,.6);text-align:center;animation:heroIn .9s var(--spring) .3s both;pointer-events:none!important}
+.offchip{font-size:12px;font-weight:700;color:var(--c-ink-3)}
+.brandpill{padding:7px 16px}
+.hub-card .btn.go{background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff;box-shadow:0 8px 22px rgba(22,143,89,.4)}
+.hub-card .btn.go:hover{filter:brightness(1.05)}
+#title.hub .title-foot{text-shadow:0 1px 4px rgba(0,0,0,.55)}
+@keyframes heroIn{from{transform:translateY(-14px) scale(.9);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:640px){.hero-tag{font-size:12px}.offchip{display:none}}
+@media (max-height:700px){.hero-logo{font-size:clamp(30px,5vw,46px)}.hero-tag{display:none}}
+@media (max-height:520px) and (orientation:landscape){.hero-logo{display:none}}
+
+/* ---------- juice kit ---------- */
+.juice-layer{position:fixed;inset:0;pointer-events:none;z-index:120;overflow:hidden}
+.floater{position:absolute;transform:translate(-50%,-50%);font:800 18px var(--head);color:#fff;padding:4px 12px;border-radius:999px;background:rgba(18,32,42,.72);box-shadow:0 6px 18px rgba(18,32,42,.3);white-space:nowrap;animation:floatUp 1.25s var(--ease) forwards}
+.floater.good{background:linear-gradient(145deg,#31d68e,var(--leaf-d))} .floater.money{background:linear-gradient(145deg,#ffd257,#f2a900);color:#3a2600} .floater.cost{background:rgba(194,53,43,.88)} .floater.skill{background:linear-gradient(145deg,#9b83ff,var(--plum))}
+.floater.big{font-size:26px;padding:6px 18px}
+@keyframes floatUp{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}30%{transform:translate(-50%,-55%) scale(1)}100%{opacity:0;transform:translate(-50%,-180%) scale(.96)}}
+.coin{position:absolute;left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3b0 0,#ffd257 35%,#e8a100 100%);box-shadow:0 0 0 2px #c98500 inset,0 3px 8px rgba(0,0,0,.25)}
+.coin::after{content:"P$";position:absolute;inset:0;display:grid;place-items:center;font:900 8px var(--body);color:#7a4b00}
+.confetti{position:absolute;width:9px;height:14px;border-radius:2px;top:-20px}
+.pulse{animation:jpulse .55s var(--spring)}
+@keyframes jDrop{from{opacity:0;transform:translateY(-12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes jRise{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes jpulse{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.floater{animation:fadeOnly 1.4s forwards}.coin,.confetti{display:none}.pulse{animation:none}@keyframes fadeOnly{0%,70%{opacity:1}100%{opacity:0}}}
+
+/* ---------- the life-event card: a friendly card at the bottom, never a wall over the game ---------- */
+#panels.on:has(.panel.event){background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;align-items:flex-end;pointer-events:none}
+#panels.on .panel.event{pointer-events:auto;margin-bottom:calc(var(--nav-h) + 30px + var(--safe-b));background:var(--paper);color:var(--c-ink);border:0;border-radius:var(--r-l);box-shadow:var(--shadow-3);animation:jRise .45s var(--spring) both;max-width:min(94vw,440px)}
+#panels.on .panel.event h3{font-family:var(--head);color:var(--c-ink)} #panels.on .panel.event .pm{color:var(--c-ink-2)}
+#panels.on .panel.event .btn{background:#f0f3f5;color:var(--c-ink);border:0}
+#panels.on .panel.event .btn.primary{background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff}
+#panels.on .panel.event .ev-sum{color:var(--leaf-d);font-weight:800}
+
+/* ---------- timed activities: a small chip, the room stays visible ---------- */
+#panels.on:has(.panel.prog-panel){background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;align-items:flex-start;pointer-events:none}
+#panels.on .panel.prog-panel{pointer-events:auto;margin-top:calc(70px + var(--safe-t));padding:10px 14px;min-width:0;width:min(92vw,340px);background:var(--pill);color:var(--c-ink);border:0;border-radius:var(--r-pill);box-shadow:var(--shadow-2);display:flex;align-items:center;gap:12px;animation:jDrop .4s var(--spring) both}
+#panels.on .panel.prog-panel h3{margin:0;font:800 14px var(--body);color:var(--c-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+#panels.on .panel.prog-panel .prog{flex:1;height:10px;margin:0;background:rgba(18,32,42,.1);border-radius:10px;overflow:hidden}
+#panels.on .panel.prog-panel .prog i{background:linear-gradient(90deg,var(--leaf),var(--wheat));border-radius:10px}
+#panels.on .panel.prog-panel .pbtns{margin:0}
+#panels.on .panel.prog-panel .btn{padding:6px 12px;font-size:12px;background:#f0f3f5;color:var(--c-ink);border:0;border-radius:var(--r-pill)}
+
+/* ---------- First day in Regina ---------- */
+.fday{position:fixed;left:calc(12px + var(--safe-l));top:calc(64px + var(--safe-t));z-index:44;width:min(270px,calc(100vw - 24px));background:var(--pill);color:var(--c-ink);border-radius:var(--r-m);box-shadow:var(--shadow-2),0 0 0 1px var(--pill-line);padding:10px 12px 8px;font:600 12.5px var(--body);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:jDrop .55s var(--spring) both}
+.fday header{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.fday header b{font:600 15px var(--head);flex:1}
+.fday header small{color:var(--c-ink-3);font-weight:800}
+.fday .fbar{height:6px;border-radius:6px;background:rgba(18,32,42,.1);margin:7px 0 6px;overflow:hidden}.fday .fbar i{display:block;height:100%;background:linear-gradient(90deg,var(--leaf),var(--wheat));border-radius:6px;transition:width .5s var(--spring)}
+.fday ol{list-style:none;margin:0;padding:0;display:grid;gap:3px}
+.fday li{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:10px}
+.fday li .ck{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid rgba(18,32,42,.25);display:grid;place-items:center;font-size:11px;color:#fff}
+.fday li.done{color:var(--c-ink-3);text-decoration:line-through}.fday li.done .ck{background:var(--leaf);border-color:var(--leaf)}
+.fday li.next{background:var(--leaf-l);color:var(--c-ink);font-weight:800}.fday li.next .ck{border-color:var(--leaf)}
+.fday li .rw{margin-left:auto;font-size:11px;font-weight:800;color:#9a6b00}
+.fday li.next button{margin-left:auto;border:0;border-radius:999px;background:var(--leaf);color:#fff;font:800 11px var(--body);padding:4px 10px;cursor:pointer}
+.fday.min ol,.fday.min .fbar{display:none}
+body.building .fday,body.map-ov .fday,body.phone-open .fday,body.hud-hidden .fday,body.cat-open .fday{display:none}
+body.home-view .fday{top:calc(118px + var(--safe-t))}
+@media (max-width:520px){.fday{top:calc(60px + var(--safe-t));width:min(250px,calc(100vw - 24px))}body.home-view .fday{top:calc(112px + var(--safe-t))}.fday:not(.open) li:not(.next),.fday:not(.open) .fhint{display:none}}
+.navbar button.hint-pulse::after{content:"";position:absolute;inset:-3px;border-radius:999px;border:2px solid var(--wheat);animation:ping 1.6s ease-out infinite}
+
+/* ---------- the daily gift: seven stamps you never lose ---------- */
+.panel.daily{background:var(--paper)!important;color:var(--c-ink)!important;border:0!important;border-radius:var(--r-l)!important;box-shadow:var(--shadow-3)!important;max-width:min(94vw,420px);text-align:center}
+.panel.daily h3{font:600 22px var(--head);margin:4px 0 2px;color:var(--c-ink)}
+.panel.daily .pm{color:var(--c-ink-2)}
+.stamps{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}
+.stamp{aspect-ratio:1;border-radius:14px;background:#f0f3f5;display:grid;place-items:center;font:800 11px var(--body);color:var(--c-ink-3);position:relative}
+.stamp em{font-style:normal;font-size:16px}
+.stamp.got{background:var(--leaf-l);color:var(--leaf-d)}
+.stamp.got::after{content:"✓";position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:var(--leaf);color:#fff;font-size:10px;display:grid;place-items:center}
+.stamp.today{background:linear-gradient(145deg,#ffe28a,var(--wheat));color:#5a3a00;box-shadow:0 6px 16px rgba(242,169,0,.4);animation:jpulse 1.6s var(--spring) infinite}
+.panel.daily .btn.primary{background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff;border:0;font-size:16px;padding:13px 18px;border-radius:var(--r-m)}
+.panel.daily .btn{background:#f0f3f5;color:var(--c-ink);border:0;border-radius:var(--r-m)}
+.panel.daily .fine{color:var(--c-ink-3)}
+
+/* ---------- needs you can read ---------- */
+body.shell-on #hud .needs{width:206px}
+body.shell-on #hud .needs>div{display:grid;grid-template-columns:18px 52px 1fr 26px;align-items:center;gap:4px}
+body.shell-on #hud .needs .nl{font:700 10.5px var(--body);color:var(--c-ink-2)}
+body.shell-on #hud .needs .nv{font:800 10.5px var(--body);color:var(--c-ink-3);text-align:right;font-variant-numeric:tabular-nums}
+body.shell-on #hud .needs .bar.low~.nv{color:#c2352b}
+body.home-view #hud .needs,body.home-view #hud .hud-btns{display:none!important}
+
+/* ---------- Home view: the room is the controller (tap a piece to walk over and use it), the prompt floats over the object ---------- */
+body.home-view.touch-mode .touch{display:none!important}
+body.home-view #hud .prompt.anchored{bottom:auto;transform:translate(-50%,-100%);background:var(--pill);color:var(--c-ink);border:0;box-shadow:var(--shadow-2);padding:7px 12px;font-size:13px;border-radius:var(--r-pill);animation:none;transition:left .12s linear,top .12s linear}
+body.home-view #hud .prompt.anchored::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:var(--pill)}
+body.home-view #hud .prompt.anchored kbd{padding:2px 7px;font-size:12px}
+
+/* ---------- phones: everything a thumb needs sits above the tab bar; needs become a slim column under the minimap ---------- */
+body.shell-on.touch-mode #hud .joy{bottom:calc(84px + var(--safe-b));left:calc(4px + var(--safe-l));width:150px;height:150px}
+body.shell-on.touch-mode #hud .tbtns{bottom:calc(92px + var(--safe-b));right:calc(12px + var(--safe-r))}
+body.shell-on.touch-mode #hud .tb{background:var(--pill);color:var(--c-ink);border:0;box-shadow:var(--shadow-1)}
+body.shell-on.touch-mode #hud .tb.big{background:linear-gradient(145deg,#ffd257,#f2a900);color:#3a2600}
+body.shell-on.touch-mode #hud .hud-btns{bottom:calc(188px + var(--safe-b))}
+body.shell-on.touch-mode #hud .hud-btns .hbtn{width:46px;height:46px}
+body.shell-on.touch-mode #hud .hud-tl{top:calc(178px + var(--safe-t));bottom:auto;left:auto;right:calc(10px + var(--safe-r))}
+body.shell-on.touch-mode #hud .needs{width:auto;padding:6px 8px;gap:3px;border-radius:14px}
+body.shell-on.touch-mode #hud .needs>div{grid-template-columns:16px 34px 20px;gap:4px}
+body.shell-on.touch-mode #hud .needs .nl{display:none}
+body.shell-on.touch-mode #hud .needs span{font-size:12px}
+@media (max-width:760px){body.shell-on.touch-mode #hud .hud-tl{top:calc(182px + var(--safe-t))}}
+
+/* ---------- place cards: every activity chip is a button now (docs/AMAZING.md G6) ---------- */
+.pc-acts .pc-act{font:700 12px var(--body);padding:6px 11px;border-radius:var(--r-pill);border:0;background:var(--leaf-l);color:var(--leaf-d);box-shadow:0 0 0 1px rgba(34,181,115,.25);cursor:pointer;transition:transform .15s var(--spring)}
+.pc-acts .pc-act:hover{transform:translateY(-1px)} .pc-acts .pc-act:active{transform:scale(.95)}
+/* phone apps: Odd Jobs cards */
+.card.gig.done{opacity:.6}
+.card.gig-on{background:linear-gradient(160deg,#fff6d6,#ffe9a8);color:#3a2600}
+.card.gig-on .progress i{background:linear-gradient(90deg,#f2a900,#22b573)}
+#title.hub .title-foot a{pointer-events:auto;color:#fff;font-weight:800;text-decoration:underline}
+
+/* ---------- Goodnight: the day counted up under a dusk-blue sky ---------- */
+#panels.on:has(.panel.goodnight){background:radial-gradient(120% 80% at 50% 0,#2c3f6e 0,#13254f 55%,#0d1a3a 100%);backdrop-filter:none}
+#panels.on:has(.panel.goodnight)::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 32% 8%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 72% 14%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 30%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 55% 24%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 20% 40%,#fff 50%,transparent 51%);opacity:.8;pointer-events:none}
+.panel.goodnight{position:relative;background:rgba(255,255,255,.96)!important;color:var(--c-ink)!important;border:0!important;border-radius:var(--r-l)!important;text-align:center;max-width:min(92vw,400px)}
+.panel.goodnight h3{font:600 24px var(--head);margin:4px 0 12px;color:var(--c-ink)}
+.gn-moon{font-size:46px;animation:jDrop .8s var(--spring) both}
+.gn-lines{display:grid;gap:6px;text-align:left;margin:0 0 12px}
+.gn-line{display:flex;justify-content:space-between;gap:12px;font:700 14.5px var(--body);padding:8px 12px;border-radius:12px;background:#f3f6f8;animation:jRise .5s var(--spring) both}
+.gn-line.sub{background:none;padding:2px 12px 2px 30px;font-weight:600;color:var(--c-ink-2);font-size:13px}
+.gn-line b{font-family:var(--head);font-weight:600;color:var(--leaf-d)}
+.gn-tomorrow{display:grid;gap:2px;padding:12px;border-radius:var(--r-m);background:linear-gradient(145deg,#eaf5fd,#fff3e0);animation:jRise .5s var(--spring) both}
+.gn-tomorrow small{color:var(--c-ink-3);font-weight:700} .gn-tomorrow b{font:600 17px var(--head)}
+.gn-next{margin:10px 0 0;font-weight:700;color:#9a6b00;animation:jRise .5s var(--spring) both}
+#panels .panel.goodnight .btn.primary{background:linear-gradient(145deg,#ffd257,#f2a900);color:#3a2600;border:0;font-size:16px;padding:12px 20px;border-radius:var(--r-m);margin-top:12px}
+
+/* ---------- one design system (docs/AMAZING.md D9): the old dark-glass panels (creator, shops, wardrobe, menus) in the bright prairie skin ---------- */
+#panels{background:rgba(18,32,42,.28);backdrop-filter:blur(2px)}
+#panels .panel{background:var(--paper);color:var(--c-ink);border:0;border-radius:var(--r-l);box-shadow:var(--shadow-3)}
+#panels .panel h3{font-family:var(--head);font-weight:600;color:var(--c-ink)}
+#panels .panel .pm{color:var(--c-ink-2)}
+#panels .panel .fine,#panels .panel .muted,#panels .panel small,#panels .panel .empty{color:var(--c-ink-3)}
+#panels .panel .btn{background:#eef2f5;color:var(--c-ink);border:0;border-radius:var(--r-m);font-weight:800;box-shadow:none}
+#panels .panel .btn:hover{background:#e3e9ee}
+#panels .panel .btn.primary{background:linear-gradient(145deg,#31d68e,var(--leaf-d));color:#fff;box-shadow:0 6px 16px rgba(22,143,89,.3)}
+#panels .panel .btn.danger{background:#ffe6e3;color:#c2352b}
+#panels .panel .btn:disabled{opacity:.5}
+#panels .panel .x{background:#eef2f5;border:0;color:var(--c-ink)}
+#panels .panel .pill{background:#eef7f2;color:var(--leaf-d);border:0;font-weight:800}
+#panels .panel .item{background:#f6f8fa;border:0;box-shadow:0 0 0 1px var(--pill-line)}
+#panels .panel .item b{color:var(--c-ink)} #panels .panel .item em{color:var(--leaf-d)}
+#panels .panel .buy span{color:var(--leaf-d)} #panels .panel .buy s{color:var(--c-ink-3)}
+#panels .panel .tabs button{border:0;background:#eef2f5;color:var(--c-ink-2)}
+#panels .panel .tabs button.on{background:var(--c-ink);color:#fff}
+#panels .panel .cbody h4{color:var(--c-ink-3)}
+#panels .panel .sw{border-color:rgba(18,32,42,.15)} #panels .panel .sw.on{border-color:#fff;box-shadow:0 0 0 3px var(--leaf)}
+#panels .panel .chips-sel button{border:0;background:#eef2f5;color:var(--c-ink)} #panels .panel .chips-sel button.on{background:var(--leaf);color:#fff}
+#panels .panel .namef{color:var(--c-ink-3);font-weight:700}
+#panels .panel .namef input,#panels .panel .form input,#panels .panel .form select{background:#fbfdfe;border:1.5px solid rgba(18,32,42,.15);color:var(--c-ink)}
+#panels .panel .swatch.big{border:0;box-shadow:inset 0 0 0 1px rgba(18,32,42,.08)}
+#panels .panel .ev-ic{filter:drop-shadow(0 6px 10px rgba(18,32,42,.15))}
+#panels .panel.char.side{background:rgba(255,255,255,.96);backdrop-filter:blur(10px)}
+#panels:has(.panel.side){background:linear-gradient(90deg,transparent 40%,rgba(18,32,42,.18))}
+#panels .panel .btn.eat{padding:3px 9px;font-size:11px;margin-left:4px;background:var(--leaf-l);color:var(--leaf-d)}
+/* why you feel this way */
+.ml-list{display:grid;gap:6px;margin:12px 0 14px;text-align:left}
+.ml{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:8px;padding:9px 12px;border-radius:12px;background:#f3f6f8;font-size:14px}
+.ml.up{background:var(--leaf-l)} .ml.down{background:#ffecea}
+.ml i{font-style:normal;font-weight:800;color:var(--c-ink-3)} .ml.up i{color:var(--leaf-d)} .ml.down i{color:#c2352b}
+.tb-mood{cursor:pointer}
+/* place cards: who is here now (labelled NPCs) */
+.pc-here{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
+.pc-here>small{width:100%;font:800 11px var(--body);color:var(--c-ink-3);text-transform:uppercase;letter-spacing:.08em}
+.pc-npc{display:flex;align-items:center;gap:8px;border:0;border-radius:14px;padding:6px 10px 6px 6px;background:#f2f5f7;text-align:left;cursor:pointer;font:600 12px var(--body);color:var(--c-ink)}
+.pc-npc .pc-av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:16px}
+.pc-npc em{font-style:normal;font-size:9.5px;font-weight:800;color:#fff;background:var(--c-ink-3);border-radius:6px;padding:1px 5px;margin-left:2px}
+.pc-npc small{display:block;color:var(--c-ink-3);font-size:11px}
+#panels .panel.char .pbtns{background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.98) 38%)}
+#panels .panel.menu.moodlets{text-align:center}

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../core/rng.js';
 
+const ASPHALT = '#6a737d';
 const mk = (w, h, draw) => {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d'); draw(g, w, h); return c;
@@ -19,13 +20,14 @@ export function facadeTextures(style, seed = 1) {
   const S = 256, cell = 64;
   const lit = [];
   const draw = (g, emissive) => {
+    // bright diorama palette: the glass reflects a blue prairie sky instead of reading as dark holes (playtest: "dark glass on mid wall" was the murky look)
     const P = {
-      glass:  { wall: '#aebfcc', frame: '#6f8091', glassA: '#46647e', glassB: '#2b4156', inset: 3 },
-      brick:  { wall: '#b9805f', frame: '#e5ddd0', glassA: '#3a4a58', glassB: '#27323c', inset: 14 },
-      concrete: { wall: '#b4b4b0', frame: '#d1d1cc', glassA: '#4c6376', glassB: '#2e3f4e', inset: 12 },
-      stucco: { wall: '#d9c8a6', frame: '#f1ead9', glassA: '#4b5f70', glassB: '#2f3f4b', inset: 15 },
-      siding: { wall: '#e6e4de', frame: '#ffffff', glassA: '#4d6272', glassB: '#2f3e4a', inset: 17 },
-      store:  { wall: '#2a2d33', frame: '#14161a', glassA: '#7aa1b5', glassB: '#3d596b', inset: 9 },
+      glass:  { wall: '#d3e0ea', frame: '#eef3f7', glassA: '#a9cbe6', glassB: '#6f9cc4', inset: 3 },
+      brick:  { wall: '#c98a66', frame: '#f1ebe0', glassA: '#8fb2cc', glassB: '#5e84a3', inset: 14 },
+      concrete: { wall: '#d6d4cf', frame: '#f0efea', glassA: '#97b8d0', glassB: '#6489a6', inset: 12 },
+      stucco: { wall: '#ead9b8', frame: '#fbf5e8', glassA: '#94b5cc', glassB: '#62869f', inset: 15 },
+      siding: { wall: '#f0eee8', frame: '#ffffff', glassA: '#97b6ca', glassB: '#66889e', inset: 17 },
+      store:  { wall: '#4a4f58', frame: '#2c3036', glassA: '#b6dbe9', glassB: '#7aa6bb', inset: 9 },
     }[style];
     if (!emissive) { g.fillStyle = P.wall; g.fillRect(0, 0, S, S); }
     else { g.fillStyle = '#000'; g.fillRect(0, 0, S, S); }
@@ -60,12 +62,12 @@ export function facadeTextures(style, seed = 1) {
 export function asphaltTexture() {
   return tex(mk(256, 256, (g, w, h) => {
     // u = across road (0..1), v = along road. 12 m asphalt in 18 m corridor: sidewalks 3 m each side.
-    g.fillStyle = '#2b2d31'; g.fillRect(0, 0, w, h);
+    g.fillStyle = ASPHALT; g.fillRect(0, 0, w, h);   // a light slate road (VISION palette), not the near-black that filled half of every street frame
     const rnd = mulberry32(7);
-    for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(255,255,255,${rnd() * 0.05})`; g.fillRect(rnd() * w, rnd() * h, 2, 2); g.fillStyle = `rgba(0,0,0,${rnd() * 0.12})`; g.fillRect(rnd() * w, rnd() * h, 3, 3); }
+    for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(255,255,255,${rnd() * 0.05})`; g.fillRect(rnd() * w, rnd() * h, 2, 2); g.fillStyle = `rgba(0,0,0,${rnd() * 0.08})`; g.fillRect(rnd() * w, rnd() * h, 3, 3); }
     const sw = (3 / 18) * w;
-    g.fillStyle = '#9b9a95'; g.fillRect(0, 0, sw, h); g.fillRect(w - sw, 0, sw, h);         // sidewalks
-    g.fillStyle = '#c9c7c0'; g.fillRect(sw - 3, 0, 3, h); g.fillRect(w - sw, 0, 3, h);        // curbs
+    g.fillStyle = '#ddd8cd'; g.fillRect(0, 0, sw, h); g.fillRect(w - sw, 0, sw, h);         // sidewalks
+    g.fillStyle = '#f2eee6'; g.fillRect(sw - 3, 0, 3, h); g.fillRect(w - sw, 0, 3, h);        // curbs
     g.fillStyle = '#e3b93a'; g.fillRect(w / 2 - 2, 0, 1.5, h * 0.5); g.fillRect(w / 2 + 1, 0, 1.5, h * 0.5);       // dashed yellow centre line
     g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(sw + 4, 0, 1.5, h); g.fillRect(w - sw - 6, 0, 1.5, h); // edge lines
     // sidewalk joints
@@ -73,7 +75,7 @@ export function asphaltTexture() {
   }));
 }
 export function intersectionTexture() {
-  return tex(mk(64, 64, (g, w, h) => { g.fillStyle = '#2b2d31'; g.fillRect(0, 0, w, h); const r = mulberry32(3); for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(255,255,255,${r() * 0.05})`; g.fillRect(r() * w, r() * h, 2, 2); } }));
+  return tex(mk(64, 64, (g, w, h) => { g.fillStyle = ASPHALT; g.fillRect(0, 0, w, h); const r = mulberry32(3); for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(255,255,255,${r() * 0.05})`; g.fillRect(r() * w, r() * h, 2, 2); } }));
 }
 export function concreteTexture(base = '#a8a69f') {
   return tex(mk(128, 128, (g, w, h) => {
@@ -123,42 +125,5 @@ export const tileTexture = (a = '#d9d6cc', b = '#c4c0b4') => tex(mk(128, 128, (g
   g.strokeStyle = 'rgba(0,0,0,.12)'; g.strokeRect(0.5, 0.5, 127, 127);
 }));
 
-/** Draw a billboard face. ad = { text, theme } or null (house "your ad here" panel). */
-const imgCache = new Map();
-/** Decode an uploaded ad image once; returns the Image when ready (and calls onReady when it becomes ready), else null. */
-export function adImage(src, onReady) {
-  if (typeof src !== 'string' || !src.startsWith('data:image/') || typeof Image === 'undefined') return null;
-  let e = imgCache.get(src);
-  if (!e) { const im = new Image(); e = { im, ok: false }; im.onload = () => { e.ok = true; onReady?.(); }; im.src = src; imgCache.set(src, e); if (imgCache.size > 24) imgCache.delete(imgCache.keys().next().value); }
-  return e.ok ? e.im : null;
-}
-export function drawBillboard(canvas, ad, { tier = 'standard', priceLabel = '', onImage = null } = {}, themes) {
-  const g = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-  const [c1, c2] = ad ? themes[ad.theme] ?? themes.prairie : tier === 'mega' ? ['#6a2cff', '#ff2d95'] : ['#0b8f86', '#2a74d6'];
-  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, c1); gr.addColorStop(1, c2);
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
-  g.fillStyle = 'rgba(255,255,255,.08)'; for (let i = -h; i < w; i += 36) { g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.lineTo(i + h + 14, 0); g.lineTo(i + 14, h); g.fill(); }
-  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 8;
-  const pic = ad?.image ? adImage(ad.image, onImage) : null;
-  if (pic) { // an uploaded picture, cropped to fill the board, with a caption strip
-    const k = Math.max(w / pic.width, h / pic.height), dw = pic.width * k, dh = pic.height * k; g.drawImage(pic, (w - dw) / 2, (h - dh) / 2, dw, dh);
-    const cap = g.createLinearGradient(0, h * 0.62, 0, h); cap.addColorStop(0, 'rgba(0,0,0,0)'); cap.addColorStop(1, 'rgba(0,0,0,.72)'); g.shadowBlur = 0; g.fillStyle = cap; g.fillRect(0, h * 0.62, w, h * 0.38);
-    g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = '800 46px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif'; g.fillText(ad.text, w / 2, h - 52, w * 0.92);
-    g.font = '600 16px system-ui,sans-serif'; g.globalAlpha = 0.8; g.fillText('Advertisement · virtual', w / 2, h - 20); g.globalAlpha = 1; return;
-  }
-  if (ad) {
-    const words = ad.text.split(' '), lines = []; let cur = '';
-    g.font = '800 54px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif';
-    for (const wd of words) { const t = cur ? cur + ' ' + wd : wd; if (g.measureText(t).width > w * 0.86 && cur) { lines.push(cur); cur = wd; } else cur = t; }
-    lines.push(cur);
-    const size = lines.length > 2 ? 44 : 56; g.font = `800 ${size}px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif`;
-    const lh = size * 1.15, y0 = h / 2 - ((lines.length - 1) * lh) / 2 - 6;
-    lines.forEach((l, i) => g.fillText(l, w / 2, y0 + i * lh));
-    g.shadowBlur = 0; g.font = '600 18px system-ui,sans-serif'; g.globalAlpha = 0.8; g.fillText(ad.house ? 'In-game sponsor' : 'Advertisement · virtual', w / 2, h - 22); g.globalAlpha = 1;
-  } else {
-    g.font = '800 66px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif'; g.fillText('YOUR AD HERE', w / 2, h * 0.38);
-    g.shadowBlur = 0; g.font = '700 30px system-ui,sans-serif'; g.fillStyle = '#ffe58a'; g.fillText(priceLabel, w / 2, h * 0.62);
-    g.font = '600 20px system-ui,sans-serif'; g.fillStyle = '#fff'; g.globalAlpha = 0.85; g.fillText('Book it in the Ads app on your phone', w / 2, h * 0.82); g.globalAlpha = 1;
-    if (tier === 'mega') { g.fillStyle = '#ffd24a'; g.fillRect(w / 2 - 70, 16, 140, 28); g.fillStyle = '#2a1700'; g.font = '800 16px system-ui'; g.fillText('MEGA SCREEN', w / 2, 31); }
-  }
-}
+/** Billboard faces live in boardArt.js (no three.js) so the Advertise page can share them. */
+export { adImage, drawBillboard } from './boardArt.js';

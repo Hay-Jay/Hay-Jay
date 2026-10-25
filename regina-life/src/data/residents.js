@@ -4,11 +4,11 @@
  */
 export const RESIDENTS = [
   { id: 'tobi',  handle: '@tobi.rgn',        name: 'Tobi Adeyemi',     emoji: '🎧', color: '#ff8a5c', job: 'Barista, Cathedral Village', bio: 'Pulls the best espresso on 13th Ave. Plays bass in a band that has never played a gig.', likes: ['coffee', 'pop'], datable: true,
-    lines: ['Did you know a double-double is basically a personality?', 'Our band finally has a name. We argue about it daily.', 'Come by the café — first one is on me. (Second one is not.)'] },
+    lines: ['Did you know two-cream-two-sugar is basically a personality?', 'Our band finally has a name. We argue about it daily.', 'Come by the café — first one is on me. (Second one is not.)'] },
   { id: 'priya', handle: '@priya_runs',      name: 'Priya Sharma',     emoji: '🏃', color: '#3bd6c6', job: 'Nurse, runs Wascana loop', bio: 'Night-shift nurse. Runs the Wascana loop at dawn. Will absolutely make you stretch.', likes: ['apple', 'milk'], datable: true,
     lines: ['Hydrate! Seriously. Hydrate.', 'I did the full Wascana loop before sunrise. The geese were judging me.', 'Gym later? I will spot you.'] },
-  { id: 'jess',  handle: '@jess.thunder',    name: 'Jess Lafontaine',  emoji: '🏒', color: '#2ea86a', job: 'Hockey referee', bio: 'Referees by night, Rider Nation by Saturday. Loud. Loyal. Green and white.', likes: ['chips', 'pop'], datable: true,
-    lines: ['That was NOT icing. I will die on this hill.', 'Rider game on Saturday? You are coming. Not a question.', 'Bring ketchup chips. Obviously.'] },
+  { id: 'jess',  handle: '@jess.thunder',    name: 'Jess Lafontaine',  emoji: '🏒', color: '#2ea86a', job: 'Hockey referee', bio: 'Referees by night, football fan by Saturday. Loud. Loyal. Green and white.', likes: ['chips', 'pop'], datable: true,
+    lines: ['That was NOT icing. I will die on this hill.', 'Football on Saturday? You are coming. Not a question.', 'Bring ketchup chips. Obviously.'] },
   { id: 'omar',  handle: '@omar_builds',     name: 'Omar Haddad',      emoji: '🔧', color: '#c98a3c', job: 'Carpenter', bio: 'Builds decks, fixes doors, collects tape measures. Has opinions about every staircase in Regina.', likes: ['sandwich', 'coffee'], datable: false,
     lines: ['Measure twice. Cut once. Complain about the weather always.', 'Need a bookshelf? I know a guy. The guy is me.', 'Your door sticks? Classic prairie humidity.'] },
   { id: 'kaya',  handle: '@kaya.sky',        name: 'Kaya Whitebear',   emoji: '🎨', color: '#b077e8', job: 'Muralist', bio: 'Paints big skies on bigger walls. If you see a mural of a meadowlark downtown, that was her.', likes: ['bannock', 'apple'], datable: true,
@@ -29,6 +29,26 @@ export const RESIDENTS = [
     lines: ['Tulips are a bet against the weather. I like those odds.', 'Compost is just patience with extra steps.', 'The geese are back. I have opinions.'] },
 ];
 export const RES_BY_ID = Object.fromEntries(RESIDENTS.map((r) => [r.id, r]));
+
+/**
+ * Where each resident is, by Regina weekday and hour (docs/AMAZING.md G12): routines you can learn, like Stardew's town. Rows are
+ * [days, fromHour, toHour, place id from world/cityData.js POIS, what they are doing]; days 'wk' (Mon-Fri), 'we' (Sat-Sun) or 'all'.
+ * The first matching row wins; outdoor places are skipped in rain, snow or storms (they head indoors), and nobody is out between 23:00 and 6:00.
+ */
+export const ROUTINES = {
+  tobi:   [['wk', 7, 9, 'market', 'grabbing milk for the café'], ['all', 12, 13, 'victoriapark', 'on a lunch break'], ['we', 19, 22, 'scarth', 'busking with the band']],
+  priya:  [['all', 6, 8, 'wascana', 'running the Wascana loop'], ['wk', 9, 11, 'fitness', 'stretching (and judging your form)']],
+  jess:   [['wk', 17, 20, 'fitness', 'lifting before a game'], ['we', 11, 14, 'scarth', 'arguing about last night\'s call']],
+  omar:   [['wk', 12, 13, 'market', 'buying a sandwich'], ['we', 10, 13, 'threads', 'trying on work boots']],
+  kaya:   [['all', 10, 16, 'scarth', 'painting a mural'], ['wk', 17, 19, 'victoriapark', 'sketching the elms']],
+  liam:   [['we', 7, 11, 'wascana', 'watching the geese'], ['wk', 18, 20, 'bridge', 'checking the water']],
+  mei:    [['all', 6, 11, 'market', 'dropping off sourdough'], ['we', 14, 16, 'victoriapark', 'feeding Gordon the starter, metaphorically']],
+  diego:  [['all', 14, 17, 'scarth', 'hunting for records'], ['we', 11, 13, 'market', 'buying snacks for the show']],
+  hannah: [['wk', 12, 13, 'victoriapark', 'reading on a bench'], ['we', 10, 12, 'cityhall', 'at a council meeting, taking notes']],
+  sam:    [['all', 6, 8, 'market', 'getting coffee after a night shift'], ['wk', 15, 17, 'cityhall', 'filing a pothole report']],
+  aisha:  [['wk', 9, 15, 'uofr', 'in class (supposedly)'], ['all', 20, 23, 'scarth', 'out with friends']],
+  marc:   [['all', 7, 15, 'leg', 'tending the tulip beds'], ['we', 16, 18, 'victoriapark', 'checking the elms']],
+};
 export const normalizeHandle = (q) => String(q ?? '').trim().toLowerCase().replace(/^@/, '');
 /** Find by exact handle (with or without @) or id. */
 export const findResident = (q) => { const n = normalizeHandle(q); return RESIDENTS.find((r) => r.id === n || normalizeHandle(r.handle) === n) ?? null; };

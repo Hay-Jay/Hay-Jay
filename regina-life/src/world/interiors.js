@@ -3,7 +3,7 @@ import { CollisionGrid } from './collision.js';
 import { tileTexture, woodTexture, concreteTexture, glowTexture, signTexture } from './textures.js';
 import { buildCharacter } from '../player/character.js';
 import { DEFAULT_LOOK, FOOD, CLOTHES, STORE_STOCK, MARKET_STOCK } from '../data/catalog.js';
-import { JOBS } from '../data/jobs.js';
+import { JOBS, XP_PER_TASK } from '../data/jobs.js';
 import { mulberry32 } from '../core/rng.js';
 import { buildHome } from './homeBuilder.js';
 import { HOMES, STUDIO } from '../data/homes.js';
@@ -121,7 +121,13 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
       if (sh) {
         if (sh.tasksDone >= sh.tasksTotal) {
           const r = G.finishShift(ctx.store);
-          if (r.ok) { ctx.audio?.blip('cash'); ctx.ui.toast(`Shift complete! +${ctx.fmt(r.pay)} deposited${r.promoted ? ` · Promoted to ${r.promoted}!` : ''}`, 'good'); ctx.player.setCarry(false); task.carrying = false; }
+          if (r.ok) {   // payday: coins into the wallet, the XP you earned, how close the next promotion is (docs/AMAZING.md G11)
+            ctx.player.setCarry(false); task.carrying = false; ctx.player.gesture('wave', 1.4);
+            const j = ctx.store.state.job.active, def = j ? JOBS[j.id] : null, nx = def?.levels[j.level + 1], need = nx ? Math.max(0, Math.ceil((nx.xpNeeded - j.xp) / (XP_PER_TASK * def.levels[j.level].tasks))) : 0;
+            ctx.fx?.juice.pay(r.pay, ctx.fx.head?.(), 'payday'); ctx.audio?.chime('gain');
+            if (r.promoted) { ctx.fx?.juice.confetti(100); ctx.audio?.chime('fanfare'); ctx.fx?.juice.floater(`🎉 Promoted: ${r.promoted}!`, ctx.fx.head?.(), 'skill', { big: true }); }
+            ctx.ui.toast(`Shift complete! +${ctx.fmt(r.pay)}${r.promoted ? ` · Promoted to ${r.promoted}!` : nx ? ` · ${need} more shift${need === 1 ? '' : 's'} to ${nx.name}` : ''}`, 'good'); ctx.did?.('shift');
+          }
           else ctx.ui.toast(r.error, 'warn');
         } else ctx.ui.menu(employerName, `You're partway through your shift (${sh.tasksDone}/${sh.tasksTotal}).`, [{ label: 'Keep working' }, { label: 'Abandon shift (no pay)', danger: true, run: () => { G.abandonShift(ctx.store); task.carrying = false; ctx.player.setCarry(false); task.target = -1; } }]);
       } else if (job) {
@@ -328,7 +334,7 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     dispose() { homeApi?.dispose(); disposables.forEach((d) => d.dispose?.()); },
   };
   if (homeApi) {   // everything homes know about themselves: layout, rooms, room groups, wall modes, per-room lights
-    for (const k of ['layout', 'rooms', 'roomGroups', 'yard', 'parts', 'lot', 'setWallMode', 'setViewer', 'setCameraCut', 'setRoomLights', 'roomLightsOn']) interior[k] = homeApi[k];
+    for (const k of ['layout', 'rooms', 'roomGroups', 'yard', 'parts', 'lot', 'setWallMode', 'setCutSides', 'setViewer', 'setCameraCut', 'setRoomLights', 'roomLightsOn']) interior[k] = homeApi[k];
     for (const k of ['wallMode', 'overheadMode', 'viewerRoom']) Object.defineProperty(interior, k, { get: () => homeApi[k], enumerable: true });
   }
   return interior;

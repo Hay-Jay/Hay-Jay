@@ -5,5 +5,5 @@ export const WALLPAPERS = [
   { name: 'Aurora', css: 'radial-gradient(120% 70% at 20% 0%,#2fd5a2 0%,transparent 55%),radial-gradient(90% 60% at 90% 20%,#7a5cff 0%,transparent 60%),#0a1226' },
   { name: 'Wascana', css: 'linear-gradient(180deg,#0d2742 0%,#14507a 55%,#2aa0a8 100%)' },
   { name: 'Midnight', css: 'radial-gradient(100% 60% at 50% 0%,#2a3568 0%,#0a0d1c 70%)' },
-  { name: 'Rider Red', css: 'linear-gradient(160deg,#5a0f1c 0%,#a3312f 55%,#e07a4a 100%)' },
+  { name: 'Prairie Ember', css: 'linear-gradient(160deg,#5a0f1c 0%,#a3312f 55%,#e07a4a 100%)' },
 ];

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Store } from '../src/core/store.js';
 import * as G from '../src/core/game.js';
-import { EVENTS, eligible, rollEvent, resolveEvent as _resolve, issueEvent, EVENT_BY_ID, EVENT_COOLDOWN_MS } from '../src/core/events.js';
+import { EVENTS, eligible, rollEvent, resolveEvent as _resolve, issueEvent, EVENT_BY_ID, EVENT_COOLDOWN_MS, EVENT_GRACE_MS, eventsCalm } from '../src/core/events.js';
 
 const mem = () => { const m = new Map(); return { getItem: (k) => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), removeItem: (k) => m.delete(k) }; };
 let t, store;
@@ -27,6 +27,21 @@ describe('rolling', () => {
     expect(rollEvent(store, c, () => 0, t + 1000)).toBeNull();
     t += EVENT_COOLDOWN_MS + 1; store.state.eventLog = [a.id];
     const b = rollEvent(store, c, () => 0, t); expect(b.id).not.toBe(a.id);
+  });
+  it('a notification budget: at most one event every five minutes', () => {
+    expect(EVENT_COOLDOWN_MS).toBeGreaterThanOrEqual(5 * 60_000);
+    expect(rollEvent(store, c, () => 0, t)).toBeTruthy(); expect(rollEvent(store, c, () => 0, t + 4 * 60_000)).toBeNull();
+  });
+  it('a new player is left alone for ten minutes, unless three First-day steps are already done', () => {
+    store.state.flags = { firstPlayAt: t };
+    expect(eventsCalm(store.state, t + 60_000)).toBe(true); expect(rollEvent(store, c, () => 0, t + 9 * 60_000)).toBeNull();
+    expect(store.state.pendingEvent ?? null).toBeNull();   // nothing was issued while calm
+    store.state.onboarding = { done: ['a', 'b', 'c'] }; expect(eventsCalm(store.state, t + 60_000)).toBe(false);
+    store.state.onboarding = { done: [] }; expect(rollEvent(store, c, () => 0, t + EVENT_GRACE_MS + 1)).toBeTruthy();
+  });
+  it('Quiet mode silences events; a save without firstPlayAt is not in a grace window', () => {
+    store.state.settings.quiet = true; expect(rollEvent(store, c, () => 0, t)).toBeNull();
+    store.state.settings.quiet = false; store.state.flags = {}; expect(eventsCalm(store.state, t)).toBe(false);
   });
 });
 describe('resolving', () => {

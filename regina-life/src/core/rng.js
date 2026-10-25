@@ -1,3 +1,5 @@
+/** FNV-1a: a stable 32-bit seed from a string (a Regina day key, an id). */
+export const hashStr = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h; };
 /** Small seeded PRNG so the city generates identically every load. */
 export function mulberry32(seed) {
   let a = seed >>> 0;

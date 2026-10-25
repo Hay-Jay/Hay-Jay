@@ -11,7 +11,9 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 export class Panels {
   constructor(root, ctx) {
     this.root = root; this.ctx = ctx; this.cur = null;
-    root.addEventListener('click', (e) => { if (e.target === root) this.close(); });
+    // a backdrop click closes only panels that may be dismissed: the creator, timed activities and life events must be finished with their own buttons
+    // (clicking the 3D character behind the creator used to end it and start the game with the default look)
+    root.addEventListener('click', (e) => { if (e.target === root && this.cur && this.cur.dismissable !== false) this.close(); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && this.cur && this.cur.dismissable !== false) this.close(); });
   }
   get open() { return !!this.cur; }
@@ -25,6 +27,54 @@ export class Panels {
   menu(title, text, buttons) {
     const p = this._show(`<h3>${esc(title)}</h3><p class="pm">${esc(text)}</p><div class="pbtns">${buttons.map((b, i) => `<button class="btn ${b.primary ? 'primary' : ''} ${b.danger ? 'danger' : ''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div>`, 'menu');
     p.addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (!b) return; const btn = buttons[+b.dataset.i]; this.close(); btn.run?.(); });
+  }
+
+  /**
+   * The daily gift card (docs/AMAZING.md G4): seven stamps you never lose. `st` is dailyStatus(), `amounts` the seven rewards in cents.
+   * onClaim(buttonEl) returns the claim result; the card re-renders as "claimed".
+   */
+  dailyCard(st, amounts, { onClaim, onBank, fmt }) {
+    const render = (s) => {
+      const got = s.ready ? s.streak : s.day;   // stamps already on the card
+      p.innerHTML = `<div class="ev-ic">🎁</div><h3>Daily gift</h3>
+        <div class="stamps">${amounts.map((a, i) => `<div class="stamp ${i < got ? 'got' : ''} ${s.ready && i === s.day - 1 ? 'today' : ''}"><em>${i === 6 ? '🌟' : '🌾'}</em>${i + 1}</div>`).join('')}</div>
+        <p class="pm">${s.ready ? `Stamp ${s.day} of 7 is ready: <b>${fmt(s.amount)}</b>.` : `Stamp ${s.day} collected. Come back tomorrow for the next one (${fmt(amounts[s.day % 7])}).`}<br><small>Missed a day? No problem: your stamps never reset.</small></p>
+        <div class="pbtns col">${s.ready ? `<button class="btn primary" data-claim>Claim ${fmt(s.amount)}</button>` : '<button class="btn primary" data-close>See you tomorrow</button>'}<button class="btn" data-bank>Open Bank app</button></div>
+        <p class="fine">Prairie Dollars are a fictional in-game currency.</p>`;
+    };
+    const p = this._show('', 'menu daily'); render(st);
+    p.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-claim]'); if (c) { const r = onClaim(c); if (r?.ok) { render({ ready: false, day: r.day, amount: 0, streak: r.day }); const me = this.cur; setTimeout(() => { if (this.cur === me) this.close(); }, 1700); } return; }   // the stamp lands, then the card gets out of the way
+      if (e.target.closest('[data-close]')) return this.close();
+      if (e.target.closest('[data-bank]')) { this.close(); onBank?.(); }
+    });
+  }
+
+  /**
+   * Goodnight (docs/AMAZING.md G9): the day's tally counting up line by line, then tomorrow in Regina (the real forecast, or a labelled simulation)
+   * and what is on. `d` = { name, tally, tomorrow, live, sunrise, next, fmt }; onWake runs when you press the button.
+   */
+  goodnight(d, onWake) {
+    const lines = [
+      ['💰', 'Earned today', d.tally.earned ? `+${d.fmt(d.tally.earned)}` : '—'],
+      ...d.tally.top.slice(0, 3).map((x) => ['·', esc(x.memo), d.fmt(x.amount)]),
+      ['🧾', 'Spent today', d.tally.spent ? `−${d.fmt(d.tally.spent)}` : '—'],
+    ];
+    const t = d.tomorrow;
+    const p = this._show(`<div class="gn-moon">🌙</div><h3>Goodnight, ${esc(d.name)}</h3>
+      <div class="gn-lines">${lines.map((l, i) => `<div class="gn-line ${l[0] === '·' ? 'sub' : ''}" style="animation-delay:${0.25 + i * 0.28}s"><span>${l[0]} ${l[1]}</span><b>${l[2]}</b></div>`).join('')}</div>
+      ${t ? `<div class="gn-tomorrow" style="animation-delay:${0.4 + lines.length * 0.28}s"><small>Tomorrow in Regina${d.live ? '' : ' · SIMULATED'}</small><b>${t.icon} ${esc(t.text)} · ${t.hi}° / ${t.lo}°</b>${d.sunrise ? `<small>Sunrise ${esc(d.sunrise)}</small>` : ''}</div>` : ''}
+      ${d.next ? `<p class="gn-next" style="animation-delay:${0.6 + lines.length * 0.28}s">${esc(d.next)}</p>` : ''}
+      <div class="pbtns"><button class="btn primary" data-wake>☀️ Good morning!</button></div>`, 'menu goodnight', { dismissable: false, onClose: onWake });
+    p.querySelector('[data-wake]').onclick = () => this.close();
+  }
+
+  /** Why you feel this way (core/moodlets.js): each reason with its sign. */
+  moodlets(list, mood) {
+    const p = this._show(`<div class="ev-ic">${mood.face}</div><h3>Feeling ${esc(mood.label.toLowerCase())}</h3>
+      <div class="ml-list">${list.length ? list.map((m) => `<div class="ml ${m.v > 0 ? 'up' : m.v < 0 ? 'down' : ''}"><span>${m.icon}</span><b>${esc(m.text)}</b><i>${m.v > 0 ? '+' + m.v : m.v < 0 ? m.v : '·'}</i></div>`).join('') : '<p class="pm">Nothing in particular. Just another day in Regina.</p>'}</div>
+      <div class="pbtns"><button class="btn primary" data-ok>Got it</button></div>`, 'menu moodlets');
+    p.querySelector('[data-ok]').onclick = () => this.close();
   }
 
   /** Timed activity with a progress bar (input is blocked while a panel is open). */
@@ -57,15 +107,17 @@ export class Panels {
     const render = () => {
       const bal = store.state.bank.balance;
       p.innerHTML = `<div class="ph"><h3>${esc(title)}</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
-        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0, price = G.priceFor(store, id); return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(price)}${price !== f.price ? ` <s>${fmtMoney(f.price)}</s>` : ''}</span><button class="btn small primary" data-buy="${id}" ${price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own}</em>` : ''}</div>`; }).join('')}</div>
-        <p class="fine">Prices are set by the store${G.priceFor(store, ids[0]) !== FOOD[ids[0]].price ? ' and adjusted by the mayor\'s policy' : ''} — purchases are validated by the in-game ledger.</p>`;
+        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0, price = G.priceFor(store, id); return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(price)}${price !== f.price ? ` <s>${fmtMoney(f.price)}</s>` : ''}</span><button class="btn small primary" data-buy="${id}" ${price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own} · <button class="btn small eat" data-eat="${id}">Eat now</button></em>` : ''}</div>`; }).join('')}</div>
+        <p class="fine">${G.priceFor(store, ids[0]) !== FOOD[ids[0]].price ? 'Sale prices thanks to the mayor\'s policy. ' : ''}Eat now, or take it home: it keeps in your fridge.</p>`;
     };
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
+      const ea = e.target.closest('[data-eat]');
+      if (ea) { const b0 = this.ctx.fx?.snap(); const r = G.consume(store, ea.dataset.eat); if (r.ok) { this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}. Yum!`, 'good'); if (b0) this.ctx.fx.gains(b0); } render(); return; }
       const b = e.target.closest('[data-buy]'); if (!b) return;
-      const r = G.buyItem(store, b.dataset.buy, 1, where);
-      if (r.ok) { this.ctx.audio?.blip('cash'); this.ctx.toast(`Bought ${ITEM_NAME(b.dataset.buy)}`, 'good'); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); }
+      const b0 = this.ctx.fx?.snap(), r = G.buyItem(store, b.dataset.buy, 1, where);
+      if (r.ok) { this.ctx.audio?.chime('pop'); if (b0) this.ctx.fx.gains(b0); this.ctx.toast(`Bought ${ITEM_NAME(b.dataset.buy)}. Tap Eat now, or save it for home.`, 'good'); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); }
       render();
     });
   }
@@ -186,8 +238,8 @@ export class Panels {
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
-      const b = e.target.closest('[data-eat]'); if (!b) return; const r = G.consume(store, b.dataset.eat);
-      if (r.ok) { this.ctx.audio?.blip('ok'); this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}`, 'good'); } render();
+      const b = e.target.closest('[data-eat]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.consume(store, b.dataset.eat);
+      if (r.ok) { this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}`, 'good'); if (b0) this.ctx.fx.gains(b0); } render();
     });
   }
   cook() {
@@ -199,8 +251,8 @@ export class Panels {
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
-      const b = e.target.closest('[data-cook]'); if (!b) return; const r = G.cook(store, b.dataset.cook);
-      if (r.ok) { this.ctx.audio?.blip('ok'); this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); } else this.ctx.toast(r.error, 'warn'); render();
+      const b = e.target.closest('[data-cook]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.cook(store, b.dataset.cook);
+      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); this.ctx.onCooked?.(); } else this.ctx.toast(r.error, 'warn'); render();
     });
   }
 }

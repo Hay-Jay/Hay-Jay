@@ -11,7 +11,7 @@ const SEASONAL = {
 };
 const GENERIC = [
   ['🏛️', 'City council debates snow-clearing budget', 'Everyone agrees on one thing: more plows.'], ['🚌', 'Transit riders ask for more frequent buses', 'A committee will study the study.'],
-  ['☕', 'Local café launches "Triple-Triple"', 'Doctors are concerned. Customers are not.'], ['🎶', 'Open-mic night returns to Scarth Street', 'Bring your voice and your best sax.'],
+  ['☕', 'Local café launches a "five-cream" coffee', 'Doctors are concerned. Customers are not.'], ['🎶', 'Open-mic night returns to Scarth Street', 'Bring your voice and your best sax.'],
   ['🏒', 'Hockey talk dominates every coffee line', 'Experts disagree. Loudly.'], ['🎨', 'Mural unveiled downtown', 'Residents describe it as "very Regina".'],
 ];
 /** @returns {{icon:string,title:string,body:string,tag:string}[]} newest first */

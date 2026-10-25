@@ -77,7 +77,7 @@ export function buildLandmarks({ group, add, colliders, building, tint, plainBox
   {
     const U = poiById.uofr;
     const quad = [[-70, -40, 38, 14, 4, 'brick'], [-70, 20, 38, 18, 5, 'concrete'], [20, -40, 46, 16, 3, 'concrete'], [20, 6, 40, 18, 6, 'brick'], [-10, 60, 54, 20, 4, 'glass'], [-130, -10, 30, 30, 3, 'stucco']];
-    quad.forEach(([dx, dz, w, d, floors, style]) => building({ x0: U.x + dx, z0: U.z + dz, x1: U.x + dx + w, z1: U.z + dz + d, floors, style, color: '#ffffff', roofColor: '#4a4a4f' }));
+    quad.forEach(([dx, dz, w, d, floors, style]) => building({ x0: U.x + dx, z0: U.z + dz, x1: U.x + dx + w, z1: U.z + dz + d, floors, style, color: '#ffffff', roofColor: '#c4c9cf' }));
     const lawn = new THREE.Mesh(new THREE.PlaneGeometry(130, 90).rotateX(-Math.PI / 2), std('#86ad5e')); lawn.position.set(U.x - 20, 0.08, U.z + 20); lawn.receiveShadow = true; group.add(lawn);
     for (let k = 0; k < 40; k++) trees.push({ x: U.x - 80 + rnd() * 160, z: U.z - 60 + rnd() * 140, s: 0.7 + rnd() * 0.6 });
     skip.uofr = 260;
@@ -87,7 +87,7 @@ export function buildLandmarks({ group, add, colliders, building, tint, plainBox
   {
     const H = poiById.harbour;
     [[0, 0, 80, 46], [95, 0, 56, 40], [0, 70, 64, 36], [80, 70, 90, 40]].forEach(([dx, dz, w, d]) =>
-      building({ x0: H.x + dx - 40, z0: H.z + dz - 20, x1: H.x + dx - 40 + w, z1: H.z + dz - 20 + d, floors: 2, style: 'stucco', color: '#f4f0e6', roofColor: '#3b3e44', storefront: true }));
+      building({ x0: H.x + dx - 40, z0: H.z + dz - 20, x1: H.x + dx - 40 + w, z1: H.z + dz - 20 + d, floors: 2, style: 'stucco', color: '#f4f0e6', roofColor: '#d6d2c8', storefront: true }));
     const lot = new THREE.Mesh(new THREE.PlaneGeometry(260, 190).rotateX(-Math.PI / 2), std('#3a3b3f')); lot.position.set(H.x + 50, 0.1, H.z + 40); lot.receiveShadow = true; group.add(lot);
     skip.harbour = 200;
   }

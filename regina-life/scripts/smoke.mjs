@@ -432,7 +432,7 @@ await step('home view of the One-bedroom, then move up to the Bungalow from the 
   if (b.bal - a.bal !== 350000) throw new Error(`the Bungalow move from the One-bedroom should cost exactly $3,500: ${b.bal} -> ${a.bal}`);
   if (a.placed + a.stored !== b.placed + b.stored) throw new Error('pieces were lost on the second move');
   if (!(await page.evaluate(() => __regina.homeView)) || i.layout !== 'bungalow' || i.wallMode !== 'cut' || homeKeys(i) !== 'apartment:bungalow' || !(i.bounds.x0 <= -9.6)) throw new Error('after the Bungalow move: ' + JSON.stringify(i));
-  const cx = await page.evaluate(() => __regina.camera.position.x); if (Math.abs(cx - -2.8) > 0.2) throw new Error('the Home view camera should be centred on the Bungalow (x -2.8), it is at ' + cx);
+  const cx = await page.evaluate(() => __regina.rig.buildLook.x); if (Math.abs(cx - -2.8) > 0.2) throw new Error('the Home view camera should look at the middle of the Bungalow (x -2.8), it looks at ' + cx);
   await shot('58-bungalow-home-view');
 });
 await step('bungalow: the garage storage shelf opens the In storage tab', async () => {
