@@ -107,10 +107,13 @@ The plan, the research behind it and the money tracks are in [`docs/AMAZING.md`]
 * **First day in Regina** — a six-step card (gift, place a piece, eat, visit, get a job, first shift) with small rewards, then **Today in Regina**:
   three small tasks a day. No random events for a new player's first 10 minutes, then at most one every 5 minutes (or none in Quiet mode).
 * **Ways to earn** — the **Odd Jobs** app: snow shovelling when it really snows, raking in autumn, grocery runs with a tip, dog walks (with a pup),
-  flyers and busking on Scarth Street. Payday now feels like payday. The **daily gift** is seven stamps that never reset.
+  flyers and busking on Scarth Street. Payday now feels like payday. The **daily gift** is seven stamps that never reset. Sell paintings
+  and baked goods at the **Farmers' Market stall** (Wednesdays and Saturdays, 9 to 1, Regina time), and take a **lodger** once you own the Bungalow.
 * **Regina** — **Victoria Park** on its real block (paths, fountain, elms, benches you can use), a **Pumpkin Walk** hunt on 29–31 October,
   residents with routines ("Here now" on place cards), real winter (snow cover that follows the weather, a frozen Wascana, breath in the cold),
-  a soundscape that follows the real wind, and a **Goodnight** card with tomorrow's forecast.
+  a soundscape that follows the real wind, and a **Goodnight** card with tomorrow's forecast. At -5° or colder you **bundle up** outdoors in the
+  warmest things you own (your saved outfit stays as you picked it; switch it off in Settings). Photos save as **postcards** stamped with the date
+  and the real weather.
 * **Supporting the game** — an [Advertise page](advertise.html) where a real Regina business can preview its ad on an in-game billboard
   (founding prices, ad rules, booking through the owner), labelled **Sponsored** billboard rows with a leaving-the-game screen, and a
   **Supporters' Mural** in Victoria Park. Real money never enters the game or buys anything in it.

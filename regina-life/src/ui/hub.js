@@ -33,7 +33,9 @@ export class Hub {
   show() { this.active = true; this.snapNext = true; this.dirty = true; this.render(); }
   hide() { this.active = false; }
   setLevel(l) { this.level = l; this.selected = null; this.dirty = true; this.render(); this.onSelect?.(null, null); this.onZoom?.(l); }
-  select(id) { this.selected = id; this.pinsEl.querySelectorAll('.pin').forEach((p) => p.classList.toggle('sel', p.dataset.pin === id)); this.renderCard(); this.onSelect?.(id ? this.info() : null, id); } // no refit: the pin area already leaves room for the taller 'selected' card
+  select(id) { this.selected = id; this.pinsEl.querySelectorAll('.pin').forEach((p) => p.classList.toggle('sel', p.dataset.pin === id)); this.renderCard(); this.onSelect?.(id ? this.info() : null, id); this._roomForCard(); }
+  /** No refit as a rule (the pin area already leaves room for the taller 'selected' card), unless this card came out taller still (e.g. residents here now). */
+  _roomForCard() { const t = this.cardEl.getBoundingClientRect().top; if (this.safe && !this.safe.side && t > 0 && t - 8 < this.safe.y1 - 1) this.dirty = true; }
   render() {
     const ids = this.level === 'close' ? CLOSE : FAR;
     const mk = (id, emoji, name, open, cls = '') => `<button class="pin ${open ? 'open' : ''} ${cls}" data-pin="${id}" aria-label="${name}"><span class="pe">${emoji}</span><span class="pl">${name}</span></button>`;
@@ -71,7 +73,7 @@ export class Hub {
     const side = card.width > 0 && card.right > w - 40 && card.left > w * 0.45; // landscape phones park the card flush against the right edge
     // the card grows when a place is selected; reserve that room up front so selecting a pin never reflows the map
     const cardTop = card.top ? card.top - (side || this.cardEl.classList.contains('sel') ? 0 : this.selExtra) : h;
-    const safe = { x0: 6, x1: side ? card.left - 8 : w - 6, y0: topBottom + 8, y1: side ? h - 8 : Math.min(h, cardTop) - 8, fixed: [] };
+    const safe = { x0: 6, x1: side ? card.left - 8 : w - 6, y0: topBottom + 8, y1: side ? h - 8 : Math.min(h, cardTop) - 8, fixed: [], side };
     if (!side && safe.y1 - safe.y0 < 150) { // squashed window: use the full height but make the card a wall the pins must go around
       safe.y1 = h - 8; if (card.width && h > cardTop) safe.fixed.push({ x: (card.left + card.right) / 2, y: (cardTop + h) / 2, w: card.width, h: h - cardTop });
     }

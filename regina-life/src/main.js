@@ -10,9 +10,9 @@ import { dayTally } from './core/goodnight.js';
 import { moodlets } from './core/moodlets.js';
 import { residentsAt } from './core/routines.js';
 import { collectRent } from './core/lodger.js';
+import { bundledLook, bundleWeather, bundleGaps, dressedWarm } from './core/bundle.js';
 import { CRAFTS, marketOpen, craftPrice, makeCraft, sellCraft, sanitizeCrafts, STALL_DAILY_CAP } from './core/stall.js';
 import { RES_BY_ID } from './data/residents.js';
-import { CLOTHES } from './data/catalog.js';
 import { fetchWeather, simulateWeather } from './core/weather.js';
 import { CONTACTS } from './data/contacts.js';
 import { JOBS } from './data/jobs.js';
@@ -182,7 +182,10 @@ async function boot() {
     S().destination = poi ? { id: poi.id, name: poi.name, x: poi.x, z: poi.z } : null; store.commit('destination');
     if (poi) toast(`Navigating to ${poi.name}`, 'info');
   };
-  const rebuildPlayer = () => { player.setLook(S().player.look); };
+  // Bundle up (core/bundle.js): outdoors in the cold you are DRAWN in the warmest things you own; the saved look never changes
+  let drawnKey = JSON.stringify(S().player.look);   // the controller was built with the saved look
+  const drawnLook = () => bundledLook(S().player.look, S().wardrobe, { temp: weather.temp, outdoors: gameMode === 'play' && !inInterior && !creator, on: S().settings.bundle !== false });
+  const rebuildPlayer = (force = true) => { const l = drawnLook(), k = JSON.stringify(l); if (!force && k === drawnKey) return false; drawnKey = k; player.setLook(l); return true; };
 
   const ctx = {
     store, G, audio, toast, clock, weather: () => weather, refreshWeather, player: () => ({ x: player.pos.x, z: player.pos.z, yaw: player.yaw }),
@@ -348,7 +351,7 @@ async function boot() {
     const repaired = kind === 'apartment' ? H.repairHome(store) : 0;
     const next = interiorFor(kind); inInterior = kind;
     city.group.visible = false; ped.setVisible(false);
-    setIndoor(true);
+    setIndoor(true); rebuildPlayer(false);
     attachInterior(next);
     player.teleport(next.spawn.x, next.spawn.z, next.spawn.yaw);
     if (!S().job.shift) next.resetTask();
@@ -361,7 +364,7 @@ async function boot() {
   async function exitInterior() {
     if (fading || !inInterior) return; const wasHome = inInterior === 'apartment'; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
     interior.group.userData.tvOff?.(); scene.remove(interior.group); interior = null; inInterior = null;
-    city.group.visible = true; ped.setVisible(true); setIndoor(false);
+    city.group.visible = true; ped.setVisible(true); setIndoor(false); rebuildPlayer(false); bundleHint();
     player.bounds = null; player.grid = city.colliders; rig.grid = city.colliders; rig.indoor = false; rig.bounds = null; rig.targetDist = 6; rig.pitch = 0.28;
     const d = wasHome && HOME_DOORS[layoutOf(S()).id] ? homeDoor() : lastDoor ?? (wasHome ? homeDoor() : null); const out = d ? { x: d.x, z: d.z, yaw: Math.atan2(d.nx, d.nz) } : { x: city.spawn.x, z: city.spawn.z, yaw: 0 };
     player.teleport(out.x + d.nx * 0.8, out.z + d.nz * 0.8, out.yaw); rig.snapBehind(out.yaw); rig.snap(player);
@@ -718,9 +721,9 @@ async function boot() {
 
   /* ---------- app shell: Home · Buy · Map · Phone ---------- */
   const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet(), onMood: () => {
-    if (gameMode !== 'play') return; const s = S(), top = CLOTHES[s.player.look.top], head = CLOTHES[s.player.look.head];
+    if (gameMode !== 'play') return; const s = S();
     panels.moodlets(moodlets(s, { temp: weather.temp, kind: weather.kind, night: env?.night ?? 0, home: inInterior === 'apartment', cozy: H.homeBonuses(s).mood ?? 0,
-      paidToday: dayTally(s, Date.now()).top.filter((x) => /Payroll|Odd job/.test(x.memo)).reduce((a, x) => a + x.amount, 0), outfitWarm: ['jacket', 'hoodie', 'sweater'].includes(top?.style) && head?.style === 'toque' }), moodOf(s.needs));
+      paidToday: dayTally(s, Date.now()).top.filter((x) => /Payroll|Odd job/.test(x.memo)).reduce((a, x) => a + x.amount, 0), outfitWarm: dressedWarm(drawnLook()) }), moodOf(s.needs));
   } });
   /* ---------- First day in Regina: the checklist card a new player always sees (core/onboarding.js has the rules) ---------- */
   const firstDay = new FirstDay({ store, onGo: (st) => {
@@ -938,7 +941,7 @@ async function boot() {
   const startPlay = () => {
     hub?.hide(); gameMode = 'play'; creator = false; S().flags ||= {}; if (!Number.isFinite(S().flags.firstPlayAt)) S().flags.firstPlayAt = Date.now(); camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
     $('title').classList.remove('on'); $('hud').classList.remove('hidden'); shell.show(true); S().started = true; store.commit('started');
-    input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player);
+    input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player); rebuildPlayer(false);
     setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000);
   };
   const newLife = () => {
@@ -1053,6 +1056,11 @@ async function boot() {
   });
   addEventListener('pagehide', () => { savePos(); store.save(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { savePos(); store.save(); } });
+  const bundleHint = () => {   // once a Regina day when it is cold out: you bundled up, or what you are missing and where to get it (never a nag, never a sale)
+    const s = S(), f = (s.flags ||= {}); if (gameMode !== 'play' || inInterior || s.settings.bundle === false || !bundleWeather(weather.temp) || f.bundleHint === dayKeyNow()) return;
+    const gaps = bundleGaps(s.player.look, s.wardrobe); f.bundleHint = dayKeyNow();
+    toast(gaps.length ? `🥶 ${weather.temp}° out here. ${gaps.join(' and ').replace(/^./, (c) => c.toUpperCase())} from Prairie Threads would help.` : `🧣 ${weather.temp}° out here, so you bundled up.`, 'info');
+  };
   const savePos = () => { if (!inInterior && gameMode === 'play') S().pos = { x: player.pos.x, z: player.pos.z, yaw: player.yaw }; };
 
   /* ---------- go ---------- */
@@ -1103,7 +1111,7 @@ async function boot() {
     if (s.needs.hunger < 12 && !f.hungerHint) { f.hungerHint = true; toast("You're hungry — buy food at Prairie Corner Market.", 'warn'); }
     if (s.needs.energy < 12 && !f.tiredHint) { f.tiredHint = true; toast("You're exhausted — sleep in your apartment or grab a coffee.", 'warn'); }
     if (s.needs.hunger > 30) f.hungerHint = false; if (s.needs.energy > 30) f.tiredHint = false;
-    if (!inInterior) { savePos(); }
+    if (!inInterior) { savePos(); rebuildPlayer(false); if ((Date.now() / 1000 | 0) % 20 === 0) bundleHint(); }
     if ((Date.now() | 0) % 5 === 0) store.commit('needs');
     phone.tick(); tickFirstDay(); if ((Date.now() / 1000 | 0) % 30 === 0) tellFestival();
     stall.visible = !inInterior && marketOpen(marketWhen());   // the Farmers' Market stall: Wednesdays and Saturdays, 9 to 1
