@@ -19,7 +19,8 @@ const PALETTES = {
   concrete: ['#ffffff', '#ececec', '#dfe3e6'],
   stucco: ['#ffffff', '#f5ead6', '#eadfc8'],
 };
-const ROOFS = ['#3d3a38', '#4a4340', '#2f3438', '#5a4a40', '#44484d'];
+// toy-town roofs: terracotta, slate blue, sage, sand and barn red instead of five near-blacks (seen from the Map and Home views, roofs ARE the city)
+const ROOFS = ['#d6d2c8', '#c4c9cf', '#e2ddd2', '#c8714d', '#7d8fa8', '#8fae96', '#cdb592', '#b0665c', '#8aa0c2'];
 
 function inPoly(x, z, poly) {
   let c = false;
@@ -51,13 +52,13 @@ export function buildCity({ quality = 'high' } = {}) {
     mats[id] = new THREE.MeshStandardMaterial({ map: t.map, emissiveMap: t.emissive, emissive: new THREE.Color('#fff2d0'), emissiveIntensity: 0, vertexColors: true, roughness: 0.85, metalness: 0.04, ...opts });
   };
   facade('brick'); facade('concrete'); facade('stucco'); facade('siding', { roughness: 0.9 });
-  facade('glass', { roughness: 0.28, metalness: 0.35 }); facade('store', { roughness: 0.4, metalness: 0.2 });
+  facade('glass', { roughness: 0.35, metalness: 0.06 }); facade('store', { roughness: 0.45, metalness: 0.04 });   // no environment map, so real metalness only darkens
   mats.roof = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 });
   mats.trim = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7 });
   const road = asphaltTexture(); road.anisotropy = 8;
   mats.road = new THREE.MeshStandardMaterial({ map: road, roughness: 0.92, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   mats.inter = new THREE.MeshStandardMaterial({ map: intersectionTexture(), roughness: 0.92, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
-  const paveTex = concreteTexture('#a9a7a0'); mats.pave = new THREE.MeshStandardMaterial({ map: paveTex, vertexColors: true, roughness: 0.95 });
+  const paveTex = concreteTexture('#d2cec4'); mats.pave = new THREE.MeshStandardMaterial({ map: paveTex, vertexColors: true, roughness: 0.95 });
   const lawnTex = grassTexture('#78a052'); lawnTex.repeat.set(1, 1);
   mats.lawn = new THREE.MeshStandardMaterial({ map: lawnTex, vertexColors: true, roughness: 1, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
   const groundTex = grassTexture('#7a9a55'); groundTex.repeat.set(2600, 2600);
@@ -81,9 +82,9 @@ export function buildCity({ quality = 'high' } = {}) {
         add('trim', plainBox(x0 - 0.3, z0 - 0.3, x1 + 0.3, z0 + 0.1, 0.9, '#b8b6b0', h + 0.5), cx, cz);
         add('trim', plainBox(x0 - 0.3, z1 - 0.1, x1 + 0.3, z1 + 0.3, 0.9, '#b8b6b0', h + 0.5), cx, cz);
       }
-      if (floors > 3 && rnd() < 0.8) { // rooftop plant
-        const w = Math.min(10, (x1 - x0) * 0.35), d = Math.min(8, (z1 - z0) * 0.3);
-        add('trim', plainBox(cx - w / 2, cz - d / 2, cx + w / 2, cz + d / 2, 2.6, '#9a9b9c', h + 0.5), cx, cz);
+      if (floors > 3 && rnd() < 0.3) { // rooftop plant on some roofs (not a grey box on every one), off-centre and in a few colours
+        const w = Math.min(8, (x1 - x0) * 0.28), d = Math.min(6, (z1 - z0) * 0.24), ox = (rnd() - 0.5) * (x1 - x0) * 0.3, oz = (rnd() - 0.5) * (z1 - z0) * 0.3;
+        add('trim', plainBox(cx + ox - w / 2, cz + oz - d / 2, cx + ox + w / 2, cz + oz + d / 2, 1.8, pick(['#d9dcdf', '#c9d3cf', '#e2d8c8']), h + 0.5), cx, cz);
       }
     } else {
       const rise = Math.min((x1 - x0), (z1 - z0)) * 0.32;
@@ -128,19 +129,19 @@ export function buildCity({ quality = 'high' } = {}) {
 
   {
     const loft = reserve({ x0: -46, z0: 12, x1: -14, z1: 40 });
-    const b = building({ ...loft, floors: 8, style: 'brick', color: '#f1d6c4', roofColor: '#46413e', storefront: true });
-    doorOn({ ...loft, ...b }, 'n', 'Enter Wheat City Lofts — Unit 204', 'apartment', 'door_lofts', { sign: { text: 'WHEAT CITY LOFTS', sub: 'Rentals · Unit 204' }, accent: '#e3b93a' });
+    const b = building({ ...loft, floors: 8, style: 'brick', color: '#f1d6c4', roofColor: '#b0665c', storefront: true });
+    doorOn({ ...loft, ...b }, 'n', 'Go home: Dewdney Lofts — Unit 204', 'apartment', 'door_lofts', { sign: { text: 'DEWDNEY LOFTS', sub: 'Rentals · Unit 204' }, accent: '#e3b93a' });
     const mk = reserve({ x0: 14, z0: 12, x1: 46, z1: 36 });
-    const m = building({ ...mk, floors: 2, style: 'stucco', color: '#f3e3c5', roofColor: '#3a3d42', storefront: true });
+    const m = building({ ...mk, floors: 2, style: 'stucco', color: '#f3e3c5', roofColor: '#8fae96', storefront: true });
     doorOn({ ...mk, ...m }, 'n', 'Enter Prairie Corner Market', 'market', 'door_market', { sign: { text: 'PRAIRIE CORNER', sub: 'MARKET · Fresh daily' }, accent: '#3bb273' });
     const gy = reserve({ x0: 122, z0: 12, x1: 154, z1: 36 });
-    const gb = building({ ...gy, floors: 2, style: 'glass', color: '#d6e8ff', roofColor: '#2f3438', storefront: true });
+    const gb = building({ ...gy, floors: 2, style: 'glass', color: '#d6e8ff', roofColor: '#8aa0c2', storefront: true });
     doorOn({ ...gy, ...gb }, 'n', 'Enter Prairie Fitness', 'gym', 'door_gym', { sign: { text: 'PRAIRIE FITNESS', sub: 'Open 24 hours' }, accent: '#3bd6c6' });
     const ch = reserve({ x0: -46, z0: -40, x1: -14, z1: -12 });
-    const chb = building({ ...ch, floors: 3, style: 'concrete', color: '#f2eee4', roofColor: '#3a4a68', storefront: true });
+    const chb = building({ ...ch, floors: 3, style: 'concrete', color: '#f2eee4', roofColor: '#cdb592', storefront: true });
     doorOn({ ...ch, ...chb }, 's', 'Enter Regina City Hall', 'cityhall', 'door_cityhall', { sign: { text: 'REGINA CITY HALL', sub: 'Council · Elections' }, accent: '#c9a64e' });
     const th = reserve({ x0: 14, z0: -40, x1: 46, z1: -12 });
-    const t = building({ ...th, floors: 2, style: 'concrete', color: '#ededed', roofColor: '#34373b', storefront: true });
+    const t = building({ ...th, floors: 2, style: 'concrete', color: '#ededed', roofColor: '#9c8fb0', storefront: true });
     doorOn({ ...th, ...t }, 's', 'Enter Prairie Threads', 'threads', 'door_threads', { sign: { text: 'PRAIRIE THREADS', sub: 'Clothing · Accessories' }, accent: '#8e6bd8' });
   }
 
@@ -157,6 +158,15 @@ export function buildCity({ quality = 'high' } = {}) {
     // ground pad
     const pavedZone = zone === 'core' || zone === 'mid';
     add(pavedZone ? 'pave' : 'lawn', tint(plainBox(x0, z0, x1, z1, pavedZone ? 0.14 : 0.05, pavedZone ? '#d4d2cb' : '#8fb067'), pavedZone ? '#d4d2cb' : '#8fb067'), cx, cz);
+    // boulevard trees along every downtown sidewalk (Regina's hand-planted elms): cheap low-poly instances, kept clear of the doors you walk into
+    if (pavedZone) for (const [ax, az, bx, bz, ix, iz] of [[x0, z0, x1, z0, 0, 1], [x0, z1, x1, z1, 0, -1], [x0, z0, x0, z1, 1, 0], [x1, z0, x1, z1, -1, 0]]) {
+      const len = Math.hypot(bx - ax, bz - az);
+      for (let s = 10; s <= len - 10; s += 24) {
+        const t = s / len, px = ax + (bx - ax) * t + ix * 1.1, pz = az + (bz - az) * t + iz * 1.1;
+        if (interactables.some((it) => it.kind === 'door' && Math.hypot(it.x - px, it.z - pz) < 8)) continue;
+        trees.push({ x: px, z: pz, s: 0.42 + Math.abs(Math.sin(px * 12.9898 + pz * 78.233)) * 0.12, belt: true, street: true });   // no rnd(): the rest of the city keeps its layout
+      }
+    }
 
     if (zone === 'park') {
       parkBlocks.push({ x0, z0, x1, z1 });
@@ -263,7 +273,7 @@ export function buildCity({ quality = 'high' } = {}) {
   /* ---------------- Wascana: lake, park, bridge, Albert St south ---------------- */
   // shape y = -z so that rotateX(-90°) lays it flat with its normal pointing UP (the old +90° made it face down and get culled)
   const lakeShape = new THREE.Shape(lake.map(([x, z]) => new THREE.Vector2(x, -z)));
-  const lakeMesh = new THREE.Mesh(new THREE.ShapeGeometry(lakeShape).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2f6f8f', roughness: 0.12, metalness: 0.25, transparent: true, opacity: 0.93, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
+  const lakeMesh = new THREE.Mesh(new THREE.ShapeGeometry(lakeShape).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#4b9cc4', roughness: 0.2, metalness: 0.04, transparent: true, opacity: 0.94, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }));
   lakeMesh.position.y = 0.05; lakeMesh.receiveShadow = true; lakeMesh.name = 'lake'; group.add(lakeMesh);
   // park lawn
   {
@@ -430,7 +440,7 @@ export function buildCity({ quality = 'high' } = {}) {
   }
 
   // street lamps + glow pools
-  const lampPoles = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 7.2, 6).translate(0, 3.6, 0), new THREE.MeshStandardMaterial({ color: '#2b2e33', roughness: 0.6, metalness: 0.5 }), lamps.length);
+  const lampPoles = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1, 0.14, 7.2, 6).translate(0, 3.6, 0), new THREE.MeshStandardMaterial({ color: '#3d4a52', roughness: 0.6, metalness: 0.15 }), lamps.length);
   const lampHeadMat = new THREE.MeshStandardMaterial({ color: '#ddd', emissive: new THREE.Color('#ffd08a'), emissiveIntensity: 0, roughness: 0.4 });
   const lampHeads = new THREE.InstancedMesh(new THREE.BoxGeometry(0.9, 0.22, 0.45).translate(0.3, 7.25, 0), lampHeadMat, lamps.length);
   const glowMat = new THREE.MeshBasicMaterial({ map: glowTexture(), color: '#ffcf86', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
@@ -496,7 +506,7 @@ export function buildCity({ quality = 'high' } = {}) {
     spawn: { x: -14, z: 4, heading: Math.PI / 2 },
     recolorTrees, billboards: boards, refreshBillboards, setOverview, rotateBoards,
     carsReady: Promise.resolve().then(() => {
-      const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.5 }), cars.length);
+      const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.38, metalness: 0.12 }), cars.length);
       const c = new THREE.Color();
       cars.forEach((car, i) => { dummy.position.set(car.x, 0, car.z); dummy.rotation.set(0, car.rot, 0); dummy.scale.set(1, 1, 1); dummy.updateMatrix(); m.setMatrixAt(i, dummy.matrix); c.set(car.color); m.setColorAt(i, c); });
       m.castShadow = true; m.receiveShadow = true; m.frustumCulled = false; props.add(m);

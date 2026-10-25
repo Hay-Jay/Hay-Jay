@@ -98,7 +98,7 @@ export class Phone {
     const c = this.ctx.clock(), w = this.ctx.weather(), s = this.state, L = this.$('.lock');
     L.querySelector('.lt-date').textContent = c.dateLabel;
     L.querySelector('.lt-clock').textContent = c.label;
-    L.querySelector('.lock-widgets').innerHTML = `<div class="lw"><span>${w.icon}</span><b>${w.temp}°</b><small>${esc(w.text)}${w.live ? '' : ' · sim'}</small></div><div class="lw"><span>💳</span><b>${fmtMoney(s.bank.balance)}</b><small>Wascana CU</small></div>`;
+    L.querySelector('.lock-widgets').innerHTML = `<div class="lw"><span>${w.icon}</span><b>${w.temp}°</b><small>${esc(w.text)}${w.live ? '' : ' · sim'}</small></div><div class="lw"><span>💳</span><b>${fmtMoney(s.bank.balance)}</b><small>Big Sky Savings</small></div>`;
     const ns = s.notifications.slice(0, 3);
     L.querySelector('.lock-notifs').innerHTML = ns.map((n) => this.notifHtml(n, 'nl')).join('');
     L.querySelector('[data-act="flash"]').classList.toggle('on', s.phone.flashlight);
@@ -151,7 +151,7 @@ export class Phone {
     const hist = s.bank.history.slice(0, 8).reverse();
     let bars = ''; const mx = Math.max(1, ...hist.map((h) => h.amount));
     hist.forEach((h) => (bars += `<i class="${h.type}" style="height:${10 + (h.amount / mx) * 30}px"></i>`));
-    H.querySelector('.wg-bank').innerHTML = `<small>Wascana CU</small><div class="mid">${fmtMoney(s.bank.balance)}</div><div class="spark">${bars || '<em>No activity yet</em>'}</div>`;
+    H.querySelector('.wg-bank').innerHTML = `<small>Big Sky Savings</small><div class="mid">${fmtMoney(s.bank.balance)}</div><div class="spark">${bars || '<em>No activity yet</em>'}</div>`;
     H.querySelector('.wg-today').innerHTML = `<small>Today · ${c.shortDate}</small><div class="row2"><div><b>${c.label} ${c.ampm}</b><span>Regina time (CST)</span></div><div><span>🌅 ${hoursLabel(st.sunrise)}</span><span>🌇 ${hoursLabel(st.sunset)}</span></div></div>`;
     const j = s.job.active, app = s.job.application;
     H.querySelector('.wg-job').innerHTML = j ? `<small>Career</small><b>${esc(this.ctx.jobTitle())}</b><span>${s.job.shift ? `Shift ${s.job.shift.tasksDone}/${s.job.shift.tasksTotal} tasks` : 'Off shift · head to work'}</span>` : app ? `<small>Career</small><b>Application ${app.status === 'offered' ? 'offer received!' : 'pending…'}</b><span>Open Jobs to respond</span>` : `<small>Career</small><b>Looking for work?</b><span>Browse openings in Jobs</span>`;

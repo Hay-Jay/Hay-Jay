@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../core/rng.js';
 
+const ASPHALT = '#6a737d';
 const mk = (w, h, draw) => {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d'); draw(g, w, h); return c;
@@ -19,13 +20,14 @@ export function facadeTextures(style, seed = 1) {
   const S = 256, cell = 64;
   const lit = [];
   const draw = (g, emissive) => {
+    // bright diorama palette: the glass reflects a blue prairie sky instead of reading as dark holes (playtest: "dark glass on mid wall" was the murky look)
     const P = {
-      glass:  { wall: '#aebfcc', frame: '#6f8091', glassA: '#46647e', glassB: '#2b4156', inset: 3 },
-      brick:  { wall: '#b9805f', frame: '#e5ddd0', glassA: '#3a4a58', glassB: '#27323c', inset: 14 },
-      concrete: { wall: '#b4b4b0', frame: '#d1d1cc', glassA: '#4c6376', glassB: '#2e3f4e', inset: 12 },
-      stucco: { wall: '#d9c8a6', frame: '#f1ead9', glassA: '#4b5f70', glassB: '#2f3f4b', inset: 15 },
-      siding: { wall: '#e6e4de', frame: '#ffffff', glassA: '#4d6272', glassB: '#2f3e4a', inset: 17 },
-      store:  { wall: '#2a2d33', frame: '#14161a', glassA: '#7aa1b5', glassB: '#3d596b', inset: 9 },
+      glass:  { wall: '#d3e0ea', frame: '#eef3f7', glassA: '#a9cbe6', glassB: '#6f9cc4', inset: 3 },
+      brick:  { wall: '#c98a66', frame: '#f1ebe0', glassA: '#8fb2cc', glassB: '#5e84a3', inset: 14 },
+      concrete: { wall: '#d6d4cf', frame: '#f0efea', glassA: '#97b8d0', glassB: '#6489a6', inset: 12 },
+      stucco: { wall: '#ead9b8', frame: '#fbf5e8', glassA: '#94b5cc', glassB: '#62869f', inset: 15 },
+      siding: { wall: '#f0eee8', frame: '#ffffff', glassA: '#97b6ca', glassB: '#66889e', inset: 17 },
+      store:  { wall: '#4a4f58', frame: '#2c3036', glassA: '#b6dbe9', glassB: '#7aa6bb', inset: 9 },
     }[style];
     if (!emissive) { g.fillStyle = P.wall; g.fillRect(0, 0, S, S); }
     else { g.fillStyle = '#000'; g.fillRect(0, 0, S, S); }
@@ -60,12 +62,12 @@ export function facadeTextures(style, seed = 1) {
 export function asphaltTexture() {
   return tex(mk(256, 256, (g, w, h) => {
     // u = across road (0..1), v = along road. 12 m asphalt in 18 m corridor: sidewalks 3 m each side.
-    g.fillStyle = '#2b2d31'; g.fillRect(0, 0, w, h);
+    g.fillStyle = ASPHALT; g.fillRect(0, 0, w, h);   // a light slate road (VISION palette), not the near-black that filled half of every street frame
     const rnd = mulberry32(7);
-    for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(255,255,255,${rnd() * 0.05})`; g.fillRect(rnd() * w, rnd() * h, 2, 2); g.fillStyle = `rgba(0,0,0,${rnd() * 0.12})`; g.fillRect(rnd() * w, rnd() * h, 3, 3); }
+    for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(255,255,255,${rnd() * 0.05})`; g.fillRect(rnd() * w, rnd() * h, 2, 2); g.fillStyle = `rgba(0,0,0,${rnd() * 0.08})`; g.fillRect(rnd() * w, rnd() * h, 3, 3); }
     const sw = (3 / 18) * w;
-    g.fillStyle = '#9b9a95'; g.fillRect(0, 0, sw, h); g.fillRect(w - sw, 0, sw, h);         // sidewalks
-    g.fillStyle = '#c9c7c0'; g.fillRect(sw - 3, 0, 3, h); g.fillRect(w - sw, 0, 3, h);        // curbs
+    g.fillStyle = '#ddd8cd'; g.fillRect(0, 0, sw, h); g.fillRect(w - sw, 0, sw, h);         // sidewalks
+    g.fillStyle = '#f2eee6'; g.fillRect(sw - 3, 0, 3, h); g.fillRect(w - sw, 0, 3, h);        // curbs
     g.fillStyle = '#e3b93a'; g.fillRect(w / 2 - 2, 0, 1.5, h * 0.5); g.fillRect(w / 2 + 1, 0, 1.5, h * 0.5);       // dashed yellow centre line
     g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(sw + 4, 0, 1.5, h); g.fillRect(w - sw - 6, 0, 1.5, h); // edge lines
     // sidewalk joints
@@ -73,7 +75,7 @@ export function asphaltTexture() {
   }));
 }
 export function intersectionTexture() {
-  return tex(mk(64, 64, (g, w, h) => { g.fillStyle = '#2b2d31'; g.fillRect(0, 0, w, h); const r = mulberry32(3); for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(255,255,255,${r() * 0.05})`; g.fillRect(r() * w, r() * h, 2, 2); } }));
+  return tex(mk(64, 64, (g, w, h) => { g.fillStyle = ASPHALT; g.fillRect(0, 0, w, h); const r = mulberry32(3); for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(255,255,255,${r() * 0.05})`; g.fillRect(r() * w, r() * h, 2, 2); } }));
 }
 export function concreteTexture(base = '#a8a69f') {
   return tex(mk(128, 128, (g, w, h) => {

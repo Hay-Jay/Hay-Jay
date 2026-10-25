@@ -20,7 +20,7 @@ export const EVENTS = [
       { label: 'Call it in and keep walking', fx: { mood: -1, skill: { charisma: 1 } }, result: 'You phone it in and keep your boots dry.' },
     ] },
   { id: 'rider_pride', where: ['street'], icon: '💚', title: 'Rider Pride',
-    text: 'A fan in a green jersey spots you. "ROUGHRIDER COUNTRY, EH?! Chant with me!"',
+    text: 'A fan in a green jersey spots you. "GREEN AND WHITE, EH?! Chant with me!"',
     choices: [
       { label: 'Join the chant', fx: { fun: 14, mood: 8, energy: -2, skill: { charisma: 3 } }, result: 'You both shout until a pigeon leaves. Great vibes.' },
       { label: 'Smile and walk on', fx: { skill: { charisma: 1 } }, result: 'You nod politely. "Next year!" they shout.' },
@@ -157,7 +157,17 @@ export const EVENTS = [
     ] },
 ];
 export const EVENT_BY_ID = Object.fromEntries(EVENTS.map((e) => [e.id, e]));
-export const EVENT_COOLDOWN_MS = 70_000;
+// A notification budget (docs/AMAZING.md G2): at most one life event every 5 minutes, none in a new player's first 10 minutes (unless they have
+// already done three First-day steps), and none at all in Quiet mode. The Sims' longest-running complaint was event and call spam; ours greeted a
+// new player with a modal 4 seconds after spawning.
+export const EVENT_COOLDOWN_MS = 5 * 60_000;
+export const EVENT_GRACE_MS = 10 * 60_000;
+/** True while the game should leave the player alone: Quiet mode, or the new-player grace window. */
+export function eventsCalm(s, now) {
+  if (s?.settings?.quiet) return true;
+  const f = s?.flags || {}, steps = Array.isArray(s?.onboarding?.done) ? s.onboarding.done.length : 0;
+  return Number.isFinite(f.firstPlayAt) && now - f.firstPlayAt < EVENT_GRACE_MS && steps < 3;
+}
 export const PENDING_TTL_MS = 15 * 60_000;
 /** Events are single-use tokens: only an event the game ISSUED (rollEvent / travel) can be resolved, once, within the TTL. */
 export function issueEvent(store, eventId, now = store.now()) { if (!own(EVENT_BY_ID, eventId)) return false; store.state.pendingEvent = { id: eventId, at: now }; return true; }
@@ -175,6 +185,7 @@ export function eligible(c) {
 }
 export function rollEvent(store, c, rnd = Math.random, now = store.now()) {
   const s = store.state, f = (s.flags ||= {});
+  if (eventsCalm(s, now)) return null;
   if (f.eventAt && now - f.eventAt < EVENT_COOLDOWN_MS) return null;
   const recent = new Set((s.eventLog || []).slice(0, 4));
   const pool = eligible(c).filter((e) => !recent.has(e.id));

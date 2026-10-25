@@ -6,7 +6,7 @@ export const CONTACTS = {
   mom:     { id: 'mom',     name: 'Mom',                   sub: 'Family · NPC',            color: '#e0568a', kind: 'person' },
   market:  { id: 'market',  name: 'Prairie Corner Market', sub: 'Employer · NPC',          color: '#3bb273', kind: 'business', place: 'market' },
   threads: { id: 'threads', name: 'Prairie Threads',       sub: 'Employer · NPC',          color: '#8e6bd8', kind: 'business', place: 'threads' },
-  bank:    { id: 'bank',    name: 'Wascana Credit Union',  sub: 'Bank · automated NPC',    color: '#2d7ff9', kind: 'business' },
+  bank:    { id: 'bank',    name: 'Big Sky Savings',       sub: 'Bank · automated NPC',    color: '#2d7ff9', kind: 'business' },
 };
 export const CONTACT_ORDER = ['dani', 'mom', 'market', 'threads', 'bank'];
 // Residents are addressable like any contact (for messages / calls / transfers) once befriended.
@@ -36,5 +36,5 @@ export function npcReply(contactId, text, level = 0) {
     return "Prairie Corner Market — open daily. Ask about careers in the Jobs app.";
   }
   if (contactId === 'threads') return 'Thanks for messaging Prairie Threads! Apply via the Jobs app, or drop by to shop.';
-  return 'This is an automated message from Wascana Credit Union. Never share your PIN.';
+  return 'This is an automated message from Big Sky Savings. Never share your PIN.';
 }

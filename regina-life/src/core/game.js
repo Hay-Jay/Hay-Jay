@@ -41,6 +41,8 @@ export function buyItem(store, itemId, qty = 1, where = 'Store') {
   return { ok: true, tx: r.tx };
 }
 
+/** Lifetime counters of things you did (s.stats): the First day card, the daily To-Do and the diary read them. Never money, never trusted for pay. */
+export function tally(s, key, n = 1) { s.stats = s.stats && typeof s.stats === 'object' ? s.stats : {}; s.stats[key] = Math.min(1e7, (Number.isFinite(s.stats[key]) ? s.stats[key] : 0) + n); }
 export function consume(store, itemId) {
   const s = store.state, f = FOOD[itemId];
   if (!f || !(s.inventory[itemId] > 0)) return { ok: false, error: 'You do not have that' };
@@ -48,6 +50,7 @@ export function consume(store, itemId) {
   s.needs.hunger = clamp(s.needs.hunger + f.hunger);
   s.needs.energy = clamp(s.needs.energy + f.energy);
   s.needs.mood = clamp(s.needs.mood + 3);
+  tally(s, 'eaten');
   store.commit('needs');
   return { ok: true, food: f };
 }
@@ -163,7 +166,7 @@ export function finishShift(store) {
   const lvl = currentLevel(j), wage = wageFor(store, lvl);
   const pay = store.ledger.credit(wage, `Payroll: ${JOBS[j.id].employer}`, { category: 'income', ref: `shift:${sh.startedAt}` });
   if (!pay.ok) return pay;
-  j.xp += XP_PER_TASK * sh.tasksTotal; j.shifts++;
+  j.xp += XP_PER_TASK * sh.tasksTotal; j.shifts++; tally(s, 'shifts');
   s.job.shift = null;
   let promoted = null;
   const next = JOBS[j.id].levels[j.level + 1];
@@ -232,6 +235,7 @@ export function cook(store, recipeId) {
   const bonus = 1 + skillLevel(s.skills?.cooking || 0) * 0.06;
   s.needs.hunger = clamp(s.needs.hunger + Math.round(r.hunger * bonus)); s.needs.energy = clamp(s.needs.energy + r.energy); s.needs.mood = clamp(s.needs.mood + r.mood);
   s.needs.fun = clamp((s.needs.fun ?? 60) + 6);
+  tally(s, 'eaten'); tally(s, 'cooked');
   store.commit('needs'); addSkill(store, 'cooking', 8);
   return { ok: true, recipe: r };
 }
@@ -261,5 +265,6 @@ export function doActivity(store, id, opts = {}) {
   const hb = opts.home ? homeBonuses(store.state, a.skill?.[0] ?? null) : null, funBoost = hb ? 1 + hb.fun + (id === 'read' || id === 'tv' ? hb.comfort : 0) : 1;
   for (const [k, v] of Object.entries(a.needs)) n[k] = clamp((n[k] ?? 50) + (k === 'fun' && v > 0 ? Math.round(v * funBoost) : v) + (k === 'mood' && v > 0 && hb ? Math.round(hb.mood) : 0));
   if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (a.skill[0] === 'fitness' ? policyMult(store.state, 'fitness') : 1) * (hb ? 1 + hb.skill : 1));
+  tally(store.state, 'activities');
   store.commit('needs'); return { ok: true, activity: a };
 }

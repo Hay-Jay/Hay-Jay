@@ -171,7 +171,7 @@ const mapsApp = app('maps', 'Maps', (body, ctx, phone) => {
 
 /* ================= BANK ================= */
 const CAT = { income: ['#34c98b', 'Income'], groceries: ['#ff9f43', 'Groceries'], clothing: ['#8e6bd8', 'Clothing'], transfer: ['#4da3ff', 'Transfers'], purchase: ['#ff6b81', 'Other'], travel: ['#26c6da', 'Travel'] };
-const bankApp = app('bank', 'Wascana CU', (body, ctx) => {
+const bankApp = app('bank', 'Big Sky Savings', (body, ctx) => {
   const { store, G } = ctx; let view = 'main', msg = '';
   const render = () => {
     const s = store.state, h = s.bank.history;
@@ -183,7 +183,7 @@ const bankApp = app('bank', 'Wascana CU', (body, ctx) => {
     }
     const byCat = {}; h.filter((x) => x.type === 'debit').forEach((x) => (byCat[x.category] = (byCat[x.category] || 0) + x.amount));
     const tot = Object.values(byCat).reduce((a, b) => a + b, 0) || 1;
-    body.innerHTML = `${nav('Wascana CU')}<div class="scroll"><div class="card bal"><small>Chequing · ••4521</small><div class="amt">${fmtMoney(s.bank.balance)}</div><small>Prairie Dollars (fictional in-game currency)</small></div>
+    body.innerHTML = `${nav('Big Sky Savings')}<div class="scroll"><div class="card bal"><small>Chequing · ••4521</small><div class="amt">${fmtMoney(s.bank.balance)}</div><small>Prairie Dollars (fictional in-game currency)</small></div>
       <div class="actions3"><button data-act="send">${ICON.send}<span>send</span></button><button data-act="jobs">${ICON.jobs}<span>earn</span></button><button data-act="shop">${ICON.inventory}<span>spend</span></button></div>
       ${Object.keys(byCat).length ? `<h4 class="sec">Spending</h4><div class="stack">${Object.entries(byCat).map(([k, v]) => `<i style="flex:${v / tot};background:${(CAT[k] || CAT.purchase)[0]}" title="${(CAT[k] || CAT.purchase)[1]}"></i>`).join('')}</div><div class="legend">${Object.entries(byCat).map(([k, v]) => `<span><i style="background:${(CAT[k] || CAT.purchase)[0]}"></i>${(CAT[k] || CAT.purchase)[1]} ${fmtMoney(v)}</span>`).join('')}</div>` : ''}
       <h4 class="sec">Transactions</h4><div class="list">${h.length ? h.slice(0, 40).map((x) => `<div class="row"><div class="avatar sm" style="background:${(CAT[x.category] || CAT.purchase)[0]}">${x.type === 'credit' ? '↓' : '↑'}</div><div class="grow"><b>${esc(x.memo)}</b><p>${new Date(x.t).toLocaleTimeString('en-CA', { timeZone: TZ, hour: 'numeric', minute: '2-digit' })} · ${(CAT[x.category] || CAT.purchase)[1]}</p></div><b class="${x.type === 'credit' ? 'green' : ''}">${x.type === 'credit' ? '+' : '−'}${fmtMoney(x.amount)}</b></div>`).join('') : '<p class="empty">No transactions yet</p>'}</div></div>`;

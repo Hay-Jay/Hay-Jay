@@ -62,7 +62,7 @@ export const THEMES = {
  */
 export const HOUSE_ADS = [
   { id: 'market', text: 'Prairie Corner Market · Fresh daily', theme: 'rider' },
-  { id: 'lofts', text: 'Wheat City Lofts · Now leasing', theme: 'sunset' },
+  { id: 'lofts', text: 'Dewdney Lofts · Now leasing', theme: 'sunset' },
   { id: 'fitness', text: 'Prairie Fitness · First week free', theme: 'lake' },
   { id: 'threads', text: 'Prairie Threads · Toques are in', theme: 'berry' },
   { id: 'cabs', text: 'Queen City Cabs · Always on call', theme: 'night' },

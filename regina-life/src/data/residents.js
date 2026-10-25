@@ -7,7 +7,7 @@ export const RESIDENTS = [
     lines: ['Did you know a double-double is basically a personality?', 'Our band finally has a name. We argue about it daily.', 'Come by the café — first one is on me. (Second one is not.)'] },
   { id: 'priya', handle: '@priya_runs',      name: 'Priya Sharma',     emoji: '🏃', color: '#3bd6c6', job: 'Nurse, runs Wascana loop', bio: 'Night-shift nurse. Runs the Wascana loop at dawn. Will absolutely make you stretch.', likes: ['apple', 'milk'], datable: true,
     lines: ['Hydrate! Seriously. Hydrate.', 'I did the full Wascana loop before sunrise. The geese were judging me.', 'Gym later? I will spot you.'] },
-  { id: 'jess',  handle: '@jess.thunder',    name: 'Jess Lafontaine',  emoji: '🏒', color: '#2ea86a', job: 'Hockey referee', bio: 'Referees by night, Rider Nation by Saturday. Loud. Loyal. Green and white.', likes: ['chips', 'pop'], datable: true,
+  { id: 'jess',  handle: '@jess.thunder',    name: 'Jess Lafontaine',  emoji: '🏒', color: '#2ea86a', job: 'Hockey referee', bio: 'Referees by night, football fan by Saturday. Loud. Loyal. Green and white.', likes: ['chips', 'pop'], datable: true,
     lines: ['That was NOT icing. I will die on this hill.', 'Rider game on Saturday? You are coming. Not a question.', 'Bring ketchup chips. Obviously.'] },
   { id: 'omar',  handle: '@omar_builds',     name: 'Omar Haddad',      emoji: '🔧', color: '#c98a3c', job: 'Carpenter', bio: 'Builds decks, fixes doors, collects tape measures. Has opinions about every staircase in Regina.', likes: ['sandwich', 'coffee'], datable: false,
     lines: ['Measure twice. Cut once. Complain about the weather always.', 'Need a bookshelf? I know a guy. The guy is me.', 'Your door sticks? Classic prairie humidity.'] },

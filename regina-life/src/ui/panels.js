@@ -11,7 +11,9 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 export class Panels {
   constructor(root, ctx) {
     this.root = root; this.ctx = ctx; this.cur = null;
-    root.addEventListener('click', (e) => { if (e.target === root) this.close(); });
+    // a backdrop click closes only panels that may be dismissed: the creator, timed activities and life events must be finished with their own buttons
+    // (clicking the 3D character behind the creator used to end it and start the game with the default look)
+    root.addEventListener('click', (e) => { if (e.target === root && this.cur && this.cur.dismissable !== false) this.close(); });
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && this.cur && this.cur.dismissable !== false) this.close(); });
   }
   get open() { return !!this.cur; }
@@ -25,6 +27,27 @@ export class Panels {
   menu(title, text, buttons) {
     const p = this._show(`<h3>${esc(title)}</h3><p class="pm">${esc(text)}</p><div class="pbtns">${buttons.map((b, i) => `<button class="btn ${b.primary ? 'primary' : ''} ${b.danger ? 'danger' : ''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div>`, 'menu');
     p.addEventListener('click', (e) => { const b = e.target.closest('[data-i]'); if (!b) return; const btn = buttons[+b.dataset.i]; this.close(); btn.run?.(); });
+  }
+
+  /**
+   * The daily gift card (docs/AMAZING.md G4): seven stamps you never lose. `st` is dailyStatus(), `amounts` the seven rewards in cents.
+   * onClaim(buttonEl) returns the claim result; the card re-renders as "claimed".
+   */
+  dailyCard(st, amounts, { onClaim, onBank, fmt }) {
+    const render = (s) => {
+      const got = s.ready ? s.streak : s.day;   // stamps already on the card
+      p.innerHTML = `<div class="ev-ic">🎁</div><h3>Daily gift</h3>
+        <div class="stamps">${amounts.map((a, i) => `<div class="stamp ${i < got ? 'got' : ''} ${s.ready && i === s.day - 1 ? 'today' : ''}"><em>${i === 6 ? '🌟' : '🌾'}</em>${i + 1}</div>`).join('')}</div>
+        <p class="pm">${s.ready ? `Stamp ${s.day} of 7 is ready: <b>${fmt(s.amount)}</b>.` : `Stamp ${s.day} collected. Come back tomorrow for the next one (${fmt(amounts[s.day % 7])}).`}<br><small>Missed a day? No problem: your stamps never reset.</small></p>
+        <div class="pbtns col">${s.ready ? `<button class="btn primary" data-claim>Claim ${fmt(s.amount)}</button>` : '<button class="btn primary" data-close>See you tomorrow</button>'}<button class="btn" data-bank>Open Bank app</button></div>
+        <p class="fine">Prairie Dollars are a fictional in-game currency.</p>`;
+    };
+    const p = this._show('', 'menu daily'); render(st);
+    p.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-claim]'); if (c) { const r = onClaim(c); if (r?.ok) { render({ ready: false, day: r.day, amount: 0, streak: r.day }); const me = this.cur; setTimeout(() => { if (this.cur === me) this.close(); }, 1700); } return; }   // the stamp lands, then the card gets out of the way
+      if (e.target.closest('[data-close]')) return this.close();
+      if (e.target.closest('[data-bank]')) { this.close(); onBank?.(); }
+    });
   }
 
   /** Timed activity with a progress bar (input is blocked while a panel is open). */

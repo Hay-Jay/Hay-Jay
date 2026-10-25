@@ -4,11 +4,13 @@ import { cloudTexture, glowTexture } from './textures.js';
 
 const lerpC = (a, b, t) => a.clone().lerp(b, t);
 const C = (h) => new THREE.Color(h);
+// Living skies: a bright day, a warm dusk and a dusk-blue night (never black: VISION 3.1). The dome now goes through the renderer's tone mapping and
+// colour-space conversion like every other material, so these hex values are what you actually see.
 const SKY = {
-  night:   { top: C('#050a1c'), hor: C('#101a35') },
-  twilight:{ top: C('#2a3b6e'), hor: C('#e9946a') },
-  dawn:    { top: C('#4a73b8'), hor: C('#f7c28f') },
-  day:     { top: C('#2f6fd0'), hor: C('#a9cdf2') },
+  night:   { top: C('#13254f'), hor: C('#2c3f6e') },
+  twilight:{ top: C('#3a4f8c'), hor: C('#f0a070') },
+  dawn:    { top: C('#5a86c8'), hor: C('#f7c28f') },
+  day:     { top: C('#4f8fe0'), hor: C('#bfdcf5') },
 };
 
 /** Sky dome, sun/moon, clouds, stars, fog, lighting and precipitation – driven by Regina time + weather. */
@@ -23,7 +25,10 @@ export class Atmosphere {
         void main(){ float h = clamp(vP.y,0.0,1.0); vec3 c = mix(hor, top, pow(h,0.6));
           float s = max(dot(normalize(vP), normalize(sunDir)),0.0);
           c += sunCol * (pow(s,900.0)*2.0 + pow(s,12.0)*0.35) * sunAmt;
-          c = mix(c, hor, smoothstep(0.0,-0.25,vP.y)); gl_FragColor = vec4(c,1.0); }`,
+          c = mix(c, hor, smoothstep(0.0,-0.25,vP.y)); gl_FragColor = vec4(c,1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
+        }`,
     }));
     this.dome.renderOrder = -10; scene.add(this.dome);
 
@@ -40,6 +45,7 @@ export class Atmosphere {
     this.sun = new THREE.DirectionalLight('#fff1d6', 2.4); this.sun.castShadow = true;
     const sc = this.sun.shadow.camera; sc.left = -90; sc.right = 90; sc.top = 90; sc.bottom = -90; sc.near = 1; sc.far = 600;
     this.sun.shadow.mapSize.set(2048, 2048); this.sun.shadow.bias = -0.0004; this.sun.shadow.normalBias = 0.6;
+    this.sun.shadow.radius = 3; this.sun.shadow.intensity = 0.82;   // r186's PCF takes its softness from radius; shadows that are soft and never pitch black
     scene.add(this.sun, this.sun.target);
     this.fill = new THREE.AmbientLight('#8aa0c8', 0.0); scene.add(this.fill);
     this.fog = new THREE.Fog('#a9cdf2', 150, 1400); scene.fog = this.fog;
@@ -74,19 +80,28 @@ export class Atmosphere {
 
   /** @param {Date} date Regina "now"  @param {object} weather from core/weather */
   setTime(date, weather) {
-    if (this.indoor) { this.hemi.intensity = this.homeLift ? 1.25 : 0.55; this.hemi.color.set('#fff4e0'); this.hemi.groundColor.set('#8a7f70'); this.fill.intensity = this.homeLift ? 0.65 : 0.3; this.sun.visible = false; this.exposureBase = this.homeLift ? 1.1 : 0.95; return this.env; }
     const sp = sunPosition(date); const alt = sp.altitude;
     const clock = reginaClock(date), season = seasonOf(clock.month);
     const altDeg = (alt * 180) / Math.PI;
     const night = THREE.MathUtils.smoothstep(-altDeg, -2, 10);                 // 0 day → 1 night
     const dusk = Math.max(0, 1 - Math.abs(altDeg - 1) / 9);                    // golden-hour weight
+    if (this.indoor) {   // no sky indoors, but the clock still runs: windows, lamps and the Home view's lawn follow the real Regina day
+      const kind = weather?.kind ?? 'clear', d = 1 - night;
+      this.env = { ...this.env, night, sunAlt: alt, season, kind, dusk, phase: night > 0.85 ? 'night' : night > 0.15 ? 'twilight' : 'day', temp: weather?.temp };
+      this.sun.visible = false;
+      if (this.homeLift) {   // the dollhouse: bright daylight by day, warm lamplight under a dusk-blue sky by night
+        this.hemi.intensity = 0.8 + d * 0.65; this.hemi.color.copy(lerpC(C('#ffd6a0'), C('#fff6e8'), d)); this.hemi.groundColor.copy(lerpC(C('#3f4a70'), C('#9a8e7c'), d));
+        this.fill.color.set(night > 0.5 ? '#7d8fcf' : '#8aa0c8'); this.fill.intensity = 0.35 + d * 0.35; this.exposureBase = 1.0 + d * 0.06;
+      } else { this.hemi.intensity = 0.75; this.hemi.color.set('#fff4e0'); this.hemi.groundColor.set('#8a7f70'); this.fill.intensity = 0.35; this.exposureBase = 1.0; }
+      return this.env;
+    }
     // sky palette
     let top = lerpC(SKY.day.top, SKY.night.top, night), hor = lerpC(SKY.day.hor, SKY.night.hor, night);
     hor = lerpC(hor, SKY.twilight.hor, dusk * 0.85); top = lerpC(top, SKY.twilight.top, dusk * 0.5);
     const cloud = THREE.MathUtils.clamp((weather?.cloud ?? 20) / 100, 0, 1);
     const kind = weather?.kind ?? 'clear';
     const grey = (kind === 'rain' || kind === 'storm' || kind === 'snow' || kind === 'drizzle') ? 0.75 : kind === 'fog' ? 0.85 : cloud * 0.55;
-    const greyCol = lerpC(C('#9aa3ad'), C('#262b33'), night);
+    const greyCol = lerpC(C('#aab3bd'), C('#3a4560'), night);
     top.lerp(greyCol, grey); hor.lerp(greyCol, grey * 0.9);
     const u = this.dome.material.uniforms; u.top.value.copy(top); u.hor.value.copy(hor);
     // sun is placed in the sky: azimuth from south (westward +). Convert to world: +z = south, +x = east.
@@ -98,11 +113,12 @@ export class Atmosphere {
     // lights
     const dayAmt = 1 - night;
     this.sun.color.set(alt < 0.2 ? '#ffb27a' : '#fff0d4').lerp(C('#c8d3e6'), grey * 0.6);
-    this.sun.intensity = Math.max(0.0, dayAmt * (2.6 - grey * 1.8)) + night * 0.35;
-    if (night > 0.5) this.sun.color.set('#9db4e8');
-    this.hemi.intensity = 0.3 + dayAmt * (0.75 - grey * 0.15) + night * 0.55;
-    this.hemi.color.copy(lerpC(C('#cfe3ff'), C('#7f98d0'), night)); this.hemi.groundColor.copy(lerpC(C('#7a7560'), C('#3a4560'), night));
-    this.fill.intensity = night * 0.55;
+    this.sun.intensity = Math.max(0.0, dayAmt * (2.5 - grey * 1.6)) + night * 0.5;
+    if (night > 0.5) this.sun.color.set('#a9c0f0');
+    // a strong sky fill: the shaded side of a building sits at about half the sunny side (a toy diorama, not a photograph), and the night stays readable
+    this.hemi.intensity = 0.7 + dayAmt * (1.0 - grey * 0.1) + night * 0.6;
+    this.hemi.color.copy(lerpC(C('#d8e9ff'), C('#8ea6e0'), night)); this.hemi.groundColor.copy(lerpC(C('#b3a98f'), C('#46557a'), night));
+    this.fill.intensity = night * 0.6;
     const moonDir = this._tmp.set(-dir.x * 0.6 - 0.2, Math.max(0.25, -dir.y * 0.9 + 0.35), -dir.z * 0.6 + 0.3).normalize().clone();
     this.moonDir = moonDir; this.moon.material.opacity = night * (1 - grey); this.moon.visible = night > 0.05;
     this.stars.material.opacity = Math.max(0, night - 0.35) * (1 - grey) * 1.4;
@@ -119,10 +135,10 @@ export class Atmosphere {
     if (pk !== this.precipKind) this._makePrecip(pk);
     // snow cover: sticks in winter or after snowfall
     const snow = season === 'winter' ? 1 : (kind === 'snow' ? 0.6 : 0);
-    this.env = { night, sunAlt: alt, season, snow, cloud, kind, phase: night > 0.85 ? 'night' : night > 0.15 ? 'twilight' : 'day', temp: weather?.temp };
-    this.exposureBase = 0.9 + night * 0.15;
+    this.env = { night, sunAlt: alt, season, snow, cloud, kind, dusk, phase: night > 0.85 ? 'night' : night > 0.15 ? 'twilight' : 'day', temp: weather?.temp };
+    this.exposureBase = 1.0 + night * 0.12;
     if (this.hubLift) { // home-screen map: keep it readable whatever the hour
-      this.hemi.intensity = Math.max(this.hemi.intensity, 1.4); this.fill.intensity = Math.max(this.fill.intensity, 0.5); this.exposureBase = Math.max(this.exposureBase, 1.12);
+      this.hemi.intensity = Math.max(this.hemi.intensity, 1.9); this.fill.intensity = Math.max(this.fill.intensity, 0.5); this.exposureBase = Math.max(this.exposureBase, 1.08);
     }
     return this.env;
   }

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import './theme.css';
+import './ui/amazing.css';
 import { Store } from './core/store.js';
 import * as G from './core/game.js';
 import { fmtMoney } from './core/ledger.js';
@@ -20,6 +21,7 @@ import { Phone } from './ui/phone.js';
 import { Panels } from './ui/panels.js';
 import { MapView } from './ui/map.js';
 import { Audio } from './ui/audio.js';
+import { makeJuice } from './ui/juice.js';
 import { ICON } from './ui/icons.js';
 import { Hub } from './ui/hub.js';
 import { rollEvent, resolveEvent, choiceAvailable, EVENT_BY_ID } from './core/events.js';
@@ -30,6 +32,7 @@ import * as POL from './core/politics.js';
 import * as H from './core/home.js';
 import { planMove, upgradeHome } from './core/move.js';
 import { lotOf, roomAtFloor } from './core/lot.js';
+import { cutSidesFor } from './world/homeWalls.js';
 import { HOMES, layoutOf } from './data/homes.js';
 import { policyMult } from './core/policy.js';
 import { travel, cabFare } from './core/travel.js';
@@ -39,7 +42,9 @@ import { BuildMode } from './ui/build.js';
 import { Catalogue } from './ui/catalogue.js';
 import { makeThumbs } from './ui/thumbs.js';
 import { Shell, moodOf } from './ui/shell.js';
-import { dailyStatus, claimDaily } from './core/daily.js';
+import { dailyStatus, claimDaily, REWARD_CENTS } from './core/daily.js';
+import { updateOnboarding } from './core/onboarding.js';
+import { FirstDay } from './ui/firstday.js';
 import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
 
 const $ = (id) => document.getElementById(id);
@@ -66,11 +71,13 @@ async function boot() {
   /* ---------- renderer ---------- */
   const canvas = $('game');
   let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !isTouch, powerPreference: 'high-performance' }); }
+  // MSAA on phones too: tile-based mobile GPUs resolve it on-chip, and at pixel ratio 1 it is the difference between jaggy and clean (visual audit)
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
   catch (e) { loadTxt.textContent = 'WebGL is not available on this device/browser.'; throw e; }
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95;
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // Neutral keeps the palette's colours (ACES crushed the darks and pushed pastels to white); PCFSoftShadowMap is gone in three r186, softness comes from shadow.radius
+  renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.25, 4200);
   scene.add(camera);
@@ -122,7 +129,8 @@ async function boot() {
     if (!force && now - lastEnvAt < (fast ? 400 : 4000)) return; lastEnvAt = now;
     env = atmo.setTime(virtualNow(), weather); city.setEnvironment(env);
     if (env.season !== lastSeason) { city.recolorTrees(env.season); lastSeason = env.season; }
-    renderer.toneMappingExposure = atmo.exposureBase ?? 0.95;
+    renderer.toneMappingExposure = atmo.exposureBase ?? 1;
+    if (homeView && inInterior) { scene.background = homeSky(); homeStage.tint?.(env.night ?? 0); }
   };
   const refreshWeather = async () => { weather = await fetchWeather(); ped.redress(weather.temp); updateEnv(true); store.commit('weather'); };
 
@@ -133,6 +141,25 @@ async function boot() {
     const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; $('toasts').appendChild(t);
     setTimeout(() => t.classList.add('out'), 3200); setTimeout(() => t.remove(), 3600);
     while ($('toasts').children.length > 3) $('toasts').firstChild.remove();
+  };
+  /* ---------- juice: every payoff answers back (floaters over your head, coins into the wallet, chimes, confetti for firsts) ---------- */
+  const juice = makeJuice({ camera, canvas, audio, moneyEl: () => (document.body.classList.contains('shell-on') ? $('tb-money') : $('hud-money')) });
+  const headAt = () => new THREE.Vector3(player.pos.x, 2.15, player.pos.z);
+  const NEED_NAMES = { energy: 'Energy', hunger: 'Hunger', hygiene: 'Hygiene', fun: 'Fun', mood: 'Mood' };
+  const snap = () => ({ needs: { ...S().needs }, skills: { ...S().skills }, bal: S().bank.balance });
+  /** Show what just changed since `b` (a snap()): the two biggest need gains, any skill XP or level-up, money in or out. */
+  const showGains = (b, at = headAt()) => {
+    const s = S(), ds = Object.keys(NEED_NAMES).map((k) => [k, Math.round((s.needs[k] ?? 0) - (b.needs[k] ?? 0))]).filter(([, d]) => d >= 2).sort((x, y) => y[1] - x[1]).slice(0, 2);
+    ds.forEach(([k, d], i) => setTimeout(() => juice.floater(`+${d} ${NEED_NAMES[k]}`, at, 'good'), i * 220));
+    if (ds.length) { audio.chime('gain'); juice.pulse(hudNeeds); }
+    let lvl = false;
+    for (const k of Object.keys(G.SKILLS)) {
+      const before = G.skillLevel(b.skills?.[k] || 0), after = G.skillLevel(s.skills?.[k] || 0);
+      if (after > before) { lvl = true; setTimeout(() => { juice.floater(`${G.SKILLS[k].icon} ${G.SKILLS[k].name} level ${after}!`, at, 'skill', { big: true }); audio.chime('fanfare'); juice.confetti(40); }, 520); }
+      else if ((s.skills?.[k] || 0) > (b.skills?.[k] || 0)) setTimeout(() => juice.floater(`${G.SKILLS[k].icon} +${G.SKILLS[k].name}`, at, 'skill'), ds.length * 220);
+    }
+    const dm = s.bank.balance - b.bal; if (dm > 0) juice.pay(dm, at); else if (dm < 0) juice.spend(-dm);
+    return { needs: ds, levelUp: lvl, money: dm };
   };
   const fadeTo = async (on, ms = 450) => { const f = $('fade'); f.style.transitionDuration = ms + 'ms'; f.classList.toggle('on', on); await new Promise((r) => setTimeout(r, ms)); };
   const setDestination = (poi) => {
@@ -146,7 +173,7 @@ async function boot() {
     mapState, cabFare, setDestination, phone: () => phone, rebuildPlayer, applySettings,
     jobTitle: () => (S().job.active ? JOBS[S().job.active.id].title : ''),
     flushPending: () => G.flushPending(store),
-    callLine: (id) => ({ dani: 'Hey you! Have you checked the Jobs app? The Market is hiring — and bring me back a coffee, eh?', mom: "Hi sweetheart, just checking you're eating and dressing warm!", market: 'Prairie Corner Market — your shift is ready whenever you are.', threads: 'Prairie Threads here — we love your style!', bank: 'This is Wascana Credit Union. Never share your PIN. Goodbye.' }[id] || 'Hello?'),
+    callLine: (id) => ({ dani: 'Hey you! Have you checked the Jobs app? The Market is hiring — and bring me back a coffee, eh?', mom: "Hi sweetheart, just checking you're eating and dressing warm!", market: 'Prairie Corner Market — your shift is ready whenever you are.', threads: 'Prairie Threads here — we love your style!', bank: 'This is Big Sky Savings. Never share your PIN. Goodbye.' }[id] || 'Hello?'),
     news: () => generateNews({ date: virtualNow(), clock: clock(), weather, season: seasonOf(clock().month), state: S() }),
     adsFocus: null, refreshBillboards: () => city.refreshBillboards(S().ads, Date.now(), policyMult(S(), 'ads')),
     confirm: (title, text, yes, run) => panels.menu(title, text, [{ label: yes, primary: true, run }, { label: 'Cancel' }]),
@@ -164,7 +191,7 @@ async function boot() {
         await fadeTo(true); closeMap(); closeMapOverview();
         player.teleport(poi.x, poi.z + 7, Math.PI); player.pos.z = poi.z + 7; city.colliders.resolve(player.pos, 0.5); player.syncRoot();
         rig.snapBehind(player.yaw); rig.snap(player);
-        await new Promise((r2) => setTimeout(r2, 350)); await fadeTo(false); toast(`Arrived at ${poi.name} · paid ${fmtMoney(fare)}`, 'good');
+        await new Promise((r2) => setTimeout(r2, 350)); await fadeTo(false); toast(`Arrived at ${poi.name} · paid ${fmtMoney(fare)}`, 'good'); G.tally(S(), 'visits'); juice.spend(fare);
       })();
       return true;
     },
@@ -175,6 +202,7 @@ async function boot() {
     },
     onPanel: () => {},
     rebuildPlayerLook: rebuildPlayer,
+    fx: { juice, snap, gains: (b, at) => showGains(b, at) },
   };
   const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio; radio.volume = S().radio?.volume ?? 0.7; radio.onVolume = (v) => { S().radio.volume = v; store.commit('phone-quiet'); };
   ctx.startTrip = (destId, mode) => {
@@ -202,10 +230,10 @@ async function boot() {
   const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f, top = 0) => { rig.buildInset = f; stripTop = top; if (build.active) { applyTop(); placeToasts(); } },
     onWallMode: (m) => { wallMode = m; interior?.setWallMode?.(m); },
     onFocus: (id, rect) => rig.setBuildFocus(rect),
-    onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); if (interior?.overheadMode) build.setWallMode(interior.overheadMode); },
+    onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); orbitOn(false); if (interior?.overheadMode) build.setWallMode(interior.overheadMode); },
     onStop: () => {
       stripTop = 0; placeToasts();
-      if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
+      if (homeView) { interior?.setOverhead(true); rig.mode = 'build'; orbitOn(true); homeInsets(); toast('Home saved', 'good'); return; } // back to the live dollhouse view
       interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); toast('Home saved', 'good');
     } });
   /** The Buy tab: a bottom sheet over the Home view / build mode. Pieces you buy are handed to build mode to place. */
@@ -229,7 +257,7 @@ async function boot() {
     return (interiors[kind] ||= buildInterior(kind));
   };
   const ictx = {
-    store, game: G, fmt: fmtMoney, audio,
+    store, game: G, fmt: fmtMoney, audio, fx: ctx.fx, did: (what, id) => ctx.onDid?.(what, id),
     player: { setCarry: (v) => player.setCarry(v), gesture: (g) => player.gesture(g), sitAt: (s) => player.sitAt(s) },
     ui: {
       toast, menu: (t, tx, b) => panels.menu(t, tx, b), shop: (t, ids, w) => panels.shop(t, ids, w), clothingShop: () => panels.clothingShop(),
@@ -246,13 +274,14 @@ async function boot() {
       noticeBoard: () => { const p = POL.ensurePolitics(store), pol = POLICIES[p.mayor.policy]; panels.menu('📌 City notices', `• ${pol.icon} ${pol.name}: ${pol.effect}.\n• Election term ${p.term} is under way — vote in the Town Hall app.\n• ${ctx.news()[2]?.title ?? 'Council meets Tuesday.'}`, [{ label: 'Close' }]); },
       activity: (id) => {
         const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
-        const a = G.ACTIVITIES[id]; player.gesture('use', a.secs);
-        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); toast(activityToast(id), 'good'); } else toast(r.error, 'warn'); });
+        const a = G.ACTIVITIES[id]; player.gesture('use', a.secs); const b = snap();
+        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); showGains(b); toast(activityToast(id), 'good'); ctx.onDid?.('activity', id); } else toast(r.error, 'warn'); });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
+        const b = snap();
         fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store, { home: inInterior === 'apartment' }); await fadeTo(false, 700); fading = false;
-        if (r.ok) toast('You feel well rested.', 'good');
+        if (r.ok) { toast('You feel well rested.', 'good'); showGains(b); ctx.onDid?.('sleep'); }
       },
     },
   };
@@ -272,6 +301,7 @@ async function boot() {
     next.setHome(S().home);
     if (multi && wallMode) next.setWallMode(wallMode);          // the session's Walls choice survives a move (never applied to the Studio: its overhead view is 'up')
     next.setOverhead(homeView || build.active);
+    if (homeView && !build.active) orbitOn(true);
     build.setLayout(next.layout); build.setWallMode(next.overheadMode);
     homeStage.fit(lot.yardRect ?? lot.bbox); rig.setBuildFrame(lot.bbox); rig.setBuildFocus(null);
   }
@@ -289,6 +319,7 @@ async function boot() {
     rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(next.spawn.yaw); rig.snap(player);
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
     toast(({ market: 'Prairie Corner Market', threads: 'Prairie Threads', apartment: layoutOf(S()).title, gym: 'Prairie Fitness', cityhall: 'Regina City Hall' })[kind], 'info');
+    if (kind !== 'apartment') G.tally(S(), 'visits');
   }
   async function exitInterior() {
     if (fading || !inInterior) return; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
@@ -318,7 +349,7 @@ async function boot() {
       if (inInterior === 'apartment') {
         attachInterior(next);                                                         // takes the old interior off the scene
         player.teleport(next.spawn.x, next.spawn.z, next.spawn.yaw); rig.snapBehind(next.spawn.yaw); rig.snap(player);
-        if (homeView) { homeInsets(); rig.snapBuild(); }                              // the dollhouse camera jumps to its new frame behind the fade
+        if (homeView) { homeInsets(); rig.snapBuild(player); }                        // the dollhouse camera jumps to its new frame behind the fade
       }
       dropStaleApartments();                                                          // the old layout's interior (now off the scene) or a stale one from before a move made outdoors
       audio.blip('cash'); moved = r;
@@ -333,7 +364,7 @@ async function boot() {
     atmo.dome.visible = !on; atmo.stars.visible = !on; atmo.moon.visible = !on; atmo.clouds.forEach((c) => (c.visible = !on));
     if (atmo.precip) atmo.precip.visible = !on;
     atmo.sun.visible = !on;
-    if (on) { atmo.setTime(new Date(), weather); scene.background = new THREE.Color('#181a20'); scene.fog.near = 400; scene.fog.far = 900; }
+    if (on) { atmo.setTime(virtualNow(), weather); scene.background = homeView ? homeSky() : new THREE.Color('#181a20'); scene.fog.near = 400; scene.fog.far = 900; }
     else { updateEnv(true); atmo.moon.visible = (env?.night ?? 0) > 0.05; }
     document.body.classList.toggle('indoors', on);
   }
@@ -407,6 +438,37 @@ async function boot() {
     if (it.kind === 'billboard') { ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return; }
     audio.blip('tick'); it.run(ictx);
   };
+  /* ---------- Home view: tap a piece to walk over and use it; tap the floor to walk there (a drag still turns the dollhouse) ---------- */
+  let autoWalk = null, tapDown = null;
+  const tapRay = new THREE.Raycaster(), tapNdc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), tapHit = new THREE.Vector3();
+  const tapMark = new THREE.Mesh(new THREE.RingGeometry(0.22, 0.34, 28).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0, depthWrite: false })); tapMark.position.y = 0.03; tapMark.renderOrder = 3; scene.add(tapMark);
+  canvas.addEventListener('pointerdown', (e) => { tapDown = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  canvas.addEventListener('pointerup', (e) => {
+    const d = tapDown; tapDown = null;
+    if (!d || !homeView || build.active || panels.open || catalogue.isOpen || phone.isOpen || fading || camMode || inInterior !== 'apartment' || !interior) return;
+    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > 8 || performance.now() - d.t > 450) return;
+    const r = canvas.getBoundingClientRect(); tapNdc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    tapRay.setFromCamera(tapNdc, camera); if (!tapRay.ray.intersectPlane(floorPlane, tapHit)) return;
+    let best = null, bd = 2.2;
+    for (const it of interior.interactables) { const q = Math.hypot(it.x - tapHit.x, it.z - tapHit.z); if (q < bd && (!it.enabled || it.enabled(ictx))) { bd = q; best = it; } }
+    const b = interior.bounds, gx = Math.min(b.x1 - 0.3, Math.max(b.x0 + 0.3, best ? best.x : tapHit.x)), gz = Math.min(b.z1 - 0.3, Math.max(b.z0 + 0.3, best ? best.z : tapHit.z));
+    autoWalk = { x: gx, z: gz, it: best, t: 0, last: Infinity, stuck: 0 };
+    tapMark.position.set(gx, 0.03, gz); tapMark.material.opacity = 0.95; tapMark.scale.setScalar(1.4); audio.chime('pop');
+  });
+  /** The input the player walks with this frame: the real one, or a steer towards the tapped spot (camera-relative, like a stick). */
+  const walkInput = (dt) => {
+    if (!autoWalk) return input;
+    if (input.move.mag > 0.1 || !homeView || inInterior !== 'apartment' || build.active || panels.open) { autoWalk = null; return input; }
+    const a = autoWalk, dx = a.x - player.pos.x, dz = a.z - player.pos.z, dist = Math.hypot(dx, dz);
+    a.t += dt; if (dist < a.last - 0.02) { a.last = dist; a.stuck = 0; } else a.stuck += dt;
+    if (dist < (a.it ? 0.45 : 0.25) || a.stuck > 1.1 || a.t > 14) {
+      autoWalk = null;
+      if (a.it && Math.hypot(a.it.x - player.pos.x, a.it.z - player.pos.z) <= a.it.radius) { target = { it: a.it, label: typeof a.it.label === 'function' ? a.it.label(ictx) : a.it.label }; interact(); }
+      return input;
+    }
+    const cy = rig.yaw, fx = -Math.sin(cy), fz = -Math.cos(cy), rx = Math.cos(cy), rz = -Math.sin(cy), ux = dx / dist, uz = dz / dist, k = Math.min(1, dist / 0.7);
+    return { move: { x: (ux * rx + uz * rz) * k, y: (ux * fx + uz * fz) * k, mag: k }, running: dist > 4 };
+  };
   input.on('interact', interact);
   $('prompt').addEventListener('click', interact);
   $('t-interact').addEventListener('pointerdown', (e) => { e.preventDefault(); interact(); });
@@ -419,6 +481,28 @@ async function boot() {
 
   /* ---------- app shell: Home · Buy · Map · Phone ---------- */
   const shell = new Shell({ onTab: (t) => goTab(t), onWallet: () => openWallet() });
+  /* ---------- First day in Regina: the checklist card a new player always sees (core/onboarding.js has the rules) ---------- */
+  const firstDay = new FirstDay({ store, onGo: (st) => {
+    if (st.id === 'gift') openWallet();
+    else if (st.id === 'job') { goTab('home').then(() => { phone.open(); phone.openApp('jobs'); }); }
+    else if (st.id === 'eat') { if (Object.keys(S().inventory).length) { if (inInterior === 'apartment') panels.fridge(); else goTab('home'); } else { setDestination(poiById.market); if (inInterior) exitInterior(); toast('Prairie Corner Market is across Victoria Ave. Follow the arrow!', 'info'); } }
+    else if (st.id === 'shift') { const j = S().job.active, pl = j ? POIS.find((p) => p.enter === JOBS[j.id].place) : null; if (pl) { setDestination(pl); if (inInterior && inInterior !== pl.enter) exitInterior(); } }
+    else if (st.tab) goTab(st.tab);
+  } });
+  let lastHintTab = null, lastFdBottom = -1;
+  /** Tick the card: pay and celebrate new steps, pulse the tab that leads to the next one. */
+  const tickFirstDay = () => {
+    const play = gameMode === 'play' && !creator;
+    if (play) {
+      const r = updateOnboarding(store);
+      r.fresh.forEach((st, i) => setTimeout(() => { juice.floater(`✓ ${st.title}`, firstDay.el, 'good'); juice.pay(st.reward, firstDay.el); audio.chime('gain'); }, i * 450));
+      if (r.finished) setTimeout(() => { juice.confetti(90); audio.chime('fanfare'); toast('First day in Regina: done! Here is a little bonus. Regina is yours.', 'good'); setTimeout(() => { S().onboarding.seenDone = true; store.commit('onboarding'); firstDay.render(true, true); }, 7000); }, r.fresh.length * 450 + 200);
+    }
+    firstDay.render(false, play);
+    const fdb = firstDay.el.hidden ? 0 : Math.round(firstDay.el.getBoundingClientRect().bottom); if (fdb !== lastFdBottom) { lastFdBottom = fdb; if (homeView && !build.active) homeInsets(); }
+    const want = play ? firstDay.next?.tab ?? null : null;
+    if (want !== lastHintTab) { document.querySelectorAll('#navbar button').forEach((b) => b.classList.toggle('hint-pulse', !!want && b.dataset.tab === want)); lastHintTab = want; }
+  };
   const syncTab = () => { if (!panels.open && !catalogue.isOpen) buyOpen = false; shell.setTab(mapOverview || mapOpen ? 'map' : phone.isOpen ? 'phone' : (panels.open || catalogue.isOpen) && buyOpen ? 'buy' : homeView ? 'home' : null); };
   /** Home view: a live, tilted dollhouse of your apartment. You can still walk around and use things; Edit / Buy change the room. */
   // the dollhouse sits on a little lawn under a clear sky, so the home screen reads as a toy diorama rather than a dark room
@@ -433,21 +517,39 @@ async function boot() {
       ring.geometry.dispose(); ring.geometry = new THREE.RingGeometry(rad, rad + 1.1, 56).rotateX(-Math.PI / 2);
       disc.position.set(cx, -0.07, cz); ring.position.set(cx, -0.065, cz);
     };
+    /** The lawn and its ring dim into a blue-green night with the rest of the dollhouse. */
+    homeStage.tint = (n) => { disc.material.color.set('#9ed48a').lerp(new THREE.Color('#3f6a5a'), n * 0.7); ring.material.opacity = 0.55 - n * 0.35; };
     homeStage.fit(lotOf(layoutOf(S())).bbox);
   }
   /** Keep the whole room between the top bar/chips and the tab bar. */
-  const homeInsets = () => { rig.buildInset = Math.min(0.6, Math.max(92, catalogue.isOpen ? catalogue.height + 14 : 0) / innerHeight); homeTop = Math.min(0.24, (catalogue.isOpen ? 76 : 118) / innerHeight); applyTop(); };
+  const homeInsets = () => {
+    const fd = firstDay.el, fdb = !catalogue.isOpen && fd && !fd.hidden ? fd.getBoundingClientRect().bottom + 10 : 0;   // the First day card sits over the top of the stage on phones
+    rig.buildInset = Math.min(0.6, Math.max(92, catalogue.isOpen ? catalogue.height + 14 : 0) / innerHeight); homeTop = Math.min(0.4, Math.max(catalogue.isOpen ? 76 : 118, fdb) / innerHeight); applyTop();
+  };
   addEventListener('resize', () => { if (homeView && !build.active) homeInsets(); });
   function setHomeView(on) {
-    if (on === homeView) return; homeView = on; homeStage.visible = on; atmo.homeLift = on; if (inInterior) { scene.background = new THREE.Color(on ? '#cfe6f3' : '#181a20'); lastEnvAt = 0; updateEnv(true); }
+    if (on === homeView) return; homeView = on; homeStage.visible = on; atmo.homeLift = on; if (inInterior) { lastEnvAt = 0; updateEnv(true); scene.background = on ? homeSky() : new THREE.Color('#181a20'); }
     if (on) {
       rig.mode = 'build'; rig.setBuildFocus(null); homeInsets(); rig.indoor = true; rig.yaw = 0; interior?.setOverhead(true); document.body.classList.add('home-view');
+      orbitOn(true);
       shell.setChips([{ id: 'edit', icon: '✏️', label: 'Edit room' }, { id: 'paint', icon: '🎨', label: 'Paint & floors' }, { id: 'out', icon: '🚪', label: 'Go outside' }], (c) => { if (c === 'edit') build.start(); else if (c === 'paint') catalogue.open('design'); else exitInterior(); });
     } else {
+      orbitOn(false);
       document.body.classList.remove('home-view'); interior?.setOverhead(false); rig.endBuild(); rig.mode = 'follow'; rig.targetDist = 3.2; rig.pitch = 0.46; rig.fov = 62; rig.snapBehind(player.yaw); rig.snap(player); camera.fov = 62; camera.updateProjectionMatrix(); shell.setChips([]);
     }
     syncTab();
   }
+  /**
+   * The Home view's living dollhouse: a 3/4 camera you can turn and zoom, with the walls nearest the camera cut away (every home, the Studio too). Editing
+   * (build mode) goes back to the straight-down view, where placing a piece is precise; the session's Walls choice still wins when it is 'down'.
+   */
+  function orbitOn(on) {
+    rig.orbit = on; if (!interior || interior.kind !== 'apartment') return;
+    if (on) { interior.setCutSides?.(cutSidesFor(rig.orbitYaw)); interior.setWallMode?.(wallMode === 'down' ? 'down' : 'cut'); }
+    else { interior.setCutSides?.(null); if (interior.rooms.length === 1) interior.setWallMode?.('up'); else if (wallMode) interior.setWallMode?.(wallMode); else interior.setWallMode?.('cut'); }
+  }
+  /** The sky behind the dollhouse follows the real Regina day: pale blue, a peach dusk, a dusk-blue night (never black). */
+  const homeSky = () => { const n = env?.night ?? 0, d = env?.dusk ?? 0; return new THREE.Color('#cfe6f3').lerp(new THREE.Color('#f4c7a2'), Math.min(1, d) * 0.75 * (1 - n)).lerp(new THREE.Color('#223463'), n); };
   async function goHome() {
     if (creator || camMode || fading || build.active) return;
     phone.close(); panels.close(); if (mapOpen) closeMap(); if (mapOverview) closeMapOverview();
@@ -465,11 +567,17 @@ async function boot() {
   }
   let buyOpen = false;
   function openBuy() { buyOpen = true; catalogue.open(); syncTab(); }
+  /** The green +: the daily gift card (seven stamps that never reset), with a coin burst on claim and confetti on the seventh stamp. */
   function openWallet() {
-    const st = dailyStatus(S(), Date.now());
-    panels.menu('💰 Wallet', `Balance ${fmtMoney(S().bank.balance)}. ${st.ready ? `Daily reward ready — day ${st.day} of 7: ${fmtMoney(st.amount)}.` : 'Daily reward claimed — see you tomorrow!'} Prairie Dollars are the fictional in-game currency; buying more arrives with accounts and secure payments.`, [
-      ...(st.ready ? [{ label: `🎁 Claim ${fmtMoney(st.amount)}`, primary: true, run: () => { const r = claimDaily(store); if (r.ok) { audio.blip('cash'); toast(`Daily reward · +${fmtMoney(r.amount)}`, 'good'); } else toast(r.error, 'warn'); } }] : []),
-      { label: 'Open Bank app', run: () => { phone.open(); phone.openApp('bank'); } }, { label: 'Close' }]);
+    panels.dailyCard(dailyStatus(S(), Date.now()), REWARD_CENTS, {
+      fmt: fmtMoney,
+      onClaim: (btn) => {
+        const r = claimDaily(store); if (!r.ok) { toast(r.error, 'warn'); return r; }
+        juice.pay(r.amount, btn); audio.chime('gain'); if (r.day === 7) { juice.confetti(80); audio.chime('fanfare'); }
+        toast(`Daily gift · stamp ${r.day} of 7 · +${fmtMoney(r.amount)}`, 'good'); return r;
+      },
+      onBank: () => { phone.open(); phone.openApp('bank'); },
+    });
   }
 
   /* ---------- Map tab: a bright 3D overview with place cards (reuses the home-screen pin engine) ---------- */
@@ -479,7 +587,7 @@ async function boot() {
     extra: () => [{ id: 'you', emoji: '📍', name: 'You', x: player.pos.x, z: player.pos.z, blurb: 'You are here.' }],
     onSelect: (info, id) => renderPlaceCard(info, id), onZoom: () => paintMapChips(),
   });
-  const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Wheat City Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : poiById[id]);
+  const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Dewdney Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : poiById[id]);
   let ovPick = null, ovMode = 'places';
   const boardPick = (b) => ({ id: 'bb_' + b.id, name: `Billboard · ${b.name}`, area: 'Billboard', emoji: '📢', x: b.x + Math.sin(b.yaw) * 10, z: b.z + Math.cos(b.yaw) * 10, state: 'open', board: b });
   function renderBoardCard(b) {
@@ -547,7 +655,7 @@ async function boot() {
     lastEnvAt = 0; updateEnv(true);
   };
   const startPlay = () => {
-    hub?.hide(); gameMode = 'play'; creator = false; camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
+    hub?.hide(); gameMode = 'play'; creator = false; S().flags ||= {}; if (!Number.isFinite(S().flags.firstPlayAt)) S().flags.firstPlayAt = Date.now(); camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
     $('title').classList.remove('on'); $('hud').classList.remove('hidden'); shell.show(true); S().started = true; store.commit('started');
     input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player);
     setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000);
@@ -562,7 +670,9 @@ async function boot() {
       const f = S().flags ||= {}; f.welcomed = true;
       G.receiveMessage(store, 'dani', `Welcome to Regina, ${S().player.name}! 🌾 Grab groceries at the Market across Victoria Ave and check the Jobs app on your phone (press P).`, 20000);
       G.receiveMessage(store, 'mom', 'Settled in? Remember to eat and stay warm. Love you!', 55000);
-      startPlay(); if (pendingStart) { placeAt(pendingStart); rig.snapBehind(player.yaw); rig.snap(player); pendingStart = null; } toast(`Welcome to Regina, ${S().player.name}!`, 'good');
+      startPlay(); toast(`Welcome to Regina, ${S().player.name}!`, 'good');
+      if (pendingStart) { placeAt(pendingStart); rig.snapBehind(player.yaw); rig.snap(player); pendingStart = null; }
+      else goHome().then(() => player.gesture('wave', 1.6));   // a new life starts in your own bright little home, not on a street corner (playtests)
     } });
   };
   const hasLife = () => store.hasSave() && S().started;
@@ -576,7 +686,9 @@ async function boot() {
     if (!hasLife()) { pendingStart = hubChoice; newLife(); return; }
     fading = true; await fadeTo(true, 320); enterHubMode(false);
     if (hubChoice) placeAt(hubChoice); else player.teleport(S().pos?.x ?? city.spawn.x, S().pos?.z ?? city.spawn.z, S().pos?.yaw ?? city.spawn.heading);
-    startPlay(); await fadeTo(false, 320); fading = false; toast(`Welcome back, ${S().player.name}.`, 'good');
+    startPlay(); toast(`Welcome back, ${S().player.name}.`, 'good');
+    if (hubChoice) { await fadeTo(false, 320); fading = false; return; }
+    fading = false; await goHome(); player.gesture('wave', 1.6);   // Continue comes home too, straight from the black (a spot picked on the title map still starts you there)
   };
   let hubChoice = null;
   hub = new Hub({
@@ -592,9 +704,10 @@ async function boot() {
   });
   $('hub-zoom').onclick = () => hub.setLevel(hub.level === 'close' ? 'far' : 'close');
   const hubRefresh = () => {
-    const c = clock(); $('hub-wx').textContent = `${weather.icon} ${weather.temp}°${weather.live ? '' : ' (sim)'} · ${c.label} ${c.ampm}`;
-    const free = city.billboards.filter((b) => !(S().ads[b.id]?.until > Date.now())).length; $('hub-ads').textContent = `📢 ${free} billboards to book`;
-    $('hc-welcome').textContent = hasLife() ? `Welcome back, ${S().player.name}! Pick a spot to start there — or press Continue.` : 'Pick a spot on the map to start there — or just press play.';
+    const c = clock(); $('hub-wx').textContent = `${weather.icon} ${weather.temp}° in Regina${weather.live ? '' : ' (simulated)'} · ${c.label} ${c.ampm}`;
+    $('hc-welcome').textContent = hasLife() ? `Welcome back, ${S().player.name}! Your home is waiting, or tap a pin to start somewhere else.` : 'A little studio downtown is yours. Tap Play, or tap a pin to start somewhere else.';
+    // one green button: Play for a first visit (New life), Continue for a saved life (New life becomes the quiet second button)
+    const life = hasLife(); $('btn-new').classList.toggle('go', !life); $('btn-new').classList.toggle('alt', life); $('btn-new').textContent = life ? 'New life' : '▶ Play';
   };
   let tickI = 0;
   const hubTicker = () => { const n = ctx.news(); const it = n[tickI++ % n.length]; const el = $('hub-ticker'); el.textContent = `${it.icon} ${it.title}`; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; };
@@ -602,14 +715,15 @@ async function boot() {
 
   /* ---------- HUD ---------- */
   const hudMoney = $('hud-money'), hudNeeds = $('hud-needs'), hudClock = $('hud-clock'), hudPlace = $('hud-place'), hudDest = $('hud-dest'), hudJob = $('hud-job'), promptEl = $('prompt');
-  hudNeeds.innerHTML = ['⚡', '🍽️', '🚿', '🎉', '🙂'].map((i) => `<div><span>${i}</span><div class="bar"><i></i></div></div>`).join('');
+  // every need says what it is and how full it is (playtest: five unlabeled emoji bars, and the player could not tell what an activity changed)
+  hudNeeds.innerHTML = [['⚡', 'Energy'], ['🍽️', 'Hunger'], ['🚿', 'Hygiene'], ['🎉', 'Fun'], ['🙂', 'Mood']].map(([i, n]) => `<div title="${n}"><span>${i}</span><b class="nl">${n}</b><div class="bar"><i></i></div><small class="nv">0</small></div>`).join('');
   let hudT = 1, lastPrompt = '';
   const updateHud = (dt) => {
     hudT += dt; if (hudT < 0.2) return; hudT = 0; const s = S();
     hudMoney.textContent = fmtMoney(s.bank.balance);
     shell.setMoney(s.bank.balance); shell.setMood(moodOf(s.needs)); shell.setReward(dailyStatus(s, Date.now()).ready); syncTab();
     const vals = [s.needs.energy, s.needs.hunger, s.needs.hygiene ?? 0, s.needs.fun ?? 0, s.needs.mood];
-    hudNeeds.querySelectorAll('.bar').forEach((b, i) => { b.firstChild.style.width = vals[i] + '%'; b.classList.toggle('low', vals[i] < 20); });
+    hudNeeds.querySelectorAll('.bar').forEach((b, i) => { b.firstChild.style.width = vals[i] + '%'; b.classList.toggle('low', vals[i] < 20); b.nextElementSibling.textContent = Math.round(vals[i]); });
     const c = clock(); hudClock.innerHTML = `${c.label} ${c.ampm} <small>${weather.icon} ${weather.temp}°${weather.live ? '' : ' · sim'}</small>`;
     shell.setClock(`<span aria-hidden="true">${(env?.night ?? 0) > 0.5 ? '🌙' : '☀️'}</span> ${c.date.toLocaleDateString('en-CA', { weekday: 'short', day: 'numeric', timeZone: 'America/Regina' })} · ${c.label} ${c.ampm} <small class="tb-weather">${weather.icon} ${weather.temp}°${weather.live ? '' : ' sim'}</small>`);
     // place
@@ -620,7 +734,7 @@ async function boot() {
     const dst = s.destination;
     if (dst && !inInterior) {
       const dx = dst.x - player.pos.x, dz = dst.z - player.pos.z, d = Math.hypot(dx, dz);
-      if (d < 14) { toast(`You've arrived: ${dst.name}`, 'good'); audio.blip('ok'); s.destination = null; store.commit('destination'); hudDest.hidden = true; }
+      if (d < 14) { toast(`You've arrived: ${dst.name}`, 'good'); audio.chime('gain'); G.tally(s, 'visits'); s.destination = null; store.commit('destination'); hudDest.hidden = true; }
       else { const ang = Math.atan2(dx, dz) - (rig.yaw + Math.PI); hudDest.hidden = false; hudDest.innerHTML = `<span class="arrow" style="transform:rotate(${(-ang * 180) / Math.PI + 180}deg)">➤</span> <b>${esc(dst.name)}</b> ${d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m'}`; }
     } else hudDest.hidden = true;
     // job objective
@@ -707,7 +821,7 @@ async function boot() {
     if (s.needs.hunger > 30) f.hungerHint = false; if (s.needs.energy > 30) f.tiredHint = false;
     if (!inInterior) { savePos(); }
     if ((Date.now() | 0) % 5 === 0) store.commit('needs');
-    phone.tick();
+    phone.tick(); tickFirstDay();
   }, 1000);
   setInterval(() => { if (gameMode === 'play') { phone.tick(); } }, 30000);
 
@@ -737,7 +851,8 @@ async function boot() {
     else if (gameMode === 'title' || gameMode === 'loading') {
       titleT += dt; hub.update(dt, camera, innerWidth, innerHeight);
     } else {
-      player.update(dt, input, rig.yaw, player.grid ?? city.colliders, slow);
+      player.update(dt, walkInput(dt), rig.yaw, player.grid ?? city.colliders, slow);
+      if (tapMark.material.opacity > 0) { tapMark.material.opacity = Math.max(0, tapMark.material.opacity - dt * 1.1); tapMark.scale.setScalar(Math.max(1, tapMark.scale.x - dt * 1.5)); }
       if (!inInterior) ped.update(dt, player.pos);
       const speedNorm = Math.min(1, player.speed / 7.2);
       rig.update(dt, input, player, { speedNorm, sensitivity: isTouch ? 0.9 : 1 });
@@ -745,6 +860,7 @@ async function boot() {
         interior.setViewer(player.pos.x, player.pos.z);
         if (rig.mode !== 'build') interior.setCameraCut(player.pos, camera.position);
       }
+      if (rig.orbit && inInterior === 'apartment') interior.setCutSides?.(cutSidesFor(rig.orbitYaw));   // turning the dollhouse lowers the side wall you now look over
       if (creator && rig.mode !== 'creator') rig.mode = 'creator';
     }
     // studio key light for the character creator / selfie so faces are always readable, even at night
@@ -761,6 +877,9 @@ async function boot() {
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
     // interaction prompt
     if (gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
+    // in the dollhouse the prompt floats over the thing you can use, like a speech bubble, instead of sitting on the room
+    const anchor = homeView && target?.it && !promptEl.hidden; promptEl.classList.toggle('anchored', !!anchor);
+    if (anchor) { const p = juice.toScreen(new THREE.Vector3(target.it.x, 1.9, target.it.z)); promptEl.style.left = Math.round(p.x) + 'px'; promptEl.style.top = Math.round(p.y) + 'px'; } else if (promptEl.style.top) { promptEl.style.left = ''; promptEl.style.top = ''; }
     // minimap + hud
     if (gameMode === 'play' && !camMode) { mapView.draw(); updateHud(dt); }
     if (mapOpen) fullMap.draw();
@@ -770,7 +889,7 @@ async function boot() {
 
   /* ---------- debug / test handle ---------- */
   window.__regina = {
-    catalogue, settleBuildCam: () => rig.snapBuild(),
+    catalogue, settleBuildCam: () => rig.snapBuild(player),
     store, G, player, rig, city, camera, scene, renderer, phone, panels, ctx, atmo,
     get inInterior() { return inInterior; }, get mode() { return gameMode; }, get fps() { return fpsN / Math.max(0.001, fpsAcc); },
     enterInterior: (k) => enterInterior(k, { x: 0, z: 0, nx: 0, nz: 1 }), exitInterior, interactNow: interact, getTarget: () => target,
