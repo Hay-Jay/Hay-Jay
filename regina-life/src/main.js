@@ -9,6 +9,8 @@ import { reginaClock, seasonOf, sunTimes, hoursLabel } from './core/time.js';
 import { dayTally } from './core/goodnight.js';
 import { moodlets } from './core/moodlets.js';
 import { residentsAt } from './core/routines.js';
+import { collectRent } from './core/lodger.js';
+import { CRAFTS, marketOpen, craftPrice, makeCraft, sellCraft, sanitizeCrafts, STALL_DAILY_CAP } from './core/stall.js';
 import { RES_BY_ID } from './data/residents.js';
 import { CLOTHES } from './data/catalog.js';
 import { fetchWeather, simulateWeather } from './core/weather.js';
@@ -217,6 +219,7 @@ async function boot() {
     onPanel: () => {},
     rebuildPlayerLook: rebuildPlayer,
     fx: { juice, snap, gains: (b, at) => showGains(b, at), head: () => headAt() },
+    onCooked: () => { if (G.skillLevel(S().skills?.cooking || 0) >= 1) { const n = makeCraft(store, 'baked'); toast(`🥧 You made a batch to sell (${n} ready). Farmers' Market: Wednesdays and Saturdays, 9 to 1.`, 'info'); } },
   };
   const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio; radio.volume = S().radio?.volume ?? 0.7; radio.onVolume = (v) => { S().radio.volume = v; store.commit('phone-quiet'); };
   ctx.startTrip = (destId, mode) => {
@@ -301,7 +304,8 @@ async function boot() {
       activity: (id) => {
         const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
         const a = G.ACTIVITIES[id]; player.gesture('use', a.secs); const b = snap();
-        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); showGains(b); toast(activityToast(id), 'good'); ctx.onDid?.('activity', id); } else toast(r.error, 'warn'); });
+        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); showGains(b); toast(activityToast(id), 'good'); ctx.onDid?.('activity', id);
+          if (id === 'paint') { const n = makeCraft(store, 'painting'); setTimeout(() => toast(`🖼️ A finished painting (${n} ready to sell). Farmers' Market: Wednesdays and Saturdays, 9 to 1, by City Hall.`, 'info'), 900); } } else toast(r.error, 'warn'); });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
@@ -545,6 +549,29 @@ async function boot() {
   /** The house door as an interactable (outdoors, Bungalow only: the Lofts door is part of the city). */
   const homeDoorInteractable = () => { const d = HOME_DOORS[layoutOf(S()).id]; return d ? { id: 'door_home', kind: 'door', enter: 'apartment', x: d.x, z: d.z, nx: d.nx, nz: d.nz, radius: 3.2, label: `Go home: ${d.name.replace(' (Home)', '')}` } : null; };
 
+  /* ---------- the Farmers' Market stall by City Hall: Wednesdays and Saturdays, 9 to 1 (core/stall.js) ---------- */
+  const STALL = { x: -79, z: -7.5 };   // between two boulevard elms on Victoria Ave, a few steps from City Hall
+  const stall = new THREE.Group(); stall.visible = false; stall.position.set(STALL.x, 0, STALL.z); scene.add(stall);
+  {
+    const wood = new THREE.MeshStandardMaterial({ color: '#9a6a3c', roughness: 0.8 }), cloth = new THREE.MeshStandardMaterial({ color: '#2e9f6b', roughness: 0.9 }), white = new THREE.MeshStandardMaterial({ color: '#fffaf0', roughness: 0.9 });
+    const b = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = true; stall.add(o); return o; };
+    b(3, 0.9, 1, wood, 0, 0.45, 0); for (const sx of [-1.4, 1.4]) for (const sz of [-0.45, 0.45]) b(0.08, 2.4, 0.08, wood, sx, 1.2, sz);
+    for (let k = 0; k < 6; k++) b(0.5, 0.06, 1.3, k % 2 ? white : cloth, -1.25 + k * 0.5, 2.45, 0);
+    b(0.6, 0.45, 0.05, new THREE.MeshStandardMaterial({ color: '#d98c5f' }), -0.8, 1.15, -0.1).rotation.x = -0.2;   // a painting on show
+    for (let k = 0; k < 4; k++) b(0.22, 0.16, 0.22, new THREE.MeshStandardMaterial({ color: '#e8b94a' }), 0.3 + k * 0.28, 0.98, 0.1);   // pies
+  }
+  const marketWhen = () => { const c = clock(); return { weekday: new Date(Date.UTC(c.year, c.month - 1, c.day)).getUTCDay(), hour: c.hour }; };
+  const stallInteractable = () => (stall.visible ? { id: 'stall', x: STALL.x, z: STALL.z + 1.8, radius: 3.6, label: "🧺 Sell at the Farmers' Market stall", run: () => openStall() } : null);
+  function openStall() {
+    const s = S(), c = sanitizeCrafts(s.crafts), when = marketWhen();
+    panels.menu("🧺 Farmers' Market", `Sell what you made. ${c.day === dayKeyNow() ? `${c.sold}/${STALL_DAILY_CAP} sold today.` : `Up to ${STALL_DAILY_CAP} sales a market day.`} Better skills fetch better prices.`, [
+      ...Object.entries(CRAFTS).map(([k, d]) => ({ label: `${d.icon} Sell ${d.name.toLowerCase()} · ${fmtMoney(craftPrice(s, k))} (${c[k]} ready)`, primary: c[k] > 0, run: () => {
+        const r = sellCraft(store, k, when); if (!r.ok) { toast(r.error, 'warn'); return; }
+        juice.pay(r.price, headAt()); audio.chime('gain'); toast(`Sold! +${fmtMoney(r.price)}. ${r.left ? `${r.left} left.` : 'All gone.'}`, 'good'); setTimeout(() => openStall(), 600);
+      } })), { label: 'Done' }]);
+  }
+  const dayKeyNow = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Regina' });
+
   /* ---------- map ---------- */
   function openFullMap() {
     if (creator || build.active) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
@@ -567,10 +594,27 @@ async function boot() {
   $('mz-in').onclick = () => fullMap.zoomBy(1.4); $('mz-out').onclick = () => fullMap.zoomBy(1 / 1.4); $('mz-me').onclick = () => fullMap.focus(player.pos.x, player.pos.z);
 
   /* ---------- photo mode ---------- */
-  const FILTERS = [['', 'Normal'], ['vivid', 'Vivid'], ['warm', 'Warm'], ['mono', 'Mono'], ['cool', 'Cool']];
+  const FILTERS = [['', 'Normal'], ['postcard', '💌 Postcard'], ['vivid', 'Vivid'], ['warm', 'Warm'], ['mono', 'Mono'], ['cool', 'Cool']];
   let filter = '', selfie = false;
   $('cam-filters').innerHTML = FILTERS.map(([k, n]) => `<button data-f="${k}" class="${k === '' ? 'on' : ''}">${n}</button>`).join('');
   $('cam-filters').onclick = (e) => { const b = e.target.closest('[data-f]'); if (!b) return; filter = b.dataset.f; document.body.className = document.body.className.replace(/filter-\w+/g, '').trim(); if (filter) document.body.classList.add('filter-' + filter); $('cam-filters').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); };
+  /** A postcard you can save and share: the shot in a white frame, stamped with the place, the real Regina weather and the date (docs/AMAZING.md). */
+  function drawPostcard(g, w, h) {
+    const pad = Math.round(Math.min(w, h) * 0.045), band = Math.round(Math.min(h * 0.17, w * 0.3)), ih = h - pad - band;
+    g.fillStyle = '#fffaf0'; g.fillRect(0, 0, w, h);
+    const sw = canvas.width, sh = Math.round((canvas.width * ih) / (w - pad * 2)), sy = Math.max(0, Math.round((canvas.height - sh) / 2));
+    g.drawImage(canvas, 0, sy, sw, Math.min(sh, canvas.height), pad, pad, w - pad * 2, ih); g.filter = 'none';
+    /** Write `text` at (x, y) no wider than maxW, shrinking the font from `size` until it fits. */
+    const fit = (text, x, y, maxW, size, weight, family, color) => { let f = size; do { g.font = `${weight} ${f}px ${family}`; f -= 1; } while (g.measureText(text).width > maxW && f > 8); g.fillStyle = color; g.fillText(text, x, y); };
+    const c = clock(), place = inInterior ? 'home sweet home' : hudPlace.textContent || 'Regina', head = 'Fredoka, "Plus Jakarta Sans", system-ui, sans-serif', body = '"Plus Jakarta Sans", system-ui, sans-serif';
+    g.textBaseline = 'middle'; g.textAlign = 'left';
+    fit(`Greetings from ${place}`, pad, pad + ih + band * 0.36, w - pad * 2, Math.round(band * 0.3), 600, head, '#12202a');
+    fit(`${weather.icon} ${weather.temp}° ${weather.text}${weather.live ? '' : ' (simulated)'} · ${c.date.toLocaleDateString('en-CA', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'America/Regina' })}`, pad, pad + ih + band * 0.7, w - pad * 2, Math.round(band * 0.16), 700, body, '#44545f');
+    // the stamp, on the photo's top-right corner
+    const st = Math.round(Math.min(w, h) * 0.2), sx = w - pad - st - pad * 0.4, sy2 = pad * 1.4;
+    g.fillStyle = '#fffaf0'; g.fillRect(sx, sy2, st, st * 0.72); g.setLineDash([4, 3]); g.strokeStyle = '#f2a900'; g.lineWidth = 2; g.strokeRect(sx + 4, sy2 + 4, st - 8, st * 0.72 - 8); g.setLineDash([]);
+    g.textAlign = 'center'; fit('REGINA', sx + st / 2, sy2 + st * 0.24, st - 16, Math.round(st * 0.2), 800, body, '#168f59'); fit('LIFE', sx + st / 2, sy2 + st * 0.48, st - 16, Math.round(st * 0.2), 800, body, '#f2a900');
+  }
   function startCamera() { if (creator || camMode || build.active) return; camMode = true; phone.close(); closeMap(); $('camui').hidden = false; document.body.classList.add('hud-hidden'); updateThumb(); toast('Photo mode · drag to frame, scroll to zoom', 'info'); }
   function stopCamera() { camMode = false; selfie = false; rig.mode = 'follow'; $('camui').hidden = true; document.body.classList.remove('hud-hidden'); document.body.className = document.body.className.replace(/filter-\w+/g, '').trim(); filter = ''; $('cam-filters').querySelectorAll('button').forEach((x, i) => x.classList.toggle('on', i === 0)); }
   function updateThumb() { const p = S().photos[0]; $('cam-thumb').style.backgroundImage = p ? `url(${p.data})` : 'none'; }
@@ -581,8 +625,8 @@ async function boot() {
   $('cam-shutter').onclick = () => {
     renderer.render(scene, camera);
     const w = Math.min(720, canvas.width), h = Math.round((w * canvas.height) / canvas.width), c = document.createElement('canvas'); c.width = w; c.height = h;
-    const g = c.getContext('2d'); try { g.filter = { vivid: 'saturate(1.5) contrast(1.08)', mono: 'grayscale(1) contrast(1.15)', warm: 'sepia(.35) saturate(1.25)', cool: 'saturate(1.1) hue-rotate(12deg)' }[filter] || 'none'; } catch {}
-    g.drawImage(canvas, 0, 0, w, h);
+    const g = c.getContext('2d'); try { g.filter = { vivid: 'saturate(1.5) contrast(1.08)', mono: 'grayscale(1) contrast(1.15)', warm: 'sepia(.35) saturate(1.25)', cool: 'saturate(1.1) hue-rotate(12deg)', postcard: 'saturate(1.15)' }[filter] || 'none'; } catch {}
+    if (filter === 'postcard') drawPostcard(g, w, h); else g.drawImage(canvas, 0, 0, w, h);
     S().photos.unshift({ id: 'p' + Date.now().toString(36), t: Date.now(), data: c.toDataURL('image/jpeg', 0.72) }); S().photos.length = Math.min(S().photos.length, 12);
     store.commit('photos'); audio.blip('shutter'); const f = $('flash'); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); updateThumb();
   };
@@ -605,6 +649,7 @@ async function boot() {
       const gst = currentStep(S()); if (gst) consider({ id: 'gig', kind: 'gig', x: gst.spot.x, z: gst.spot.z, radius: GIG_REACH, label: gst.label, run: () => doGigStep() }, gst.label);
       for (const it of pumpkinInteractables()) consider(it, it.label);
       const hdi = homeDoorInteractable(); if (hdi) consider(hdi, hdi.label);
+      const sti = stallInteractable(); if (sti) consider(sti, sti.label);
       const n = ped.nearest(player.pos, 2.4); if (n) { const d = Math.hypot(n.x - player.pos.x, n.z - player.pos.z) / 2.4; if (d < bd) best = { npc: n, label: 'Say hi' }; }
     }
     return best;
@@ -1061,6 +1106,8 @@ async function boot() {
     if (!inInterior) { savePos(); }
     if ((Date.now() | 0) % 5 === 0) store.commit('needs');
     phone.tick(); tickFirstDay(); if ((Date.now() / 1000 | 0) % 30 === 0) tellFestival();
+    stall.visible = !inInterior && marketOpen(marketWhen());   // the Farmers' Market stall: Wednesdays and Saturdays, 9 to 1
+    if ((Date.now() / 1000 | 0) % 10 === 0) { const rent = collectRent(store); if (rent) { juice.pay(rent, null, 'rent'); toast(`Rent from Robin, your lodger: +${fmtMoney(rent)}`, 'good'); } }
   }, 1000);
   setInterval(() => { if (gameMode === 'play') { phone.tick(); } }, 30000);
   setInterval(() => {   // the soundscape follows where you are, the hour, the season and the real wind

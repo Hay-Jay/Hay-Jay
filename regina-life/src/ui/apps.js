@@ -22,6 +22,7 @@ import { contactIds } from '../data/contacts.js';
 import { ownedTypes } from '../core/home.js';
 import { homeCards, moveConfirm, planSvg } from './homes-model.js';
 import * as GIGS from '../core/gigs.js';
+import { canHaveLodger, sanitizeLodger, setLodger, LODGER_PAY, LODGER_NAME } from '../core/lodger.js';
 import { dayKey } from '../core/daily.js';
 import { safeUrl, muralNames } from '../core/sponsors.js';
 import { SUPPORT_URL } from '../data/sponsors.js';
@@ -255,7 +256,7 @@ const photosApp = app('photos', 'Photos', (body, ctx) => {
   const { store } = ctx; let sel = null;
   const render = () => {
     const ph = store.state.photos;
-    if (sel !== null && ph[sel]) { body.innerHTML = `${nav('Photo', { back: true, right: `<button class="nav-act red" data-act="del" aria-label="Delete">${ICON.trash}</button>` })}<div class="viewer"><img src="${ph[sel].data}" alt="Photo"><small>${new Date(ph[sel].t).toLocaleString('en-CA', { timeZone: TZ })}</small></div>`; return; }
+    if (sel !== null && ph[sel]) { body.innerHTML = `${nav('Photo', { back: true, right: `<button class="nav-act red" data-act="del" aria-label="Delete">${ICON.trash}</button>` })}<div class="viewer"><img src="${ph[sel].data}" alt="Photo"><a class="btn primary wide" href="${ph[sel].data}" download="regina-life-${ph[sel].id}.jpg">Save image</a><small>${new Date(ph[sel].t).toLocaleString('en-CA', { timeZone: TZ })}</small></div>`; return; }
     sel = null;
     body.innerHTML = `${nav('Photos')}<div class="scroll">${ph.length ? `<div class="grid3">${ph.map((p, i) => `<button data-i="${i}"><img src="${p.data}" alt="Photo ${i + 1}" loading="lazy"></button>`).join('')}</div>` : '<p class="empty big">No photos yet.<br>Open the Camera app to capture the city.</p>'}<p class="fine pad">${ph.length} photo${ph.length === 1 ? '' : 's'} · stored on this device</p></div>`;
   };
@@ -623,6 +624,7 @@ const gigsApp = app('gigs', 'Odd Jobs', (body, ctx) => {
       inner += `<div class="card gig-on"><small>On the job</small><h3>${a.icon} ${esc(a.title)}</h3><p>${st ? esc(st.label) : 'All done: collect your pay!'}</p><div class="progress"><i style="width:${(a.step / a.steps.length) * 100}%"></i></div>
         <small>Step ${Math.min(a.step + 1, a.steps.length)} of ${a.steps.length} · ${a.kind === 'busk' ? 'the crowd decides the pay' : fmtMoney(a.pay)}</small><div class="mc-btns"><button class="btn primary" data-act="show">Show me where</button><button class="btn" data-act="drop">Drop it</button></div></div>`;
     }
+    if (canHaveLodger(s)) { const l = sanitizeLodger(s.lodger); inner += `<div class="card"><b>🏡 Rent out the den</b><p>${l.on ? `${esc(LODGER_NAME)} lives in your den: +${fmtMoney(LODGER_PAY)} on each day you play.` : `Take in a lodger (an NPC) for +${fmtMoney(LODGER_PAY)} on each day you play.`}</p><button class="btn ${l.on ? '' : 'primary'} wide" data-act="lodger">${l.on ? 'Ask them to move out' : 'Take in a lodger'}</button></div>`; }
     const note = c.snow ? '❄️ Snow on the ground: neighbours need their walks shovelled.' : c.season === 'autumn' ? '🍂 Leaf season on the elms.' : c.season === 'spring' || c.season === 'summer' ? '🌷 Planters need watering.' : '';
     inner += `<p class="fine pad">${note} ${today}/${GIGS.GIG_DAILY_CAP} done today · a new board every day at midnight, Regina time.</p>`;
     inner += board.map((x) => `<div class="card gig ${x.done ? 'done' : ''}"><div class="jt"><div class="avatar" style="background:linear-gradient(145deg,#ffd257,#e08a00)">${x.icon}</div><div><h3>${esc(x.title)}</h3><small>${x.kind === 'busk' ? 'P$5 to P$40, by the crowd' : fmtMoney(x.pay)} · about ${x.mins} min</small></div></div><p>${esc(x.blurb)}</p>
@@ -633,6 +635,7 @@ const gigsApp = app('gigs', 'Odd Jobs', (body, ctx) => {
   body.addEventListener('click', (e) => {
     const t = e.target.closest('[data-take]'); if (t) { ctx.gigTake(t.dataset.take); render(); return; }
     const act = e.target.closest('[data-act]')?.dataset.act; if (act === 'drop') { ctx.gigDrop(); render(); } else if (act === 'show') ctx.gigShow();
+    else if (act === 'lodger') { const on = !sanitizeLodger(ctx.store.state.lodger).on, r = setLodger(ctx.store, on); ctx.toast(r.ok ? (on ? 'Robin moves into the den. Rent arrives each day you play.' : 'Robin moves out. The den is yours again.') : r.error, r.ok ? 'good' : 'warn'); render(); }
   });
   render();
   return { update() { render(); } };

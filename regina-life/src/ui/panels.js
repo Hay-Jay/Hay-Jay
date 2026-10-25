@@ -252,7 +252,7 @@ export class Panels {
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
       const b = e.target.closest('[data-cook]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.cook(store, b.dataset.cook);
-      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); } else this.ctx.toast(r.error, 'warn'); render();
+      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); this.ctx.onCooked?.(); } else this.ctx.toast(r.error, 'warn'); render();
     });
   }
 }
