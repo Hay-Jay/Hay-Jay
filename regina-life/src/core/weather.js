@@ -17,7 +17,7 @@ export const WMO = (code) => {
   return { kind: 'cloudy', text: 'Cloudy', icon: '☁️' };
 };
 
-export const URL = () => `https://api.open-meteo.com/v1/forecast?latitude=${REGINA.lat}&longitude=${REGINA.lon}&current=temperature_2m,apparent_temperature,weather_code,cloud_cover,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min&timezone=America%2FRegina&forecast_days=1`;
+export const URL = () => `https://api.open-meteo.com/v1/forecast?latitude=${REGINA.lat}&longitude=${REGINA.lon}&current=temperature_2m,apparent_temperature,weather_code,cloud_cover,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=America%2FRegina&forecast_days=2`;   // today plus tomorrow (the Goodnight card's forecast)
 
 /** Deterministic seasonal simulation — used only when live data is unavailable. */
 export function simulateWeather(date = new Date()) {
@@ -33,8 +33,15 @@ export function simulateWeather(date = new Date()) {
   return {
     live: false, source: 'SIMULATED', kind, text, icon, temp, feels: temp - (season === 'winter' ? 5 : 0),
     cloud: { clear: 5, partly: 40, cloudy: 90, snow: 95, rain: 90 }[kind], wind: Math.round(8 + rnd() * 22),
-    precip: kind === 'rain' || kind === 'snow' ? 1 : 0, hi: temp + 4, lo: temp - 6, updated: date.getTime(),
+    precip: kind === 'rain' || kind === 'snow' ? 1 : 0, hi: temp + 4, lo: temp - 6, updated: date.getTime(), tomorrow: simTomorrow(date),
   };
+}
+/** Tomorrow's simulated outlook (same seeded model, the next Regina day at noon). Labelled SIMULATED wherever it is shown. */
+function simTomorrow(date) {
+  const p = reginaParts(new Date(date.getTime() + 86400000)), season = seasonOf(p.month), rnd = mulberry32(p.year * 1000 + p.month * 31 + p.day);
+  const base = { winter: -13, spring: 5, summer: 22, autumn: 6 }[season], t = Math.round(base + (rnd() - 0.5) * 8);
+  let kind = 'clear'; const r = rnd(); if (r > 0.55) kind = 'partly'; if (r > 0.75) kind = 'cloudy'; if (r > 0.9) kind = season === 'winter' ? 'snow' : 'rain';
+  return { hi: t + 4, lo: t - 6, kind, text: { clear: 'Clear sky', partly: 'Partly cloudy', cloudy: 'Overcast', snow: 'Snow', rain: 'Rain' }[kind], icon: { clear: '☀️', partly: '⛅', cloudy: '☁️', snow: '❄️', rain: '🌧️' }[kind] };
 }
 
 export async function fetchWeather(fetchImpl = globalThis.fetch, date = new Date()) {
@@ -52,6 +59,7 @@ export async function fetchWeather(fetchImpl = globalThis.fetch, date = new Date
       temp: Math.round(c.temperature_2m), feels: Math.round(c.apparent_temperature ?? c.temperature_2m),
       cloud: c.cloud_cover ?? 50, wind: Math.round(c.wind_speed_10m ?? 0), precip: c.precipitation ?? 0,
       hi: Math.round(j.daily?.temperature_2m_max?.[0] ?? c.temperature_2m), lo: Math.round(j.daily?.temperature_2m_min?.[0] ?? c.temperature_2m),
+      tomorrow: Number.isFinite(j.daily?.temperature_2m_max?.[1]) ? { hi: Math.round(j.daily.temperature_2m_max[1]), lo: Math.round(j.daily.temperature_2m_min?.[1] ?? j.daily.temperature_2m_max[1]), ...WMO(j.daily.weather_code?.[1] ?? 3) } : null,
       updated: Date.now(),
     };
   } catch {

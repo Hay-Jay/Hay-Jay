@@ -254,6 +254,15 @@ export const ACTIVITIES = {
   paint:   { label: 'Painting at the easel…', secs: 5, needs: { energy: -3, fun: 14, mood: 7 }, skill: ['charisma', 5], minEnergy: 15 },
   gaming:  { label: 'Playing a game…', secs: 4, needs: { energy: -4, fun: 24 }, minEnergy: 10 },
   water:   { label: 'Having a drink of water…', secs: 2, needs: { energy: 3, hunger: 1 } },
+  // out and about (docs/AMAZING.md G6): every chip on a place card is something you can actually do there
+  bench:   { label: 'Reading on a park bench…', secs: 5, needs: { fun: 12, mood: 6, energy: 2 }, skill: ['charisma', 2] },
+  people:  { label: 'People-watching…', secs: 5, needs: { fun: 10, mood: 5 }, skill: ['charisma', 3] },
+  buskers: { label: 'Listening to the buskers…', secs: 5, needs: { fun: 14, mood: 5 } },
+  window:  { label: 'Window shopping…', secs: 4, needs: { fun: 8, mood: 3, energy: -2 } },
+  geese:   { label: 'Watching the geese on Wascana…', secs: 5, needs: { fun: 10, mood: 8 } },
+  shore:   { label: 'Walking the shoreline…', secs: 6, needs: { energy: -4, fun: 10, mood: 7, hygiene: -2 }, skill: ['fitness', 4], minEnergy: 10 },
+  sky:     { label: 'Watching the big prairie sky…', secs: 5, needs: { mood: 10, fun: 6 } },
+  grounds: { label: 'Walking the Legislative grounds…', secs: 6, needs: { energy: -3, fun: 8, mood: 6 }, skill: ['fitness', 3] },
 };
 /** Pre-check so the UI can refuse before starting a progress bar. */
 export function activityBlocked(store, id) { const a = own(ACTIVITIES, id) ? ACTIVITIES[id] : null; if (!a) return 'Unknown activity'; if (a.minEnergy && store.state.needs.energy < a.minEnergy) return "You're too tired for that. Rest or grab a coffee."; return a.requires?.(store) ?? null; }

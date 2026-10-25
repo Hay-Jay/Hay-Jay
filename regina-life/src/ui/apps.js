@@ -21,6 +21,10 @@ import { STATIONS } from '../data/radio.js';
 import { contactIds } from '../data/contacts.js';
 import { ownedTypes } from '../core/home.js';
 import { homeCards, moveConfirm, planSvg } from './homes-model.js';
+import * as GIGS from '../core/gigs.js';
+import { dayKey } from '../core/daily.js';
+import { safeUrl, muralNames } from '../core/sponsors.js';
+import { SUPPORT_URL } from '../data/sponsors.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nav = (title, { back = false, right = '' } = {}) => `<div class="nav">${back ? `<button class="nav-back" data-act="back">${ICON.back}<span>Back</span></button>` : '<span></span>'}<h2>${title}</h2><span class="nav-right">${right}</span></div>`;
@@ -414,7 +418,7 @@ const adsApp = app('ads', 'Ads', (body, ctx, phone) => {
     body.innerHTML = `${nav('Ads')}<div class="scroll">
       ${mine.length ? `<h4 class="sec">On air now</h4><div class="list">${mine.map((b) => { const a = s.ads[b.id]; return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:linear-gradient(135deg,${THEMES[a.theme][0]},${THEMES[a.theme][1]})">${a.image ? '🖼️' : '📢'}</div><div class="grow"><b>“${esc(a.text)}”</b><p>${esc(b.name)} · ${left(a.until)}</p></div></button>`; }).join('')}</div>` : ''}
       ${AD_TIER_ORDER.map((tid) => { const t = AD_TIERS[tid], boards = BILLBOARDS.filter((b) => b.adTier === tid); return `<h4 class="sec">${esc(t.name)} · ${fmtMoney(t.price)} / ${t.days} days</h4><p class="fine pad">${esc(t.blurb)} Up to ${t.maxRotation} ads share the screen.</p><div class="list">${boards.map((b) => { const a = activeAd(s, b.id, now); return `<button class="row" data-b="${b.id}"><div class="avatar sm" style="background:${tierDot[tid]}">📢</div><div class="grow"><b>${esc(b.name)}</b><p>${a ? `<span class="ok">● On air</span> · ${left(a.until)}` : `Free to book · ${t.size.label}`}</p></div></button>`; }).join('')}</div>`; }).join('')}
-      <div class="card"><b>Advertise for real?</b><p>Local businesses with accounts will be able to book these same boards for real money: about <b>CA$${(AD_TIERS.standard.realMoney.cents / 100).toFixed(0)}</b> per 7 days for a Standard board, <b>CA$${(AD_TIERS.big.realMoney.cents / 100).toFixed(0)}</b> for a Big board and <b>CA$${(AD_TIERS.landmark.realMoney.cents / 100).toFixed(0)}</b> for a Landmark board. That arrives with accounts and secure payments, so it is not available yet.</p></div>
+      <div class="card"><b>Own a real Regina business?</b><p>Put it on these boards: about <b>CA$${(AD_TIERS.standard.realMoney.cents / 100).toFixed(0)}</b> per 7 days for a Standard board, <b>CA$${(AD_TIERS.big.realMoney.cents / 100).toFixed(0)}</b> for a Big board and <b>CA$${(AD_TIERS.landmark.realMoney.cents / 100).toFixed(0)}</b> for a Landmark board, clearly labelled Sponsored. Booking happens on our Advertise page, outside the game, and never touches your Prairie Dollars.</p><a class="btn primary wide" href="./advertise.html" target="_blank" rel="noopener">Advertise your business</a></div>
       <p class="fine pad">Here, billboards are paid in Prairie Dollars only. Boards rotate your ad with in-game sponsor ads. Reach numbers are simulated.</p></div>`;
   };
   const detail = () => {
@@ -607,5 +611,41 @@ const homesApp = app('homes', 'Homes', (body, ctx) => {
   return { update(topic) { if (topic === undefined || topic === 'deferred' || topic === 'home' || topic === 'bank') render(); } };
 });
 
-export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp];
+/* ================= ODD JOBS: side hustles that turn earning into play (docs/AMAZING.md section 5; rules in core/gigs.js) ================= */
+const gigsApp = app('gigs', 'Odd Jobs', (body, ctx) => {
+  const render = () => {
+    const s = ctx.store.state, c = ctx.gigConditions(), now = Date.now(), board = GIGS.gigBoard(s, c, now), g = GIGS.sanitizeGigs(s.gigs), a = g.active, today = g.day === dayKey(now) ? g.done.length : 0;
+    let inner = '';
+    if (a) {
+      const st = a.steps[a.step];
+      inner += `<div class="card gig-on"><small>On the job</small><h3>${a.icon} ${esc(a.title)}</h3><p>${st ? esc(st.label) : 'All done: collect your pay!'}</p><div class="progress"><i style="width:${(a.step / a.steps.length) * 100}%"></i></div>
+        <small>Step ${Math.min(a.step + 1, a.steps.length)} of ${a.steps.length} · ${a.kind === 'busk' ? 'the crowd decides the pay' : fmtMoney(a.pay)}</small><div class="mc-btns"><button class="btn primary" data-act="show">Show me where</button><button class="btn" data-act="drop">Drop it</button></div></div>`;
+    }
+    const note = c.snow ? '❄️ Snow on the ground: neighbours need their walks shovelled.' : c.season === 'autumn' ? '🍂 Leaf season on the elms.' : c.season === 'spring' || c.season === 'summer' ? '🌷 Planters need watering.' : '';
+    inner += `<p class="fine pad">${note} ${today}/${GIGS.GIG_DAILY_CAP} done today · a new board every day at midnight, Regina time.</p>`;
+    inner += board.map((x) => `<div class="card gig ${x.done ? 'done' : ''}"><div class="jt"><div class="avatar" style="background:linear-gradient(145deg,#ffd257,#e08a00)">${x.icon}</div><div><h3>${esc(x.title)}</h3><small>${x.kind === 'busk' ? 'P$5 to P$40, by the crowd' : fmtMoney(x.pay)} · about ${x.mins} min</small></div></div><p>${esc(x.blurb)}</p>
+      <button class="btn primary wide" data-take="${esc(x.id)}" ${x.done || a ? 'disabled' : ''}>${x.done ? 'Done today ✓' : a ? 'Finish your current job first' : 'Take it'}</button></div>`).join('');
+    inner += `<p class="fine pad">Earned from odd jobs: ${fmtMoney(g.earned)} over ${g.total} job${g.total === 1 ? '' : 's'}. Odd jobs never expire mid-day and skipping a day costs you nothing.</p>`;
+    body.innerHTML = `${nav('Odd Jobs')}<div class="scroll">${inner}</div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-take]'); if (t) { ctx.gigTake(t.dataset.take); render(); return; }
+    const act = e.target.closest('[data-act]')?.dataset.act; if (act === 'drop') { ctx.gigDrop(); render(); } else if (act === 'show') ctx.gigShow();
+  });
+  render();
+  return { update() { render(); } };
+});
+
+/* ================= SUPPORTERS: the mural, Support and Advertise (real money lives outside the game: docs/AMAZING.md R1, R2) ================= */
+const supportersApp = app('supporters', 'Supporters', (body) => {
+  const names = muralNames(), sup = safeUrl(SUPPORT_URL);
+  body.innerHTML = `${nav('Supporters')}<div class="scroll">
+    <div class="card"><b>🎨 The Supporters' Mural</b><p>The people who help keep Regina Life free have their names on a mural in Victoria Park.</p>${names.length ? `<div class="chips">${names.map((n) => `<span>${esc(n.name)}</span>`).join('')}</div>` : '<small>The mural is waiting for its first names.</small>'}</div>
+    <div class="card"><b>💛 Support the game</b><p>Regina Life is free and will stay free. Support never buys anything in the game: it is a thank-you, not a perk.</p>${sup ? `<a class="btn primary wide" href="${esc(sup.href)}" target="_blank" rel="noopener">Support Regina Life</a>` : '<small>Support opens soon.</small>'}</div>
+    <div class="card"><b>📢 Own a real Regina business?</b><p>Put it on a billboard in the game, clearly labelled Sponsored, with a link to your site.</p><a class="btn wide" href="./advertise.html" target="_blank" rel="noopener">See prices and preview your ad</a></div>
+    <p class="fine pad">Prairie Dollars are fictional. Real money never enters the game.</p></div>`;
+  return {};
+});
+
+export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp, gigsApp, supportersApp];
 export const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));

@@ -5,7 +5,8 @@ import './ui/amazing.css';
 import { Store } from './core/store.js';
 import * as G from './core/game.js';
 import { fmtMoney } from './core/ledger.js';
-import { reginaClock, seasonOf } from './core/time.js';
+import { reginaClock, seasonOf, sunTimes, hoursLabel } from './core/time.js';
+import { dayTally } from './core/goodnight.js';
 import { fetchWeather, simulateWeather } from './core/weather.js';
 import { CONTACTS } from './data/contacts.js';
 import { JOBS } from './data/jobs.js';
@@ -44,7 +45,10 @@ import { makeThumbs } from './ui/thumbs.js';
 import { Shell, moodOf } from './ui/shell.js';
 import { dailyStatus, claimDaily, REWARD_CENTS } from './core/daily.js';
 import { updateOnboarding } from './core/onboarding.js';
+import { gigConditions, startGig, gigStep, finishGig, abandonGig, currentStep, sanitizeGigs, GIG_REACH } from './core/gigs.js';
 import { FirstDay } from './ui/firstday.js';
+import { muralNames } from './core/sponsors.js';
+import { PUMPKIN, PUMPKIN_AREA, pumpkinOn, pumpkinSoon, pumpkinSpots, startHunt, findPumpkin, endHunt, huntToday } from './core/festivals.js';
 import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
 
 const $ = (id) => document.getElementById(id);
@@ -202,7 +206,7 @@ async function boot() {
     },
     onPanel: () => {},
     rebuildPlayerLook: rebuildPlayer,
-    fx: { juice, snap, gains: (b, at) => showGains(b, at) },
+    fx: { juice, snap, gains: (b, at) => showGains(b, at), head: () => headAt() },
   };
   const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio; radio.volume = S().radio?.volume ?? 0.7; radio.onVolume = (v) => { S().radio.volume = v; store.commit('phone-quiet'); };
   ctx.startTrip = (destId, mode) => {
@@ -215,6 +219,14 @@ async function boot() {
     }, { stop: false });
   };
   ctx.moveHome = (id) => moveHome(id);
+  /* ---------- Odd Jobs (core/gigs.js): take a gig on the phone, follow the gold marker, press E at each spot, get paid ---------- */
+  ctx.gigConditions = () => { const c = clock(); return gigConditions({ season: env?.season ?? seasonOf(c.month), temp: weather.temp ?? 10, kind: weather.kind ?? 'clear', hour: c.hour }); };
+  ctx.gigTake = (id) => {
+    const r = startGig(store, id, ctx.gigConditions()); if (!r.ok) { toast(r.error, 'warn'); audio.blip('error'); return; }
+    audio.chime('gain'); toast(`${r.gig.icon} Odd job: ${r.gig.title}. Follow the gold marker!`, 'good'); phone.close(); if (inInterior) exitInterior(); setDestination(null);
+  };
+  ctx.gigDrop = () => { if (abandonGig(store).ok) { player.setCarry(false); toast('Odd job dropped. No harm done.', 'info'); } };
+  ctx.gigShow = () => { phone.close(); if (inInterior) exitInterior(); const st = currentStep(S()); if (st) toast(`Head to ${st.spot.name || 'the gold marker'}`, 'info'); };
   phone = new Phone($('phone'), ctx);
   panels = new Panels($('panels'), { ...ctx, player: { gesture: (g) => player.gesture(g) } });
   panels.ctx.rebuildPlayer = rebuildPlayer;
@@ -230,6 +242,10 @@ async function boot() {
   const build = new BuildMode({ canvas, camera, scene, store, panels, audio, toast, isBlocked: () => phone.isOpen, onLayout: (f, top = 0) => { rig.buildInset = f; stripTop = top; if (build.active) { applyTop(); placeToasts(); } },
     onWallMode: (m) => { wallMode = m; interior?.setWallMode?.(m); },
     onFocus: (id, rect) => rig.setBuildFocus(rect),
+    onPlaced: (type, x, z, moved) => {   // a soft material thud and a little pop where it landed (Unpacking-style foley, synthesised)
+      const def = H.itemDef(type), cat = def?.cat ?? '', mat = /Plant/i.test(cat) ? 'leafy' : /Kitchen|Bath/i.test(cat) ? 'ceramic' : /Tech|Gym|Fitness/i.test(cat) ? 'metal' : /Sleep|Living|Seat|Sofa|Rug/i.test(cat) ? 'fabric' : 'wood';
+      audio.thud(mat); juice.floater(moved ? '✓ Moved' : `✨ ${def?.name ?? 'Placed'}`, new THREE.Vector3(x, 1.2, z), 'good'); juice.haptic(8);
+    },
     onStart: () => { rig.mode = 'build'; rig.indoor = true; input.runToggle = false; interior?.setOverhead(true); orbitOn(false); if (interior?.overheadMode) build.setWallMode(interior.overheadMode); },
     onStop: () => {
       stripTop = 0; placeToasts();
@@ -279,9 +295,16 @@ async function boot() {
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
-        const b = snap();
-        fading = true; await fadeTo(true, 700); toast('💤 Sleeping…', 'info'); await new Promise((r) => setTimeout(r, 1400)); const r = G.sleep(store, { home: inInterior === 'apartment' }); await fadeTo(false, 700); fading = false;
-        if (r.ok) { toast('You feel well rested.', 'good'); showGains(b); ctx.onDid?.('sleep'); }
+        const b = snap(), now = Date.now(), tally = dayTally(S(), now);
+        fading = true; await fadeTo(true, 700); const r = G.sleep(store, { home: inInterior === 'apartment' });
+        if (!r.ok) { await fadeTo(false, 500); fading = false; toast(r.error, 'warn'); return; }
+        // the Goodnight card: the day counted up, then tomorrow's real Regina forecast and what is on (docs/AMAZING.md G9)
+        const st = sunTimes(new Date(now + 86400000)), soon = pumpkinSoon(now + 86400000);
+        panels.goodnight({ name: S().player.name, tally, tomorrow: weather.tomorrow ?? null, live: !!weather.live, fmt: fmtMoney, sunrise: st.sunrise != null ? `${hoursLabel(st.sunrise)} AM` : null,
+          next: soon === 0 ? '🎃 Tomorrow: the Pumpkin Walk in Victoria Park!' : dailyStatus(S(), now + 86400000).ready ? '🎁 A new daily gift stamp is waiting tomorrow.' : null }, async () => {
+          audio.chime('gain'); await fadeTo(false, 700); fading = false; toast('You feel well rested.', 'good'); showGains(b); ctx.onDid?.('sleep');
+        });
+        await fadeTo(false, 400);
       },
     },
   };
@@ -369,6 +392,115 @@ async function boot() {
     document.body.classList.toggle('indoors', on);
   }
 
+  /** Do the current gig step where you stand: a short timed action (shovel, rake, play a set) or an instant one (pick up, drop off). */
+  function doGigStep() {
+    const st = currentStep(S()); if (!st) return;
+    const advance = () => {
+      const g0 = sanitizeGigs(S().gigs).active, r = gigStep(store, { x: player.pos.x, z: player.pos.z });
+      if (!r.ok) { toast(r.error, 'warn'); return; }
+      if (g0?.kind === 'delivery' && r.step === 1) player.setCarry(true);
+      if (!r.done) { juice.floater(`✓ ${r.step}/${r.total}`, headAt(), 'good'); audio.chime('pop'); const nx = currentStep(S()); if (nx) toast(nx.label, 'info'); return; }
+      const f = finishGig(store, ctx.gigConditions()); player.setCarry(false);
+      if (!f.ok) { toast(f.error, 'warn'); return; }
+      juice.pay(f.total, headAt(), f.tip ? '(with a tip!)' : ''); audio.chime('gain'); player.gesture('wave', 1.4);
+      if ((S().stats?.gigs ?? 0) === 1) { juice.confetti(60); audio.chime('fanfare'); }
+      toast(`${f.title}: done! +${fmtMoney(f.total)}${f.tip ? ` (incl. a ${fmtMoney(f.tip)} tip)` : ''}`, 'good'); ctx.onDid?.('gig', f.kind);
+    };
+    if (st.hold > 0) { player.gesture('use', st.hold); panels.progress(st.label.replace(/\s*\(\d\/\d\)$/, '') + '…', st.hold, advance); } else advance();
+  }
+  // the gold marker over the current gig spot: a light column you can see from blocks away, a ring on the ground, a bobbing cone
+  const gigMark = new THREE.Group(); gigMark.visible = false; scene.add(gigMark);
+  {
+    const gold = new THREE.MeshBasicMaterial({ color: '#ffc83d', transparent: true, opacity: 0.85, depthWrite: false });
+    const col = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 40, 20, 1, true), new THREE.MeshBasicMaterial({ color: '#ffd257', transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); col.position.y = 20;
+    const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.0, 40).rotateX(-Math.PI / 2), gold); ring.position.y = 0.12;
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.7, 16).rotateX(Math.PI), gold); cone.position.y = 3; cone.name = 'cone';
+    gigMark.add(col, ring, cone);
+  }
+  // a walking buddy for dog-walking gigs: a little low-poly pup that trots after you (it belongs to a labelled NPC neighbour)
+  const dog = new THREE.Group(); dog.visible = false; scene.add(dog);
+  {
+    const fur = new THREE.MeshStandardMaterial({ color: '#b8834f', roughness: 0.9 }), dark = new THREE.MeshStandardMaterial({ color: '#4a3424', roughness: 0.9 });
+    const box = (w, h, d, m, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = true; dog.add(b); return b; };
+    box(0.32, 0.26, 0.62, fur, 0, 0.42, 0); box(0.28, 0.26, 0.3, fur, 0, 0.62, 0.36); box(0.16, 0.12, 0.14, dark, 0, 0.58, 0.55);
+    for (const s2 of [-1, 1]) box(0.07, 0.14, 0.1, dark, s2 * 0.11, 0.8, 0.32);
+    dog.userData.legs = [[-0.1, 0.2], [0.1, 0.2], [-0.1, -0.2], [0.1, -0.2]].map(([x, z]) => box(0.08, 0.3, 0.08, fur, x, 0.15, z));
+    dog.userData.tail = box(0.06, 0.06, 0.26, fur, 0, 0.56, -0.38); dog.userData.t = 0;
+  }
+  const updateGigWorld = (dt) => {
+    const a = gameMode === 'play' && !inInterior ? sanitizeGigs(S().gigs).active : null, st = a && a.step < a.steps.length ? a.steps[a.step] : null;
+    gigMark.visible = !!st; if (st) { gigMark.position.set(st.spot.x, 0, st.spot.z); const c = gigMark.getObjectByName('cone'); c.position.y = 3 + Math.sin(performance.now() / 300) * 0.25; c.rotation.y += dt * 2; }
+    const walking = !!a && a.kind === 'dogwalk' && a.step >= 1 && a.step < a.steps.length;
+    if (walking && !dog.visible) { dog.visible = true; dog.position.set(player.pos.x - 1, 0, player.pos.z - 1); }
+    if (!walking) dog.visible = false;
+    if (dog.visible) {
+      const want = new THREE.Vector3(player.pos.x - Math.sin(player.yaw) * 1.3 + Math.cos(player.yaw) * 0.6, 0, player.pos.z - Math.cos(player.yaw) * 1.3 - Math.sin(player.yaw) * 0.6);
+      const dx = want.x - dog.position.x, dz = want.z - dog.position.z, d = Math.hypot(dx, dz), sp = Math.min(d * 3, 9);
+      if (d > 0.05) { dog.position.x += (dx / d) * sp * dt; dog.position.z += (dz / d) * sp * dt; dog.rotation.y = Math.atan2(dx, dz); }
+      dog.userData.t += dt * (2 + sp * 2); const k = Math.min(1, sp / 2);
+      dog.userData.legs.forEach((l, i) => (l.rotation.x = Math.sin(dog.userData.t + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI : 0)) * 0.6 * k));
+      dog.userData.tail.rotation.y = Math.sin(performance.now() / 120) * 0.6;
+    }
+  };
+
+  /* ---------- the Pumpkin Walk (core/festivals.js): jack-o'-lanterns in Victoria Park, 29-31 October, a 90-second hunt ---------- */
+  const pumpkins = new THREE.Group(); pumpkins.visible = false; scene.add(pumpkins);
+  const pumpkinFace = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#ffd36b';
+    g.beginPath(); g.moveTo(30, 52); g.lineTo(50, 52); g.lineTo(40, 34); g.fill(); g.beginPath(); g.moveTo(78, 52); g.lineTo(98, 52); g.lineTo(88, 34); g.fill();
+    g.beginPath(); g.moveTo(26, 74); for (let i = 0; i <= 8; i++) g.lineTo(26 + i * 9.5, i % 2 ? 98 : 80); g.lineTo(102, 74); g.closePath(); g.fill();
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  let pumpkinYear = -1, huntSpots = [];
+  const buildPumpkins = (year) => {
+    pumpkins.clear(); huntSpots = pumpkinSpots(year); pumpkinYear = year;
+    const skin = new THREE.MeshStandardMaterial({ color: '#f28a1e', roughness: 0.7 }), stemM = new THREE.MeshStandardMaterial({ color: '#4f7a2e', roughness: 0.9 }), face = new THREE.MeshBasicMaterial({ map: pumpkinFace, transparent: true, depthWrite: false });
+    const body = new THREE.SphereGeometry(0.55, 18, 12).scale(1, 0.78, 1), stem = new THREE.CylinderGeometry(0.06, 0.09, 0.28, 8), faceG = new THREE.PlaneGeometry(0.8, 0.8);
+    for (const p of huntSpots) {
+      const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = Math.atan2(PUMPKIN_AREA.cx - p.x, PUMPKIN_AREA.cz - p.z); g.userData.i = p.i;
+      const b = new THREE.Mesh(body, skin); b.position.y = 0.43; b.castShadow = true; const st = new THREE.Mesh(stem, stemM); st.position.y = 0.9; const f = new THREE.Mesh(faceG, face); f.position.set(0, 0.45, 0.52);
+      g.add(b, st, f); pumpkins.add(g);
+    }
+    // the sign at the plaza's east path: start the hunt here
+    const sg = new THREE.Group(); sg.position.set(PUMPKIN_AREA.cx + 12, 0, PUMPKIN_AREA.cz - 12);
+    const cv = document.createElement('canvas'); cv.width = 512; cv.height = 192; const g2 = cv.getContext('2d'); g2.fillStyle = '#2b1d3a'; g2.fillRect(0, 0, 512, 192); g2.fillStyle = '#ff9a3d'; g2.font = '800 54px "Plus Jakarta Sans",system-ui,sans-serif'; g2.textAlign = 'center'; g2.fillText('🎃 PUMPKIN WALK', 256, 82); g2.fillStyle = '#fff'; g2.font = '700 26px system-ui,sans-serif'; g2.fillText('Find all nine in 90 seconds!', 256, 140);
+    const tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace;
+    const board = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.2), new THREE.MeshBasicMaterial({ map: tx })); board.position.y = 2.1; board.rotation.y = Math.PI * 0.75;
+    for (const sx of [-1.4, 1.4]) { const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.7, 0.12), stemM); post.position.set(sx * Math.cos(Math.PI * 0.75), 1.35, -sx * Math.sin(Math.PI * 0.75)); sg.add(post); }
+    sg.add(board); pumpkins.add(sg); pumpkins.userData.sign = { x: sg.position.x - 1.5, z: sg.position.z + 1.5 };
+  };
+  /** Pumpkin Walk prompts: the sign (start), and during a hunt every pumpkin you have not found yet. */
+  const pumpkinInteractables = () => {
+    if (!pumpkins.visible) return [];
+    const now = Date.now(), h = huntToday(S(), now), live = h && !h.done && now - h.startedAt <= PUMPKIN.secs * 1000, out = [];
+    if (!live) out.push({ id: 'pumpkin-sign', x: pumpkins.userData.sign.x, z: pumpkins.userData.sign.z, radius: 3.5, label: h?.done ? 'Pumpkin Walk (come back tomorrow)' : '🎃 Start the Pumpkin Walk hunt (90 s)', run: () => {
+      const r = startHunt(store); if (!r.ok) { toast(r.error, 'info'); return; } audio.chime('fanfare'); toast('Go! Nine carved pumpkins are hiding round Victoria Park. 90 seconds!', 'good'); } });
+    else for (const p of huntSpots) if (!h.found.includes(p.i)) out.push({ id: 'pumpkin-' + p.i, x: p.x, z: p.z, radius: PUMPKIN.reach, label: '🎃 Found one!', run: () => {
+      const r = findPumpkin(store, p.i, { x: player.pos.x, z: player.pos.z }); if (!r.ok) { toast(r.error, 'warn'); return; }
+      audio.chime('gain'); juice.floater(`🎃 ${r.found}/${r.total}`, new THREE.Vector3(p.x, 1.4, p.z), 'good'); if (r.found >= r.total) finishPumpkins(); } });
+    return out;
+  };
+  const finishPumpkins = () => {
+    const r = endHunt(store); if (!r.ok) return;
+    if (r.pay) juice.pay(r.pay, headAt()); if (r.found >= PUMPKIN.count) { juice.confetti(90); audio.chime('fanfare'); }
+    toast(r.found >= PUMPKIN.count ? `All nine! +${fmtMoney(r.pay)}${r.prize ? ' and the Pumpkin Walk toque (check your wardrobe)' : ''}` : `Time! You found ${r.found} of ${PUMPKIN.count}. +${fmtMoney(r.pay)}`, 'good');
+  };
+  const updatePumpkins = () => {
+    const now = virtualNow().getTime(), on = gameMode === 'play' && !inInterior && pumpkinOn(now);
+    if (on) { const y = +new Date(now).toLocaleDateString('en-CA', { timeZone: 'America/Regina' }).slice(0, 4); if (y !== pumpkinYear) buildPumpkins(y); }
+    pumpkins.visible = on;
+    const h = on ? huntToday(S(), Date.now()) : null, live = h && !h.done;
+    if (live) {   // hide the ones you found; the clock runs out on its own
+      for (const g of pumpkins.children) if (g.userData.i != null) g.visible = !h.found.includes(g.userData.i);
+      if (PUMPKIN.secs - (Date.now() - h.startedAt) / 1000 <= 0) finishPumpkins();   // the HUD chip is drawn by updateHud
+    } else if (on) for (const g of pumpkins.children) g.visible = true;
+  };
+  /** A note from Dani when the Pumpkin Walk is coming (or on), once a year. */
+  const tellFestival = () => {
+    const now = virtualNow().getTime(), k = pumpkinSoon(now); if (k == null) return;
+    const year = new Date(now).toLocaleDateString('en-CA', { timeZone: 'America/Regina' }).slice(0, 4), f = (S().festivals ||= {}), told = (f.told ||= []);
+    if (told.includes('pumpkin:' + year)) return; told.push('pumpkin:' + year);
+    G.receiveMessage(store, 'dani', k === 0 ? 'The Pumpkin Walk is ON in Victoria Park! 🎃 Nine carved pumpkins, 90 seconds. Bet you can\'t find them all.' : `Pumpkin Walk in Victoria Park in ${k} day${k > 1 ? 's' : ''} (29 to 31 Oct)! 🎃 They hide nine carved pumpkins. Wanna go?`);
+  };
+
   /* ---------- map ---------- */
   function openFullMap() {
     if (creator || build.active) return; mapOpen = true; $('map-full').classList.add('on'); phone.close();
@@ -426,16 +558,28 @@ async function boot() {
     if (inInterior) for (const it of interior.interactables) consider(it, typeof it.label === 'function' ? it.label(ictx) : it.label);
     else {
       for (const it of city.interactables) consider(it, it.label);
+      const gst = currentStep(S()); if (gst) consider({ id: 'gig', kind: 'gig', x: gst.spot.x, z: gst.spot.z, radius: GIG_REACH, label: gst.label, run: () => doGigStep() }, gst.label);
+      for (const it of pumpkinInteractables()) consider(it, it.label);
       const n = ped.nearest(player.pos, 2.4); if (n) { const d = Math.hypot(n.x - player.pos.x, n.z - player.pos.z) / 2.4; if (d < bd) best = { npc: n, label: 'Say hi' }; }
     }
     return best;
   };
+  /** The leaving-the-game screen every sponsored link goes through (VISION 5.7): who it is, where it goes, and a clear way to stay. */
+  const leaveFor = (a) => panels.menu(`Sponsored · ${a.business}`, `“${a.text}”. This opens ${a.host} in a new tab, outside Regina Life. Sponsors are real local businesses; they never see your game or your Prairie Dollars.`, [
+    { label: `Visit ${a.host}`, primary: true, run: () => { try { window.open(a.url, '_blank', 'noopener,noreferrer'); } catch {} } },
+    { label: 'Advertise your business', run: () => { try { window.open('./advertise.html', '_blank', 'noopener'); } catch {} } }, { label: 'Stay in Regina' }]);
   const interact = () => {
     if (!target || creator || panels.open || mapOpen || camMode || fading) return;
     if (target.npc) { const n = target.npc; const msg = ped.greet(n, { px: player.pos.x, pz: player.pos.z, temp: weather.temp, night: env?.night > 0.6 }); player.gesture('wave', 1.4); toast(`🗣️ “${msg}”`, 'info'); S().needs.mood = Math.min(100, S().needs.mood + 1.5); return; }
     const it = target.it;
     if (it.kind === 'door') { enterInterior(it.enter, it); return; }
-    if (it.kind === 'billboard') { ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return; }
+    if (it.kind === 'billboard') {   // a real sponsor on screen right now: say who it is and offer their site through the leaving-the-game screen
+      const b = city.billboards.find((x) => x.id === it.boardId), a = b?.slots[b.slot % Math.max(1, b.slots.length)];
+      if (a?.sponsored) { leaveFor(a); return; }
+      ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return;
+    }
+    if (it.mural) { phone.open(); phone.openApp('supporters'); return; }
+    if (it.activity) { ictx.ui.activity(it.activity); return; }
     audio.blip('tick'); it.run(ictx);
   };
   /* ---------- Home view: tap a piece to walk over and use it; tap the floor to walk there (a drag still turns the dollhouse) ---------- */
@@ -604,10 +748,23 @@ async function boot() {
     if (!ovPick) { el.innerHTML = `<div class="pc-head"><span class="pc-ico">📍</span><div><h3>You are here</h3><small>${esc(inInterior ? 'Indoors' : 'Out and about in Regina')}</small></div></div>`; return; }
     const p = ovPick, d = Math.hypot(p.x - player.pos.x, p.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)), dist = d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m', here = d < 40;
     el.innerHTML = `<div class="pc-head"><span class="pc-ico">${p.emoji}</span><div><h3>${esc(p.name.replace(/ \(Home\)/, ''))}</h3><small>${esc(p.area ?? 'Regina')} · ${here ? 'you are here' : dist + ' away'}</small></div><span class="pc-tag ${p.state === 'open' ? 'open' : ''}">${p.state === 'open' ? '● Open now' : 'Visit & explore'}</span></div>
-      <p class="pc-blurb">${esc(p.blurb)}</p><div class="pc-acts">${(p.acts ?? []).map((a) => `<span class="${/\(soon\)/.test(a) ? 'soon' : ''}">${esc(a)}</span>`).join('')}</div>
+      <p class="pc-blurb">${esc(p.blurb)}</p><div class="pc-acts">${(p.acts ?? []).map((a) => { const id = actId(a); return id ? `<button class="pc-act" data-act="${id}">${esc(a)}</button>` : `<span class="${/\(soon\)/.test(a) ? 'soon' : ''}">${esc(a)}</span>`; }).join('')}</div>
       <div class="pc-go"><button class="gobtn primary" data-go="walk" ${here ? 'disabled' : ''}><b>🚶 Walk</b><small>${here ? 'Already here' : `Free · about ${mins} min`}</small></button><button class="gobtn" data-go="cab" ${here || fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)} · instant</small></button></div>`;
   }
+  /** Place-card chips you can actually do (docs/AMAZING.md G6): an activity id, 'photo', or 'enter' (go inside). Null = a "soon" label. */
+  const ACT_IDS = { 'Read on a bench': 'bench', 'People-watch': 'people', 'Hear the buskers': 'buskers', 'Window shop': 'window', 'Watch the geese': 'geese', 'Walk the shoreline': 'shore', 'Watch the sunset': 'sky', 'Walk the grounds': 'grounds', 'Take a photo': 'photo', 'Buy groceries': 'enter', 'Bakery & deli': 'enter', 'Work a shift': 'enter', 'Try on outfits': 'enter', 'Toques & accessories': 'enter', 'Vote': 'enter', 'Meet the mayor': 'enter', 'Hand out flyers': 'enter', 'Treadmill': 'enter', 'Weights': 'enter', 'Yoga': 'enter', 'Take a trip': 'trip' };
+  function actId(label) { const k = String(label).replace(/^\P{L}+/u, '').trim(); return ACT_IDS[k] ?? null; }
   $('ov-card').addEventListener('click', (e) => {
+    const ab = e.target.closest('[data-act]');
+    if (ab && ovPick && !ovPick.board) {   // do it here if you are here; otherwise walk there first
+      const p = ovPick, id = ab.dataset.act, near = Math.hypot(p.x - player.pos.x, p.z - player.pos.z) < 70;
+      if (id === 'trip') { closeMapOverview(); phone.open(); phone.openApp('trips'); return; }
+      if (!near) { closeMapOverview(); setDestination(p); toast(`Head to ${p.name.replace(/ \(Home\)/, '')} first. Follow the arrow!`, 'info'); return; }
+      closeMapOverview();
+      if (id === 'photo') { startCamera(); return; }
+      if (id === 'enter') { if (p.enter) enterInterior(p.enter, { x: p.x, z: p.z, nx: 0, nz: p.z > 0 ? -1 : 1 }); return; }
+      ictx.ui.activity(id); G.tally(S(), 'visits'); return;
+    }
     const b = e.target.closest('[data-go]'); if (!b || !ovPick) return; const p = ovPick;
     if (b.dataset.go === 'book') { closeMapOverview(); ctx.adsFocus = p.board.id; phone.open(); phone.openApp('ads'); return; }
     if (b.dataset.go === 'walk') { closeMapOverview(); setDestination(p); audio.blip('ok'); }
@@ -731,10 +888,10 @@ async function boot() {
     if (!inInterior) { let bd = 1e9; for (const d of DISTRICTS) { const k = Math.hypot(player.pos.x - d.x, player.pos.z - d.z) - d.r; if (k < bd && k < 0) { bd = k; place = d.name; } } }
     hudPlace.textContent = place;
     // destination
-    const dst = s.destination;
+    const gst = !s.destination && !inInterior ? currentStep(s) : null, dst = s.destination ?? (gst ? { x: gst.spot.x, z: gst.spot.z, name: `🧰 ${gst.label}`, gig: true } : null);
     if (dst && !inInterior) {
       const dx = dst.x - player.pos.x, dz = dst.z - player.pos.z, d = Math.hypot(dx, dz);
-      if (d < 14) { toast(`You've arrived: ${dst.name}`, 'good'); audio.chime('gain'); G.tally(s, 'visits'); s.destination = null; store.commit('destination'); hudDest.hidden = true; }
+      if (d < 14 && !dst.gig) { toast(`You've arrived: ${dst.name}`, 'good'); audio.chime('gain'); G.tally(s, 'visits'); s.destination = null; store.commit('destination'); hudDest.hidden = true; }
       else { const ang = Math.atan2(dx, dz) - (rig.yaw + Math.PI); hudDest.hidden = false; hudDest.innerHTML = `<span class="arrow" style="transform:rotate(${(-ang * 180) / Math.PI + 180}deg)">➤</span> <b>${esc(dst.name)}</b> ${d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m'}`; }
     } else hudDest.hidden = true;
     // job objective
@@ -743,7 +900,10 @@ async function boot() {
       let txt = `Shift ${sh.tasksDone}/${sh.tasksTotal}`;
       if (inInterior && interior?.task) { const t = interior.task; txt += sh.tasksDone >= sh.tasksTotal ? ' · Clock out at the counter' : t.carrying ? ` · Deliver to ${interior.stations[t.target]?.name}` : ' · Pick up stock'; }
       hudJob.hidden = false; hudJob.textContent = '💼 ' + txt;
-    } else hudJob.hidden = true;
+    } else {
+      const ph = !inInterior && pumpkins.visible ? huntToday(s, Date.now()) : null, left = ph && !ph.done ? Math.ceil(PUMPKIN.secs - (Date.now() - ph.startedAt) / 1000) : -1;
+      hudJob.hidden = left < 0; if (left >= 0) hudJob.textContent = `🎃 Pumpkin Walk ${ph.found.length}/${PUMPKIN.count} · ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    }
     const un = G.unreadTotal(s); const bd = $('b-phone').querySelector('.badge'); bd.hidden = !un; bd.textContent = un;
     shell.setBadge('phone', un);
   };
@@ -782,7 +942,7 @@ async function boot() {
   await progress(100, 'Ready');
   await new Promise((r) => setTimeout(r, 300));
   $('loading').classList.remove('on');
-  gameMode = 'title'; $('title').classList.add('on'); city.refreshBillboards(S().ads, Date.now());
+  gameMode = 'title'; $('title').classList.add('on'); city.refreshBillboards(S().ads, Date.now()); city.paintMural(muralNames());
   $('btn-continue').style.display = hasLife() ? '' : 'none'; hub.show(); enterHubMode(true); hubTicker(); hubRefresh();
   $('title-note').textContent = hasLife() ? `Saved life: ${S().player.name} · ${fmtMoney(S().bank.balance)}` : 'Your progress saves automatically on this device.';
   phone.applyWallpaper(); phone.setView(S().phone.unlocked ? 'home' : 'lock'); phone.refreshHome(); phone.renderStatus();
@@ -821,7 +981,7 @@ async function boot() {
     if (s.needs.hunger > 30) f.hungerHint = false; if (s.needs.energy > 30) f.tiredHint = false;
     if (!inInterior) { savePos(); }
     if ((Date.now() | 0) % 5 === 0) store.commit('needs');
-    phone.tick(); tickFirstDay();
+    phone.tick(); tickFirstDay(); if ((Date.now() / 1000 | 0) % 30 === 0) tellFestival();
   }, 1000);
   setInterval(() => { if (gameMode === 'play') { phone.tick(); } }, 30000);
 
@@ -875,6 +1035,7 @@ async function boot() {
     // destination beacon
     const dst = S().destination; beacon.visible = !!dst && !inInterior && gameMode === 'play';
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
+    updateGigWorld(dt); updatePumpkins();
     // interaction prompt
     if (gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
     // in the dollhouse the prompt floats over the thing you can use, like a speech bubble, instead of sitting on the room

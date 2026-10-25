@@ -78,8 +78,10 @@ export const HOUSE_ADS = [
  * What a board shows in rotation: the player's active ad first, then deterministic sponsor ads, up to the tier's
  * maxRotation. Pure; `ad` is the player's active ad for this board (or null).
  */
-export function rotationFor(board, ad) {
+export function rotationFor(board, ad, sponsored = []) {
   const t = AD_TIERS[board.adTier] ?? AD_TIERS.standard, n = t.maxRotation, out = ad ? [{ ...ad, mine: true }] : [];
+  for (const sp of sponsored) if (out.length < n) out.push({ ...sp, sponsored: true });   // real advertisers (core/sponsors.js), always labelled
+
   let h = 0; for (const c of board.id) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   for (let i = 0; out.length < n; i++) { const a = HOUSE_ADS[(h + i * 5) % HOUSE_ADS.length]; if (!out.some((o) => o.id === a.id)) out.push({ ...a, house: true }); }
   return out;

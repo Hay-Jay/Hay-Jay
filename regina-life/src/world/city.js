@@ -8,6 +8,7 @@ import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT,
 import { buildLandmarks } from './landmarks.js';
 import { BILLBOARDS, THEMES, rotationFor } from '../data/billboards.js';
 import { adQuote } from '../core/ads.js';
+import { sponsoredFor } from '../core/sponsors.js';
 import { fmtMoney } from '../core/ledger.js';
 import { drawBillboard } from './textures.js';
 
@@ -29,6 +30,20 @@ function inPoly(x, z, poly) {
     if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) c = !c;
   }
   return c;
+}
+
+/** The Supporters' Mural (docs/AMAZING.md R2): a prairie sunset with a grain elevator and the names of the people who support the game. */
+function drawMural(cv, names = []) {
+  const g = cv.getContext('2d'), w = cv.width, h = cv.height;
+  const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#5a86c8'); sky.addColorStop(0.55, '#f7c28f'); sky.addColorStop(0.7, '#f0a070'); g.fillStyle = sky; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#ffe7a6'; g.beginPath(); g.arc(w * 0.78, h * 0.62, 34, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#e8b94a'; g.fillRect(0, h * 0.7, w, h * 0.3); g.fillStyle = 'rgba(160,110,30,.35)'; for (let x = 0; x < w; x += 9) g.fillRect(x, h * 0.7 + ((x * 7) % 11), 2, h * 0.3);
+  g.fillStyle = '#a3312f'; g.fillRect(w * 0.86, h * 0.3, 46, h * 0.42); g.beginPath(); g.moveTo(w * 0.86 - 6, h * 0.3); g.lineTo(w * 0.86 + 23, h * 0.16); g.lineTo(w * 0.86 + 52, h * 0.3); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.92)'; g.font = '800 30px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif'; g.textAlign = 'left'; g.textBaseline = 'top';
+  g.fillText("THANK YOU, SUPPORTERS", 28, 18);
+  g.font = '700 21px "Plus Jakarta Sans","Segoe UI",system-ui,sans-serif'; g.fillStyle = '#12202a';
+  if (!names.length) { g.fillStyle = 'rgba(18,32,42,.75)'; g.fillText('Your name could be here. Support Regina Life in the Supporters app.', 28, 66); return; }
+  let x = 28, y = 64; for (const n of names) { const t = n.name, tw = g.measureText(t).width + 26; if (x + tw > w * 0.82) { x = 28; y += 30; } if (y > h - 30) break; g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(x - 6, y - 2, tw - 10, 26); g.fillStyle = '#12202a'; g.fillText(t, x, y); x += tw; }
 }
 
 export function buildCity({ quality = 'high' } = {}) {
@@ -145,6 +160,42 @@ export function buildCity({ quality = 'high' } = {}) {
     doorOn({ ...th, ...t }, 's', 'Enter Prairie Threads', 'threads', 'door_threads', { sign: { text: 'PRAIRIE THREADS', sub: 'Clothing · Accessories' }, accent: '#8e6bd8' });
   }
 
+  /**
+   * Victoria Park (docs/AMAZING.md): a real green square downtown with diagonal paths to a round plaza, rows of hand-planted elms, benches you can sit
+   * on, and the Supporters' Mural facing Scarth Street. It has its own seeded RNG so building it never reshuffles the rest of the city.
+   */
+  const vparkInfo = {};
+  function victoriaPark({ x0, z0, x1, z1, cx, cz }) {
+    const vr = mulberry32(1882);
+    parkBlocks.push({ x0, z0, x1, z1 });
+    add('lawn', tint(plainBox(x0, z0, x1, z1, 0.05, '#93bf6a'), '#93bf6a'), cx, cz);
+    for (const [ax, az, bx, bz] of [[x0 + 3, z0 + 3, x1 - 3, z1 - 3], [x1 - 3, z0 + 3, x0 + 3, z1 - 3]]) add('pave', tint(stripQuad(ax, az, bx, bz, 3.2, 0.1), '#ddd3be'), cx, cz);   // the diagonal paths
+    add('pave', tint(new THREE.CylinderGeometry(9, 9, 0.16, 36).translate(cx, 0.08, cz), '#e4dccb'), cx, cz);                                    // the round plaza
+    add('trim', tint(new THREE.CylinderGeometry(2.2, 2.6, 1.1, 20).translate(cx, 0.55, cz), '#c9c2b0'), cx, cz);                                 // the fountain basin
+    for (let k = 0; k < 4; k++) { const ex = k % 2 ? x1 - 4 : x0 + 4; for (let t = 0; t < 7; t++) { const zz = z0 + 8 + t * ((z1 - z0 - 16) / 6); trees.push({ x: ex, z: zz + (vr() - 0.5) * 2, s: 0.95 + vr() * 0.3 }); } }
+    for (let t = 0; t < 6; t++) { const xx = x0 + 14 + t * ((x1 - x0 - 28) / 5); trees.push({ x: xx, z: z0 + 4, s: 0.9 + vr() * 0.3 }, { x: xx, z: z1 - 4, s: 0.9 + vr() * 0.3 }); }
+    // benches round the plaza: you can read on them or people-watch (core/game.js ACTIVITIES)
+    vparkInfo.benches = [];
+    for (let k = 0; k < 4; k++) {
+      const a = Math.PI / 4 + (k * Math.PI) / 2, bx = cx + Math.cos(a) * 11.5, bz = cz + Math.sin(a) * 11.5, rot = -a + Math.PI / 2;
+      const seat = new THREE.BoxGeometry(2.2, 0.12, 0.6).translate(0, 0.48, 0), back = new THREE.BoxGeometry(2.2, 0.55, 0.1).translate(0, 0.78, -0.3), legs = new THREE.BoxGeometry(2.0, 0.42, 0.5).translate(0, 0.21, 0);
+      for (const [g, col] of [[seat, '#9a6a3c'], [back, '#9a6a3c'], [legs, '#3d4a52']]) { g.rotateY(rot); g.translate(bx, 0, bz); add('trim', tint(g, col), bx, bz); }
+      colliders.add(bx - 0.9, bz - 0.9, bx + 0.9, bz + 0.9, 1);
+      const sx = cx + Math.cos(a) * 9.8, sz = cz + Math.sin(a) * 9.8;
+      vparkInfo.benches.push({ x: sx, z: sz });
+      interactables.push({ id: 'vpark_bench_' + k, x: sx, z: sz, radius: 2.4, label: k % 2 ? 'People-watch from the bench' : 'Read on a bench', activity: k % 2 ? 'people' : 'bench' });
+    }
+    // the Supporters' Mural: a long painted wall on the Scarth Street side, facing east
+    const mx = x1 - 8, mz = cz + 22, W = 16, Hh = 3.4;
+    add('trim', tint(new THREE.BoxGeometry(0.5, Hh + 0.3, W + 0.6).translate(mx - 0.3, (Hh + 0.3) / 2, mz), '#d8cfbd'), mx, mz);
+    colliders.add(mx - 0.6, mz - W / 2 - 0.3, mx, mz + W / 2 + 0.3, Hh);
+    const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 224;
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(W, Hh), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9 })); face.position.set(mx + 0.01, Hh / 2 + 0.15, mz); face.rotation.y = Math.PI / 2; group.add(face);
+    vparkInfo.mural = { cv, tex, x: mx + 2.6, z: mz };
+    interactables.push({ id: 'mural', x: mx + 2.6, z: mz, radius: 4, label: "Read the Supporters' Mural", mural: true });
+  }
+
   /* ---------------- downtown grid blocks ---------------- */
   const parkBlocks = [];
   for (let bi = GRID.i0; bi < GRID.i1; bi++) for (let bj = GRID.j0; bj < GRID.j1; bj++) {
@@ -154,6 +205,7 @@ export function buildCity({ quality = 'high' } = {}) {
     let zone = score < 0.9 ? 'core' : score < 1.6 ? 'mid' : 'res';
     if (bj >= 5) zone = 'res';
     if (zone !== 'core' && rnd() < 0.1 && !(bi === 0 && bj === 0)) zone = 'park';
+    const vpark = bi === -2 && bj === 0; if (vpark) zone = 'park';   // Victoria Park: the real one sits between Scarth and Lorne, Victoria Ave and 12th Ave
     const special = reserved.some((r) => r.x0 > x0 && r.x1 < x1 && r.z0 > z0 && r.z1 < z1);
     // ground pad
     const pavedZone = zone === 'core' || zone === 'mid';
@@ -168,6 +220,7 @@ export function buildCity({ quality = 'high' } = {}) {
       }
     }
 
+    if (vpark) { victoriaPark({ x0, z0, x1, z1, cx, cz }); continue; }
     if (zone === 'park') {
       parkBlocks.push({ x0, z0, x1, z1 });
       const n = 14 + Math.floor(rnd() * 8);
@@ -399,7 +452,7 @@ export function buildCity({ quality = 'high' } = {}) {
   /** Each board rotates the player's ad (if any) with in-game sponsor ads, like a real digital board. */
   const paintBoard = (b) => { const a = b.slots[b.slot % Math.max(1, b.slots.length)]; drawBillboard(b.cv, a, { tier: b.tier, onImage: () => paintBoard(b) }, THEMES); b.tex.needsUpdate = true; };
   const refreshBillboards = (ads = {}, now = Date.now()) => {
-    for (const b of boards) { const a = ads[b.id]; b.slots = rotationFor(b, a && a.until > now ? a : null); b.slot = 0; paintBoard(b); }
+    for (const b of boards) { const a = ads[b.id]; b.slots = rotationFor(b, a && a.until > now ? a : null, sponsoredFor(b.id, now)); b.slot = 0; paintBoard(b); }
   };
   let rotT = 0;
   const rotateBoards = (dt, camPos) => {
@@ -455,7 +508,7 @@ export function buildCity({ quality = 'high' } = {}) {
     const strip = (g) => { const n = g.toNonIndexed(); n.deleteAttribute('uv'); return n; };
     const body = tint(strip(new THREE.BoxGeometry(1.8, 0.7, 4.3).translate(0, 0.75, 0)), '#ffffff');
     const cabin = tint(strip(new THREE.BoxGeometry(1.6, 0.6, 2.2).translate(0, 1.4, -0.1)), '#3a4654');
-    const wheels = [[-0.9, 1.4], [0.9, 1.4], [-0.9, -1.4], [0.9, -1.4]].map(([x, z]) => tint(strip(new THREE.CylinderGeometry(0.34, 0.34, 0.25, 10).rotateZ(Math.PI / 2).translate(x, 0.34, z)), '#101010'));
+    const wheels = [[-0.9, 1.4], [0.9, 1.4], [-0.9, -1.4], [0.9, -1.4]].map(([x, z]) => tint(strip(new THREE.CylinderGeometry(0.34, 0.34, 0.25, 10).rotateZ(Math.PI / 2).translate(x, 0.34, z)), '#33373d'));
     return mergeGeometries([body, cabin, ...wheels]);
   })();
 
@@ -505,6 +558,7 @@ export function buildCity({ quality = 'high' } = {}) {
     group, colliders, interactables, mats, chunks, lamps, trees, signMeshes,
     spawn: { x: -14, z: 4, heading: Math.PI / 2 },
     recolorTrees, billboards: boards, refreshBillboards, setOverview, rotateBoards,
+    vpark: vparkInfo, paintMural: (names) => { if (vparkInfo.mural) { drawMural(vparkInfo.mural.cv, names); vparkInfo.mural.tex.needsUpdate = true; } },
     carsReady: Promise.resolve().then(() => {
       const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.38, metalness: 0.12 }), cars.length);
       const c = new THREE.Color();

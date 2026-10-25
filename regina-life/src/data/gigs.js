@@ -20,7 +20,7 @@ const corner = (i, j) => ({ x: i * PITCH + 7, z: j * PITCH + 9, name: `${STREETS
 export const SPOTS = {
   market: { x: 30, z: 9.4, name: 'Prairie Corner Market' },
   scarth: { x: -103, z: -60, name: 'Scarth Street Mall' },
-  vpark: { x: -103, z: 60, name: 'Victoria Park' },
+  vpark: { x: -150, z: 47, name: 'Victoria Park' },
   lofts: { x: -30, z: 9.4, name: 'Dewdney Lofts' },
 };
 /** The residents whose dogs you walk (labelled NPCs from data/residents.js). */

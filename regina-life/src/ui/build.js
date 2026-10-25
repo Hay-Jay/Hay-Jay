@@ -131,8 +131,8 @@ export function roomChipsHTML(rooms, focus = null) {
  * BuildMode has no interior or camera of its own: main.js wires those two callbacks (interior.setWallMode / rig.setBuildFocus).
  */
 export class BuildMode {
-  constructor({ canvas, camera, scene, store, panels, audio, toast, isBlocked = () => false, catalogue = null, layout = null, onStart, onStop, onLayout, onWallMode, onFocus }) {
-    Object.assign(this, { canvas, camera, scene, store, panels, audio, toast, isBlocked, catalogue, onStart, onStop, onLayout, onWallMode, onFocus });
+  constructor({ canvas, camera, scene, store, panels, audio, toast, isBlocked = () => false, catalogue = null, layout = null, onStart, onStop, onLayout, onWallMode, onFocus, onPlaced }) {
+    Object.assign(this, { canvas, camera, scene, store, panels, audio, toast, isBlocked, catalogue, onStart, onStop, onLayout, onWallMode, onFocus, onPlaced });
     this.active = false; this.sel = null; this.rot = 0; this.pt = null; this.lastErr = null; this.ray = new THREE.Raycaster(); this.plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); this.hit = new THREE.Vector3();
     this.wallMode = 'cut'; this.focus = null; this._focusPinned = false; this.lastEdit = null; this._notice = null; this._roomsSig = null;
     this.lot = lotOf(layout ?? layoutOf(store.state));
@@ -315,7 +315,7 @@ export class BuildMode {
     if (!this.pt) return;
     const r = this.sel.id ? moveFurniture(this.store, this.sel.id, this.pt.x, this.pt.z, this.rot) : placeFurniture(this.store, this.sel.type, this.pt.x, this.pt.z, this.rot);
     if (!r.ok) { this.audio?.blip('error'); this.toast(r.error, 'warn'); return; }
-    this.audio?.blip('ok'); this._edited(r);
+    this.audio?.blip('ok'); this._edited(r); this.onPlaced?.(this.sel.type, this.pt.x, this.pt.z, !!this.sel.id);   // the juice (a thud, a pop) lives in main
     if (this.sel.id || availableToPlace(this.state, this.sel.type) < 1) this.sel = null;
     this.refresh(); this._ghost();
   }

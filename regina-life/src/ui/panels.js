@@ -50,6 +50,25 @@ export class Panels {
     });
   }
 
+  /**
+   * Goodnight (docs/AMAZING.md G9): the day's tally counting up line by line, then tomorrow in Regina (the real forecast, or a labelled simulation)
+   * and what is on. `d` = { name, tally, tomorrow, live, sunrise, next, fmt }; onWake runs when you press the button.
+   */
+  goodnight(d, onWake) {
+    const lines = [
+      ['💰', 'Earned today', d.tally.earned ? `+${d.fmt(d.tally.earned)}` : '—'],
+      ...d.tally.top.slice(0, 3).map((x) => ['·', esc(x.memo), d.fmt(x.amount)]),
+      ['🧾', 'Spent today', d.tally.spent ? `−${d.fmt(d.tally.spent)}` : '—'],
+    ];
+    const t = d.tomorrow;
+    const p = this._show(`<div class="gn-moon">🌙</div><h3>Goodnight, ${esc(d.name)}</h3>
+      <div class="gn-lines">${lines.map((l, i) => `<div class="gn-line ${l[0] === '·' ? 'sub' : ''}" style="animation-delay:${0.25 + i * 0.28}s"><span>${l[0]} ${l[1]}</span><b>${l[2]}</b></div>`).join('')}</div>
+      ${t ? `<div class="gn-tomorrow" style="animation-delay:${0.4 + lines.length * 0.28}s"><small>Tomorrow in Regina${d.live ? '' : ' · SIMULATED'}</small><b>${t.icon} ${esc(t.text)} · ${t.hi}° / ${t.lo}°</b>${d.sunrise ? `<small>Sunrise ${esc(d.sunrise)}</small>` : ''}</div>` : ''}
+      ${d.next ? `<p class="gn-next" style="animation-delay:${0.6 + lines.length * 0.28}s">${esc(d.next)}</p>` : ''}
+      <div class="pbtns"><button class="btn primary" data-wake>☀️ Good morning!</button></div>`, 'menu goodnight', { dismissable: false, onClose: onWake });
+    p.querySelector('[data-wake]').onclick = () => this.close();
+  }
+
   /** Timed activity with a progress bar (input is blocked while a panel is open). */
   progress(label, secs, onDone, { stop = true } = {}) {
     const p = this._show(`<h3>${esc(label)}</h3><div class="prog"><i></i></div>${stop ? '<div class="pbtns"><button class="btn" data-stop>Stop</button></div>' : ''}`, 'menu prog-panel', { dismissable: false });
@@ -80,15 +99,17 @@ export class Panels {
     const render = () => {
       const bal = store.state.bank.balance;
       p.innerHTML = `<div class="ph"><h3>${esc(title)}</h3><span class="pill">${fmtMoney(bal)}</span><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
-        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0, price = G.priceFor(store, id); return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(price)}${price !== f.price ? ` <s>${fmtMoney(f.price)}</s>` : ''}</span><button class="btn small primary" data-buy="${id}" ${price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own}</em>` : ''}</div>`; }).join('')}</div>
-        <p class="fine">Prices are set by the store${G.priceFor(store, ids[0]) !== FOOD[ids[0]].price ? ' and adjusted by the mayor\'s policy' : ''} — purchases are validated by the in-game ledger.</p>`;
+        <div class="items">${ids.map((id) => { const f = FOOD[id], own = store.state.inventory[id] || 0, price = G.priceFor(store, id); return `<div class="item"><div class="emoji">${f.icon}</div><b>${esc(f.name)}</b><small>+${f.hunger} hunger${f.energy > 5 ? ` · +${f.energy} energy` : ''}</small><div class="buy"><span>${fmtMoney(price)}${price !== f.price ? ` <s>${fmtMoney(f.price)}</s>` : ''}</span><button class="btn small primary" data-buy="${id}" ${price > bal ? 'disabled' : ''}>Buy</button></div>${own ? `<em>You have ${own} · <button class="btn small eat" data-eat="${id}">Eat now</button></em>` : ''}</div>`; }).join('')}</div>
+        <p class="fine">${G.priceFor(store, ids[0]) !== FOOD[ids[0]].price ? 'Sale prices thanks to the mayor\'s policy. ' : ''}Eat now, or take it home: it keeps in your fridge.</p>`;
     };
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
+      const ea = e.target.closest('[data-eat]');
+      if (ea) { const b0 = this.ctx.fx?.snap(); const r = G.consume(store, ea.dataset.eat); if (r.ok) { this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}. Yum!`, 'good'); if (b0) this.ctx.fx.gains(b0); } render(); return; }
       const b = e.target.closest('[data-buy]'); if (!b) return;
-      const r = G.buyItem(store, b.dataset.buy, 1, where);
-      if (r.ok) { this.ctx.audio?.blip('cash'); this.ctx.toast(`Bought ${ITEM_NAME(b.dataset.buy)}`, 'good'); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); }
+      const b0 = this.ctx.fx?.snap(), r = G.buyItem(store, b.dataset.buy, 1, where);
+      if (r.ok) { this.ctx.audio?.chime('pop'); if (b0) this.ctx.fx.gains(b0); this.ctx.toast(`Bought ${ITEM_NAME(b.dataset.buy)}. Tap Eat now, or save it for home.`, 'good'); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); }
       render();
     });
   }
@@ -209,8 +230,8 @@ export class Panels {
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
-      const b = e.target.closest('[data-eat]'); if (!b) return; const r = G.consume(store, b.dataset.eat);
-      if (r.ok) { this.ctx.audio?.blip('ok'); this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}`, 'good'); } render();
+      const b = e.target.closest('[data-eat]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.consume(store, b.dataset.eat);
+      if (r.ok) { this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}`, 'good'); if (b0) this.ctx.fx.gains(b0); } render();
     });
   }
   cook() {
@@ -222,8 +243,8 @@ export class Panels {
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
-      const b = e.target.closest('[data-cook]'); if (!b) return; const r = G.cook(store, b.dataset.cook);
-      if (r.ok) { this.ctx.audio?.blip('ok'); this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); } else this.ctx.toast(r.error, 'warn'); render();
+      const b = e.target.closest('[data-cook]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.cook(store, b.dataset.cook);
+      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); } else this.ctx.toast(r.error, 'warn'); render();
     });
   }
 }

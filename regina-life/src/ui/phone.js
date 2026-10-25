@@ -111,14 +111,14 @@ export class Phone {
 
   /* ---------------- home screen ---------------- */
   buildHome() {
-    const grid = ['contacts', 'bank', 'jobs', 'photos', 'weather', 'calendar', 'inventory', 'settings'];
+    const grid = ['jobs', 'gigs', 'bank', 'contacts', 'photos', 'weather', 'calendar', 'inventory', 'settings'];
     const dock = ['phone', 'messages', 'maps', 'camera'];
     this.$('.home').innerHTML = `
       <div class="pages"><div class="page p1">
         <div class="widgets"><div class="wg wg-weather" data-open="weather"></div><div class="wg wg-bank" data-open="bank"></div></div>
         <div class="icons">${grid.map((id) => this.iconHtml(id)).join('')}</div>
       </div><div class="page p2">
-        <div class="icons">${['social', 'life', 'news', 'ads', 'townhall', 'trips', 'radio', 'homes'].map((id) => this.iconHtml(id)).join('')}</div>
+        <div class="icons">${['social', 'life', 'news', 'ads', 'townhall', 'trips', 'radio', 'homes', 'supporters'].map((id) => this.iconHtml(id)).join('')}</div>
         <div class="wg wide wg-today" data-open="calendar"></div>
         <div class="wg wide wg-job" data-open="jobs"></div>
         <div class="wg wide wg-needs" data-open="inventory"></div>

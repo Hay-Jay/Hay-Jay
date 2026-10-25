@@ -98,6 +98,7 @@ export function sanitize(s, now = Date.now()) {
   s.stats = stats;
   s.onboarding = sanitizeOnboarding(s.onboarding);
   s.gigs = sanitizeGigs(s.gigs);
+  s.festivals = isObj(s.festivals) ? { ...(isObj(s.festivals.pumpkinHunt) ? { pumpkinHunt: s.festivals.pumpkinHunt } : {}), ...(Array.isArray(s.festivals.told) ? { told: s.festivals.told.filter((x) => typeof x === 'string').slice(-20) } : {}) } : {};
   s.diary = arr(s.diary).filter((d) => isObj(d) && Number.isFinite(d.t) && typeof d.text === 'string').map((d) => ({ t: d.t, icon: str(d.icon).slice(0, 4), text: d.text.slice(0, 140) })).slice(0, 200);
   return s;
 }

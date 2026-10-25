@@ -35,6 +35,7 @@ export const CLOTHES = {
   dress_black: { id: 'dress_black', slot: 'shoes',  style: 'dress',   color: '#16171a', name: 'Oxfords — Black',      price: 12900 },
   none_head:   { id: 'none_head',   slot: 'head',   style: 'none',    color: '#000000', name: 'No headwear',          price: 0 },
   toque_red:   { id: 'toque_red',   slot: 'head',   style: 'toque',   color: '#b5302c', name: 'Toque — Brick',    price: 2400 },
+  toque_pumpkin: { id: 'toque_pumpkin', slot: 'head', style: 'toque', color: '#f28a1e', name: 'Toque — Pumpkin Walk (prize)', price: 0, prize: true },
   toque_grey:  { id: 'toque_grey',  slot: 'head',   style: 'toque',   color: '#7a7d82', name: 'Toque — Grey',         price: 2400 },
   cap_navy:    { id: 'cap_navy',    slot: 'head',   style: 'cap',     color: '#223458', name: 'Ball Cap — Navy',      price: 2900 },
   none_face:   { id: 'none_face',   slot: 'face',   style: 'none',    color: '#000000', name: 'No eyewear',           price: 0 },
@@ -43,7 +44,7 @@ export const CLOTHES = {
   none_neck:   { id: 'none_neck',   slot: 'neck',   style: 'none',    color: '#000000', name: 'No scarf',             price: 0 },
   scarf_plaid: { id: 'scarf_plaid', slot: 'neck',   style: 'scarf',   color: '#8a2e2a', name: 'Wool Scarf — Brick',   price: 3400 },
 };
-export const STARTER_WARDROBE = Object.values(CLOTHES).filter((c) => c.price === 0).map((c) => c.id);
+export const STARTER_WARDROBE = Object.values(CLOTHES).filter((c) => c.price === 0 && !c.prize).map((c) => c.id);   // prizes (festival cosmetics) are earned, not handed out
 export const SLOTS = ['top', 'bottom', 'shoes', 'head', 'face', 'neck'];
 export const STORE_STOCK = Object.values(CLOTHES).filter((c) => c.price > 0).map((c) => c.id);
 

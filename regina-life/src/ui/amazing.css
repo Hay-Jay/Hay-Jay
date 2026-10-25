@@ -126,3 +126,27 @@ body.shell-on.touch-mode #hud .needs>div{grid-template-columns:16px 34px 20px;ga
 body.shell-on.touch-mode #hud .needs .nl{display:none}
 body.shell-on.touch-mode #hud .needs span{font-size:12px}
 @media (max-width:760px){body.shell-on.touch-mode #hud .hud-tl{top:calc(182px + var(--safe-t))}}
+
+/* ---------- place cards: every activity chip is a button now (docs/AMAZING.md G6) ---------- */
+.pc-acts .pc-act{font:700 12px var(--body);padding:6px 11px;border-radius:var(--r-pill);border:0;background:var(--leaf-l);color:var(--leaf-d);box-shadow:0 0 0 1px rgba(34,181,115,.25);cursor:pointer;transition:transform .15s var(--spring)}
+.pc-acts .pc-act:hover{transform:translateY(-1px)} .pc-acts .pc-act:active{transform:scale(.95)}
+/* phone apps: Odd Jobs cards */
+.card.gig.done{opacity:.6}
+.card.gig-on{background:linear-gradient(160deg,#fff6d6,#ffe9a8);color:#3a2600}
+.card.gig-on .progress i{background:linear-gradient(90deg,#f2a900,#22b573)}
+#title.hub .title-foot a{pointer-events:auto;color:#fff;font-weight:800;text-decoration:underline}
+
+/* ---------- Goodnight: the day counted up under a dusk-blue sky ---------- */
+#panels.on:has(.panel.goodnight){background:radial-gradient(120% 80% at 50% 0,#2c3f6e 0,#13254f 55%,#0d1a3a 100%);backdrop-filter:none}
+#panels.on:has(.panel.goodnight)::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1.5px 1.5px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 32% 8%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 72% 14%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 88% 30%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 55% 24%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 20% 40%,#fff 50%,transparent 51%);opacity:.8;pointer-events:none}
+.panel.goodnight{position:relative;background:rgba(255,255,255,.96)!important;color:var(--c-ink)!important;border:0!important;border-radius:var(--r-l)!important;text-align:center;max-width:min(92vw,400px)}
+.panel.goodnight h3{font:600 24px var(--head);margin:4px 0 12px;color:var(--c-ink)}
+.gn-moon{font-size:46px;animation:jDrop .8s var(--spring) both}
+.gn-lines{display:grid;gap:6px;text-align:left;margin:0 0 12px}
+.gn-line{display:flex;justify-content:space-between;gap:12px;font:700 14.5px var(--body);padding:8px 12px;border-radius:12px;background:#f3f6f8;animation:jRise .5s var(--spring) both}
+.gn-line.sub{background:none;padding:2px 12px 2px 30px;font-weight:600;color:var(--c-ink-2);font-size:13px}
+.gn-line b{font-family:var(--head);font-weight:600;color:var(--leaf-d)}
+.gn-tomorrow{display:grid;gap:2px;padding:12px;border-radius:var(--r-m);background:linear-gradient(145deg,#eaf5fd,#fff3e0);animation:jRise .5s var(--spring) both}
+.gn-tomorrow small{color:var(--c-ink-3);font-weight:700} .gn-tomorrow b{font:600 17px var(--head)}
+.gn-next{margin:10px 0 0;font-weight:700;color:#9a6b00;animation:jRise .5s var(--spring) both}
+.panel.goodnight .btn.primary{background:linear-gradient(145deg,#ffd257,#f2a900);color:#3a2600;border:0;font-size:16px;padding:12px 20px;border-radius:var(--r-m);margin-top:12px}
