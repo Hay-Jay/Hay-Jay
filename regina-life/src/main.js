@@ -53,6 +53,7 @@ import { makeThumbs } from './ui/thumbs.js';
 import { Shell, moodOf } from './ui/shell.js';
 import { dailyStatus, claimDaily, REWARD_CENTS } from './core/daily.js';
 import { updateOnboarding } from './core/onboarding.js';
+import { tickErrands } from './core/errands.js';
 import { gigConditions, startGig, gigStep, finishGig, abandonGig, currentStep, sanitizeGigs, GIG_REACH } from './core/gigs.js';
 import { FirstDay } from './ui/firstday.js';
 import { todoStatus, updateTodo, TODO_PAY, TODO_BONUS } from './core/todo.js';
@@ -675,6 +676,7 @@ async function boot() {
       ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return;
     }
     if (it.mural) { phone.open(); phone.openApp('supporters'); return; }
+    if (it.comingSoon) { const c = it.comingSoon; audio.blip('tick'); panels.menu(`${c.emoji} ${c.name}: coming soon`, `${c.blurb} This lot is under construction and opens in a future update of Regina Life.`, [{ label: 'Can\'t wait', primary: true }]); return; }
     if (it.activity) { ictx.ui.activity(it.activity); return; }
     audio.blip('tick'); it.run(ictx);
   };
@@ -842,7 +844,7 @@ async function boot() {
   const ovHub = new Hub({
     pinsEl: $('ov-pins'), cardEl: $('ov-card'), topEls: [$('topbar'), $('chiprow')], selExtra: 210,
     extra: () => [{ id: 'you', emoji: '📍', name: 'You', x: player.pos.x, z: player.pos.z, blurb: 'You are here.' }],
-    onSelect: (info, id) => renderPlaceCard(info, id), onZoom: () => paintMapChips(),
+    onSelect: (info, id) => renderPlaceCard(info, id), onZoom: (l) => { paintMapChips(); city.setOverviewLevel(l); },
   });
   const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Dewdney Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : poiById[id]);
   let ovPick = null, ovMode = 'places';
@@ -984,7 +986,7 @@ async function boot() {
       $('btn-continue').textContent = info ? (hasLife() ? 'Play here' : 'Start here') : 'Continue';
       $('hc-welcome').style.display = info ? 'none' : '';
     },
-    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; },
+    onZoom: (l) => { $('hub-zoom').textContent = l === 'close' ? '🗺️ All Regina' : '🏙️ Downtown'; city.setOverviewLevel(l); },
   });
   $('hub-zoom').onclick = () => hub.setLevel(hub.level === 'close' ? 'far' : 'close');
   const hubRefresh = () => {
@@ -1113,6 +1115,7 @@ async function boot() {
     if (s.needs.hunger > 30) f.hungerHint = false; if (s.needs.energy > 30) f.tiredHint = false;
     if (!inInterior) { savePos(); rebuildPlayer(false); if ((Date.now() / 1000 | 0) % 20 === 0) bundleHint(); }
     if ((Date.now() | 0) % 5 === 0) store.commit('needs');
+    for (const d of tickErrands(store)) { toast(`${d.order.icon} ${d.text}`, 'good'); audio.chime('gain'); }   // food, groceries and services ordered in the Errands app
     phone.tick(); tickFirstDay(); if ((Date.now() / 1000 | 0) % 30 === 0) tellFestival();
     stall.visible = !inInterior && marketOpen(marketWhen());   // the Farmers' Market stall: Wednesdays and Saturdays, 9 to 1
     if ((Date.now() / 1000 | 0) % 10 === 0) { const rent = collectRent(store); if (rent) { juice.pay(rent, null, 'rent'); toast(`Rent from Robin, your lodger: +${fmtMoney(rent)}`, 'good'); } }

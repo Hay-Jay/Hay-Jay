@@ -77,6 +77,27 @@ export const POIS = [
   { id: 'south',   name: 'South Regina',            cat: 'district', ...SITE.south, emoji: '🌤️', area: 'South Regina', acts: ["🌳 Parks (soon)"], state: 'visit', blurb: 'Residential south with parks and schools.' },
 ];
 export const poiById = Object.fromEntries(POIS.map((p) => [p.id, p]));
+
+/**
+ * Empty lots that show what is coming to Regina Life: fenced construction sites with a big "Coming soon" sign.
+ * Downtown sites take over a whole block that would otherwise be a small park (`block` = [i, j] grid block; the city
+ * generator only builds them where that block really is a park, so the rest of the layout never moves). Outer sites
+ * sit on the open land between neighbourhoods (x, z = centre, w × d metres).
+ */
+const blockSite = (i, j) => ({ block: [i, j], x: (i + 0.5) * PITCH, z: (j + 0.5) * PITCH, w: PITCH - ROAD_W - 8, d: PITCH - ROAD_W - 8 });
+export const COMING_SOON = [
+  { id: 'foodhall', name: 'Food Hall',          emoji: '🍜', blurb: 'A dozen local kitchens under one roof, with long tables for eating together.', ...blockSite(2, -2) },
+  { id: 'cinema',   name: 'Cinema',             emoji: '🎬', blurb: 'Catch a movie with friends. Popcorn included, obviously.', ...blockSite(1, -3) },
+  { id: 'library',  name: 'Public Library',     emoji: '📚', blurb: 'Borrow books, study, and level up new skills for free.', ...blockSite(-2, 3) },
+  { id: 'pool',     name: 'Leisure Centre',     emoji: '🏊', blurb: 'An indoor pool, a climbing wall and drop-in sports.', ...blockSite(3, 3) },
+  { id: 'nightmkt', name: 'Night Market',       emoji: '🏮', blurb: 'Street food, music and stalls on summer nights.', ...blockSite(-5, -1) },
+  { id: 'hospital', name: 'City Hospital',      emoji: '🏥', blurb: 'Check-ups, and a place to recover when life knocks you down.', x: 700, z: -900, w: 120, d: 90 },
+  { id: 'mall',     name: 'Shopping Mall',      emoji: '🛍️', blurb: 'Dozens of shops, a food court and somewhere warm in January.', x: -700, z: -1100, w: 130, d: 90 },
+  { id: 'funpark',  name: 'Amusement Park',     emoji: '🎡', blurb: 'A Ferris wheel with a view across the whole prairie.', x: 900, z: 2200, w: 140, d: 110 },
+  { id: 'arena',    name: 'Sports Complex',     emoji: '🏒', blurb: 'Hockey, curling and a fieldhouse for every season.', x: -1000, z: 2000, w: 130, d: 100 },
+  { id: 'campus',   name: 'Tech Campus',        emoji: '💻', blurb: 'Offices, start-ups and new jobs for Regina.', x: 2600, z: 1000, w: 120, d: 90 },
+];
+export const comingSoonByBlock = Object.fromEntries(COMING_SOON.filter((c) => c.block).map((c) => [c.block.join(','), c]));
 export const CAT_ICON = { home: '🏠', shop: '🛍️', landmark: '🏛️', school: '🎓', transport: '✈️', district: '📍', gym: '🏋️' };
 
 /** Wascana Lake outline (stylised ribbon following the real east–west orientation). */

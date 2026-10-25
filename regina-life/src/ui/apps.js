@@ -26,6 +26,9 @@ import { canHaveLodger, sanitizeLodger, setLodger, LODGER_PAY, LODGER_NAME } fro
 import { dayKey } from '../core/daily.js';
 import { safeUrl, muralNames } from '../core/sponsors.js';
 import { SUPPORT_URL } from '../data/sponsors.js';
+import { RESTAURANTS, RESTAURANT_BY_ID, SERVICES, ERRANDS_SOON, MAX_ITEMS } from '../data/errands.js';
+import * as ERR from '../core/errands.js';
+import { MARKET_STOCK } from '../data/catalog.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nav = (title, { back = false, right = '' } = {}) => `<div class="nav">${back ? `<button class="nav-back" data-act="back">${ICON.back}<span>Back</span></button>` : '<span></span>'}<h2>${title}</h2><span class="nav-right">${right}</span></div>`;
@@ -175,7 +178,7 @@ const mapsApp = app('maps', 'Maps', (body, ctx, phone) => {
 });
 
 /* ================= BANK ================= */
-const CAT = { income: ['#34c98b', 'Income'], groceries: ['#ff9f43', 'Groceries'], clothing: ['#8e6bd8', 'Clothing'], transfer: ['#4da3ff', 'Transfers'], purchase: ['#ff6b81', 'Other'], travel: ['#26c6da', 'Travel'] };
+const CAT = { income: ['#34c98b', 'Income'], groceries: ['#ff9f43', 'Groceries'], food: ['#f7b731', 'Food delivery'], services: ['#20bf6b', 'Services'], clothing: ['#8e6bd8', 'Clothing'], transfer: ['#4da3ff', 'Transfers'], purchase: ['#ff6b81', 'Other'], travel: ['#26c6da', 'Travel'] };
 const bankApp = app('bank', 'Big Sky Savings', (body, ctx) => {
   const { store, G } = ctx; let view = 'main', msg = '';
   const render = () => {
@@ -327,7 +330,7 @@ const inventoryApp = app('inventory', 'Inventory', (body, ctx) => {
     const n = s.needs;
     body.innerHTML = `${nav('Inventory')}<div class="needs-row">${[['⚡ Energy', n.energy], ['🍽️ Hunger', n.hunger], ['🙂 Mood', n.mood]].map(([l, v]) => `<div><small>${l}</small><div class="bar"><i style="width:${v}%"></i></div></div>`).join('')}</div>
       <div class="seg"><button class="${tab === 'food' ? 'on' : ''}" data-tab="food">Food</button><button class="${tab === 'wardrobe' ? 'on' : ''}" data-tab="wardrobe">Wardrobe</button></div><div class="scroll">${tab === 'food'
-      ? `<div class="list">${inv.length ? inv.map(([id, q]) => `<div class="row"><div class="avatar sm emoji">${FOOD[id].icon}</div><div class="grow"><b>${FOOD[id].name} ×${q}</b><p>+${FOOD[id].hunger} hunger${FOOD[id].energy > 5 ? ` · +${FOOD[id].energy} energy` : ''}</p></div><button class="btn small" data-eat="${id}">Eat</button></div>`).join('') : '<p class="empty big">Your bag is empty.<br>Buy groceries at Prairie Corner Market.</p>'}</div>`
+      ? `<div class="list">${inv.length ? inv.map(([id, q]) => `<div class="row"><div class="avatar sm emoji">${FOOD[id].icon}</div><div class="grow"><b>${FOOD[id].name} ×${q}</b><p>+${FOOD[id].hunger} hunger${FOOD[id].energy > 5 ? ` · +${FOOD[id].energy} energy` : ''}</p></div><button class="btn small" data-eat="${id}">Eat</button></div>`).join('') : '<p class="empty big">Your bag is empty.<br>Buy groceries at Prairie Corner Market, or order delivery in the Errands app.</p>'}</div>`
       : `<div class="list">${s.wardrobe.map((id) => CLOTHES[id]).filter((c) => !c.id.startsWith('none_')).map((c) => { const on = s.player.look[SLOT_KEY[c.slot]] === c.id; return `<div class="row"><div class="swatch" style="background:${c.color}"></div><div class="grow"><b>${esc(c.name)}</b><p>${c.slot}</p></div><button class="btn small ${on ? 'on' : ''}" data-eq="${c.id}">${on ? 'Worn' : 'Wear'}</button></div>`; }).join('')}</div>`}</div>`;
   };
   body.addEventListener('click', (e) => {
@@ -642,6 +645,61 @@ const gigsApp = app('gigs', 'Odd Jobs', (body, ctx) => {
   return { update() { render(); } };
 });
 
+/* ================= ERRANDS: order food, groceries and help around the house (rules in core/errands.js) ================= */
+const errandsApp = app('errands', 'Errands', (body, ctx) => {
+  const { store } = ctx; let tab = 'food', shop = null, cart = {};
+  const qty = (id) => cart[id] || 0;
+  const stepper = (id) => `<span class="er-step"><button class="btn small" data-dec="${id}" ${qty(id) ? '' : 'disabled'} aria-label="Remove one">−</button><b>${qty(id)}</b><button class="btn small" data-inc="${id}" aria-label="Add one">+</button></span>`;
+  const itemRow = (id, price) => { const f = FOOD[id]; return `<div class="row"><div class="avatar sm emoji">${f.icon}</div><div class="grow"><b>${esc(f.name)}</b><p>${fmtMoney(price)} · +${f.hunger} hunger${f.energy > 9 ? ` · +${f.energy} energy` : ''}</p></div>${stepper(id)}</div>`; };
+  const checkout = (q) => q.error ? '' : `<div class="card er-cart"><div class="er-line"><span>Items (${q.count})</span><b>${fmtMoney(q.sub)}</b></div><div class="er-line"><span>Delivery</span><b>${fmtMoney(q.fee)}</b></div><div class="er-line tot"><span>Total</span><b>${fmtMoney(q.total)}</b></div>
+    <button class="btn primary wide" data-act="pay" ${q.total > store.state.bank.balance ? 'disabled' : ''}>${q.total > store.state.bank.balance ? 'Not enough money' : `Place order · ${fmtMoney(q.total)}`}</button></div>`;
+  const ordersHtml = () => {
+    const now = Date.now(), act = ERR.activeOrders(store.state), past = ERR.pastOrders(store.state);
+    const card = (o) => { const st = ERR.orderStage(o, now); return `<div class="card er-order"><div class="jt"><div class="avatar emoji">${o.icon}</div><div><h3>${esc(o.from)}</h3><small>${fmtMoney(o.total)}${o.items ? ' · ' + Object.entries(o.items).map(([id, q]) => `${FOOD[id].icon}${q > 1 ? '×' + q : ''}`).join(' ') : ''}</small></div></div>
+      <div class="er-stages">${(o.kind === 'service' ? ['Booked', 'On it', 'Done'] : ['Ordered', o.kind === 'food' ? 'Cooking' : 'Packing', 'On the way']).map((l, i) => `<span class="${st.p >= i / 2 - 0.001 ? 'on' : ''}">${l}</span>`).join('')}</div>
+      <div class="progress"><i style="width:${Math.round(st.p * 100)}%"></i></div><small>${esc(st.label)}</small></div>`; };
+    return (act.length ? act.map(card).join('') : '<p class="empty">Nothing on the way. Hungry? Order from the Food tab.</p>')
+      + (past.length ? `<h4 class="sec">Recent</h4><div class="list">${past.map((o) => `<div class="row"><div class="avatar sm emoji">${o.icon}</div><div class="grow"><b>${esc(o.from)}</b><p>${o.kind === 'service' ? 'Done' : 'Delivered'} · ${fmtMoney(o.total)}</p></div><small>${timeAgo(o.due, Date.now())}</small></div>`).join('')}</div>` : '');
+  };
+  const render = () => {
+    const s = store.state, n = ERR.activeOrders(s).length;
+    if (shop) {
+      const r = RESTAURANT_BY_ID[shop];
+      body.innerHTML = `${nav(esc(r.name), { back: true })}<div class="scroll"><div class="er-hero" style="background:linear-gradient(145deg,${r.color},#1b1f27)"><span>${r.icon}</span><div><b>${esc(r.name)}</b><small>${esc(r.tag)} · delivers in about 2 min</small></div></div>
+        <div class="list">${r.menu.map((id) => itemRow(id, FOOD[id].price)).join('')}</div>${checkout(ERR.foodQuote(shop, cart))}<p class="fine pad">Your meal goes in your bag when it arrives. Up to ${MAX_ITEMS} items per order.</p></div>`;
+      return;
+    }
+    const tabs = [['food', 'Food'], ['groceries', 'Groceries'], ['services', 'Services'], ['orders', `Orders${n ? `<i class="er-n">${n}</i>` : ''}`]];
+    let inner = '';
+    if (tab === 'food') inner = `<div class="er-grid">${RESTAURANTS.map((r) => `<button class="er-shop" data-shop="${r.id}" style="--c:${r.color}"><span>${r.icon}</span><b>${esc(r.name)}</b><small>${esc(r.tag)}</small></button>`).join('')}</div><p class="fine pad">All restaurants are fictional. Prices in Prairie Dollars.</p>`;
+    else if (tab === 'groceries') inner = `<div class="list">${MARKET_STOCK.map((id) => itemRow(id, G_price(id))).join('')}</div>${checkout(ERR.groceryQuote(store, cart))}<p class="fine pad">From Prairie Corner Market at shelf prices, delivered to your door.</p>`;
+    else if (tab === 'services') {
+      const busy = new Set(ERR.activeOrders(s).map((o) => o.service));
+      inner = SERVICES.map((sv) => `<div class="card"><div class="jt"><div class="avatar emoji">${sv.icon}</div><div><h3>${esc(sv.name)}</h3><small>${fmtMoney(sv.price)} · ${Object.entries(sv.fx).map(([k, v]) => `+${v} ${k}`).join(' · ')}${sv.skill ? ` · +${sv.skill[0]}` : ''}</small></div></div><p>${esc(sv.blurb)}</p>
+        <button class="btn primary wide" data-book="${sv.id}" ${busy.has(sv.id) || sv.price > s.bank.balance ? 'disabled' : ''}>${busy.has(sv.id) ? 'Booked ✓' : sv.price > s.bank.balance ? 'Not enough money' : `Book · ${fmtMoney(sv.price)}`}</button></div>`).join('')
+        + `<h4 class="sec">Coming soon</h4><div class="er-grid">${ERRANDS_SOON.map((x) => `<div class="er-shop soon"><span>${x.icon}</span><b>${esc(x.name)}</b><small>${esc(x.blurb)}</small><em>Coming soon</em></div>`).join('')}</div>`;
+    } else inner = ordersHtml();
+    body.innerHTML = `${nav('Errands')}<div class="seg">${tabs.map(([id, l]) => `<button class="${tab === id ? 'on' : ''}" data-tab="${id}">${l}</button>`).join('')}</div><div class="scroll">${inner}</div>`;
+  };
+  const G_price = (id) => ctx.G.priceFor(store, id);
+  const result = (r, okText) => { if (r.ok) { ctx.audio?.chime?.('gain'); ctx.toast(okText, 'good'); cart = {}; shop = null; tab = 'orders'; } else { ctx.audio?.blip('error'); ctx.toast(r.error, 'warn'); } render(); };
+  body.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-tab]'); if (t) { if (tab !== t.dataset.tab) cart = {}; tab = t.dataset.tab; render(); return; }
+    if (e.target.closest('[data-act="back"]')) { shop = null; cart = {}; render(); return; }
+    const sh = e.target.closest('[data-shop]'); if (sh) { shop = sh.dataset.shop; cart = {}; render(); return; }
+    const inc = e.target.closest('[data-inc]'); if (inc) { const id = inc.dataset.inc, total = Object.values(cart).reduce((a, b) => a + b, 0); if (total < MAX_ITEMS) cart[id] = qty(id) + 1; render(); return; }
+    const dec = e.target.closest('[data-dec]'); if (dec) { const id = dec.dataset.dec; cart[id] = Math.max(0, qty(id) - 1); render(); return; }
+    if (e.target.closest('[data-act="pay"]')) {
+      if (shop) result(ERR.orderFood(store, shop, cart), `Order placed with ${RESTAURANT_BY_ID[shop].name}. On its way!`);
+      else result(ERR.orderGroceries(store, cart), 'Groceries ordered. On their way!');
+      return;
+    }
+    const bk = e.target.closest('[data-book]'); if (bk) { const sv = SERVICES.find((x) => x.id === bk.dataset.book); result(ERR.bookService(store, sv.id), `${sv.name} booked.`); }
+  });
+  render();
+  return { update(topic) { if (topic === undefined || topic === 'deferred' || topic === 'errands' || topic === 'bank' || topic === 'needs' || tab === 'orders') render(); } };
+});
+
 /* ================= SUPPORTERS: the mural, Support and Advertise (real money lives outside the game: docs/AMAZING.md R1, R2) ================= */
 const supportersApp = app('supporters', 'Supporters', (body) => {
   const names = muralNames(), sup = safeUrl(SUPPORT_URL);
@@ -653,5 +711,5 @@ const supportersApp = app('supporters', 'Supporters', (body) => {
   return {};
 });
 
-export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp, gigsApp, supportersApp];
+export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp, gigsApp, errandsApp, supportersApp];
 export const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));

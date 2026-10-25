@@ -136,10 +136,11 @@ describe('Studio placed pieces parity (colliders, prompts, shadows)', () => {
 });
 
 describe('the other buildings are untouched by the shared-helper changes', () => {
-  // frozen from the hand-built version of world/interiors.js (every mesh pose, material and light was compared before this refactor: identical)
-  const frozen = { market: { meshes: 526, ids: ['cooler', 'counter', 'exit', 'pallet', 'station_0', 'station_1', 'station_2', 'station_3'] }, threads: { meshes: 202, ids: ['counter', 'exit', 'mirror', 'pallet', 'station_0', 'station_1', 'station_2', 'station_3'] }, gym: { meshes: 70, ids: ['exit', 'treadmill', 'water', 'weights', 'yoga'] }, cityhall: { meshes: 127, ids: ['ballot', 'canvass', 'exit', 'mayor', 'notice'] } };
+  // frozen from the hand-built version of world/interiors.js (every mesh pose, material and light was compared before this refactor: identical).
+  // Counts leave out the shopkeepers' own meshes: the character model (player/character.js) is restyled on its own.
+  const frozen = { market: { meshes: 465, ids: ['cooler', 'counter', 'exit', 'pallet', 'station_0', 'station_1', 'station_2', 'station_3'] }, threads: { meshes: 136, ids: ['counter', 'exit', 'mirror', 'pallet', 'station_0', 'station_1', 'station_2', 'station_3'] }, gym: { meshes: 70, ids: ['exit', 'treadmill', 'water', 'weights', 'yoga'] }, cityhall: { meshes: 59, ids: ['ballot', 'canvass', 'exit', 'mayor', 'notice'] } };
   for (const [kind, f] of Object.entries(frozen)) it(`${kind}: same meshes and interactables, setOverhead still hides the ceiling lights, dispose releases`, () => {
-    const b = buildInterior(kind); let n = 0; b.group.traverse((o) => { if (o.isMesh) n++; });
+    const b = buildInterior(kind); let n = 0; b.group.traverse((o) => { let p = o; while (p && p.name !== 'character') p = p.parent; if (o.isMesh && !p) n++; });
     expect(n).toBe(f.meshes); expect(b.interactables.map((i) => i.id).sort()).toEqual(f.ids); expect(b.layout).toBeUndefined();
     const ceil = b.lights.filter((l) => l.isMaterial).length; expect(ceil).toBeGreaterThan(0);
     b.setOverhead(true); b.setOverhead(false); b.setHome({ wall: 'sage', placed: [] });   // setHome is a no-op outside the apartment
