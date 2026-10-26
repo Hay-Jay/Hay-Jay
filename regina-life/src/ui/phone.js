@@ -111,7 +111,7 @@ export class Phone {
 
   /* ---------------- home screen ---------------- */
   buildHome() {
-    const grid = ['jobs', 'gigs', 'bank', 'contacts', 'photos', 'weather', 'calendar', 'inventory', 'settings'];
+    const grid = ['jobs', 'errands', 'gigs', 'bank', 'contacts', 'photos', 'weather', 'calendar', 'inventory', 'settings'];
     const dock = ['phone', 'messages', 'maps', 'camera'];
     this.$('.home').innerHTML = `
       <div class="pages"><div class="page p1">

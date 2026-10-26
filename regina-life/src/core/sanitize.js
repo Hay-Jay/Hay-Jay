@@ -19,6 +19,7 @@ import { EVENT_BY_ID } from './events.js';
 import { validDaily } from './daily.js';
 import { sanitizeOnboarding } from './onboarding.js';
 import { sanitizeGigs } from './gigs.js';
+import { sanitizeErrands } from './errands.js';
 import { sanitizeTodo } from './todo.js';
 import { sanitizeCrafts } from './stall.js';
 import { sanitizeLodger } from './lodger.js';
@@ -101,6 +102,7 @@ export function sanitize(s, now = Date.now()) {
   s.stats = stats;
   s.onboarding = sanitizeOnboarding(s.onboarding);
   s.gigs = sanitizeGigs(s.gigs);
+  s.errands = sanitizeErrands(s.errands);
   s.todo = sanitizeTodo(s.todo);
   s.crafts = sanitizeCrafts(s.crafts);
   s.lodger = sanitizeLodger(s.lodger);

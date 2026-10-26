@@ -4,7 +4,8 @@ import { mulberry32 } from '../core/rng.js';
 import { Batcher, CHUNK, facadeBox, plainBox, gableRoof, stripQuad, tint } from './batch.js';
 import { facadeTextures, asphaltTexture, intersectionTexture, concreteTexture, grassTexture, glowTexture, signTexture } from './textures.js';
 import { CollisionGrid } from './collision.js';
-import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById, OUTER_ROADS, ISLAND } from './cityData.js';
+import { PITCH, ROAD_W, GRID, DISTRICTS, POIS, ALBERT_X, lakePolygon, PARK_RECT, poiById, OUTER_ROADS, ISLAND, COMING_SOON, comingSoonByBlock } from './cityData.js';
+import { buildComingSoonSite } from './comingSoon.js';
 import { buildLandmarks } from './landmarks.js';
 import { BILLBOARDS, THEMES, rotationFor } from '../data/billboards.js';
 import { adQuote } from '../core/ads.js';
@@ -197,7 +198,7 @@ export function buildCity({ quality = 'high' } = {}) {
   }
 
   /* ---------------- downtown grid blocks ---------------- */
-  const parkBlocks = [];
+  const parkBlocks = [], soonSites = [];
   for (let bi = GRID.i0; bi < GRID.i1; bi++) for (let bj = GRID.j0; bj < GRID.j1; bj++) {
     const x0 = bi * PITCH + R2, x1 = (bi + 1) * PITCH - R2, z0 = bj * PITCH + R2, z1 = (bj + 1) * PITCH - R2;
     const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
@@ -222,8 +223,10 @@ export function buildCity({ quality = 'high' } = {}) {
 
     if (vpark) { victoriaPark({ x0, z0, x1, z1, cx, cz }); continue; }
     if (zone === 'park') {
-      parkBlocks.push({ x0, z0, x1, z1 });
       const n = 14 + Math.floor(rnd() * 8);
+      const site = comingSoonByBlock[`${bi},${bj}`];
+      if (site) { for (let k = 0; k < n; k++) { rnd(); rnd(); rnd(); } soonSites.push(buildComingSoonSite({ group, colliders, interactables, site, rnd: mulberry32(bi * 31 + bj) })); continue; }   // same rnd draws as the park it replaces, so nothing else moves
+      parkBlocks.push({ x0, z0, x1, z1 });
       for (let k = 0; k < n; k++) trees.push({ x: x0 + 6 + rnd() * (x1 - x0 - 12), z: z0 + 6 + rnd() * (z1 - z0 - 12), s: 0.8 + rnd() * 0.7 });
       add('pave', plainBox(cx - 1.5, z0, cx + 1.5, z1, 0.16, '#c9c2b0', 0), cx, cz);
       add('pave', plainBox(x0, cz - 1.5, x1, cz + 1.5, 0.16, '#c9c2b0', 0), cx, cz);
@@ -410,12 +413,14 @@ export function buildCity({ quality = 'high' } = {}) {
   }
   /* ---------------- the island: green belts of trees between the neighbourhoods, a sandy beach, water all round ---------------- */
   const hoods = DISTRICTS.filter((d) => d.id !== 'downtown' && d.id !== 'wascana');
+  const outerSoon = COMING_SOON.filter((c) => !c.block), onSoonSite = (tx, tz) => outerSoon.some((c) => Math.abs(tx - c.x) < c.w / 2 + 10 && Math.abs(tz - c.z) < c.d / 2 + 14);
+  for (const site of outerSoon) soonSites.push(buildComingSoonSite({ group, colliders, interactables, site, rnd: mulberry32(site.x * 7 + site.z) }));
   for (let x = ISLAND.x0 + 60; x < ISLAND.x1 - 40; x += 58) for (let z = ISLAND.z0 + 60; z < ISLAND.z1 - 40; z += 58) {
     const tx = x + (rnd() - 0.5) * 46, tz = z + (rnd() - 0.5) * 46;
     if (tx > grid.x0 - 60 && tx < grid.x1 + 60 && tz > grid.z0 - 60 && tz < PARK_RECT.z1 + 60) continue;          // downtown + Wascana have their own trees
     if (hoods.some((d) => Math.hypot(tx - d.x, tz - d.z) < d.r + 25)) continue;                                      // neighbourhoods have their own
     if (nearRoad(tx, tz, 22) || inPoly(tx, tz, lake)) continue;
-    if (rnd() < 0.5 + 0.2 * Math.sin(tx / 380) * Math.cos(tz / 420)) trees.push({ x: tx, z: tz, s: 0.8 + rnd() * 0.9, belt: true });   // clumpy, not a uniform grid
+    if (rnd() < 0.5 + 0.2 * Math.sin(tx / 380) * Math.cos(tz / 420)) { const sz = 0.8 + rnd() * 0.9; if (!onSoonSite(tx, tz)) trees.push({ x: tx, z: tz, s: sz, belt: true }); }   // clumpy, not a uniform grid (and clear of the construction sites)
   }
   {
     const rr = (path, x0, z0, x1, z1, r) => { path.moveTo(x0 + r, z0); path.lineTo(x1 - r, z0); path.quadraticCurveTo(x1, z0, x1, z0 + r); path.lineTo(x1, z1 - r); path.quadraticCurveTo(x1, z1, x1 - r, z1); path.lineTo(x0 + r, z1); path.quadraticCurveTo(x0, z1, x0, z1 - r); path.lineTo(x0, z0 + r); path.quadraticCurveTo(x0, z0, x0 + r, z0); return path; };
@@ -461,7 +466,9 @@ export function buildCity({ quality = 'high' } = {}) {
   };
   /** In the overview map the boards are drawn oversized so the ads read from far away (like the map in the game that inspired this). */
   let overview = false;
-  const setOverview = (on) => { overview = on; for (const b of boards) b.root.scale.setScalar(on ? 2.6 : 1); };
+  const setOverview = (on) => { overview = on; for (const b of boards) b.root.scale.setScalar(on ? 2.6 : 1); for (const c of soonSites) c.setOverview(on, overviewLevel); };
+  let overviewLevel = 'close';
+  const setOverviewLevel = (l) => { overviewLevel = l; if (overview) for (const c of soonSites) c.setOverview(true, l); };
   refreshBillboards();
 
   /* ---------------- instanced props ---------------- */
@@ -557,7 +564,7 @@ export function buildCity({ quality = 'high' } = {}) {
   const api = {
     group, colliders, interactables, mats, chunks, lamps, trees, signMeshes,
     spawn: { x: -14, z: 4, heading: Math.PI / 2 },
-    recolorTrees, billboards: boards, refreshBillboards, setOverview, rotateBoards,
+    recolorTrees, billboards: boards, refreshBillboards, setOverview, setOverviewLevel, rotateBoards,
     vpark: vparkInfo, paintMural: (names) => { if (vparkInfo.mural) { drawMural(vparkInfo.mural.cv, names); vparkInfo.mural.tex.needsUpdate = true; } },
     carsReady: Promise.resolve().then(() => {
       const m = new THREE.InstancedMesh(carGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.38, metalness: 0.12 }), cars.length);

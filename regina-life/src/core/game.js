@@ -49,7 +49,7 @@ export function consume(store, itemId) {
   s.inventory[itemId]--; if (!s.inventory[itemId]) delete s.inventory[itemId];
   s.needs.hunger = clamp(s.needs.hunger + f.hunger);
   s.needs.energy = clamp(s.needs.energy + f.energy);
-  s.needs.mood = clamp(s.needs.mood + 3);
+  s.needs.mood = clamp(s.needs.mood + (f.mood ?? 3));
   tally(s, 'eaten');
   store.commit('needs');
   return { ok: true, food: f };

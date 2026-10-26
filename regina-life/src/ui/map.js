@@ -1,4 +1,4 @@
-import { DISTRICTS, POIS, poiById, mapRoads, lakePolygon, PARK_RECT, PITCH, GRID, ROAD_W } from '../world/cityData.js';
+import { DISTRICTS, POIS, poiById, mapRoads, lakePolygon, PARK_RECT, PITCH, GRID, ROAD_W, COMING_SOON } from '../world/cityData.js';
 import { clusterPoints, placeLabels, clipSegment, spreadRects } from './maplayout.js';
 
 const ROADS = mapRoads(), LAKE = lakePolygon();
@@ -103,6 +103,18 @@ export class MapView {
     }
     // lake
     g.fillStyle = THEME.water; g.beginPath(); LAKE.forEach(([x, z], i) => { const [px, py] = P(x, z); i ? g.lineTo(px, py) : g.moveTo(px, py); }); g.closePath(); g.fill();
+    // coming-soon construction sites: hatched lots with a 🚧 and, close up, what is coming
+    for (const c of COMING_SOON) {
+      const [x0, y0] = P(c.x - c.w / 2, c.z - c.d / 2), [x1, y1] = P(c.x + c.w / 2, c.z + c.d / 2);
+      if (x1 < -20 || y1 < -20 || x0 > this.w + 20 || y0 > this.h + 20) continue;
+      g.save(); g.beginPath(); g.rect(x0, y0, x1 - x0, y1 - y0); g.fillStyle = '#4a3a1e'; g.fill(); g.clip();
+      g.strokeStyle = '#f0a020aa'; g.lineWidth = 1.5; for (let k = x0 - (y1 - y0); k < x1; k += 7) { g.beginPath(); g.moveTo(k, y1); g.lineTo(k + (y1 - y0), y0); g.stroke(); }
+      g.restore(); g.strokeStyle = '#f0a020'; g.lineWidth = 1.5; g.strokeRect(x0, y0, x1 - x0, y1 - y0);
+      if (!mini || this.scale > 0.3) {
+        const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `14px ${EMOJI}`; g.fillText('🚧', cx, cy);
+        if (!mini && this.scale > 0.25) { g.font = '700 10px system-ui'; g.fillStyle = '#ffcf7a'; g.fillText(`Soon: ${c.name}`, cx, cy + 14); }
+      }
+    }
     // roads (the stylised links between districts are drawn faint so they read as context, not as streets)
     g.lineCap = 'round'; g.lineJoin = 'round';
     for (const r of ROADS) {

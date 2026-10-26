@@ -11,8 +11,21 @@ export const FOOD = {
   coffee:   { id: 'coffee',   name: 'Coffee, Cream & Sugar',    price: 279, hunger: 2,  energy: 22, icon: '☕', shelf: 'cooler' },
   pop:      { id: 'pop',      name: 'Cream Soda',       price: 229, hunger: 4,  energy: 10, icon: '🥤', shelf: 'cooler' },
   bannock:  { id: 'bannock',  name: 'Fresh Bannock',    price: 599, hunger: 30, energy: 5,  icon: '🫓', shelf: 'bakery' },
+  // takeout: ordered through the Errands app (data/errands.js), never stocked at the Market
+  ginger_beef:    { id: 'ginger_beef',    name: 'Ginger Beef',          price: 1699, hunger: 55, energy: 8,  mood: 8,  icon: '🥡', shelf: 'takeout' },
+  fried_rice:     { id: 'fried_rice',     name: 'Egg Fried Rice',       price: 1099, hunger: 40, energy: 6,  mood: 4,  icon: '🍚', shelf: 'takeout' },
+  pizza_slice:    { id: 'pizza_slice',    name: 'Pepperoni Slice',      price: 599,  hunger: 24, energy: 4,  mood: 5,  icon: '🍕', shelf: 'takeout' },
+  pizza_whole:    { id: 'pizza_whole',    name: 'Large Garden Pizza',   price: 2299, hunger: 70, energy: 8,  mood: 10, icon: '🍕', shelf: 'takeout' },
+  perogies:       { id: 'perogies',       name: 'Perogies & Sausage',   price: 1599, hunger: 58, energy: 7,  mood: 9,  icon: '🥟', shelf: 'takeout' },
+  cabbage_rolls:  { id: 'cabbage_rolls',  name: 'Cabbage Rolls',        price: 1399, hunger: 48, energy: 6,  mood: 6,  icon: '🥬', shelf: 'takeout' },
+  bannock_burger: { id: 'bannock_burger', name: 'Bannock Burger',       price: 1499, hunger: 52, energy: 8,  mood: 8,  icon: '🍔', shelf: 'takeout' },
+  bison_chili:    { id: 'bison_chili',    name: 'Bison Chili',          price: 1299, hunger: 46, energy: 9,  mood: 7,  icon: '🍲', shelf: 'takeout' },
+  saskatoon_pie:  { id: 'saskatoon_pie',  name: 'Saskatoon Berry Pie',  price: 899,  hunger: 22, energy: 5,  mood: 14, icon: '🥧', shelf: 'takeout' },
+  sundae:         { id: 'sundae',         name: 'Hot Fudge Sundae',     price: 749,  hunger: 16, energy: 6,  mood: 12, icon: '🍨', shelf: 'takeout' },
+  breakfast_wrap: { id: 'breakfast_wrap', name: 'Breakfast Wrap',       price: 999,  hunger: 38, energy: 12, mood: 5,  icon: '🌯', shelf: 'takeout' },
+  latte:          { id: 'latte',          name: 'Maple Latte',          price: 549,  hunger: 4,  energy: 26, mood: 6,  icon: '☕', shelf: 'takeout' },
 };
-export const MARKET_STOCK = Object.keys(FOOD);
+export const MARKET_STOCK = Object.keys(FOOD).filter((id) => FOOD[id].shelf !== 'takeout');
 
 /** slot: top | bottom | shoes | head | face | neck */
 export const CLOTHES = {
