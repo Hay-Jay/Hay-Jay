@@ -9,7 +9,7 @@ import { cabFare, CAB_BASE } from '../src/core/travel.js';
 import { adPrice, weekPrice, adQuote, adAirtime, tierOf, buyAd, adReach } from '../src/core/ads.js';
 import { POLICIES } from '../src/data/policies.js';
 import { FOOD, CLOTHES } from '../src/data/catalog.js';
-import { JOBS, XP_PER_TASK } from '../src/data/jobs.js';
+import { JOBS, XP_PER_TASK, BONUS_SHARE } from '../src/data/jobs.js';
 import { DESTINATIONS } from '../src/data/destinations.js';
 import { BILLBOARDS, AD_TIERS, AD_TIER_ORDER, AD_DAYS, DURATIONS, DAY_PRICE, placementOk } from '../src/data/billboards.js';
 import { PACKS, PACK_LIMITS, PACKS_ENABLED, packRate } from '../src/data/packs.js';
@@ -113,7 +113,7 @@ describe('pacing model', () => {
   it('end to end: starting balance + 6 entry shifts buys the first set, paid through the real ledger', () => {
     G.applyForJob(store, 'retail'); store.state.job.application.offerAt = 0; G.tickJobs(store); G.acceptOffer(store);
     for (let i = 0; i < 6; i++) { G.startShift(store); for (let k = 0; k < 4; k++) G.completeTask(store); t += 60_000; store.state.needs.energy = 90; expect(G.finishShift(store).ok).toBe(true); }
-    expect(store.ledger.balance).toBe(STARTING_BALANCE + 6 * entry); expect(store.ledger.balance).toBeGreaterThanOrEqual(FIRST_FURNITURE_SET);
+    expect(store.ledger.balance).toBe(STARTING_BALANCE + 6 * entry + Math.round(entry * BONUS_SHARE));   // the 5th shift is an employee-of-the-week bonus expect(store.ledger.balance).toBeGreaterThanOrEqual(FIRST_FURNITURE_SET);
     expect(Number.isSafeInteger(store.ledger.balance)).toBe(true);
   });
 });

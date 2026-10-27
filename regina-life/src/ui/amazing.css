@@ -210,3 +210,15 @@ body.shell-on.touch-mode #hud .needs span{font-size:12px}
 .er-cart .er-line{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}.er-cart .er-line.tot{font-size:15px;border-top:1px solid rgba(127,127,140,.25);margin:4px 0 10px;padding-top:6px}
 .er-stages{display:flex;justify-content:space-between;margin-top:10px;font-size:10.5px;opacity:.55}.er-stages span.on{opacity:1;font-weight:800;color:var(--teal)}
 .seg .er-n{display:inline-grid;place-items:center;min-width:15px;height:15px;margin-left:3px;border-radius:8px;background:#ff5a5f;color:#fff;font-size:9.5px;font-style:normal;font-weight:800;vertical-align:1px}
+/* cooking mini-game + game day */
+#panels .panel .cookbar{position:relative;height:26px;border-radius:13px;background:#eef2f5;margin:12px 0 10px;overflow:hidden}
+#panels .panel .cookbar .zone{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#5fd38d,#2ea86a);border-radius:13px}
+#panels .panel .cookbar .needle{position:absolute;top:-2px;bottom:-2px;width:5px;margin-left:-2px;border-radius:3px;background:var(--c-ink);box-shadow:0 0 0 2px #fff}
+#panels .panel .cooksteps{display:flex;gap:6px;justify-content:center;margin-bottom:6px}
+#panels .panel .cooksteps span{padding:5px 10px;border-radius:10px;background:#eef2f5;font-size:13px;font-weight:700;color:var(--c-ink-3)}
+#panels .panel .cooksteps span.now{background:#fff3d6;color:var(--c-ink)} #panels .panel .cooksteps span.hit{background:#d8f5e3;color:#1d7a47} #panels .panel .cooksteps span.miss{background:#fde2e0;color:#b33a2e}
+#panels .panel .scoreboard{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;border-radius:16px;background:#12202a;color:#fff;margin:6px 0 10px}
+#panels .panel .scoreboard div{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;text-align:center}
+#panels .panel .scoreboard span{font-size:22px}#panels .panel .scoreboard b{font-size:13px}#panels .panel .scoreboard.live b{font-size:30px;font-variant-numeric:tabular-nums}
+#panels .panel .scoreboard em{font-style:normal;opacity:.6;font-weight:700}
+#panels .panel .plays{margin:0 0 6px;padding-left:18px;font-size:13px;color:var(--c-ink-2,#3b4a55);min-height:80px}

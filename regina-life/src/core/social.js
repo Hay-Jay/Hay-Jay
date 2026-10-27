@@ -18,7 +18,41 @@ export const HANGOUTS = {
   gym:    { label: 'Work out together', icon: '🏋️', cost: 0, rel: 5, needs: { fun: 6, energy: -10, hygiene: -8 }, skill: ['fitness', 8], minEnergy: 25, say: 'Spotting each other. Mostly talking. A little lifting.' },
   movie:  { label: 'Catch a movie', icon: '🎬', cost: 3800, rel: 8, needs: { fun: 22, mood: 8 }, say: 'Popcorn, trailers, and one very loud person two rows back.' },
   dinner: { label: 'Date-night dinner', icon: '🕯️', cost: 9000, rel: 10, needs: { fun: 16, mood: 14, hunger: 30 }, datingOnly: true, say: 'Candlelight, a window table and way too many appetizers.' },
+  nightin: { label: 'Cozy night in', icon: '🛋️', cost: 0, rel: 7, needs: { fun: 14, mood: 12, energy: 4 }, togetherOnly: true, say: 'Blankets, a movie you both pretend to watch, and leftover pie.' },
+  skate:  { label: 'Skate at the outdoor rink', icon: '⛸️', cost: 1200, rel: 8, needs: { fun: 18, mood: 8, energy: -8 }, minEnergy: 20, say: 'Mostly holding hands. Partly holding each other up.' },
 };
+/**
+ * Love goes in steps once you are dating: move in together, get engaged, get married. Each step needs a closer bond; the ring and the wedding
+ * cost money. Living together (and beyond) lifts your mood a little while you are home, and your partner is there when you get in.
+ */
+export const LOVE_STAGES = ['dating', 'living', 'engaged', 'married'];
+export const LOVE_STEP = {
+  living:  { label: 'Ask to move in together', icon: '🏠', level: 75, cost: 0, say: 'Yes! I\'ll bring my plants. All of them.' },
+  engaged: { label: 'Propose', icon: '💍', level: 88, cost: 50000, memo: 'Engagement ring', say: 'YES. Yes yes yes. 💍' },
+  married: { label: 'Plan the wedding', icon: '💒', level: 92, cost: 150000, memo: 'Wedding at the Legislative grounds', say: 'Best day of my life. 💒' },
+};
+export const WEDDING_GIFT = 2000;   // each friend chips in P$20
+export const loveStage = (s) => (s.partner && s.love && LOVE_STAGES.includes(s.love.stage) ? s.love.stage : s.partner ? 'dating' : null);
+export const nextLoveStep = (s) => { const st = loveStage(s); if (!st || st === 'married') return null; return LOVE_STAGES[LOVE_STAGES.indexOf(st) + 1]; };
+export function sanitizeLove(l, partner) { return partner && l && typeof l === 'object' && LOVE_STAGES.includes(l.stage) ? { stage: l.stage, at: Number.isFinite(l.at) ? l.at : 0 } : null; }
+/** Take the next step with your partner (move in, propose, marry). */
+export function loveStep(store, id, now = store.now()) {
+  const s = store.state, f = fr(s, id), res = resOf(id); if (!f || !res || s.partner !== id) return { ok: false, error: 'You are not together.' };
+  const step = nextLoveStep(s); if (!step) return { ok: false, error: 'You are already married. 💛' };
+  const L = LOVE_STEP[step]; if (f.level < L.level) return { ok: false, error: `Not yet: you need a closer bond (${Math.floor(f.level)}/${L.level}). Spend more time together.` };
+  if (L.cost) { if (store.ledger.balance < L.cost) return { ok: false, error: `You need ${fmtMoney(L.cost)} for that.` }; const r = store.ledger.debit(L.cost, L.memo, { category: 'purchase' }); if (!r.ok) return r; }
+  s.love = { stage: step, at: now }; gain(store, id, 5, now);
+  let gifts = 0;
+  if (step === 'married') { const others = friendIds(s).filter((x) => x !== id).length; if (others) { gifts = others * WEDDING_GIFT; store.ledger.credit(gifts, `Wedding gifts from ${others} friend${others > 1 ? 's' : ''}`, { category: 'income' }); } s.needs.mood = clamp(s.needs.mood + 30); s.needs.fun = clamp((s.needs.fun ?? 60) + 30); }
+  receiveMessage(store, id, `${res.emoji} ${L.say}`, 900);
+  notify(store, { app: 'social', title: step === 'living' ? `🏠 ${res.name.split(' ')[0]} moved in!` : step === 'engaged' ? '💍 You are engaged!' : '💒 You got married!', body: step === 'living' ? 'Your partner now lives with you. Home feels warmer.' : step === 'engaged' ? `${res.name} said yes!` : `Congratulations to you and ${res.name}!` });
+  store.commit('friends'); store.commit('bank'); return { ok: true, step, gifts };
+}
+/** Living together: home is a little happier. Call every second. */
+export function tickLove(store, dtSec, { home = false } = {}) {
+  const st = loveStage(store.state); if (!home || !st || st === 'dating') return;
+  store.state.needs.mood = clamp(store.state.needs.mood + dtSec * (st === 'married' ? 0.018 : 0.012));
+}
 export const HANGOUT_COOLDOWN_MS = 45_000, GIFT_COOLDOWN_MS = 120_000, PING_COOLDOWN_MS = 240_000;
 const ensure = (s) => { s.friends ||= {}; return s.friends; };
 export const friendIds = (s) => Object.keys(s.friends || {});
@@ -43,6 +77,7 @@ export function hangoutBlocked(store, id, kind, now = store.now()) {
   const s = store.state, f = fr(s, id), h = own(HANGOUTS, kind) ? HANGOUTS[kind] : null;
   if (!f || !resOf(id)) return 'Not your friend yet'; if (!h) return 'Unknown activity';
   if (h.datingOnly && f.status !== 'dating') return 'Only for people you are dating';
+  if (h.togetherOnly && (s.partner !== id || !['living', 'engaged', 'married'].includes(loveStage(s)))) return 'Only once you live together';
   if (now - f.lastHang < HANGOUT_COOLDOWN_MS) return `Give ${RES_BY_ID[id].name.split(' ')[0]} a minute — you just hung out.`;
   if (h.minEnergy && s.needs.energy < h.minEnergy) return "You're too tired for that.";
   if (h.cost && store.ledger.balance < h.cost) return `You need ${fmtMoney(h.cost)}.`;
@@ -87,7 +122,7 @@ export function askOut(store, id, now = store.now()) {
 }
 export function breakUp(store, id) {
   const s = store.state, f = fr(s, id); if (!f || s.partner !== id) return { ok: false, error: 'You are not together' };
-  f.status = null; s.partner = null; f.level = clamp(f.level - 25); s.needs.mood = clamp(s.needs.mood - 15);
+  f.status = null; s.partner = null; s.love = null; f.level = clamp(f.level - 25); s.needs.mood = clamp(s.needs.mood - 15);
   store.commit('friends'); return { ok: true };
 }
 /** Friendships fade if you ignore people. Call every second with dtSec. */

@@ -23,6 +23,10 @@ import { sanitizeErrands } from './errands.js';
 import { sanitizeTodo } from './todo.js';
 import { sanitizeCrafts } from './stall.js';
 import { sanitizeLodger } from './lodger.js';
+import { sanitizeLove } from './social.js';
+import { sanitizePet } from './pets.js';
+import { sanitizeCar } from './car.js';
+import { sanitizeGameday } from './gameday.js';
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const arr = (v) => (Array.isArray(v) ? v : []);
@@ -51,6 +55,8 @@ export function sanitize(s, now = Date.now()) {
   s.friends = friends;
   s.partner = typeof s.partner === 'string' && own(friends, s.partner) && friends[s.partner].status === 'dating' ? s.partner : null;
   for (const [id, f] of Object.entries(friends)) if (f.status === 'dating' && id !== s.partner) f.status = null;
+  s.love = sanitizeLove(s.love, s.partner);
+  s.pet = sanitizePet(s.pet); s.car = sanitizeCar(s.car); s.gameday = sanitizeGameday(s.gameday);
   // politics
   const p = s.politics;
   if (!isObj(p) || !Number.isInteger(p.term) || p.term < 1 || !Number.isFinite(p.start)) s.politics = null;

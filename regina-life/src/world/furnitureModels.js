@@ -163,6 +163,10 @@ function armchair(k, { id, w, d, h, color, tier: t }) {
     k.b(w, 0.06, d, wd, 0, 0.3, 0); k.b(w - 0.2, 0.16, d - 0.24, color, 0, 0.36, 0.08); k.b(w - 0.1, h - 0.4, 0.16, color, 0, 0.4, -d / 2 + 0.08); k.b(w - 0.3, 0.14, 0.2, c3, 0, h - 0.14, -d / 2 + 0.12);
     for (const sx of [-1, 1]) { k.b(0.07, 0.03, d - 0.1, wd, sx * (w / 2 - 0.035), 0.5, 0); k.b(0.05, 0.14, 0.05, wd, sx * (w / 2 - 0.035), 0.36, 0.1); } return;
   }
+  if (id === 'chair_accent') {   // a light mid-century accent chair: splayed wooden legs, a slim cushion and a tilted back, no arms
+    const wd = '#8a6a48'; for (const sx of [-1, 1]) for (const sz of [-1, 1]) k.c(0.02, 0.028, 0.34, wd, sx * (w / 2 - 0.09), 0, sz * (d / 2 - 0.09), 6);
+    k.b(w, 0.06, d, wd, 0, 0.34, 0); k.b(w - 0.04, 0.1, d - 0.12, color, 0, 0.4, 0.04); k.b(w - 0.04, h - 0.5, 0.12, color, 0, 0.5, -d / 2 + 0.06); return;
+  }
   const lg = 0.1, base = 0.26, seat = lg + base, aw = id === 'recliner' ? 0.2 : 0.18;
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) k.b(0.06, lg, 0.06, '#3d2a1d', sx * (w / 2 - 0.1), 0, sz * (d / 2 - 0.1));
   k.b(w, base, d, sh(color, -0.04), 0, lg, 0); for (const sx of [-1, 1]) k.b(aw, 0.24 + (t >= 3 ? 0.04 : 0), d, color, sx * (w / 2 - aw / 2), seat, 0);

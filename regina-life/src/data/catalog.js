@@ -32,6 +32,7 @@ export const CLOTHES = {
   tee_white:   { id: 'tee_white',   slot: 'top',    style: 'tee',     color: '#e9e6df', name: 'Classic Tee — Bone',   price: 0 },
   tee_black:   { id: 'tee_black',   slot: 'top',    style: 'tee',     color: '#1d1f24', name: 'Classic Tee — Black',  price: 0 },
   tee_navy:    { id: 'tee_navy',    slot: 'top',    style: 'tee',     color: '#233a5e', name: 'Classic Tee — Navy',   price: 0 },
+  jersey_storm:{ id: 'jersey_storm',slot: 'top',    style: 'tee',     color: '#1e7a3c', name: 'Prairie Storm Jersey (fan prize)', price: 0, prize: true },
   tee_coral:   { id: 'tee_coral',   slot: 'top',    style: 'tee',     color: '#e8826f', name: 'Classic Tee — Coral',  price: 0 },
   hoodie_grey: { id: 'hoodie_grey', slot: 'top',    style: 'hoodie',  color: '#6c7077', name: 'Hoodie — Prairie Grey',price: 6500 },
   hoodie_red:  { id: 'hoodie_red',  slot: 'top',    style: 'hoodie',  color: '#a3312f', name: 'Bunnyhug — Brick',   price: 6500 },

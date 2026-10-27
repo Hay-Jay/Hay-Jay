@@ -1,5 +1,6 @@
 import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HAIR_STYLES, FACE_SHAPES, BODY_TYPES, FACIAL_HAIR, EXPRESSIONS, LIP_COLORS, FRAMES, FRAME_PRESET, STORE_STOCK, ITEM_NAME } from '../data/catalog.js';
-import { RECIPES } from '../core/game.js';
+import { RECIPES, COOK_QUALITY, skillLevel } from '../core/game.js';
+import { gamedayStatus, buyTicket, watchGame, HOME_TEAM, TICKET_PRICE, WATCH_SECS, GAME_WEEKDAYS } from '../core/gameday.js';
 import { fmtMoney } from '../core/ledger.js';
 import { ICON } from './icons.js';
 import { FURNITURE, WALLS, FLOORS, WALL_PRICE, FLOOR_PRICE, SELL_RATIO } from '../data/furniture.js';
@@ -254,8 +255,68 @@ export class Panels {
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
-      const b = e.target.closest('[data-cook]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.cook(store, b.dataset.cook);
-      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); this.ctx.onCooked?.(); } else this.ctx.toast(r.error, 'warn'); render();
+      const b = e.target.closest('[data-cook]'); if (!b) return;
+      this.cookGame(b.dataset.cook);
+    });
+  }
+
+  /**
+   * The cooking mini-game: three steps (chop, stir, plate). A marker sweeps across a bar; tap when it is in the green. Each good tap makes the
+   * meal better (Burnt, Good, Great, Perfect: core/game.js COOK_QUALITY). Higher Cooking skill widens the green. Ingredients are only used
+   * when the meal is served, so closing early costs nothing.
+   */
+  cookGame(recipeId) {
+    const { store, G } = this.ctx, rec = RECIPES.find((r) => r.id === recipeId); if (!rec) return;
+    const STEPS = [['🔪', 'Chop'], ['🥄', 'Stir'], ['🍽️', 'Plate']], lvl = skillLevel(store.state.skills?.cooking || 0), zw = Math.min(0.34, 0.2 + lvl * 0.015);
+    let step = 0, hits = 0, zone = 0, t0 = performance.now(), raf = 0, done = false; const speed = 0.9 + Math.random() * 0.25;
+    const p = this._show(`<div class="ph"><h3>${rec.icon} ${esc(rec.name)}</h3><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
+      <p class="pm" data-say></p><div class="cookbar"><i class="zone"></i><b class="needle"></b></div><div class="cooksteps">${STEPS.map(([i, n]) => `<span>${i} ${n}</span>`).join('')}</div>
+      <div class="pbtns"><button class="btn primary" data-tap>Tap! (Space)</button></div>`, 'menu cook-panel', { onClose: () => { done = true; cancelAnimationFrame(raf); removeEventListener('keydown', key, true); } });
+    const zoneEl = p.querySelector('.zone'), needle = p.querySelector('.needle'), say = p.querySelector('[data-say]'), steps = [...p.querySelectorAll('.cooksteps span')];
+    const pos = () => { const k = ((performance.now() - t0) / 1000) * speed * (1 + step * 0.25); const f = k % 2; return f < 1 ? f : 2 - f; };
+    const setStep = () => { zone = 0.1 + Math.random() * (0.8 - zw); zoneEl.style.left = zone * 100 + '%'; zoneEl.style.width = zw * 100 + '%'; say.textContent = `${STEPS[step][0]} ${STEPS[step][1]}: tap when the marker is in the green.`; steps.forEach((el, i) => el.classList.toggle('now', i === step)); t0 = performance.now(); };
+    const loop = () => { if (done) return; needle.style.left = pos() * 100 + '%'; raf = requestAnimationFrame(loop); };
+    const tap = () => {
+      if (done) return; const x = pos(), ok = x >= zone && x <= zone + zw; if (ok) hits++;
+      steps[step].classList.add(ok ? 'hit' : 'miss'); this.ctx.audio?.blip(ok ? 'ok' : 'error');
+      if (++step < STEPS.length) { setStep(); return; }
+      done = true; cancelAnimationFrame(raf); const b0 = this.ctx.fx?.snap(), r = G.cook(store, recipeId, hits);
+      setTimeout(() => { this.close();
+        if (r.ok) { this.ctx.toast(`${r.quality.icon} ${r.quality.name} ${r.recipe.name}!${hits === 3 ? ' Chef\'s kiss.' : hits === 0 ? ' Edible. Mostly.' : ''}`, hits ? 'good' : 'warn'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); if (hits === 3) this.ctx.fx?.juice?.confetti?.(40); this.ctx.onCooked?.(); }
+        else this.ctx.toast(r.error, 'warn'); }, 450);
+    };
+    const key = (e) => { if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); tap(); } };
+    addEventListener('keydown', key, true);
+    p.addEventListener('click', (e) => { if (e.target.closest('[data-x]')) return this.close(); if (e.target.closest('[data-tap]')) tap(); });
+    setStep(); loop();
+  }
+
+  /** Game day at the stadium: today's matchup, buy a ticket, watch the game quarter by quarter. */
+  gameday() {
+    const { store } = this.ctx; const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const render = () => {
+      const st = gamedayStatus(store.state, store.now()), m = st.today;
+      p.innerHTML = `<div class="ph"><h3>🏈 Game day</h3><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
+        ${m ? `<div class="scoreboard"><div><span>${HOME_TEAM.icon}</span><b>${esc(HOME_TEAM.city)} ${esc(HOME_TEAM.name)}</b></div><em>vs</em><div><span>${m.away.icon}</span><b>${esc(m.away.name)}</b></div></div>
+          <p class="pm">${st.watched ? `Final: ${HOME_TEAM.name} ${m.home}, ${m.away.name} ${m.vis}. ${m.win ? 'What a win! 🎉' : 'Next time!'}` : st.hasTicket ? 'You have a ticket. Find your seat and cheer!' : `Home game today! Upper-bowl seats are ${fmtMoney(TICKET_PRICE)}.`}</p>
+          <div class="pbtns">${st.watched ? '' : st.hasTicket ? '<button class="btn primary" data-gd="watch">📣 Watch the game</button>' : `<button class="btn primary" data-gd="buy" ${store.state.bank.balance < TICKET_PRICE ? 'disabled' : ''}>🎟️ Buy a ticket · ${fmtMoney(TICKET_PRICE)}</button>`}<button class="btn" data-x>Close</button></div>`
+        : `<p class="pm">No home game today. The ${esc(HOME_TEAM.name)} play here every ${GAME_WEEKDAYS.map((d) => DAYS[d]).join(', ').replace(/, ([^,]*)$/, ' and $1')}. Next game: ${st.nextIn === 1 ? 'tomorrow' : `in ${st.nextIn} days`}.</p><div class="pbtns"><button class="btn" data-x>Close</button></div>`}
+        <p class="fine">${st.games ? `You've been to ${st.games} game${st.games > 1 ? 's' : ''} (${st.wins} win${st.wins === 1 ? '' : 's'}).` : 'Your first game comes with a free fan jersey.'}</p>`;
+    };
+    const p = this._show('', 'menu gameday'); render();
+    p.addEventListener('click', (e) => {
+      if (e.target.closest('[data-x]')) return this.close();
+      const a = e.target.closest('[data-gd]')?.dataset.gd;
+      if (a === 'buy') { const r = buyTicket(store); if (r.ok) { this.ctx.audio?.chime?.('gain'); this.ctx.toast('🎟️ Ticket bought. Enjoy the game!', 'good'); } else this.ctx.toast(r.error, 'warn'); render(); }
+      if (a === 'watch') {
+        const b0 = this.ctx.fx?.snap(), r = watchGame(store); if (!r.ok) { this.ctx.toast(r.error, 'warn'); render(); return; }
+        this.ctx.player.gesture('wave', WATCH_SECS);
+        p.innerHTML = `<h3>📣 ${esc(HOME_TEAM.name)} vs ${esc(r.away.name)}</h3><div class="scoreboard live"><div><span>${HOME_TEAM.icon}</span><b data-h>0</b></div><em>–</em><div><span>${r.away.icon}</span><b data-v>0</b></div></div><ol class="plays"></ol>`;
+        const ol = p.querySelector('.plays'), each = (WATCH_SECS * 1000) / (r.plays.length + 1);
+        r.plays.forEach((line, i) => setTimeout(() => { if (this.cur === null) return; const li = document.createElement('li'); li.textContent = line; ol.appendChild(li); const nums = line.match(/(\d+)\D+(\d+)$/); if (nums) { p.querySelector('[data-h]').textContent = nums[1]; p.querySelector('[data-v]').textContent = nums[2]; } this.ctx.audio?.blip('tick'); }, each * (i + 1)));
+        setTimeout(() => { this.close(); if (b0) this.ctx.fx?.gains(b0); if (r.win) { this.ctx.fx?.juice?.confetti?.(90); this.ctx.audio?.chime?.('fanfare'); }
+          this.ctx.toast(`Final: ${HOME_TEAM.name} ${r.home}, ${r.away.name.split(' ').pop()} ${r.vis}. ${r.win ? 'Storm win! 🟢🎉' : 'Tough loss.'}${r.jersey ? ' You got a free fan jersey! 👕' : ''}`, r.win ? 'good' : 'info'); this.ctx.onDid?.('gameday'); }, WATCH_SECS * 1000 + 400);
+      }
     });
   }
 }

@@ -60,6 +60,10 @@ import { todoStatus, updateTodo, TODO_PAY, TODO_BONUS } from './core/todo.js';
 import { muralNames } from './core/sponsors.js';
 import { PUMPKIN, PUMPKIN_AREA, pumpkinOn, pumpkinSoon, pumpkinSpots, startHunt, findPumpkin, endHunt, huntToday } from './core/festivals.js';
 import { POLICIES, CANDIDATE_BY_ID } from './data/policies.js';
+import * as PET from './core/pets.js';
+import * as CAR from './core/car.js';
+import { Household } from './world/household.js';
+import { buildCar } from './world/carModel.js';
 
 const $ = (id) => document.getElementById(id);
 const frame = () => new Promise((r) => requestAnimationFrame(() => r()));
@@ -186,6 +190,27 @@ async function boot() {
   // Bundle up (core/bundle.js): outdoors in the cold you are DRAWN in the warmest things you own; the saved look never changes
   let drawnKey = JSON.stringify(S().player.look);   // the controller was built with the saved look
   const drawnLook = () => bundledLook(S().player.look, S().wardrobe, { temp: weather.temp, outdoors: gameMode === 'play' && !inInterior && !creator, on: S().settings.bundle !== false });
+  /* ---------- who is home with you (pet, partner) and your own car ---------- */
+  const household = new Household();
+  const livingPartner = () => (['living', 'engaged', 'married'].includes(SOC.loveStage(S())) ? S().partner : null);
+  function syncHousehold() { if (inInterior === 'apartment' && interior) household.sync(interior.group, PET.petOf(S()), livingPartner(), interior.spawn ?? { x: 0, z: 0 }); }
+  let carModel = null;
+  function streetChips() {
+    if (inInterior || mapOverview || gameMode !== 'play' || creator) return;
+    const c = CAR.carOf(S()); shell.setChips(c ? [{ id: 'drive', icon: player.driving ? '🅿️' : CAR.CARS[c.model].icon, label: player.driving ? 'Park & get out' : 'Drive', on: player.driving }] : [], () => toggleDrive());
+  }
+  /** Get in or out of your car (G). Only outdoors, in play. */
+  function toggleDrive(quiet = false) {
+    if (player.driving) {
+      player.exitCar(player.grid ?? city.colliders); if (carModel) { scene.remove(carModel.root); carModel.dispose(); carModel = null; }
+      rig.targetDist = 6; if (!quiet) { audio.blip('ok'); toast('Parked. Press G to drive again.', 'info'); } streetChips(); return true;
+    }
+    const c = CAR.carOf(S());
+    if (!c) { if (!quiet) toast('No car yet. Buy one in the Autos app on your phone.', 'info'); return false; }
+    if (inInterior || fading || creator || camMode || build.active || gameMode !== 'play') { if (!quiet) toast('Head outside to drive.', 'info'); return false; }
+    const m = CAR.CARS[c.model]; carModel = buildCar(m.shape, CAR.CAR_COLORS[c.color]); scene.add(carModel.root);
+    player.enterCar(carModel, m.speed); rig.targetDist = 11; audio.blip('ok'); if (!quiet) toast(`${m.icon} Vroom! Steer like walking, Shift for a boost, G to park.`, 'good'); streetChips(); return true;
+  }
   const rebuildPlayer = (force = true) => { const l = drawnLook(), k = JSON.stringify(l); if (!force && k === drawnKey) return false; drawnKey = k; player.setLook(l); return true; };
 
   const ctx = {
@@ -223,6 +248,8 @@ async function boot() {
     onPanel: () => {},
     rebuildPlayerLook: rebuildPlayer,
     fx: { juice, snap, gains: (b, at) => showGains(b, at), head: () => headAt() },
+    onPet: () => syncHousehold(),
+    onCar: () => { if (player.driving) toggleDrive(true); streetChips(); },
     onCooked: () => { if (G.skillLevel(S().skills?.cooking || 0) >= 1) { const n = makeCraft(store, 'baked'); toast(`🥧 You made a batch to sell (${n} ready). Farmers' Market: Wednesdays and Saturdays, 9 to 1.`, 'info'); } },
   };
   const radio = new Radio(audio, { getNews: () => ctx.news() }); ctx.radio = radio; radio.volume = S().radio?.volume ?? 0.7; radio.onVolume = (v) => { S().radio.volume = v; store.commit('phone-quiet'); };
@@ -347,7 +374,7 @@ async function boot() {
     homeStage.fit(lot.yardRect ?? lot.bbox); rig.setBuildFrame(lot.bbox); rig.setBuildFocus(null);
   }
   async function enterInterior(kind, door) {
-    if (fading || inInterior) return; fading = true; lastDoor = door;
+    if (fading || inInterior) return; if (player.driving) toggleDrive(true); fading = true; lastDoor = door;
     await fadeTo(true, 380);
     const repaired = kind === 'apartment' ? H.repairHome(store) : 0;
     const next = interiorFor(kind); inInterior = kind;
@@ -355,6 +382,7 @@ async function boot() {
     setIndoor(true); rebuildPlayer(false);
     attachInterior(next);
     player.teleport(next.spawn.x, next.spawn.z, next.spawn.yaw);
+    if (kind === 'apartment') { household.clear(); syncHousehold(); }
     if (!S().job.shift) next.resetTask();
     if (repaired) toast(`Some furniture was blocking the way — ${repaired} piece${repaired > 1 ? 's' : ''} moved to storage.`, 'info');
     rig.targetDist = 3.2; rig.pitch = 0.46; rig.snapBehind(next.spawn.yaw); rig.snap(player);
@@ -364,11 +392,11 @@ async function boot() {
   }
   async function exitInterior() {
     if (fading || !inInterior) return; const wasHome = inInterior === 'apartment'; if (homeView) setHomeView(false); fading = true; await fadeTo(true, 380);
-    interior.group.userData.tvOff?.(); scene.remove(interior.group); interior = null; inInterior = null;
+    interior.group.userData.tvOff?.(); household.clear(); scene.remove(interior.group); interior = null; inInterior = null;
     city.group.visible = true; ped.setVisible(true); setIndoor(false); rebuildPlayer(false); bundleHint();
     player.bounds = null; player.grid = city.colliders; rig.grid = city.colliders; rig.indoor = false; rig.bounds = null; rig.targetDist = 6; rig.pitch = 0.28;
     const d = wasHome && HOME_DOORS[layoutOf(S()).id] ? homeDoor() : lastDoor ?? (wasHome ? homeDoor() : null); const out = d ? { x: d.x, z: d.z, yaw: Math.atan2(d.nx, d.nz) } : { x: city.spawn.x, z: city.spawn.z, yaw: 0 };
-    player.teleport(out.x + d.nx * 0.8, out.z + d.nz * 0.8, out.yaw); rig.snapBehind(out.yaw); rig.snap(player);
+    player.teleport(out.x + d.nx * 0.8, out.z + d.nz * 0.8, out.yaw); rig.snapBehind(out.yaw); rig.snap(player); streetChips();
     await new Promise((r) => setTimeout(r, 120)); await fadeTo(false, 380); fading = false;
   }
   /**
@@ -638,6 +666,7 @@ async function boot() {
   /* ---------- interaction ---------- */
   let target = null;
   const nearestInteractable = () => {
+    if (player.driving) return null;
     let best = null, bd = 1e9;
     // multi-room homes: a prompt needs line of sight, so nothing is offered through a wall (a doorway passes). Items in the player's own room need no ray; the Studio has no walls to check.
     const sight = inInterior === 'apartment' && interior.rooms.length > 1, here = sight ? roomAtFloor(interior.layout, player.pos.x, player.pos.z)?.id : null;
@@ -647,7 +676,11 @@ async function boot() {
       if (it.enabled && !it.enabled(ictx)) return;
       const score = d / it.radius; if (score < bd) { bd = score; best = { it, label }; }
     };
-    if (inInterior) for (const it of interior.interactables) consider(it, typeof it.label === 'function' ? it.label(ictx) : it.label);
+    if (inInterior) {
+      for (const it of interior.interactables) consider(it, typeof it.label === 'function' ? it.label(ictx) : it.label);
+      const pa = household.petAt, pt = PET.petOf(S()); if (pa && pt) consider({ id: 'pet', x: pa.x, z: pa.z, radius: 1.4, run: () => { const r = PET.playWithPet(store); if (r.ok) { player.gesture('use', 1.2); audio.chime('gain'); juice.floater('💛', headAt(), 'good'); toast(`${pt.name} loves you 🐾`, 'good'); } else if (pt.fed < 50 && PET.feedPet(store).ok) toast(`You fed ${pt.name} 🍖`, 'good'); else toast(r.error, 'info'); } }, pt.fed < 40 ? `Feed ${pt.name}` : `Play with ${pt.name}`);
+      const pp = household.partnerAt, pid = livingPartner(); if (pp && pid) { const res = RES_BY_ID[pid]; consider({ id: 'partner', x: pp.x, z: pp.z, radius: 1.5, run: () => { player.gesture('wave', 1.2); SOC.chat(store, pid); S().needs.mood = Math.min(100, S().needs.mood + 3); store.commit('needs'); juice.floater('💛', headAt(), 'good'); toast(`${res.emoji} ${res.name.split(' ')[0]}: “${['Missed you today!', 'Dinner later?', 'You look great.', 'Love you. 💛', 'How was work?'][Math.floor(Math.random() * 5)]}”`, 'info'); } }, `Hug ${res.name.split(' ')[0]}`); }
+    }
     else {
       for (const it of city.interactables) consider(it, it.label);
       const gst = currentStep(S()); if (gst) consider({ id: 'gig', kind: 'gig', x: gst.spot.x, z: gst.spot.z, radius: GIG_REACH, label: gst.label, run: () => doGigStep() }, gst.label);
@@ -864,10 +897,10 @@ async function boot() {
     const p = ovPick, d = Math.hypot(p.x - player.pos.x, p.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)), dist = d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m', here = d < 40;
     el.innerHTML = `<div class="pc-head"><span class="pc-ico">${p.emoji}</span><div><h3>${esc(p.name.replace(/ \(Home\)/, ''))}</h3><small>${esc(p.area ?? 'Regina')} · ${here ? 'you are here' : dist + ' away'}</small></div><span class="pc-tag ${p.state === 'open' ? 'open' : ''}">${p.state === 'open' ? '● Open now' : 'Visit & explore'}</span></div>
       <p class="pc-blurb">${esc(p.blurb)}</p>${hereNow(p.id)}<div class="pc-acts">${(p.acts ?? []).map((a) => { const id = actId(a); return id ? `<button class="pc-act" data-act="${id}">${esc(a)}</button>` : `<span class="${/\(soon\)/.test(a) ? 'soon' : ''}">${esc(a)}</span>`; }).join('')}</div>
-      <div class="pc-go"><button class="gobtn primary" data-go="walk" ${here ? 'disabled' : ''}><b>🚶 Walk</b><small>${here ? 'Already here' : `Free · about ${mins} min`}</small></button><button class="gobtn" data-go="cab" ${here || fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)} · instant</small></button></div>`;
+      <div class="pc-go ${CAR.carOf(S()) ? 'three' : ''}"><button class="gobtn primary" data-go="walk" ${here ? 'disabled' : ''}><b>🚶 Walk</b><small>${here ? 'Already here' : `Free · about ${mins} min`}</small></button>${CAR.carOf(S()) ? `<button class="gobtn" data-go="drive" ${here || inInterior ? 'disabled' : ''}><b>${CAR.CARS[CAR.carOf(S()).model].icon} Drive</b><small>${inInterior ? 'Go outside first' : `Free · about ${Math.max(1, Math.round(d / 14 / 60))} min`}</small></button>` : ''}<button class="gobtn" data-go="cab" ${here || fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)} · instant</small></button></div>`;
   }
   /** Place-card chips you can actually do (docs/AMAZING.md G6): an activity id, 'photo', or 'enter' (go inside). Null = a "soon" label. */
-  const ACT_IDS = { 'Read on a bench': 'bench', 'People-watch': 'people', 'Hear the buskers': 'buskers', 'Window shop': 'window', 'Watch the geese': 'geese', 'Walk the shoreline': 'shore', 'Watch the sunset': 'sky', 'Walk the grounds': 'grounds', 'Take a photo': 'photo', 'Buy groceries': 'enter', 'Bakery & deli': 'enter', 'Work a shift': 'enter', 'Try on outfits': 'enter', 'Toques & accessories': 'enter', 'Vote': 'enter', 'Meet the mayor': 'enter', 'Hand out flyers': 'enter', 'Treadmill': 'enter', 'Weights': 'enter', 'Yoga': 'enter', 'Take a trip': 'trip' };
+  const ACT_IDS = { 'Read on a bench': 'bench', 'People-watch': 'people', 'Hear the buskers': 'buskers', 'Window shop': 'window', 'Watch the geese': 'geese', 'Walk the shoreline': 'shore', 'Watch the sunset': 'sky', 'Walk the grounds': 'grounds', 'Take a photo': 'photo', 'Buy groceries': 'enter', 'Bakery & deli': 'enter', 'Work a shift': 'enter', 'Try on outfits': 'enter', 'Toques & accessories': 'enter', 'Vote': 'enter', 'Meet the mayor': 'enter', 'Hand out flyers': 'enter', 'Treadmill': 'enter', 'Weights': 'enter', 'Yoga': 'enter', 'Take a trip': 'trip', 'Game day': 'gameday' };
   /** Residents at this place right now (core/routines.js), always labelled NPC: tap to say hi (and meet them the first time). */
   function hereNow(placeId) {
     const c = clock(), here = residentsAt(placeId, { weekday: new Date(Date.UTC(c.year, c.month - 1, c.day)).getUTCDay(), hour: c.hour, kind: weather.kind });
@@ -891,12 +924,14 @@ async function boot() {
       if (!near) { closeMapOverview(); setDestination(p); toast(`Head to ${p.name.replace(/ \(Home\)/, '')} first. Follow the arrow!`, 'info'); return; }
       closeMapOverview();
       if (id === 'photo') { startCamera(); return; }
+      if (id === 'gameday') { panels.gameday(); G.tally(S(), 'visits'); return; }
       if (id === 'enter') { if (p.enter) enterInterior(p.enter, { x: p.x, z: p.z, nx: 0, nz: p.z > 0 ? -1 : 1 }); return; }
       ictx.ui.activity(id); G.tally(S(), 'visits'); return;
     }
     const b = e.target.closest('[data-go]'); if (!b || !ovPick) return; const p = ovPick;
     if (b.dataset.go === 'book') { closeMapOverview(); ctx.adsFocus = p.board.id; phone.open(); phone.openApp('ads'); return; }
     if (b.dataset.go === 'walk') { closeMapOverview(); setDestination(p); audio.blip('ok'); }
+    else if (b.dataset.go === 'drive') { closeMapOverview(); setDestination(p); if (!player.driving) toggleDrive(); }
     else { closeMapOverview(); if (!ctx.quickCab(p)) openMapOverview(); }
   });
   function paintMapChips() {
@@ -921,9 +956,10 @@ async function boot() {
     mapOverview = true; ovMode = 'places'; ovHub.custom = null; document.body.classList.add('map-ov'); $('ovmap').hidden = false; enterHubMode(true); ovHub.level = 'close'; ovHub.selected = null; ovHub.show(); renderPlaceCard(null); paintMapChips(); syncTab();
   }
   function closeMapOverview() {
-    if (!mapOverview) return; mapOverview = false; document.body.classList.remove('map-ov'); ovHub.hide(); ovHub.selected = null; $('ovmap').hidden = true; enterHubMode(false); rig.snap(player); shell.setChips([]); syncTab();
+    if (!mapOverview) return; mapOverview = false; document.body.classList.remove('map-ov'); ovHub.hide(); ovHub.selected = null; $('ovmap').hidden = true; enterHubMode(false); rig.snap(player); shell.setChips([]); streetChips(); syncTab();
   }
   input.on('view', () => (camMode ? stopCamera() : startCamera()));
+  input.on('drive', () => { if (panels.open || phone.isOpen || mapOverview) return; toggleDrive(); });
   input.on('escape', () => { if (panels.open) panels.close(); else if (mapOverview) closeMapOverview(); else if (mapOpen) closeMap(); else if (camMode) stopCamera(); else if (phone.isOpen) phone.close(); });
 
   /* ---------- new game / title ---------- */
@@ -944,10 +980,10 @@ async function boot() {
     hub?.hide(); gameMode = 'play'; creator = false; S().flags ||= {}; if (!Number.isFinite(S().flags.firstPlayAt)) S().flags.firstPlayAt = Date.now(); camera.clearViewOffset(); rig.mode = 'follow'; rig.targetDist = 6;
     $('title').classList.remove('on'); $('hud').classList.remove('hidden'); shell.show(true); S().started = true; store.commit('started');
     input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player); rebuildPlayer(false);
-    setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000);
+    setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000); streetChips();
   };
   const newLife = () => {
-    hub.hide(); enterHubMode(false);
+    hub.hide(); enterHubMode(false); if (player.driving) toggleDrive(true);
     store.reset(); dropStaleApartments(); wallMode = null; POL.ensurePolitics(store); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
     creator = true; gameMode = 'creator'; $('title').classList.remove('on'); rig.mode = 'creator'; rig.yaw = player.yaw + 0.5; rig.snap(player);
     const off = () => camera.setViewOffset(innerWidth, innerHeight, innerWidth * (innerWidth > 760 ? 0.17 : 0), innerWidth > 760 ? 0 : innerHeight * 0.18, innerWidth, innerHeight);
@@ -1105,6 +1141,8 @@ async function boot() {
   setInterval(() => {
     if (gameMode !== 'play') return;
     G.tickNeeds(store, S().settings.timeMode === 'fast' ? 4 : 1, { home: inInterior === 'apartment' }); G.tickJobs(store);
+    { const home = inInterior === 'apartment', dt = S().settings.timeMode === 'fast' ? 4 : 1, pm = PET.tickPet(store, dt, { home }); SOC.tickLove(store, dt, { home }); if (home) syncHousehold();
+      const pf = (S().flags ||= {}); if ((pm === 'Hungry' || pm === 'Lonely') && Date.now() - (pf.petNag || 0) > 300000) { pf.petNag = Date.now(); G.notify(store, { app: 'pets', title: `${PET.PET_KINDS[S().pet.kind].icon} ${S().pet.name} is ${pm.toLowerCase()}`, body: pm === 'Hungry' ? 'Feed them in the Pets app.' : 'Go home and play together.' }); } }
     maybeEvent();
     SOC.decaySocial(store, 1); if (Math.random() < 0.015) SOC.maybePing(store); if (radio.playing) S().needs.fun = Math.min(100, (S().needs.fun ?? 50) + 0.04);
     const s = S(), f = (s.flags ||= {});
@@ -1171,6 +1209,7 @@ async function boot() {
     // flashlight follows player facing
     if (flash.intensity > 0) { flash.position.set(player.pos.x, 1.4, player.pos.z); flash.target.position.set(player.pos.x + Math.sin(player.yaw) * 10, 0.5, player.pos.z + Math.cos(player.yaw) * 10); }
     if (inInterior) interior.update(dt, env, ictx);
+    if (inInterior === 'apartment') household.update(dt, player, { happy: PET.petMood(PET.petOf(S())) !== 'Hungry', grid: player.grid, bounds: player.bounds });
     else city.update(dt, camera.position);
     atmo.update(dt, camera, player.pos);
     // destination beacon
