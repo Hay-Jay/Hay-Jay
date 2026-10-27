@@ -1,4 +1,4 @@
-import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HAIR_STYLES, FACE_SHAPES, BODY_TYPES, FACIAL_HAIR, EXPRESSIONS, STORE_STOCK, ITEM_NAME } from '../data/catalog.js';
+import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HAIR_STYLES, FACE_SHAPES, BODY_TYPES, FACIAL_HAIR, EXPRESSIONS, LIP_COLORS, FRAMES, FRAME_PRESET, STORE_STOCK, ITEM_NAME } from '../data/catalog.js';
 import { RECIPES } from '../core/game.js';
 import { fmtMoney } from '../core/ledger.js';
 import { ICON } from './icons.js';
@@ -160,7 +160,7 @@ export class Panels {
     const chips = (arr, key) => `<div class="chips-sel">${arr.map((c) => `<button class="${look[key] === c ? 'on' : ''}" data-k="${key}" data-v="${c}">${esc(c.replace('-', ' '))}</button>`).join('')}</div>`;
     const body = () => {
       const s = store.state;
-      if (tab === 'face') return `<h4>Skin tone</h4>${sw(SKIN_TONES, 'skin')}<h4>Face shape</h4>${chips(FACE_SHAPES, 'face')}<h4>Eye colour</h4>${sw(EYE_COLORS, 'eyes')}<h4>Expression</h4>${chips(EXPRESSIONS, 'expression')}<h4>Facial hair</h4>${chips(FACIAL_HAIR, 'facialHair')}`;
+      if (tab === 'face') return `<h4>Skin tone</h4>${sw(SKIN_TONES, 'skin')}<h4>Face shape</h4>${chips(FACE_SHAPES, 'face')}<h4>Eye colour</h4>${sw(EYE_COLORS, 'eyes')}<h4>Lip colour</h4>${sw(LIP_COLORS, 'lips')}<h4>Expression</h4>${chips(EXPRESSIONS, 'expression')}<h4>Facial hair</h4>${chips(FACIAL_HAIR, 'facialHair')}`;
       if (tab === 'hair') return `<h4>Style</h4>${chips(HAIR_STYLES, 'hair')}<h4>Colour</h4>${sw(HAIR_COLORS, 'hairColor')}`;
       if (tab === 'body') return `<h4>Build</h4>${chips(BODY_TYPES, 'body')}<h4>Height</h4><input type="range" min="0.92" max="1.08" step="0.01" value="${look.height}" data-h aria-label="Height"><small class="muted">${Math.round(175 * look.height)} cm</small>`;
       return SLOTS.map((slot) => { const owned = s.wardrobe.map((id) => CLOTHES[id]).filter((c) => c.slot === slot); return `<h4>${{ top: 'Top', bottom: 'Bottom', shoes: 'Shoes', head: 'Headwear', face: 'Eyewear', neck: 'Scarf' }[slot]}</h4><div class="swatches">${owned.map((c) => `<button class="sw cloth ${look[SLOT_KEY[slot]] === c.id ? 'on' : ''}" style="background:${c.id.startsWith('none_') ? 'repeating-linear-gradient(45deg,#444,#444 4px,#222 4px,#222 8px)' : c.color}" data-cloth="${c.id}" title="${esc(c.name)}" aria-label="${esc(c.name)}"></button>`).join('')}</div>`; }).join('') + `<p class="fine">${creator ? 'Buy more at Prairie Threads.' : 'Buy more clothing at Prairie Threads on Victoria Ave.'}</p>`;
@@ -168,6 +168,7 @@ export class Panels {
     const render = () => {
       p.innerHTML = `<div class="ph"><h3>${creator ? 'Create your character' : 'Wardrobe'}</h3>${creator ? '' : `<button class="x" data-x aria-label="Close">${ICON.close}</button>`}</div>
         ${creator ? `<label class="namef">Name<input data-name maxlength="16" value="${esc(store.state.player.name)}" autocomplete="off"></label>` : ''}
+        ${creator ? `<div class="frame-pick" role="group" aria-label="Male or female">${FRAMES.map((f) => `<button class="${(look.frame ?? 'male') === f ? 'on' : ''}" data-frame="${f}" aria-pressed="${(look.frame ?? 'male') === f}"><span aria-hidden="true">${f === 'male' ? '👨' : '👩'}</span>${f === 'male' ? 'Male' : 'Female'}</button>`).join('')}</div>` : ''}
         ${groups.length > 1 ? `<div class="tabs">${groups.map(([n, k]) => `<button class="${k === tab ? 'on' : ''}" data-tab="${k}">${n}</button>`).join('')}</div>` : ''}
         <div class="cbody">${body()}</div>
         ${creator ? `<div class="pbtns"><button class="btn" data-rand>Randomise</button><button class="btn primary" data-done>Start my life in Regina</button></div>` : ''}`;
@@ -176,12 +177,14 @@ export class Panels {
     let rafH;
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
+      const fr = e.target.closest('[data-frame]'); if (fr) { if (look.frame !== fr.dataset.frame) Object.assign(look, FRAME_PRESET[fr.dataset.frame], { frame: fr.dataset.frame }); this.ctx.rebuildPlayer(); render(); store.commit('look'); return; }
       const t = e.target.closest('[data-tab]'); if (t) { tab = t.dataset.tab; render(); return; }
       const k = e.target.closest('[data-k]'); if (k) { const v = k.dataset.v; look[k.dataset.k] = /^\d+$/.test(v) ? +v : v; this.ctx.rebuildPlayer(); render(); store.commit('look'); return; }
       const cl = e.target.closest('[data-cloth]'); if (cl) { G.equip(store, cl.dataset.cloth); this.ctx.rebuildPlayer(); render(); return; }
       if (e.target.closest('[data-rand]')) {
         const pick = (a) => a[Math.floor(Math.random() * a.length)];
-        Object.assign(look, { skin: Math.floor(Math.random() * SKIN_TONES.length), hair: pick(HAIR_STYLES), hairColor: Math.floor(Math.random() * HAIR_COLORS.length), eyes: Math.floor(Math.random() * EYE_COLORS.length), face: pick(FACE_SHAPES), body: pick(BODY_TYPES), facialHair: pick(FACIAL_HAIR), expression: pick(['neutral', 'smile', 'smile']), height: 0.95 + Math.random() * 0.1 });
+        const frame = pick(FRAMES), fem = frame === 'female';
+        Object.assign(look, { frame, lips: fem ? 1 + Math.floor(Math.random() * (LIP_COLORS.length - 1)) : 0, skin: Math.floor(Math.random() * SKIN_TONES.length), hair: pick(HAIR_STYLES), hairColor: Math.floor(Math.random() * HAIR_COLORS.length), eyes: Math.floor(Math.random() * EYE_COLORS.length), face: pick(FACE_SHAPES), body: pick(BODY_TYPES), facialHair: fem ? 'none' : pick(FACIAL_HAIR), expression: pick(['neutral', 'smile', 'smile']), height: (fem ? 0.93 : 0.96) + Math.random() * 0.09 });
         this.ctx.rebuildPlayer(); render(); return;
       }
       if (e.target.closest('[data-done]')) { const nm = p.querySelector('[data-name]').value.trim() || 'Alex'; store.state.player.name = nm.slice(0, 16); this.close(); }

@@ -5,8 +5,9 @@ import { PITCH, ROAD_W } from './cityData.js';
 import { mulberry32 } from '../core/rng.js';
 
 /** Weather-responsive outfit for NPCs (and a shared helper for tests). */
-export function outfitForTemp(temp, rnd = Math.random) {
+export function outfitForTemp(temp, rnd = Math.random, fem = false) {
   const pick = (a) => a[Math.floor(rnd() * a.length)];
+  if (fem && temp > 8 && rnd() < 0.4) return { ...outfitForTemp(temp, rnd), bottom: pick(['skirt_denim', 'skirt_plaid']) };
   if (temp <= -15) return { top: 'jacket_black', bottom: 'jeans_black', shoes: 'boots_brown', head: pick(['toque_red', 'toque_grey']), neck: 'scarf_plaid' };
   if (temp <= -3) return { top: pick(['jacket_black', 'jacket_green']), bottom: pick(['jeans_blue', 'jeans_black']), shoes: 'boots_brown', head: pick(['toque_grey', 'none_head']), neck: 'none_neck' };
   if (temp <= 8) return { top: pick(['hoodie_grey', 'hoodie_red', 'sweater_cream', 'jacket_green']), bottom: pick(['jeans_blue', 'chino_tan', 'jogger_grey']), shoes: pick(['sneaker_black', 'boots_brown']), head: 'none_head', neck: 'none_neck' };
@@ -33,8 +34,9 @@ export class Pedestrians {
       const loop = [[x0, z0], [x1, z0], [x1, z1], [x0, z1]], start = Math.floor(rnd() * 4), dir = rnd() < 0.5 ? 1 : -1;
       const a = loop[start], b = loop[(start + dir + 4) % 4];
       const t = rnd();
-      const look = { ...DEFAULT_LOOK, skin: Math.floor(rnd() * SKIN_TONES.length), hair: HAIR_STYLES[Math.floor(rnd() * HAIR_STYLES.length)], hairColor: Math.floor(rnd() * HAIR_COLORS.length), face: FACE_SHAPES[Math.floor(rnd() * 4)], body: BODY_TYPES[Math.floor(rnd() * 4)], facialHair: rnd() < 0.2 ? 'stubble' : 'none', expression: rnd() < 0.6 ? 'smile' : 'neutral', height: 0.94 + rnd() * 0.12, ...outfitForTemp(temp, rnd), face_acc: 'none_face' };
-      Object.assign(look, outfitForTemp(temp, rnd));
+      const fem = rnd() < 0.5;
+      const look = { ...DEFAULT_LOOK, frame: fem ? 'female' : 'male', lips: fem ? 1 + Math.floor(rnd() * 3) : 0, skin: Math.floor(rnd() * SKIN_TONES.length), hair: HAIR_STYLES[Math.floor(rnd() * HAIR_STYLES.length)], hairColor: Math.floor(rnd() * HAIR_COLORS.length), face: FACE_SHAPES[Math.floor(rnd() * 4)], body: BODY_TYPES[Math.floor(rnd() * 4)], facialHair: !fem && rnd() < 0.2 ? 'stubble' : 'none', expression: rnd() < 0.6 ? 'smile' : 'neutral', height: 0.94 + rnd() * 0.12, ...outfitForTemp(temp, rnd), face_acc: 'none_face' };
+      Object.assign(look, outfitForTemp(temp, rnd, fem));
       const ch = buildCharacter(look, { detail: 0.45 });
       ch.root.position.set(a[0] + (b[0] - a[0]) * t, 0, a[1] + (b[1] - a[1]) * t);
       scene.add(ch.root);
@@ -46,7 +48,7 @@ export class Pedestrians {
     for (const n of this.list) {
       const pos = n.ch.root.position.clone(), yaw = n.ch.root.rotation.y;
       this.scene.remove(n.ch.root); n.ch.dispose();
-      const base = { ...n.baseLook, face_acc: 'none_face', neck: 'none_neck', head: 'none_head', ...outfitForTemp(temp, n.rnd) }; n.baseLook = base;
+      const base = { ...n.baseLook, face_acc: 'none_face', neck: 'none_neck', head: 'none_head', ...outfitForTemp(temp, n.rnd, n.baseLook.frame === 'female') }; n.baseLook = base;
       n.ch = buildCharacter({ ...base }, { detail: 0.45 }); n.ch.root.position.copy(pos); n.ch.root.rotation.y = yaw; this.scene.add(n.ch.root);
     }
   }

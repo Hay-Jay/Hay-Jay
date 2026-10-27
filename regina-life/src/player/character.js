@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SKIN_TONES, HAIR_COLORS, EYE_COLORS, CLOTHES } from '../data/catalog.js';
+import { SKIN_TONES, HAIR_COLORS, EYE_COLORS, LIP_COLORS, CLOTHES } from '../data/catalog.js';
 
 /**
  * Procedural, fully articulated human character in a soft, friendly "cozy game" style.
@@ -8,7 +8,7 @@ import { SKIN_TONES, HAIR_COLORS, EYE_COLORS, CLOTHES } from '../data/catalog.js
  *   mitten hands with a thumb, and chunky rounded shoes, so the figure reads clearly from the dollhouse camera.
  * - Smooth lathe/capsule anatomy, deformable head (face shapes), eyes with irises, brows, nose, ears,
  *   expressions and blinking.
- * - Customisable skin, hair styles/colours, facial hair, body type, clothing, footwear and accessories.
+ * - Male or female frame (shoulders, waist, hips, lashes), customisable skin, lip colour, hair styles/colours, facial hair, body type, clothing, footwear and accessories.
  * - Layered procedural animation (idle / walk / run / sit / carry / wave / use) with damped blending so
  *   transitions are natural.
  * - Clothing is plain colour only: there is deliberately NO number, logo or text on any garment.
@@ -36,6 +36,7 @@ export function resolveLook(look) {
     skinHex: SKIN_TONES[look.skin] ?? SKIN_TONES[2],
     hairHex: HAIR_COLORS[look.hairColor] ?? HAIR_COLORS[2],
     eyeHex: EYE_COLORS[look.eyes] ?? EYE_COLORS[0],
+    lipHex: LIP_COLORS[look.lips] ?? LIP_COLORS[0],
     topI: g(look.top), bottomI: g(look.bottom), shoesI: g(look.shoes), headI: g(look.head), faceI: g(look.face_acc), neckI: g(look.neck),
   };
 }
@@ -70,7 +71,10 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
     if (hem) mesh(new THREE.TorusGeometry(rBot, Math.min(0.009, rBot * 0.18), 5, seg(n)).rotateX(Math.PI / 2).translate(0, -len, 0), mat, parent);
   };
 
-  const body = BODY[look.body] ?? BODY.average;
+  const fem = look.frame === 'female';
+  // the female frame: narrower shoulders and waist, wider hips, slimmer arms; the male frame is the original figure
+  const body = { ...(BODY[look.body] ?? BODY.average) }; if (fem) { body.sh *= 0.9; body.waist *= 0.9; body.arm *= 0.88; body.leg *= 0.97; }
+  const hipK = fem ? 1.13 : 1;
   const face = FACE[look.face] ?? FACE.oval;
   const skin = M(look.skinHex, { rough: 0.55, emissive: 0.07 });
   const root = new THREE.Group(); root.name = 'character';
@@ -78,7 +82,7 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
   const hips = joint(scaleGroup, 0, 0.92, 0);
 
   /* ---------- torso ---------- */
-  const profile = (off = 0) => [...(off ? [[0.0, -0.075], [0.15 * body.waist + off, -0.075]] : [[0.0, -0.06], [0.125, -0.06]]), [0.148 + off, 0.04], [0.135 * body.waist + off, 0.2], [0.155 * body.chest + off, 0.34], [0.172 * body.chest + off, 0.42], [0.168 * body.chest + off, 0.475], [0.12 + off, 0.52], [0.062, 0.545]]
+  const profile = (off = 0) => [...(off ? [[0.0, -0.075], [0.15 * body.waist + off, -0.075]] : [[0.0, -0.06], [0.125, -0.06]]), [0.148 * hipK + off, 0.04], [0.135 * body.waist + off, 0.2], [0.155 * body.chest + off, 0.34], [0.172 * body.chest + off, 0.42], [0.168 * body.chest + off, 0.475], [0.12 + off, 0.52], [0.062, 0.545]]
     .map(([r, y]) => new THREE.Vector2(r, y));
   const torsoGeo = (off, cut = 1) => { const p = profile(off); const g = new THREE.LatheGeometry(cut < 1 ? p.slice(0, -1) : p, seg(28)); g.scale(1.18 * body.sh, 1, 0.74); return g; };
   const spine = joint(hips, 0, 0, 0);
@@ -122,7 +126,7 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
   /* ---------- eyes ---------- */
   const eyeGroup = joint(head, 0, 0.018, 0);
   const eyes = [];
-  const lashMat = M('#1b1412', { rough: 0.6 });
+  const lashMat = M('#1b1412', { rough: 0.6 }), lashW = fem ? 0.0034 : 0.0026;
   for (const s of [-1, 1]) {
     const eg = joint(eyeGroup, s * 0.04 * face.sx, -0.002, 0.088);
     const w = mesh(new THREE.SphereGeometry(0.021, seg(16), seg(12)), M('#fbf9f6', { rough: 0.2 }), eg); w.scale.set(0.95, 1.1, 0.5); w.castShadow = false;
@@ -133,16 +137,17 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
     mesh(new THREE.CircleGeometry(0.0042, 10), shine, eg, 0.0045, 0.0045, 0.0111).castShadow = false;
     mesh(new THREE.CircleGeometry(0.002, 8), shine, eg, -0.0045, -0.0068, 0.0111).castShadow = false;
     // upper lash line: a thin dark arc that gives the eye its shape
-    const lash = mesh(new THREE.TorusGeometry(0.0205, 0.0026, 5, seg(14), Math.PI * 0.82), lashMat, eg, 0, 0.0005, 0.004); lash.rotation.z = Math.PI * 0.09; lash.scale.set(0.98, 1.12, 1); lash.castShadow = false;
-    const flick = mesh(new THREE.CapsuleGeometry(0.0018, 0.007, 2, 4), lashMat, eg, s * 0.0205, 0.009, 0.006); flick.rotation.z = s * -0.9; flick.castShadow = false;
+    const lash = mesh(new THREE.TorusGeometry(0.0205, lashW, 5, seg(14), Math.PI * 0.82), lashMat, eg, 0, 0.0005, 0.004); lash.rotation.z = Math.PI * 0.09; lash.scale.set(0.98, 1.12, 1); lash.castShadow = false;
+    const flick = mesh(new THREE.CapsuleGeometry(0.0018, fem ? 0.011 : 0.007, 2, 4), lashMat, eg, s * 0.0205, 0.009, 0.006); flick.rotation.z = s * -0.9; flick.castShadow = false;
+    if (fem) { const f2 = mesh(new THREE.CapsuleGeometry(0.0016, 0.008, 2, 4), lashMat, eg, s * 0.014, 0.017, 0.007); f2.rotation.z = s * -0.5; f2.castShadow = false; }
     eyes.push(eg);
   }
   // brows
   const browMat = M(look.hairHex, { rough: 0.9 });
   const brows = [];
-  for (const s of [-1, 1]) { const b = mesh(new THREE.CapsuleGeometry(0.0046, 0.03, 4, 6), browMat, head, s * 0.041 * face.sx, 0.054, 0.093); b.rotation.z = Math.PI / 2; b.castShadow = false; brows.push({ m: b, s }); }
+  for (const s of [-1, 1]) { const b = mesh(new THREE.CapsuleGeometry(0.0046, 0.03, 4, 6), browMat, head, s * 0.041 * face.sx, 0.054, 0.093); b.rotation.z = Math.PI / 2; if (fem) b.scale.set(0.75, 1, 0.8); b.castShadow = false; brows.push({ m: b, s }); }
   // mouth (rebuilt per expression)
-  const lipMat = M('#a65a56', { rough: 0.4 });
+  const lipMat = M(look.lipHex, { rough: 0.4 });
   const beardMode = look.facialHair;
   const mouthZ = beardMode === 'full' ? 0.1175 : beardMode === 'stubble' ? 0.1 : 0.0985;
   const mouth = new THREE.Mesh(new THREE.BufferGeometry(), lipMat); mouth.position.set(0, -0.05, mouthZ); mouth.castShadow = false; head.add(mouth);
@@ -172,6 +177,9 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
       case 'short': hairCap(48, 118, 1.07); { const f = mesh(new THREE.SphereGeometry(0.06, seg(12), seg(8)), hairMat, head, 0.0, 0.088, 0.058); f.scale.set(1.5, 0.45, 0.8); f.rotation.x = 0.4; } break;
       case 'side-part': hairCap(46, 120, 1.08); { const f = mesh(new THREE.SphereGeometry(0.07, seg(12), seg(8)), hairMat, head, -0.03, 0.082, 0.045); f.scale.set(1.45, 0.55, 0.9); f.rotation.set(0.45, 0, -0.35); } break;
       case 'long': { hairCap(50, 135, 1.08); const back = mesh(new THREE.CapsuleGeometry(0.1, 0.3, 6, seg(14)), hairMat, head, 0, -0.17, -0.055); back.scale.set(1.05, 1, 0.62); for (const s of [-1, 1]) { const l = mesh(new THREE.CapsuleGeometry(0.03, 0.22, 4, seg(8)), hairMat, head, s * 0.098, -0.1, 0.0); l.scale.set(0.8, 1, 1.2); } break; }
+      case 'pixie': hairCap(44, 116, 1.06); { const f = mesh(new THREE.SphereGeometry(0.065, seg(12), seg(8)), hairMat, head, 0.025, 0.085, 0.05); f.scale.set(1.5, 0.42, 0.85); f.rotation.set(0.5, 0, 0.3); } break;
+      case 'bob': { hairCap(48, 128, 1.08); const back = mesh(new THREE.CapsuleGeometry(0.1, 0.06, 6, seg(14)), hairMat, head, 0, -0.045, -0.04); back.scale.set(1.12, 1, 0.75); for (const s of [-1, 1]) { const l = mesh(new THREE.CapsuleGeometry(0.032, 0.08, 4, seg(8)), hairMat, head, s * 0.1 * face.sx, -0.045, 0.012); l.scale.set(0.75, 1, 1.25); } break; }
+      case 'ponytail': { hairCap(48, 122, 1.07); mesh(new THREE.TorusGeometry(0.02, 0.007, 6, 12), M('#d9415a', { rough: 0.6 }), head, 0, 0.06, -0.115).rotation.x = 0.6; const t = mesh(new THREE.CapsuleGeometry(0.03, 0.2, 4, seg(10)), hairMat, head, 0, -0.04, -0.15); t.rotation.x = 0.35; t.scale.set(1, 1, 0.85); break; }
       case 'bun': hairCap(48, 120, 1.07); mesh(new THREE.SphereGeometry(0.055, seg(14), seg(10)), hairMat, head, 0, 0.128, -0.05); break;
       case 'curly': hairCap(46, 118, 1.06); { for (let k = 0; k < 26; k++) { const th = 0.15 + Math.random() * 1.15, ph = Math.random() * Math.PI * 2; const r = 0.108; const c = mesh(new THREE.SphereGeometry(0.03, seg(8), seg(6)), hairMat, head, Math.sin(th) * Math.cos(ph) * r * face.sx, Math.cos(th) * r * 1.05 + 0.005, Math.sin(th) * Math.sin(ph) * r - 0.012); if (c.position.z > 0.045 && c.position.y < 0.085) c.position.z -= 0.03; } } break;
       case 'afro': { const a = mesh(new THREE.IcosahedronGeometry(0.152, 3), hairMat, head, 0, 0.092, -0.05); a.scale.set(1.04, 0.96, 1.0); break; }
@@ -263,26 +271,28 @@ export function buildCharacter(lookIn, { detail = 1 } = {}) {
   const bStyle = look.bottomI?.style ?? 'jeans', bCol = look.bottomI?.color ?? '#334';
   const pants = M(bCol, { rough: bStyle === 'jeans' ? 0.85 : 0.95 });
   const legs = [];
-  const hipW = 0.092 * (body.waist * 0.5 + 0.55);
+  const hipW = 0.092 * (body.waist * 0.5 + 0.55) * hipK;
   // pelvis / hip block
   {
-    const pe = mesh(new THREE.SphereGeometry(0.15, seg(18), seg(12)), skin, hips, 0, -0.04, 0); pe.scale.set(1.0 * body.waist, 0.62, 0.72);
-    const pp = mesh(new THREE.SphereGeometry(0.15 + 0.011, seg(18), seg(12), 0, Math.PI * 2, 0, Math.PI * 0.75), pants, hips, 0, -0.04, 0); pp.scale.set(1.0 * body.waist, 0.7, 0.68);
+    const pe = mesh(new THREE.SphereGeometry(0.15, seg(18), seg(12)), skin, hips, 0, -0.04, 0); pe.scale.set(body.waist * hipK, 0.62, 0.72);
+    const pp = mesh(new THREE.SphereGeometry(0.15 + 0.011, seg(18), seg(12), 0, Math.PI * 2, 0, Math.PI * 0.75), pants, hips, 0, -0.04, 0); pp.scale.set(body.waist * hipK, 0.7, 0.68);
+    // a skirt hangs from the hips (not the legs), flaring out to mid-thigh so the legs swing freely underneath
+    if (bStyle === 'skirt') { const sk = mesh(new THREE.CylinderGeometry(0.162 * body.waist * hipK, 0.235 * hipK, 0.36, seg(24), 1, true).translate(0, -0.2, 0), pants, hips); sk.scale.set(1, 1, 0.78); sk.material.side = THREE.DoubleSide; }
     mesh(new THREE.CylinderGeometry(0.152 * body.waist, 0.15 * body.waist, 0.06, seg(24)), pants, hips, 0, 0.0, 0).scale.set(1, 1, 0.73);
     mesh(new THREE.TorusGeometry(0.15 * body.waist, 0.007, 6, seg(28)).rotateX(Math.PI / 2), M('#2b2118', { rough: 0.5 }), hips, 0, 0.03, 0).scale.set(1, 1, 0.73);
   }
   const thighLen = 0.45, shinLen = 0.43;
-  const shorts = bStyle === 'shorts';
+  const shorts = bStyle === 'shorts', skirt = bStyle === 'skirt';
   const legThick = { jeans: 0.011, chino: 0.009, jogger: 0.015, shorts: 0.011 }[bStyle] ?? 0.01;
   const lR = body.leg * 1.08, rK = lR * 0.8, rA = lR * 0.56;
   for (const s of [-1, 1]) {
     const hip = joint(hips, s * hipW, -0.02, 0);
     mesh(taper(lR, rK, thighLen, 16), skin, hip);
     const tl = shorts ? thighLen * 0.55 : thighLen;
-    tube(lR + legThick + 0.004, (shorts ? lR * 0.92 + 0.008 : rK) + legThick + 0.004, tl, pants, hip, 16, shorts);
+    if (!skirt) tube(lR + legThick + 0.004, (shorts ? lR * 0.92 + 0.008 : rK) + legThick + 0.004, tl, pants, hip, 16, shorts);
     const knee = joint(hip, 0, -thighLen, 0);
     mesh(taper(rK, rA, shinLen, 16), skin, knee);
-    if (!shorts) {
+    if (!shorts && !skirt) {
       mesh(new THREE.SphereGeometry(rK + legThick + 0.004, seg(12), seg(8)), pants, knee);
       const hemR = bStyle === 'jogger' ? rA + 0.006 : rK * 0.92 + legThick;   // joggers taper into a cuff, jeans and chinos fall straight
       tube(rK + legThick + 0.004, hemR, shinLen - (bStyle === 'jogger' ? 0.05 : 0.03), pants, knee, 16);
