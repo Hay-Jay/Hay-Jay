@@ -126,7 +126,7 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
             const j = ctx.store.state.job.active, def = j ? JOBS[j.id] : null, nx = def?.levels[j.level + 1], need = nx ? Math.max(0, Math.ceil((nx.xpNeeded - j.xp) / (XP_PER_TASK * def.levels[j.level].tasks))) : 0;
             ctx.fx?.juice.pay(r.pay, ctx.fx.head?.(), 'payday'); ctx.audio?.chime('gain');
             if (r.promoted) { ctx.fx?.juice.confetti(100); ctx.audio?.chime('fanfare'); ctx.fx?.juice.floater(`🎉 Promoted: ${r.promoted}!`, ctx.fx.head?.(), 'skill', { big: true }); }
-            ctx.ui.toast(`Shift complete! +${ctx.fmt(r.pay)}${r.promoted ? ` · Promoted to ${r.promoted}!` : nx ? ` · ${need} more shift${need === 1 ? '' : 's'} to ${nx.name}` : ''}`, 'good'); ctx.did?.('shift');
+            ctx.ui.toast(`Shift complete! +${ctx.fmt(r.pay)}${r.bonus ? ` · ⭐ Employee of the week: +${ctx.fmt(r.bonus)}` : ''}${r.promoted ? ` · Promoted to ${r.promoted}!` : nx ? ` · ${need} more shift${need === 1 ? '' : 's'} to ${nx.name}` : ''}`, 'good'); ctx.did?.('shift');
           }
           else ctx.ui.toast(r.error, 'warn');
         } else ctx.ui.menu(employerName, `You're partway through your shift (${sh.tasksDone}/${sh.tasksTotal}).`, [{ label: 'Keep working' }, { label: 'Abandon shift (no pay)', danger: true, run: () => { G.abandonShift(ctx.store); task.carrying = false; ctx.player.setCarry(false); task.target = -1; } }]);

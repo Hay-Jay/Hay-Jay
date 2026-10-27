@@ -1,6 +1,6 @@
 import { ICON, APP_STYLE } from './icons.js';
 import { CONTACTS, CONTACT_ORDER } from '../data/contacts.js';
-import { JOBS, XP_PER_TASK } from '../data/jobs.js';
+import { JOBS, XP_PER_TASK, BONUS_EVERY } from '../data/jobs.js';
 import { FOOD, CLOTHES, SLOTS, SLOT_KEY } from '../data/catalog.js';
 import { POIS, CAT_ICON, poiById } from '../world/cityData.js';
 import { MapView } from './map.js';
@@ -29,6 +29,8 @@ import { SUPPORT_URL } from '../data/sponsors.js';
 import { RESTAURANTS, RESTAURANT_BY_ID, SERVICES, ERRANDS_SOON, MAX_ITEMS } from '../data/errands.js';
 import * as ERR from '../core/errands.js';
 import { MARKET_STOCK } from '../data/catalog.js';
+import * as PET from '../core/pets.js';
+import * as CAR from '../core/car.js';
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const nav = (title, { back = false, right = '' } = {}) => `<div class="nav">${back ? `<button class="nav-back" data-act="back">${ICON.back}<span>Back</span></button>` : '<span></span>'}<h2>${title}</h2><span class="nav-right">${right}</span></div>`;
@@ -222,7 +224,9 @@ const jobsApp = app('jobs', 'Jobs', (body, ctx, phone) => {
       const def = JOBS[j.id], lvl = def.levels[j.level], next = def.levels[j.level + 1], sh = s.job.shift;
       const pct = next ? Math.min(100, ((j.xp - lvl.xpNeeded) / (next.xpNeeded - lvl.xpNeeded)) * 100) : 100;
       inner = `<div class="card job-card"><small>${esc(def.employer)}</small><h3>${esc(def.title)}</h3><p class="lvl">${esc(lvl.name)} · ${fmtMoney(G.wageFor(store, lvl))} / shift</p>
-        <div class="progress"><i style="width:${pct}%"></i></div><small>${next ? `${j.xp}/${next.xpNeeded} XP to ${esc(next.name)}` : 'Top level reached'} · ${j.shifts} shifts completed</small></div>
+        <div class="progress"><i style="width:${pct}%"></i></div><small>${next ? `${j.xp}/${next.xpNeeded} XP to ${esc(next.name)}` : 'Top level reached'} · ${j.shifts} shifts completed</small>
+        <ol class="ladder">${def.levels.map((l, i) => `<li class="${i < j.level ? 'done' : i === j.level ? 'now' : ''}"><span>${i < j.level ? '✓' : i === j.level ? '★' : i + 1}</span><b>${esc(l.name)}</b><small>${fmtMoney(G.wageFor(store, l))}</small></li>`).join('')}</ol>
+        <small>⭐ Every ${BONUS_EVERY}th shift: employee of the week bonus (${BONUS_EVERY - (j.shifts % BONUS_EVERY)} to go)</small></div>
         ${sh ? `<div class="card shift"><b>Shift in progress</b><p>${sh.tasksDone} / ${sh.tasksTotal} tasks done</p><div class="progress"><i style="width:${(sh.tasksDone / sh.tasksTotal) * 100}%"></i></div><small>${sh.tasksDone >= sh.tasksTotal ? 'Return to the counter to clock out.' : 'Carry stock from the back to the highlighted shelf.'}</small></div>`
         : `<div class="card"><b>Next shift</b><p>${lvl.tasks} tasks · pay ${fmtMoney(G.wageFor(store, lvl))}</p><small>Go to ${esc(def.employer)}, then talk to staff at the counter to clock in. Pay is deposited only after the work is done.</small></div>`}
         <div class="mc-btns"><button class="btn primary" data-act="nav">Navigate to work</button><button class="btn danger" data-act="quit">Quit job</button></div>`;
@@ -509,7 +513,8 @@ const socialApp = app('social', 'Social', (body, ctx, phone) => {
       <div class="actions3"><button data-do="msg">${ICON.messages}<span>message</span></button><button data-do="call">${ICON.phone}<span>call</span></button></div>
       <h4 class="sec">Hang out</h4><div class="list wide0">${Object.entries(SOC.HANGOUTS).filter(([, h]) => !h.datingOnly || dating).map(([k, h]) => { const bad = SOC.hangoutBlocked(store, sel, k); return `<button class="row" data-h="${k}" ${bad ? 'data-bad="' + esc(bad) + '"' : ''}><div class="avatar sm emoji">${h.icon}</div><div class="grow"><b>${h.label}</b><p>${h.cost ? fmtMoney(h.cost) : 'Free'} · +${h.rel} friendship</p></div></button>`; }).join('')}</div>
       <h4 class="sec">Gift</h4><div class="list wide0">${Object.entries(s.inventory).length ? Object.entries(s.inventory).map(([id, n]) => `<button class="row" data-g="${id}"><div class="avatar sm emoji">${FOOD[id].icon}</div><div class="grow"><b>${FOOD[id].name} ×${n}</b><p>${r.likes.includes(id) ? '❤️ Their favourite!' : 'A nice gesture'}</p></div></button>`).join('') : '<p class="empty">Buy something at the Market to give as a gift</p>'}</div>
-      <div class="mc-btns wide0">${dating ? '<button class="btn danger" data-do="breakup">Break up</button>' : r.datable ? '<button class="btn primary" data-do="ask">💛 Ask on a date</button>' : ''}</div>
+      ${dating ? (() => { const st = SOC.loveStage(s), nx = SOC.nextLoveStep(s), L = nx ? SOC.LOVE_STEP[nx] : null; return `<div class="card wide0"><small>Together · ${({ dating: 'Dating 💛', living: 'Living together 🏠', engaged: 'Engaged 💍', married: 'Married 💒' })[st]}</small>${L ? `<p>${L.icon} Next: ${esc(L.label)} · needs ${L.level}/100${L.cost ? ` · ${fmtMoney(L.cost)}` : ''}</p>` : '<p>Happily ever after. 💛</p>'}</div>`; })() : ''}
+      <div class="mc-btns wide0">${dating ? `${SOC.nextLoveStep(s) ? `<button class="btn primary" data-do="step">${SOC.LOVE_STEP[SOC.nextLoveStep(s)].icon} ${esc(SOC.LOVE_STEP[SOC.nextLoveStep(s)].label)}</button>` : ''}<button class="btn danger" data-do="breakup">Break up</button>` : r.datable ? '<button class="btn primary" data-do="ask">💛 Ask on a date</button>' : ''}</div>
       <p class="err">${esc(msg)}</p></div>`;
   };
   body.addEventListener('click', (e) => {
@@ -523,6 +528,7 @@ const socialApp = app('social', 'Social', (body, ctx, phone) => {
     if (d === 'msg') phone.openApp('messages'); if (d === 'call') phone.startCall(sel);
     if (d === 'ask') { const r = SOC.askOut(store, sel); msg = r.ok ? '' : r.error; if (r.ok) { ctx.audio?.blip('ok'); ctx.toast('💛 You are now dating!', 'good'); } detail(); }
     if (d === 'breakup') { SOC.breakUp(store, sel); detail(); }
+    if (d === 'step') { const r = SOC.loveStep(store, sel); msg = r.ok ? '' : r.error; if (r.ok) { ctx.audio?.chime?.('fanfare'); ctx.fx?.juice?.confetti?.(r.step === 'married' ? 140 : 70); ctx.toast(r.step === 'living' ? '🏠 You moved in together!' : r.step === 'engaged' ? '💍 You are engaged!' : `💒 Just married!${r.gifts ? ` Friends gave ${fmtMoney(r.gifts)} in gifts.` : ''}`, 'good'); } else ctx.toast(r.error, 'warn'); detail(); }
   });
   body.addEventListener('input', (e) => { if (e.target.id === 'soq') { q = e.target.value; const pos = e.target.selectionStart; list(); const el = body.querySelector('#soq'); el.focus(); el.setSelectionRange(pos, pos); } });
   list();
@@ -701,6 +707,72 @@ const errandsApp = app('errands', 'Errands', (body, ctx) => {
 });
 
 /* ================= SUPPORTERS: the mural, Support and Advertise (real money lives outside the game: docs/AMAZING.md R1, R2) ================= */
+/* ================= PETS (Prairie Paws shelter) ================= */
+const petsApp = app('pets', 'Pets', (body, ctx) => {
+  const { store } = ctx; let kind = 'dog', color = 0, name = '';
+  const bar = (label, v) => `<label><span>${label}</span><b>${Math.round(v)}%</b></label><div class="progress thin"><i style="width:${Math.round(v)}%"></i></div>`;
+  const render = () => {
+    const s = store.state, p = PET.petOf(s);
+    if (p) {
+      const k = PET.PET_KINDS[p.kind], mood = PET.petMood(p);
+      body.innerHTML = `${nav('Pets')}<div class="scroll"><div class="pet-hero" style="background:linear-gradient(145deg,${k.colors[p.color]},#3a2a1e)"><span class="pf">${k.icon}</span><div><h3>${esc(p.name)}</h3><small>${k.name} · ${mood}${mood === 'Happy' ? ' 💛' : ''}</small></div></div>
+        <div class="card"><div class="pet-bars">${bar('🍖 Fed', p.fed)}${bar('💛 Love', p.love)}</div><small>🥫 ${p.food} meal${p.food === 1 ? '' : 's'} of pet food left · ${esc(p.name)} waits for you at home.</small></div>
+        <div class="mc-btns"><button class="btn primary" data-pet="feed">🍖 Feed</button><button class="btn primary" data-pet="play">🎾 Play</button></div>
+        <div class="card"><b>Pet food</b><p>A bag of kibble: ${PET.PET_FOOD.meals} meals for ${fmtMoney(PET.PET_FOOD.price)}.</p><button class="btn wide" data-pet="food" ${s.bank.balance < PET.PET_FOOD.price ? 'disabled' : ''}>Buy a bag · ${fmtMoney(PET.PET_FOOD.price)}</button></div>
+        <p class="fine pad">A happy pet lifts your mood while you are home. Pets never run away: a hungry one just looks at you very sadly.</p></div>`;
+      return;
+    }
+    const k = PET.PET_KINDS[kind];
+    body.innerHTML = `${nav('Prairie Paws')}<div class="scroll"><div class="pet-hero"><span class="pf">🐾</span><div><h3>Adopt a friend</h3><small>Prairie Paws animal shelter</small></div></div>
+      <div class="seg">${Object.values(PET.PET_KINDS).map((x) => `<button class="${kind === x.id ? 'on' : ''}" data-kind="${x.id}">${x.icon} ${x.name}</button>`).join('')}</div>
+      <div class="card"><h3>${k.icon} ${k.name}</h3><p>${esc(k.blurb)}</p><small>Coat</small><div class="coat">${k.colors.map((c, i) => `<button class="${color === i ? 'on' : ''}" style="background:${c}" data-coat="${i}" aria-label="Coat ${i + 1}"></button>`).join('')}</div>
+        <div class="form"><label>Name<input id="petname" maxlength="${PET.NAME_MAX}" value="${esc(name)}" placeholder="${kind === 'dog' ? 'Biscuit' : 'Mittens'}" autocomplete="off"></label></div>
+        <button class="btn primary wide" data-pet="adopt" ${s.bank.balance < k.fee ? 'disabled' : ''}>${s.bank.balance < k.fee ? `Adoption fee ${fmtMoney(k.fee)}` : `Adopt · ${fmtMoney(k.fee)}`}</button></div>
+      <p class="fine pad">The fee covers shots and a starter bag of food. Your pet lives at home and follows you around.</p></div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const kd = e.target.closest('[data-kind]'); if (kd) { kind = kd.dataset.kind; color = 0; render(); return; }
+    const co = e.target.closest('[data-coat]'); if (co) { color = +co.dataset.coat; render(); return; }
+    const a = e.target.closest('[data-pet]')?.dataset.pet; if (!a) return;
+    const r = a === 'adopt' ? PET.adopt(store, kind, name || (kind === 'dog' ? 'Biscuit' : 'Mittens'), color) : a === 'feed' ? PET.feedPet(store) : a === 'play' ? PET.playWithPet(store) : PET.buyPetFood(store);
+    if (r.ok) { ctx.audio?.chime?.('gain'); ctx.toast(a === 'adopt' ? `${PET.PET_KINDS[kind].icon} Welcome home, ${r.pet.name}!` : a === 'feed' ? 'Nom nom nom 🍖' : a === 'play' ? 'So much fun! 🎾' : 'Kibble stocked 🥫', 'good'); ctx.onPet?.(); }
+    else { ctx.audio?.blip('error'); ctx.toast(r.error, 'warn'); }
+    render();
+  });
+  body.addEventListener('input', (e) => { if (e.target.id === 'petname') name = e.target.value; });
+  render();
+  return { update(topic) { if (document.activeElement?.id === 'petname') return; if (topic === 'pet' || topic === 'bank' || topic === undefined) render(); } };
+});
+
+/* ================= AUTOS (Prairie Motors) ================= */
+const autosApp = app('autos', 'Autos', (body, ctx) => {
+  const { store } = ctx; let color = 0;
+  const swatches = (on) => `<div class="coat">${CAR.CAR_COLORS.map((c, i) => `<button class="${on === i ? 'on' : ''}" style="background:${c}" data-col="${i}" aria-label="Colour ${i + 1}"></button>`).join('')}</div>`;
+  const render = () => {
+    const s = store.state, c = CAR.carOf(s);
+    if (c) {
+      const m = CAR.CARS[c.model];
+      body.innerHTML = `${nav('My car')}<div class="scroll"><div class="car-hero" style="background:linear-gradient(145deg,${CAR.CAR_COLORS[c.color]},#1b1f27)"><span class="pf">${m.icon}</span><div><h3>${esc(m.name)}</h3><small>Top speed about ${Math.round(m.speed * 3.6)} km/h</small></div></div>
+        <div class="card"><b>How to drive</b><p>Outside, press <b>G</b> or tap the <b>🚗 Drive</b> chip to get in. Steer like walking, hold Shift for a burst of speed. Press G again to park and get out.</p></div>
+        <div class="card"><b>Repaint</b><small>Free at Prairie Motors.</small>${swatches(c.color)}</div>
+        <button class="btn danger wide" data-car="sell">Sell back · ${fmtMoney(Math.floor(m.price * CAR.SELL_BACK))}</button></div>`;
+      return;
+    }
+    body.innerHTML = `${nav('Prairie Motors')}<div class="scroll"><div class="car-hero"><span class="pf">🚗</span><div><h3>Get your own wheels</h3><small>Drive anywhere in Regina, any time</small></div></div>
+      <div class="card"><small>Pick a colour</small>${swatches(color)}</div>
+      ${Object.values(CAR.CARS).map((m) => `<div class="card"><div class="jt"><div class="avatar emoji">${m.icon}</div><div><h3>${esc(m.name)}</h3><small>${fmtMoney(m.price)} · about ${Math.round(m.speed * 3.6)} km/h</small></div></div><p>${esc(m.blurb)}</p>
+        <button class="btn primary wide" data-buy="${m.id}" ${s.bank.balance < m.price ? 'disabled' : ''}>${s.bank.balance < m.price ? `Save up · ${fmtMoney(m.price)}` : `Buy · ${fmtMoney(m.price)}`}</button></div>`).join('')}
+      <p class="fine pad">No fuel or insurance to worry about. You can sell your car back any time for half the price.</p></div>`;
+  };
+  body.addEventListener('click', (e) => {
+    const col = e.target.closest('[data-col]'); if (col) { const v = +col.dataset.col; if (CAR.carOf(store.state)) { CAR.repaintCar(store, v); ctx.onCar?.(); } else color = v; render(); return; }
+    const b = e.target.closest('[data-buy]'); if (b) { const r = CAR.buyCar(store, b.dataset.buy, color); if (r.ok) { ctx.audio?.chime?.('fanfare'); ctx.fx?.juice?.confetti?.(60); ctx.toast(`${CAR.CARS[b.dataset.buy].icon} It's yours! Go outside and press G to drive.`, 'good'); ctx.onCar?.(); } else ctx.toast(r.error, 'warn'); render(); return; }
+    if (e.target.closest('[data-car="sell"]')) { ctx.onCar?.('sell'); const r = CAR.sellCar(store); if (r.ok) ctx.toast(`Sold for ${fmtMoney(r.refund)}`, 'good'); else ctx.toast(r.error, 'warn'); ctx.onCar?.(); render(); }
+  });
+  render();
+  return { update(topic) { if (topic === 'car' || topic === 'bank' || topic === undefined) render(); } };
+});
+
 const supportersApp = app('supporters', 'Supporters', (body) => {
   const names = muralNames(), sup = safeUrl(SUPPORT_URL);
   body.innerHTML = `${nav('Supporters')}<div class="scroll">
@@ -711,5 +783,5 @@ const supportersApp = app('supporters', 'Supporters', (body) => {
   return {};
 });
 
-export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp, gigsApp, errandsApp, supportersApp];
+export const APPS = [messages, phoneApp, contactsApp, mapsApp, bankApp, jobsApp, cameraApp, photosApp, weatherApp, calendarApp, inventoryApp, settingsApp, lifeApp, newsApp, adsApp, socialApp, townhallApp, tripsApp, radioApp, homesApp, gigsApp, errandsApp, petsApp, autosApp, supportersApp];
 export const APP_BY_ID = Object.fromEntries(APPS.map((a) => [a.id, a]));

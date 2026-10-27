@@ -1,6 +1,6 @@
 /** Game-rule operations (shopping, wardrobe, jobs, needs, messaging). Pure over a Store → unit-testable. */
 import { FOOD, CLOTHES, ITEM_NAME, ITEM_PRICE, SLOT_KEY } from '../data/catalog.js';
-import { JOBS, XP_PER_TASK, MIN_SECONDS_PER_TASK } from '../data/jobs.js';
+import { JOBS, XP_PER_TASK, MIN_SECONDS_PER_TASK, BONUS_EVERY, BONUS_SHARE } from '../data/jobs.js';
 import { CONTACTS, npcReply } from '../data/contacts.js';
 import { fmtMoney } from './ledger.js';
 import { policyMult, MAX_CAMPAIGN_POINTS, CANVASS_COOLDOWN_MS } from './policy.js';
@@ -167,13 +167,15 @@ export function finishShift(store) {
   const pay = store.ledger.credit(wage, `Payroll: ${JOBS[j.id].employer}`, { category: 'income', ref: `shift:${sh.startedAt}` });
   if (!pay.ok) return pay;
   j.xp += XP_PER_TASK * sh.tasksTotal; j.shifts++; tally(s, 'shifts');
+  let bonus = 0;
+  if (j.shifts % BONUS_EVERY === 0) { const b = Math.round(wage * BONUS_SHARE), r = store.ledger.credit(b, `Employee of the week: ${JOBS[j.id].employer}`, { category: 'income', ref: `bonus:${j.id}:${sh.startedAt}` }); if (r.ok) bonus = b; }
   s.job.shift = null;
   let promoted = null;
   const next = JOBS[j.id].levels[j.level + 1];
   if (next && j.xp >= next.xpNeeded) { j.level++; promoted = next.name; receiveMessage(store, JOBS[j.id].contact, `Congratulations! You've been promoted to ${promoted}. 🎉`, 1200); }
   s.needs.mood = clamp(s.needs.mood + 6);
   store.commit('jobs');
-  return { ok: true, pay: wage, promoted };
+  return { ok: true, pay: wage, promoted, bonus };
 }
 export function abandonShift(store) { store.state.job.shift = null; store.commit('jobs'); }
 
@@ -226,18 +228,30 @@ export const RECIPES = [
   { id: 'apple_toast',  name: 'Apple Toast',    icon: '🍞', needs: { bread: 1, apple: 1 },    hunger: 42, energy: 6, mood: 6 },
   { id: 'deli_plate',   name: 'Deli Plate',     icon: '🥪', needs: { sandwich: 1, chips: 1 }, hunger: 55, energy: 8, mood: 8 },
   { id: 'bannock_milk', name: 'Bannock & Milk', icon: '🫓', needs: { bannock: 1, milk: 1 },   hunger: 48, energy: 9, mood: 9 },
+  { id: 'french_toast', name: 'Prairie French Toast', icon: '🥞', needs: { bread: 1, milk: 1 }, hunger: 46, energy: 8, mood: 10 },
+  { id: 'apple_crisp',  name: 'Apple Crisp',    icon: '🥧', needs: { apple: 2, bread: 1 },    hunger: 34, energy: 6, mood: 14 },
+  { id: 'bannock_club', name: 'Bannock Club',   icon: '🥙', needs: { bannock: 1, sandwich: 1 }, hunger: 70, energy: 10, mood: 10 },
+  { id: 'cafe_au_lait', name: 'Café au Lait',   icon: '☕', needs: { coffee: 1, milk: 1 },   hunger: 6, energy: 30, mood: 6 },
 ];
-export function cook(store, recipeId) {
+/** How well the cooking mini-game went (0-3 good taps): scales how filling the meal is, the mood it gives and the Cooking XP. */
+export const COOK_QUALITY = [
+  { name: 'Burnt',   icon: '🔥', mult: 0.6, xp: 4,  mood: -4 },
+  { name: 'Good',    icon: '🙂', mult: 1.0, xp: 8,  mood: 0 },
+  { name: 'Great',   icon: '😋', mult: 1.2, xp: 12, mood: 4 },
+  { name: 'Perfect', icon: '🌟', mult: 1.4, xp: 16, mood: 8 },
+];
+export function cook(store, recipeId, quality = 1) {
   const r = RECIPES.find((x) => x.id === recipeId), s = store.state;
   if (!r) return { ok: false, error: 'Unknown recipe' };
   for (const [id, n] of Object.entries(r.needs)) if ((s.inventory[id] || 0) < n) return { ok: false, error: `Missing ingredients: ${FOOD[id].name}` };
   for (const [id, n] of Object.entries(r.needs)) { s.inventory[id] -= n; if (!s.inventory[id]) delete s.inventory[id]; }
   const bonus = 1 + skillLevel(s.skills?.cooking || 0) * 0.06;
-  s.needs.hunger = clamp(s.needs.hunger + Math.round(r.hunger * bonus)); s.needs.energy = clamp(s.needs.energy + r.energy); s.needs.mood = clamp(s.needs.mood + r.mood);
+  const q = COOK_QUALITY[Number.isInteger(quality) ? Math.max(0, Math.min(3, quality)) : 1];
+  s.needs.hunger = clamp(s.needs.hunger + Math.round(r.hunger * bonus * q.mult)); s.needs.energy = clamp(s.needs.energy + r.energy); s.needs.mood = clamp(s.needs.mood + r.mood + q.mood);
   s.needs.fun = clamp((s.needs.fun ?? 60) + 6);
   tally(s, 'eaten'); tally(s, 'cooked');
-  store.commit('needs'); addSkill(store, 'cooking', 8);
-  return { ok: true, recipe: r };
+  store.commit('needs'); addSkill(store, 'cooking', q.xp);
+  return { ok: true, recipe: r, quality: q };
 }
 
 /* ---------- activities (Sims-style: do a thing, change needs, grow skills) ---------- */

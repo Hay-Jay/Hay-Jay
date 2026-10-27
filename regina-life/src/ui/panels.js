@@ -1,5 +1,6 @@
-import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HAIR_STYLES, FACE_SHAPES, BODY_TYPES, FACIAL_HAIR, EXPRESSIONS, STORE_STOCK, ITEM_NAME } from '../data/catalog.js';
-import { RECIPES } from '../core/game.js';
+import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HAIR_STYLES, FACE_SHAPES, BODY_TYPES, FACIAL_HAIR, EXPRESSIONS, LIP_COLORS, FRAMES, FRAME_PRESET, STORE_STOCK, ITEM_NAME } from '../data/catalog.js';
+import { RECIPES, COOK_QUALITY, skillLevel } from '../core/game.js';
+import { gamedayStatus, buyTicket, watchGame, HOME_TEAM, TICKET_PRICE, WATCH_SECS, GAME_WEEKDAYS } from '../core/gameday.js';
 import { fmtMoney } from '../core/ledger.js';
 import { ICON } from './icons.js';
 import { FURNITURE, WALLS, FLOORS, WALL_PRICE, FLOOR_PRICE, SELL_RATIO } from '../data/furniture.js';
@@ -160,7 +161,7 @@ export class Panels {
     const chips = (arr, key) => `<div class="chips-sel">${arr.map((c) => `<button class="${look[key] === c ? 'on' : ''}" data-k="${key}" data-v="${c}">${esc(c.replace('-', ' '))}</button>`).join('')}</div>`;
     const body = () => {
       const s = store.state;
-      if (tab === 'face') return `<h4>Skin tone</h4>${sw(SKIN_TONES, 'skin')}<h4>Face shape</h4>${chips(FACE_SHAPES, 'face')}<h4>Eye colour</h4>${sw(EYE_COLORS, 'eyes')}<h4>Expression</h4>${chips(EXPRESSIONS, 'expression')}<h4>Facial hair</h4>${chips(FACIAL_HAIR, 'facialHair')}`;
+      if (tab === 'face') return `<h4>Skin tone</h4>${sw(SKIN_TONES, 'skin')}<h4>Face shape</h4>${chips(FACE_SHAPES, 'face')}<h4>Eye colour</h4>${sw(EYE_COLORS, 'eyes')}<h4>Lip colour</h4>${sw(LIP_COLORS, 'lips')}<h4>Expression</h4>${chips(EXPRESSIONS, 'expression')}<h4>Facial hair</h4>${chips(FACIAL_HAIR, 'facialHair')}`;
       if (tab === 'hair') return `<h4>Style</h4>${chips(HAIR_STYLES, 'hair')}<h4>Colour</h4>${sw(HAIR_COLORS, 'hairColor')}`;
       if (tab === 'body') return `<h4>Build</h4>${chips(BODY_TYPES, 'body')}<h4>Height</h4><input type="range" min="0.92" max="1.08" step="0.01" value="${look.height}" data-h aria-label="Height"><small class="muted">${Math.round(175 * look.height)} cm</small>`;
       return SLOTS.map((slot) => { const owned = s.wardrobe.map((id) => CLOTHES[id]).filter((c) => c.slot === slot); return `<h4>${{ top: 'Top', bottom: 'Bottom', shoes: 'Shoes', head: 'Headwear', face: 'Eyewear', neck: 'Scarf' }[slot]}</h4><div class="swatches">${owned.map((c) => `<button class="sw cloth ${look[SLOT_KEY[slot]] === c.id ? 'on' : ''}" style="background:${c.id.startsWith('none_') ? 'repeating-linear-gradient(45deg,#444,#444 4px,#222 4px,#222 8px)' : c.color}" data-cloth="${c.id}" title="${esc(c.name)}" aria-label="${esc(c.name)}"></button>`).join('')}</div>`; }).join('') + `<p class="fine">${creator ? 'Buy more at Prairie Threads.' : 'Buy more clothing at Prairie Threads on Victoria Ave.'}</p>`;
@@ -168,6 +169,7 @@ export class Panels {
     const render = () => {
       p.innerHTML = `<div class="ph"><h3>${creator ? 'Create your character' : 'Wardrobe'}</h3>${creator ? '' : `<button class="x" data-x aria-label="Close">${ICON.close}</button>`}</div>
         ${creator ? `<label class="namef">Name<input data-name maxlength="16" value="${esc(store.state.player.name)}" autocomplete="off"></label>` : ''}
+        ${creator ? `<div class="frame-pick" role="group" aria-label="Male or female">${FRAMES.map((f) => `<button class="${(look.frame ?? 'male') === f ? 'on' : ''}" data-frame="${f}" aria-pressed="${(look.frame ?? 'male') === f}"><span aria-hidden="true">${f === 'male' ? '👨' : '👩'}</span>${f === 'male' ? 'Male' : 'Female'}</button>`).join('')}</div>` : ''}
         ${groups.length > 1 ? `<div class="tabs">${groups.map(([n, k]) => `<button class="${k === tab ? 'on' : ''}" data-tab="${k}">${n}</button>`).join('')}</div>` : ''}
         <div class="cbody">${body()}</div>
         ${creator ? `<div class="pbtns"><button class="btn" data-rand>Randomise</button><button class="btn primary" data-done>Start my life in Regina</button></div>` : ''}`;
@@ -176,12 +178,14 @@ export class Panels {
     let rafH;
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
+      const fr = e.target.closest('[data-frame]'); if (fr) { if (look.frame !== fr.dataset.frame) Object.assign(look, FRAME_PRESET[fr.dataset.frame], { frame: fr.dataset.frame }); this.ctx.rebuildPlayer(); render(); store.commit('look'); return; }
       const t = e.target.closest('[data-tab]'); if (t) { tab = t.dataset.tab; render(); return; }
       const k = e.target.closest('[data-k]'); if (k) { const v = k.dataset.v; look[k.dataset.k] = /^\d+$/.test(v) ? +v : v; this.ctx.rebuildPlayer(); render(); store.commit('look'); return; }
       const cl = e.target.closest('[data-cloth]'); if (cl) { G.equip(store, cl.dataset.cloth); this.ctx.rebuildPlayer(); render(); return; }
       if (e.target.closest('[data-rand]')) {
         const pick = (a) => a[Math.floor(Math.random() * a.length)];
-        Object.assign(look, { skin: Math.floor(Math.random() * SKIN_TONES.length), hair: pick(HAIR_STYLES), hairColor: Math.floor(Math.random() * HAIR_COLORS.length), eyes: Math.floor(Math.random() * EYE_COLORS.length), face: pick(FACE_SHAPES), body: pick(BODY_TYPES), facialHair: pick(FACIAL_HAIR), expression: pick(['neutral', 'smile', 'smile']), height: 0.95 + Math.random() * 0.1 });
+        const frame = pick(FRAMES), fem = frame === 'female';
+        Object.assign(look, { frame, lips: fem ? 1 + Math.floor(Math.random() * (LIP_COLORS.length - 1)) : 0, skin: Math.floor(Math.random() * SKIN_TONES.length), hair: pick(HAIR_STYLES), hairColor: Math.floor(Math.random() * HAIR_COLORS.length), eyes: Math.floor(Math.random() * EYE_COLORS.length), face: pick(FACE_SHAPES), body: pick(BODY_TYPES), facialHair: fem ? 'none' : pick(FACIAL_HAIR), expression: pick(['neutral', 'smile', 'smile']), height: (fem ? 0.93 : 0.96) + Math.random() * 0.09 });
         this.ctx.rebuildPlayer(); render(); return;
       }
       if (e.target.closest('[data-done]')) { const nm = p.querySelector('[data-name]').value.trim() || 'Alex'; store.state.player.name = nm.slice(0, 16); this.close(); }
@@ -251,8 +255,68 @@ export class Panels {
     const p = this._show('', 'shop'); render();
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
-      const b = e.target.closest('[data-cook]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.cook(store, b.dataset.cook);
-      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); this.ctx.onCooked?.(); } else this.ctx.toast(r.error, 'warn'); render();
+      const b = e.target.closest('[data-cook]'); if (!b) return;
+      this.cookGame(b.dataset.cook);
+    });
+  }
+
+  /**
+   * The cooking mini-game: three steps (chop, stir, plate). A marker sweeps across a bar; tap when it is in the green. Each good tap makes the
+   * meal better (Burnt, Good, Great, Perfect: core/game.js COOK_QUALITY). Higher Cooking skill widens the green. Ingredients are only used
+   * when the meal is served, so closing early costs nothing.
+   */
+  cookGame(recipeId) {
+    const { store, G } = this.ctx, rec = RECIPES.find((r) => r.id === recipeId); if (!rec) return;
+    const STEPS = [['🔪', 'Chop'], ['🥄', 'Stir'], ['🍽️', 'Plate']], lvl = skillLevel(store.state.skills?.cooking || 0), zw = Math.min(0.34, 0.2 + lvl * 0.015);
+    let step = 0, hits = 0, zone = 0, t0 = performance.now(), raf = 0, done = false; const speed = 0.9 + Math.random() * 0.25;
+    const p = this._show(`<div class="ph"><h3>${rec.icon} ${esc(rec.name)}</h3><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
+      <p class="pm" data-say></p><div class="cookbar"><i class="zone"></i><b class="needle"></b></div><div class="cooksteps">${STEPS.map(([i, n]) => `<span>${i} ${n}</span>`).join('')}</div>
+      <div class="pbtns"><button class="btn primary" data-tap>Tap! (Space)</button></div>`, 'menu cook-panel', { onClose: () => { done = true; cancelAnimationFrame(raf); removeEventListener('keydown', key, true); } });
+    const zoneEl = p.querySelector('.zone'), needle = p.querySelector('.needle'), say = p.querySelector('[data-say]'), steps = [...p.querySelectorAll('.cooksteps span')];
+    const pos = () => { const k = ((performance.now() - t0) / 1000) * speed * (1 + step * 0.25); const f = k % 2; return f < 1 ? f : 2 - f; };
+    const setStep = () => { zone = 0.1 + Math.random() * (0.8 - zw); zoneEl.style.left = zone * 100 + '%'; zoneEl.style.width = zw * 100 + '%'; say.textContent = `${STEPS[step][0]} ${STEPS[step][1]}: tap when the marker is in the green.`; steps.forEach((el, i) => el.classList.toggle('now', i === step)); t0 = performance.now(); };
+    const loop = () => { if (done) return; needle.style.left = pos() * 100 + '%'; raf = requestAnimationFrame(loop); };
+    const tap = () => {
+      if (done) return; const x = pos(), ok = x >= zone && x <= zone + zw; if (ok) hits++;
+      steps[step].classList.add(ok ? 'hit' : 'miss'); this.ctx.audio?.blip(ok ? 'ok' : 'error');
+      if (++step < STEPS.length) { setStep(); return; }
+      done = true; cancelAnimationFrame(raf); const b0 = this.ctx.fx?.snap(), r = G.cook(store, recipeId, hits);
+      setTimeout(() => { this.close();
+        if (r.ok) { this.ctx.toast(`${r.quality.icon} ${r.quality.name} ${r.recipe.name}!${hits === 3 ? ' Chef\'s kiss.' : hits === 0 ? ' Edible. Mostly.' : ''}`, hits ? 'good' : 'warn'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); if (hits === 3) this.ctx.fx?.juice?.confetti?.(40); this.ctx.onCooked?.(); }
+        else this.ctx.toast(r.error, 'warn'); }, 450);
+    };
+    const key = (e) => { if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); tap(); } };
+    addEventListener('keydown', key, true);
+    p.addEventListener('click', (e) => { if (e.target.closest('[data-x]')) return this.close(); if (e.target.closest('[data-tap]')) tap(); });
+    setStep(); loop();
+  }
+
+  /** Game day at the stadium: today's matchup, buy a ticket, watch the game quarter by quarter. */
+  gameday() {
+    const { store } = this.ctx; const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const render = () => {
+      const st = gamedayStatus(store.state, store.now()), m = st.today;
+      p.innerHTML = `<div class="ph"><h3>🏈 Game day</h3><button class="x" data-x aria-label="Close">${ICON.close}</button></div>
+        ${m ? `<div class="scoreboard"><div><span>${HOME_TEAM.icon}</span><b>${esc(HOME_TEAM.city)} ${esc(HOME_TEAM.name)}</b></div><em>vs</em><div><span>${m.away.icon}</span><b>${esc(m.away.name)}</b></div></div>
+          <p class="pm">${st.watched ? `Final: ${HOME_TEAM.name} ${m.home}, ${m.away.name} ${m.vis}. ${m.win ? 'What a win! 🎉' : 'Next time!'}` : st.hasTicket ? 'You have a ticket. Find your seat and cheer!' : `Home game today! Upper-bowl seats are ${fmtMoney(TICKET_PRICE)}.`}</p>
+          <div class="pbtns">${st.watched ? '' : st.hasTicket ? '<button class="btn primary" data-gd="watch">📣 Watch the game</button>' : `<button class="btn primary" data-gd="buy" ${store.state.bank.balance < TICKET_PRICE ? 'disabled' : ''}>🎟️ Buy a ticket · ${fmtMoney(TICKET_PRICE)}</button>`}<button class="btn" data-x>Close</button></div>`
+        : `<p class="pm">No home game today. The ${esc(HOME_TEAM.name)} play here every ${GAME_WEEKDAYS.map((d) => DAYS[d]).join(', ').replace(/, ([^,]*)$/, ' and $1')}. Next game: ${st.nextIn === 1 ? 'tomorrow' : `in ${st.nextIn} days`}.</p><div class="pbtns"><button class="btn" data-x>Close</button></div>`}
+        <p class="fine">${st.games ? `You've been to ${st.games} game${st.games > 1 ? 's' : ''} (${st.wins} win${st.wins === 1 ? '' : 's'}).` : 'Your first game comes with a free fan jersey.'}</p>`;
+    };
+    const p = this._show('', 'menu gameday'); render();
+    p.addEventListener('click', (e) => {
+      if (e.target.closest('[data-x]')) return this.close();
+      const a = e.target.closest('[data-gd]')?.dataset.gd;
+      if (a === 'buy') { const r = buyTicket(store); if (r.ok) { this.ctx.audio?.chime?.('gain'); this.ctx.toast('🎟️ Ticket bought. Enjoy the game!', 'good'); } else this.ctx.toast(r.error, 'warn'); render(); }
+      if (a === 'watch') {
+        const b0 = this.ctx.fx?.snap(), r = watchGame(store); if (!r.ok) { this.ctx.toast(r.error, 'warn'); render(); return; }
+        this.ctx.player.gesture('wave', WATCH_SECS);
+        p.innerHTML = `<h3>📣 ${esc(HOME_TEAM.name)} vs ${esc(r.away.name)}</h3><div class="scoreboard live"><div><span>${HOME_TEAM.icon}</span><b data-h>0</b></div><em>–</em><div><span>${r.away.icon}</span><b data-v>0</b></div></div><ol class="plays"></ol>`;
+        const ol = p.querySelector('.plays'), each = (WATCH_SECS * 1000) / (r.plays.length + 1);
+        r.plays.forEach((line, i) => setTimeout(() => { if (this.cur === null) return; const li = document.createElement('li'); li.textContent = line; ol.appendChild(li); const nums = line.match(/(\d+)\D+(\d+)$/); if (nums) { p.querySelector('[data-h]').textContent = nums[1]; p.querySelector('[data-v]').textContent = nums[2]; } this.ctx.audio?.blip('tick'); }, each * (i + 1)));
+        setTimeout(() => { this.close(); if (b0) this.ctx.fx?.gains(b0); if (r.win) { this.ctx.fx?.juice?.confetti?.(90); this.ctx.audio?.chime?.('fanfare'); }
+          this.ctx.toast(`Final: ${HOME_TEAM.name} ${r.home}, ${r.away.name.split(' ').pop()} ${r.vis}. ${r.win ? 'Storm win! 🟢🎉' : 'Tough loss.'}${r.jersey ? ' You got a free fan jersey! 👕' : ''}`, r.win ? 'good' : 'info'); this.ctx.onDid?.('gameday'); }, WATCH_SECS * 1000 + 400);
+      }
     });
   }
 }

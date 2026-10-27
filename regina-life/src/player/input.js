@@ -16,7 +16,7 @@ export class Input {
       if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'tab'].includes(k)) e.preventDefault();
       if (e.repeat) return;
       this.keys.add(k);
-      const map = { e: 'interact', f: 'interact', enter: 'interact', p: 'phone', m: 'map', c: 'wardrobe', escape: 'escape', v: 'view', h: 'hud' };
+      const map = { e: 'interact', f: 'interact', enter: 'interact', p: 'phone', m: 'map', c: 'wardrobe', escape: 'escape', v: 'view', h: 'hud', g: 'drive' };
       if (map[k]) this.emit(map[k]);
     });
     addEventListener('keyup', (e) => this.keys.delete(e.key.toLowerCase()));

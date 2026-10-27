@@ -29,11 +29,13 @@ export const FURNITURE = Object.fromEntries([
   /* ---- Kitchen ---- */
   A('chair',         'Dining chair',         'Kitchen', 'chair',    1,   5900, 0.5,  0.5,  0.9,  '#8a6a48'),
   A('chair_wood',    'Walnut dining chair',  'Kitchen', 'chair',    3,  14900, 0.5,  0.52, 0.88, '#6a4a33'),
+  A('chair_cafe',    'Café chair',           'Kitchen', 'chair',    2,   8900, 0.5,  0.5,  0.9,  '#2f6d6a'),
   A('table_bistro',  'Bistro table',         'Kitchen', 'dtable',   1,   8900, 0.7,  0.7,  0.75, '#c9b79a'),
   A('dining',        'Dining table',         'Kitchen', 'dtable',   2,  29900, 1.5,  0.9,  0.75, '#7a5a3e'),
   A('dining_oak',    'Oak dining table',     'Kitchen', 'dtable',   3,  64900, 1.8,  0.95, 0.76, '#b58a56'),
   A('cart',          'Rolling kitchen cart', 'Kitchen', 'island',   1,  12900, 0.6,  0.45, 0.85, '#e3dccb'),
   A('island',        'Kitchen island',       'Kitchen', 'island',   3,  54900, 1.2,  0.6,  0.92, '#4f6d7a'),
+  A('island_butcher','Butcher-block island', 'Kitchen', 'island',   2,  29900, 1.0,  0.6,  0.92, '#c98a5a'),
   /* ---- Bath ---- */
   A('hamper',        'Laundry hamper',       'Bath',    'hamper',   1,   3900, 0.45, 0.4,  0.65, '#c9b79a'),
   A('bath_mat',      'Bath mat',             'Bath',    'bathmat',  1,   2900, 0.5,  0.8,  0.02, '#7fb5b0', false),
@@ -47,6 +49,7 @@ export const FURNITURE = Object.fromEntries([
   A('sectional',     'Leather sectional',    'Comfort', 'sofa',     4, 279900, 2.8,  1.7,  0.9,  '#6b4a36'),
   A('beanbag',       'Bean bag',             'Comfort', 'beanbag',  1,   8900, 0.9,  0.9,  0.55, '#3e6a9e'),
   A('armchair',      'Armchair',             'Comfort', 'armchair', 2,  29900, 0.95, 0.95, 0.9,  '#a3552f'),
+  A('chair_accent',  'Accent chair',         'Comfort', 'armchair', 1,  14900, 0.85, 0.85, 0.85, '#e9a23b'),
   A('recliner',      'Recliner',             'Comfort', 'armchair', 3,  69900, 0.95, 1.05, 1.05, '#5d6b73'),
   A('lounge',        'Leather lounge chair', 'Comfort', 'armchair', 4, 149900, 0.9,  0.95, 0.9,  '#7a4b32'),
   A('coffee',        'Coffee table',         'Comfort', 'ctable',   2,  19900, 1.1,  0.6,  0.42, '#5e4733'),
@@ -58,8 +61,10 @@ export const FURNITURE = Object.fromEntries([
   A('tv_65',         '65" 4K TV',            'Fun',     'tv',       3,  89900, 1.5,  0.38, 1.0,  '#202328'),
   A('tv_oled',       '77" OLED TV',          'Fun',     'tv',       4, 249900, 1.8,  0.4,  1.12, '#16181c'),
   A('speaker',       'Stereo cabinet',       'Fun',     'audio',    2,  34900, 0.8,  0.4,  0.7,  '#2b2e33'),
+  A('jukebox',       'Jukebox',              'Fun',     'audio',    3,  89900, 0.8,  0.55, 1.5,  '#b5462f'),
   A('turntable',     'Record console',       'Fun',     'audio',    4, 129900, 1.0,  0.45, 0.85, '#8a5a36'),
   A('foosball',      'Foosball table',       'Fun',     'game',     2,  49900, 1.4,  0.75, 0.9,  '#3f7a5a'),
+  A('arcade_mini',   'Mini arcade cabinet',  'Fun',     'game',     1,  39900, 0.6,  0.7,  1.6,  '#c0392b'),
   A('arcade',        'Arcade cabinet',       'Fun',     'game',     3, 119900, 0.75, 0.85, 1.8,  '#3d3a8c'),
   A('pool',          'Pool table',           'Fun',     'game',     4, 249900, 2.5,  1.4,  0.85, '#2f6d4a'),
   /* ---- Skills ---- */
@@ -69,22 +74,27 @@ export const FURNITURE = Object.fromEntries([
   A('exbike',        'Exercise bike',        'Skills',  'cardio',   2,  39900, 0.55, 1.1,  1.1,  '#d2d6dc'),
   A('treadmill',     'Treadmill',            'Skills',  'cardio',   3,  99900, 0.85, 1.9,  1.3,  '#30343b'),
   A('desk',          'Writing desk',         'Skills',  'desk',     1,  14900, 1.2,  0.6,  0.75, '#c9a878'),
+  A('desk_oak',      'Oak study desk',       'Skills',  'desk',     2,  34900, 1.5,  0.7,  0.76, '#9a6b42'),
   A('bookcase',      'Bookcase',             'Skills',  'shelf',    2,  19900, 1.4,  0.38, 1.9,  '#5b4331'),
   A('easel',         'Art easel',            'Skills',  'easel',    1,   8900, 0.7,  0.6,  1.55, '#b08a62'),
   A('piano',         'Digital piano',        'Skills',  'piano',    3,  89900, 1.4,  0.45, 0.9,  '#1c1e22'),
+  A('piano_concert', 'Concert stage piano',  'Skills',  'piano',    4, 179900, 1.6,  0.5,  0.9,  '#f1efe8'),
   /* ---- Light ---- */
   A('lamp_paper',    'Paper lantern lamp',   'Light',   'lamp',     1,   2900, 0.4,  0.4,  1.5,  '#f1e6c8'),
   A('lamp',          'Floor lamp',           'Light',   'lamp',     2,   7900, 0.4,  0.4,  1.7,  '#e8d9a8'),
   A('lamp_tripod',   'Tripod lamp',          'Light',   'lamp',     3,  14900, 0.65, 0.65, 1.65, '#e2c88a'),
   A('lamp_arc',      'Arc floor lamp',       'Light',   'lamp',     4,  32900, 0.95, 0.4,  2.0,  '#f0e2b8'),
   A('fireplace',     'Electric fireplace',   'Light',   'hearth',   3,  59900, 1.1,  0.35, 0.85, '#4a4f58'),
+  A('fireplace_stone','Stone fireplace',     'Light',   'hearth',   4, 129900, 1.4,  0.4,  1.0,  '#9a8f86'),
   /* ---- Decor ---- */
   A('plant_pothos',  'Pothos on a stand',    'Decor',   'plant',    1,   2900, 0.4,  0.4,  0.75, '#4c8a46'),
   A('plant',         'Fiddle-leaf plant',    'Decor',   'plant',    2,   5900, 0.55, 0.55, 1.3,  '#3f7a3a'),
   A('plant_palm',    'Kentia palm',          'Decor',   'plant',    3,  13900, 0.8,  0.8,  1.8,  '#3a7a4a'),
   A('plant_tree',    'Indoor olive tree',    'Decor',   'plant',    4,  24900, 0.9,  0.9,  2.0,  '#6f8f5a'),
   A('mirror',        'Full-length mirror',   'Decor',   'mirror',   2,  12900, 0.55, 0.15, 1.7,  '#b08a62'),
+  A('mirror_lean',   'Leaning mirror',       'Decor',   'mirror',   1,   4900, 0.45, 0.15, 1.5,  '#d4a943'),
   A('aquarium',      'Aquarium on stand',    'Decor',   'aquarium', 3,  59900, 1.2,  0.45, 1.1,  '#3a8fb7'),
+  A('aquarium_big',  'Reef aquarium',        'Decor',   'aquarium', 4, 149900, 1.6,  0.5,  1.3,  '#2a7fb7'),
   A('clock',         'Grandfather clock',    'Decor',   'clock',    4,  79900, 0.5,  0.3,  1.95, '#5b3d2a'),
   /* ---- Storage ---- */
   A('trunk',         'Storage trunk',        'Storage', 'trunk',    1,   7900, 0.8,  0.45, 0.45, '#8a6a48'),
@@ -112,10 +122,12 @@ export const WALLS = {
   sky: ['Sky', '#bcd4e6', 7900], lilac: ['Lilac', '#cfc3e0', 7900], blush: ['Blush', '#e8cfc8', 7900], sun: ['Sunflower', '#f0d98c', 7900],
   terracotta: ['Terracotta', '#c98467', 9900], teal: ['Deep teal', '#3f7f86', 9900],
   forest: ['Forest', '#4d6b52', 12900], navy: ['Navy', '#2f4670', 12900], plum: ['Plum', '#6d4a6b', 12900], charcoal: ['Charcoal', '#4a4f58', 12900],
+  peach: ['Peach', '#f2c9a8', 7900], rose: ['Dusty rose', '#d9a5a8', 9900], ocean: ['Ocean', '#4f8fb0', 12900], mustard: ['Mustard', '#d4a33b', 12900],
 };
 export const FLOORS = {
   oak: ['Oak', 'wood', '#b08a62', 0], birch: ['Birch', 'wood', '#d9c4a1', 54900], maple: ['Maple', 'wood', '#c9a678', 54900], ash: ['Grey ash', 'wood', '#9d9a92', 64900],
   walnut: ['Walnut', 'wood', '#6a4a33', 84900], ebony: ['Ebony', 'wood', '#3b2f2a', 94900],
+  cherry: ['Cherry', 'wood', '#8f4b32', 84900], marble: ['Marble tile', 'tile', '#ecebe6', 149900],
   white_tile: ['White tile', 'tile', '#d9dde2', 104900], slate: ['Slate tile', 'tile', '#8a8f98', 114900], terracotta_tile: ['Terracotta tile', 'tile', '#b5654a', 124900],
 };
 /** Cheapest first-time prices (the old flat rates); use wallPrice()/floorPrice() for a specific style. */

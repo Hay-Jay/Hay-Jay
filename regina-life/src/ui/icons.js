@@ -40,10 +40,12 @@ export const ICON = {
   mic: S('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),
   keypad: S('<g fill="currentColor" stroke="none"><circle cx="6" cy="5" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="18" cy="5" r="1.5"/><circle cx="6" cy="11" r="1.5"/><circle cx="12" cy="11" r="1.5"/><circle cx="18" cy="11" r="1.5"/><circle cx="6" cy="17" r="1.5"/><circle cx="12" cy="17" r="1.5"/><circle cx="18" cy="17" r="1.5"/><circle cx="12" cy="22" r="1.5"/></g>'),
   speaker: S('<path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>'),
+  pets: S('<circle cx="6" cy="10" r="1.8"/><circle cx="10" cy="6" r="1.8"/><circle cx="14" cy="6" r="1.8"/><circle cx="18" cy="10" r="1.8"/><path d="M12 11c-3 0-5.5 3.6-5.5 6.2 0 1.6 1.3 2.3 2.8 2.3 1.1 0 1.8-.6 2.7-.6s1.6.6 2.7.6c1.5 0 2.8-.7 2.8-2.3C17.5 14.6 15 11 12 11z"/>'),
+  autos: S('<path d="M4 15v-3l2-5h12l2 5v3"/><rect x="3" y="12" width="18" height="5" rx="1.5"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/>'),
   flip: S('<path d="M4 8V5h3M20 16v3h-3"/><path d="M5 9a8 8 0 0 1 14-2M19 15a8 8 0 0 1-14 2"/>'),
 };
 export const APP_STYLE = {
   messages: ['#5bf17a', '#16b24b'], phone: ['#5bf17a', '#16b24b'], contacts: ['#a5adb8', '#6b7480'], maps: ['#5fd0ff', '#2f7cf6'],
   bank: ['#43d6a5', '#0b8f6e'], jobs: ['#ffb347', '#ef6c1a'], camera: ['#8d949e', '#4a5059'], photos: ['#ffd36b', '#ff6b8a'],
-  weather: ['#6bc1ff', '#2c6fd6'], calendar: ['#ffffff', '#e8e8ee'], inventory: ['#b88cff', '#6a3de8'], life: ['#ff7aa8', '#e8365f'], social: ['#8f7bff', '#5a3fe0'], townhall: ['#e6c25a', '#a8761c'], trips: ['#4fd0ff', '#1b7fc9'], radio: ['#ff9a6b', '#e05a2b'], homes: ['#ff8a5c', '#c4402a'], gigs: ['#ffd257', '#e08a00'], errands: ['#ff7a59', '#e8364f'], supporters: ['#ff9ec4', '#d6336c'], news: ['#ffd36b', '#ff8a3d'], ads: ['#5de0c8', '#1a8f86'], settings: ['#9aa1ab', '#5b626d'],
+  weather: ['#6bc1ff', '#2c6fd6'], calendar: ['#ffffff', '#e8e8ee'], inventory: ['#b88cff', '#6a3de8'], life: ['#ff7aa8', '#e8365f'], social: ['#8f7bff', '#5a3fe0'], townhall: ['#e6c25a', '#a8761c'], trips: ['#4fd0ff', '#1b7fc9'], radio: ['#ff9a6b', '#e05a2b'], homes: ['#ff8a5c', '#c4402a'], gigs: ['#ffd257', '#e08a00'], errands: ['#ff7a59', '#e8364f'], supporters: ['#ff9ec4', '#d6336c'], news: ['#ffd36b', '#ff8a3d'], ads: ['#5de0c8', '#1a8f86'], settings: ['#9aa1ab', '#5b626d'], pets: ['#ffb36b', '#e86a3a'], autos: ['#6aa2ff', '#1f4fbf'],
 };

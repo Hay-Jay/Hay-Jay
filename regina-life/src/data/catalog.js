@@ -32,6 +32,8 @@ export const CLOTHES = {
   tee_white:   { id: 'tee_white',   slot: 'top',    style: 'tee',     color: '#e9e6df', name: 'Classic Tee — Bone',   price: 0 },
   tee_black:   { id: 'tee_black',   slot: 'top',    style: 'tee',     color: '#1d1f24', name: 'Classic Tee — Black',  price: 0 },
   tee_navy:    { id: 'tee_navy',    slot: 'top',    style: 'tee',     color: '#233a5e', name: 'Classic Tee — Navy',   price: 0 },
+  jersey_storm:{ id: 'jersey_storm',slot: 'top',    style: 'tee',     color: '#1e7a3c', name: 'Prairie Storm Jersey (fan prize)', price: 0, prize: true },
+  tee_coral:   { id: 'tee_coral',   slot: 'top',    style: 'tee',     color: '#e8826f', name: 'Classic Tee — Coral',  price: 0 },
   hoodie_grey: { id: 'hoodie_grey', slot: 'top',    style: 'hoodie',  color: '#6c7077', name: 'Hoodie — Prairie Grey',price: 6500 },
   hoodie_red:  { id: 'hoodie_red',  slot: 'top',    style: 'hoodie',  color: '#a3312f', name: 'Bunnyhug — Brick',   price: 6500 },
   sweater_cream:{id: 'sweater_cream',slot:'top',    style: 'sweater', color: '#d8cdb4', name: 'Knit Sweater — Cream', price: 7900 },
@@ -42,6 +44,8 @@ export const CLOTHES = {
   chino_tan:   { id: 'chino_tan',   slot: 'bottom', style: 'chino',   color: '#b49a72', name: 'Chinos — Wheat',       price: 5400 },
   jogger_grey: { id: 'jogger_grey', slot: 'bottom', style: 'jogger',  color: '#4a4e55', name: 'Joggers — Slate',      price: 4800 },
   shorts_khaki:{ id: 'shorts_khaki',slot: 'bottom', style: 'shorts',  color: '#a99871', name: 'Shorts — Khaki',       price: 3900 },
+  skirt_denim: { id: 'skirt_denim', slot: 'bottom', style: 'skirt',   color: '#4a6a97', name: 'Skirt — Denim',        price: 0 },
+  skirt_plaid: { id: 'skirt_plaid', slot: 'bottom', style: 'skirt',   color: '#8a2e3a', name: 'Pleated Skirt — Berry', price: 4500 },
   sneaker_white:{id: 'sneaker_white',slot:'shoes',  style: 'sneaker', color: '#f0efe9', name: 'Court Sneakers — White', price: 0 },
   sneaker_black:{id: 'sneaker_black',slot:'shoes',  style: 'sneaker', color: '#202226', name: 'Court Sneakers — Black', price: 8900 },
   boots_brown: { id: 'boots_brown', slot: 'shoes',  style: 'boots',   color: '#5b3d26', name: 'Winter Boots — Brown', price: 16900 },
@@ -64,14 +68,21 @@ export const STORE_STOCK = Object.values(CLOTHES).filter((c) => c.price > 0).map
 export const SKIN_TONES = ['#f6d9c3', '#efc3a0', '#e0a87c', '#c68a5b', '#a56a3f', '#7d4a2a', '#5a331d', '#3b2314'];
 export const HAIR_COLORS = ['#0d0b0a', '#2a1b12', '#4a3020', '#7a5230', '#b58a52', '#d8c08a', '#8d2f1d', '#8e8e92', '#d9d9dc'];
 export const EYE_COLORS = ['#3a2a1d', '#5b7a52', '#4f7ea8', '#6b6f73'];
-export const HAIR_STYLES = ['buzz', 'short', 'side-part', 'long', 'bun', 'curly', 'afro', 'braids', 'bald'];
+export const HAIR_STYLES = ['buzz', 'short', 'side-part', 'pixie', 'bob', 'long', 'ponytail', 'bun', 'curly', 'afro', 'braids', 'bald'];
+export const LIP_COLORS = ['#a65a56', '#c46a6a', '#d9415a', '#9b3c63', '#7a4436'];
+/** Body frame picked first in the creator. Picking one also sets a matching starting look, which you can then change freely. */
+export const FRAMES = ['male', 'female'];
+export const FRAME_PRESET = {
+  male:   { hair: 'short', facialHair: 'none', lips: 0, height: 1.0 },
+  female: { hair: 'long',  facialHair: 'none', lips: 1, height: 0.97 },
+};
 export const FACE_SHAPES = ['oval', 'round', 'square', 'heart'];
 export const BODY_TYPES = ['slim', 'average', 'athletic', 'broad'];
 export const FACIAL_HAIR = ['none', 'stubble', 'moustache', 'goatee', 'full'];
 export const EXPRESSIONS = ['neutral', 'smile', 'serious', 'surprised'];
 
 export const DEFAULT_LOOK = {
-  skin: 2, hair: 'short', hairColor: 2, eyes: 0, face: 'oval', body: 'average', facialHair: 'none', expression: 'smile',
+  frame: 'male', skin: 2, hair: 'short', lips: 0, hairColor: 2, eyes: 0, face: 'oval', body: 'average', facialHair: 'none', expression: 'smile',
   height: 1.0,
   top: 'tee_navy', bottom: 'jeans_blue', shoes: 'sneaker_white', head: 'none_head', face_acc: 'none_face', neck: 'none_neck',
 };

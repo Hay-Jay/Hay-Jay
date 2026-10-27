@@ -14,6 +14,8 @@ export const JOBS = {
       lv('Associate',        1650, 4, 0),
       lv('Senior Associate', 1850, 5, 400),
       lv('Shift Lead',       2100, 6, 1200),
+      lv('Assistant Manager', 2400, 6, 2600),
+      lv('Store Manager',    2750, 6, 4500),
     ],
   },
   stylist: {
@@ -24,8 +26,12 @@ export const JOBS = {
       lv('Floor Stylist',  1700, 4, 0),
       lv('Lead Stylist',   1950, 5, 450),
       lv('Store Manager',  2450, 6, 1400),
+      lv('Regional Stylist', 2600, 6, 2900),
+      lv('Fashion Director', 2780, 6, 5000),
     ],
   },
 };
 export const XP_PER_TASK = 10;
+/** Every 5th shift at a job earns an "employee of the week" bonus of half a shift's pay. */
+export const BONUS_EVERY = 5, BONUS_SHARE = 0.5;
 export const MIN_SECONDS_PER_TASK = 6; // anti-exploit: a shift can't be completed faster than this
