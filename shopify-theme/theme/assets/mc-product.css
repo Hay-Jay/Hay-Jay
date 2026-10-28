@@ -62,7 +62,6 @@
 .pl-stock { display: inline-flex; align-items: center; gap: 8px; color: var(--fg); }
 .pl-stock i { width: 10px; height: 10px; border-radius: 50%; background: var(--fg); }
 .pl-stock.out i { background: transparent; border: 2px solid currentColor; }
-.pl-stock.out span { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .pl-offer { display: flex; align-items: center; gap: 10px; margin-top: -4px; padding: 8px 10px; border: 1.5px dashed var(--fg); font-weight: 700; text-transform: none; letter-spacing: .02em; font-size: 13px; line-height: 1.35; }
 .pl-offer i { flex: none; display: grid; place-items: center; width: 22px; height: 22px; background: var(--fg); color: var(--bg); font: 900 16px/1 var(--head); font-style: normal; }
 
@@ -73,7 +72,7 @@
 .opt-name { display: block; padding: 0; margin-bottom: 9px; color: var(--dim); font: 700 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
 .opt-name b { color: var(--fg); margin-left: 10px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { position: relative; display: inline-grid; place-items: center; min-width: 56px; min-height: 52px; padding: 6px 14px 3px; border: 2px solid var(--fg); border-bottom-width: 5px; border-radius: 9px 9px 0 0; background: transparent; color: var(--fg);
+.chip { position: relative; display: inline-grid; place-items: center; min-width: 50px; min-height: 52px; padding: 6px 10px 3px; border: 2px solid var(--fg); border-bottom-width: 5px; border-radius: 9px 9px 0 0; background: transparent; color: var(--fg);
   font: 900 1.45rem/1 var(--head); letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; transition: background .15s, color .15s, transform .15s; }
 .chip:hover:not(:disabled):not(.on) { background: var(--soft); transform: translateY(-2px); }
 .chip.on { background: var(--fg); color: var(--bg); }
