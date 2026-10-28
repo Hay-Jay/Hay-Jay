@@ -6,7 +6,7 @@ Animated versions of the Praise Night with Pastor Ayo flyer (Christ Embassy Regi
 |---|---|---|
 | `praise-night-loop-1920x1080.mp4` | Pre-service, walk-in, LED wall, stream holding screen | 20 s seamless loop |
 | `praise-night-intermission-loop-1920x1080.mp4` | Breaks — "INTERMISSION · WE'LL BE RIGHT BACK" | 20 s seamless loop |
-| `praise-night-intermission-countdown-5min-1920x1080.mp4` | Timed breaks — counts down to 00:00 | 5 min (play once) |
+| `praise-night-intermission-countdown-5min-1920x1080.mp4` | Timed breaks — counts down to 00:00 | 5 min, starts at 05:00 and ends on 00:00 (play once) |
 
 **Motion:** a slow push-in, a gold light sweep across "PRAISE NIGHT", soft glow on the gold and lens flares, twinkling stars, and rising gold sparkles. Each element repeats exactly every 20 s, so the loop has no visible jump.
 

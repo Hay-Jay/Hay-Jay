@@ -218,7 +218,7 @@ def render_loop(name, w, h, fps, seconds, intermission, workdir):
     return frames
 
 
-def encode(frames, fps, out, vf=None, extra_in=None, duration=None):
+def encode(frames, fps, out, vf=None, extra_in=None, duration=None, crf=18):
     cmd = ["ffmpeg", "-y", "-loglevel", "error"]
     if extra_in:
         cmd += extra_in
@@ -227,7 +227,7 @@ def encode(frames, fps, out, vf=None, extra_in=None, duration=None):
         cmd += ["-vf", vf]
     if duration:
         cmd += ["-t", str(duration)]
-    cmd += ["-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
+    cmd += ["-c:v", "libx264", "-preset", "slow", "-crf", str(crf), "-pix_fmt", "yuv420p",
             "-movflags", "+faststart", out]
     subprocess.run(cmd, check=True)
     print("  wrote", out)
@@ -265,12 +265,12 @@ def main():
         rbb = f"drawtext={style}:text='WE\\'LL BE RIGHT BACK':x={cx:.0f}-tw/2"
         encode(fr, a.fps, os.path.join(a.out, f"praise-night-intermission-loop-{tag}.mp4"), vf=rbb)
 
-        # Countdown: loop the intermission frames and draw mm:ss that ends on 00:00.
+        # Countdown: loop the intermission frames and draw mm:ss from c:00, holding 00:00 for the last second.
         c = a.countdown
         clock = (f"%{{eif\\:trunc(({c}-t+0.999)/60)\\:d\\:2}}\\:%{{eif\\:mod(trunc({c}-t+0.999)\\,60)\\:d\\:2}}")
         cd = f"drawtext={style}:text='WE START AGAIN IN  {clock}':x={cx:.0f}-tw/2"
         encode(fr, a.fps, os.path.join(a.out, f"praise-night-intermission-countdown-{c // 60}min-{tag}.mp4"),
-               vf=cd, extra_in=["-stream_loop", "-1"], duration=c)
+               vf=cd, extra_in=["-stream_loop", "-1"], duration=c + 1, crf=26)  # keeps 5 min under 100 MB
 
 
 if __name__ == "__main__":
