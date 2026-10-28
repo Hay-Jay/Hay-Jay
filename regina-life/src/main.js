@@ -24,6 +24,8 @@ import { Atmosphere } from './world/sky.js';
 import { glowTexture, signTexture } from './world/textures.js';
 import { buildInterior } from './world/interiors.js';
 import { Pedestrians } from './world/npcs.js';
+import { Vignettes } from './world/vignettes.js';
+import { activeVignettes } from './core/vignettes.js';
 import { DISTRICTS, POIS, poiById } from './world/cityData.js';
 import { Input, mountJoystick } from './player/input.js';
 import { PlayerController } from './player/controller.js';
@@ -121,6 +123,17 @@ async function boot() {
   await city.carsReady;
   await progress(68, 'Waking the pedestrians…');
   const ped = new Pedestrians(scene, { count: 14, temp: 12 }); ped.limit = 14;
+  // city scenes (core/vignettes.js): a busker on Scarth St, a reader and a painter in Victoria Park, a neighbour shovelling or raking, a phone call by the Market
+  const vig = (() => {
+    const bench = (k) => city.interactables.find((i) => i.id === 'vpark_bench_' + k), bs = [0, 1, 2, 3].map(bench).filter(Boolean);
+    const pc = bs.length ? { x: bs.reduce((a, b) => a + b.x, 0) / bs.length, z: bs.reduce((a, b) => a + b.z, 0) / bs.length } : { x: -165, z: 55 }, seat = bench(2)?.seat;
+    const clear = (sp) => { const v = new THREE.Vector3(sp.x, 0, sp.z); city.colliders.resolve(v, 0.9); return { ...sp, x: v.x, z: v.z }; };   // never inside a tree trunk or a wall
+    return new Vignettes(city.group, {
+      busker: clear({ x: -96, z: -47, yaw: -Math.PI / 2 }), reader: seat ? { ...seat, sit: true } : null,
+      painter: clear({ x: pc.x + 14, z: pc.z, yaw: -Math.PI / 2 }), raker: clear({ x: pc.x - 15, z: pc.z + 3, yaw: Math.PI / 2 }),
+      shoveller: clear({ x: -16, z: 8.6, yaw: -Math.PI / 2 }), caller: clear({ x: 47, z: 8.4, yaw: 2.4 }),
+    });
+  })();
   await progress(78, 'Meeting the locals…');
 
   const input = new Input(canvas);
@@ -151,6 +164,8 @@ async function boot() {
     if (treeSeason !== lastSeason) { city.recolorTrees(treeSeason); lastSeason = treeSeason; }
     renderer.toneMappingExposure = atmo.exposureBase ?? 1;
     if (homeView && inInterior) { scene.background = homeSky(); homeStage.tint?.(env.night ?? 0); }
+    vig.sync(activeVignettes({ hour: clock().hour, temp: weather.temp ?? 10, kind: weather.kind, snow: (env.snow ?? 0) > 0.5, season: env.season }), weather.temp ?? 10);
+    ped.setRain(weather.kind === 'rain' || weather.kind === 'storm');
   };
   const refreshWeather = async () => { weather = await fetchWeather(); ped.redress(weather.temp); updateEnv(true); store.commit('weather'); };
 
@@ -683,8 +698,16 @@ async function boot() {
     g.fillStyle = '#fffaf0'; g.fillRect(sx, sy2, st, st * 0.72); g.setLineDash([4, 3]); g.strokeStyle = '#f2a900'; g.lineWidth = 2; g.strokeRect(sx + 4, sy2 + 4, st - 8, st * 0.72 - 8); g.setLineDash([]);
     g.textAlign = 'center'; fit('REGINA', sx + st / 2, sy2 + st * 0.24, st - 16, Math.round(st * 0.2), 800, body, '#168f59'); fit('LIFE', sx + st / 2, sy2 + st * 0.48, st - 16, Math.round(st * 0.2), 800, body, '#f2a900');
   }
+  // photo-mode poses: strike one for the shot (player/poses.js); leaving photo mode lets go
+  const PHOTO_POSES = [['', '🙂', 'Natural'], ['wave', '👋', 'Wave'], ['cheer', '🙌', 'Cheer'], ['dance', '💃', 'Dance'], ['read', '📖', 'Read'], ['guitar', '🎸', 'Guitar'], ['phone', '📱', 'Phone'], ['umbrella', '☂️', 'Umbrella']];
+  const posesRow = document.createElement('div'); posesRow.className = 'cam-poses'; $('camui').appendChild(posesRow);
+  posesRow.innerHTML = PHOTO_POSES.map(([id, ic, name]) => `<button type="button" data-pose="${id}" class="${id ? '' : 'on'}">${ic} ${name}</button>`).join('');
+  posesRow.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pose]'); if (!b) return; posesRow.querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b));
+    if (b.dataset.pose) player.pose(b.dataset.pose, 1e6); else player.endPose(); audio.blip('tick');
+  });
   function startCamera() { if (creator || camMode || build.active) return; camMode = true; phone.close(); closeMap(); $('camui').hidden = false; document.body.classList.add('hud-hidden'); updateThumb(); toast('Photo mode · drag to frame, scroll to zoom', 'info'); }
-  function stopCamera() { camMode = false; selfie = false; rig.mode = 'follow'; $('camui').hidden = true; document.body.classList.remove('hud-hidden'); document.body.className = document.body.className.replace(/filter-\w+/g, '').trim(); filter = ''; $('cam-filters').querySelectorAll('button').forEach((x, i) => x.classList.toggle('on', i === 0)); }
+  function stopCamera() { camMode = false; player.endPose(); posesRow.querySelectorAll('button').forEach((x, i) => x.classList.toggle('on', i === 0)); selfie = false; rig.mode = 'follow'; $('camui').hidden = true; document.body.classList.remove('hud-hidden'); document.body.className = document.body.className.replace(/filter-\w+/g, '').trim(); filter = ''; $('cam-filters').querySelectorAll('button').forEach((x, i) => x.classList.toggle('on', i === 0)); }
   function updateThumb() { const p = S().photos[0]; $('cam-thumb').style.backgroundImage = p ? `url(${p.data})` : 'none'; }
   $('cam-close').onclick = stopCamera;
   $('cam-flip').onclick = () => { selfie = !selfie; rig.mode = selfie ? 'selfie' : 'follow'; if (selfie) rig.yaw = player.yaw; else rig.snapBehind(player.yaw); };
@@ -713,7 +736,8 @@ async function boot() {
     };
     if (inInterior) for (const it of interior.interactables) consider(it, typeof it.label === 'function' ? it.label(ictx) : it.label);
     else {
-      for (const it of city.interactables) consider(it, it.label);
+      for (const it of city.interactables) if (!(it.id === 'vpark_bench_2' && vig.has('reader'))) consider(it, it.label);   // the reader has that bench today
+      const vg = vig.nearest(player.pos); if (vg) consider({ id: 'vig_' + vg.id, x: vg.x, z: vg.z, radius: 2.8, label: `Say hi to ${vg.who.toLowerCase()} (NPC)`, vignette: vg }, `Say hi to ${vg.who.toLowerCase()} (NPC)`);
       const gst = currentStep(S()); if (gst) consider({ id: 'gig', kind: 'gig', x: gst.spot.x, z: gst.spot.z, radius: GIG_REACH, label: gst.label, run: () => doGigStep() }, gst.label);
       for (const it of pumpkinInteractables()) consider(it, it.label);
       const hdi = homeDoorInteractable(); if (hdi) consider(hdi, hdi.label);
@@ -742,6 +766,7 @@ async function boot() {
     }
     if (it.mural) { phone.open(); phone.openApp('supporters'); return; }
     if (it.forSale) { audio.blip('tick'); phone.open(); phone.openApp('homes'); return; }
+    if (it.vignette) { const v = it.vignette; player.face(v.x, v.z); player.gesture('wave', 1.4); toast(`${v.icon} ${v.who} (NPC): “${vig.greet(v.id, { temp: weather.temp ?? 10 })}”`, 'info'); S().needs.mood = Math.min(100, S().needs.mood + 1.5); return; }
     if (it.comingSoon) { const c = it.comingSoon; audio.blip('tick'); panels.menu(`${c.emoji} ${c.name}: coming soon`, `${c.blurb} This lot is under construction and opens in a future update of Regina Life.`, [{ label: 'Can\'t wait', primary: true }]); return; }
     if (it.activity) { ictx.ui.activity(it.activity, it.seat ? { seat: it.seat } : {}); return; }
     audio.blip('tick'); it.run(ictx);
@@ -1275,7 +1300,7 @@ async function boot() {
     } else {
       player.update(dt, walkInput(dt), rig.yaw, player.grid ?? city.colliders, slow);
       if (tapMark.material.opacity > 0) { tapMark.material.opacity = Math.max(0, tapMark.material.opacity - dt * 1.1); tapMark.scale.setScalar(Math.max(1, tapMark.scale.x - dt * 1.5)); }
-      if (!inInterior) ped.update(dt, player.pos);
+      if (!inInterior) { ped.update(dt, player.pos); vig.update(dt, player.pos); }
       const speedNorm = Math.min(1, player.speed / 7.2);
       rig.update(dt, input, player, { speedNorm, sensitivity: isTouch ? 0.9 : 1 });
       if (inInterior === 'apartment' && interior.rooms.length > 1) {   // walking through a multi-room home: draw only the rooms near the player, and cut a partition that stands between the head and the camera

@@ -209,3 +209,8 @@ body.shell-on.touch-mode #hud .needs span{font-size:12px}
 
 /* home lots on the map (core/homeLots.js) */
 .pc-tag.sale{background:#fde7e2;color:#b2382a}
+/* photo-mode poses */
+.cam-poses{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(118px + var(--safe-b));display:flex;gap:8px;max-width:calc(100vw - 24px);overflow-x:auto;padding:4px;scrollbar-width:none}
+.cam-poses::-webkit-scrollbar{display:none}
+.cam-poses button{flex:none;border:0;border-radius:999px;padding:8px 13px;background:rgba(18,32,42,.55);color:#fff;font:700 13px var(--body);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
+.cam-poses button.on{background:#2fbf7a}

@@ -69,6 +69,9 @@ export const POSES = {
     lower(t, T) { T.lLegX = -0.22; T.rLegX = 0.18; T.lKneeX = T.rKneeX = 0.2; } },
   plant: { props: ['trowel'], upper(t, T) { T.spineX = 0.4; T.rShX = -0.95 + 0.15 * sin(t * 4); T.rShZ = -0.1; T.rElX = -0.35; T.lShX = -0.65; T.lShZ = 0.1; T.lElX = -0.4; T.headX = 0.3; }, lower(t, T) { crouch(T); } },
   flyer: { props: ['flyers', 'flyer'], upper(t, T) { const k = ease(clamp01(pulse(t, 3.2, 0.3) * 1.4)); T.rShX = -0.35 - 0.9 * k; T.rShZ = -0.05; T.rElX = -0.9 + 0.6 * k; T.lShX = -0.5; T.lShZ = 0.38; T.lElX = -1.65; T.headY = sin(t * 0.8) * 0.3; T.spineX += 0.05 * k; } },
+  /* ---- photo poses ---- */
+  wave: { upper(t, T) { T.rShX = -2.5; T.rShZ = -0.5 + sin(t * 9) * 0.3; T.rElX = -0.6 + sin(t * 9) * 0.25; T.headX = -0.04; } },
+  cheer: { upper(t, T) { T.lShX = T.rShX = -2.75 + sin(t * 3) * 0.06; T.lShZ = -0.35; T.rShZ = 0.35; T.lElX = T.rElX = -0.25; T.headX = -0.18; } },
   /* ---- holds that ride along with walking ---- */
   leash: { props: ['leash'], walk: true, upper(t, T) { T.lShX = -0.55; T.lShZ = -0.15; T.lElX = -0.35; } },
   umbrella: { props: ['umbrella'], walk: true, upper(t, T) { T.rShX = -0.32; T.rShZ = -0.1; T.rElX = -1.88; } },
