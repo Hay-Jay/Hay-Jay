@@ -1,39 +1,50 @@
+{%- assign n = cart.item_count -%}
 <div class="dr-head">
-  <div>
-    <p class="mono dr-kick"><b class="rec" aria-hidden="true"></b> Requisition manifest</p>
-    <h2 class="dr-t" id="mcDrawerT">Your bag <span class="dr-n" data-cart-count-text>{{ cart.item_count }}</span></h2>
-  </div>
-  <button class="dr-x mono" type="button" data-close aria-label="Close the bag">Close<span>Esc</span></button>
+  <h2 class="dr-t" id="mcDrawerT"><span class="dr-k mono" aria-hidden="true"><b class="rec"></b>Manifest</span>Your bag <span class="dr-n" data-cart-count-text>{{ n }}</span></h2>
+  <button class="dr-x" type="button" data-close aria-label="Close the bag"><i aria-hidden="true"></i></button>
 </div>
-{%- if cart.item_count == 0 -%}
+{%- if n == 0 -%}
   <div class="dr-empty">
     <span class="stamp pend" style="--r:-6deg" aria-hidden="true">Manifest empty</span>
-    <p class="dr-empty-t">No assets requisitioned yet.</p>
-    <p class="mono dr-empty-s">Open the register and add something to the bag.</p>
-    <a class="btn" href="{{ routes.all_products_collection_url }}">Open the register<i class="arr" aria-hidden="true"></i></a>
+    <p class="dr-empty-t">Your bag is empty.</p>
+    <a class="btn" href="{{ routes.all_products_collection_url }}">Shop now<i class="arr" aria-hidden="true"></i></a>
   </div>
 {%- else -%}
-  <ol class="dr-lines" role="list">
-    {%- for item in cart.items -%}
-      {% render 'mc-cart-line', item: item, i: forloop.index, compact: true %}
-    {%- endfor -%}
-  </ol>
-  <div class="dr-foot">
-    <p class="dr-sub"><span class="mono">Subtotal</span><b>{{ cart.total_price | money }}<small>{{ cart.currency.iso_code }}</small></b></p>
-    {%- if cart.total_discount > 0 -%}
-      <p class="mono dr-save">Discounts applied: −{{ cart.total_discount | money }}</p>
+  <div class="dr-body">
+    {%- comment -%} the free-magazine nudge sits first, so it is seen without scrolling the bag {%- endcomment -%}
+    {%- if section.settings.offer_on -%}
+      {% render 'mc-bag-offer', form_id: 'mcOfferDr', offer_product: section.settings.offer_product, title: section.settings.offer_title, name: section.settings.offer_name, note: section.settings.offer_note %}
     {%- endif -%}
-    <p class="mono dr-note">{{ settings.cart_note | escape }}</p>
-    <form action="{{ routes.cart_url }}" method="post" class="dr-form">
-      <button class="btn dr-go" type="submit" name="checkout">Proceed to checkout<i class="arr" aria-hidden="true"></i></button>
-    </form>
-    <a class="mono link-line dr-full" href="{{ routes.cart_url }}">View the full manifest<span class="arr" aria-hidden="true"></span></a>
+    <ol class="dr-lines" role="list">
+      {%- for item in cart.items -%}
+        {% render 'mc-cart-line', item: item, i: forloop.index, compact: true %}
+      {%- endfor -%}
+    </ol>
   </div>
+  <div class="dr-foot">
+    <p class="dr-sub"><span>Subtotal</span><b>{{ cart.total_price | money }}<small>{{ cart.currency.iso_code }}</small></b></p>
+    {%- if cart.total_discount > 0 -%}
+      <p class="dr-save">Includes −{{ cart.total_discount | money }} in discounts</p>
+    {%- endif -%}
+    <p class="dr-note">{{ settings.cart_note | escape }}</p>
+    <form action="{{ routes.cart_url }}" method="post" class="dr-form">
+      <button class="btn dr-go" type="submit" name="checkout"><i class="dr-lock" aria-hidden="true"></i>Checkout<i class="arr" aria-hidden="true"></i></button>
+    </form>
+    <a class="dr-full" href="{{ routes.cart_url }}">View bag</a>
+  </div>
+  <form id="mcOfferDr" action="{{ routes.cart_add_url }}" method="post" hidden></form>
 {%- endif -%}
 
 {% schema %}
 {
   "name": "Bag drawer",
-  "settings": []
+  "settings": [
+    { "type": "header", "content": "Free Vision Issue nudge" },
+    { "type": "checkbox", "id": "offer_on", "label": "Offer the free magazine when the bag has a jersey or hoodie", "info": "Turn off when the automatic discount ends.", "default": true },
+    { "type": "product", "id": "offer_product", "label": "Free product", "info": "Leave blank to use the magazine (product type Magazine)." },
+    { "type": "text", "id": "offer_title", "label": "Headline ({item} = jersey or hoodie)", "default": "Free with your {item}" },
+    { "type": "text", "id": "offer_name", "label": "Product name", "default": "The Vision Issue" },
+    { "type": "text", "id": "offer_note", "label": "Small print", "default": "Discount applies at checkout." }
+  ]
 }
 {% endschema %}

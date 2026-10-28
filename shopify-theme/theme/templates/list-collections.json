@@ -2,7 +2,10 @@
   "sections": {
     "main": {
       "type": "mc-collection-list",
-      "settings": {}
+      "settings": {
+        "heading": "Collections",
+        "kicker": "Asset sections"
+      }
     }
   },
   "order": [

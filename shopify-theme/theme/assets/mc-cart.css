@@ -1,36 +1,43 @@
-/* CART PAGE — the requisition manifest. Shares the line styles with the drawer (mc-drawer.css). */
-.cart { overflow: clip; }
-.cart-head .reg-sub { max-width: 38em; }
-.cart-grid { display: grid; gap: clamp(28px, 5vw, 56px); align-items: start; }
+/* CART PAGE — the bag, as a requisition manifest. Line, nudge and quantity styles are shared with the drawer (mc-drawer.css). */
+.cart { overflow: clip; padding-block: clamp(28px, 5vw, 72px) clamp(48px, 7vw, 96px); }
+.cart-head { margin-bottom: clamp(14px, 2.4vw, 28px); }
+.cart-head .kick { margin-bottom: 8px; }
+.cart-h { display: flex; align-items: center; flex-wrap: wrap; gap: 0 .3em; margin: 0; font: 900 clamp(3rem, 9vw, 6.4rem)/.86 var(--head); text-transform: uppercase; letter-spacing: -.004em; }
+.cart-n { display: inline-grid; place-items: center; min-width: 1.35em; height: 1.1em; padding: .08em .2em 0; background: var(--fg); color: var(--bg); font-size: .5em; letter-spacing: 0; }
+.cart-grid { display: grid; gap: clamp(24px, 4vw, 56px); align-items: start; }
 .cart-main { min-width: 0; }
-.cart-count { margin: 0 0 6px; color: var(--dim); }
 .cart-lines { border-top: 3px solid var(--fg); }
-.cart-lines .ln { grid-template-columns: 112px minmax(0, 1fr); gap: 18px; padding-block: 20px; }
-.cart-lines .ln-t { font-size: clamp(1.7rem, 3vw, 2.3rem); }
-.cart-lines .ln-price { font-size: 1.9rem; }
+.cart-lines .ln { grid-template-columns: 116px minmax(0, 1fr); gap: 20px; padding-block: 20px; }
+.cart-lines .ln-t { font-size: clamp(1.45rem, 2.4vw, 2rem); }
+.cart-lines .ln-price { font-size: clamp(1.5rem, 2.4vw, 1.9rem); }
+.cart-main .offer { margin-top: 22px; }
 .cart-back { margin-top: 22px; }
-.cart-sum { position: relative; padding: 32px 22px 24px; background: var(--paper2) var(--grain-d); border: 2px dashed var(--fg); box-shadow: 0 10px 24px rgba(0, 0, 0, .18); display: grid; gap: 12px; }
+.cart-sum { position: relative; display: grid; gap: 12px; padding: 30px 22px 22px; background: var(--paper2) var(--grain-d); border: 2px dashed var(--fg); box-shadow: 0 10px 24px rgba(0, 0, 0, .18); }
 .cart-sum .tape { left: 50%; top: -16px; margin-left: -46px; --tr: 3deg; }
-.cart-sum .mg-k { margin: 0; color: var(--dim); }
-.cs-total { display: flex; align-items: baseline; gap: .5em; margin: 0; }
-.cs-total b { font: 900 clamp(3rem, 6vw, 4.6rem)/.9 var(--head); letter-spacing: .01em; }
-.cs-total small { font: 700 12px/1 var(--mono); letter-spacing: .12em; color: var(--dim); }
-.cs-save { margin: 0; color: var(--dim); }
-.cs-note { margin: 0; color: var(--dim); font-size: 14px; max-width: 34ch; }
+.cs-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; }
+.cs-row span { font: 700 13px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.cs-total { font: 900 clamp(2.6rem, 5vw, 3.6rem)/.9 var(--head); letter-spacing: .01em; white-space: nowrap; }
+.cs-total small { margin-left: .4em; font: 700 12px/1 var(--mono); letter-spacing: .12em; color: var(--dim); }
+.cs-save { margin: 0; font: 700 12.5px/1.4 var(--mono); }
+.cs-note { margin: 0; color: var(--dim); font: 400 13px/1.45 var(--mono); }
 .cs-lbl { color: var(--dim); }
 .cs-ta { width: 100%; background: #f5f5f5; border: 2px solid var(--fg); border-radius: 0; color: var(--fg); font: 400 16px/1.4 var(--type); padding: 10px 12px; resize: vertical; box-shadow: inset 3px 3px 0 rgba(0, 0, 0, .14); }
-.cs-go { width: 100%; justify-content: space-between; min-height: 60px; font-size: 1.4rem; }
-.cs-pay { margin-top: 2px; }
+.cs-go { margin-top: 4px; }
 .cs-pay [data-shopify="payment-button"], .cs-pay .additional-checkout-buttons { margin: 0; }
-.cs-trust { display: grid; gap: 6px; margin: 6px 0 0; padding: 12px 0 0; border-top: 1px dashed var(--rule); color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: .03em; font-size: 13px; }
-.cs-trust li::before { content: "▪ "; }
-.cart-sum .stamp.ok { justify-self: start; margin-top: 8px; }
-.cart-empty { display: grid; justify-items: start; gap: 14px; padding: clamp(18px, 4vw, 40px) 0 clamp(30px, 5vw, 56px); }
-.cart-empty-t { font: 900 clamp(2.4rem, 6vw, 4.6rem)/.92 var(--head); text-transform: uppercase; margin: 0; }
-.cart-empty-s { max-width: 34em; margin: 0; color: var(--dim); }
+.cs-pay:empty { display: none; }
+.cs-trust { margin: 0; padding-top: 10px; border-top: 1px dashed var(--rule); color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 12.5px; }
+.cart-sum .stamp.ok { position: absolute; right: 16px; bottom: -14px; margin: 0; }
+.cart-empty { display: grid; justify-items: start; gap: 14px; padding: 6px 0 clamp(20px, 3vw, 36px); }
+.cart-empty-t { font: 400 1.1rem/1.4 var(--type); margin: 0; color: var(--dim); }
 .cart-picks { margin-top: 10px; }
 /* the suggestion cards on an empty bag (the register's .sheet grid lives in mc-shop.css, not loaded here) */
-.cart-picks .sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 1.8vw, 24px); padding: 26px 0 22px; }
-@media (min-width: 960px) { .cart-picks .sheet { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (min-width: 960px) { .cart-grid { grid-template-columns: minmax(0, 1fr) 400px; } .cart-sum { position: sticky; top: calc(var(--bar) + 24px); } }
-@media (max-width: 699px) { .cart-lines .ln { grid-template-columns: 84px minmax(0, 1fr); gap: 14px; } .cs-go { font-size: 1.25rem; } }
+.cart-picks .sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 1.8vw, 24px); padding: 14px 0 0; }
+@media (min-width: 960px) {
+  .cart-picks .sheet { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cart-grid { grid-template-columns: minmax(0, 1fr) 400px; }
+  .cart-sum { position: sticky; top: calc(var(--bar) + 24px); }
+}
+@media (max-width: 699px) {
+  .cart-lines .ln { grid-template-columns: 84px minmax(0, 1fr); gap: 14px; padding-block: 16px; }
+  .cart-sum { padding: 26px 16px 20px; }
+}

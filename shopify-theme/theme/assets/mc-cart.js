@@ -1,6 +1,8 @@
 /* MONOCHROME® — the bag: slide-in drawer, quantity changes, add to bag (AJAX), live header count.
    Works with the Shopify Cart API (/cart/add.js, /cart/change.js, /cart.js) and the Section Rendering API. Without JavaScript every
-   control is a plain link or form that goes to the cart page. Exposes MC.cart = { add, change, open, close, refresh }. */
+   control is a plain link or form that goes to the cart page. Exposes MC.cart = { add, change, open, close, refresh, setCount, isOpen, stamp }.
+   Adding something plays a short sequence: a rubber stamp thunks onto the button that was used, the bag count bumps, then the drawer
+   slides in (all instant with reduced motion). */
 (() => {
   'use strict';
   const MC = window.MC = window.MC || {};
@@ -10,7 +12,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const root = document.documentElement;
   const CART = R.cart || '/cart';
-  let lastFocus = null, hideT = 0, busy = false;
+  let lastFocus = null, hideT = 0, openT = 0, busy = false;
 
   const getJson = async (url, opts = {}) => {
     const r = await fetch(url, { ...opts, headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...(opts.headers || {}) } });
@@ -20,21 +22,55 @@
   };
 
   function setCount(n) {
+    const up = typeof MC.cartCount === 'number' && n > MC.cartCount;
     MC.cartCount = n;
     $$('[data-cart-count]').forEach(el => { el.textContent = n; el.hidden = !n; });
     $$('[data-cart-count-text]').forEach(el => { el.textContent = n; });
-    const b = $('.bar-bag'); if (b) b.setAttribute('aria-label', `Bag, ${n} ${n === 1 ? 'item' : 'items'}`);
+    $$('[data-cart-count]').forEach(el => { const a = el.closest('a, button'); if (a) a.setAttribute('aria-label', `Bag, ${n} ${n === 1 ? 'item' : 'items'}`); });
+    if (up && !reduce) bump();
+  }
+  // the count in the header jumps, and the bag button flashes
+  function bump() {
+    $$('[data-cart-count], [data-cart-count-text]').forEach(el => {
+      const host = el.closest('a, button');
+      [el, host].forEach(x => { if (!x) return; x.classList.remove('bag-bump'); void x.offsetWidth; x.classList.add('bag-bump'); });
+      setTimeout(() => { el.classList.remove('bag-bump'); if (host) host.classList.remove('bag-bump'); }, 900);
+    });
+  }
+  // a rubber stamp lands on the element that was used ("Added"); it sits above everything, so it works on any button
+  function stamp(el, text = 'Added') {
+    if (reduce || !el || !el.getBoundingClientRect) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width || r.bottom < 0 || r.top > innerHeight) return;
+    // the stamp is inked on the button's own colour, so it covers the label instead of fighting it
+    let dark = false, bg = '';
+    for (let x = el; x && x !== document.documentElement; x = x.parentElement) {
+      const c = getComputedStyle(x).backgroundColor, m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/.exec(c);
+      if (m && (m[4] === undefined || +m[4] > 0.5)) { dark = (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 < 0.45; bg = `rgb(${m[1]}, ${m[2]}, ${m[3]})`; break; }
+    }
+    const w = document.createElement('span');
+    w.className = 'add-stamp'; w.setAttribute('aria-hidden', 'true');
+    w.style.left = (r.left + r.width / 2) + 'px'; w.style.top = (r.top + r.height / 2) + 'px';
+    w.style.fontSize = Math.max(15, Math.min(r.height * 0.48, 32)) + 'px';
+    const s = document.createElement('span');
+    s.className = 'stamp in' + (dark ? ' white' : ''); s.style.setProperty('--r', '-6deg'); s.textContent = text;
+    if (bg) s.style.backgroundColor = bg;
+    w.append(s); document.body.append(w);
+    el.classList.remove('is-thunk'); void el.offsetWidth; el.classList.add('is-thunk');
+    setTimeout(() => { w.classList.add('out'); el.classList.remove('is-thunk'); }, 1050);
+    setTimeout(() => w.remove(), 1500);
   }
 
   // ---- drawer ------------------------------------------------------------------------------
   const isOpen = () => !!drawer && drawer.classList.contains('open');
   function open() {
-    if (!drawer) return;
+    if (!drawer || isOpen()) return;
     const mp = $('#magpop'); if (mp && !mp.hidden) { const c = $('[data-close]', mp); if (c) c.click(); }
     const mn = $('#menu.open'); if (mn) { const c = $('[data-close]', mn); if (c) c.click(); }
     clearTimeout(hideT); lastFocus = document.activeElement;
     drawer.hidden = false; void drawer.offsetWidth;
-    drawer.classList.add('open'); root.classList.add('drawer-lock'); MC.drawerOpen = true;
+    drawer.classList.add('open', 'opening'); root.classList.add('drawer-lock'); MC.drawerOpen = true;
+    clearTimeout(openT); openT = setTimeout(() => drawer.classList.remove('opening'), 1200);
     const focusIn = () => { const f = $('.dr-go, .dr-empty .btn', drawer) || panel; if (f) f.focus({ preventScroll: true }); };
     requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(focusIn, reduce ? 0 : 60)));
   }
@@ -98,15 +134,37 @@
   }
 
   // ---- API ---------------------------------------------------------------------------------------------------
-  async function add(data) {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  // opts.from: the button that was used (gets the stamp); opts.open === false keeps the drawer shut
+  async function add(data, opts = {}) {
     const body = data instanceof FormData ? data : JSON.stringify(data);
     const headers = data instanceof FormData ? {} : { 'Content-Type': 'application/json' };
     const item = await getJson(R.cartAdd ? R.cartAdd + '.js' : '/cart/add.js', { method: 'POST', body, headers });
-    const cart = await getJson('/cart.js');
+    const t0 = performance.now(), show = !reduce && !!opts.from;
+    if (show) stamp(opts.from);
+    const cartP = getJson('/cart.js'), freshP = refresh();
+    const cart = await cartP;
+    if (show) await wait(Math.max(0, 330 - (performance.now() - t0))); // the count bumps as the stamp lands
     setCount(cart.item_count);
-    await refresh();
-    if (MC.page !== 'cart') open();
+    await freshP;
+    if (show && !isOpen()) await wait(Math.max(0, 760 - (performance.now() - t0)));
+    if (MC.page !== 'cart' && opts.open !== false) open();
+    flagLine(item);
+    const first = item && (item.items ? item.items[0] : item);
+    say(`${(first && (first.product_title || first.title)) || 'Item'} added to your bag.`);
     return item;
+  }
+  // screen readers hear what the stamp shows
+  let live = null;
+  function say(msg) {
+    if (!live) { live = document.createElement('p'); live.className = 'sr-only'; live.setAttribute('role', 'status'); document.body.append(live); }
+    live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60);
+  }
+  // the line that was just added flashes once in the drawer / on the cart page
+  function flagLine(item) {
+    if (reduce || !item) return;
+    const ids = (item.items ? item.items : [item]).map(i => String(i.variant_id || i.id));
+    $$('.ln[data-vid]').filter(l => ids.includes(l.dataset.vid)).forEach(l => { l.classList.remove('is-new'); void l.offsetWidth; l.classList.add('is-new'); });
   }
   async function change(line, quantity) {
     if (busy) return null; busy = true;
@@ -121,7 +179,7 @@
     } catch (e) { showError(e.message); return null; }
     finally { busy = false; row.forEach(r => r.classList.remove('is-busy')); }
   }
-  MC.cart = { add, change, open, close, refresh, setCount, isOpen };
+  MC.cart = { add, change, open, close, refresh, setCount, isOpen, stamp };
 
   // ---- controls ----------------------------------------------------------------------------------------------
   document.addEventListener('click', async e => {
@@ -135,8 +193,12 @@
     if (ad) {
       e.preventDefault(); if (ad.classList.contains('mc-add-pending')) return;
       ad.classList.add('mc-add-pending');
-      try { await add({ id: +ad.dataset.mcAdd, quantity: 1 }); }
-      catch (err) { window.location.href = ad.getAttribute('href') || CART; }
+      try { await add({ id: +ad.dataset.mcAdd, quantity: 1 }, { from: ad }); }
+      catch (err) {
+        // Shopify said no (sold out...): the bag page explains; network trouble: let the browser post the form itself
+        if (!err.status && ad.form && ad.form.requestSubmit) ad.form.requestSubmit(ad);
+        else window.location.href = ad.getAttribute('href') || CART;
+      }
       finally { ad.classList.remove('mc-add-pending'); }
     }
   });

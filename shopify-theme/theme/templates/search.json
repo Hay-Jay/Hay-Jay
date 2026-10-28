@@ -2,7 +2,10 @@
   "sections": {
     "main": {
       "type": "mc-search",
-      "settings": {}
+      "settings": {
+        "heading": "Search",
+        "kicker": "Asset register"
+      }
     }
   },
   "order": [

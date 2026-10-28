@@ -2,7 +2,11 @@
   "sections": {
     "main": {
       "type": "mc-register",
-      "settings": {}
+      "settings": {
+        "heading": "Shop all",
+        "kicker": "Asset register",
+        "stamp": "Cleared for issue"
+      }
     }
   },
   "order": [

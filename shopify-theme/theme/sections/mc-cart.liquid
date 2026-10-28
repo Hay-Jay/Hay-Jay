@@ -4,33 +4,24 @@
     render 'mc-countries'
   endcapture
   assign countries = raw | split: ';'
-  assign ng_listed = false
-  if raw contains '|NG|'
-    assign ng_listed = true
-  endif
 -%}
 <section class="spread paper cart" id="cartMain" aria-labelledby="cartH">
   <div class="wrap">
-    {% render 'mc-filehead', file: 'MC-102', doc: 'Requisition manifest', page: 2, level: 3, extra: ' — requisition' %}
-    <header class="reg-head cart-head">
-      <div class="reg-title">
-        <p class="kick mono">Division of Wearables — Requisition</p>
-        <h1 class="h1" id="cartH"><span class="tw caret" style="--n:8">Your bag</span></h1>
-        <p class="reg-sub">{{ section.settings.intro | escape }}</p>
-      </div>
+    <header class="cart-head">
+      <p class="kick mono">Requisition manifest</p>
+      <h1 class="cart-h" id="cartH">Your bag{% if n > 0 %} <span class="cart-n">{{ n }}</span>{% endif %}</h1>
     </header>
     {%- if n == 0 -%}
       <div class="cart-empty">
         <span class="stamp lg" style="--r:-7deg" aria-hidden="true">Manifest empty</span>
-        <p class="cart-empty-t">No assets requisitioned.</p>
-        <p class="cart-empty-s">Nothing is in your bag. Open the register, pick a file and use <b>Requisition: Add to bag</b>.</p>
-        <p><a class="btn" href="{{ routes.all_products_collection_url }}">Open the asset register<i class="arr" aria-hidden="true"></i></a></p>
+        <p class="cart-empty-t">Nothing in here yet.</p>
+        <p><a class="btn" href="{{ routes.all_products_collection_url }}">Shop now<i class="arr" aria-hidden="true"></i></a></p>
       </div>
       {%- assign shown = 0 -%}
-      <div class="board cart-picks"><div class="sheet">
+      <div class="cart-picks"><div class="sheet">
         {%- for p in collections['all'].products -%}
           {%- if p.available and shown < 4 -%}
-            {% render 'mc-card', product: p, i: shown %}
+            {% render 'mc-card', product: p, i: shown, sizes: '(min-width:960px) 23vw, 46vw' %}
             {%- assign shown = shown | plus: 1 -%}
           {%- endif -%}
         {%- endfor -%}
@@ -41,51 +32,54 @@
         <button class="sr-only" type="submit" name="update" tabindex="-1" aria-hidden="true">Update quantities</button>
         <div class="cart-grid">
           <div class="cart-main">
-            <p class="mono cart-count">{{ n }} {% if n == 1 %}asset{% else %}assets{% endif %} on the manifest</p>
             <ol class="cart-lines" role="list">
               {%- for item in cart.items -%}
                 {% render 'mc-cart-line', item: item, i: forloop.index %}
               {%- endfor -%}
             </ol>
-            <p class="cart-back"><a class="mono link-line" href="{{ routes.all_products_collection_url }}">Continue shopping<span class="arr" aria-hidden="true"></span></a></p>
+            {%- if section.settings.offer_on -%}
+              {% render 'mc-bag-offer', form_id: 'mcOfferCart', offer_product: section.settings.offer_product, title: section.settings.offer_title, name: section.settings.offer_name, note: section.settings.offer_note %}
+            {%- endif -%}
+            <p class="cart-back"><a class="mono link-line" href="{{ routes.all_products_collection_url }}">Keep shopping</a></p>
           </div>
           <aside class="cart-sum" aria-label="Order summary">
             <span class="tape" aria-hidden="true"></span>
-            <p class="mono mg-k">Manifest total</p>
-            <p class="cs-total"><b>{{ cart.total_price | money }}</b><small>{{ cart.currency.iso_code }}</small></p>
+            <p class="cs-row"><span>Subtotal</span><b class="cs-total">{{ cart.total_price | money }}<small>{{ cart.currency.iso_code }}</small></b></p>
             {%- if cart.total_discount > 0 -%}
-              <p class="mono cs-save">Discounts applied: −{{ cart.total_discount | money }}</p>
+              <p class="cs-save">Includes −{{ cart.total_discount | money }} in discounts</p>
             {%- endif -%}
             <p class="cs-note">{{ settings.cart_note | escape }}</p>
             {%- if section.settings.show_note -%}
-              <label class="mono cs-lbl" for="cartNote">Note for the order (optional)</label>
+              <label class="mono cs-lbl" for="cartNote">Order note (optional)</label>
               <textarea class="cs-ta" id="cartNote" name="note" rows="3">{{ cart.note }}</textarea>
             {%- endif -%}
-            <button class="btn cs-go" type="submit" name="checkout">Proceed to checkout<i class="arr" aria-hidden="true"></i></button>
+            <button class="btn cs-go" type="submit" name="checkout"><i class="dr-lock" aria-hidden="true"></i>Checkout<i class="arr" aria-hidden="true"></i></button>
             <noscript><button class="btn ghost cs-up" type="submit" name="update">Update quantities</button></noscript>
             {%- if settings.cart_dynamic_buttons -%}
               <div class="cs-pay">{{ content_for_additional_checkout_buttons }}</div>
             {%- endif -%}
-            <ul class="cs-trust mono">
-              <li>Secure checkout on the Monochrome store</li>
-              <li>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria and Canada included{% endif %}</li>
-              <li>All prices in {{ cart.currency.iso_code }}</li>
-            </ul>
-            <span class="stamp ok" style="--r:-5deg" aria-hidden="true">Approved for field use</span>
+            <p class="cs-trust mono">Secure checkout · Ships to {{ countries.size }} countries</p>
+            <span class="stamp ok" style="--r:-5deg" aria-hidden="true">Cleared</span>
           </aside>
         </div>
       </form>
+      <form id="mcOfferCart" action="{{ routes.cart_add_url }}" method="post" hidden></form>
     {%- endif -%}
   </div>
 </section>
 
 {% schema %}
 {
-  "name": "Requisition manifest",
+  "name": "Bag",
   "settings": [
-    { "type": "textarea", "id": "intro", "label": "Intro line", "default": "Every file you have requisitioned, with sizes and prices. Change a quantity or strike a line, then proceed to checkout." },
-    { "type": "checkbox", "id": "show_note", "label": "Offer an order note", "default": false }
+    { "type": "checkbox", "id": "show_note", "label": "Offer an order note", "default": false },
+    { "type": "header", "content": "Free Vision Issue nudge" },
+    { "type": "checkbox", "id": "offer_on", "label": "Offer the free magazine when the bag has a jersey or hoodie", "info": "Turn off when the automatic discount ends.", "default": true },
+    { "type": "product", "id": "offer_product", "label": "Free product", "info": "Leave blank to use the magazine (product type Magazine)." },
+    { "type": "text", "id": "offer_title", "label": "Headline ({item} = jersey or hoodie)", "default": "Free with your {item}" },
+    { "type": "text", "id": "offer_name", "label": "Product name", "default": "The Vision Issue" },
+    { "type": "text", "id": "offer_note", "label": "Small print", "default": "Discount applies at checkout." }
   ],
-  "presets": [{ "name": "Requisition manifest" }]
+  "presets": [{ "name": "Bag" }]
 }
 {% endschema %}

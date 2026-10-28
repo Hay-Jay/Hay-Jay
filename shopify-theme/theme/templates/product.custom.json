@@ -20,7 +20,15 @@
         "klarna"
       ],
       "settings": {
-        "show_dynamic": true
+        "show_dynamic": true,
+        "offer_on": true,
+        "offer_text": "Free Vision Issue with any jersey or hoodie. Applied at checkout.",
+        "fit_top": "<p>Relaxed cut, true to size. Between sizes? Go up.</p>",
+        "fit_bottom": "<p>Not sure of your size? Message us before you order.</p>",
+        "fit_accessory": "<p>Rings: between two sizes, go up. Chains and necklaces: one size.</p>",
+        "ship_text": "<p>Ships to {countries} countries, Nigeria and Canada included. Rates are calculated at checkout.</p>",
+        "rel_title": "Also on file",
+        "rel_count": 4
       }
     }
   },
