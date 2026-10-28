@@ -100,9 +100,9 @@
         {%- assign p = collection.products | where: 'handle', h | first -%}
         {%- if p -%}
           {%- if i < 2 -%}
-            {% render 'mc-card', product: p, i: i, order: ord, data: true, eager: true, uid: p.handle %}
+            {% render 'mc-card', product: p, i: i, order: ord, data: true, eager: true, uid: p.handle, cur: false %}
           {%- else -%}
-            {% render 'mc-card', product: p, i: i, order: ord, data: true, uid: p.handle %}
+            {% render 'mc-card', product: p, i: i, order: ord, data: true, uid: p.handle, cur: false %}
           {%- endif -%}
           {%- assign i = i | plus: 1 -%}
         {%- endif -%}

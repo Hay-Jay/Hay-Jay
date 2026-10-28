@@ -30,18 +30,24 @@
       else strip.scrollTo({ left: t.offsetLeft - strip.clientWidth / 2 + t.offsetWidth / 2, behavior: smooth() });
     }
   }
+  // while the strip glides to a photo, the photos it passes do not count as "current"
+  let target = -1, targetT = 0;
   function go(i, how) {
     if (!track || n < 2) return;
     i = (i + n) % n;
+    target = i; clearTimeout(targetT); targetT = setTimeout(() => { target = -1; }, 1500);
     track.scrollTo({ left: i * track.clientWidth, behavior: how || smooth() });
     mark(i); MC.lensKill();
   }
   if (track) {
     let raf = 0;
-    track.addEventListener('scroll', () => {
-      if (raf) return;
-      raf = requestAnimationFrame(() => { raf = 0; const w = track.clientWidth || 1; mark(Math.min(n - 1, Math.max(0, Math.round(track.scrollLeft / w)))); });
-    }, { passive: true });
+    const settle = () => {
+      const k = Math.min(n - 1, Math.max(0, Math.round(track.scrollLeft / (track.clientWidth || 1))));
+      if (target >= 0) { if (k !== target) return; target = -1; }
+      mark(k);
+    };
+    track.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; settle(); }); }, { passive: true });
+    track.addEventListener('scrollend', () => { target = -1; settle(); });
     // keep the current photo in place when the strip changes width (rotation, resize)
     addEventListener('resize', () => { track.scrollTo({ left: cur * track.clientWidth, behavior: 'auto' }); });
     mark(0);
@@ -222,15 +228,18 @@
 
   // ---- phones: the sticky bar appears once the main Add to bag has scrolled up out of view -------------------------------------------------
   const buyRow = $('#plBuy');
-  if (sticky && buyRow && 'IntersectionObserver' in window) {
+  if (sticky && buyRow) {
     const phone = matchMedia('(max-width: 899px)');
-    let past = false;
+    let raf = 0, was = null;
+    // measured on scroll rather than observed: a jump (back button, anchor, restored scroll) must show it too
     const set = () => {
-      const on = past && phone.matches && !(buy && buy.disabled && !data.variants.some(x => x.a));
+      raf = 0;
+      const on = phone.matches && buyRow.getBoundingClientRect().bottom < 0 && data.variants.some(x => x.a);
+      if (on === was) return; was = on;
       sticky.classList.toggle('on', on); sticky.inert = !on; root.classList.toggle('buy-pin', on);
     };
-    new IntersectionObserver(es => es.forEach(en => { past = !en.isIntersecting && en.boundingClientRect.top < 0; set(); }), { threshold: 0 }).observe(buyRow);
-    if (phone.addEventListener) phone.addEventListener('change', set);
+    const ask = () => { if (!raf) raf = requestAnimationFrame(set); };
+    addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask); set();
     // the sticky bar names the product and size; a tap on that part goes back up to the size tabs
     const t = $('.pls-t', sticky);
     if (t) { t.style.cursor = 'pointer'; t.addEventListener('click', () => { const o = $('#opts') || buyRow; o.scrollIntoView({ block: 'center', behavior: smooth() }); }); }

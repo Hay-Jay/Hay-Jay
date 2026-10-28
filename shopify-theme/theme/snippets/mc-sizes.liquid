@@ -1,6 +1,6 @@
 {%- comment -%}
   Size line of a card/row. Params: product, cls (output of mc-class), range (true = short form for cards: "S–XXL", "6–12").
-  Output e.g. S M L XL (default) or S–XL (range).
+  Output e.g. S M L XL (default) or S–XL (range; empty when the product has no size option).
 {%- endcomment -%}
 {%- liquid
   assign out = ''
@@ -16,7 +16,9 @@
       endif
     endif
   endfor
-  if out == ''
+  if out == '' and range
+    # cards: no size line when there is nothing to choose
+  elsif out == ''
     if cls == 'gift'
       assign out = 'Choose amount'
     elsif cls == 'print'

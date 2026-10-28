@@ -28,6 +28,7 @@
 .cs-trust { margin: 0; padding-top: 10px; border-top: 1px dashed var(--rule); color: var(--dim); font-weight: 400; text-transform: none; letter-spacing: .04em; font-size: 12.5px; }
 .cart-sum .stamp.ok { position: absolute; right: 16px; bottom: -14px; margin: 0; }
 .cart-empty { display: grid; justify-items: start; gap: 14px; padding: 6px 0 clamp(20px, 3vw, 36px); }
+.cart-empty .stamp { margin: 4px 0 2px 4px; }
 .cart-empty-t { font: 400 1.1rem/1.4 var(--type); margin: 0; color: var(--dim); }
 .cart-picks { margin-top: 10px; }
 /* the suggestion cards on an empty bag (the register's .sheet grid lives in mc-shop.css, not loaded here) */

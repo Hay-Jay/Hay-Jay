@@ -9,7 +9,8 @@
   With JavaScript, mc-cart.js turns every [data-mc-add] button into an AJAX add that opens the bag; without it the form posts to /cart/add.
   Params: product, i (0-based position, default 0), sizes, widths, feat (true = larger name), data (true = shop data-* attributes),
           photo (1-based photo number override), order (output of mc-order, saves recomputing), quick (false = no quick add),
-          uid (unique id suffix when the same product appears twice on one page), eager (true = first photo is the LCP image)
+          uid (unique id suffix when the same product appears twice on one page), eager (true = first photo is the LCP image),
+          cur (false = no currency code after the price, for pages that say "Prices in CAD" once in their header)
 {%- endcomment -%}
 {%- liquid
   capture cls
@@ -100,7 +101,8 @@
 <div class="card{% if feat %} feat{% endif %}{% unless product.available %} sold{% endunless %}{% if is_new %} isnew{% endif %}" style="--i:{{ pos }}"{% if data %} data-h="{{ product.handle }}" data-n="{{ hay }}" data-cat="{{ cls }}" data-p="{{ product.price | divided_by: 100.0 }}" data-pub="{{ product.published_at | date: '%s' }}" data-av="{% if product.available %}1{% else %}0{% endif %}" data-no="{{ num }}" data-f="{{ num | minus: 1 }}"{% endif %}>
   <a class="card-a" href="{{ product.url }}">
     <span class="card-ph{% if is_ring %} zoom{% endif %}{% if has2 %} has2{% endif %}">
-      {%- render 'mc-img', image: pic, alt: product.title, widths: ws, sizes: sz_attr, eager: eager -%}
+      {%- comment -%} the name is the link's text right below, so the photos stay silent (no "name, name" for screen readers) {%- endcomment -%}
+      {%- render 'mc-img', image: pic, alt: '', widths: ws, sizes: sz_attr, eager: eager -%}
       {%- if has2 %}{% render 'mc-img', image: pic2, alt: '', class: 'ph ph2', widths: ws, sizes: sz_attr %}{% endif -%}
       <i class="card-vf" aria-hidden="true"></i>
       <span class="card-tag" aria-hidden="true">{{ fno }}</span>
@@ -109,7 +111,7 @@
     </span>
     <span class="cap">
       <b class="card-t">{{ ttl }}</b>
-      <span class="card-m"><span class="pr">{% if product.compare_at_price > product.price %}<s>{{ product.compare_at_price | money }}</s> {% endif %}{% render 'mc-price', product: product %} <small>{{ cart.currency.iso_code }}</small></span><span class="sz">{% if product.available %}{{ sz | escape }}{% else %}Sold out{% endif %}</span></span>
+      <span class="card-m"><span class="pr">{% if product.compare_at_price > product.price %}<s>{{ product.compare_at_price | money }}</s> {% endif %}{% render 'mc-price', product: product %}{% unless cur == false %} <small>{{ cart.currency.iso_code }}</small>{% endunless %}</span>{% if product.available == false %}<span class="sz">Sold out</span>{% elsif sz != blank %}<span class="sz">{{ sz | escape }}</span>{% endif %}</span>
     </span>
   </a>
   {%- case qa -%}

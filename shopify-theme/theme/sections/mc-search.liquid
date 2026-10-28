@@ -41,9 +41,9 @@
               {%- for item in search.results -%}
                 {%- if item.object_type == 'product' or item.variants.size > 0 -%}
                   {%- if i < 2 -%}
-                    {% render 'mc-card', product: item, i: i, order: ord, eager: true, uid: item.handle %}
+                    {% render 'mc-card', product: item, i: i, order: ord, eager: true, uid: item.handle, cur: false %}
                   {%- else -%}
-                    {% render 'mc-card', product: item, i: i, order: ord, uid: item.handle %}
+                    {% render 'mc-card', product: item, i: i, order: ord, uid: item.handle, cur: false %}
                   {%- endif -%}
                   {%- assign i = i | plus: 1 -%}
                 {%- endif -%}
