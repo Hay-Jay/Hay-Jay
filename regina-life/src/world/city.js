@@ -178,13 +178,14 @@ export function buildCity({ quality = 'high' } = {}) {
     // benches round the plaza: you can read on them or people-watch (core/game.js ACTIVITIES)
     vparkInfo.benches = [];
     for (let k = 0; k < 4; k++) {
-      const a = Math.PI / 4 + (k * Math.PI) / 2, bx = cx + Math.cos(a) * 11.5, bz = cz + Math.sin(a) * 11.5, rot = -a + Math.PI / 2;
+      const a = Math.PI / 4 + (k * Math.PI) / 2, bx = cx + Math.cos(a) * 11.5, bz = cz + Math.sin(a) * 11.5, rot = -a - Math.PI / 2;   // facing the fountain
       const seat = new THREE.BoxGeometry(2.2, 0.12, 0.6).translate(0, 0.48, 0), back = new THREE.BoxGeometry(2.2, 0.55, 0.1).translate(0, 0.78, -0.3), legs = new THREE.BoxGeometry(2.0, 0.42, 0.5).translate(0, 0.21, 0);
       for (const [g, col] of [[seat, '#9a6a3c'], [back, '#9a6a3c'], [legs, '#3d4a52']]) { g.rotateY(rot); g.translate(bx, 0, bz); add('trim', tint(g, col), bx, bz); }
       colliders.add(bx - 0.9, bz - 0.9, bx + 0.9, bz + 0.9, 1);
       const sx = cx + Math.cos(a) * 9.8, sz = cz + Math.sin(a) * 9.8;
       vparkInfo.benches.push({ x: sx, z: sz });
-      interactables.push({ id: 'vpark_bench_' + k, x: sx, z: sz, radius: 2.4, label: k % 2 ? 'People-watch from the bench' : 'Read on a bench', activity: k % 2 ? 'people' : 'bench' });
+      interactables.push({ id: 'vpark_bench_' + k, x: sx, z: sz, radius: 2.4, label: k % 2 ? 'People-watch from the bench' : 'Read on a bench', activity: k % 2 ? 'people' : 'bench',
+        seat: { x: bx - Math.cos(a) * 0.06, z: bz - Math.sin(a) * 0.06, y: 0.1, yaw: rot, stand: { x: sx, z: sz } } });
     }
     // the Supporters' Mural: a long painted wall on the Scarth Street side, facing east
     const mx = x1 - 8, mz = cz + 22, W = 16, Hh = 3.4;

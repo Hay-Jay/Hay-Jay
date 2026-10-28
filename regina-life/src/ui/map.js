@@ -1,4 +1,12 @@
 import { DISTRICTS, POIS, poiById, mapRoads, lakePolygon, PARK_RECT, PITCH, GRID, ROAD_W, COMING_SOON } from '../world/cityData.js';
+
+/** The map's places: the city's, with the homes where they really are (core/homeLots.js via getState().homes): yours, for sale, or left behind. */
+function placesOf(st) {
+  if (!Array.isArray(st.homes)) return POIS;
+  return [...POIS.filter((p) => p.id !== 'lofts'), ...st.homes.map((l) => (l.status === 'home'
+    ? { ...poiById.lofts, name: l.name, emoji: '🏠', x: l.x, z: l.z, blurb: l.blurb, area: l.area }   // the home slot keeps the Lofts' id so navigation and the title map agree
+    : { id: l.pin, name: l.status === 'sale' ? `${l.building} · for sale` : l.building, emoji: l.status === 'sale' ? '🏷️' : l.emoji, cat: 'home', x: l.x, z: l.z, state: 'soon', blurb: l.blurb, area: l.area }))];
+}
 import { clusterPoints, placeLabels, clipSegment, spreadRects } from './maplayout.js';
 
 const ROADS = mapRoads(), LAKE = lakePolygon();
@@ -147,7 +155,7 @@ export class MapView {
 
   _drawMiniPois(g, st, P) {
     const showAll = this.scale > 0.4;
-    for (const p of POIS) {
+    for (const p of placesOf(st)) {
       const [x, y] = P(p.x, p.z); if (x < -20 || y < -20 || x > this.w + 20 || y > this.h + 20) continue;
       if (!(p.cat === 'shop' || p.cat === 'home' || p.id === st.dest?.id)) { if (Math.hypot(x - this.w / 2, y - this.h / 2) > Math.min(this.w, this.h) * 0.46) continue; }
       if (!showAll && p.cat === 'district') continue;
@@ -167,7 +175,7 @@ export class MapView {
   _drawPlaces(g, st, P, px, py) {
     const s = this.scale, W = this.w, H = this.h;
     const items = [];
-    for (const p of POIS) {
+    for (const p of placesOf(st)) {
       const [x, y] = P(p.x, p.z); if (x < -30 || y < -30 || x > W + 30 || y > H + 30) continue;
       const pinned = this.selected === p.id || st.dest?.id === p.id;
       items.push({ poi: p, sx: x, sy: y, pinned, prio: pinned ? 100 : (PRIO[p.cat] ?? 20) + (p.state === 'open' ? 10 : 0) });

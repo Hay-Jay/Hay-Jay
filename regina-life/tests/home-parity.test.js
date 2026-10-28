@@ -72,7 +72,7 @@ describe('Studio behaviour parity (what the actions do)', () => {
   it('routes every other Studio interactable to the same ui call as before', () => {
     const it = buildInterior('apartment'), c = ctxStub();
     for (const [id, fn, args] of [['bed', 'sleep'], ['stove', 'cook'], ['fridge', 'openFridge'], ['stereo', 'radioMenu'], ['wardrobe', 'openWardrobe'], ['shower', 'activity', ['shower']], ['books', 'activity', ['read']], ['exit', 'exitInterior']]) {
-      byId(it, id).run(c); expect(c.ui[fn], id).toHaveBeenCalled(); if (args) expect(c.ui[fn]).toHaveBeenLastCalledWith(...args);
+      byId(it, id).run(c); expect(c.ui[fn], id).toHaveBeenCalled(); if (args) expect(c.ui[fn].mock.lastCall.slice(0, args.length)).toEqual(args);   // (a second argument now says where your body goes: player/poses.js)
     }
   });
 
@@ -83,7 +83,7 @@ describe('Studio behaviour parity (what the actions do)', () => {
 
   it('the TV: Watch TV first, then a menu with Next channel / Turn off / Cancel; switching off clears the label', () => {
     const it = buildInterior('apartment'), c = ctxStub(), tv = byId(it, 'tv');
-    expect(tv.label()).toBe('Watch TV'); tv.run(c); expect(c.audio.blip).toHaveBeenCalledWith('tick'); expect(c.ui.activity).toHaveBeenCalledWith('tv'); expect(tv.label()).toBe('Change channel / Off');
+    expect(tv.label()).toBe('Watch TV'); tv.run(c); expect(c.audio.blip).toHaveBeenCalledWith('tick'); expect(c.ui.activity).toHaveBeenCalledWith('tv', { face: expect.any(Object) }); expect(tv.label()).toBe('Change channel / Off');
     tv.run(c); const [t, , buttons] = c.ui.menu.mock.calls[0]; expect(t).toBe('Television'); expect(buttons.map((b) => b.label)).toEqual(['Next channel', 'Turn off', 'Cancel']);
     buttons[1].run(); expect(tv.label()).toBe('Watch TV'); tv.run(c); expect(tv.label()).toBe('Change channel / Off'); it.group.userData.tvOff(); expect(tv.label()).toBe('Watch TV');   // leaving the building turns it off
   });

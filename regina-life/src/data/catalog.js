@@ -37,25 +37,38 @@ export const CLOTHES = {
   sweater_cream:{id: 'sweater_cream',slot:'top',    style: 'sweater', color: '#d8cdb4', name: 'Knit Sweater — Cream', price: 7900 },
   jacket_green:{ id: 'jacket_green',slot: 'top',    style: 'jacket',  color: '#3e5b43', name: 'Field Jacket — Sage',  price: 12900 },
   jacket_black:{ id: 'jacket_black',slot: 'top',    style: 'jacket',  color: '#222428', name: 'Parka — Midnight',     price: 29900 },
+  sweater_green:{id: 'sweater_green',slot:'top',    style: 'sweater', color: '#2f6b45', name: 'Knit Sweater — Prairie Green', price: 7900 },
+  flannel_red: { id: 'flannel_red', slot: 'top',    style: 'overshirt', color: '#a83a32', inner: '#ece7dc', name: 'Flannel Overshirt — Barn Red', price: 5900 },
+  flannel_spruce:{id: 'flannel_spruce',slot:'top',  style: 'overshirt', color: '#3f5f45', inner: '#2b2f36', name: 'Flannel Overshirt — Spruce', price: 5900 },
+  puffer_red:  { id: 'puffer_red',  slot: 'top',    style: 'puffer',  color: '#c8402f', name: 'Puffer Parka — Prairie Red', price: 34900 },
+  puffer_navy: { id: 'puffer_navy', slot: 'top',    style: 'puffer',  color: '#25365a', name: 'Puffer Parka — Navy', price: 34900 },
   jeans_blue:  { id: 'jeans_blue',  slot: 'bottom', style: 'jeans',   color: '#34507a', name: 'Straight Jeans — Indigo', price: 0 },
   jeans_black: { id: 'jeans_black', slot: 'bottom', style: 'jeans',   color: '#1f2226', name: 'Straight Jeans — Black',  price: 5900 },
   chino_tan:   { id: 'chino_tan',   slot: 'bottom', style: 'chino',   color: '#b49a72', name: 'Chinos — Wheat',       price: 5400 },
   jogger_grey: { id: 'jogger_grey', slot: 'bottom', style: 'jogger',  color: '#4a4e55', name: 'Joggers — Slate',      price: 4800 },
   shorts_khaki:{ id: 'shorts_khaki',slot: 'bottom', style: 'shorts',  color: '#a99871', name: 'Shorts — Khaki',       price: 3900 },
+  skirt_denim: { id: 'skirt_denim', slot: 'bottom', style: 'skirt',   color: '#3b5c8c', name: 'Denim Skirt',          price: 4900 },
+  skirt_plum:  { id: 'skirt_plum',  slot: 'bottom', style: 'skirt',   color: '#6b3a5a', name: 'A-line Skirt — Plum',  price: 5400 },
+  overalls_denim:{id: 'overalls_denim',slot:'bottom',style: 'overalls', color: '#3d5f8f', name: 'Overalls — Denim',    price: 7900 },
   sneaker_white:{id: 'sneaker_white',slot:'shoes',  style: 'sneaker', color: '#f0efe9', name: 'Court Sneakers — White', price: 0 },
   sneaker_black:{id: 'sneaker_black',slot:'shoes',  style: 'sneaker', color: '#202226', name: 'Court Sneakers — Black', price: 8900 },
   boots_brown: { id: 'boots_brown', slot: 'shoes',  style: 'boots',   color: '#5b3d26', name: 'Winter Boots — Brown', price: 16900 },
   dress_black: { id: 'dress_black', slot: 'shoes',  style: 'dress',   color: '#16171a', name: 'Oxfords — Black',      price: 12900 },
+  pacs_charcoal:{id: 'pacs_charcoal',slot:'shoes',  style: 'winter',  color: '#2b2f36', name: 'Pac Boots — Charcoal (fur cuff)', price: 19900 },
   none_head:   { id: 'none_head',   slot: 'head',   style: 'none',    color: '#000000', name: 'No headwear',          price: 0 },
   toque_red:   { id: 'toque_red',   slot: 'head',   style: 'toque',   color: '#b5302c', name: 'Toque — Brick',    price: 2400 },
   toque_pumpkin: { id: 'toque_pumpkin', slot: 'head', style: 'toque', color: '#f28a1e', name: 'Toque — Pumpkin Walk (prize)', price: 0, prize: true },
   toque_grey:  { id: 'toque_grey',  slot: 'head',   style: 'toque',   color: '#7a7d82', name: 'Toque — Grey',         price: 2400 },
   cap_navy:    { id: 'cap_navy',    slot: 'head',   style: 'cap',     color: '#223458', name: 'Ball Cap — Navy',      price: 2900 },
+  beanie_spruce:{id: 'beanie_spruce',slot:'head',   style: 'beanie',  color: '#3a7a55', name: 'Slouchy Beanie — Spruce', price: 2200 },
+  trapper_brown:{id: 'trapper_brown',slot:'head',   style: 'trapper', color: '#5b3d26', name: 'Trapper Hat — Brown',  price: 4400 },
+  bucket_wheat:{ id: 'bucket_wheat',slot: 'head',   style: 'bucket',  color: '#d9c08a', name: 'Bucket Hat — Wheat',   price: 2600 },
   none_face:   { id: 'none_face',   slot: 'face',   style: 'none',    color: '#000000', name: 'No eyewear',           price: 0 },
   glasses_black:{id: 'glasses_black',slot:'face',   style: 'glasses', color: '#121214', name: 'Round Glasses — Black',price: 8900 },
   shades:      { id: 'shades',      slot: 'face',   style: 'shades',  color: '#0c0c0e', name: 'Sunglasses',           price: 5200 },
   none_neck:   { id: 'none_neck',   slot: 'neck',   style: 'none',    color: '#000000', name: 'No scarf',             price: 0 },
   scarf_plaid: { id: 'scarf_plaid', slot: 'neck',   style: 'scarf',   color: '#8a2e2a', name: 'Wool Scarf — Brick',   price: 3400 },
+  scarf_gold:  { id: 'scarf_gold',  slot: 'neck',   style: 'scarf',   color: '#e0b23a', name: 'Wool Scarf — Gold',    price: 3400 },
 };
 export const STARTER_WARDROBE = Object.values(CLOTHES).filter((c) => c.price === 0 && !c.prize).map((c) => c.id);   // prizes (festival cosmetics) are earned, not handed out
 export const SLOTS = ['top', 'bottom', 'shoes', 'head', 'face', 'neck'];
@@ -64,7 +77,7 @@ export const STORE_STOCK = Object.values(CLOTHES).filter((c) => c.price > 0).map
 export const SKIN_TONES = ['#f6d9c3', '#efc3a0', '#e0a87c', '#c68a5b', '#a56a3f', '#7d4a2a', '#5a331d', '#3b2314'];
 export const HAIR_COLORS = ['#0d0b0a', '#2a1b12', '#4a3020', '#7a5230', '#b58a52', '#d8c08a', '#8d2f1d', '#8e8e92', '#d9d9dc'];
 export const EYE_COLORS = ['#3a2a1d', '#5b7a52', '#4f7ea8', '#6b6f73'];
-export const HAIR_STYLES = ['buzz', 'short', 'side-part', 'long', 'bun', 'curly', 'afro', 'braids', 'bald'];
+export const HAIR_STYLES = ['buzz', 'short', 'side-part', 'bob', 'waves', 'long', 'ponytail', 'bun', 'buns', 'curly', 'afro', 'braids', 'bald'];
 export const FACE_SHAPES = ['oval', 'round', 'square', 'heart'];
 export const BODY_TYPES = ['slim', 'average', 'athletic', 'broad'];
 export const FACIAL_HAIR = ['none', 'stubble', 'moustache', 'goatee', 'full'];

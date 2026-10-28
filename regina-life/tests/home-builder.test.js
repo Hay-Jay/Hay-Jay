@@ -320,7 +320,8 @@ describe('setHome: incremental, per-room and layout-aware', () => {
     const t = furn.find((r) => Math.abs((r.x0 + r.x1) / 2 - 3) < 1e-9); near(t.x1 - t.x0, tread.w); near(t.z1 - t.z0, tread.d);   // rot 2 keeps w x d
     const prompt = it1.interactables.find((i) => i.id === 'furn_p2'); expect(prompt).toBeTruthy(); expect(prompt.furn).toBe(true); expect(prompt.label).toBe(`Work out on ${tread.name.toLowerCase()}`); expect(prompt.radius).toBe(1.5); expect(prompt.room).toBe('living');
     const reach = Math.max(tread.w, tread.d) / 2 + 0.6; near(prompt.x, 3 + rotXZ(0, reach, 2).x); near(prompt.z, 1 + rotXZ(0, reach, 2).z);   // the spot in front of the piece
-    const c = ctxStub(); prompt.run(c); expect(c.ui.activity).toHaveBeenCalledWith('treadmill');
+    const c = ctxStub(); prompt.run(c); expect(c.ui.activity).toHaveBeenCalledWith('treadmill', { perch: expect.objectContaining({ y: 0.205, stand: { x: prompt.x, z: prompt.z } }) });
+    const perch = c.ui.activity.mock.lastCall[1].perch; expect(perch.x).toBeGreaterThan(t.x0); expect(perch.x).toBeLessThan(t.x1); expect(perch.z).toBeGreaterThan(t.z0); expect(perch.z).toBeLessThan(t.z1);   // you run ON the deck
     it1.setHome(home({ placed: [] })); expect(it1.colliders.rects.filter((r) => r.tag === 'furn')).toHaveLength(0); expect(it1.interactables.find((i) => i.id === 'furn_p2')).toBeUndefined();
     it1.dispose();
   });

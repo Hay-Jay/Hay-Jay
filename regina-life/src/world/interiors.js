@@ -125,7 +125,7 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
             ctx.player.setCarry(false); task.carrying = false; ctx.player.gesture('wave', 1.4);
             const j = ctx.store.state.job.active, def = j ? JOBS[j.id] : null, nx = def?.levels[j.level + 1], need = nx ? Math.max(0, Math.ceil((nx.xpNeeded - j.xp) / (XP_PER_TASK * def.levels[j.level].tasks))) : 0;
             ctx.fx?.juice.pay(r.pay, ctx.fx.head?.(), 'payday'); ctx.audio?.chime('gain');
-            if (r.promoted) { ctx.fx?.juice.confetti(100); ctx.audio?.chime('fanfare'); ctx.fx?.juice.floater(`🎉 Promoted: ${r.promoted}!`, ctx.fx.head?.(), 'skill', { big: true }); }
+            if (r.promoted) { ctx.fx?.juice.confetti(100); ctx.audio?.chime('fanfare'); ctx.player.gesture('cheer', 1.8); ctx.fx?.juice.floater(`🎉 Promoted: ${r.promoted}!`, ctx.fx.head?.(), 'skill', { big: true }); }
             ctx.ui.toast(`Shift complete! +${ctx.fmt(r.pay)}${r.promoted ? ` · Promoted to ${r.promoted}!` : nx ? ` · ${need} more shift${need === 1 ? '' : 's'} to ${nx.name}` : ''}`, 'good'); ctx.did?.('shift');
           }
           else ctx.ui.toast(r.error, 'warn');
@@ -275,20 +275,20 @@ export function buildInterior(kind, { texCache = {}, layout = null } = {}) {   /
     // treadmills
     const tread = (x) => { box(0.9, 0.18, 1.8, '#17191d', x, 0, -3.8, { collide: true }); box(0.7, 0.04, 1.6, '#2c2f35', x, 0.18, -3.8); box(0.06, 1.1, 0.06, '#9aa3ad', x - 0.4, 0.2, -4.6); box(0.06, 1.1, 0.06, '#9aa3ad', x + 0.4, 0.2, -4.6); box(0.8, 0.4, 0.08, '#101114', x, 1.1, -4.65); add(new THREE.PlaneGeometry(0.7, 0.3), new THREE.MeshBasicMaterial({ color: '#4ae0d0' }), x, 1.3, -4.6, { cast: false }); blob(x, -3.8, 1, 1.8, 0.35); };
     [-3.5, -1.5, 0.5].forEach(tread);
-    interactables.push({ id: 'treadmill', x: -1.5, z: -2.5, radius: 3.2, label: 'Run on the treadmill', run: (ctx) => ctx.ui.activity('treadmill') });
+    interactables.push({ id: 'treadmill', x: -1.5, z: -2.5, radius: 3.2, label: 'Run on the treadmill', run: (ctx) => ctx.ui.activity('treadmill', { perch: { x: -1.5, z: -3.6, y: 0.22, yaw: Math.PI, stand: { x: -1.5, z: -2.5 } } }) });
     // weights
     box(1.7, 0.4, 0.5, '#202226', 5, 0, -1, { collide: true }); box(0.1, 1.3, 0.1, '#9aa3ad', 4.3, 0, -1, { collide: true }); box(0.1, 1.3, 0.1, '#9aa3ad', 5.7, 0, -1);
     box(2.0, 0.06, 0.06, '#c9ccd2', 5, 1.2, -1, { mo: { metalness: 0.9, roughness: 0.2 } }); for (const s of [-1, 1]) add(new THREE.CylinderGeometry(0.28, 0.28, 0.1, 18).rotateZ(Math.PI / 2), mat('#15161a'), 5 + s * 0.95, 1.2, -1);
     blob(5, -1, 2, 1, 0.4);
-    interactables.push({ id: 'weights', x: 5, z: 0.4, radius: 2.0, label: 'Lift weights', run: (ctx) => ctx.ui.activity('weights') });
+    interactables.push({ id: 'weights', x: 5, z: 0.4, radius: 2.0, label: 'Lift weights', run: (ctx) => ctx.ui.activity('weights', { face: { x: 5, z: -1 } }) });
     // dumbbell rack
     box(0.5, 0.9, 3.2, '#2c2f35', -6.3, 0, 0.6, { collide: true }); for (let k = 0; k < 8; k++) { box(0.28, 0.16, 0.16, '#6e7480', -6.3, 0.95, -0.6 + k * 0.4); }
     // yoga mat
     add(new THREE.PlaneGeometry(0.9, 1.9).rotateX(-Math.PI / 2), mat('#8e6bd8', { roughness: 0.9 }), -3.5, 0.025, 1.2, { cast: false });
-    interactables.push({ id: 'yoga', x: -3.5, z: 1.2, radius: 1.5, label: 'Stretch on the mat', run: (ctx) => ctx.ui.activity('yoga') });
+    interactables.push({ id: 'yoga', x: -3.5, z: 1.2, radius: 1.5, label: 'Stretch on the mat', run: (ctx) => ctx.ui.activity('yoga', { perch: { x: -3.5, z: 1.2, y: 0.03, yaw: Math.PI, stand: { x: -3.5, z: 2.4 } } }) });
     // water cooler + lockers
     box(0.4, 1.0, 0.4, '#e9eef2', 5.6, 0, 3.8, { collide: true }); add(new THREE.CylinderGeometry(0.17, 0.17, 0.45, 14), mat('#7ac8ff', { transparent: true, opacity: 0.6, roughness: 0.1 }), 5.6, 1.25, 3.8);
-    interactables.push({ id: 'water', x: 5.0, z: 3.6, radius: 1.5, label: 'Drink some water', run: (ctx) => ctx.ui.activity('water') });
+    interactables.push({ id: 'water', x: 5.0, z: 3.6, radius: 1.5, label: 'Drink some water', run: (ctx) => ctx.ui.activity('water', { face: { x: 5.6, z: 3.8 } }) });
     for (let k = 0; k < 6; k++) box(0.5, 1.8, 0.45, ['#3bd6c6', '#2a74d6'][k % 2], -6.6, 0, 3.2 + k * 0.55 - 1.2, { collide: false });
     colliders.add(-6.9, 1.6, -6.2, 4.6, 1.8);
     exitDoor(0, 5.2);

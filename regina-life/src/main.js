@@ -11,6 +11,9 @@ import { moodlets } from './core/moodlets.js';
 import { residentsAt } from './core/routines.js';
 import { collectRent } from './core/lodger.js';
 import { bundledLook, bundleWeather, bundleGaps, dressedWarm } from './core/bundle.js';
+import { ACTIVITY_POSE, GIG_POSE } from './player/poses.js';
+import { homeLots, currentLot } from './core/homeLots.js';
+import { HOME_LOTS } from './data/homeLots.js';
 import { CRAFTS, marketOpen, craftPrice, makeCraft, sellCraft, sanitizeCrafts, STALL_DAILY_CAP } from './core/stall.js';
 import { RES_BY_ID } from './data/residents.js';
 import { fetchWeather, simulateWeather } from './core/weather.js';
@@ -18,7 +21,7 @@ import { CONTACTS } from './data/contacts.js';
 import { JOBS } from './data/jobs.js';
 import { buildCity } from './world/city.js';
 import { Atmosphere } from './world/sky.js';
-import { glowTexture } from './world/textures.js';
+import { glowTexture, signTexture } from './world/textures.js';
 import { buildInterior } from './world/interiors.js';
 import { Pedestrians } from './world/npcs.js';
 import { DISTRICTS, POIS, poiById } from './world/cityData.js';
@@ -152,7 +155,7 @@ async function boot() {
   const refreshWeather = async () => { weather = await fetchWeather(); ped.redress(weather.temp); updateEnv(true); store.commit('weather'); };
 
   /* ---------- game context shared by UI ---------- */
-  const mapState = () => ({ x: player.pos.x, z: player.pos.z, yaw: player.yaw, dest: S().destination });
+  const mapState = () => ({ x: player.pos.x, z: player.pos.z, yaw: player.yaw, dest: S().destination, homes: homeLots(S()) });
   let phone, panels, inInterior = null, interior = null, lastDoor = null, gameMode = 'loading', camMode = false, creator = false, fading = false;
   const toast = (msg, type = 'info') => {
     const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; $('toasts').appendChild(t);
@@ -245,7 +248,7 @@ async function boot() {
   ctx.gigDrop = () => { if (abandonGig(store).ok) { player.setCarry(false); toast('Odd job dropped. No harm done.', 'info'); } };
   ctx.gigShow = () => { phone.close(); if (inInterior) exitInterior(); const st = currentStep(S()); if (st) toast(`Head to ${st.spot.name || 'the gold marker'}`, 'info'); };
   phone = new Phone($('phone'), ctx);
-  panels = new Panels($('panels'), { ...ctx, player: { gesture: (g) => player.gesture(g) } });
+  panels = new Panels($('panels'), { ...ctx, player: { gesture: (g, d) => player.gesture(g, d), pose: (n, s) => player.pose(n, s) } });
   panels.ctx.rebuildPlayer = rebuildPlayer;
 
   let homeView = false;
@@ -291,7 +294,7 @@ async function boot() {
   };
   const ictx = {
     store, game: G, fmt: fmtMoney, audio, fx: ctx.fx, did: (what, id) => ctx.onDid?.(what, id),
-    player: { setCarry: (v) => player.setCarry(v), gesture: (g) => player.gesture(g), sitAt: (s) => player.sitAt(s) },
+    player: { setCarry: (v) => player.setCarry(v), gesture: (g, d) => player.gesture(g, d), sitAt: (s) => player.sitAt(s), pose: (n, s) => player.pose(n, s) },
     ui: {
       toast, menu: (t, tx, b) => panels.menu(t, tx, b), shop: (t, ids, w) => panels.shop(t, ids, w), clothingShop: () => panels.clothingShop(),
       openWardrobe: () => panels.wardrobe(), openFridge: () => panels.fridge(), cook: () => panels.cook(), openApp: (id) => { phone.open(); phone.openApp(id); },
@@ -305,11 +308,11 @@ async function boot() {
         panels.menu(`${m.emoji} Mayor ${m.name}`, `“${m.slogan}” — Current policy: ${pol.name}: ${pol.effect}. Next election in about ${h} hours.`, [{ label: 'Open Town Hall app', primary: true, run: () => { phone.open(); phone.openApp('townhall'); } }, { label: 'Leave' }]);
       },
       noticeBoard: () => { const p = POL.ensurePolitics(store), pol = POLICIES[p.mayor.policy]; panels.menu('📌 City notices', `• ${pol.icon} ${pol.name}: ${pol.effect}.\n• Election term ${p.term} is under way — vote in the Town Hall app.\n• ${ctx.news()[2]?.title ?? 'Council meets Tuesday.'}`, [{ label: 'Close' }]); },
-      activity: (id) => {
+      activity: (id, how = {}) => {
         const bad = G.activityBlocked(store, id); if (bad) { toast(bad, 'warn'); audio.blip('error'); return; }
-        const a = G.ACTIVITIES[id]; player.gesture('use', a.secs); const b = snap();
-        panels.progress(a.label, a.secs, () => { const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); showGains(b); toast(activityToast(id), 'good'); ctx.onDid?.('activity', id);
-          if (id === 'paint') { const n = makeCraft(store, 'painting'); setTimeout(() => toast(`🖼️ A finished painting (${n} ready to sell). Farmers' Market: Wednesdays and Saturdays, 9 to 1, by City Hall.`, 'info'), 900); } } else toast(r.error, 'warn'); });
+        const a = G.ACTIVITIES[id]; startPose(how.pose ?? ACTIVITY_POSE[id], a.secs, how); const b = snap();
+        panels.progress(a.label, a.secs, () => { endPose(); const r = id === 'canvass' ? POL.canvass(store) : G.doActivity(store, id, { home: inInterior === 'apartment' }); if (r.ok) { audio.blip('ok'); showGains(b); toast(activityToast(id), 'good'); ctx.onDid?.('activity', id);
+          if (id === 'paint') { const n = makeCraft(store, 'painting'); setTimeout(() => toast(`🖼️ A finished painting (${n} ready to sell). Farmers' Market: Wednesdays and Saturdays, 9 to 1, by City Hall.`, 'info'), 900); } } else toast(r.error, 'warn'); }, { onStop: endPose });
       },
       sleep: async () => {
         const n = S().needs; if (n.energy > 85) { toast("You're not tired right now.", 'info'); return; }
@@ -326,6 +329,12 @@ async function boot() {
       },
     },
   };
+  /** Your body during an activity (player/poses.js): turn to the piece, step onto it or sit on it, then hold the pose until the bar fills. */
+  function startPose(name, secs, how = {}) {
+    if (how.perch) player.perchAt(how.perch); else if (how.seat) player.sitAt(how.seat); else if (how.face) player.face(how.face.x, how.face.z);
+    if (name) player.pose(name, secs + 0.5); else player.gesture('use', secs);
+  }
+  function endPose() { player.endPose(); if (player.sitting?.perch) player.standUp(); }   // step off the treadmill; a bench or the bike you leave yourself
   const activityToast = (id) => ({ shower: 'Fresh as a prairie breeze 🚿', tv: 'That was a good episode 📺', read: 'You learned something 📖', treadmill: 'Great run! +Fitness 💪', weights: 'Solid set! +Fitness 💪', yoga: 'So zen 🧘', piano: 'Lovely tune 🎹', paint: 'A little masterpiece 🎨', gaming: 'Good game! 🎮', water: 'Hydrated 💧', canvass: 'Flyers gone — your candidate thanks you 🗳️' })[id] || 'Done';
   /**
    * Put `next` on screen as the interior the player is in (enterInterior) or is being moved into (moveHome): scene, collision, camera limits, and for a home its
@@ -420,11 +429,11 @@ async function boot() {
       if (!r.done) { juice.floater(`✓ ${r.step}/${r.total}`, headAt(), 'good'); audio.chime('pop'); const nx = currentStep(S()); if (nx) toast(nx.label, 'info'); return; }
       const f = finishGig(store, ctx.gigConditions()); player.setCarry(false);
       if (!f.ok) { toast(f.error, 'warn'); return; }
-      juice.pay(f.total, headAt(), f.tip ? '(with a tip!)' : ''); audio.chime('gain'); player.gesture('wave', 1.4);
+      juice.pay(f.total, headAt(), f.tip ? '(with a tip!)' : ''); audio.chime('gain'); player.gesture('cheer', 1.6);
       if ((S().stats?.gigs ?? 0) === 1) { juice.confetti(60); audio.chime('fanfare'); }
       toast(`${f.title}: done! +${fmtMoney(f.total)}${f.tip ? ` (incl. a ${fmtMoney(f.tip)} tip)` : ''}`, 'good'); ctx.onDid?.('gig', f.kind);
     };
-    if (st.hold > 0) { player.gesture('use', st.hold); panels.progress(st.label.replace(/\s*\(\d\/\d\)$/, '') + '…', st.hold, advance); } else advance();
+    if (st.hold > 0) { const kind = sanitizeGigs(S().gigs).active?.kind; startPose(GIG_POSE[kind] ?? null, st.hold); panels.progress(st.label.replace(/\s*\(\d\/\d\)$/, '') + '…', st.hold, () => { endPose(); advance(); }, { onStop: endPose }); } else advance();
   }
   // the gold marker over the current gig spot: a light column you can see from blocks away, a ring on the ground, a bobbing cone
   const gigMark = new THREE.Group(); gigMark.visible = false; scene.add(gigMark);
@@ -452,13 +461,32 @@ async function boot() {
     if (walking && !dog.visible) { dog.visible = true; dog.position.set(player.pos.x - 1, 0, player.pos.z - 1); }
     if (!walking) dog.visible = false;
     if (dog.visible) {
-      const want = new THREE.Vector3(player.pos.x - Math.sin(player.yaw) * 1.3 + Math.cos(player.yaw) * 0.6, 0, player.pos.z - Math.cos(player.yaw) * 1.3 - Math.sin(player.yaw) * 0.6);
+      const want = new THREE.Vector3(player.pos.x - Math.sin(player.yaw) * 1.3 - Math.cos(player.yaw) * 0.6, 0, player.pos.z - Math.cos(player.yaw) * 1.3 + Math.sin(player.yaw) * 0.6);   // on your leash side
       const dx = want.x - dog.position.x, dz = want.z - dog.position.z, d = Math.hypot(dx, dz), sp = Math.min(d * 3, 9);
       if (d > 0.05) { dog.position.x += (dx / d) * sp * dt; dog.position.z += (dz / d) * sp * dt; dog.rotation.y = Math.atan2(dx, dz); }
       dog.userData.t += dt * (2 + sp * 2); const k = Math.min(1, sp / 2);
       dog.userData.legs.forEach((l, i) => (l.rotation.x = Math.sin(dog.userData.t + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI : 0)) * 0.6 * k));
       dog.userData.tail.rotation.y = Math.sin(performance.now() / 120) * 0.6;
     }
+    // the leash: a soft sagging line from your hand to the collar
+    const hand = dog.visible ? player.char.propAt('leash', _v1) : null; leash.visible = !!hand;
+    if (hand) {
+      const cx = dog.position.x + Math.sin(dog.rotation.y) * 0.42, cz = dog.position.z + Math.cos(dog.rotation.y) * 0.42, p = leash.geometry.attributes.position;
+      for (let i = 0; i < 12; i++) { const u = i / 11; p.setXYZ(i, hand.x + (cx - hand.x) * u, hand.y + (0.66 - hand.y) * u - Math.sin(u * Math.PI) * 0.22, hand.z + (cz - hand.z) * u); }
+      p.needsUpdate = true; leash.geometry.computeBoundingSphere();
+    }
+  };
+  const _v1 = new THREE.Vector3();
+  const leash = new THREE.Line(new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(36), 3)), new THREE.LineBasicMaterial({ color: '#d9433a' }));
+  leash.visible = false; leash.frustumCulled = false; scene.add(leash);
+  /** What your hands are busy with when nothing else is going on: the phone, a leash, an umbrella in the rain, or dancing to the radio at home. */
+  const wantHold = () => {
+    if (gameMode !== 'play' || creator || camMode) return null;
+    if (phone?.isOpen) return 'phone';
+    if (dog.visible) return 'leash';
+    if (!inInterior && (weather.kind === 'rain' || weather.kind === 'storm')) return 'umbrella';
+    if (inInterior === 'apartment' && radio.playing) return 'dance';
+    return null;
   };
 
   /* ---------- the Pumpkin Walk (core/festivals.js): jack-o'-lanterns in Victoria Park, 29-31 October, a 90-second hunt ---------- */
@@ -498,7 +526,7 @@ async function boot() {
   };
   const finishPumpkins = () => {
     const r = endHunt(store); if (!r.ok) return;
-    if (r.pay) juice.pay(r.pay, headAt()); if (r.found >= PUMPKIN.count) { juice.confetti(90); audio.chime('fanfare'); }
+    if (r.pay) juice.pay(r.pay, headAt()); if (r.found >= PUMPKIN.count) { juice.confetti(90); audio.chime('fanfare'); player.gesture('cheer', 1.8); }
     toast(r.found >= PUMPKIN.count ? `All nine! +${fmtMoney(r.pay)}${r.prize ? ' and the Pumpkin Walk toque (check your wardrobe)' : ''}` : `Time! You found ${r.found} of ${PUMPKIN.count}. +${fmtMoney(r.pay)}`, 'good');
   };
   const updatePumpkins = () => {
@@ -538,8 +566,8 @@ async function boot() {
     }
   };
 
-  /* ---------- your home's front door: the Lofts for the Studio and the One-bedroom, a house by the lake for the Bungalow ---------- */
-  const HOME_DOORS = { bungalow: { x: 165, z: 762, nx: 0, nz: 1, name: 'Lakeview Bungalow (Home)' } };
+  /* ---------- your home's front door (data/homeLots.js): the Lofts for the Studio, Cathedral Court for the One-bedroom, a house by the lake for the Bungalow ---------- */
+  const HOME_DOORS = Object.fromEntries(['onebed', 'bungalow'].map((id) => [id, { ...HOME_LOTS[id].door, name: `${HOME_LOTS[id].building} (Home)` }]));
   function homeDoor() { const d = HOME_DOORS[layoutOf(S()).id]; return d ?? { x: poiById.lofts.x, z: poiById.lofts.z, nx: 0, nz: -1, name: 'Dewdney Lofts (Home)' }; }   // the Lofts door faces north, onto Victoria Ave
   const homeSign = new THREE.Group(); homeSign.visible = false; scene.add(homeSign);
   {
@@ -550,6 +578,42 @@ async function boot() {
     const tx = new THREE.CanvasTexture(cv); tx.colorSpace = THREE.SRGBColorSpace; const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.45), new THREE.MeshBasicMaterial({ map: tx })); sign.position.set(0, 1.9, 0);
     homeSign.add(post, box, flag, sign);
   }
+  /* ---------- Cathedral Court: the One-bedroom's walk-up gets a real front door, a green awning and its name over the door ---------- */
+  {
+    const L = HOME_LOTS.onebed, g = new THREE.Group(); g.position.set(L.face.x, 0, L.face.z); g.rotation.y = Math.atan2(L.door.nx, L.door.nz); scene.add(g);   // local +z points out of the wall
+    const m = (c, o = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, ...o });
+    const add = (geo, mat, x, y, z) => { const me = new THREE.Mesh(geo, mat); me.position.set(x, y, z); me.castShadow = true; me.receiveShadow = true; g.add(me); return me; };
+    add(new THREE.BoxGeometry(2.6, 3.1, 0.3), m('#2a2420'), 0, 1.55, 0.12); add(new THREE.BoxGeometry(1.9, 2.7, 0.1), m('#7b4a2c'), 0, 1.38, 0.3);
+    add(new THREE.BoxGeometry(0.08, 0.08, 0.12), m('#d9b44a', { metalness: 0.7, roughness: 0.3 }), 0.7, 1.3, 0.38);
+    add(new THREE.BoxGeometry(3.6, 0.2, 1.7), m('#2e7d5b'), 0, 3.35, 0.85); add(new THREE.BoxGeometry(3.2, 0.16, 1.1), m('#cfc8b6'), 0, 0.08, 0.6);
+    for (const s of [-1, 1]) add(new THREE.SphereGeometry(0.16, 12, 8), m('#fff2c4', { emissive: '#ffd27a', emissiveIntensity: 1.1 }), s * 1.55, 2.55, 0.42);
+    const t = signTexture('CATHEDRAL COURT', { accent: '#2e7d5b', sub: 'Apartments · Unit 3B' });
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(7, 1.75), new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, emissive: new THREE.Color('#ffffff'), emissiveIntensity: 0.25, roughness: 0.6 })); sign.position.set(0, 4.7, 0.32); g.add(sign);
+  }
+  /* ---------- For Sale signs on the homes you could move up to: walk up and press E to see it in the Homes app ---------- */
+  const saleSigns = {};
+  for (const id of ['onebed', 'bungalow']) {
+    const L = HOME_LOTS[id], d = L.door, g = new THREE.Group(); g.visible = false; scene.add(g);
+    g.position.set(d.x - d.nz * 2.4 + d.nx * 0.6, 0, d.z + d.nx * 2.4 + d.nz * 0.6); g.rotation.y = Math.atan2(d.nx, d.nz);
+    const wood = new THREE.MeshStandardMaterial({ color: '#f4f1ea', roughness: 0.7 });
+    const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.9, 0.1), wood); post.position.set(-0.75, 0.95, 0); const arm = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.08, 0.08), wood); arm.position.set(0.05, 1.86, 0);
+    const cv = document.createElement('canvas'); cv.width = 512; cv.height = 320; const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+    const board = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.94), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })); board.position.set(0.05, 1.32, 0);
+    g.add(post, arm, board); saleSigns[id] = { g, cv, tex, price: -1, lot: L };
+  }
+  const drawSale = (s, l) => {
+    const c = s.cv.getContext('2d'); c.fillStyle = '#c8402f'; c.fillRect(0, 0, 512, 320); c.fillStyle = '#fffaf0'; c.fillRect(14, 14, 484, 292);
+    c.fillStyle = '#c8402f'; c.font = '900 76px "Plus Jakarta Sans",system-ui,sans-serif'; c.textAlign = 'center'; c.fillText('FOR SALE', 256, 102);
+    c.fillStyle = '#12202a'; c.font = '800 40px "Plus Jakarta Sans",system-ui,sans-serif'; c.fillText(l.building, 256, 168);
+    c.font = '800 46px "Plus Jakarta Sans",system-ui,sans-serif'; c.fillStyle = '#1f7a4d'; c.fillText(fmtMoney(l.price), 256, 228);
+    c.fillStyle = '#44545f'; c.font = '700 26px "Plus Jakarta Sans",system-ui,sans-serif'; c.fillText(`${l.rooms} rooms · move in from the Homes app`, 256, 278); s.tex.needsUpdate = true;
+  };
+  /** Keep the doors, signs and labels in step with where you live (after a move, a reset, a load). */
+  function syncHomeLots() {
+    for (const l of homeLots(S())) { const s = saleSigns[l.id]; if (!s) continue; s.status = l.status; if (l.status === 'sale' && s.price !== l.price) { drawSale(s, l); s.price = l.price; } }
+    const dl = city.interactables.find((i) => i.id === 'door_lofts'); if (dl) dl.label = layoutOf(S()).id === 'studio' ? 'Go home: Dewdney Lofts — Unit 204' : 'Dewdney Lofts (you moved out)';
+  }
+  const saleInteractables = () => Object.entries(saleSigns).filter(([, s]) => s.status === 'sale').map(([id, s]) => ({ id: 'forsale_' + id, x: s.g.position.x, z: s.g.position.z, radius: 2.6, label: `For sale: ${s.lot.building} · see it in the Homes app`, forSale: id }));
   /** The house door as an interactable (outdoors, Bungalow only: the Lofts door is part of the city). */
   const homeDoorInteractable = () => { const d = HOME_DOORS[layoutOf(S()).id]; return d ? { id: 'door_home', kind: 'door', enter: 'apartment', x: d.x, z: d.z, nx: d.nx, nz: d.nz, radius: 3.2, label: `Go home: ${d.name.replace(' (Home)', '')}` } : null; };
 
@@ -653,6 +717,7 @@ async function boot() {
       const gst = currentStep(S()); if (gst) consider({ id: 'gig', kind: 'gig', x: gst.spot.x, z: gst.spot.z, radius: GIG_REACH, label: gst.label, run: () => doGigStep() }, gst.label);
       for (const it of pumpkinInteractables()) consider(it, it.label);
       const hdi = homeDoorInteractable(); if (hdi) consider(hdi, hdi.label);
+      for (const it of saleInteractables()) consider(it, it.label);
       const sti = stallInteractable(); if (sti) consider(sti, sti.label);
       const n = ped.nearest(player.pos, 2.4); if (n) { const d = Math.hypot(n.x - player.pos.x, n.z - player.pos.z) / 2.4; if (d < bd) best = { npc: n, label: 'Say hi' }; }
     }
@@ -667,7 +732,7 @@ async function boot() {
     if (target.npc) { const n = target.npc; const msg = ped.greet(n, { px: player.pos.x, pz: player.pos.z, temp: weather.temp, night: env?.night > 0.6 }); player.gesture('wave', 1.4); toast(`🗣️ “${msg}”`, 'info'); S().needs.mood = Math.min(100, S().needs.mood + 1.5); return; }
     const it = target.it;
     if (it.kind === 'door') {
-      if (it.id === 'door_lofts' && layoutOf(S()).id === 'bungalow') { const hd = homeDoor(); setDestination({ id: 'home', name: hd.name, x: hd.x, z: hd.z }); toast('You moved out! Your bungalow is by the lake. Follow the arrow.', 'info'); return; }
+      if (it.id === 'door_lofts' && layoutOf(S()).id !== 'studio') { const hd = homeDoor(); setDestination({ id: 'home', name: hd.name, x: hd.x, z: hd.z }); toast(`You moved out! Home is ${hd.name.replace(' (Home)', '')} now. Follow the arrow.`, 'info'); return; }
       enterInterior(it.enter, it); return;
     }
     if (it.kind === 'billboard') {   // a real sponsor on screen right now: say who it is and offer their site through the leaving-the-game screen
@@ -676,8 +741,9 @@ async function boot() {
       ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return;
     }
     if (it.mural) { phone.open(); phone.openApp('supporters'); return; }
+    if (it.forSale) { audio.blip('tick'); phone.open(); phone.openApp('homes'); return; }
     if (it.comingSoon) { const c = it.comingSoon; audio.blip('tick'); panels.menu(`${c.emoji} ${c.name}: coming soon`, `${c.blurb} This lot is under construction and opens in a future update of Regina Life.`, [{ label: 'Can\'t wait', primary: true }]); return; }
-    if (it.activity) { ictx.ui.activity(it.activity); return; }
+    if (it.activity) { ictx.ui.activity(it.activity, it.seat ? { seat: it.seat } : {}); return; }
     audio.blip('tick'); it.run(ictx);
   };
   /* ---------- Home view: tap a piece to walk over and use it; tap the floor to walk there (a drag still turns the dollhouse) ---------- */
@@ -750,7 +816,7 @@ async function boot() {
     if (play) {
       const r = updateOnboarding(store);
       r.fresh.forEach((st, i) => setTimeout(() => { juice.floater(`✓ ${st.title}`, firstDay.el, 'good'); juice.pay(st.reward, firstDay.el); audio.chime('gain'); }, i * 450));
-      if (r.finished) setTimeout(() => { juice.confetti(90); audio.chime('fanfare'); toast('First day in Regina: done! Here is a little bonus. Regina is yours.', 'good'); setTimeout(() => { S().onboarding.seenDone = true; store.commit('onboarding'); firstDay.render(true, true); }, 7000); }, r.fresh.length * 450 + 200);
+      if (r.finished) setTimeout(() => { juice.confetti(90); audio.chime('fanfare'); player.gesture('cheer', 1.8); toast('First day in Regina: done! Here is a little bonus. Regina is yours.', 'good'); setTimeout(() => { S().onboarding.seenDone = true; store.commit('onboarding'); firstDay.render(true, true); }, 7000); }, r.fresh.length * 450 + 200);
     }
     if (firstDay.graduated) {   // after the First day: Today in Regina, three small tasks a day (core/todo.js)
       if (play) { const snowDay = (env?.snow ?? 0) > 0.5, r = updateTodo(store, Date.now(), { snow: snowDay });
@@ -832,7 +898,7 @@ async function boot() {
       fmt: fmtMoney,
       onClaim: (btn) => {
         const r = claimDaily(store); if (!r.ok) { toast(r.error, 'warn'); return r; }
-        juice.pay(r.amount, btn); audio.chime('gain'); if (r.day === 7) { juice.confetti(80); audio.chime('fanfare'); }
+        juice.pay(r.amount, btn); audio.chime('gain'); if (r.day === 7) { juice.confetti(80); audio.chime('fanfare'); player.gesture('cheer', 1.8); }
         toast(`Daily gift · stamp ${r.day} of 7 · +${fmtMoney(r.amount)}`, 'good'); return r;
       },
       onBank: () => { phone.open(); phone.openApp('bank'); },
@@ -842,11 +908,17 @@ async function boot() {
   /* ---------- Map tab: a bright 3D overview with place cards (reuses the home-screen pin engine) ---------- */
   let mapOverview = false;
   const ovHub = new Hub({
-    pinsEl: $('ov-pins'), cardEl: $('ov-card'), topEls: [$('topbar'), $('chiprow')], selExtra: 210,
+    pinsEl: $('ov-pins'), cardEl: $('ov-card'), topEls: [$('topbar'), $('chiprow')], selExtra: 210, place: (id) => placeOf(id),
     extra: () => [{ id: 'you', emoji: '📍', name: 'You', x: player.pos.x, z: player.pos.z, blurb: 'You are here.' }],
     onSelect: (info, id) => renderPlaceCard(info, id), onZoom: (l) => { paintMapChips(); city.setOverviewLevel(l); },
   });
-  const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Dewdney Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : poiById[id]);
+  /** A map place by id. The home slot ('lofts' on the close map) is wherever you live now (core/homeLots.js), with the home actions. */
+  function placeOf(id) {
+    if (id !== 'lofts') return poiById[id];
+    const l = currentLot(S()), p = poiById.lofts;
+    return l.id === 'studio' ? p : { ...p, name: l.name, emoji: l.emoji, x: l.x, z: l.z, area: l.area, blurb: `${l.title}. ${l.blurb}` };
+  }
+  const placeById = (id) => (id === 'downtown' ? { id, name: 'Downtown Regina', emoji: '🏙️', x: 0, z: 0, blurb: 'Scarth Street, Victoria Ave and your neighbourhood.', acts: ['🏠 Dewdney Lofts', '🛒 Market', '🏛️ City Hall'], area: 'Downtown', state: 'open' } : placeOf(id));
   let ovPick = null, ovMode = 'places';
   const boardPick = (b) => ({ id: 'bb_' + b.id, name: `Billboard · ${b.name}`, area: 'Billboard', emoji: '📢', x: b.x + Math.sin(b.yaw) * 10, z: b.z + Math.cos(b.yaw) * 10, state: 'open', board: b });
   function renderBoardCard(b) {
@@ -858,6 +930,7 @@ async function boot() {
   }
   function renderPlaceCard(info, id) {
     if (info?.custom?.board) { $('ov-hint').hidden = true; renderBoardCard(info.custom.board); return; }
+    if (info?.custom?.homeLot) { renderHomeCard(info.custom.homeLot); return; }
     ovPick = info && id && id !== 'you' ? placeById(id) : null; const el = $('ov-place'); $('ov-hint').hidden = !!info;
     if (!info) { el.innerHTML = ''; return; }
     if (!ovPick) { el.innerHTML = `<div class="pc-head"><span class="pc-ico">📍</span><div><h3>You are here</h3><small>${esc(inInterior ? 'Indoors' : 'Out and about in Regina')}</small></div></div>`; return; }
@@ -896,16 +969,33 @@ async function boot() {
     }
     const b = e.target.closest('[data-go]'); if (!b || !ovPick) return; const p = ovPick;
     if (b.dataset.go === 'book') { closeMapOverview(); ctx.adsFocus = p.board.id; phone.open(); phone.openApp('ads'); return; }
+    if (b.dataset.go === 'homes') { closeMapOverview(); phone.open(); phone.openApp('homes'); return; }
     if (b.dataset.go === 'walk') { closeMapOverview(); setDestination(p); audio.blip('ok'); }
     else { closeMapOverview(); if (!ctx.quickCab(p)) openMapOverview(); }
   });
   function paintMapChips() {
-    shell.setChips([{ id: 'zoom', icon: ovHub.level === 'close' ? '🗺️' : '🏙️', label: ovHub.level === 'close' ? 'All Regina' : 'Downtown', on: false }, { id: 'ads', icon: '📢', label: 'Billboards', on: ovMode === 'boards' }, { id: 'gov', icon: '🏛️', label: 'Gov' }, { id: 'neighbours', icon: '👥', label: 'Neighbours' }],
+    shell.setChips([{ id: 'zoom', icon: ovHub.level === 'close' ? '🗺️' : '🏙️', label: ovHub.level === 'close' ? 'All Regina' : 'Downtown', on: false }, { id: 'ads', icon: '📢', label: 'Billboards', on: ovMode === 'boards' }, { id: 'homes', icon: '🏡', label: 'Homes', on: ovMode === 'homes' }, { id: 'gov', icon: '🏛️', label: 'Gov' }, { id: 'neighbours', icon: '👥', label: 'Neighbours' }],
       (c) => {
-        if (c === 'zoom') { if (ovMode === 'boards') showBoards(false); ovHub.setLevel(ovHub.level === 'close' ? 'far' : 'close'); }
+        if (c === 'zoom') { if (ovMode !== 'places') showBoards(false); ovHub.setLevel(ovHub.level === 'close' ? 'far' : 'close'); }
         else if (c === 'ads') showBoards(ovMode !== 'boards');
+        else if (c === 'homes') showHomes(ovMode !== 'homes');
         else { closeMapOverview(); phone.open(); phone.openApp(c === 'gov' ? 'townhall' : 'social'); }
       });
+  }
+  /** The Homes chip: every home in Regina as a pin (core/homeLots.js): yours, the ones you could move up to, the ones you left. */
+  function showHomes(on) {
+    ovMode = on ? 'homes' : 'places';
+    if (on) ovHub.setPins(homeLots(S()).map((l) => ({ id: l.pin, emoji: l.status === 'sale' ? '🏷️' : l.emoji, name: l.status === 'sale' ? `${l.building} · for sale` : l.name, x: l.x, z: l.z, open: l.status === 'home', blurb: l.blurb, homeLot: l })), 'close');
+    else ovHub.setPins(null, 'close');
+    paintMapChips();
+  }
+  function renderHomeCard(l) {
+    const d = Math.hypot(l.x - player.pos.x, l.z - player.pos.z), fare = cabFare(d), mins = Math.max(1, Math.round(d / 3.1 / 60)), here = d < 40;
+    ovPick = { id: l.pin, name: l.name, x: l.x, z: l.z, homeLot: l }; $('ov-hint').hidden = true;
+    const tag = l.status === 'home' ? '<span class="pc-tag open">● Your home</span>' : l.status === 'sale' ? `<span class="pc-tag sale">For sale · ${fmtMoney(l.price)}</span>` : '<span class="pc-tag">Your old place</span>';
+    $('ov-place').innerHTML = `<div class="pc-head"><span class="pc-ico">${l.emoji}</span><div><h3>${esc(l.building)}${l.unit ? ` · ${esc(l.unit)}` : ''}</h3><small>${esc(l.area)} · ${here ? 'you are here' : (d >= 1000 ? (d / 1000).toFixed(1) + ' km' : Math.round(d) + ' m') + ' away'}</small></div>${tag}</div>
+      <p class="pc-blurb">${esc(l.blurb)}</p><div class="pc-acts"><span>🚪 ${l.rooms} room${l.rooms > 1 ? 's' : ''}</span><span>${l.status === 'sale' ? 'Moving keeps every piece you own' : l.status === 'home' ? 'Sleep, cook, redecorate' : 'You moved up from here'}</span></div>
+      <div class="pc-go three">${l.status === 'sale' ? `<button class="gobtn primary" data-go="homes"><b>🏡 See it</b><small>Homes app</small></button>` : ''}<button class="gobtn ${l.status === 'sale' ? '' : 'primary'}" data-go="walk" ${here ? 'disabled' : ''}><b>🚶 Walk</b><small>${here ? 'Already here' : `about ${mins} min`}</small></button><button class="gobtn" data-go="cab" ${here || fare > S().bank.balance ? 'disabled' : ''}><b>🚕 Cab</b><small>${fmtMoney(fare)}</small></button></div>`;
   }
   /** The Billboards chip: every board in Regina as a pin (green dot = free to book). */
   function showBoards(on) {
@@ -946,14 +1036,43 @@ async function boot() {
     input.enabled = true; rig.snapBehind(player.yaw); rig.snap(player); rebuildPlayer(false);
     setTimeout(() => ($('hud-hint').style.opacity = '0'), 14000);
   };
+  /* ---------- the creator's studio: a bright photo set (curved backdrop, a turntable, soft lights), the same at any hour ---------- */
+  const creatorSet = new THREE.Group(); creatorSet.visible = false; scene.add(creatorSet);
+  {
+    const cv = document.createElement('canvas'); cv.width = 4; cv.height = 256; const g = cv.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
+    gr.addColorStop(0, '#9fd3f0'); gr.addColorStop(0.5, '#fdf3e1'); gr.addColorStop(1, '#f4d7b2'); g.fillStyle = gr; g.fillRect(0, 0, 4, 256);
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+    const wall = new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 9, 48, 1, true), new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false })); wall.position.y = 4.4;
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(9, 48).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#f1e4cf', roughness: 0.9 })); floor.position.y = -0.09; floor.receiveShadow = true;
+    const plat = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.08, 0.1, 48), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.45 })); plat.position.y = -0.04; plat.receiveShadow = true;
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(1.04, 0.03, 8, 64).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#2fbf7a', emissive: '#2fbf7a', emissiveIntensity: 0.6 })); rim.position.y = 0.01;
+    creatorSet.add(wall, floor, plat, rim);
+    // two softboxes on stands and a pot of wheat, so the set reads as a little photo studio from every side of the turntable
+    const dark = new THREE.MeshStandardMaterial({ color: '#2a2f38', roughness: 0.5 }), soft = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#fff6e0', emissiveIntensity: 1.1 });
+    for (const [x, z, a] of [[2.6, 1.6, -2.1], [-2.6, 1.4, 2.1]]) {
+      const st = new THREE.Group(); st.position.set(x, 0, z); st.rotation.y = a; creatorSet.add(st);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.1, 8), dark); pole.position.y = 1.05; const box = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.7, 0.25), dark); box.position.set(0, 2.15, 0);
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 0.62), soft); face.position.set(0, 2.15, 0.13); const legs = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.3, 3, 1, true), dark); legs.position.y = 0.15; st.add(pole, box, face, legs);
+    }
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.22, 0.45, 18), new THREE.MeshStandardMaterial({ color: '#c8714d', roughness: 0.7 })); pot.position.set(-2.2, 0.14, -2.4); creatorSet.add(pot);
+    const wheat = new THREE.MeshStandardMaterial({ color: '#e0b23a', roughness: 0.8 });
+    for (let k = 0; k < 14; k++) { const a = k * 2.4, s = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 1.1, 5), wheat); s.position.set(-2.2 + Math.cos(a) * 0.12, 0.85, -2.4 + Math.sin(a) * 0.12); s.rotation.set(Math.sin(a) * 0.25, 0, Math.cos(a) * 0.25); const ear = new THREE.Mesh(new THREE.CapsuleGeometry(0.025, 0.12, 3, 6), wheat); ear.position.y = 0.6; s.add(ear); creatorSet.add(s); }
+    const hemi = new THREE.HemisphereLight('#ffffff', '#f3dcc0', 1.5), key = new THREE.DirectionalLight('#fff4e5', 1.4); key.position.set(3, 6, 4); key.target = plat; creatorSet.add(hemi, key);
+  }
+  /** Show the studio round the player (the city and the sky step out), or put the world back. */
+  const showCreatorSet = (on) => {
+    creatorSet.visible = on; if (on) creatorSet.position.set(player.pos.x, 0, player.pos.z);
+    city.group.visible = !on; ped.setVisible(!on); setIndoor(on);
+    if (on) scene.background = new THREE.Color('#fdf3e1');
+  };
   const newLife = () => {
     hub.hide(); enterHubMode(false);
-    store.reset(); dropStaleApartments(); wallMode = null; POL.ensurePolitics(store); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading);
+    store.reset(); dropStaleApartments(); wallMode = null; POL.ensurePolitics(store); phone.applyWallpaper(); rebuildPlayer(); player.teleport(city.spawn.x, city.spawn.z, city.spawn.heading); showCreatorSet(true);
     creator = true; gameMode = 'creator'; $('title').classList.remove('on'); rig.mode = 'creator'; rig.yaw = player.yaw + 0.5; rig.snap(player);
     const off = () => camera.setViewOffset(innerWidth, innerHeight, innerWidth * (innerWidth > 760 ? 0.17 : 0), innerWidth > 760 ? 0 : innerHeight * 0.18, innerWidth, innerHeight);
     off();
     panels.characterPanel({ creator: true, onDone: () => {
-      const f = S().flags ||= {}; f.welcomed = true;
+      showCreatorSet(false); const f = S().flags ||= {}; f.welcomed = true;
       G.receiveMessage(store, 'dani', `Welcome to Regina, ${S().player.name}! 🌾 Grab groceries at the Market across Victoria Ave and check the Jobs app on your phone (press P).`, 20000);
       G.receiveMessage(store, 'mom', 'Settled in? Remember to eat and stay warm. Love you!', 55000);
       startPlay(); toast(`Welcome to Regina, ${S().player.name}!`, 'good');
@@ -978,9 +1097,9 @@ async function boot() {
   };
   let hubChoice = null;
   hub = new Hub({
-    pinsEl: $('hub-pins'), cardEl: $('hub-card'),
+    pinsEl: $('hub-pins'), cardEl: $('hub-card'), place: (id) => placeOf(id),
     onSelect: (info, id) => {
-      hubChoice = info ? (id === 'downtown' ? { id: 'downtown' } : poiById[id]) : null;
+      hubChoice = info ? (id === 'downtown' ? { id: 'downtown' } : placeOf(id)) : null;
       $('hc-place').innerHTML = info ? `<span class="tagline ${info.open ? '' : 'soon'}">${info.open ? '● Open now' : 'Visit & explore'}</span><h3>${info.emoji} ${esc(info.name)}</h3><p>${esc(info.blurb)}</p>` : '';
       $('btn-continue').style.display = hasLife() || info ? ''  : 'none';
       $('btn-continue').textContent = info ? (hasLife() ? 'Play here' : 'Start here') : 'Continue';
@@ -1049,7 +1168,9 @@ async function boot() {
     if (topic === 'bank' || topic === 'inventory') renderMapCard();
     if (topic === 'ads' || topic === 'politics') ctx.refreshBillboards();
     if (topic === 'home' && interior?.kind === 'apartment' && interior.layout.id === layoutOf(S()).id) interior.setHome(S().home);   // upgradeHome commits before the new interior is attached
+    if (topic === 'home' || topic === 'reset') syncHomeLots();
   });
+  syncHomeLots();
 
   /* ---------- resize ---------- */
   addEventListener('resize', () => {
@@ -1176,8 +1297,9 @@ async function boot() {
     // destination beacon
     const dst = S().destination; beacon.visible = !!dst && !inInterior && gameMode === 'play';
     if (beacon.visible) { beacon.position.set(dst.x, 45, dst.z); beacon.material.opacity = 0.22 + Math.sin(performance.now() / 500) * 0.08; }
-    updateGigWorld(dt); updatePumpkins(); updateBreath(dt);
-    { const hd = HOME_DOORS[layoutOf(S()).id]; homeSign.visible = !!hd && !inInterior; if (hd) { homeSign.position.set(hd.x + 1.6, 0, hd.z); homeSign.rotation.y = Math.PI; } }
+    updateGigWorld(dt); updatePumpkins(); updateBreath(dt); player.hold(wantHold());
+    { const hd = HOME_DOORS[layoutOf(S()).id]; homeSign.visible = !!hd && !inInterior; if (hd) { homeSign.position.set(hd.x + hd.nz * 1.6, 0, hd.z - hd.nx * 1.6); homeSign.rotation.y = Math.atan2(hd.nx, hd.nz) + Math.PI; } }
+    for (const s of Object.values(saleSigns)) s.g.visible = s.status === 'sale' && !inInterior;
     // interaction prompt
     if (gameMode === 'play' && !panels.open && !catalogue.isOpen && !mapOpen && !mapOverview && !camMode && !creator && !build.active) { target = nearestInteractable(); setPrompt(target?.label ?? ''); } else { target = null; setPrompt(''); }
     // in the dollhouse the prompt floats over the thing you can use, like a speech bubble, instead of sitting on the room

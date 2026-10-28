@@ -22,22 +22,32 @@ export class PlayerController {
     this.setLook(look);
   }
   setLook(look) {
+    const keep = this.char ? (({ pose, poseT, poseAge, hold, holdAge }) => ({ pose, poseT, poseAge, hold, holdAge }))(this.char.A) : {};   // a new outfit mid-activity keeps the pose
     if (this.char) { this.scene.remove(this.char.root); this.char.dispose(); }
     this.char = buildCharacter(look);
     this.scene.add(this.char.root);
-    this.char.motion({ carrying: this.carrying, sitting: !!this.sitting });
+    this.char.motion({ carrying: this.carrying, sitting: !!this.sitting && !this.sitting.perch, ...keep });
     this.syncRoot();
   }
   teleport(x, z, yaw = this.yaw) { this.pos.set(x, 0, z); this.yaw = yaw; this.vel.set(0, 0); this.sitting = null; this.char.motion({ sitting: false, driving: false }); this.syncRoot(); }
   syncRoot() { const y = this.sitting?.y ?? 0; this.char.root.position.set(this.pos.x, y, this.pos.z); this.char.root.rotation.y = this.yaw; }
   setCarry(v) { this.carrying = v; this.char.motion({ carrying: v }); }
   gesture(n, d) { this.char.gesture(n, d); }
+  /** A timed activity pose (player/poses.js), e.g. pose('guitar', 8). endPose() stops it early. */
+  pose(name, secs = 4) { this.char.motion({ pose: name, poseT: secs, poseAge: 0 }); }
+  endPose() { this.char.motion({ pose: null, poseT: 0 }); }
+  /** An ongoing hold (the phone, a leash, an umbrella, dancing to the radio): hold(null) lets go. */
+  hold(name) { if ((this.char.A.hold ?? null) !== (name || null)) this.char.motion({ hold: name || null, holdAge: 0 }); }
+  /** Turn to face a point (the piece you are using). */
+  face(x, z) { const dx = x - this.pos.x, dz = z - this.pos.z; if (Math.hypot(dx, dz) > 0.05) { this.yaw = Math.atan2(dx, dz); this.syncRoot(); } }
+  /** Stand ON something (the treadmill deck): like sitAt, but standing. `s` = { x, z, yaw, y, stand?: { x, z } }; moving or standUp() steps off. */
+  perchAt(s) { this.sitting = { ...s, perch: true }; this.pos.x = s.x; this.pos.z = s.z; this.yaw = s.yaw; this.vel.set(0, 0); this.char.motion({ sitting: false, speed: 0 }); this.syncRoot(); }
   /** Sit on a seat: `s` = { x, z, yaw, y, stand?: { x, z } }. `stand` is where standUp() puts the player back (omitted: 0.9 m south of the seat, as before). */
   sitAt(s) { this.sitting = s; this.pos.x = s.x; this.pos.z = s.z; this.yaw = s.yaw; this.vel.set(0, 0); this.char.motion({ sitting: true, speed: 0 }); this.syncRoot(); }
   /** Stand up at the seat's stand spot, then resolve against the collision grid (`grid`, else the one main.js assigned) and the room bounds so the player never lands inside a wall or piece. */
   standUp(grid = this.grid) {
     if (!this.sitting) return;
-    const at = standSpot(this.sitting, this.pos); this.sitting = null; this.char.motion({ sitting: false });
+    const at = standSpot(this.sitting, this.pos); this.sitting = null; this.char.motion({ sitting: false, pose: null });
     this.pos.x = at.x; this.pos.z = at.z;
     if (grid) grid.resolve(this.pos, PLAYER_R);
     if (this.bounds) { const b = this.bounds; this.pos.x = Math.min(b.x1, Math.max(b.x0, this.pos.x)); this.pos.z = Math.min(b.z1, Math.max(b.z0, this.pos.z)); }

@@ -19,7 +19,8 @@ const PIN = 46, R = PIN / 2 - 2, LIFT = 12, LABEL_H = 24, SEL_EXTRA = 90; // pin
  * leader line down to the real spot. The camera is auto-framed so every pin fits between the header and the card.
  */
 export class Hub {
-  constructor({ pinsEl, cardEl, onSelect, onZoom, topEls = null, extra = null, selExtra = SEL_EXTRA }) {
+  constructor({ pinsEl, cardEl, onSelect, onZoom, topEls = null, extra = null, selExtra = SEL_EXTRA, place = null }) {
+    this.place = place ?? ((id) => poiById[id]);   // a host can redirect a slot (main.js: 'lofts' is wherever you live now)
     this.selExtra = selExtra; this.pinsEl = pinsEl; this.cardEl = cardEl; this.onSelect = onSelect; this.onZoom = onZoom; this.extra = extra;
     this.topEls = topEls ?? [pinsEl.parentElement?.querySelector('.hub-top')].filter(Boolean);
     this.level = 'close'; this.active = false; this.selected = null; this.t = 0;
@@ -39,7 +40,7 @@ export class Hub {
   render() {
     const ids = this.level === 'close' ? CLOSE : FAR;
     const mk = (id, emoji, name, open, cls = '') => `<button class="pin ${open ? 'open' : ''} ${cls}" data-pin="${id}" aria-label="${name}"><span class="pe">${emoji}</span><span class="pl">${name}</span></button>`;
-    const items = this.custom ? this.custom.map((c) => ({ id: c.id, html: mk(c.id, c.emoji, c.name, c.open), p: { x: c.x, z: c.z }, name: c.name })) : ids.map((id) => { const p = poiById[id]; return { id, html: mk(id, p.emoji, p.name.replace(/ \(Home\)/, ''), p.state === 'open'), p, name: p.name.replace(/ \(Home\)/, '') }; });
+    const items = this.custom ? this.custom.map((c) => ({ id: c.id, html: mk(c.id, c.emoji, c.name, c.open), p: { x: c.x, z: c.z }, name: c.name })) : ids.map((id) => { const p = this.place(id); return { id, html: mk(id, p.emoji, p.name.replace(/ \(Home\)/, ''), p.state === 'open'), p, name: p.name.replace(/ \(Home\)/, '') }; });
     if (this.level === 'far' && !this.custom) items.push({ id: 'downtown', html: mk('downtown', '🏙️', 'Downtown Regina', true), p: { x: 0, z: 0 }, name: 'Downtown Regina' });
     for (const e of this.extra?.() ?? []) items.push({ id: e.id, html: mk(e.id, e.emoji, e.name, false, e.id), p: { x: e.x, z: e.z }, name: e.name, extra: e });
     this.pinsEl.dataset.level = this.level;
@@ -61,7 +62,7 @@ export class Hub {
     const cu = this.custom?.find((c) => c.id === id); if (cu) return { name: cu.name, emoji: cu.emoji, blurb: cu.blurb ?? '', open: !!cu.open, custom: cu };
     const ex = this.extra?.().find((e) => e.id === id); if (ex) return { name: ex.name, emoji: ex.emoji, blurb: ex.blurb ?? '', open: false, extra: ex };
     if (id === 'downtown') return { name: 'Downtown Regina', emoji: '🏙️', blurb: 'Scarth Street, Victoria Ave and your neighbourhood. Zoom in to pick a building.', open: true, downtown: true };
-    const p = poiById[id]; return { name: p.name, emoji: p.emoji, blurb: p.blurb, open: p.state === 'open' };
+    const p = this.place(id); return { name: p.name, emoji: p.emoji, blurb: p.blurb, open: p.state === 'open' };
   }
 
   /** Names under the pins only where there is room for them: wide screens in the close-up (the far view is an overview; names show on hover/tap). */

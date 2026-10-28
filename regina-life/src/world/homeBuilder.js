@@ -153,6 +153,17 @@ export function deriveHome(layout) {
 
 /* ======================================================================================================= helpers (THREE) */
 
+/**
+ * How your body meets a piece of gear while you use it (player/poses.js): step onto the treadmill deck or the yoga mat, sit on the exercise bike,
+ * otherwise turn to face it. `it` is the placed item, `stand` the spot in front of it you step back to.
+ */
+export function gearSpot(it, stand) {
+  const yaw = wrapAngle((it.rot * Math.PI) / 2), at = (dz) => { const o = rotXZ(0, dz, it.rot); return { x: it.x + o.x, z: it.z + o.z }; };
+  if (it.type === 'treadmill') return { perch: { ...at(-0.2), y: 0.205, yaw, stand } };
+  if (it.type === 'exbike') return { seat: { ...at(-0.27), y: 0.3, yaw, stand }, pose: 'ride' };
+  if (itemDef(it.type)?.kind === 'mat') return { perch: { x: it.x, z: it.z, y: 0.02, yaw, stand } };
+  return { face: { x: it.x, z: it.z } };
+}
 const wrapAngle = (a) => ((((a + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - Math.PI;
 const hashStr = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h; };
 const matKey = (color, o) => {
@@ -175,7 +186,7 @@ const ACTION_RUN = {
   },
   tv: (c, h) => {
     const tv = h.fx.tv; if (!tv) return;
-    if (!tv.on) { tv.on = true; c.audio?.blip('tick'); c.ui.activity('tv'); }
+    if (!tv.on) { tv.on = true; c.audio?.blip('tick'); c.ui.activity('tv', { face: h.pose }); }
     else c.ui.menu('Television', 'What would you like to do?', [{ label: 'Next channel', run: () => { tv.show++; } }, { label: 'Turn off', run: () => tv.off() }, { label: 'Cancel' }]);
   },
   cook: (c) => c.ui.cook(),
@@ -186,8 +197,8 @@ const ACTION_RUN = {
     { label: '🎨 Redecorate (build mode)', primary: true, run: () => c.ui.build() }, { label: 'Close' }]),
   radio: (c) => c.ui.radioMenu(),
   wardrobe: (c) => c.ui.openWardrobe(),
-  read: (c) => c.ui.activity('read'),
-  shower: (c) => c.ui.activity('shower'),
+  read: (c, h) => c.ui.activity('read', { face: h.pose }),
+  shower: (c, h) => c.ui.activity('shower', { perch: { x: h.pose.x, z: h.pose.z, y: 0.04, yaw: Math.atan2(h.x - h.pose.x, h.z - h.pose.z), stand: { x: h.x, z: h.z } } }),   // step into the stall
   lights: (c, h) => { h.toggleLights(h.room); c.audio?.blip('tick'); },
   storage: (c) => (c.ui.openStorage ?? c.ui.furnitureShop)(),   // the garage shelf opens the Catalogue's "In storage" tab (main.js ui.openStorage); a host without it opens the shop
 };
@@ -432,7 +443,7 @@ export function buildHome(layout, kit) {
         for (const r of [rot, (rot + 1) % 4, (rot + 3) % 4, (rot + 2) % 4]) {
           const o = rotXZ(0, reach, r), sx = it.x + o.x, sz = it.z + o.z;
           if (!spotOk(sx, sz, it.x, it.z)) continue;
-          inter = { id: `furn_${it.id}`, furn: true, x: sx, z: sz, radius: 1.5, label: `${act[1]} ${def.name.toLowerCase()}`, room: roomIdAt(geo, sx, sz), run: (ctx) => ctx.ui.activity(act[0]) };
+          inter = { id: `furn_${it.id}`, furn: true, x: sx, z: sz, radius: 1.5, label: `${act[1]} ${def.name.toLowerCase()}`, room: roomIdAt(geo, sx, sz), run: (ctx) => ctx.ui.activity(act[0], gearSpot(it, { x: sx, z: sz })) };
           interactables.push(inter); break search;
         }
       }

@@ -78,11 +78,11 @@ export class Panels {
   }
 
   /** Timed activity with a progress bar (input is blocked while a panel is open). */
-  progress(label, secs, onDone, { stop = true } = {}) {
+  progress(label, secs, onDone, { stop = true, onStop = null } = {}) {
     const p = this._show(`<h3>${esc(label)}</h3><div class="prog"><i></i></div>${stop ? '<div class="pbtns"><button class="btn" data-stop>Stop</button></div>' : ''}`, 'menu prog-panel', { dismissable: false });
     const bar = p.querySelector('.prog i'); let done = false; const t0 = performance.now();
     const tick = () => { if (done || this.cur?.stopped) return; const k = Math.min(1, (performance.now() - t0) / (secs * 1000)); bar.style.width = k * 100 + '%'; if (k >= 1) { done = true; this.close(); onDone?.(); } else requestAnimationFrame(tick); };
-    const sb = p.querySelector('[data-stop]'); if (sb) sb.onclick = () => { done = true; this.close(); };
+    const sb = p.querySelector('[data-stop]'); if (sb) sb.onclick = () => { done = true; this.close(); onStop?.(); };
     requestAnimationFrame(tick);
   }
 
@@ -114,7 +114,7 @@ export class Panels {
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
       const ea = e.target.closest('[data-eat]');
-      if (ea) { const b0 = this.ctx.fx?.snap(); const r = G.consume(store, ea.dataset.eat); if (r.ok) { this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}. Yum!`, 'good'); if (b0) this.ctx.fx.gains(b0); } render(); return; }
+      if (ea) { const b0 = this.ctx.fx?.snap(); const r = G.consume(store, ea.dataset.eat); if (r.ok) { this.ctx.player.pose?.('eat', 2.4); this.ctx.toast(`Ate ${r.food.name}. Yum!`, 'good'); if (b0) this.ctx.fx.gains(b0); } render(); return; }
       const b = e.target.closest('[data-buy]'); if (!b) return;
       const b0 = this.ctx.fx?.snap(), r = G.buyItem(store, b.dataset.buy, 1, where);
       if (r.ok) { this.ctx.audio?.chime('pop'); if (b0) this.ctx.fx.gains(b0); this.ctx.toast(`Bought ${ITEM_NAME(b.dataset.buy)}. Tap Eat now, or save it for home.`, 'good'); } else { this.ctx.audio?.blip('error'); this.ctx.toast(r.error, 'warn'); }
@@ -239,7 +239,7 @@ export class Panels {
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
       const b = e.target.closest('[data-eat]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.consume(store, b.dataset.eat);
-      if (r.ok) { this.ctx.player.gesture('use'); this.ctx.toast(`Ate ${r.food.name}`, 'good'); if (b0) this.ctx.fx.gains(b0); } render();
+      if (r.ok) { this.ctx.player.pose?.('eat', 2.4); this.ctx.toast(`Ate ${r.food.name}`, 'good'); if (b0) this.ctx.fx.gains(b0); } render();
     });
   }
   cook() {
@@ -252,7 +252,7 @@ export class Panels {
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
       const b = e.target.closest('[data-cook]'); if (!b) return; const b0 = this.ctx.fx?.snap(), r = G.cook(store, b.dataset.cook);
-      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.gesture('use'); if (b0) this.ctx.fx.gains(b0); this.ctx.onCooked?.(); } else this.ctx.toast(r.error, 'warn'); render();
+      if (r.ok) { this.ctx.toast(`${r.recipe.name} — delicious!`, 'good'); this.ctx.player.pose?.('stir', 2.6); if (b0) this.ctx.fx.gains(b0); this.ctx.onCooked?.(); } else this.ctx.toast(r.error, 'warn'); render();
     });
   }
 }

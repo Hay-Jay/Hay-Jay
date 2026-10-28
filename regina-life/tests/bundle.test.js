@@ -24,3 +24,11 @@ describe('Bundle up', () => {
     expect(bundledLook(look, ['bogus', null, 'toque_red'], { temp: -10 })).toMatchObject({ top: 'tee_navy', head: 'toque_red' }); expect(bundledLook(look, undefined, { temp: -10 })).toBe(look);
   });
 });
+describe('Bundle up with the new winter gear', () => {
+  it('a puffer beats the parka and a trapper beats a toque; a bucket hat is not a winter hat', () => {
+    const w = [...all, 'puffer_red', 'trapper_brown', 'bucket_wheat'];
+    expect(bundledLook(look, w, { temp: -30 })).toMatchObject({ top: 'puffer_red', head: 'trapper_brown' });
+    expect(bundledLook({ ...look, head: 'bucket_wheat' }, w, { temp: -10 }).head).toBe('trapper_brown');
+    expect(dressedWarm({ ...look, top: 'puffer_navy', head: 'beanie_spruce' })).toBe(true);
+  });
+});
