@@ -78,7 +78,7 @@ async function setup() {
       for (const dx of [-1920, 0, 1920]) { g.fillStyle = col; g.beginPath(); g.ellipse(x + dx, y, s * 1.8, s * 0.6, 0, 0, TAU); g.fill(); } } }
 
   A.flag = makeFlag();
-  A.flagLayer = canvas(900, 620);
+  A.flagLayer = canvas(1100, 620);
   A.glowGold = glowSprite(256, [[0, 'rgba(255,236,180,1)'], [0.15, 'rgba(255,200,90,0.55)'], [0.45, 'rgba(255,150,40,0.12)'], [1, 'rgba(255,140,30,0)']]);
   A.glowBlue = glowSprite(256, [[0, 'rgba(160,200,255,0.9)'], [0.2, 'rgba(70,120,255,0.4)'], [1, 'rgba(40,80,255,0)']]);
   A.dot = glowSprite(32, [[0, 'rgba(255,245,215,1)'], [0.3, 'rgba(255,205,110,0.7)'], [1, 'rgba(255,180,60,0)']]);
@@ -242,7 +242,7 @@ function drawBackground(t) {
 function drawFlag(t) {
   // Waving flag, upper left, feathered into the scene
   const f = A.flag, fl = A.flagLayer, g = fl.getContext('2d');
-  const w = 860, h = 430, ox = -70, oy = -30, strips = 86, sw = w / strips;
+  const w = 1240, h = 620, ox = -200, oy = -120, strips = 110, sw = w / strips;
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, fl.width, fl.height);
   for (let i = 0; i < strips; i++) {
     const u = i / strips;
@@ -254,10 +254,11 @@ function drawFlag(t) {
     g.fillRect(x, oy + wave, Math.ceil(sw) + 1, h);
   }
   g.globalCompositeOperation = 'destination-in';
-  const m = g.createRadialGradient(240, 200, 60, 260, 230, 620);
-  m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(0.55, 'rgba(0,0,0,0.6)'); m.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = m; g.fillRect(0, 0, fl.width, fl.height);
-  ctx.globalAlpha = 0.5; ctx.drawImage(fl, 0, 0); ctx.globalAlpha = 1;
+  g.save(); g.scale(1, 0.68);
+  const m = g.createRadialGradient(380, 250, 30, 380, 250, 400);
+  m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(0.5, 'rgba(0,0,0,0.65)'); m.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = m; g.fillRect(0, 0, fl.width, fl.height / 0.68); g.restore();
+  ctx.globalAlpha = 0.42; ctx.drawImage(fl, 0, 0); ctx.globalAlpha = 1;
 }
 
 function drawHaze(t) {
