@@ -635,7 +635,7 @@ html:not(.js) .ticker-t { animation: none; }
 .foot-col { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
 .foot-h { color: var(--dim); padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--rule); align-self: stretch; }
 .foot-col a {
-  display: inline-flex; align-items: center; min-height: 44px; color: #ececec; text-decoration: none; font: 800 1.15rem/1 var(--head); letter-spacing: .05em; text-transform: uppercase;
+  display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; color: #ececec; text-decoration: none; font: 800 1.15rem/1 var(--head); letter-spacing: .05em; text-transform: uppercase;
   background: linear-gradient(currentColor, currentColor) 0 calc(100% - 9px) / 0 2px no-repeat; transition: background-size .35s var(--ease);
 }
 .foot-col a:hover, .foot-col a:focus-visible, .foot-col a[aria-current=page] { background-size: 100% 2px; }

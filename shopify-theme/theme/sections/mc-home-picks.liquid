@@ -33,7 +33,7 @@
       {%- for p in col.products -%}
         {%- if shown >= limit %}{% break %}{% endif -%}
         {%- if section.settings.hide_sold and p.available == false %}{% continue %}{% endif -%}
-        {% render 'mc-card', product: p, i: shown, order: ord, sizes: '(min-width:1400px) 310px, (min-width:900px) 23vw, 46vw', widths: '300,450,600,800' %}
+        {% render 'mc-card', product: p, i: shown, order: ord, sizes: '(min-width:1400px) 310px, (min-width:700px) 23vw, 46vw', widths: '300,450,600,800' %}
         {%- assign shown = shown | plus: 1 -%}
       {%- endfor -%}
     </div>

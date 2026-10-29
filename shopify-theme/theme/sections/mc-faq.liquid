@@ -20,7 +20,6 @@
     endif
   endfor
   assign gift_amounts = amts | split: '|' | join: ', ' | replace_last: ', ', ' and '
-  assign nq = section.blocks.size
 -%}
 <!-- FAQ: the debrief -->
 <section class="spread dark faq-spread" aria-labelledby="faqH">

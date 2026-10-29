@@ -49,6 +49,8 @@
   background-image: var(--grain-d); box-shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 16px 34px rgba(0, 0, 0, .3); transition: box-shadow .4s;
 }
 .hs-card:not([data-pos="0"]) .hs-a { box-shadow: 0 1px 0 rgba(0, 0, 0, .2), 0 6px 14px rgba(0, 0, 0, .22); }
+/* the prints underneath are blank backs: no caption or tag peeking out from the pile */
+.hs-card:not([data-pos="0"]) .hs-cap, .hs-card:not([data-pos="0"]) .hs-tag, .hs-card:not([data-pos="0"]) .stamp { visibility: hidden; }
 .hs-a:focus-visible { outline: 3px solid #0a0a0a; outline-offset: 4px; }
 .hs.on .hs-card[data-pos="0"] .hs-a { cursor: grab; }
 .hs.on .hs-card.drag .hs-a { cursor: grabbing; }
@@ -97,8 +99,9 @@
 .hg-end { margin-top: 28px; }
 .hg-end .btn { width: 100%; }
 @media (max-width: 699px) { .hgrid .hsec-more { display: none; } }
-@media (min-width: 700px) { .hg-end { display: none; } .hg-grid { gap: 30px 18px; } }
-@media (min-width: 900px) { .hg-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px 22px; } }
+@media (min-width: 700px) { .hg-end { display: none; } .hg-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 16px; } }
+@media (min-width: 700px) and (max-width: 1099px) { .hg-grid .card-t { font-size: 1.05rem; } }
+@media (min-width: 900px) { .hg-grid { gap: 36px 22px; } }
 
 /* ---- 03 shop by category ------------------------------------------------------------------------------------------------ */
 .hc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -130,8 +133,12 @@
   .hc-tile:hover .hc-arr { transform: rotate(45deg); }
 }
 .hc-tile:hover .hc-lbl span, .hc-tile:focus-visible .hc-lbl span { background-size: 100% 100%; color: #0a0a0a; }
+@media (min-width: 700px) {
+  .hc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+  .hc-lbl { font-size: clamp(1.4rem, 3.2vw, 3rem); }
+}
 @media (min-width: 900px) {
-  .hc-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .hc-grid { gap: 20px; }
   .hc-tile { aspect-ratio: 5 / 4; }
   .hc-txt { left: 18px; right: 18px; bottom: 16px; }
   .hc-n { font-size: 12px; }
@@ -154,8 +161,6 @@
 .hm-copy .kick { margin-bottom: 8px; }
 .hm-copy .kick .rec { margin-right: 0; }
 .hm-copy .h2 { font-size: clamp(2.1rem, 9vw, 4.6rem); }
-.hm-copy .h2 a { display: inline-block; padding-block: 2px; text-decoration: none; }
-.hm-copy .h2 a:hover { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
 .hm-line { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 10px; color: var(--dim); }
 .hm-line b { color: var(--fg); }
 .hm-line small { color: var(--dim); font-size: 10.5px; }

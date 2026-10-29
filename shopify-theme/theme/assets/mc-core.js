@@ -253,16 +253,19 @@
   const menuOpen = () => !!menu && !menu.hidden && menu.classList.contains('open');
   MC.menuOpen = menuOpen;
   const shown = el => !!el && el.offsetParent !== null;
+  // run fn after the next paint (so a CSS transition starts from the closed state); a timer covers pages that are not painting yet
+  const afterPaint = fn => { let done = false; const go = () => { if (!done) { done = true; fn(); } }; requestAnimationFrame(() => requestAnimationFrame(go)); setTimeout(go, 120); };
+  MC.afterPaint = afterPaint;
   function openMenu(focusFind, from) {
     clearTimeout(menuT); menu.hidden = false;
     opener = from || (focusFind ? findBtn : menuBtn);
     if (opener) opener.setAttribute('aria-expanded', 'true');
     root.style.overflow = 'hidden'; root.classList.add('menu-up');
     loadCatalog();
-    requestAnimationFrame(() => requestAnimationFrame(() => {
+    afterPaint(() => {
       menu.classList.add('open');
       const f = focusFind ? jump : $('.menu-x', menu); if (f) f.focus({ preventScroll: true });
-    }));
+    });
   }
   function closeMenu(restore = true) {
     menu.classList.remove('open');
@@ -463,10 +466,10 @@
       shown = true; remember();
       mp.hidden = false;
       if (stamp) stamp.classList.remove('in');
-      requestAnimationFrame(() => requestAnimationFrame(() => {
+      afterPaint(() => {
         mp.classList.add('open');
         if (stamp) setTimeout(() => stamp.classList.add('in'), reduce ? 0 : 420);
-      }));
+      });
       const watch = setInterval(() => {
         if (!isOpen()) { clearInterval(watch); return; }
         if (foreign()) { clearInterval(watch); hide(); forget(); } // another pop-up took the stage: offer ours another time

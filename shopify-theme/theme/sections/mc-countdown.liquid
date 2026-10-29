@@ -319,7 +319,7 @@
         {%- if pages != blank -%}<div><dt>Pages</dt><dd>{{ pages }}</dd></div>{%- endif -%}
         <div><dt>Format</dt><dd>Printed copy</dd></div>
         {%- if variant and section.settings.preorder and is_live == false and variant.available -%}<div data-cd-po><dt>Pre-orders</dt><dd>Open</dd></div>{%- endif -%}
-        {%- if variant -%}<div><dt>Price on release</dt><dd>{{ variant.price | money }} {{ cart.currency.iso_code }}</dd></div>{%- endif -%}
+        {%- if variant -%}<div><dt>Price</dt><dd>{{ variant.price | money }} {{ cart.currency.iso_code }}</dd></div>{%- endif -%}
         <div><dt>Delivery</dt><dd>{{ countries.size }} countries</dd></div>
       </dl>
     </aside>
@@ -360,13 +360,13 @@
     { "type": "text", "id": "headline", "label": "Headline", "default": "Enter the orbit" },
     { "type": "textarea", "id": "sub", "label": "Intro", "default": "Volume 001. Sealed until the clock runs out." },
     { "type": "textarea", "id": "live_sub", "label": "Intro after the launch", "default": "Volume 001. Out now, in print." },
-    { "type": "text", "id": "live_heading", "label": "Heading after the launch", "default": "The Vision Issue is out" },
+    { "type": "text", "id": "live_heading", "label": "Heading after the launch", "default": "Out now" },
     { "type": "text", "id": "signup_heading", "label": "Signup heading", "default": "Get the launch signal" },
-    { "type": "text", "id": "live_signup_heading", "label": "Signup heading after the launch", "default": "Get the next transmission" },
+    { "type": "text", "id": "live_signup_heading", "label": "Signup heading after the launch", "default": "Drop alerts" },
     { "type": "text", "id": "signup_note", "label": "Signup small print", "default": "One email at launch." },
     { "type": "text", "id": "live_signup_note", "label": "Signup small print after the launch", "default": "One email per drop." },
     { "type": "text", "id": "calendar_title", "label": "Calendar event title", "default": "MONOCHROME — The Vision Issue drops" },
-    { "type": "text", "id": "tape", "label": "Tape (separate with |)", "info": "{day} becomes the launch weekday.", "default": "The Vision Issue|Enter the orbit|Eyes only" }
+    { "type": "text", "id": "tape", "label": "Tape (separate with |)", "info": "{day} becomes the launch weekday.", "default": "The Vision Issue|Eyes only" }
   ],
   "blocks": [
     { "type": "line", "name": "Transmission", "settings": [

@@ -56,7 +56,6 @@
 
     {%- if n_prints > 0 -%}
     <div class="hs" data-hs role="group" aria-roledescription="photo stack" aria-label="{{ section.settings.stack_label | escape }}">
-      <span class="clip hs-clip" aria-hidden="true"></span>
       <ol class="hs-pile" data-hs-pile>
         {%- assign k = 0 -%}
         {%- for block in section.blocks -%}
@@ -134,7 +133,7 @@
     { "type": "text", "id": "hint_touch", "label": "Hint (touch)", "default": "Swipe to flip" },
     { "type": "header", "content": "Hazard tape" },
     { "type": "text", "id": "ticker_mag", "label": "Tape, magazine words (only while the magazine is on sale)", "default": "Free Vision Issue with any jersey or hoodie" },
-    { "type": "text", "id": "ticker_a", "label": "Tape words (separate with |)", "info": "{pieces} = live count, {countries} = delivery countries, {currency} = the shopper's currency", "default": "Ships to {countries} countries|Nigeria and Canada included|Prices in {currency}" }
+    { "type": "text", "id": "ticker_a", "label": "Tape words (separate with |)", "info": "{pieces} = live count, {countries} = delivery countries, {currency} = the shopper's currency", "default": "Ships to {countries} countries|Nigeria + Canada" }
   ],
   "blocks": [
     {

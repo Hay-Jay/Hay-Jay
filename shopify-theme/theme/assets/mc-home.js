@@ -34,8 +34,8 @@
       const at = cards.indexOf(order[0]) + 1;
       if (num) num.textContent = pad(at);
       if (announce && live) {
-        const t = $('.hs-cap', order[0]);
-        live.textContent = `${at} of ${cards.length}: ${t ? t.textContent.replace(/\s+/g, ' ').trim() : ''}`;
+        const txt = s => { const e = $(s, order[0]); return e ? e.textContent.replace(/\s+/g, ' ').trim() : ''; };
+        live.textContent = `${at} of ${cards.length}: ${txt('.hs-cap b')}, ${txt('.hs-pr')}`;
       }
     }
     function settle(c) { c.style.removeProperty('--dx'); c.style.removeProperty('--dr'); }

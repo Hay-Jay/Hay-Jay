@@ -9,12 +9,6 @@
             "text": "Package intercepted in Regina, {pages} pages."
           }
         },
-        "l2": {
-          "type": "line",
-          "settings": {
-            "text": "Cover subject: the dream team."
-          }
-        },
         "l3": {
           "type": "line",
           "settings": {
@@ -24,7 +18,6 @@
       },
       "block_order": [
         "l1",
-        "l2",
         "l3"
       ],
       "settings": {
@@ -35,7 +28,9 @@
         "live_sub": "Volume 001. Out now, in print.",
         "signup_note": "One email at launch.",
         "live_signup_note": "One email per drop.",
-        "tape": "The Vision Issue|Enter the orbit|Eyes only"
+        "tape": "The Vision Issue|Eyes only",
+        "live_heading": "Out now",
+        "live_signup_heading": "Drop alerts"
       }
     }
   },

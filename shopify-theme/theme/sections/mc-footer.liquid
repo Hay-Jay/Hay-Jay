@@ -22,7 +22,8 @@
     when 'all'
       assign show_news = true
     when 'not_home'
-      unless template.name == 'index'
+      # the home page and the Vision Issue page carry their own signup
+      unless template.name == 'index' or template.suffix == 'vision-issue'
         assign show_news = true
       endunless
   endcase
@@ -103,11 +104,11 @@
       "type": "select", "id": "news", "label": "Newsletter signup",
       "options": [
         { "value": "all", "label": "On every page" },
-        { "value": "not_home", "label": "Every page but the home page" },
+        { "value": "not_home", "label": "Every page but home and Vision Issue" },
         { "value": "none", "label": "Hidden" }
       ],
       "default": "not_home",
-      "info": "The home page has its own signup section."
+      "info": "The home page and the Vision Issue page have their own signup."
     },
     { "type": "text", "id": "news_label", "label": "Newsletter label", "default": "Drop alerts by email" }
   ],

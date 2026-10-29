@@ -34,16 +34,16 @@
   -%}
 <section class="spread dark hmag" id="vision" aria-labelledby="magH">
   <div class="wrap hm-grid">
-    <a class="hm-cover" href="{{ mag.url }}" data-tilt tabindex="-1" aria-hidden="true">
+    <a class="hm-cover" href="{{ mag.url }}" data-tilt aria-label="{{ mag.title | strip | escape }}">
       <span class="hm-tilt">
         {% render 'mc-img', image: mag.featured_image, alt: '', class: 'hm-img', sizes: '(min-width:900px) 220px, 120px', widths: '240,360,480' %}
         <i class="hm-glare"></i>
       </span>
-      {%- if section.settings.stamp != blank %}<span class="stamp white sm hm-stamp" style="--r:-9deg">{{ section.settings.stamp | escape }}</span>{% endif -%}
+      {%- if section.settings.stamp != blank %}<span class="stamp white sm hm-stamp" style="--r:-9deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>{% endif -%}
     </a>
     <div class="hm-copy">
       {%- if section.settings.kicker != blank %}<p class="kick mono"><b class="rec" aria-hidden="true"></b>{{ section.settings.kicker | escape }}</p>{% endif -%}
-      <h2 class="h2 rv" id="magH"><a href="{{ mag.url }}">{{ mtitle | escape }}</a></h2>
+      <h2 class="h2 rv" id="magH">{{ mtitle | escape }}</h2>
       <p class="hm-line mono">{% if line != blank %}<span>{{ line | escape }}</span>{% endif %}<b>{{ variant.price | money }} <small>{{ cart.currency.iso_code }}</small></b></p>
       {%- if section.settings.offer != blank %}<p class="hm-offer">{{ section.settings.offer | escape }}</p>{% endif -%}
     </div>

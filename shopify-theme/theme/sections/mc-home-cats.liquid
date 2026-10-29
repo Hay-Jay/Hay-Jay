@@ -114,7 +114,7 @@
         <li class="hc-li" {{ block.shopify_attributes }}>
           <a class="hc-tile" href="{{ url }}" style="--i:{{ forloop.index0 }}">
             <span class="hc-ph">
-              {%- if pic != blank -%}{% render 'mc-img', image: pic, alt: '', widths: '300,450,600,800', sizes: '(min-width:900px) 23vw, 46vw' %}{%- endif -%}
+              {%- if pic != blank -%}{% render 'mc-img', image: pic, alt: '', widths: '300,450,600,800', sizes: '(min-width:700px) 23vw, 46vw' %}{%- endif -%}
               <i class="hc-vf" aria-hidden="true"></i>
             </span>
             <span class="hc-no mono" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
