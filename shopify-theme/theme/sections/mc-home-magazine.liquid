@@ -1,3 +1,8 @@
+{%- comment -%}
+  The Vision Issue, compact: the cover (it tilts under the pointer, mc-home.js), the title, one facts line, the offer line and an
+  Add to bag button (a real form post to /cart/add; mc-cart.js turns [data-mc-add] into an AJAX add that opens the bag).
+  Shown only while the magazine is available.
+{%- endcomment -%}
 {%- liquid
   if section.settings.product != blank
     assign mag = section.settings.product
@@ -16,67 +21,50 @@
       render 'mc-magfacts', product: mag
     endcapture
     assign fp = facts | split: '~'
-    assign vol = fp[0]
-    assign issue = fp[1]
     assign mag_pages = fp[2]
-    assign blurb = fp[3]
-    assign mtitle = mag.title | remove: 'MONOCHROME Magazine — ' | remove: ' (Print)' | strip
-    assign line = 'Print'
-    if vol != blank
-      assign line = line | append: ' — Vol. ' | append: vol
-    endif
-    if issue != blank
-      assign line = line | append: ' — Issue ' | append: issue
-    endif
-    if mag_pages != blank
-      assign line = line | append: ' — ' | append: mag_pages | append: ' pages'
+    assign mtitle = section.settings.heading | strip
+    if mtitle == blank
+      assign mtitle = mag.title | remove: 'MONOCHROME Magazine — ' | remove: ' (Print)' | strip
     endif
     assign variant = mag.selected_or_first_available_variant
-    capture fno
-      render 'mc-fileno', product: mag
-    endcapture
-    capture raw
-      render 'mc-countries'
-    endcapture
-    assign countries = raw | split: ';'
-    assign ng_listed = false
-    if raw contains '|NG|'
-      assign ng_listed = true
+    assign line = section.settings.format | strip
+    if mag_pages != blank
+      assign line = line | append: ' · ' | append: mag_pages | append: ' pages'
     endif
   -%}
-<!-- INCOMING INTEL: the magazine -------------------------------------------------------------- -->
-<section class="spread dark mag" id="vision" aria-labelledby="magH">
-  <div class="wrap mag-grid">
-    <div class="mag-copy">
-      <p class="kick mono"><b class="rec" aria-hidden="true"></b> {{ section.settings.kicker | escape }}</p>
-      <h2 class="h2 rv" id="magH">{{ mtitle | escape }}</h2>
-      <p class="mag-sub mono">{{ line | escape }}</p>
-      <p class="mag-blurb rv">{{ blurb | escape }}</p>
-      <p class="mag-cta">
-        <a class="btn" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">{{ section.settings.button | escape }}<i class="arr" aria-hidden="true"></i></a>
-        <a class="btn ghost" href="{{ mag.url }}">Open the file</a>
-        {%- liquid
-          assign cd_page = section.settings.countdown_page
-          if cd_page == blank
-            assign cd_page = pages['vision-issue']
-          endif
-        -%}
-        {%- if section.settings.countdown_link and cd_page != blank and cd_page.url != blank -%}
-          <a class="btn-line mono mag-cd" href="{{ cd_page.url }}">{{ section.settings.countdown_label | escape }}<i class="arr" aria-hidden="true"></i></a>
-        {%- endif -%}
-      </p>
-      <p class="mag-note mono"><span>{{ variant.price | money }} {{ cart.currency.iso_code }}</span><span>Printed copy</span><span>Delivered to {{ countries.size }} countries{% if ng_listed %}, Nigeria included{% endif %}. Rate calculated at checkout</span></p>
+<section class="spread dark hmag" id="vision" aria-labelledby="magH">
+  <div class="wrap hm-grid">
+    <a class="hm-cover" href="{{ mag.url }}" data-tilt tabindex="-1" aria-hidden="true">
+      <span class="hm-tilt">
+        {% render 'mc-img', image: mag.featured_image, alt: '', class: 'hm-img', sizes: '(min-width:900px) 220px, 120px', widths: '240,360,480' %}
+        <i class="hm-glare"></i>
+      </span>
+      {%- if section.settings.stamp != blank %}<span class="stamp white sm hm-stamp" style="--r:-9deg">{{ section.settings.stamp | escape }}</span>{% endif -%}
+    </a>
+    <div class="hm-copy">
+      {%- if section.settings.kicker != blank %}<p class="kick mono"><b class="rec" aria-hidden="true"></b>{{ section.settings.kicker | escape }}</p>{% endif -%}
+      <h2 class="h2 rv" id="magH"><a href="{{ mag.url }}">{{ mtitle | escape }}</a></h2>
+      <p class="hm-line mono">{% if line != blank %}<span>{{ line | escape }}</span>{% endif %}<b>{{ variant.price | money }} <small>{{ cart.currency.iso_code }}</small></b></p>
+      {%- if section.settings.offer != blank %}<p class="hm-offer">{{ section.settings.offer | escape }}</p>{% endif -%}
     </div>
-    <figure class="mag-fig">
-      <a class="mag-cover" href="{{ mag.url }}" aria-label="Open {{ mag.title | strip | escape }}">
-        <span class="mag-clip clip" aria-hidden="true"></span>
-        {% render 'mc-img', image: mag.featured_image, alt: mag.title, class: 'mag-img', sizes: '(min-width:900px) 34vw, 78vw', widths: '480,720,1080' %}
-        <span class="stamp white sm mag-stamp" style="--r:-9deg" aria-hidden="true">New intel</span>
-      </a>
-      <figcaption class="mono">Exhibit M / {{ fno }}. The one file we declassified in full colour.</figcaption>
-    </figure>
+    <form class="hm-buy" method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8">
+      <input type="hidden" name="quantity" value="1">
+      <button class="btn" type="submit" name="id" value="{{ variant.id }}" data-mc-add="{{ variant.id }}">{{ section.settings.button | escape }}</button>
+      {%- liquid
+        assign cd_page = section.settings.countdown_page
+        if cd_page == blank
+          assign cd_page = pages['vision-issue']
+        endif
+      -%}
+      {%- if section.settings.countdown_link and cd_page != blank and cd_page.url != blank -%}
+        <a class="btn-line mono" href="{{ cd_page.url }}">{{ section.settings.countdown_label | escape }}<i class="arr" aria-hidden="true"></i></a>
+      {%- elsif section.settings.more_label != blank -%}
+        <a class="btn-line mono" href="{{ mag.url }}">{{ section.settings.more_label | escape }}<i class="arr" aria-hidden="true"></i></a>
+      {%- endif -%}
+    </form>
   </div>
 </section>
+<script src="{{ 'mc-home.js' | asset_url }}" defer></script>
 {%- endif -%}
 
 {% schema %}
@@ -84,9 +72,14 @@
   "name": "Magazine (Vision Issue)",
   "settings": [
     { "type": "product", "id": "product", "label": "Magazine product", "info": "Leave empty to use the first available product of type Magazine." },
-    { "type": "text", "id": "kicker", "label": "Small heading", "default": "Incoming transmission" },
-    { "type": "text", "id": "button", "label": "Order button", "default": "Requisition a copy" },
-    { "type": "checkbox", "id": "countdown_link", "label": "Link to the launch countdown", "info": "Untick once the launch is over.", "default": true },
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "New intel" },
+    { "type": "text", "id": "heading", "label": "Heading", "info": "Empty: the product title without \"MONOCHROME Magazine —\" and \"(Print)\"." },
+    { "type": "text", "id": "format", "label": "Facts line (the page count is added from the description)", "default": "Print" },
+    { "type": "text", "id": "offer", "label": "Offer line", "info": "Empty it when the offer ends.", "default": "Free with any jersey or hoodie." },
+    { "type": "text", "id": "stamp", "label": "Stamp on the cover", "default": "Declassified" },
+    { "type": "text", "id": "button", "label": "Button", "default": "Add to bag" },
+    { "type": "text", "id": "more_label", "label": "Link to the product", "default": "Look inside" },
+    { "type": "checkbox", "id": "countdown_link", "label": "Link to the launch countdown instead", "default": false },
     { "type": "page", "id": "countdown_page", "label": "Countdown page", "info": "Empty: the page with the handle vision-issue, if it exists." },
     { "type": "text", "id": "countdown_label", "label": "Countdown link text", "default": "Watch the countdown" }
   ],

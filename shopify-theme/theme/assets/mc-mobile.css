@@ -1,135 +1,21 @@
 /* ==========================================================================
    MONOCHROME® — CLASSIFIED: the phone and small-tablet layer
-   Linked after the page stylesheet with media="(max-width: 899px)", so none of it applies on a laptop and the
-   laptop layout cannot change. Every rule is a refinement for thumbs: reachable controls, 16px form text (no iOS zoom),
-   safe areas, compact headers, and tables that read as lists.
+   Linked after the page stylesheet with media="(max-width: 899px)", so none of it applies on a laptop.
+   Refinements for thumbs: safe areas, pressed states, 16px form text (no iOS zoom). The header, menu, footer and
+   corner card carry their own phone rules in mc-base.css; the pages carry theirs in their own stylesheets.
    ========================================================================== */
 
 /* ---- basics ---------------------------------------------------------------------------------------------- */
 :root { --gut: max(clamp(16px, 3vw, 44px), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)); }
 html { -webkit-tap-highlight-color: rgba(120, 120, 120, .28); }
 a, button, summary, label, select, input, [role=button] { touch-action: manipulation; }
-.btn:active, .send:active, .bar-btn:active, .chip:active, .filter:active, .view:active, .dev:active { transform: translateY(1px); }
+.btn:active, .send:active, .bar-btn:active, .fn-go:active, .mp-add:active { transform: translateY(1px); }
 img { -webkit-touch-callout: none; }
-
-/* ---- the running head ------------------------------------------------------------------------------------- */
-@media (max-width: 520px) { .banner { font-size: 10.5px; letter-spacing: .1em; } }
-@media (max-width: 359px) { .banner { letter-spacing: .05em; } }
-/* 320px phones: the wordmark and both header buttons fit side by side */
-@media (max-width: 359px) { .bar-word { width: 112px; } .bar-btn { padding: 0 7px; min-width: 44px; letter-spacing: .06em; } .bar-btn .arr { display: none; } }
-@media (max-width: 699px) {
-  /* the white box in the header was a lone switch: it now lives in the file index with a label, where thumbs can read it */
-  .bar #declass { display: none; }
-  .bar-r { gap: 8px; }
-  .bar-btn { min-width: 48px; height: 46px; }
-}
-
-/* ---- the file index ----------------------------------------------------------------------------------------- */
-.menu { overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom, 0px); }
-.menu-in { padding-top: max(calc(24px + 3vh), calc(env(safe-area-inset-top, 0px) + 16px)); }
-.menu-find input { text-overflow: ellipsis; font-size: clamp(1.45rem, 7vw, 2rem); }
-.menu-find label { flex-wrap: wrap; }
-.menu-keys { display: none; }
-.jump-list { max-height: 38svh; }
-.menu-dc {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; width: 100%; min-height: 64px; padding: 12px 14px; text-align: left;
-  border: 2px solid rgba(255, 255, 255, .55); color: #efefef; transition: background .2s, color .2s;
-}
-.menu-dc-t { display: grid; gap: 3px; min-width: 0; }
-.menu-dc-t b { font: 900 1.45rem/1 var(--head); letter-spacing: .03em; text-transform: uppercase; }
-.menu-dc-t .mono { color: #b4b4b4; font-size: 11.5px; line-height: 1.35; }
-.menu-dc-s { min-width: 3.4em; text-align: right; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-.menu-dc-s::after { content: "Off"; }
-.menu-dc[aria-pressed=true] { background: #efefef; color: #0a0a0a; }
-.menu-dc[aria-pressed=true] .menu-dc-t .mono { color: #333; }
-.menu-dc[aria-pressed=true] .menu-dc-s::after { content: "On"; }
-.menu-dc[aria-pressed=true] .dc-ico::after { transform: translateX(76%); }
-.menu-foot { padding-bottom: 10px; }
-
-/* ---- home: the first screen should end on the button, not above it --------------------------------------------- */
-@media (max-width: 699px) {
-  .cover { padding-top: 16px; }
-  .cover .filehead { margin-bottom: 16px; }
-  .cover .fh-c { padding: 6px 10px; gap: 2px; font-size: 12px; }
-  .cover .fh-c b { font-size: 10.5px; }
-  .cv-grid { gap: 40px; }
-  .stamp.lg.cv-ts { font-size: 1.35rem; margin-bottom: 8px; }
-  .memo { font-size: 12px; margin-bottom: 12px; }
-  .cv-h { margin-bottom: 14px; }
-  .cv-op { font-size: 1.35rem; }
-  .cv-lede { font-size: 15.5px; line-height: 1.5; }
-  .cta-row { margin-top: 18px; gap: 10px; }
-  .cta-row .btn { flex: 1 1 100%; justify-content: space-between; }
-  .cta-row .btn.ghost { min-height: 48px; }
-  .cv-folder .stamp.eo { right: 20px; bottom: 22px; font-size: 1.1rem; }
-}
-@media (max-width: 359px) { .cv-h .tw { font-size: clamp(3rem, 19vw, 3.6rem); } }
-
-/* ---- the asset register: tools that stay in reach ----------------------------------------------------------------- */
-.findwrap input, .sortwrap select { font-size: 16px; letter-spacing: .04em; }
-.chip i { font-size: 10.5px; letter-spacing: .14em; }
-.fh-c b { font-size: 10.5px; }
-@media (max-width: 699px) {
-  /* the filter row scrolls sideways: a fade on the right edge says there is more */
-  .filters { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 34px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 34px), transparent); padding-right: calc(var(--gut) + 28px); scroll-snap-type: x proximity; }
-  .filter { scroll-snap-align: start; }
-  .findwrap input, .sortwrap select { min-height: 50px; }
-  .view { min-height: 50px; padding-inline: 14px; }
-  .sortwrap { flex: 1 1 0; }
-  .reg-title .h1 { font-size: clamp(2.6rem, 14.6vw, 3.6rem); }
-  .reg-title .kick { font-size: 11.5px; letter-spacing: .1em; }
-}
-@media (max-width: 359px) {
-  .reg-title .kick { letter-spacing: .04em; }
-}
-
-/* ---- extraction routes: the manifest reads as a list on a phone -------------------------------------------------------- */
-.dst-grid, .reg-head { grid-template-columns: minmax(0, 1fr); }
-.reg-title { min-width: 0; }
-.dst-main, .dst-aside { min-width: 0; }
-@media (max-width: 699px) {
-  .tbl-wrap { overflow-x: clip; }
-  .tbl { table-layout: fixed; }
-  .tbl .r-l { display: none; }
-  /* a fixed layout takes its column widths from the header row */
-  .tbl thead th:nth-child(1) { width: 2.7rem; }
-  .tbl thead th:nth-child(3) { width: 2.9rem; }
-  .tbl thead th:nth-child(5) { width: 6rem; }
-  .tbl th, .tbl td { padding: 11px 6px; }
-  .tbl thead th { padding-block: 9px; font-size: 11px; letter-spacing: .08em; }
-  .tbl .c-no { padding-left: 10px; font-size: 11px; }
-  .tbl .c-rate { font-size: 11px; letter-spacing: .01em; padding-right: 8px; white-space: nowrap; }
-  .tbl tbody th { font-size: 1.3rem; overflow-wrap: break-word; }
-  .tbl-h { font-size: clamp(2rem, 9.5vw, 2.8rem); }
-}
-@media (max-width: 359px) {
-  .tbl thead th:nth-child(5) { width: 5.3rem; }
-  .tbl .c-rate { font-size: 10.5px; letter-spacing: 0; padding-right: 4px; }
-  .tbl tbody th { font-size: 1.15rem; }
-}
-
-/* ---- the asset dossier ----------------------------------------------------------------------------------------------- */
-@media (max-width: 899px) {
-  /* sideways drags go to the gallery (product.js), vertical drags still scroll the page */
-  .stage { max-height: min(72svh, 560px); touch-action: pan-y pinch-zoom; }
-  .pl-title { overflow-wrap: anywhere; }
-}
-@media (hover: none) and (min-width: 360px) and (max-width: 699px) {
-  .pl-bar.multi #shotCount::after { content: "  \2039  swipe \203A"; color: var(--dim); }
-}
-@media (max-width: 699px) {
-  .thumbs { scrollbar-width: none; }
-  .thumbs::-webkit-scrollbar { display: none; }
-}
+input, select, textarea { font-size: max(16px, 1em); }
 
 /* ---- short screens (a phone on its side) ------------------------------------------------------------------------------------ */
 @media (max-height: 520px) and (orientation: landscape) {
-  .banner { display: none; }
-  .hdr { top: 0; }
-  .stage { aspect-ratio: 16 / 10; max-height: 74svh; }
+  .banner.top { display: none; }
+  .hdr, .shopify-section-group-header-group { top: 0; }
   .menu-in { padding-top: 16px; gap: 14px; }
-  .menu-list b { font-size: clamp(1.9rem, 9vh, 3rem); }
-  .jump-list { max-height: 30svh; }
-  .mp-card { max-height: 94svh; }
-  .mp-body { grid-template-columns: minmax(0, 24%) minmax(0, 1fr); }
 }

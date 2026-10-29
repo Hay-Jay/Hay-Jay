@@ -1,23 +1,21 @@
+{%- comment -%}
+  Home cover: a short headline, one line, two buttons and a stack of evidence prints, one per "Photo" block (a product and its photo
+  number). Each print is a link to its product with the name and price on it. mc-home.js lets visitors flip through the stack: drag or
+  swipe the top print away, or use the arrows and the arrow keys. Without JavaScript the top print is a plain link and the others peek
+  out behind it. The hazard tape underneath carries the offer, the delivery zones and the currency.
+{%- endcomment -%}
 {%- assign tk_currency = '{currency}' -%}
+{%- assign tk_countries = '{countries}' -%}
+{%- assign tk_pieces = '{pieces}' -%}
 {%- liquid
   capture raw
     render 'mc-countries'
   endcapture
   assign countries = raw | split: ';'
-  assign n_countries = countries.size
   assign n_pieces = collections['all'].products_count
-  assign cover = section.settings.cover_product
-  if cover == blank
-    assign cover = collections['all'].products.first
-  endif
-  assign photo_i = section.settings.cover_photo | minus: 1
-  assign pic = cover.images[photo_i] | default: cover.featured_image
-  capture fno
-    render 'mc-fileno', product: cover
+  capture ord
+    render 'mc-order'
   endcapture
-  assign lede = section.settings.lede | replace: '{pieces}', n_pieces | replace: '{countries}', n_countries
-  assign l1 = section.settings.line_1 | strip
-  assign l2 = section.settings.line_2 | strip
   assign words = section.settings.ticker_a
   capture mag_handle
     render 'mc-magazine'
@@ -25,77 +23,130 @@
   if mag_handle != blank and section.settings.ticker_mag != blank
     assign words = words | append: '|' | append: section.settings.ticker_mag
   endif
-  assign words = words | append: '|' | append: section.settings.ticker_b | replace: '{pieces}', n_pieces | replace: tk_currency, cart.currency.iso_code
+  assign words = words | replace: tk_pieces, n_pieces | replace: tk_countries, countries.size | replace: tk_currency, cart.currency.iso_code
+  assign l1 = section.settings.line_1 | strip
+  assign l2 = section.settings.line_2 | strip
+  assign n_prints = 0
+  for block in section.blocks
+    if block.settings.product != blank
+      assign n_prints = n_prints | plus: 1
+    endif
+  endfor
+  assign n_label = n_prints | prepend: '0' | slice: -2, 2
 -%}
-<!-- 01 BRIEFING COVER ---------------------------------------------------------------- -->
-<section class="spread paper cover" id="top" aria-label="Mission briefing cover">
-  <div class="wrap">
-    {% render 'mc-filehead', file: 'MC-101', doc: 'Mission briefing', page: 1, level: 5 %}
-    <div class="cv-grid">
-      <div class="cv-text">
-        <span class="stamp ts lg cv-ts" style="--r:-8deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>
-        <p class="memo mono">
-          <span><b>To:</b> {{ section.settings.memo_to | escape }}</span>
-          <span><b>Handler:</b> <span class="redact" tabindex="0">{{ section.settings.memo_handler | escape }}</span></span>
-        </p>
-        <h1 class="cv-h">
-          <span class="cv-op">{{ section.settings.op_label | escape }}</span>
-          <span class="tw" style="--n:{{ l1 | size }};--dl:.15s">{{ l1 | escape }}</span>
-          <span class="tw caret" style="--n:{{ l2 | size }};--dl:.8s">{{ l2 | escape }}</span>
-        </h1>
-        <p class="cv-lede">{{ lede | escape }}</p>
-        <p class="cta-row">
-          {%- if section.settings.btn_1_label != blank -%}<a class="btn" href="{{ section.settings.btn_1_url | default: routes.all_products_collection_url }}">{{ section.settings.btn_1_label | escape }}<i class="arr" aria-hidden="true"></i></a>{%- endif -%}
-          {%- if section.settings.btn_2_label != blank -%}<a class="btn ghost" href="{{ section.settings.btn_2_url | default: '/pages/lookbook' }}">{{ section.settings.btn_2_label | escape }}<i class="arr" aria-hidden="true"></i></a>{%- endif -%}
-        </p>
-      </div>
-      {%- if cover != blank and pic != blank -%}
-      <div class="cv-folder">
-        <div class="folder">
-          <div class="folder-tabs" aria-hidden="true"><span class="folder-tab mono">{{ section.settings.tab_text | escape }}</span><span class="folder-tab folder-tab2 mono">{{ fno }}</span></div>
-          <div class="folder-body">
-            <span class="clip" aria-hidden="true"></span>
-            <figure class="xp cam-xp" id="coverPhoto">
-              <a class="ph-link" href="{{ cover.url }}" aria-label="Open {{ cover.title | strip | escape }}">{% render 'mc-img', image: pic, alt: cover.title, sizes: '(min-width:900px) 40vw, 80vw', widths: '640,960,1280,1800', eager: true %}</a>
-              {% render 'mc-cam', n: 1, ex: 'Exhibit 01', live: true %}
-            </figure>
-            <a class="etag" href="{{ cover.url }}"><span class="etag-k mono">Exhibit 01 / {{ fno }}</span><b>{{ cover.title | strip | escape }}</b><span class="mono">{{ cover.price | money }} {{ cart.currency.iso_code }}</span></a>
-            <span class="stamp eo white" style="--r:5deg" aria-hidden="true">Eyes only</span>
-          </div>
-        </div>
-        <p class="cv-cap mono"><span class="hint-fine">Hover the photograph to declassify the colour.</span><span class="hint-touch">Press and hold the photograph to declassify the colour.</span></p>
+<section class="spread paper hero" id="top" aria-labelledby="heroH">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="hero-op">{{ section.settings.op_label | escape }}</p>
+      <h1 class="hero-h" id="heroH">
+        {%- if l1 != blank %}<span class="tw" style="--n:{{ l1 | size }};--dl:.15s">{{ l1 | escape }}</span>{% endif -%}
+        {%- if l2 != blank %} <span class="hero-x">{{ l2 | escape }}</span>{% endif -%}
+      </h1>
+      {%- if section.settings.stamp != blank -%}
+        <span class="stamp lg hero-ts" style="--r:-8deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>
+      {%- endif -%}
+      {%- if section.settings.lede != blank -%}
+        <p class="hero-sub">{{ section.settings.lede | replace: tk_pieces, n_pieces | replace: tk_countries, countries.size | escape }}</p>
+      {%- endif -%}
+      <p class="hero-cta">
+        {%- if section.settings.btn_1_label != blank -%}<a class="btn" href="{{ section.settings.btn_1_url | default: routes.all_products_collection_url }}">{{ section.settings.btn_1_label | escape }}<i class="arr" aria-hidden="true"></i></a>{%- endif -%}
+        {%- if section.settings.btn_2_label != blank -%}<a class="btn ghost" href="{{ section.settings.btn_2_url | default: '/collections/new-arrivals' }}">{{ section.settings.btn_2_label | escape }}</a>{%- endif -%}
+      </p>
+    </div>
+
+    {%- if n_prints > 0 -%}
+    <div class="hs" data-hs role="group" aria-roledescription="photo stack" aria-label="{{ section.settings.stack_label | escape }}">
+      <span class="clip hs-clip" aria-hidden="true"></span>
+      <ol class="hs-pile" data-hs-pile>
+        {%- assign k = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- assign p = block.settings.product -%}
+          {%- if p != blank -%}
+            {%- liquid
+              assign pn = block.settings.photo | minus: 1
+              assign pic = p.images[pn] | default: p.featured_image
+              capture fno
+                render 'mc-fileno', product: p, order: ord
+              endcapture
+              assign colh = p.collections | map: 'handle'
+              assign top = false
+              if k == 0
+                assign top = true
+              endif
+            -%}
+            <li class="hs-card" data-pos="{{ k }}" {{ block.shopify_attributes }}>
+              <a class="hs-a" href="{{ p.url }}" draggable="false"{% unless top %} tabindex="-1" aria-hidden="true"{% endunless %}>
+                <span class="hs-ph">
+                  {%- if pic != blank -%}
+                    {%- if top -%}
+                      {% render 'mc-img', image: pic, alt: '', widths: '360,540,720,900', sizes: '(min-width:960px) 420px, 76vw', eager: true %}
+                    {%- else -%}
+                      {% render 'mc-img', image: pic, alt: '', widths: '360,540,720,900', sizes: '(min-width:960px) 420px, 76vw' %}
+                    {%- endif -%}
+                  {%- endif -%}
+                  <span class="hs-tag mono" aria-hidden="true">{{ fno }}</span>
+                  {%- if colh contains 'new-arrivals' %}<span class="stamp white sm hs-new" style="--r:8deg" aria-hidden="true">New</span>{% endif -%}
+                  {%- unless p.available %}<span class="stamp white hs-oos" style="--r:-10deg" aria-hidden="true">Sold out</span>{% endunless -%}
+                </span>
+                <span class="hs-cap"><b>{{ p.title | strip | escape }}</b><span class="hs-pr">{% render 'mc-price', product: p %} <small>{{ cart.currency.iso_code }}</small></span></span>
+              </a>
+            </li>
+            {%- assign k = k | plus: 1 -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+      {%- if n_prints > 1 -%}
+      <div class="hs-ctl" data-hs-ctl hidden>
+        <button class="hs-btn" type="button" data-hs-prev aria-label="Previous photo"><i class="hs-ar hs-ar-l" aria-hidden="true"></i></button>
+        <span class="hs-count mono" aria-hidden="true"><b data-hs-i>01</b> / {{ n_label }}</span>
+        <button class="hs-btn" type="button" data-hs-next aria-label="Next photo"><i class="hs-ar" aria-hidden="true"></i></button>
+        <span class="hs-hint mono" aria-hidden="true"><span class="hint-fine">{{ section.settings.hint_fine | escape }}</span><span class="hint-touch">{{ section.settings.hint_touch | escape }}</span></span>
+        <span class="sr-only" data-hs-live aria-live="polite"></span>
       </div>
       {%- endif -%}
     </div>
+    {%- endif -%}
   </div>
-  {% render 'mc-ticker', words: words, cls: 'hazard' %}
+  {%- if words != blank %}{% render 'mc-ticker', words: words, cls: 'hazard' %}{% endif -%}
 </section>
+{%- if n_prints > 1 -%}
+<script src="{{ 'mc-home.js' | asset_url }}" defer></script>
+{%- endif -%}
 
 {% schema %}
 {
-  "name": "Cover (briefing)",
+  "name": "Cover (photo stack)",
   "settings": [
-    { "type": "header", "content": "Cover photograph" },
-    { "type": "product", "id": "cover_product", "label": "Product", "info": "The product whose photo sits in the folder. Leave empty to use the first product." },
-    { "type": "range", "id": "cover_photo", "label": "Photo number", "min": 1, "max": 12, "step": 1, "default": 1, "info": "1 = the product's main (first) photo." },
     { "type": "header", "content": "Words" },
-    { "type": "text", "id": "stamp", "label": "Stamp", "default": "Top secret" },
-    { "type": "text", "id": "memo_to", "label": "Memo: To", "default": "Operative (that is you)" },
-    { "type": "text", "id": "memo_handler", "label": "Memo: Handler (hidden behind a redaction bar)", "default": "Agent Chrome, Desk 7" },
     { "type": "text", "id": "op_label", "label": "Small heading", "default": "Operation:" },
     { "type": "text", "id": "line_1", "label": "Headline, line 1", "default": "Wear the" },
-    { "type": "text", "id": "line_2", "label": "Headline, line 2", "default": "Unknown" },
-    { "type": "textarea", "id": "lede", "label": "Short intro", "info": "{pieces} and {countries} are replaced with live numbers.", "default": "Black, white and chrome clothing, made in small runs. {pieces} pieces on file, delivered to {countries} countries, Nigeria and Canada included." },
-    { "type": "text", "id": "btn_1_label", "label": "Button 1", "default": "Shop the register" },
-    { "type": "url", "id": "btn_1_url", "label": "Button 1 link" },
-    { "type": "text", "id": "btn_2_label", "label": "Button 2", "default": "Review the evidence" },
-    { "type": "url", "id": "btn_2_url", "label": "Button 2 link" },
-    { "type": "text", "id": "tab_text", "label": "Folder tab", "default": "Op: Wear the Unknown" },
+    { "type": "text", "id": "line_2", "label": "Headline, line 2 (revealed from under a redaction bar)", "default": "Unknown" },
+    { "type": "text", "id": "stamp", "label": "Stamp", "default": "Top secret" },
+    { "type": "text", "id": "lede", "label": "One short line", "info": "{pieces} and {countries} are replaced with live numbers.", "default": "Black, white and chrome. Made in small runs." },
+    { "type": "text", "id": "btn_1_label", "label": "Button 1", "default": "Shop the drop" },
+    { "type": "url", "id": "btn_1_url", "label": "Button 1 link", "info": "Empty: all products." },
+    { "type": "text", "id": "btn_2_label", "label": "Button 2", "default": "New in" },
+    { "type": "url", "id": "btn_2_url", "label": "Button 2 link", "info": "Empty: the new-arrivals collection." },
+    { "type": "header", "content": "Photo stack" },
+    { "type": "paragraph", "content": "Add a Photo block per print. Visitors drag, swipe or use the arrows to flip through them." },
+    { "type": "text", "id": "stack_label", "label": "Stack name (read out by screen readers)", "default": "Featured pieces" },
+    { "type": "text", "id": "hint_fine", "label": "Hint (mouse)", "default": "Drag to flip" },
+    { "type": "text", "id": "hint_touch", "label": "Hint (touch)", "default": "Swipe to flip" },
     { "type": "header", "content": "Hazard tape" },
-    { "type": "text", "id": "ticker_a", "label": "Tape, first words (separate with |)", "default": "Wear the unknown|Do not cross|Operation: Wear the Unknown|Black / white / chrome" },
-    { "type": "text", "id": "ticker_mag", "label": "Tape, magazine word (only while the magazine is on sale)", "default": "New intel: the Vision Issue" },
-    { "type": "text", "id": "ticker_b", "label": "Tape, last words", "info": "{pieces} = live count, {currency} = the shopper's currency", "default": "{pieces} assets on file|Prices in {currency}" }
+    { "type": "text", "id": "ticker_mag", "label": "Tape, magazine words (only while the magazine is on sale)", "default": "Free Vision Issue with any jersey or hoodie" },
+    { "type": "text", "id": "ticker_a", "label": "Tape words (separate with |)", "info": "{pieces} = live count, {countries} = delivery countries, {currency} = the shopper's currency", "default": "Ships to {countries} countries|Nigeria and Canada included|Prices in {currency}" }
   ],
-  "presets": [{ "name": "Cover (briefing)" }]
+  "blocks": [
+    {
+      "type": "photo",
+      "name": "Photo",
+      "limit": 8,
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "range", "id": "photo", "label": "Photo number", "min": 1, "max": 20, "step": 1, "default": 1, "info": "1 = the product's main (first) photo." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Cover (photo stack)", "blocks": [{ "type": "photo" }, { "type": "photo" }, { "type": "photo" }] }]
 }
 {% endschema %}

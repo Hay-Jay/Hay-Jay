@@ -26,54 +26,62 @@
   endcapture
   assign countries = raw | split: ';'
   assign reg = routes.all_products_collection_url
+  assign fa = section.settings.figure_a
+  assign fc = section.settings.figure_c
 -%}
 <section class="spread paper ab-sit" aria-labelledby="sitH">
-  <div class="wrap ab-essay">
-    <aside class="ab-margin mono" aria-label="Case notes">
-      <p class="ab-mh">In the file</p>
-      <ul>
-        <li><a href="{{ reg }}?c=top"><span>Tops</span><b>{{ n_top }}</b></a></li>
-        <li><a href="{{ reg }}?c=bottom"><span>Bottoms</span><b>{{ n_bottom }}</b></a></li>
-        <li><a href="{{ reg }}?c=accessory"><span>Hardware</span><b>{{ n_acc }}</b></a></li>
-        <li><a href="{{ reg }}?c=gift"><span>Gift card</span><b>{{ n_gift }}</b></a></li>
-        <li><a href="{{ reg }}?c=print"><span>Print</span><b>{{ n_print }}</b></a></li>
-      </ul>
-      <p class="ab-mh">Store address</p>
-      <p>{{ section.settings.address | escape }}</p>
-      <p class="ab-mh">Delivers to</p>
-      <p>{{ countries.size }} countries. Nigeria and Canada included.</p>
-      <p class="ab-mh">Informant</p>
-      <p><span class="redact" tabindex="0">{{ section.settings.informant | escape }}</span></p>
-    </aside>
+  <div class="wrap ab-grid">
+    {%- if fa != blank -%}
+      {%- assign pn = section.settings.figure_a_photo | minus: 1 -%}
+      {%- assign pic = fa.images[pn] | default: fa.featured_image -%}
+      <figure class="ab-fig ab-fig-a rv" data-tilt>
+        <span class="tape" aria-hidden="true"></span>
+        <a class="xp" href="{{ fa.url }}">{% render 'mc-img', image: pic, alt: fa.title, sizes: '(min-width:900px) 34vw, 86vw', widths: '480,720,1080' %}<span class="ab-ex mono" aria-hidden="true">Exhibit A</span></a>
+        <figcaption class="mono"><a href="{{ fa.url }}">{{ fa.title | strip | escape }}</a><span>{% render 'mc-price', product: fa %}</span></figcaption>
+      </figure>
+    {%- endif -%}
 
     <div class="ab-text">
-      <h2 class="sec-tag" id="sitH"><span class="mono">§1</span>{{ section.settings.heading | escape }}</h2>
-      <p class="drop rv">{{ section.settings.para_1 | escape }}</p>
-      <p class="rv">{% render 'mc-md', text: section.settings.para_2 %}</p>
-      {% render 'mc-figure', product: section.settings.figure_a, photo: section.settings.figure_a_photo, letter: 'a', cam: 4 %}
-      <blockquote class="ab-pull rv">{{ section.settings.pull | escape }}</blockquote>
+      <h2 class="ab-h2 rv" id="sitH">{{ section.settings.heading | escape }}</h2>
+      <p class="ab-p rv" style="--rv:1">{{ section.settings.para_1 | escape }}</p>
+      {%- if section.settings.para_2 != blank %}<p class="ab-fin rv" style="--rv:2">{% render 'mc-md', text: section.settings.para_2 %}</p>{% endif -%}
+      <nav class="ab-cats rv" style="--rv:3" aria-label="Shop by category">
+        {%- if n_top > 0 %}<a href="{{ reg }}?c=top">Tops<sup>{{ n_top }}</sup></a>{% endif -%}
+        {%- if n_bottom > 0 %}<a href="{{ reg }}?c=bottom">Bottoms<sup>{{ n_bottom }}</sup></a>{% endif -%}
+        {%- if n_acc > 0 %}<a href="{{ reg }}?c=accessory">Hardware<sup>{{ n_acc }}</sup></a>{% endif -%}
+        {%- if n_gift > 0 %}<a href="{{ reg }}?c=gift">Gift cards<sup>{{ n_gift }}</sup></a>{% endif -%}
+        {%- if n_print > 0 %}<a href="{{ reg }}?c=print">Print<sup>{{ n_print }}</sup></a>{% endif -%}
+      </nav>
+      <p class="ab-hq mono rv" style="--rv:4"><span>HQ {{ section.settings.address | escape }}</span><span>Ships to {{ countries.size }} countries</span>{% if section.settings.informant != blank %}<span>Source: <span class="redact" tabindex="0">{{ section.settings.informant | escape }}</span></span>{% endif %}</p>
     </div>
 
-    {% render 'mc-figure', product: section.settings.figure_c, photo: section.settings.figure_c_photo, letter: 'c', cam: 6 %}
+    {%- if fc != blank -%}
+      {%- assign pn = section.settings.figure_c_photo | minus: 1 -%}
+      {%- assign pic = fc.images[pn] | default: fc.featured_image -%}
+      <figure class="ab-fig ab-fig-c rv" data-tilt>
+        <span class="tape" aria-hidden="true"></span>
+        <a class="xp" href="{{ fc.url }}">{% render 'mc-img', image: pic, alt: fc.title, sizes: '(min-width:900px) 26vw, 60vw', widths: '360,540,800' %}<span class="ab-ex mono" aria-hidden="true">Exhibit C</span></a>
+        <figcaption class="mono"><a href="{{ fc.url }}">{{ fc.title | strip | escape }}</a><span>{% render 'mc-price', product: fc %}</span></figcaption>
+      </figure>
+    {%- endif -%}
   </div>
 </section>
 
 {% schema %}
 {
-  "name": "About: situation",
+  "name": "About: story",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Situation" },
-    { "type": "textarea", "id": "para_1", "label": "Opening paragraph", "default": "MONOCHROME® is clothing and objects made from three finishes: black, white and chrome. There is no colour of the month and no seasonal palette. Keeping the list that short means every piece you buy works with every piece you already own." },
-    { "type": "textarea", "id": "para_2", "label": "Second paragraph", "info": "Put **words** between double stars to set them as lead-ins.", "default": "**Black** is the base. It carries the heavy pieces: the acid-washed hoodie and tees, the cargo shorts and skirt, the jerseys. **White** is contrast, the 77 jersey and the lettering on the chest. **Chrome** is the edge: signet rings, star rings, a trinity ring, a chain for your pants, a cross on a chain." },
-    { "type": "text", "id": "pull", "label": "Pull quote", "default": "Nothing here needs a matching partner. It is all the same three finishes." },
-    { "type": "text", "id": "address", "label": "Store address", "default": "Regina, Saskatchewan, Canada" },
-    { "type": "text", "id": "informant", "label": "Informant (behind a redaction bar)", "default": "A very well dressed source" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "The idea" },
+    { "type": "textarea", "id": "para_1", "label": "Paragraph", "default": "Clothing and objects in three finishes. No colour of the month, so every piece works with every piece you own." },
+    { "type": "textarea", "id": "para_2", "label": "Second line", "info": "Put **words** between double stars to set them as black labels.", "default": "**Black** the base. **White** the contrast. **Chrome** the edge." },
+    { "type": "text", "id": "address", "label": "Headquarters", "default": "Regina, Canada" },
+    { "type": "text", "id": "informant", "label": "Source (behind a redaction bar)", "info": "Leave empty to hide.", "default": "A very well dressed one" },
     { "type": "header", "content": "Photographs" },
     { "type": "product", "id": "figure_a", "label": "Exhibit A product" },
     { "type": "range", "id": "figure_a_photo", "label": "Exhibit A photo number", "min": 1, "max": 12, "step": 1, "default": 6 },
     { "type": "product", "id": "figure_c", "label": "Exhibit C product" },
     { "type": "range", "id": "figure_c_photo", "label": "Exhibit C photo number", "min": 1, "max": 12, "step": 1, "default": 4 }
   ],
-  "presets": [{ "name": "About: situation" }]
+  "presets": [{ "name": "About: story" }]
 }
 {% endschema %}

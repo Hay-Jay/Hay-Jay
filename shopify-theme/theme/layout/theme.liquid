@@ -86,13 +86,13 @@
       root: "/", idx: "", page: {{ key | json }},
       routes: {
         home: {{ routes.root_url | json }}, shop: {{ routes.all_products_collection_url | json }},
-        lookbook: "/pages/lookbook", about: "/pages/about", shipping: "/pages/shipping", faq: "/pages/faq", contact: "/pages/contact",
+        lookbook: "/pages/lookbook", about: "/pages/about", shipping: "/pages/shipping", faq: "/pages/faq", contact: "/pages/contact", vision: "/pages/vision-issue",
         cart: {{ routes.cart_url | json }}, cartAdd: {{ routes.cart_add_url | json }}, cartChange: {{ routes.cart_change_url | json }}, cartUpdate: {{ routes.cart_update_url | json }},
         search: {{ routes.search_url | json }}, account: {{ routes.account_url | json }}
       },
       catalogUrl: {{ routes.all_products_collection_url | append: '?view=catalog' | json }},
       currency: {{ cart.currency.iso_code | json }}, moneyFormat: {{ shop.money_format | json }},
-      cartCount: {{ cart.item_count }}, intro: {{ settings.intro_enable | json }}, magpopDelay: {{ settings.magpop_delay | default: 9 }}
+      cartCount: {{ cart.item_count }}, intro: {{ settings.intro_enable | json }}, magpopDelay: {{ settings.magpop_delay | default: 8 }}
     };
     (function () {
       var d = document.documentElement; d.classList.add('js');

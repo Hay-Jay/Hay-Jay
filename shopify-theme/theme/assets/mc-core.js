@@ -1,7 +1,7 @@
-/* MONOCHROME® — CLASSIFIED (multi-page). Behaviour shared by every page (a work of fiction, see the footer):
+/* MONOCHROME® — CLASSIFIED. Behaviour shared by every page (a work of fiction, see the footer):
    links (MC.url), the DECLASSIFY toggle (redaction bars), stamps + reveals, the declassify lens on photographs,
-   live camera clocks, tickers, counters, the file index + search overlay, the once-per-session intro on the briefing,
-   prefetch. Page-specific code lives in shop.js, product.js and lookbook.js. */
+   live camera clocks, tickers, counters, the menu + search overlay, the rotating notice strip, the magazine corner card,
+   tilting prints, the once-per-session intro on the home page, prefetch. Page-specific code lives in the page scripts. */
 (() => {
   'use strict';
 
@@ -246,12 +246,17 @@
   document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.xp') && (tp || noHover())) e.preventDefault(); });
   document.addEventListener('click', e => { if (suppressClick > performance.now()) { e.preventDefault(); e.stopPropagation(); } }, true);
 
-  // ---- File index overlay + command bar (search the archive for a page or an asset) -----------------------
-  const menu = $('#menu'), menuBtn = $('#menuBtn'), jump = $('#jump'), jList = $('#jumpList'), jNone = $('#jumpNone');
-  let menuT = 0, catalog = null, catPromise = null, jItems = [], jSel = -1;
-  const menuOpen = () => !menu.hidden && menu.classList.contains('open');
-  function openMenu(focusFind) {
-    clearTimeout(menuT); menu.hidden = false; menuBtn.setAttribute('aria-expanded', 'true');
+  // ---- The menu: search + links, over any page (Menu, Search, "/" or Ctrl+K) --------------------------------------------
+  // Without JavaScript, Menu jumps to the footer links and Search opens the search page; both are real links.
+  const menu = $('#menu'), menuBtn = $('#menuBtn'), findBtn = $('#findBtn'), jump = $('#jump'), jList = $('#jumpList'), jNone = $('#jumpNone');
+  let menuT = 0, catalog = null, catPromise = null, jItems = [], jSel = -1, opener = null;
+  const menuOpen = () => !!menu && !menu.hidden && menu.classList.contains('open');
+  MC.menuOpen = menuOpen;
+  const shown = el => !!el && el.offsetParent !== null;
+  function openMenu(focusFind, from) {
+    clearTimeout(menuT); menu.hidden = false;
+    opener = from || (focusFind ? findBtn : menuBtn);
+    if (opener) opener.setAttribute('aria-expanded', 'true');
     root.style.overflow = 'hidden'; root.classList.add('menu-up');
     loadCatalog();
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -260,36 +265,31 @@
     }));
   }
   function closeMenu(restore = true) {
-    menu.classList.remove('open'); menuBtn.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('open');
+    [menuBtn, findBtn].forEach(b => b && b.setAttribute('aria-expanded', 'false'));
     root.style.overflow = ''; root.classList.remove('menu-up');
-    menuT = setTimeout(() => { menu.hidden = true; }, reduce ? 0 : 620);
-    if (restore) menuBtn.focus({ preventScroll: true });
+    menuT = setTimeout(() => { menu.hidden = true; }, reduce ? 0 : 560);
+    if (restore) { const back = shown(opener) ? opener : shown(menuBtn) ? menuBtn : findBtn; if (back) back.focus({ preventScroll: true }); }
   }
+  MC.closeMenu = closeMenu;
   function pageEntries() {
-    const KW = ['briefing cover home operation mission', 'index store buy products collection register assets equipment shop', 'photos photographs film strip evidence exhibits surveillance lookbook', 'story brand formula briefing objectives rules engagement about', 'delivery nigeria canada countries returns refund distribution routes extraction shipping', 'questions help answers debrief faq transcript', 'email instagram report secure channel contact'];
-    const nav = $$('.menu-list a', menu).map((a, i) => ({ type: 'Page', title: a.querySelector('b').textContent, href: a.getAttribute('href'), meta: a.querySelector('i') ? a.querySelector('i').textContent : '', kw: KW[i] || '' }));
+    const pick = (sel, type) => $$(sel, menu).map(a => ({ type, title: (a.querySelector('b') || a).textContent.trim(), href: a.getAttribute('href'), meta: a.querySelector('i') ? a.querySelector('i').textContent : '', kw: (a.dataset.kw || '').toLowerCase() }));
     const extra = [
-      ['Page', 'Tops', 'shop/?c=top', 'Asset register', 'shirts tee jersey hoodie sweatshirt crop'],
-      ['Page', 'Bottoms', 'shop/?c=bottom', 'Asset register', 'cargo shorts skirt pants'],
-      ['Page', 'Hardware', 'shop/?c=accessory', 'Asset register', 'rings chains necklace jewellery jewelry accessories objects'],
-      ['Page', 'Gift cards', 'shop/?c=gift', 'Asset register', 'gift card voucher present'],
-      ['Page', 'Print: the Vision Issue', 'shop/?c=print', 'Asset register', 'magazine print issue vision zine read'],
-      ['Page', 'Returns & exchanges', 'shipping/#returns', 'Extraction routes', 'refund return exchange policy'],
-      ['Page', 'Size guidance', 'shipping/#sizing', 'Extraction routes', 'size sizing fit measurements'],
-      ['Page', 'Join the network', 'contact/#subscribe', 'Report in', 'newsletter email drop alerts signup subscribe']
+      ['Help', 'Returns & exchanges', 'shipping/#returns', 'Shipping', 'refund return exchange policy'],
+      ['Help', 'Size guide', 'shipping/#sizing', 'Shipping', 'size sizing fit measurements'],
+      ['Help', 'Drop alerts', 'contact/#subscribe', 'Newsletter', 'newsletter email drop alerts signup subscribe']
     ].map(([type, title, href, meta, kw]) => ({ type, title, href: MC.url(href), meta, kw }));
     const ext = [
       { type: 'Store', title: 'Bag', href: ROUTES.cart || '/cart', meta: 'Your bag', kw: 'cart checkout bag basket' },
-      { type: 'Social', title: '@monochrome.ca', href: 'https://www.instagram.com/monochrome.ca/', meta: 'Instagram', kw: 'instagram social' },
-      { type: 'Mail', title: 'info.mccanada@gmail.com', href: 'mailto:info.mccanada@gmail.com', meta: 'Email', kw: 'email contact mail' }
+      { type: 'Social', title: '@monochrome.ca', href: 'https://www.instagram.com/monochrome.ca/', meta: 'Instagram', kw: 'instagram social' }
     ];
-    return [...nav, ...extra, ...ext];
+    return [...pick('.menu-list a', 'Page'), ...pick('.mcat', 'Shop'), ...pick('.menu-help a', 'Help'), ...extra, ...ext];
   }
   function loadCatalog() {
     if (catPromise) return catPromise;
     catPromise = new Promise(resolve => {
       const done = list => {
-        const prods = (list || []).map(p => ({ type: 'Asset', title: p.t, href: p.u, meta: (p.v ? 'From ' : '') + MC.fmt(p.p) + (p.a ? '' : ' — sold out'), kw: `${p.h} ${p.c} ${p.ty || ''} ${p.s || ''}`.toLowerCase() }));
+        const prods = (list || []).map(p => ({ type: 'Product', title: p.t, href: p.u, meta: (p.v ? 'From ' : '') + MC.fmt(p.p) + (p.a ? '' : ' — sold out'), kw: `${p.h} ${p.c} ${p.ty || ''} ${p.s || ''}`.toLowerCase() }));
         catalog = [...pageEntries(), ...prods]; resolve(catalog);
         if (jump && jump.value) renderJump();
       };
@@ -305,7 +305,7 @@
       if (!hay.includes(k)) return -1;
       sc += t.startsWith(k) ? 6 : t.includes(' ' + k) ? 4 : t.includes(k) ? 3 : 1;
     }
-    return sc + (it.type === 'Page' ? 1 : 0);
+    return sc + (it.type === 'Product' ? 2 : it.type === 'Page' ? 1 : 0);
   }
   function renderJump() {
     const q = jump.value.trim().toLowerCase();
@@ -325,14 +325,16 @@
     $$('.jump-i', jList).forEach((a, i) => a.setAttribute('aria-selected', String(i === jSel)));
     const a = $('#j' + jSel); jump.setAttribute('aria-activedescendant', 'j' + jSel); if (a) a.scrollIntoView({ block: 'nearest' });
   }
-  if (menu && menuBtn) {
-    menuBtn.addEventListener('click', e => { e.preventDefault(); menuOpen() ? closeMenu() : openMenu(false); });
+  if (menu && (menuBtn || findBtn)) {
+    if (menuBtn) menuBtn.addEventListener('click', e => { e.preventDefault(); menuOpen() ? closeMenu() : openMenu(false, menuBtn); });
+    if (findBtn) findBtn.addEventListener('click', e => { e.preventDefault(); menuOpen() ? closeMenu() : openMenu(true, findBtn); });
     menu.addEventListener('click', e => {
       if (e.target.closest('[data-close]')) return closeMenu();
       const a = e.target.closest('a'); if (a && a.getAttribute('href') && a.getAttribute('href').startsWith('#')) closeMenu(false);
     });
     if (jump) {
       jump.addEventListener('input', () => { loadCatalog().then(renderJump); renderJump(); });
+      // Enter opens the highlighted result; with no result the form searches the shop (a real GET to /search)
       jump.addEventListener('keydown', e => {
         if (e.key === 'ArrowDown') { e.preventDefault(); jumpMove(1); }
         else if (e.key === 'ArrowUp') { e.preventDefault(); jumpMove(-1); }
@@ -340,7 +342,7 @@
       });
     }
     const trap = (e, rootEl) => {
-      const f = $$('button:not(:disabled),a[href],input', rootEl).filter(x => !x.hidden && x.offsetParent !== null && x.getAttribute('aria-disabled') !== 'true');
+      const f = $$('button:not(:disabled),a[href],input:not([type=hidden])', rootEl).filter(x => !x.hidden && x.offsetParent !== null && x.getAttribute('aria-disabled') !== 'true');
       if (!f.length) return;
       const a = f[0], z = f[f.length - 1];
       if (e.shiftKey && (document.activeElement === a || !rootEl.contains(document.activeElement))) { e.preventDefault(); z.focus(); }
@@ -352,12 +354,43 @@
         if (e.key === 'Tab') trap(e, menu);
         return;
       }
-      if (MC.popupOpen && MC.popupOpen()) return;
+      if (MC.drawerOpen) return;
       const typing = e.target.closest && e.target.closest('input,textarea,select,[contenteditable]');
-      if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === '/') { e.preventDefault(); openMenu(true); }
-      else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openMenu(true); }
+      if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === '/') { e.preventDefault(); openMenu(true, findBtn); }
+      else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openMenu(true, findBtn); }
     });
-    menuBtn.addEventListener('pointerenter', () => { loadCatalog(); }, { once: true });
+    [menuBtn, findBtn].forEach(b => b && b.addEventListener('pointerenter', () => { loadCatalog(); }, { once: true }));
+  }
+
+  // ---- The notice strip: the notices take turns, each one decrypting into place (static with reduced motion) ---------------
+  const notes = $('[data-notes]');
+  if (notes) {
+    const msgs = $$('.bn-msg', notes);
+    if (msgs.length > 1) {
+      msgs.forEach(m => { m.dataset.t = m.textContent; if (m.tagName === 'A') m.setAttribute('aria-label', m.textContent); });
+      msgs[0].classList.add('on'); notes.setAttribute('data-ready', '');
+      if (!reduce) {
+        const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%/';
+        let k = 0, paused = false, timer = 0;
+        const decrypt = el => {
+          const t = el.dataset.t, n = 12; let f = 0;
+          clearInterval(el._dc);
+          el._dc = setInterval(() => {
+            f++; const keep = Math.floor(t.length * f / n);
+            el.textContent = f >= n ? t : t.slice(0, keep) + t.slice(keep).replace(/[A-Za-z0-9]/g, () => CH[Math.random() * CH.length | 0]);
+            if (f >= n) clearInterval(el._dc);
+          }, 38);
+        };
+        const next = () => {
+          if (paused || document.hidden) return;
+          msgs[k].classList.remove('on'); k = (k + 1) % msgs.length; msgs[k].classList.add('on'); decrypt(msgs[k]);
+        };
+        ['pointerenter', 'focusin'].forEach(t => notes.addEventListener(t, () => { paused = true; }));
+        ['pointerleave', 'focusout'].forEach(t => notes.addEventListener(t, () => { paused = false; }));
+        timer = setInterval(next, 4600);
+        MC.notesStop = () => clearInterval(timer);
+      }
+    }
   }
 
   // ---- Self-typing search boxes: the placeholder types a real query, backspaces it, then types the next ------------------
@@ -398,69 +431,90 @@
   }
   $$('input[data-hints]').forEach(typingHints);
 
-  // ---- Incoming transmission: the magazine pop-up -----------------------------------------------------------------
-  // Offered once a week per browser (remembered in localStorage, guarded), a few seconds in or when the visitor has read a good way down,
-  // never over the intro, the file index or a box they are typing in. Esc, the backdrop, Close and "Not now" all dismiss it.
+  // ---- The magazine corner card: once per visitor, a few seconds in or once they have scrolled a good way ---------------------
+  // Small and non-blocking (no backdrop, no focus trap, the page stays scrollable). Shown at most once per browser (remembered in
+  // localStorage, guarded); never over the menu, the bag or a box the visitor is typing in. Close, Esc or adding it dismisses it.
   const mp = $('#magpop');
   const saveDataEarly = !!(navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || '')));
+  MC.popupOpen = () => false;
   if (mp) (function () {
-    const KEY = 'mc-magpop-' + mp.dataset.key, WEEK = 7 * 864e5, card = $('.mp-card', mp);
+    const KEY = 'mc-magpop-' + mp.dataset.key;
     let stored = true;
-    const last = () => { try { return +localStorage.getItem(KEY) || 0; } catch { stored = false; return 0; } };
-    if (Date.now() - last() < WEEK) return;
-    if (!stored && MC.page !== 'home') return; // cannot remember a dismissal, so only ever offer it on the briefing
+    const seen = () => { try { return !!localStorage.getItem(KEY); } catch { stored = false; return false; } };
+    if (seen()) return;
+    if (!stored && MC.page !== 'home') return; // cannot remember it, so only ever offer it on the home page
+    const remember = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch { /* storage blocked */ } };
+    const forget = () => { try { localStorage.removeItem(KEY); } catch { /* storage blocked */ } };
     // the cover sits in a hidden box, so a lazy image would only start loading when it opens: fetch it quietly once the page has settled
     const warmCover = () => { if (saveDataEarly) return; const im = $('.mp-img', mp); if (im) im.loading = 'eager'; };
     if (document.readyState === 'complete') setTimeout(warmCover, 1500); else addEventListener('load', () => setTimeout(warmCover, 1500));
-    let seconds = 0, shown = false, exit = false, back = null;
+    let seconds = 0, shown = false;
     const isOpen = () => mp.classList.contains('open');
-    MC.popupOpen = isOpen;
+    const stamp = $('.mp-stamp', mp);
     const foreign = () => {
       const fe = document.querySelector('shopify-forms-embed'), ov = fe && fe.shadowRoot && fe.shadowRoot.querySelector('[data-layout="overlay"]');
       if (ov) { const r = ov.getBoundingClientRect(), cs = getComputedStyle(ov); if (r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden') return true; }
       const el = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
-      return !!(el && (el.closest('shopify-forms-embed, shopify-chat') || (el.closest('[aria-modal="true"]') && !el.closest('#magpop, #menu, #mcDrawer'))));
+      return !!(el && el.closest && (el.closest('shopify-forms-embed') || (el.closest('[aria-modal="true"]') && !el.closest('#menu, #mcDrawer'))));
     };
-    const ready = () => !shown && !document.hidden && !root.style.overflow && !MC.drawerOpen && !$('.intro') && !(menu && menuOpen()) &&
+    const ready = () => !shown && !document.hidden && !root.style.overflow && !MC.drawerOpen && !$('.intro') && !menuOpen() &&
       !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName));
     function show() {
-      shown = true; back = document.activeElement;
-      try { localStorage.setItem(KEY, String(Date.now())); } catch { /* storage blocked */ }
-      mp.hidden = false; root.style.overflow = 'hidden'; root.classList.add('mp-open');
+      shown = true; remember();
+      mp.hidden = false;
+      if (stamp) stamp.classList.remove('in');
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        mp.classList.add('open');
+        if (stamp) setTimeout(() => stamp.classList.add('in'), reduce ? 0 : 420);
+      }));
       const watch = setInterval(() => {
-        if (!isOpen() && shown && mp.hidden) { clearInterval(watch); return; }
-        if (isOpen() && foreign()) { clearInterval(watch); hide(); try { localStorage.removeItem(KEY); } catch { /* storage blocked */ } }
-      }, 600);
-      requestAnimationFrame(() => requestAnimationFrame(() => { mp.classList.add('open'); card.focus({ preventScroll: true }); }));
+        if (!isOpen()) { clearInterval(watch); return; }
+        if (foreign()) { clearInterval(watch); hide(); forget(); } // another pop-up took the stage: offer ours another time
+      }, 700);
     }
     function hide() {
       if (!isOpen()) return;
-      mp.classList.remove('open'); root.style.overflow = ''; root.classList.remove('mp-open');
-      setTimeout(() => { mp.hidden = true; }, reduce ? 0 : 320);
-      if (back && back.focus) try { back.focus({ preventScroll: true }); } catch { /* element gone */ }
+      const hadFocus = mp.contains(document.activeElement);
+      mp.classList.remove('open');
+      setTimeout(() => { mp.hidden = true; }, reduce ? 0 : 560);
+      if (hadFocus) { const m = $('#main'); if (m) { m.tabIndex = -1; m.focus({ preventScroll: true }); } }
     }
-    mp.addEventListener('click', e => { if (e.target.closest('[data-close]')) hide(); });
-    document.addEventListener('keydown', e => {
-      if (!isOpen()) return;
-      if (e.key === 'Escape') { e.preventDefault(); hide(); return; }
-      if (e.key !== 'Tab' || foreign()) return;
-      const f = $$('a[href],button:not(:disabled)', mp).filter(x => x.offsetParent !== null && x.tabIndex !== -1);
-      if (!f.length) return;
-      const a = f[0], z = f[f.length - 1];
-      if (e.shiftKey && (document.activeElement === a || !mp.contains(document.activeElement) || document.activeElement === card)) { e.preventDefault(); z.focus(); }
-      else if (!e.shiftKey && (document.activeElement === z || !mp.contains(document.activeElement))) { e.preventDefault(); a.focus(); }
+    mp.addEventListener('click', e => {
+      if (e.target.closest('[data-close]')) { hide(); return; }
+      if (e.target.closest('[data-mc-add]')) setTimeout(hide, 900); // the bag takes over: the stamp lands, then the card folds away
     });
-    if (fine) document.addEventListener('mouseout', e => { if (!e.relatedTarget && e.clientY <= 0 && seconds >= 6) exit = true; });
-    const wait = (+MC.magpopDelay || 9) + (noHover() ? 3 : 0);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen() && !menuOpen() && !MC.drawerOpen) hide(); });
+    const wait = Math.max(3, +MC.magpopDelay || 8);
     const iv = setInterval(() => {
       if (document.hidden) return;
-      if (foreign()) { clearInterval(iv); return; }
       seconds++;
-      const depth = (scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight);
-      if ((seconds >= wait || (seconds >= 4 && depth > 0.6) || exit) && ready()) { clearInterval(iv); show(); }
-      else if (seconds > 120) clearInterval(iv);
+      if ((seconds >= wait || (seconds >= 3 && scrollY > innerHeight * 1.2)) && ready()) { clearInterval(iv); show(); }
+      else if (seconds > 180) clearInterval(iv);
     }, 1000);
   })();
+
+  // ---- Pinned prints tilt toward the pointer ([data-tilt], fine pointers only, never with reduced motion) -----------------------
+  if (fine && !reduce) {
+    $$('[data-tilt]').forEach(el => {
+      let raf = 0, tx = 0, ty = 0;
+      const apply = () => { raf = 0; el.style.setProperty('--tx', tx.toFixed(2) + 'deg'); el.style.setProperty('--ty', ty.toFixed(2) + 'deg'); };
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect();
+        tx = ((e.clientY - r.top) / r.height - .5) * -7; ty = ((e.clientX - r.left) / r.width - .5) * 9;
+        if (!raf) raf = requestAnimationFrame(apply);
+      });
+      el.addEventListener('pointerleave', () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(apply); });
+    });
+  }
+
+  // ---- The tab bar casts a shadow once the page slides under it ------------------------------------------------------------------
+  const hdr = $('#bar');
+  if (hdr) {
+    let hRaf = 0;
+    const mark = () => { hRaf = 0; hdr.classList.toggle('stuck', scrollY > 30); };
+    addEventListener('scroll', () => { if (!hRaf) hRaf = requestAnimationFrame(mark); }, { passive: true });
+    mark();
+  }
 
   // ---- Intro: IDENTITY VERIFIED / CLEARANCE GRANTED. Briefing page only, once per session, skippable, never blocks ------
   // The overlay ignores the pointer (pointer-events: none) so nothing underneath is ever blocked; any key, tap, click or scroll

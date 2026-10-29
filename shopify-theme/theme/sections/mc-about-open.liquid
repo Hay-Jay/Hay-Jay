@@ -1,24 +1,16 @@
-<!-- 04 MISSION BRIEFING ------------------------------------------------------------------- -->
+<!-- ABOUT: the formula, as the headline -->
 <section class="spread paper ab-open" aria-labelledby="aboutH">
   <div class="wrap">
-    {% render 'mc-filehead', file: 'MC-104', doc: 'Mission and rules of engagement', page: 4, level: 5 %}
-    <div class="ab-top">
-      <div class="ab-head">
-        <p class="kick mono">Division of Wearables — Operation: Wear the Unknown</p>
-        <h1 class="h1" id="aboutH"><span class="tw" style="--n:7;--dl:.1s">Mission</span> <span class="tw caret" style="--n:8;--dl:.6s">briefing</span></h1>
-        <p class="memo mono">
-          <span><b>To:</b> Operative (that is you)</span>
-          <span><b>From:</b> Division of Wearables</span>
-          <span><b>Re:</b> Black, white and chrome</span>
-          <span><b>Date:</b> <span class="redact" tabindex="0">Whenever you read this</span></span>
-        </p>
-      </div>
-      <div class="ab-eq rv" role="img" aria-label="Black plus white plus chrome">
-        <span class="eq eq-b" aria-hidden="true">Black</span><i aria-hidden="true">+</i><span class="eq eq-w" aria-hidden="true">White</span><i aria-hidden="true">+</i><span class="eq eq-c" aria-hidden="true">Chrome</span>
-      </div>
-    </div>
-    <p class="ab-deck rv">{{ section.settings.deck | escape }}</p>
-    <span class="stamp ts lg ab-stamp" style="--r:-8deg" aria-hidden="true">Top secret</span>
+    <header class="pg-head ab-head">
+      <p class="pg-file mono"><span class="pg-no">MC-104</span><span>{{ section.settings.kicker | escape }}</span><span>Division of Wearables</span></p>
+      <h1 class="ab-eq" id="aboutH">
+        <span class="eq eq-b">{{ section.settings.word_1 | escape }}</span><i aria-hidden="true">+</i>
+        <span class="eq eq-w">{{ section.settings.word_2 | escape }}</span><i aria-hidden="true">+</i>
+        <span class="eq eq-c">{{ section.settings.word_3 | escape }}</span>
+      </h1>
+      {%- if section.settings.deck != blank %}<p class="pg-sub ab-deck">{{ section.settings.deck | escape }}</p>{% endif -%}
+      <span class="stamp lg ab-stamp" style="--r:-8deg" aria-hidden="true">Top secret</span>
+    </header>
   </div>
 </section>
 
@@ -26,7 +18,11 @@
 {
   "name": "About: opening",
   "settings": [
-    { "type": "textarea", "id": "deck", "label": "Intro line", "default": "Three finishes, a short list of rules, and the habit of leaving everything else out." }
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "About" },
+    { "type": "text", "id": "word_1", "label": "Word 1", "default": "Black" },
+    { "type": "text", "id": "word_2", "label": "Word 2", "default": "White" },
+    { "type": "text", "id": "word_3", "label": "Word 3 (chrome finish)", "default": "Chrome" },
+    { "type": "textarea", "id": "deck", "label": "One line", "default": "Three finishes. Small runs. Nothing else." }
   ],
   "presets": [{ "name": "About: opening" }]
 }

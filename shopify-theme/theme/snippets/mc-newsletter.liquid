@@ -1,16 +1,23 @@
-{%- comment -%} Drop-alert signup (Shopify customer form, tag newsletter). Params: id (unique), submit (button label, default "Join the network"), note (small print). {%- endcomment -%}
+{%- comment -%}
+  Drop-alert signup (Shopify customer form, tag newsletter). Params: id (unique), submit (button label, default "Join the network"),
+  label (field label, default "Email address"), note (small print), quiet (true = no default small print when note is empty).
+{%- endcomment -%}
 {%- form 'customer', id: id, class: 'news' -%}
   <input type="hidden" name="contact[tags]" value="newsletter">
-  <label for="{{ id }}-email" class="mono">Operative email address</label>
+  <label for="{{ id }}-email" class="mono">{{ label | default: 'Email address' | escape }}</label>
   <div class="news-row">
     <input id="{{ id }}-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}"{% if form.errors %} aria-invalid="true"{% endif %}>
-    <button class="send" type="submit">{{ submit | default: 'Join the network' }}<span class="arr" aria-hidden="true"></span></button>
+    <button class="send" type="submit">{{ submit | default: 'Join the network' | escape }}<span class="arr" aria-hidden="true"></span></button>
   </div>
   {%- if form.posted_successfully? -%}
-    <small class="mono news-note" role="status">You are on the list. Watch your inbox for the next drop.</small>
+    <small class="mono news-note" role="status">You're on the list. Watch your inbox for the next drop.</small>
   {%- elsif form.errors -%}
     <small class="mono news-note" role="alert">{{ form.errors | default_errors }}</small>
+  {%- elsif note != blank -%}
+    <small class="mono news-note">{{ note | escape }}</small>
+  {%- elsif quiet == true -%}
+    <small class="mono news-note" aria-live="polite"></small>
   {%- else -%}
-    <small class="mono news-note">{{ note | default: 'One email when a drop is cleared. No field work required.' }}</small>
+    <small class="mono news-note">Drop alerts only. One email per drop.</small>
   {%- endif -%}
 {%- endform -%}

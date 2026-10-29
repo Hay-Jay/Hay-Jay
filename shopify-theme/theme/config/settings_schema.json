@@ -42,7 +42,7 @@
         "type": "textarea",
         "id": "fiction_line",
         "label": "Footer notice",
-        "default": "A work of fiction. MONOCHROME® is a clothing brand and is not affiliated with any government agency."
+        "default": "A work of fiction. MONOCHROME® is a clothing brand, not a government agency."
       },
       {
         "type": "checkbox",
@@ -111,13 +111,14 @@
     ]
   },
   {
-    "name": "Magazine pop-up",
+    "name": "Magazine card",
     "settings": [
       {
         "type": "checkbox",
         "id": "magpop_enable",
-        "label": "Offer the magazine in a pop-up",
-        "default": true
+        "label": "Offer the magazine in a corner card",
+        "default": true,
+        "info": "A small card in the bottom-left corner, shown once per visitor on browsing pages (never on product, bag or account pages)."
       },
       {
         "type": "product",
@@ -129,10 +130,18 @@
         "type": "range",
         "id": "magpop_delay",
         "label": "Seconds before it appears",
+        "info": "It also appears sooner once the visitor scrolls a good way down.",
         "min": 4,
         "max": 30,
         "step": 1,
-        "default": 9
+        "default": 8
+      },
+      {
+        "type": "text",
+        "id": "magpop_line",
+        "label": "Card line",
+        "info": "One short line. Leave empty to hide it.",
+        "default": "Free with any jersey or hoodie"
       }
     ]
   },
@@ -143,7 +152,7 @@
         "type": "text",
         "id": "cart_note",
         "label": "Shipping line in the cart",
-        "default": "Shipping and taxes are calculated at checkout from your address."
+        "default": "Shipping and taxes at checkout."
       },
       {
         "type": "checkbox",

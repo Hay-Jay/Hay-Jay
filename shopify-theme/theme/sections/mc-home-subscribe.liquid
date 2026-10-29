@@ -1,28 +1,26 @@
-<!-- 06 JOIN THE NETWORK ------------------------------------------------------------------- -->
-<section class="spread paper subscribe" id="subscribe" aria-labelledby="subH">
-  <div class="wrap">
-    <div class="enlist">
-      <span class="tape tape-l" aria-hidden="true"></span><span class="tape tape-r" aria-hidden="true"></span>
-      <div class="enl-head">
-        <p class="kick mono">{{ section.settings.kicker | escape }}</p>
-        <h2 class="h2" id="subH">{{ section.settings.heading | escape }}</h2>
-        <p class="sec-sub">{{ section.settings.sub | escape }}</p>
-      </div>
-      {% render 'mc-newsletter', id: 'home-news', note: section.settings.note %}
-      <span class="stamp pend" style="--r:-6deg" aria-hidden="true">Clearance pending</span>
+{%- comment -%} Drop alerts, compact: one heading and the email signup (snippets/mc-newsletter, a Shopify customer form tagged newsletter). {%- endcomment -%}
+<section class="spread dark hnews" id="subscribe" aria-labelledby="subH">
+  <div class="wrap hn-grid">
+    <div class="hn-head">
+      {%- if section.settings.kicker != blank %}<p class="kick mono">{{ section.settings.kicker | escape }}</p>{% endif -%}
+      <h2 class="h2 rv" id="subH">{{ section.settings.heading | escape }}</h2>
     </div>
+    {% render 'mc-newsletter', id: 'home-news', submit: section.settings.button, label: section.settings.label, note: section.settings.note, quiet: true %}
+    {%- if section.settings.stamp != blank %}<span class="stamp white hn-stamp" style="--r:-6deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>{% endif -%}
   </div>
 </section>
 
 {% schema %}
 {
-  "name": "Join the network (signup)",
+  "name": "Drop alerts (signup)",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§5 — Recruitment form" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Join the network" },
-    { "type": "textarea", "id": "sub", "label": "Intro", "default": "Get drop alerts first. One email, your address, no field work required." },
-    { "type": "text", "id": "note", "label": "Small print", "default": "One email when a drop is cleared. No field work required." }
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§4 / Drop alerts" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Get the drop first" },
+    { "type": "text", "id": "label", "label": "Field label", "default": "Email" },
+    { "type": "text", "id": "button", "label": "Button", "default": "Join" },
+    { "type": "text", "id": "note", "label": "Small print (empty: none)" },
+    { "type": "text", "id": "stamp", "label": "Stamp", "default": "Clearance pending" }
   ],
-  "presets": [{ "name": "Join the network (signup)" }]
+  "presets": [{ "name": "Drop alerts (signup)" }]
 }
 {% endschema %}

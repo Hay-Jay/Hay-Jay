@@ -1,5 +1,5 @@
 {
-  "name": "Dossier footer",
+  "name": "Footer",
   "type": "footer",
   "sections": {
     "footer": {
@@ -8,49 +8,63 @@
         "link-1": {
           "type": "link",
           "settings": {
-            "label": "Briefing",
-            "url": "/"
+            "label": "Shop all",
+            "url": "/collections/all"
           }
         },
         "link-2": {
           "type": "link",
           "settings": {
-            "label": "Assets",
-            "url": "/collections/all"
+            "label": "New in",
+            "url": "/collections/new-arrivals"
           }
         },
         "link-3": {
           "type": "link",
           "settings": {
-            "label": "Evidence",
+            "label": "Lookbook",
             "url": "/pages/lookbook"
           }
         },
         "link-4": {
           "type": "link",
           "settings": {
-            "label": "Mission",
-            "url": "/pages/about"
+            "label": "Vision Issue",
+            "url": "/pages/vision-issue"
           }
         },
         "link-5": {
           "type": "link",
           "settings": {
-            "label": "Routes",
+            "label": "About",
+            "url": "/pages/about"
+          }
+        },
+        "help-1": {
+          "type": "help",
+          "settings": {
+            "label": "Shipping",
             "url": "/pages/shipping"
           }
         },
-        "link-6": {
-          "type": "link",
+        "help-2": {
+          "type": "help",
           "settings": {
-            "label": "Debrief",
+            "label": "Returns",
+            "url": "/pages/shipping#returns"
+          }
+        },
+        "help-3": {
+          "type": "help",
+          "settings": {
+            "label": "FAQ",
             "url": "/pages/faq"
           }
         },
-        "link-7": {
-          "type": "link",
+        "help-4": {
+          "type": "help",
           "settings": {
-            "label": "Report in",
+            "label": "Contact",
             "url": "/pages/contact"
           }
         }
@@ -61,10 +75,16 @@
         "link-3",
         "link-4",
         "link-5",
-        "link-6",
-        "link-7"
+        "help-1",
+        "help-2",
+        "help-3",
+        "help-4"
       ],
-      "settings": {}
+      "settings": {
+        "tagline": "Wear the unknown.",
+        "news": "not_home",
+        "news_label": "Drop alerts by email"
+      }
     }
   },
   "order": [

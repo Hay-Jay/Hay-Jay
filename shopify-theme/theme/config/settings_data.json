@@ -1,7 +1,7 @@
 {
   "current": {
     "banner_mark": "Top secret // Eyes only // Monochrome Bureau",
-    "fiction_line": "A work of fiction. MONOCHROME® is a clothing brand and is not affiliated with any government agency.",
+    "fiction_line": "A work of fiction. MONOCHROME® is a clothing brand, not a government agency.",
     "intro_enable": true,
     "contact_email": "info.mccanada@gmail.com",
     "social_instagram": "https://www.instagram.com/monochrome.ca/",
@@ -10,8 +10,9 @@
     "ship_countries": "Nigeria|NG|Africa\nCanada|CA|North America\nAustralia|AU|Oceania\nAustria|AT|Europe\nBelgium|BE|Europe\nCzechia|CZ|Europe\nDenmark|DK|Europe\nFinland|FI|Europe\nFrance|FR|Europe\nGermany|DE|Europe\nHong Kong SAR China|HK|Asia\nIreland|IE|Europe\nIsrael|IL|Middle East\nItaly|IT|Europe\nJapan|JP|Asia\nMalaysia|MY|Asia\nNetherlands|NL|Europe\nNew Zealand|NZ|Oceania\nNorway|NO|Europe\nPoland|PL|Europe\nPortugal|PT|Europe\nSingapore|SG|Asia\nSouth Korea|KR|Asia\nSpain|ES|Europe\nSweden|SE|Europe\nSwitzerland|CH|Europe\nUnited Arab Emirates|AE|Middle East\nUnited Kingdom|GB|Europe\nUnited States|US|North America",
     "lead_photos": "monochrome-sweatshirt|5",
     "magpop_enable": true,
-    "magpop_delay": 9,
-    "cart_note": "Shipping and taxes are calculated at checkout from your address.",
+    "magpop_delay": 8,
+    "magpop_line": "Free with any jersey or hoodie",
+    "cart_note": "Shipping and taxes at checkout.",
     "cart_dynamic_buttons": true,
     "blocks": {
       "15683396631634586217": {

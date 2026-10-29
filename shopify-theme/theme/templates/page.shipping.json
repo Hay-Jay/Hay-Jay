@@ -6,88 +6,54 @@
         "rn1": {
           "type": "return_note",
           "settings": {
-            "text": "<p>If something does not fit, contact us soon after your order arrives and include your order number.</p>"
+            "text": "<p>Doesn't fit? Contact us soon after delivery with your order number.</p>"
           }
         },
         "rn2": {
           "type": "return_note",
           "settings": {
-            "text": "<p>Items should be unworn and in original condition.</p>"
+            "text": "<p>Unworn, original condition.</p>"
           }
         },
         "rn3": {
           "type": "return_note",
           "settings": {
-            "text": "<p>Need another size? Tell us which piece and which size, and we will point you to the right next step.</p>"
-          }
-        },
-        "rn4": {
-          "type": "return_note",
-          "settings": {
-            "text": "<p>The final terms are the store’s. Read the <a href=\"{refund}\">refund policy</a> and the <a href=\"{shipping}\">shipping policy</a> before you order.</p>"
-          }
-        },
-        "st1": {
-          "type": "step",
-          "settings": {
-            "title": "Choose",
-            "text": "Open an asset file, pick your size and use Add to bag. Your bag keeps your picks until you check out."
-          }
-        },
-        "st2": {
-          "type": "step",
-          "settings": {
-            "title": "Check out",
-            "text": "Enter your address. The store shows the shipping rate for your country before you pay. Canada: free standard shipping."
-          }
-        },
-        "st3": {
-          "type": "step",
-          "settings": {
-            "title": "Delivered",
-            "text": "You get an email update once your order ships. Rates, not promises: we do not quote delivery times here."
+            "text": "<p>Final terms: <a href=\"{refund}\">refund policy</a> and <a href=\"{shipping}\">shipping policy</a>.</p>"
           }
         },
         "sz1": {
           "type": "size",
           "settings": {
             "label": "Tops & jerseys",
-            "text": "Cut relaxed and true to size. If you are between sizes, go up."
+            "text": "Relaxed, true to size. Between sizes? Go up."
           }
         },
         "sz2": {
           "type": "size",
           "settings": {
             "label": "Bottoms",
-            "text": "Cargo shorts and the cargo skirt are listed in the sizes shown on each file. Not sure? Message us before you order."
+            "text": "Sizes on each product. Unsure? Ask first."
           }
         },
         "sz3": {
           "type": "size",
           "settings": {
             "label": "Rings",
-            "text": "Sold by ring size. Pick from the sizes on the file; between two sizes, go up for comfort."
+            "text": "Ring sizes. Between two? Go up."
           }
         },
         "sz4": {
           "type": "size",
           "settings": {
-            "label": "Chains & necklaces",
-            "text": "One size. Photographs show how they sit when worn."
+            "label": "Chains",
+            "text": "One size."
           }
         },
         "sz5": {
           "type": "size",
           "settings": {
             "label": "Custom jersey",
-            "text": "Up to 10 characters. Contact us with the details before you order."
-          }
-        },
-        "sz6": {
-          "type": "size",
-          "settings": {
-            "label": "Gift cards",
-            "text": "No size. Choose an amount on the file."
+            "text": "Up to 10 characters."
           }
         }
       },
@@ -95,18 +61,20 @@
         "rn1",
         "rn2",
         "rn3",
-        "rn4",
-        "st1",
-        "st2",
-        "st3",
         "sz1",
         "sz2",
         "sz3",
         "sz4",
-        "sz5",
-        "sz6"
+        "sz5"
       ],
-      "settings": {}
+      "settings": {
+        "kicker": "Extraction routes",
+        "heading": "Shipping",
+        "deck": "{countries} countries. Rates at checkout.",
+        "nigeria": "Delivered. Rate shown at checkout.",
+        "canada": "Free standard shipping.",
+        "rates_note": "Your rate shows at checkout, before you pay."
+      }
     }
   },
   "order": [

@@ -6,78 +6,64 @@
         "q1": {
           "type": "qa",
           "settings": {
-            "question": "Where do I buy?",
-            "answer": "<p>Every piece is sold right here. Open any asset in the <a href=\"/collections/all\">register</a>, pick your size and use Add to bag. Checkout is handled securely by Shopify.</p>"
+            "question": "Do you ship to Nigeria?",
+            "answer": "<p>Yes. Nigeria is one of {countries} countries we ship to. Your rate shows at checkout, before you pay. <a href=\"/pages/shipping\">All countries</a></p>"
           }
         },
         "q2": {
           "type": "qa",
           "settings": {
-            "question": "Do you ship to Nigeria?",
-            "answer": "<p>Yes. Nigeria is one of {countries} countries on the delivery list (the full list is on the <a href=\"/pages/shipping\">Routes page</a>). The rate for your address is calculated at checkout.</p>"
+            "question": "What does shipping cost?",
+            "answer": "<p>It depends on your address and shows at checkout. Canada ships free. You get an email when your order ships.</p>"
           }
         },
         "q3": {
           "type": "qa",
           "settings": {
-            "question": "How much is shipping and how long does it take?",
-            "answer": "<p>Shipping is calculated at checkout from your address, so you see the rate for your country before you pay. Canada gets free standard shipping. You will get an email update once your order ships.</p>"
+            "question": "How does sizing work?",
+            "answer": "<p>Tops run true to size with a relaxed cut. Between sizes? Go up. Rings come in ring sizes. <a href=\"/pages/shipping#sizing\">Size guide</a></p>"
           }
         },
         "q4": {
           "type": "qa",
           "settings": {
-            "question": "How does sizing work?",
-            "answer": "<p>Tops have a relaxed cut and run true to size. If you are between sizes, go up. Every piece lists the sizes it comes in, and rings are sold by ring size. Message us if you want a recommendation. There is more on the <a href=\"/pages/shipping#sizing\">Routes page</a>.</p>"
+            "question": "Returns and exchanges?",
+            "answer": "<p>Contact us soon after delivery with your order number. Items must be unworn. <a href=\"/pages/shipping#returns\">Returns</a></p>"
           }
         },
         "q5": {
           "type": "qa",
           "settings": {
-            "question": "Which currency are prices in?",
-            "answer": "<p>Prices are set in Canadian dollars (CAD), the store’s base currency. If you shop from another country, prices are shown in your local currency where possible, and checkout charges the amount you see.</p>"
+            "question": "Which currency?",
+            "answer": "<p>Prices are in Canadian dollars (CAD). Where possible you see your local currency and pay the amount shown.</p>"
           }
         },
         "q6": {
           "type": "qa",
           "settings": {
-            "question": "Returns and exchanges",
-            "answer": "<p>If something does not fit, contact us soon after your order arrives with your order number. Items should be unworn and in original condition. The final terms are in the store’s <a href=\"/policies/refund-policy\">refund policy</a>.</p>"
+            "question": "Will a sold-out piece come back?",
+            "answer": "<p>Some do, some don't. Runs are small. Get <a href=\"#subscribe\">drop alerts</a> to hear first.</p>"
           }
         },
         "q7": {
           "type": "qa",
           "settings": {
-            "question": "Are drops limited?",
-            "answer": "<p>Yes. Pieces are made in small runs and some do not return. Sold-out assets stay in the register, marked out of stock, so you can see what you missed. Join the network on the <a href=\"/pages/contact#subscribe\">Report-in page</a> to hear about the next drop first.</p>"
+            "question": "How do gift cards work?",
+            "answer": "<p>Choose {giftamounts} CAD on the <a href=\"/products/monochrome-gift-cards\">gift card page</a>. They pick the piece.</p>"
           }
         },
         "q8": {
           "type": "qa",
           "settings": {
-            "question": "How do gift cards work?",
-            "answer": "<p>The gift card comes in these amounts: {giftamounts} CAD. Choose one on the <a href=\"/products/monochrome-gift-cards\">gift card page</a>; the recipient chooses their own piece.</p>"
+            "question": "Custom jersey?",
+            "answer": "<p>Up to 10 characters. Message us with the details before you order.</p>"
           }
         },
         "q9": {
           "type": "qa",
           "settings": {
-            "question": "Can I order a custom jersey?",
-            "answer": "<p>The Custom Monochrome Jersey takes up to 10 characters. Please contact us with your details before you order so we can answer any follow-up questions.</p>"
-          }
-        },
-        "q10": {
-          "type": "qa",
-          "settings": {
-            "question": "A piece I want is sold out. Will it come back?",
-            "answer": "<p>Some pieces return and some do not. We cannot promise either way. The quickest way to find out is to join the network for drop alerts or to message us on Instagram.</p>"
-          }
-        },
-        "q11": {
-          "type": "qa",
-          "settings": {
-            "question": "Custom orders, collaborations and bulk orders",
-            "answer": "<p>Interested in custom pieces, a collab or a bulk order? Email <a href=\"mailto:info.mccanada@gmail.com\">info.mccanada@gmail.com</a> with the details and we will get back to you.</p>"
+            "question": "Collabs and bulk orders?",
+            "answer": "<p>Email <a href=\"mailto:info.mccanada@gmail.com\">info.mccanada@gmail.com</a> with the details.</p>"
           }
         }
       },
@@ -90,11 +76,14 @@
         "q6",
         "q7",
         "q8",
-        "q9",
-        "q10",
-        "q11"
+        "q9"
       ],
       "settings": {
+        "kicker": "Debrief",
+        "heading": "FAQ",
+        "deck": "",
+        "foot_label": "Not here?",
+        "foot_link": "Ask us",
         "report_url": "/pages/contact"
       }
     }

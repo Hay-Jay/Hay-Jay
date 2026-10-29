@@ -2,58 +2,23 @@
   "sections": {
     "cover": {
       "type": "mc-home-cover",
-      "settings": {
-        "cover_product": "white-monochrome-jersey",
-        "cover_photo": 1
-      }
+      "blocks": {
+        "photo-1": { "type": "photo", "settings": { "product": "white-monochrome-jersey", "photo": 10 } },
+        "photo-2": { "type": "photo", "settings": { "product": "black-monochrome-jersey", "photo": 4 } },
+        "photo-3": { "type": "photo", "settings": { "product": "acid-washed-monochrome-hoodie", "photo": 4 } },
+        "photo-4": { "type": "photo", "settings": { "product": "monochrome-acid-washed-black", "photo": 11 } },
+        "photo-5": { "type": "photo", "settings": { "product": "monochrome-cargo-skirt", "photo": 5 } }
+      },
+      "block_order": ["photo-1", "photo-2", "photo-3", "photo-4", "photo-5"],
+      "settings": {}
     },
     "picks": {
       "type": "mc-home-picks",
-      "blocks": {
-        "pick-1": {
-          "type": "pick",
-          "settings": {
-            "product": "black-monochrome-jersey",
-            "photo": 4
-          }
-        },
-        "pick-2": {
-          "type": "pick",
-          "settings": {
-            "product": "acid-washed-monochrome-hoodie",
-            "photo": 6
-          }
-        },
-        "pick-3": {
-          "type": "pick",
-          "settings": {
-            "product": "monochrome-cargo-shorts-black",
-            "photo": 1
-          }
-        },
-        "pick-4": {
-          "type": "pick",
-          "settings": {
-            "product": "monochrome-pants-chain",
-            "photo": 2
-          }
-        },
-        "pick-5": {
-          "type": "pick",
-          "settings": {
-            "product": "royal-black",
-            "photo": 1
-          }
-        }
-      },
-      "block_order": [
-        "pick-1",
-        "pick-2",
-        "pick-3",
-        "pick-4",
-        "pick-5"
-      ],
-      "settings": {}
+      "settings": {
+        "collection": "frontpage",
+        "count": 8,
+        "hide_sold": true
+      }
     },
     "apps": {
       "type": "mc-apps",
@@ -69,108 +34,45 @@
           }
         }
       },
-      "block_order": [
-        "klarna"
-      ],
+      "block_order": ["klarna"],
+      "settings": {}
+    },
+    "categories": {
+      "type": "mc-home-cats",
+      "blocks": {
+        "tile-1": { "type": "tile", "settings": { "label": "Tops", "filter": "top", "product": "monochrome-acid-washed-grey", "photo": 15 } },
+        "tile-2": { "type": "tile", "settings": { "label": "Bottoms", "filter": "bottom", "product": "monochrome-cargo-skirt", "photo": 9 } },
+        "tile-3": { "type": "tile", "settings": { "label": "Hardware", "filter": "accessory", "product": "monochrome-cross-necklace", "photo": 2 } },
+        "tile-4": { "type": "tile", "settings": { "label": "The Vision Issue", "filter": "print" } }
+      },
+      "block_order": ["tile-1", "tile-2", "tile-3", "tile-4"],
       "settings": {}
     },
     "magazine": {
       "type": "mc-home-magazine",
-      "settings": {}
+      "settings": {
+        "countdown_link": false
+      }
     },
-    "objectives": {
-      "type": "mc-home-objectives",
+    "lookbook": {
+      "type": "mc-home-lookbook",
       "blocks": {
-        "obj-1": {
-          "type": "objective",
-          "settings": {
-            "title": "Acquire your equipment",
-            "text": "The asset register: {pieces} assets across tops, bottoms, hardware and gift cards. Filter, sort, search.",
-            "link_text": "Asset register",
-            "url": "/collections/all"
-          }
-        },
-        "obj-2": {
-          "type": "objective",
-          "settings": {
-            "title": "Review the surveillance",
-            "text": "Twelve exhibits from the field, shot dark and filed in black and white.",
-            "link_text": "Evidence wall",
-            "url": "/pages/lookbook"
-          }
-        },
-        "obj-3": {
-          "type": "objective",
-          "settings": {
-            "title": "Study the mission",
-            "text": "Black, white and chrome. The objectives and the rules of engagement, in full.",
-            "link_text": "Mission brief",
-            "url": "/pages/about"
-          }
-        },
-        "obj-4": {
-          "type": "objective",
-          "settings": {
-            "title": "Plan your extraction",
-            "text": "Delivery to {countries} authorised zones. Rates calculated at checkout, returns explained.",
-            "link_text": "Extraction routes",
-            "url": "/pages/shipping"
-          }
-        },
-        "obj-5": {
-          "type": "objective",
-          "settings": {
-            "title": "Get your answers",
-            "text": "Sizing, shipping, gift cards and limited drops, answered in the debrief.",
-            "link_text": "The debrief",
-            "url": "/pages/faq"
-          }
-        },
-        "obj-6": {
-          "type": "objective",
-          "settings": {
-            "title": "Report in",
-            "text": "Email, Instagram, or join the network for drop alerts.",
-            "link_text": "Secure channel",
-            "url": "/pages/contact"
-          }
-        }
+        "frame-1": { "type": "frame", "settings": { "product": "monochrome-acid-washed-black", "photo": 4, "ratio": "1/1" } },
+        "frame-2": { "type": "frame", "settings": { "product": "white-monochrome-jersey", "photo": 3, "ratio": "3/2" } },
+        "frame-3": { "type": "frame", "settings": { "product": "monochrome-sweatshirt", "photo": 2, "ratio": "4/5" } },
+        "frame-4": { "type": "frame", "settings": { "product": "monochrome-cargo-skirt", "photo": 2, "ratio": "3/2" } },
+        "frame-5": { "type": "frame", "settings": { "product": "black-monochrome-jersey", "photo": 6, "ratio": "4/5" } },
+        "frame-6": { "type": "frame", "settings": { "product": "monochrome-pants-chain", "photo": 2, "ratio": "1/1" } },
+        "frame-7": { "type": "frame", "settings": { "product": "monochrome-sleeveless-crop-top", "photo": 3, "ratio": "3/2" } },
+        "frame-8": { "type": "frame", "settings": { "product": "acid-washed-monochrome-hoodie", "photo": 1, "ratio": "4/5" } }
       },
-      "block_order": [
-        "obj-1",
-        "obj-2",
-        "obj-3",
-        "obj-4",
-        "obj-5",
-        "obj-6"
-      ],
+      "block_order": ["frame-1", "frame-2", "frame-3", "frame-4", "frame-5", "frame-6", "frame-7", "frame-8"],
       "settings": {}
-    },
-    "intel": {
-      "type": "mc-home-intel",
-      "settings": {
-        "link_url": "/pages/about"
-      }
-    },
-    "zones": {
-      "type": "mc-home-zones",
-      "settings": {
-        "link_url": "/pages/shipping"
-      }
     },
     "subscribe": {
       "type": "mc-home-subscribe",
       "settings": {}
     }
   },
-  "order": [
-    "cover",
-    "picks",
-    "apps",
-    "magazine",
-    "objectives",
-    "intel",
-    "zones",
-    "subscribe"
-  ]
+  "order": ["cover", "picks", "apps", "categories", "magazine", "lookbook", "subscribe"]
 }

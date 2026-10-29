@@ -3,98 +3,130 @@
     render 'mc-pagekey'
   endcapture
   assign pkp = pk | split: '~'
-  assign folio = pkp[1]
-  assign level = pkp[2]
+  assign folio = pkp[1] | plus: 0
   assign nav_url = pkp[4]
   assign docno = 100 | plus: folio | prepend: 'MC-'
   if pkp[0] == '404'
     assign docno = 'MC-404'
-  elsif template.suffix == 'portfolio'
-    assign docno = 'MC-108'
   endif
   if template.name == 'product'
     capture docno
       render 'mc-fileno', product: product
     endcapture
   endif
-  capture raw
-    render 'mc-countries'
-  endcapture
-  assign countries = raw | split: ';'
-  assign words = 'Delivering to'
-  for c in countries
-    assign cn = c | split: '|' | first
-    assign words = words | append: '|' | append: cn
-  endfor
   assign bc_seed = folio | times: 977 | plus: 13
   assign wordmark = settings.logo_wordmark
   assign emblem = settings.logo_emblem
-  assign fh_policy_ship = shop.shipping_policy.url | default: '/policies/shipping-policy'
-  assign fh_policy_refund = shop.refund_policy.url | default: '/policies/refund-policy'
-  assign fh_policy_privacy = shop.privacy_policy.url | default: '/policies/privacy-policy'
-  assign fh_policy_terms = shop.terms_of_service.url | default: '/policies/terms-of-service'
+  assign show_news = false
+  case section.settings.news
+    when 'all'
+      assign show_news = true
+    when 'not_home'
+      unless template.name == 'index'
+        assign show_news = true
+      endunless
+  endcase
 -%}
 <footer class="foot dark" id="contents">
-  {% render 'mc-ticker', words: words %}
   <div class="wrap">
-    <div class="foot-top">
-      <span class="ft-bc" aria-hidden="true">{% render 'mc-barcode', seed: bc_seed, w: 220, h: 34 %}</span>
-      <p class="mono ft-file"><b>File no.</b> {{ docno }}{% if folio != '0' %} <span aria-hidden="true">//</span> <b>Page</b> {{ folio }} of 7 <span aria-hidden="true">//</span> <b>Clearance</b> L{{ level }}{% endif %}</p>
-    </div>
     <div class="foot-grid">
       <div class="foot-brand">
-        {%- if emblem != blank -%}
-          <img class="emblem" src="{{ emblem | image_url: width: 160 }}" alt="" width="72" height="77" loading="lazy">
-        {%- else -%}
-          <img class="emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="72" height="77" loading="lazy">
+        <a class="foot-logo" href="{{ routes.root_url }}" aria-label="MONOCHROME, home">
+          {%- if emblem != blank -%}
+            <img class="emblem" src="{{ emblem | image_url: width: 160 }}" alt="" width="72" height="77" loading="lazy">
+          {%- else -%}
+            <img class="emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="72" height="77" loading="lazy">
+          {%- endif -%}
+          {%- if wordmark != blank -%}
+            <img class="word" src="{{ wordmark | image_url: width: 720 }}" alt="" width="360" height="35" loading="lazy">
+          {%- else -%}
+            <img class="word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="" width="360" height="35" loading="lazy">
+          {%- endif -%}
+        </a>
+        {%- if section.settings.tagline != blank -%}<p class="foot-tag">{{ section.settings.tagline | escape }}</p>{%- endif -%}
+        {%- if show_news -%}
+          {%- form 'customer', id: 'subscribe', class: 'foot-news' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <label for="subscribe-email" class="mono">{{ section.settings.news_label | escape }}</label>
+            <div class="fn-row">
+              <input id="subscribe-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}"{% if form.errors %} aria-invalid="true" aria-describedby="subscribe-note"{% endif %}>
+              <button class="fn-go" type="submit">Join<span class="arr" aria-hidden="true"></span></button>
+            </div>
+            {%- if form.posted_successfully? -%}
+              <p class="mono fn-note" id="subscribe-note" role="status">You're on the list.</p>
+            {%- elsif form.errors -%}
+              <p class="mono fn-note" id="subscribe-note" role="alert">{{ form.errors | default_errors }}</p>
+            {%- endif -%}
+          {%- endform -%}
         {%- endif -%}
-        {%- if wordmark != blank -%}
-          <img class="word" src="{{ wordmark | image_url: width: 720 }}" alt="Monochrome" width="360" height="32" loading="lazy">
-        {%- else -%}
-          <img class="word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="Monochrome" width="360" height="32" loading="lazy">
-        {%- endif -%}
-        <p class="mono">The Monochrome Bureau<br>Division of Wearables<br>Operation: Wear the Unknown</p>
       </div>
-      <nav class="foot-col mono" aria-label="Footer">
-        <p class="foot-h">The dossier</p>
+      <nav class="foot-col" aria-labelledby="ftShop">
+        <p class="foot-h mono" id="ftShop">Shop</p>
         {%- for block in section.blocks -%}
-          <a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>
+          {%- if block.type == 'link' -%}<a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>{%- endif -%}
         {%- endfor -%}
       </nav>
-      <nav class="foot-col mono" aria-label="Store policies">
-        <p class="foot-h">The store</p>
-        <a href="{{ routes.cart_url }}">Bag</a>
-        {%- if shop.shipping_policy.body != blank %}<a href="{{ fh_policy_ship }}">Shipping policy</a>{% endif -%}
-        {%- if shop.refund_policy.body != blank %}<a href="{{ fh_policy_refund }}">Refund policy</a>{% endif -%}
-        {%- if shop.privacy_policy.body != blank %}<a href="{{ fh_policy_privacy }}">Privacy policy</a>{% endif -%}
-        {%- if shop.terms_of_service.body != blank %}<a href="{{ fh_policy_terms }}">Terms of service</a>{% endif -%}
+      <nav class="foot-col" aria-labelledby="ftHelp">
+        <p class="foot-h mono" id="ftHelp">Help</p>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'help' -%}<a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>{%- endif -%}
+        {%- endfor -%}
       </nav>
-      <div class="foot-col mono">
-        <p class="foot-h">Secure lines</p>
-        {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">@monochrome.ca</a>{% endif -%}
+      <div class="foot-col foot-social">
+        <p class="foot-h mono">Follow</p>
+        {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif -%}
         {%- if settings.social_tiktok != blank %}<a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener">TikTok</a>{% endif -%}
         {%- if settings.social_snapchat != blank %}<a href="{{ settings.social_snapchat }}" target="_blank" rel="noopener">Snapchat</a>{% endif -%}
-        <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
-        <p class="foot-cad">Prices in {{ cart.currency.iso_code }}</p>
+        <a href="mailto:{{ settings.contact_email }}">Email</a>
       </div>
     </div>
-    <p class="foot-fic mono">{{ settings.fiction_line | escape }}</p>
-    <p class="foot-legal mono"><span>© {{ 'now' | date: '%Y' }} MONOCHROME®. All rights reserved. Prices in {{ cart.currency.iso_code }}.</span>{% if folio != '0' %}<span class="folio">Page {{ folio }} of 7</span>{% endif %}</p>
+    <div class="foot-base">
+      <span class="ft-bc" aria-hidden="true">{% render 'mc-barcode', seed: bc_seed, w: 160, h: 26 %}<b class="mono">{{ docno }}</b></span>
+      <p class="foot-fic mono">{{ settings.fiction_line | escape }}</p>
+      <p class="foot-legal mono">
+        <span>© {{ 'now' | date: '%Y' }} MONOCHROME® · Prices in {{ cart.currency.iso_code }}</span>
+        {%- if shop.refund_policy.body != blank %}<a href="{{ shop.refund_policy.url }}">Refunds</a>{% endif -%}
+        {%- if shop.privacy_policy.body != blank %}<a href="{{ shop.privacy_policy.url }}">Privacy</a>{% endif -%}
+        {%- if shop.terms_of_service.body != blank %}<a href="{{ shop.terms_of_service.url }}">Terms</a>{% endif -%}
+      </p>
+    </div>
   </div>
   <div class="banner bottom" aria-hidden="true"><span class="bn-c">{{ settings.banner_mark | escape }}</span></div>
 </footer>
 
 {% schema %}
 {
-  "name": "Dossier footer",
-  "settings": [],
+  "name": "Footer",
+  "settings": [
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Wear the unknown." },
+    {
+      "type": "select", "id": "news", "label": "Newsletter signup",
+      "options": [
+        { "value": "all", "label": "On every page" },
+        { "value": "not_home", "label": "Every page but the home page" },
+        { "value": "none", "label": "Hidden" }
+      ],
+      "default": "not_home",
+      "info": "The home page has its own signup section."
+    },
+    { "type": "text", "id": "news_label", "label": "Newsletter label", "default": "Drop alerts by email" }
+  ],
   "blocks": [
     {
       "type": "link",
-      "name": "Dossier link",
-      "limit": 10,
+      "name": "Shop link",
+      "limit": 8,
       "settings": [
-        { "type": "text", "id": "label", "label": "Label", "default": "Briefing" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop all" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "help",
+      "name": "Help link",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shipping" },
         { "type": "url", "id": "url", "label": "Link" }
       ]
     }
