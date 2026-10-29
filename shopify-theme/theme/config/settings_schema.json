@@ -43,13 +43,6 @@
         "id": "fiction_line",
         "label": "Footer notice",
         "default": "A work of fiction. MONOCHROME® is a clothing brand, not a government agency."
-      },
-      {
-        "type": "checkbox",
-        "id": "intro_enable",
-        "label": "Play the 'identity verified' intro on the home page",
-        "default": true,
-        "info": "Plays once per visit and can be skipped with any key or tap."
       }
     ]
   },

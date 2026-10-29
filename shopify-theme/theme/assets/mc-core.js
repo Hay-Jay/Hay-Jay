@@ -1,7 +1,7 @@
 /* MONOCHROME® — CLASSIFIED. Behaviour shared by every page (a work of fiction, see the footer):
    links (MC.url), the DECLASSIFY toggle (redaction bars), stamps + reveals, the declassify lens on photographs,
    live camera clocks, tickers, counters, the menu + search overlay, the rotating notice strip, the magazine corner card,
-   tilting prints, the once-per-session intro on the home page, prefetch. Page-specific code lives in the page scripts. */
+   tilting prints, prefetch. Page-specific code lives in the page scripts. */
 (() => {
   'use strict';
 
@@ -444,8 +444,7 @@
     const KEY = 'mc-magpop-' + mp.dataset.key;
     let stored = true;
     const seen = () => { try { return !!localStorage.getItem(KEY); } catch { stored = false; return false; } };
-    if (seen()) return;
-    if (!stored && MC.page !== 'home') return; // cannot remember it, so only ever offer it on the home page
+    if (seen() || !stored) return; // shown before, or storage is blocked and it could not be remembered: never nag
     const remember = () => { try { localStorage.setItem(KEY, String(Date.now())); } catch { /* storage blocked */ } };
     const forget = () => { try { localStorage.removeItem(KEY); } catch { /* storage blocked */ } };
     // the cover sits in a hidden box, so a lazy image would only start loading when it opens: fetch it quietly once the page has settled
@@ -460,7 +459,7 @@
       const el = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
       return !!(el && el.closest && (el.closest('shopify-forms-embed') || (el.closest('[aria-modal="true"]') && !el.closest('#menu, #mcDrawer'))));
     };
-    const ready = () => !shown && !document.hidden && !root.style.overflow && !MC.drawerOpen && !$('.intro') && !menuOpen() &&
+    const ready = () => !shown && !document.hidden && !root.style.overflow && !MC.drawerOpen && !menuOpen() &&
       !(document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName));
     function show() {
       shown = true; remember();
@@ -518,31 +517,6 @@
     addEventListener('scroll', () => { if (!hRaf) hRaf = requestAnimationFrame(mark); }, { passive: true });
     mark();
   }
-
-  // ---- Intro: IDENTITY VERIFIED / CLEARANCE GRANTED. Briefing page only, once per session, skippable, never blocks ------
-  // The overlay ignores the pointer (pointer-events: none) so nothing underneath is ever blocked; any key, tap, click or scroll
-  // dismisses it, it removes itself after a few seconds, and it is not created at all with reduced motion.
-  function intro() {
-    if (reduce || MC.page !== 'home' || location.hash || MC.intro === false) return;
-    try {
-      if (sessionStorage.getItem('mc-intro') === '1') return;
-      sessionStorage.setItem('mc-intro', '1');
-    } catch { return; } // no storage, no way to keep it to once per session: skip it
-    const arcs = [[10, 14], [17, 22], [24, 30], [31, 38], [38, 46], [45, 54]].map(([rx, ry], i) => `<ellipse cx="60" cy="76" rx="${rx}" ry="${ry}" style="--i:${i}"/>`).join('');
-    const el = document.createElement('div');
-    el.className = 'intro'; el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = `<div class="in-box"><svg class="in-fp" viewBox="0 0 120 152" focusable="false"><g>${arcs}</g><path d="M60 22v108M36 40c10-8 38-8 48 0M32 112c14 10 42 10 56 0" /></svg><i class="in-scan"></i>
-      <p class="in-l1">Identity <b>verified</b></p><p class="in-l2">Clearance <b>granted</b></p><p class="in-l3">Welcome, operative.</p><i class="in-bar"></i><span class="in-skip">${noHover() ? 'Tap anywhere to skip' : 'Press any key to skip'}</span></div>`;
-    document.body.appendChild(el);
-    let gone = false;
-    const off = e => {
-      if (gone) return; gone = true;
-      if (e && (e.type === 'pointerdown' || e.type === 'touchstart')) { const eat = ev => { ev.preventDefault(); ev.stopPropagation(); }; addEventListener('click', eat, { capture: true, once: true }); setTimeout(() => removeEventListener('click', eat, true), 800); }
-      el.classList.add('out'); setTimeout(() => el.remove(), 500); ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => removeEventListener(t, off, true)); };
-    ['keydown', 'pointerdown', 'wheel', 'touchstart'].forEach(t => addEventListener(t, off, { capture: true, passive: true }));
-    setTimeout(off, 2900);
-  }
-  intro();
 
   // ---- Instant prefetch: warm the page under the pointer / finger / focus -----------------------
   const warmed = new Set();

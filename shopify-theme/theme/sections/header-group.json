@@ -130,10 +130,10 @@
         "help-3"
       ],
       "settings": {
-        "notice_1": "Free Vision Issue with any jersey or hoodie",
-        "notice_1_url": "/collections/all?c=top",
-        "notice_2": "Ships to {countries} countries — Nigeria & Canada",
-        "notice_2_url": "/pages/shipping"
+        "notice_1": "Ships to {countries} countries — Nigeria & Canada",
+        "notice_1_url": "/pages/shipping",
+        "notice_2": "",
+        "notice_2_url": ""
       }
     }
   },
