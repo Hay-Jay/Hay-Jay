@@ -1,7 +1,9 @@
 <section class="spread paper cu" aria-labelledby="cuH">
   <div class="wrap cu-wrap">
-    {% render 'mc-filehead', file: 'MC-109', doc: 'Order file', page: 7, level: 3 %}
-    <h1 class="h1" id="cuH">Order {{ order.name | escape }}</h1>
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-109</span><span>Order</span></p>
+      <h1 class="h1 pg-h" id="cuH">Order {{ order.name | escape }}</h1>
+    </header>
     <p class="mono">Placed {{ order.created_at | date: '%b %d, %Y' }} — {{ order.financial_status_label | escape }} — {{ order.fulfillment_status_label | escape }}</p>
     <table class="tbl cu-orders"><thead><tr><th class="mono">Item</th><th class="mono">Qty</th><th class="mono">Total</th></tr></thead><tbody>
       {%- for line in order.line_items -%}
@@ -9,7 +11,7 @@
       {%- endfor -%}
     </tbody></table>
     <p class="mono">Subtotal {{ order.line_items_subtotal_price | money }} — Shipping {{ order.shipping_price | money }} — Total {{ order.total_price | money_with_currency }}</p>
-    <p><a class="link-line mono" href="{{ routes.account_url }}">Back to your file</a></p>
+    <p><a class="link-line mono" href="{{ routes.account_url }}">Back to your account</a></p>
   </div>
 </section>
 {% schema %}

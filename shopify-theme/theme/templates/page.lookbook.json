@@ -138,7 +138,11 @@
         "e11",
         "e12"
       ],
-      "settings": {}
+      "settings": {
+        "heading_a": "Look",
+        "heading_b": "book",
+        "line": "Tap one to shop it."
+      }
     }
   },
   "order": [

@@ -287,7 +287,7 @@
         <div class="cd-acts mono">
           <button type="button" class="cd-act" data-cd-ics>Add to calendar</button>
           <a class="cd-act" data-cd-gcal href="https://calendar.google.com/calendar/render" target="_blank" rel="noopener">Google Calendar<span class="sr-only"> (opens in a new tab)</span></a>
-          <button type="button" class="cd-act" data-cd-share>Forward this transmission</button>
+          <button type="button" class="cd-act" data-cd-share>Share</button>
           <span class="cd-toast" data-cd-toast role="status"></span>
         </div>
       </div>
@@ -314,7 +314,6 @@
       </div>
       <p class="cd-peek mono" id="cdPeekHint"><span class="hint-fine">Hover the bag to peek</span><span class="hint-touch">Press and hold the bag to peek</span><span class="sr-only">, or press Enter</span></p>
       <dl class="cd-facts mono">
-        <div><dt>Publication</dt><dd>MONOCHROME Magazine</dd></div>
         {%- if vol != blank -%}<div><dt>Volume</dt><dd>{{ vol }}</dd></div>{%- endif -%}
         {%- if issue != blank -%}<div><dt>Issue</dt><dd>{{ issue }}</dd></div>{%- endif -%}
         {%- if pages != blank -%}<div><dt>Pages</dt><dd>{{ pages }}</dd></div>{%- endif -%}
@@ -357,17 +356,17 @@
     { "type": "checkbox", "id": "preorder", "label": "Take pre-orders before the launch", "info": "Shows a pre-order button. Bag and order lines are marked Pre-order.", "default": true },
     { "type": "text", "id": "preorder_note", "label": "Pre-order note on the bag line and order", "info": "Leave blank for: Ships from (launch day)" },
     { "type": "header", "content": "Words" },
-    { "type": "text", "id": "kicker", "label": "Small heading", "default": "Intercepted — The Vision Issue" },
+    { "type": "text", "id": "kicker", "label": "Small heading", "default": "The Vision Issue" },
     { "type": "text", "id": "headline", "label": "Headline", "default": "Enter the orbit" },
-    { "type": "textarea", "id": "sub", "label": "Intro", "default": "MONOCHROME Magazine, Volume 001. The first issue is sealed in evidence until the clock runs out." },
-    { "type": "textarea", "id": "live_sub", "label": "Intro after the launch", "default": "MONOCHROME Magazine, Volume 001. The first issue is declassified and in print." },
+    { "type": "textarea", "id": "sub", "label": "Intro", "default": "Volume 001. Sealed until the clock runs out." },
+    { "type": "textarea", "id": "live_sub", "label": "Intro after the launch", "default": "Volume 001. Out now, in print." },
     { "type": "text", "id": "live_heading", "label": "Heading after the launch", "default": "The Vision Issue is out" },
     { "type": "text", "id": "signup_heading", "label": "Signup heading", "default": "Get the launch signal" },
     { "type": "text", "id": "live_signup_heading", "label": "Signup heading after the launch", "default": "Get the next transmission" },
-    { "type": "text", "id": "signup_note", "label": "Signup small print", "default": "One email the moment it is declassified." },
-    { "type": "text", "id": "live_signup_note", "label": "Signup small print after the launch", "default": "One email when the next transmission drops." },
+    { "type": "text", "id": "signup_note", "label": "Signup small print", "default": "One email at launch." },
+    { "type": "text", "id": "live_signup_note", "label": "Signup small print after the launch", "default": "One email per drop." },
     { "type": "text", "id": "calendar_title", "label": "Calendar event title", "default": "MONOCHROME — The Vision Issue drops" },
-    { "type": "text", "id": "tape", "label": "Tape (separate with |)", "info": "{day} becomes the launch weekday.", "default": "The Vision Issue|Declassified {day}|Do not cross|Enter the orbit|Eyes only" }
+    { "type": "text", "id": "tape", "label": "Tape (separate with |)", "info": "{day} becomes the launch weekday.", "default": "The Vision Issue|Enter the orbit|Eyes only" }
   ],
   "blocks": [
     { "type": "line", "name": "Transmission", "settings": [

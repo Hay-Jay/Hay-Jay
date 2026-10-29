@@ -43,7 +43,7 @@
       <h2 class="mp-t" id="magpopT"><a href="{{ mag.url }}">{{ mtitle | escape }}</a></h2>
       {%- if settings.magpop_line != blank %}<p class="mp-line mono">{{ settings.magpop_line | escape }}</p>{% endif -%}
       <p class="mp-cta">
-        <a class="mp-add" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">Add<span class="mp-pr"> — {{ variant.price | money }}</span></a>
+        <a class="mp-add" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">Add to bag<span class="mp-pr">{{ variant.price | money }}</span></a>
       </p>
     </div>
     <button class="mp-x" type="button" data-close aria-label="Close"><i aria-hidden="true"></i></button>

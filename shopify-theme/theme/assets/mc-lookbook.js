@@ -13,14 +13,14 @@
   const mq = matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
 
   const L = k => String.fromCharCode(65 + k);
-  const setNo = k => { lb.cur = k; const t = `Exhibit ${L(k)} / ${L(N - 1)}`; if (lbNo.textContent !== t) lbNo.textContent = t; if (prev) prev.disabled = k <= 0; if (next) next.disabled = k >= N - 1; };
+  const setNo = k => { lb.cur = k; const t = `${L(k)} / ${L(N - 1)}`; if (lbNo.textContent !== t) lbNo.textContent = t; if (prev) prev.disabled = k <= 0; if (next) next.disabled = k >= N - 1; };
   function modeCheck() {
     const want = mq.matches && !reduce;
     lb.pinned = want;
     lbSec.classList.toggle('pinned', want);
     if (want) { lbTrack.removeAttribute('tabindex'); lbTrack.scrollLeft = 0; lbHint.textContent = 'Scroll'; }
     else { lbTrack.tabIndex = 0; lbSec.style.height = ''; lbTrack.style.transform = ''; lbHint.textContent = 'Swipe'; }
-    $('.lb-how').textContent = want ? 'Keep scrolling.' : 'Swipe sideways.';
+    const how = $('.lb-how'); if (how) how.textContent = want ? 'Scroll.' : 'Swipe.';
     if (prev) prev.hidden = false; if (next) next.hidden = false;
     measure();
   }

@@ -2,7 +2,10 @@
   "sections": {
     "main": {
       "type": "mc-404",
-      "settings": {}
+      "settings": {
+        "kicker": "File shredded",
+        "text": "This file was moved or never existed."
+      }
     }
   },
   "order": [

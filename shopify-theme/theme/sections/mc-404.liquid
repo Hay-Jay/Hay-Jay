@@ -1,15 +1,20 @@
 <section class="spread dark lost" aria-labelledby="lostH">
   <div class="wrap lost-wrap">
     <div class="lost-in">
-      <img class="lost-emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="96" height="103">
-      <p class="kick mono">Error 404 // File not found</p>
-      <h1 class="h1" id="lostH"><span class="tw" style="--n:4;--dl:.1s">File</span> <span class="tw" style="--n:3;--dl:.5s">not</span> <span class="tw caret" style="--n:6;--dl:.8s">found</span></h1>
-      <p class="lost-copy">This file has been moved, shredded, or never existed. This incident has not been reported. You may want to keep it that way and head back to base.</p>
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">MC-404</span><span>{{ section.settings.kicker | escape }}</span></p>
+        <h1 class="h1 pg-h" id="lostH"><span class="tw" style="--n:4;--dl:.1s">Page</span> <span class="tw" style="--n:3;--dl:.45s">not</span> <span class="tw caret" style="--n:6;--dl:.75s">found</span></h1>
+        {%- if section.settings.text != blank %}<p class="pg-sub">{{ section.settings.text | escape }}</p>{% endif -%}
+      </header>
+      <form class="lost-find" action="{{ routes.search_url }}" method="get" role="search">
+        <label class="sr-only" for="lostQ">Search the shop</label>
+        <input id="lostQ" name="q" type="search" placeholder="Search the shop" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
       <nav class="lost-links" aria-label="Where to next">
-        <a href="{{ routes.root_url }}"><span class="mono">Page 1</span><b>Mission briefing</b><i class="arr" aria-hidden="true"></i></a>
-        <a href="{{ routes.all_products_collection_url }}"><span class="mono">Page 2</span><b>Asset register</b><i class="arr" aria-hidden="true"></i></a>
-        <a href="/pages/lookbook"><span class="mono">Page 3</span><b>Evidence wall</b><i class="arr" aria-hidden="true"></i></a>
-        <a href="/pages/faq"><span class="mono">Page 6</span><b>The debrief</b><i class="arr" aria-hidden="true"></i></a>
+        <a href="{{ routes.all_products_collection_url }}"><span class="mono">01</span><b>Shop all</b><i class="arr" aria-hidden="true"></i></a>
+        <a href="/collections/new-arrivals"><span class="mono">02</span><b>New in</b><i class="arr" aria-hidden="true"></i></a>
+        <a href="{{ routes.root_url }}"><span class="mono">03</span><b>Home</b><i class="arr" aria-hidden="true"></i></a>
       </nav>
     </div>
     <div class="lost-stamp" aria-hidden="true"><span class="stamp white xl" style="--r:-9deg">Access denied</span></div>
@@ -17,5 +22,11 @@
 </section>
 
 {% schema %}
-{ "name": "File not found (404)", "settings": [] }
+{
+  "name": "Page not found (404)",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "File shredded" },
+    { "type": "text", "id": "text", "label": "One line", "default": "This file was moved or never existed." }
+  ]
+}
 {% endschema %}

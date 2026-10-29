@@ -150,10 +150,11 @@
 .hm-glare { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(circle at var(--gx, 30%) var(--gy, 20%), rgba(255, 255, 255, .38), transparent 58%); mix-blend-mode: soft-light; }
 .hm-cover.tilting .hm-glare { opacity: 1; }
 .stamp.hm-stamp { position: absolute; z-index: 3; left: -8px; bottom: 10px; margin: 0; font-size: .58rem; }
+@media (max-width: 699px) { .stamp.hm-stamp { display: none; } }
 .hm-copy .kick { margin-bottom: 8px; }
 .hm-copy .kick .rec { margin-right: 0; }
 .hm-copy .h2 { font-size: clamp(2.1rem, 9vw, 4.6rem); }
-.hm-copy .h2 a { text-decoration: none; }
+.hm-copy .h2 a { display: inline-block; padding-block: 2px; text-decoration: none; }
 .hm-copy .h2 a:hover { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
 .hm-line { display: flex; flex-wrap: wrap; gap: 2px 14px; margin-top: 10px; color: var(--dim); }
 .hm-line b { color: var(--fg); }
@@ -162,7 +163,7 @@
 .hm-buy { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
 .hm-buy .btn { flex: 1 1 210px; }
 @media (min-width: 900px) {
-  .hm-grid { grid-template-columns: 190px minmax(0, 1fr) auto; gap: 30px 52px; }
+  .hm-grid { grid-template-columns: 190px minmax(0, auto) auto; justify-content: center; gap: 30px clamp(40px, 6vw, 96px); }
   .hm-buy { grid-column: auto; flex-direction: column; align-items: stretch; text-align: center; }
   .hm-buy .btn { flex: none; min-width: 250px; }
   .hm-buy .btn-line { align-self: center; }

@@ -1,7 +1,9 @@
 <section class="spread paper cu" aria-labelledby="cuH">
   <div class="wrap cu-wrap">
-    {% render 'mc-filehead', file: 'MC-109', doc: 'Password reset', page: 7, level: 2 %}
-    <h1 class="h1" id="cuH">New password</h1>
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-109</span><span>Account</span></p>
+      <h1 class="h1 pg-h" id="cuH">New password</h1>
+    </header>
     {%- form 'reset_customer_password', class: 'cu-form news' -%}
       {%- if form.errors -%}<p class="mono news-note" role="alert">{{ form.errors | default_errors }}</p>{%- endif -%}
       <label class="mono" for="RpP">Password</label><input type="password" name="customer[password]" id="RpP" autocomplete="new-password" required>

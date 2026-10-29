@@ -9,8 +9,10 @@
 <section class="spread paper ct-open" aria-labelledby="pageH">
   <div class="wrap">
     {%- if page != blank -%}
-      {% render 'mc-filehead', file: docno, doc: page.title, page: folio, level: 1 %}
-      <header class="reg-head"><div class="reg-title"><p class="kick mono">Document</p><h1 class="h1" id="pageH">{{ page.title | escape }}</h1></div></header>
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">{{ docno }}</span><span>Document</span></p>
+        <h1 class="h1 pg-h" id="pageH">{{ page.title | escape }}</h1>
+      </header>
       <div class="pg-body rte">{{ page.content }}</div>
     {%- else -%}
       <div class="pg-body rte shopify-policy__container">{{ content_for_layout | default: '' }}</div>

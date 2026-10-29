@@ -1,7 +1,9 @@
 <section class="spread paper cu" aria-labelledby="cuH">
   <div class="wrap cu-wrap">
-    {% render 'mc-filehead', file: 'MC-109', doc: 'Addresses', page: 7, level: 3 %}
-    <h1 class="h1" id="cuH">Addresses</h1>
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-109</span><span>Account</span></p>
+      <h1 class="h1 pg-h" id="cuH">Addresses</h1>
+    </header>
     {%- for address in customer.addresses -%}
       <address class="cu-addr">{{ address | format_address }}<br>{{ address.address1 | escape }} {{ address.city | escape }} {{ address.country | escape }}</address>
     {%- endfor -%}
@@ -12,7 +14,7 @@
       <label class="mono" for="AdZip">Postal code</label><input type="text" id="AdZip" name="address[zip]" autocomplete="postal-code">
       <button class="send" type="submit">Save<span class="arr" aria-hidden="true"></span></button>
     {%- endform -%}
-    <p><a class="link-line mono" href="{{ routes.account_url }}">Back to your file</a></p>
+    <p><a class="link-line mono" href="{{ routes.account_url }}">Back to your account</a></p>
   </div>
 </section>
 {% schema %}

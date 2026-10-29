@@ -185,7 +185,7 @@
     const running = () => playing && !over && !grab && !document.hidden && performance.now() > until;
     function tick(now) {
       raf = 0;
-      const dt = Math.min(50, now - (last || now));
+      const dt = Math.min(250, now - (last || now));
       last = now;
       if (running()) {
         const w = span();

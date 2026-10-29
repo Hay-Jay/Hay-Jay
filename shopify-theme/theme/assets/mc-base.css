@@ -103,7 +103,7 @@ body::after {
 .tw.caret::after { content: ""; display: inline-block; width: .28em; height: .7em; margin-left: .1em; background: currentColor; vertical-align: -.02em; animation: caret 1s steps(1) infinite; animation-delay: 1.9s; }
 @keyframes caret { 50% { opacity: 0; } }
 h1 .tw + .tw { margin-top: .02em; }
-.ab-head h1 .tw, .rt-text h1 .tw, .fq-head h1 .tw, .ct-term h1 .tw, .lost h1 .tw { display: inline-block; margin-right: .22em; }
+.pg-h .tw { display: inline-block; }
 
 /* ---- page heads (about, FAQ, shipping, contact, accounts...): one line of file data, then the title -------------------------
    Same voice as the shop page's head: a file-number chip, a micro-label, a big plain-language title. */
@@ -650,6 +650,7 @@ html:not(.js) .ticker-t { animation: none; }
 .foot-legal a { display: inline-flex; align-items: center; min-height: 44px; color: var(--dim); }
 .foot-legal a:hover { color: var(--fg); }
 .banner.bottom { height: 30px; border-top: 1px solid #333; font-size: 10.5px; letter-spacing: .2em; }
+@media (max-width: 459px) { .banner.bottom { letter-spacing: .08em; } }
 @media (min-width: 900px) {
   .foot-grid { grid-template-columns: minmax(0, 1.7fr) repeat(3, minmax(0, 1fr)); column-gap: clamp(24px, 3vw, 48px); }
   .foot-brand, .foot-social { grid-column: auto; }
@@ -708,7 +709,7 @@ html.reduce .ticker-t { animation: none; }
 
 /* ---- the magazine corner card: small, non-blocking, once per visitor (shown by core.js, never without JavaScript) ------------- */
 .magpop {
-  position: fixed; z-index: 110; left: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: min(372px, calc(100vw - 36px));
+  position: fixed; z-index: 110; left: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: min(396px, calc(100vw - 36px));
   visibility: hidden; opacity: 0; transform: translate3d(-24px, 30px, 0) rotate(-4deg); transform-origin: 0 100%;
   transition: opacity .3s, transform .55s cubic-bezier(.2, .9, .25, 1.12), visibility 0s linear .55s;
 }
@@ -723,9 +724,10 @@ html.reduce .ticker-t { animation: none; }
 .mp-cover { position: relative; display: block; background: #000; box-shadow: 3px 4px 0 rgba(0, 0, 0, .4); transform: rotate(-3deg); transition: transform .4s var(--ease); }
 .mp-cover:hover { transform: rotate(0) scale(1.03); }
 .mp-img { width: 100%; height: auto; aspect-ratio: 1391 / 1800; object-fit: cover; }
-.mp-stamp { position: absolute; right: -14px; top: -10px; font-size: .78rem; background: rgba(232, 232, 232, .85); }
+.mp-stamp { position: absolute; right: -16px; bottom: 10px; font-size: .78rem; background: rgba(232, 232, 232, .88); }
 .mp-copy { min-width: 0; padding-right: 22px; }
-.mp-kick { display: flex; align-items: center; color: var(--dim); font-size: 10.5px; letter-spacing: .12em; }
+.mp-kick { display: flex; align-items: center; gap: .5em; color: var(--dim); font-size: 10.5px; letter-spacing: .12em; }
+.mp-kick .rec { margin: 0; }
 .mp-kick .rec { box-shadow: none; background: #0a0a0a; width: 8px; height: 8px; }
 .mp-t { margin: 5px 0 7px; font: 900 clamp(1.55rem, 2.4vw, 1.9rem)/.92 var(--head); text-transform: uppercase; letter-spacing: .01em; }
 .mp-t a { text-decoration: none; }
@@ -733,12 +735,12 @@ html.reduce .ticker-t { animation: none; }
 .mp-line { display: inline; padding: 2px 5px; background: #0a0a0a; color: #f2f2f2; font-size: 10.5px; line-height: 1.75; letter-spacing: .08em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .mp-cta { margin-top: 10px; }
 .mp-add {
-  display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; background: #0a0a0a; color: #f2f2f2; border: 2px solid #0a0a0a; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px 0 14px; background: #0a0a0a; color: #f2f2f2; border: 2px solid #0a0a0a; text-decoration: none;
   font: 800 1.15rem/1 var(--head); letter-spacing: .06em; text-transform: uppercase; transition: background .2s, color .2s;
 }
 .mp-add:hover { background: transparent; color: #0a0a0a; }
 .mp-add:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 3px; }
-.mp-pr { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+.mp-pr { padding-left: 10px; border-left: 1px solid currentColor; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .02em; }
 .mp-x { position: absolute; right: -2px; top: -2px; width: 44px; height: 44px; display: grid; place-items: center; }
 .mp-x i { position: relative; width: 26px; height: 26px; background: #0a0a0a; transition: transform .25s var(--ease); }
 .mp-x i::before, .mp-x i::after { content: ""; position: absolute; left: 6px; right: 6px; top: 50%; height: 2px; margin-top: -1px; background: #f2f2f2; transform: rotate(45deg); }
@@ -748,13 +750,14 @@ html.reduce .ticker-t { animation: none; }
 .mp-x:focus-visible i { outline: 2px solid #0a0a0a; outline-offset: 2px; }
 @media (max-width: 699px) {
   /* bottom-left, clear of the chat button in the bottom-right corner */
-  .magpop { left: 10px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: min(304px, calc(100vw - 92px)); }
+  .magpop { left: 10px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); width: min(310px, calc(100vw - 86px)); }
   .mp-card { grid-template-columns: 74px minmax(0, 1fr); gap: 12px; padding: 10px 10px 10px 10px; }
   .mp-t { font-size: 1.35rem; margin: 3px 0 5px; }
   .mp-kick { font-size: 10px; letter-spacing: .06em; }
   .mp-kick span { display: none; }
   .mp-line { font-size: 10px; letter-spacing: .04em; }
   .mp-cta { margin-top: 8px; }
-  .mp-add { padding: 0 11px; font-size: 1.05rem; }
+  .mp-add { gap: 8px; padding: 0 9px 0 11px; font-size: 1.02rem; }
+  .mp-pr { padding-left: 8px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) { .magpop { transition: opacity .2s, visibility 0s linear .2s; transform: none; } .magpop.open { transform: none; } }

@@ -4,14 +4,14 @@
   assign last_i = n | minus: 1
   assign last = letters | slice: last_i, 1
 -%}
-<!-- EVIDENCE: the surveillance wall, as its own page ---------------------------------------- -->
-<section class="spread dark lookbook" id="lookbook" aria-label="Evidence wall">
+<!-- LOOKBOOK: the evidence wall. Every photo opens its product -->
+<section class="spread dark lookbook" id="lookbook" aria-labelledby="lbH">
   <div class="lb-pin" id="lbPin">
-    <div class="lb-run mono" aria-hidden="true"><span>File MC-103 — Surveillance exhibits</span><span><b class="rec"></b>Rec</span><span>Page 3 of 7</span></div>
-    <div class="lb-track" id="lbTrack" role="region" aria-label="Evidence photographs, scroll sideways" tabindex="0">
+    <div class="lb-run mono" aria-hidden="true"><span>MC-103 // Evidence wall</span><span><b class="rec"></b>Rec</span></div>
+    <div class="lb-track" id="lbTrack" role="region" aria-label="Lookbook photographs, scroll sideways" tabindex="0">
       <div class="lb-intro">
-        <h1 aria-label="Evidence"><span aria-hidden="true">Evi-</span><span aria-hidden="true">dence</span></h1>
-        <p class="mono">{{ n }} exhibits, A to {{ last }}, from the field. <span class="lb-how">Swipe sideways.</span> Open an exhibit to read the asset file.</p>
+        <h1 id="lbH" aria-label="{{ section.settings.heading_a | append: section.settings.heading_b | escape }}"><span aria-hidden="true">{{ section.settings.heading_a | escape }}-</span><span aria-hidden="true">{{ section.settings.heading_b | escape }}</span></h1>
+        <p class="mono">{{ n }} looks. <span class="lb-how">Swipe.</span> {{ section.settings.line | escape }}</p>
         <span class="stamp white" style="--r:-6deg" aria-hidden="true">Eyes only</span>
       </div>
       {%- for block in section.blocks -%}
@@ -27,38 +27,40 @@
             capture pt
               render 'mc-price', product: p
             endcapture
-            assign cam_n = li | plus: 2
-            assign ex = 'Exhibit ' | append: ltr
           -%}
-          <a class="lb-fig" href="{{ p.url }}" style="--k:{{ k }};--ar:{{ block.settings.ratio }};--mt:{{ block.settings.offset }}vh;--tilt:{{ tilt }}deg" aria-label="Exhibit {{ ltr }}, {{ p.title | strip | escape }}, {{ pt | escape }} {{ cart.currency.iso_code }}. Open the asset dossier" {{ block.shopify_attributes }}>
+          <a class="lb-fig" href="{{ p.url }}" aria-label="{{ p.title | strip | escape }}, {{ pt | strip | escape }}" style="--k:{{ k }};--ar:{{ block.settings.ratio }};--mt:{{ block.settings.offset }}vh;--tilt:{{ tilt }}deg" {{ block.shopify_attributes }}>
             <span class="lb-pin-dot" aria-hidden="true"></span>
             <span class="lb-no" aria-hidden="true">{{ ltr }}</span>
-            <div class="xp">{% render 'mc-img', image: pic, alt: p.title, sizes: '(min-width:900px) 50vh, 70vw', widths: '480,720,1000,1400', eager: forloop.first %}{% render 'mc-cam', n: cam_n, ex: ex %}</div>
-            <span class="lb-cap mono" aria-hidden="true"><b>Exhibit {{ ltr }}</b><span>{{ p.title | strip | escape }}</span><span>{{ pt }}</span></span>
+            <div class="xp">{% render 'mc-img', image: pic, alt: p.title, sizes: '(min-width:900px) 50vh, 70vw', widths: '480,720,1000,1400', eager: forloop.first %}<i class="lb-vf" aria-hidden="true"></i><span class="lb-shop mono" aria-hidden="true">Shop<i class="arr"></i></span></div>
+            <span class="lb-cap mono"><b aria-hidden="true">{{ ltr }}</b><span>{{ p.title | strip | escape }}</span><span>{{ pt }}</span></span>
           </a>
         {%- endif -%}
       {%- endfor -%}
-      <div class="lb-out"><span class="mono">End of the evidence file</span><a href="{{ routes.all_products_collection_url }}">Asset<br>register<span class="arr" aria-hidden="true"></span></a></div>
+      <div class="lb-out"><span class="mono">End of file</span><a href="{{ routes.all_products_collection_url }}">Shop<br>all<span class="arr" aria-hidden="true"></span></a></div>
     </div>
     <div class="lb-meter mono">
-      <span id="lbNo" aria-hidden="true">Exhibit A / {{ last }}</span>
+      <span id="lbNo" aria-hidden="true">A / {{ last }}</span>
       <span class="lb-rail" aria-hidden="true"><i id="lbBar"></i></span>
       <span class="lb-ctrl">
-        <button type="button" id="lbPrev" aria-label="Previous exhibit" hidden>&larr;</button>
-        <button type="button" id="lbNext" aria-label="Next exhibit" hidden>&rarr;</button>
+        <button type="button" id="lbPrev" aria-label="Previous photo" hidden>&larr;</button>
+        <button type="button" id="lbNext" aria-label="Next photo" hidden>&rarr;</button>
       </span>
       <span id="lbHint" aria-hidden="true">Swipe</span>
     </div>
   </div>
 </section>
 <script type="application/ld+json">
-{ "@context": "https://schema.org", "@type": "ImageGallery", "name": "MONOCHROME® Evidence: surveillance exhibits", "url": {{ shop.url | append: '/pages/lookbook' | json }} }
+{ "@context": "https://schema.org", "@type": "ImageGallery", "name": "MONOCHROME® Lookbook", "url": {{ shop.url | append: '/pages/lookbook' | json }} }
 </script>
 
 {% schema %}
 {
-  "name": "Evidence wall (lookbook)",
-  "settings": [],
+  "name": "Lookbook (evidence wall)",
+  "settings": [
+    { "type": "text", "id": "heading_a", "label": "Heading, first half", "default": "Look" },
+    { "type": "text", "id": "heading_b", "label": "Heading, second half", "default": "book" },
+    { "type": "text", "id": "line", "label": "One line", "default": "Tap one to shop it." }
+  ],
   "blocks": [
     {
       "type": "exhibit", "name": "Exhibit", "limit": 26,
@@ -71,6 +73,6 @@
       ]
     }
   ],
-  "presets": [{ "name": "Evidence wall (lookbook)" }]
+  "presets": [{ "name": "Lookbook (evidence wall)" }]
 }
 {% endschema %}
