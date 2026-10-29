@@ -206,7 +206,6 @@ html:not(.js) .pl-sticky { display: none; }
 .lb-hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; color: #9a9a9a; pointer-events: none; }
 .lb-stage.zoomed ~ .lb-hint { opacity: 0; }
 html.lb-lock { overflow: hidden; }
-html.lb-lock shopify-chat { display: none !important; }
 @media (prefers-reduced-motion: no-preference) { .lb:not(.open) .lb-img { transform: scale(.96); } }
 @media (prefers-reduced-motion: reduce) { .lb, .lb-img { transition: none; } }
 
