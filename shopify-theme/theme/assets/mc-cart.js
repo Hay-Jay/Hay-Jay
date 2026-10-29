@@ -1,6 +1,7 @@
 /* MONOCHROME® — the bag: slide-in drawer, quantity changes, add to bag (AJAX), live header count.
    Works with the Shopify Cart API (/cart/add.js, /cart/change.js, /cart.js) and the Section Rendering API. Without JavaScript every
    control is a plain link or form that goes to the cart page. Exposes MC.cart = { add, change, open, close, refresh, setCount, isOpen, stamp }.
+   Also the product cards' two small enhancements (they are on most pages): the size sheet closing on a pick, the hover photo loading late.
    Adding something plays a short sequence: a rubber stamp thunks onto the button that was used, the bag count bumps, then the drawer
    slides in (all instant with reduced motion). */
 (() => {
@@ -192,8 +193,12 @@
     const ad = e.target.closest('[data-mc-add]');
     if (ad) {
       e.preventDefault(); if (ad.classList.contains('mc-add-pending')) return;
+      // a card's size sheet closes as soon as a size is picked, so the bag that opens next is not covered; the stamp lands on the photo
+      let from = ad;
+      const pop = ad.closest('[popover]');
+      if (pop) { try { if (pop.matches(':popover-open')) { pop.hidePopover(); from = $('.card-ph', pop.closest('.card') || document) || ad; } } catch { /* no popovers */ } }
       ad.classList.add('mc-add-pending');
-      try { await add({ id: +ad.dataset.mcAdd, quantity: 1 }, { from: ad }); }
+      try { await add({ id: +ad.dataset.mcAdd, quantity: 1 }, { from }); }
       catch (err) {
         // Shopify said no (sold out...): the bag page explains; network trouble: let the browser post the form itself
         if (!err.status && ad.form && ad.form.requestSubmit) ad.form.requestSubmit(ad);
@@ -211,6 +216,16 @@
     const inp = e.target.closest('[data-line-qty]');
     if (inp) change(inp.dataset.line, inp.value);
   });
+  // product cards: the second photo (a <template>) loads on the first mouse hover and fades in once it has arrived
+  document.addEventListener('pointerover', e => {
+    if (e.pointerType !== 'mouse') return;
+    const card = e.target.closest && e.target.closest('.card'), t = card && $('template.ph2-t', card);
+    const img = t && t.content.querySelector('img'); if (!img) return;
+    img.loading = 'eager';
+    img.addEventListener('load', () => img.classList.add('ok'), { once: true });
+    t.replaceWith(img);
+    if (img.complete && img.naturalWidth) img.classList.add('ok');
+  }, { passive: true });
   window.addEventListener('pageshow', e => {
     const nav = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
     if (!e.persisted && !(nav && nav.type === 'back_forward')) return;

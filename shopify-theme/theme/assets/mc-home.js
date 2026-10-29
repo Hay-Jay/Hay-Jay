@@ -1,8 +1,9 @@
-/* MONOCHROME® home page behaviour (a work of fiction, see the footer). Loaded by the home sections that use it; safe to load twice.
+/* MONOCHROME® home page behaviour (a work of fiction, see the footer). Loaded once, by layout/theme.liquid on the home template.
    - Cover photo stack [data-hs]: drag or swipe the top print away (it slides under the pile), or use the arrows / arrow keys.
    - Lookbook film [data-film]: drifts slowly in a loop, drags sideways with a mouse, swipes natively on touch; stops for hover, focus,
      touch and the Pause button, and never drifts with reduced motion.
-   - Magazine cover [data-tilt]: tilts towards the pointer (fine pointers only, no reduced motion).
+   - Magazine cover [data-hm-tilt]: tilts towards the pointer with a glare (fine pointers only, no reduced motion). Its own hook, so
+     core.js's [data-tilt] (the about page's pinned prints) never tilts it a second time.
    Everything here only enhances server-rendered links and forms: without it the page still works. */
 (() => {
   'use strict';
@@ -25,12 +26,15 @@
     ctl.hidden = false;
 
     function paint(announce) {
+      // a print that goes under the pile leaves the tab order; if it had focus, the new top print takes it
+      const had = pile.contains(document.activeElement);
       order.forEach((c, i) => {
         c.dataset.pos = i;
         const a = $('.hs-a', c);
         if (i === 0) { a.removeAttribute('tabindex'); a.removeAttribute('aria-hidden'); }
         else { a.tabIndex = -1; a.setAttribute('aria-hidden', 'true'); }
       });
+      if (had) { const a = $('.hs-a', order[0]); if (a && document.activeElement !== a) a.focus({ preventScroll: true }); }
       const at = cards.indexOf(order[0]) + 1;
       if (num) num.textContent = pad(at);
       if (announce && live) {
@@ -257,7 +261,7 @@
   const boot = () => {
     $$('[data-hs]').forEach(stack);
     $$('[data-film]').forEach(film);
-    $$('[data-tilt]').forEach(tilt);
+    $$('[data-hm-tilt]').forEach(tilt);
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

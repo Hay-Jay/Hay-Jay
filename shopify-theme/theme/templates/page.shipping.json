@@ -6,13 +6,13 @@
         "rn1": {
           "type": "return_note",
           "settings": {
-            "text": "<p>Doesn't fit? Contact us soon after delivery with your order number.</p>"
+            "text": "<p>Doesn't fit? We'll exchange it.</p>"
           }
         },
         "rn2": {
           "type": "return_note",
           "settings": {
-            "text": "<p>Unworn, original condition.</p>"
+            "text": "<p>Email us within 14 days of delivery with your order number. Unworn, with tags.</p>"
           }
         },
         "rn3": {
@@ -73,6 +73,7 @@
         "deck": "{countries} countries. Rates at checkout.",
         "nigeria": "Delivered. Rate shown at checkout.",
         "canada": "Free standard shipping over $200.",
+        "us": "Free standard shipping over $100.",
         "rates_note": "Your rate shows at checkout, before you pay."
       }
     }

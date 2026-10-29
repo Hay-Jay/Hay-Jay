@@ -48,10 +48,16 @@
 .lookbook.pinned .lb-meter { padding-bottom: 30px; }
 
 @media (max-width: 699px) {
+  /* phones: the title is one compact line over the strip, and the first photo (with its caption) fits the screen on load */
   .lb-run span:last-child { display: none; }
-  .lookbook { --lbh: min(56svh, 460px); }
-  .lb-track { min-height: calc(var(--lbh) + 24px); }
-  .lb-intro { --intro-w: 62vw; padding-bottom: 28px; }
+  .lb-run { margin-bottom: 12px; }
+  .lookbook { --lbh: min(56svh, 460px, calc((100vw - 2 * var(--gut) - 40px) * 1.25)); }
+  .lb-track { min-height: calc(var(--lbh) + 24px); padding-top: 78px; }
+  .lb-intro { position: absolute; left: var(--gut); right: var(--gut); top: 0; width: auto; flex-direction: row; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; padding: 0; }
+  .lb-intro h1 { font-size: 2.9rem; line-height: .9; }
+  .lb-intro h1 span { display: inline; }
+  .lb-intro p { max-width: none; font-size: 11px; }
+  .lb-intro .stamp { display: none; }
   .lb-meter { gap: 10px; }
   #lbHint { display: none; }
   #lbNo { min-width: 8.5em; }

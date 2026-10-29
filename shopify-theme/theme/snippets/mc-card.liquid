@@ -6,10 +6,13 @@
     - one option (sizes): "+" opens a size sheet (popover, so it works without JavaScript); on desktop the sizes slide up on hover;
     - gift cards, personalised products (template suffix "custom", e.g. Easify), multi-option products and anything tagged
       no-quick-add have no quick add: the card opens the product page.
-  With JavaScript, mc-cart.js turns every [data-mc-add] button into an AJAX add that opens the bag; without it the form posts to /cart/add.
+  With JavaScript, mc-cart.js turns every [data-mc-add] button into an AJAX add that opens the bag (and closes the size sheet);
+  without it the form posts to /cart/add. Keyboard: two stops per card, the link and "+" (on desktop "+" shows on focus and opens the sheet).
+  The hover photo is a <template>: mc-cart.js loads it on the first mouse hover, so it costs nothing until then (none without JavaScript).
   Params: product, i (0-based position, default 0), sizes, widths, feat (true = larger name), data (true = shop data-* attributes),
           photo (1-based photo number override), order (output of mc-order, saves recomputing), quick (false = no quick add),
           uid (unique id suffix when the same product appears twice on one page), eager (true = first photo is the LCP image),
+          lazy (false = first photo loads with the page, for cards in the first row that are not the LCP),
           cur (false = no currency code after the price, for pages that say "Prices in CAD" once in their header)
 {%- endcomment -%}
 {%- liquid
@@ -102,8 +105,8 @@
   <a class="card-a" href="{{ product.url }}">
     <span class="card-ph{% if is_ring %} zoom{% endif %}{% if has2 %} has2{% endif %}">
       {%- comment -%} the name is the link's text right below, so the photos stay silent (no "name, name" for screen readers) {%- endcomment -%}
-      {%- render 'mc-img', image: pic, alt: '', widths: ws, sizes: sz_attr, eager: eager -%}
-      {%- if has2 %}{% render 'mc-img', image: pic2, alt: '', class: 'ph ph2', widths: ws, sizes: sz_attr %}{% endif -%}
+      {%- render 'mc-img', image: pic, alt: '', widths: ws, sizes: sz_attr, eager: eager, lazy: lazy -%}
+      {%- if has2 %}<template class="ph2-t">{% render 'mc-img', image: pic2, alt: '', class: 'ph ph2', widths: ws, sizes: sz_attr %}</template>{% endif -%}
       <i class="card-vf" aria-hidden="true"></i>
       <span class="card-tag" aria-hidden="true">{{ fno }}</span>
       {%- if is_new %}<span class="stamp white sm card-new in" style="--r:7deg">New</span>{% endif -%}
@@ -127,8 +130,7 @@
       <div class="card-qa">
         <button class="qa-go" type="button" popovertarget="{{ qid }}" aria-label="Quick add {{ ttl }}"><i aria-hidden="true"></i></button>
         <div class="qa-p" id="{{ qid }}" popover role="dialog" aria-label="{{ ttl }}: choose {{ opt_name | downcase }}">
-          {%- comment -%} the sheet closes as soon as a size is picked, so the bag drawer that opens next is not covered {%- endcomment -%}
-          <form class="qa-f" method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8" onclick="try{var p=this.closest('[popover]');if(event.target.closest('[data-mc-add]')&&p.matches(':popover-open'))p.hidePopover()}catch(e){}">
+          <form class="qa-f" method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8">
             <input type="hidden" name="quantity" value="1">
             <p class="qa-h"><b>{{ ttl }}</b><span>{% render 'mc-price', product: product %} <small>{{ cart.currency.iso_code }}</small></span></p>
             <p class="qa-l">{{ opt_name }}</p>

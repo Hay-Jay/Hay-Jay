@@ -259,8 +259,8 @@
               <input type="hidden" name="quantity" value="1">
               {%- unless is_live -%}<input type="hidden" name="properties[Pre-order]" value="{{ po_note | escape }}" data-cd-po>{%- endunless -%}
               <button class="btn cd-buy" type="submit"{% unless variant.available %} disabled{% endunless %}>
-                <span data-cd-buy-l>{%- if variant.available == false -%}Out of stock{%- elsif is_live -%}Requisition a copy{%- else -%}Pre-order a copy{%- endif -%}</span>
-                <span class="cd-price">— {{ variant.price | money }} {{ cart.currency.iso_code }}<i class="arr" aria-hidden="true"></i></span>
+                <span data-cd-buy-l>{%- if variant.available == false -%}Out of stock{%- elsif is_live -%}Add to bag{%- else -%}Pre-order a copy{%- endif -%}</span>
+                <span class="cd-price">— {{ variant.price | money_without_trailing_zeros }}<i class="ico ico-bag" aria-hidden="true"></i></span>
               </button>
             {%- endform -%}
             {%- unless is_live -%}{%- if variant.available -%}<p class="cd-po-note mono" data-cd-po><b>Pre-order</b><span>{{ po_note | escape }}</span></p>{%- endif -%}{%- endunless -%}
@@ -279,7 +279,7 @@
             <label for="cd-signal-email" class="sr-only">Email address</label>
             <div class="news-row">
               <input id="cd-signal-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}" aria-describedby="cd-signal-note"{% if form.errors %} aria-invalid="true"{% endif %}>
-              <button class="send" type="submit">Request clearance<span class="arr" aria-hidden="true"></span></button>
+              <button class="send" type="submit">Join<span class="arr" aria-hidden="true"></span></button>
             </div>
             {%- if form.errors -%}<small class="mono news-note" id="cd-signal-note" role="alert">{{ form.errors | default_errors }}</small>{%- else -%}<small class="mono news-note" id="cd-signal-note" data-live="{{ live_note | escape }}">{% if is_live %}{{ live_note | escape }}{% else %}{{ section.settings.signup_note | escape }}{% endif %}</small>{%- endif -%}
           {%- endif -%}

@@ -16,10 +16,10 @@ html.js .ab-eq .eq-c { animation: eq-in .7s cubic-bezier(.2, .9, .25, 1.1) both,
 .ab-eq > :nth-child(4) { animation-delay: .42s !important; } .ab-eq > :nth-child(5) { animation-delay: .54s !important; }
 @keyframes eq-in { from { opacity: 0; transform: scale(1.7) rotate(-4deg); } 60% { opacity: 1; transform: scale(.96) rotate(.5deg); } to { transform: none; } }
 .ab-deck { margin-top: clamp(14px, 2vw, 22px); }
-.ab-stamp { position: absolute; right: 2px; bottom: -4px; font-size: clamp(.95rem, 1.6vw, 1.5rem); }
+.stamp.ab-stamp { position: absolute; right: 2px; bottom: -14px; font-size: clamp(.95rem, 1.6vw, 1.5rem); } /* under the headline, off the words */
 @media (max-width: 699px) {
   .ab-eq { gap: 8px 8px; font-size: min(10.6vw, 4.4rem); }
-  .ab-stamp { position: static; justify-self: end; margin-top: 6px; font-size: 1rem; }
+  .stamp.ab-stamp { position: static; justify-self: end; margin-top: 6px; font-size: 1rem; }
 }
 
 /* ---- the story: a short text between two pinned prints ---------------------------------------------------------- */

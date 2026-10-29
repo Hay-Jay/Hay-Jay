@@ -9,6 +9,8 @@
     assign page_css = 'mc-contact.css'
     assign page_js = ''
     assign popup = false
+    # pages where people browse photos: the magazine card shows on wide screens only (on phones it would cover the photos)
+    assign popup_wide_only = false
     case template.name
       when 'index'
         # the home page has its own Vision Issue banner and tile, so no magazine corner card here
@@ -20,6 +22,7 @@
         assign page_css = 'mc-shop.css'
         assign page_js = 'mc-shop.js'
         assign popup = true
+        assign popup_wide_only = true
       when 'list-collections'
         assign key = 'shop'
         assign page_css = 'mc-shop.css'
@@ -48,6 +51,7 @@
             assign page_css = 'mc-lookbook.css'
             assign page_js = 'mc-lookbook.js'
             assign popup = true
+            assign popup_wide_only = true
           when 'shipping'
             assign key = 'shipping'
             assign page_css = 'mc-shipping.css'
@@ -121,7 +125,7 @@
 <body class="pg-{{ key }}">
   <a class="skip" href="#main">Skip to content</a>
   {% sections 'header-group' %}
-  {%- if popup %}{% render 'mc-magpop' %}{% endif %}
+  {%- if popup %}{% render 'mc-magpop', wide_only: popup_wide_only %}{% endif %}
   <main id="main">
     {{ content_for_layout }}
   </main>

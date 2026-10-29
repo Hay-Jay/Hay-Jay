@@ -1,6 +1,7 @@
 /* PRODUCT — the page is server-rendered by Shopify (sections/mc-product.liquid); this adds the photo strip controls (arrows,
    thumbnails, keys, counter), the full-screen zoom, the size tabs (variant -> price, stock, hidden variant id, URL), the quantity
    stepper, Add to bag (AJAX into the bag drawer, with a stamp) and the sticky Add to bag bar on phones.
+   Keyboard: only the current photo and the current thumbnail are Tab stops; the arrow keys move along the strip.
    Without JavaScript the strip still swipes, each photo links to its full size, options are a <select> and the form posts to /cart/add. */
 (() => {
   'use strict';
@@ -20,7 +21,8 @@
   function mark(i) {
     if (i === cur && countEl && countEl.dataset.ok) return;
     cur = i; if (countEl) { countEl.textContent = pad(i + 1); countEl.dataset.ok = '1'; }
-    thumbs.forEach((t, k) => t.setAttribute('aria-current', String(k === i)));
+    thumbs.forEach((t, k) => { t.setAttribute('aria-current', String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+    slides.forEach((s, k) => { const a = $('.gal-xp', s); if (a) a.tabIndex = k === i ? 0 : -1; });
     // the neighbours load before they are swiped to
     [i - 1, i + 1].forEach(k => { const im = imgOf((k + n) % n); if (im && im.loading === 'lazy') im.loading = 'eager'; });
     const t = thumbs[i];
@@ -37,7 +39,10 @@
     i = (i + n) % n;
     target = i; clearTimeout(targetT); targetT = setTimeout(() => { target = -1; }, 1500);
     track.scrollTo({ left: i * track.clientWidth, behavior: how || smooth() });
+    // focus follows along the strip (the old photo or thumbnail is no longer a Tab stop)
+    const f = document.activeElement, was = f && f.closest && (f.closest('.gal-th') ? thumbs : f.closest('.gal-xp') ? slides.map(s => $('.gal-xp', s)) : null);
     mark(i); MC.lensKill();
+    if (was && was[i]) was[i].focus({ preventScroll: true });
   }
   if (track) {
     let raf = 0;
@@ -139,10 +144,12 @@
       return;
     }
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || n < 2) return;
-    if ($('#menu.open') || MC.drawerOpen || (MC.popupOpen && MC.popupOpen())) return;
+    if ($('#menu.open') || MC.drawerOpen) return;
     if (e.target.closest && e.target.closest('input,select,textarea,[contenteditable]')) return;
-    if (e.key === 'ArrowRight') go(cur + 1);
-    else if (e.key === 'ArrowLeft') go(cur - 1);
+    // in the thumbnail strip (upright on a desktop) up and down move too, instead of scrolling the page
+    const inStrip = e.target.closest && e.target.closest('.gal-th');
+    if (e.key === 'ArrowRight' || (inStrip && e.key === 'ArrowDown')) { if (inStrip) e.preventDefault(); go(cur + 1); }
+    else if (e.key === 'ArrowLeft' || (inStrip && e.key === 'ArrowUp')) { if (inStrip) e.preventDefault(); go(cur - 1); }
   });
 
   // ---- variants ----------------------------------------------------------------------------------------------------------------
@@ -151,6 +158,8 @@
   const variantFor = () => data.variants.find(v => v.o.length === sel.length && v.o.every((o, i) => o === sel[i]));
   const idInput = $('#variantId'), buy = $('#buy'), buyT = $('#buyT'), priceEl = $('#priceV'), wasEl = $('#priceWas'), stockEl = $('#stock');
   const alertLink = $('#alertLink'), pay = $('.pl-pay'), sticky = $('#plSticky'), sBuy = $('#plsBuy'), sMeta = $('#plsMeta');
+  // the sticky bar is there before the size tabs have been seen: until a size is picked its button says "Choose size"
+  const pick = sBuy ? sBuy.dataset.pick || '' : '', needPick = () => !!pick && !chosen;
   function sync() {
     const v = variantFor();
     $$('.chip').forEach(ch => {
@@ -161,9 +170,9 @@
     $$('fieldset.opt').forEach(fs => { const b = $('legend b', fs); if (b) b.textContent = sel[+fs.dataset.o] || ''; });
     const can = !!(v && v.a);
     if (idInput && v) idInput.value = v.id;
-    [buy, sBuy].forEach(b => { if (!b) return; b.disabled = !can; b.setAttribute('aria-disabled', String(!can)); });
+    [buy, sBuy].forEach(b => { if (!b) return; const off = !can && !(b === sBuy && needPick()); b.disabled = off; b.setAttribute('aria-disabled', String(off)); });
     if (buyT) buyT.textContent = can ? 'Add to bag' : 'Sold out';
-    if (sBuy) sBuy.textContent = can ? 'Add to bag' : 'Sold out';
+    if (sBuy) sBuy.textContent = needPick() ? `Choose ${pick}` : can ? 'Add to bag' : 'Sold out';
     if (alertLink) alertLink.hidden = can;
     if (pay) pay.hidden = !can;
     // prices come formatted by Shopify in the shopper's currency (Markets may convert from CAD)
@@ -171,7 +180,7 @@
     if (priceEl) priceEl.textContent = shown;
     if (wasEl) { const c = v && !(data.range && !chosen) ? v.c : ''; wasEl.textContent = c; wasEl.hidden = !c; }
     if (sMeta) {
-      const picked = sel.filter((_, i) => data.options[i] && data.options[i].values.length > 1).join(' / '), m = v ? v.m : data.from;
+      const picked = needPick() ? '' : sel.filter((_, i) => data.options[i] && data.options[i].values.length > 1).join(' / '), m = needPick() ? shown : v ? v.m : data.from;
       sMeta.textContent = (picked && picked !== m ? picked + ' · ' : '') + m;
     }
     if (stockEl && data.variants.some(x => x.a)) {
@@ -226,22 +235,31 @@
     } finally { pending = false; [buy, sBuy].forEach(b => b && b.classList.remove('is-adding')); }
   });
 
-  // ---- phones: the sticky bar appears once the main Add to bag has scrolled up out of view -------------------------------------------------
+  // ---- phones: the sticky bar is there from the start, and steps aside only while the main Add to bag is on screen ------------------------
   const buyRow = $('#plBuy');
   if (sticky && buyRow) {
     const phone = matchMedia('(max-width: 899px)');
     let raf = 0, was = null;
-    // measured on scroll rather than observed: a jump (back button, anchor, restored scroll) must show it too
+    // measured on scroll rather than observed: a jump (back button, anchor, restored scroll) must update it too
     const set = () => {
       raf = 0;
-      const on = phone.matches && buyRow.getBoundingClientRect().bottom < 0 && data.variants.some(x => x.a);
+      const r = (buy || buyRow).getBoundingClientRect();
+      const inView = r.bottom > 0 && r.top < innerHeight - 24;
+      const on = phone.matches && !inView && data.variants.some(x => x.a);
       if (on === was) return; was = on;
       sticky.classList.toggle('on', on); sticky.inert = !on; root.classList.toggle('buy-pin', on);
     };
     const ask = () => { if (!raf) raf = requestAnimationFrame(set); };
     addEventListener('scroll', ask, { passive: true }); addEventListener('resize', ask); set();
-    // the sticky bar names the product and size; a tap on that part goes back up to the size tabs
-    const t = $('.pls-t', sticky);
-    if (t) { t.style.cursor = 'pointer'; t.addEventListener('click', () => { const o = $('#opts') || buyRow; o.scrollIntoView({ block: 'center', behavior: smooth() }); }); }
+    // the sticky bar names the product and size; with sizes to choose that part is a button back up to the size tabs,
+    // and so is "Choose size" until one has been picked (the tabs give a little shake when they arrive)
+    const toSizes = () => {
+      const o = $('#opts') || buyRow; o.scrollIntoView({ block: 'center', behavior: smooth() });
+      const ch = $('.chip.on', o) || $('.chip:not(:disabled)', o); if (ch) ch.focus({ preventScroll: true });
+      if (!reduce) { o.classList.remove('flag'); void o.offsetWidth; o.classList.add('flag'); setTimeout(() => o.classList.remove('flag'), 1200); }
+    };
+    const back = $('#plsBack', sticky);
+    if (back) back.addEventListener('click', toSizes);
+    if (sBuy) sBuy.addEventListener('click', e => { if (needPick()) { e.preventDefault(); toSizes(); } });
   }
 })();

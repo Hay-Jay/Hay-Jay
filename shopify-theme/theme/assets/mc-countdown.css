@@ -93,9 +93,8 @@ html.mc-still .ticker-t { animation: none !important; }
 @media (max-width: 560px) { .cd-buywrap { flex: 1 1 100%; } .cd-buy { width: 100%; } }
 .cd-buy { cursor: pointer; flex-wrap: wrap; column-gap: 10px; }
 .cd-price { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
-@media (max-width: 420px) { .cd-buy { justify-content: space-between; text-align: left; row-gap: 6px; } .cd-buy [data-cd-buy-l] { flex: 1 0 100%; } }
 .cd-buy:disabled { cursor: not-allowed; background: transparent; color: #ececec; border-style: dashed; }
-.cd-buy:disabled .arr { display: none; }
+.cd-buy:disabled .ico { display: none; }
 .cd-buy.mc-add-pending { opacity: .6; pointer-events: none; }
 .cd-po-note { display: flex; align-items: baseline; gap: 8px; margin: 0; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #b4b4b4; }
 .cd-po-note b { flex: none; padding: 2px 6px 1px; border: 1px solid currentColor; color: #ececec; font-weight: 700; }
@@ -206,5 +205,7 @@ html.mc-still .ticker-t { animation: none !important; }
 html:not(.js) .cd-cities, html:not(.js) .cd-scope, html:not(.js) [data-cd-ics], html:not(.js) [data-cd-gcal], html:not(.js) [data-cd-share], html:not(.js) [data-cd-utc], html:not(.js) .cd-still, html:not(.js) .cd-peek { display: none; }
 /* after the launch the calendar links have nothing left to remind anyone of */
 .cd.is-live [data-cd-ics], .cd.is-live [data-cd-gcal] { display: none; }
+/* after the launch the timetable is history: no date, no cities, no decryption bar */
+.cd.is-live .cd-when, .cd.is-live .cd-prog { display: none; }
 /* no launch moment set (or one the countdown can't read): no clock rather than a wrong one */
 .cd.no-launch .cd-clock-wrap, .cd.no-launch .cd-prog, .cd.no-launch .cd-scope, .cd.no-launch .cd-cities, .cd.no-launch [data-cd-ics], .cd.no-launch [data-cd-gcal] { display: none; }

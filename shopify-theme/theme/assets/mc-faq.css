@@ -1,13 +1,6 @@
-/* FAQ — the debrief: a dark briefing-room panel with a tape recorder, and the transcript on paper (a real <details> accordion). */
+/* FAQ — the debrief: a dark briefing-room panel and the transcript on paper (a real <details> accordion). */
 .faq-spread { overflow: clip; padding-top: clamp(28px, 4vw, 52px); }
 .fq-grid { display: grid; gap: clamp(32px, 5vw, 60px); align-items: start; }
-.recorder { display: flex; align-items: center; gap: 14px; margin-top: 8px; padding: 16px 18px; border: 2px solid var(--fg); width: fit-content; background: var(--soft); }
-.reel { position: relative; width: 56px; height: 56px; border: 3px solid var(--fg); border-radius: 50%; animation: spin 5s linear infinite; }
-.reel::before { content: ""; position: absolute; inset: 14px; border: 3px solid var(--fg); border-radius: 50%; }
-.reel::after { content: ""; position: absolute; left: 50%; top: 3px; bottom: 3px; width: 3px; margin-left: -1.5px; background: var(--fg); box-shadow: 0 0 0 0 transparent; }
-.reel + .reel { animation-duration: 3.2s; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.recorder .mono { display: inline-flex; align-items: center; margin-left: 6px; }
 .transcript { position: relative; padding: clamp(22px, 3.4vw, 44px); background: var(--paper) var(--grain-d); border: 2px solid #0a0a0a; box-shadow: 0 16px 36px rgba(0, 0, 0, .5); }
 .transcript > .clip { right: clamp(18px, 4vw, 48px); top: -22px; }
 .faq-list { border-top: 3px solid var(--fg); }
@@ -39,4 +32,3 @@ details[open] .pm::after { transform: rotate(0); }
 .fq-jump { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
 .fq-jump a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 2px solid var(--fg); text-decoration: none; font: 700 12px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; transition: background .2s, color .2s; }
 .fq-jump a:hover, .fq-jump a:focus-visible { background: var(--fg); color: var(--bg); }
-@media (max-width: 699px) { .recorder { display: none; } }

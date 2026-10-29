@@ -45,6 +45,9 @@ ok('shop: the Tops tab shows only tops and puts ?c=top in the URL', tops.length 
 ok('shop: the Tops tab is pressed', await p0.$eval('.sh-chip[data-filter="top"]', e => e.getAttribute('aria-pressed')) === 'true');
 await p0.click('.sh-view[data-view="list"]'); await p0.waitForTimeout(400);
 ok('shop: list view swaps the grid for the name list (?v=list)', await p0.evaluate(() => getComputedStyle(document.querySelector('#grid')).display === 'none' && getComputedStyle(document.querySelector('#toc')).display !== 'none') && p0.url().includes('v=list'), p0.url());
+await p0.goto(BASE + '/collections/new-arrivals'); await p0.waitForTimeout(500);
+const na = await p0.evaluate(() => ({ tools: !!document.querySelector('#tools'), mine: document.querySelectorAll('#grid .card').length, more: document.querySelectorAll('.sh-more .card').length }));
+ok('small collection (New in): no toolbar, its pieces, then more on file', !na.tools && na.mine === 2 && na.more >= 4, JSON.stringify(na));
 const pp = await page({ w: 390, h: 844 });
 await pp.goto(BASE + '/collections/all'); await pp.waitForTimeout(600);
 const top390 = await pp.$eval('#grid .card .card-ph img', i => i.getBoundingClientRect().top);
@@ -113,7 +116,8 @@ await fetch(BASE + '/cart/clear.js'); await p2.goto(BASE + '/cart'); await p2.wa
 const cols = await p2.$eval('.cart-picks .sheet', e => getComputedStyle(e).gridTemplateColumns.split(' ').length).catch(() => 0);
 ok('empty bag: suggestions sit in a 4-column grid', cols === 4, String(cols));
 });
-// 7. the magazine corner card: never on the home page; on a browsing page it opens by itself (delay 8 s), once per visitor
+// 7. the magazine corner card: never on the home page; on a browsing page it opens by itself (delay 8 s), once per visitor;
+//    on phones it is a slim bottom bar and never shows on the shop page
 let p3;
 await T('7. corner card: not on home, opens on the shop page', async () => {
 await fetch(BASE + '/cart/clear.js');
@@ -127,6 +131,15 @@ await p3.click('#magpop [data-close]'); await p3.waitForTimeout(700);
 ok('corner card: Close hides it and it is remembered', await p3.evaluate(() => document.querySelector('#magpop').hidden && Object.keys(localStorage).some(k => k.startsWith('mc-magpop-'))));
 await p3.goto(BASE + '/products/monochrome-sweatshirt'); await p3.waitForTimeout(300);
 ok('corner card: not on product pages', await p3.$('#magpop') === null);
+// phones: a slim bar along the bottom, and never on the shop (or lookbook) pages, where it would cover the photos
+const pm = await page({ w: 390, h: 844 });
+await pm.goto(BASE + '/collections/all'); await pm.evaluate(() => scrollTo(0, innerHeight * 1.5)); await pm.waitForTimeout(9500);
+ok('phone corner card: never on the shop page', await pm.evaluate(() => !document.querySelector('#magpop.open')));
+await pm.goto(BASE + '/pages/about'); await pm.evaluate(() => scrollTo(0, innerHeight * 1.5));
+await pm.waitForSelector('#magpop.open', { timeout: 12000 }).catch(() => {}); await pm.waitForTimeout(700);
+const bar = await pm.evaluate(() => { const m = document.querySelector('#magpop.open'); if (!m) return null; const r = m.querySelector('.mp-card').getBoundingClientRect(), a = m.querySelector('.mp-add'); return { h: Math.round(r.height), bottom: Math.round(r.bottom), vh: innerHeight, w: Math.round(r.width), form: !!a.form && /\/cart\/add$/.test(new URL(a.form.action).pathname) }; });
+ok('phone corner card: a slim bar along the bottom (about page); Add is a /cart/add form', !!bar && bar.h <= 64 && bar.bottom === bar.vh && bar.w === 390 && bar.form, JSON.stringify(bar));
+await pm.context().close();
 });
 // 8. command palette + declassify; the menu search
 let p4;
@@ -140,8 +153,13 @@ await p3.click('#findBtn'); await p3.waitForSelector('#menu.open', { timeout: 30
 ok('menu search: Search opens the menu with the cursor in the search box', await p3.evaluate(() => document.querySelector('#menu').classList.contains('open') && document.activeElement && document.activeElement.id === 'jump' && document.querySelector('#findBtn').getAttribute('aria-expanded') === 'true'));
 await p3.keyboard.type('cargo skirt'); await p3.waitForTimeout(900);
 ok('menu search: results are a listbox with an active option', await p3.evaluate(() => { const j = document.querySelector('#jump'); return j.getAttribute('aria-expanded') === 'true' && !!document.getElementById(j.getAttribute('aria-activedescendant')); }));
+// Enter searches (the first row is "See all results"); a result opens only once the arrow keys have moved onto it
+await Promise.all([p3.waitForURL('**/search?**', { timeout: 5000 }).catch(() => {}), p3.keyboard.press('Enter')]);
+ok('menu search: Enter shows all results (the search page)', new URL(p3.url()).pathname === '/search' && new URL(p3.url()).searchParams.get('q') === 'cargo skirt', p3.url());
+await p3.click('#findBtn'); await p3.waitForSelector('#menu.open', { timeout: 3000 }).catch(() => {});
+await p3.keyboard.type('cargo skirt'); await p3.waitForTimeout(900); await p3.keyboard.press('ArrowDown');
 await Promise.all([p3.waitForURL('**/products/**', { timeout: 5000 }).catch(() => {}), p3.keyboard.press('Enter')]);
-ok('menu search: Enter opens the top result', new URL(p3.url()).pathname === '/products/monochrome-cargo-skirt', p3.url());
+ok('menu search: ArrowDown then Enter opens the highlighted product', new URL(p3.url()).pathname === '/products/monochrome-cargo-skirt', p3.url());
 p4 = await page({ w: 390, h: 844 });
 await p4.goto(BASE + '/pages/about'); await p4.waitForTimeout(500); await p4.click('#menuBtn'); await p4.waitForTimeout(700); await p4.click('#declassMenu'); await p4.waitForTimeout(300);
 ok('phone: in-menu Declassify switch', await p4.evaluate(() => document.documentElement.classList.contains('declass')));
@@ -172,7 +190,9 @@ await p.goto(BASE + '/collections/all'); await p.waitForTimeout(700);
 const card = '#grid .card[data-h="monochrome-sweatshirt"]';
 const vis = () => p.$eval(card + ' .qa-p', e => getComputedStyle(e).visibility);
 const v0 = await vis();
+const h0 = await p.$eval(card, c => !c.querySelector('img.ph2') && !!c.querySelector('template.ph2-t'));
 await p.hover(card + ' .card-ph'); await p.waitForTimeout(450);
+ok('hover photo: loaded only on the first hover', h0 && await p.$eval(card, c => !!c.querySelector('img.ph2') && !c.querySelector('template.ph2-t')));
 ok('quick add: the sizes are hidden until the card is hovered', v0 === 'hidden' && (await vis()) === 'visible', `${v0} -> ${await vis()}`);
 await p.click(card + ' .qa-b:text-is("L")'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
 const c1 = await cart();
@@ -184,8 +204,14 @@ await p.hover(one + ' .card-ph'); await p.waitForTimeout(450);
 await p.click(one + ' .qa-one .qa-b'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
 ok('quick add: a one-size piece adds with one click', (await cart()).items.some(i => /trinity ring/i.test(i.title)) && (await p.textContent('[data-cart-count]')).trim() === '2');
 await p.keyboard.press('Escape'); await p.waitForTimeout(600); await p.mouse.move(2, 2);
-await p.focus('#grid .card[data-h="monochrome-cargo-skirt"] .card-a'); await p.waitForTimeout(450);
-ok('quick add: keyboard focus on a card shows its sizes', await p.$eval('#grid .card[data-h="monochrome-cargo-skirt"] .qa-p', e => getComputedStyle(e).visibility) === 'visible');
+// keyboard: two Tab stops per card (the link, then "+"); "+" opens the sizes as a sheet, so they are not one Tab stop each
+const kc = '#grid .card[data-h="monochrome-cargo-skirt"]';
+await p.$eval(kc, e => e.scrollIntoView({ block: 'center', behavior: 'instant' }));
+await p.focus(kc + ' .card-a'); await p.waitForFunction(s => +getComputedStyle(document.querySelector(s + ' .qa-go')).opacity > 0.9, kc, { timeout: 3000 }).catch(() => {});
+const kv = await p.$eval(kc, c => ({ go: +getComputedStyle(c.querySelector('.qa-go')).opacity, strip: getComputedStyle(c.querySelector('.qa-p')).visibility }));
+await p.keyboard.press('Tab'); await p.keyboard.press('Enter'); await p.waitForTimeout(500); await p.keyboard.press('Tab');
+ok('quick add: keyboard focus on a card shows "+", which opens its sizes', kv.go > 0.9 && kv.strip === 'hidden' && await p.$eval(kc + ' .qa-p', e => e.matches(':popover-open')) && await p.evaluate(s => document.activeElement.matches(s + ' .qa-p .qa-b'), kc), JSON.stringify(kv));
+await p.keyboard.press('Escape'); await p.waitForTimeout(400);
 ok('quick add: no quick add on gift cards or personalised pieces', !(await p.$('#grid .card[data-h="monochrome-gift-cards"] .card-qa')) && !(await p.$('#grid .card[data-h="custom-monochrome-jersey"] .card-qa')));
 ok('quick add (desktop): no console errors', !p.errs.length, p.errs.join(' | '));
 await p.context().close();
@@ -212,17 +238,19 @@ ok('phone quick add: a size closes the sheet, adds it and opens the bag', !(awai
 ok('phone quick add: no console errors', !p.errs.length, p.errs.join(' | '));
 await p.context().close();
 });
-// 12. product page on phones: a sticky Add to bag bar once the main button has scrolled away
+// 12. product page on phones: a sticky Add to bag bar from the start, out of the way while the main button is on screen
 await T('12. product sticky bar', async () => {
 await fetch(BASE + '/cart/clear.js');
 const p = await page({ w: 390, h: 844 });
 await p.goto(BASE + '/products/monochrome-sweatshirt'); await p.waitForTimeout(700);
 const st = () => p.$eval('#plSticky', e => ({ on: e.classList.contains('on'), inert: e.inert }));
-const s0 = await st();
+const s0 = await st(), pick0 = (await p.textContent('#plsBuy')).trim();
 await p.tap('.chip[data-v="M"]'); await p.waitForTimeout(200);
+await p.evaluate(() => document.querySelector('#buy').scrollIntoView({ block: 'center', behavior: 'instant' })); await p.waitForTimeout(500);
+const sMid = await st();
 await p.evaluate(() => window.scrollTo({ top: document.querySelector('#plBuy').getBoundingClientRect().bottom + scrollY + 400, behavior: 'instant' })); await p.waitForTimeout(500);
 const s1 = await st();
-ok('sticky bar: hidden (inert) at first, shown once Add to bag scrolls away', !s0.on && s0.inert && s1.on && !s1.inert, JSON.stringify([s0, s1]));
+ok('sticky bar: shown from load ("Choose size" until a size is picked), hidden while Add to bag is on screen, back after', s0.on && !s0.inert && pick0 === 'Choose size' && !sMid.on && sMid.inert && s1.on && !s1.inert, JSON.stringify([s0, pick0, sMid, s1]));
 ok('sticky bar: names the chosen size and price', /^M · \$/.test((await p.textContent('#plsMeta')).trim()), await p.textContent('#plsMeta'));
 await p.tap('#plsBuy'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
 const c1 = await cart();

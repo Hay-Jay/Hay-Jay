@@ -11,6 +11,10 @@
 .hl-ng { background: #f2f2f2; color: #0a0a0a; border-color: #f2f2f2; }
 .hl-ng .mono { color: #2a2a2a; }
 .hl-ng p { color: #0a0a0a; }
+/* the US line: one row under the two boxes */
+.hl-us { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; padding: 10px 16px 12px; border-style: dashed; }
+.hl-us .mono { flex: 0 0 100%; }
+.hl-us b { font-size: clamp(1.7rem, 3vw, 2.3rem); }
 .rt-radar { width: min(100%, 460px); justify-self: center; }
 @media (min-width: 960px) { .rt-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); } }
 @media (max-width: 959px) { .rt-radar { width: min(76%, 340px); order: -1; justify-self: end; margin: -8px 0 -24px; } }

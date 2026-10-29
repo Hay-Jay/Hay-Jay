@@ -46,7 +46,8 @@
             {%- if nu != blank -%}<a class="bn-msg" href="{{ nu }}">{{ nt | escape }}</a>{%- else -%}<span class="bn-msg">{{ nt | escape }}</span>{%- endif -%}
           {%- endif -%}
         {%- endfor -%}
-        <span class="bn-msg bn-mark" aria-hidden="true">{{ settings.banner_mark | escape }}</span>
+        {%- comment -%} a single notice stays put (it decrypts once); two take turns with the banner mark {%- endcomment -%}
+        {%- if n_notes > 1 %}<span class="bn-msg bn-mark" aria-hidden="true">{{ settings.banner_mark | escape }}</span>{% endif -%}
       {%- endif -%}
     </div>
     <nav class="bn-r mono" aria-label="Help">
@@ -158,7 +159,7 @@
   "name": "Header",
   "settings": [
     { "type": "header", "content": "Notices in the top strip" },
-    { "type": "paragraph", "content": "They take turns with the banner text from Theme settings. {countries} = how many countries you deliver to." },
+    { "type": "paragraph", "content": "One notice stays put. Two take turns with the banner text from Theme settings. {countries} = how many countries you deliver to." },
     { "type": "text", "id": "notice_1", "label": "Notice 1", "default": "Ships to {countries} countries — Nigeria & Canada" },
     { "type": "url", "id": "notice_1_url", "label": "Notice 1 link" },
     { "type": "text", "id": "notice_2", "label": "Notice 2", "info": "Optional. For a time-limited offer, empty it when the offer ends." },

@@ -108,9 +108,6 @@
   </div>
   {%- if words != blank %}{% render 'mc-ticker', words: words, cls: 'hazard' %}{% endif -%}
 </section>
-{%- if n_prints > 1 -%}
-<script src="{{ 'mc-home.js' | asset_url }}" defer></script>
-{%- endif -%}
 
 {% schema %}
 {

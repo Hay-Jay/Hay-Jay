@@ -1,6 +1,6 @@
 /* MONOCHROME® — CLASSIFIED. Behaviour shared by every page (a work of fiction, see the footer):
    links (MC.url), the DECLASSIFY toggle (redaction bars), stamps + reveals, the declassify lens on photographs,
-   live camera clocks, tickers, counters, the menu + search overlay, the rotating notice strip, the magazine corner card,
+   live camera clocks, tickers, counters, the menu + search overlay, the notice strip, the magazine corner card (a bar on phones),
    tilting prints, prefetch. Page-specific code lives in the page scripts. */
 (() => {
   'use strict';
@@ -310,12 +310,14 @@
     }
     return sc + (it.type === 'Product' ? 2 : it.type === 'Page' ? 1 : 0);
   }
+  // the first row is always "See all results" (the search page); the matches follow it
   function renderJump() {
-    const q = jump.value.trim().toLowerCase();
+    const raw = jump.value.trim(), q = raw.toLowerCase();
     menu.classList.toggle('searching', !!q);
     if (!q || !catalog) { jList.hidden = true; jList.innerHTML = ''; jNone.hidden = true; jItems = []; jSel = -1; jump.setAttribute('aria-expanded', 'false'); jump.removeAttribute('aria-activedescendant'); return; }
     const toks = q.split(/\s+/);
     jItems = catalog.map(it => ({ it, s: score(it, toks) })).filter(x => x.s >= 0).sort((a, b) => b.s - a.s).slice(0, 12).map(x => x.it);
+    if (jItems.length) jItems.unshift({ type: 'Search', title: `See all results for \u201c${raw}\u201d`, href: (ROUTES.search || '/search') + '?q=' + encodeURIComponent(raw), meta: fine ? 'Enter' : '' });
     jSel = jItems.length ? 0 : -1;
     jList.innerHTML = jItems.map((it, i) => `<li role="presentation"><a class="jump-i" role="option" id="j${i}" aria-selected="${i === 0}" href="${esc(it.href)}"${/^https?:/.test(it.href) ? ' target="_blank" rel="noopener"' : ''}><span class="mono">${esc(it.type)}</span><b>${esc(it.title)}</b><span class="mono">${esc(it.meta || '')}</span></a></li>`).join('');
     jList.hidden = !jItems.length; jNone.hidden = !!jItems.length;
@@ -337,11 +339,11 @@
     });
     if (jump) {
       jump.addEventListener('input', () => { loadCatalog().then(renderJump); renderJump(); });
-      // Enter opens the highlighted result; with no result the form searches the shop (a real GET to /search)
+      // Enter searches the shop (the form's real GET to /search), unless the arrow keys have moved the highlight onto a result
       jump.addEventListener('keydown', e => {
         if (e.key === 'ArrowDown') { e.preventDefault(); jumpMove(1); }
         else if (e.key === 'ArrowUp') { e.preventDefault(); jumpMove(-1); }
-        else if (e.key === 'Enter') { const a = $('#j' + Math.max(0, jSel)); if (a && jItems.length) { e.preventDefault(); a.click(); } }
+        else if (e.key === 'Enter' && jSel > 0 && jItems.length) { const a = $('#j' + jSel); if (a) { e.preventDefault(); a.click(); } }
       });
     }
     const trap = (e, rootEl) => {
@@ -365,25 +367,26 @@
     [menuBtn, findBtn].forEach(b => b && b.addEventListener('pointerenter', () => { loadCatalog(); }, { once: true }));
   }
 
-  // ---- The notice strip: the notices take turns, each one decrypting into place (static with reduced motion) ---------------
+  // ---- The notice strip: one notice decrypts into place once; several take turns, each one decrypting (static with reduced motion)
   const notes = $('[data-notes]');
   if (notes) {
     const msgs = $$('.bn-msg', notes);
+    const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%/';
+    const decrypt = el => {
+      const t = el.dataset.t, n = 12; let f = 0;
+      clearInterval(el._dc);
+      el._dc = setInterval(() => {
+        f++; const keep = Math.floor(t.length * f / n);
+        el.textContent = f >= n ? t : t.slice(0, keep) + t.slice(keep).replace(/[A-Za-z0-9]/g, () => CH[Math.random() * CH.length | 0]);
+        if (f >= n) clearInterval(el._dc);
+      }, 38);
+    };
+    msgs.forEach(m => { m.dataset.t = m.textContent; if (m.tagName === 'A') m.setAttribute('aria-label', m.textContent); });
+    if (msgs.length === 1 && !reduce) decrypt(msgs[0]);
     if (msgs.length > 1) {
-      msgs.forEach(m => { m.dataset.t = m.textContent; if (m.tagName === 'A') m.setAttribute('aria-label', m.textContent); });
       msgs[0].classList.add('on'); notes.setAttribute('data-ready', '');
       if (!reduce) {
-        const CH = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%/';
         let k = 0, paused = false, timer = 0;
-        const decrypt = el => {
-          const t = el.dataset.t, n = 12; let f = 0;
-          clearInterval(el._dc);
-          el._dc = setInterval(() => {
-            f++; const keep = Math.floor(t.length * f / n);
-            el.textContent = f >= n ? t : t.slice(0, keep) + t.slice(keep).replace(/[A-Za-z0-9]/g, () => CH[Math.random() * CH.length | 0]);
-            if (f >= n) clearInterval(el._dc);
-          }, 38);
-        };
         const next = () => {
           if (paused || document.hidden) return;
           msgs[k].classList.remove('on'); k = (k + 1) % msgs.length; msgs[k].classList.add('on'); decrypt(msgs[k]);
@@ -439,9 +442,11 @@
   // localStorage, guarded); never over the menu, the bag or a box the visitor is typing in. Close, Esc or adding it dismisses it.
   const mp = $('#magpop');
   const saveDataEarly = !!(navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || '')));
-  MC.popupOpen = () => false;
   if (mp) (function () {
     const KEY = 'mc-magpop-' + mp.dataset.key;
+    // phones get a slim bar along the bottom, and none at all on the pages people browse photos on (data-wide-only: shop, lookbook)
+    const phone = () => matchMedia('(max-width: 699px)').matches;
+    if (mp.hasAttribute('data-wide-only') && phone()) return;
     let stored = true;
     const seen = () => { try { return !!localStorage.getItem(KEY); } catch { stored = false; return false; } };
     if (seen() || !stored) return; // shown before, or storage is blocked and it could not be remembered: never nag
@@ -464,6 +469,7 @@
     function show() {
       shown = true; remember();
       mp.hidden = false;
+      root.classList.add('mp-bar'); // the chat launcher steps aside on phones while the bar is up (mc-base.css)
       if (stamp) stamp.classList.remove('in');
       afterPaint(() => {
         mp.classList.add('open');
@@ -478,6 +484,7 @@
       if (!isOpen()) return;
       const hadFocus = mp.contains(document.activeElement);
       mp.classList.remove('open');
+      root.classList.remove('mp-bar');
       setTimeout(() => { mp.hidden = true; }, reduce ? 0 : 560);
       if (hadFocus) { const m = $('#main'); if (m) { m.tabIndex = -1; m.focus({ preventScroll: true }); } }
     }
@@ -490,6 +497,7 @@
     const iv = setInterval(() => {
       if (document.hidden) return;
       seconds++;
+      if (mp.hasAttribute('data-wide-only') && phone()) return; // turned to a phone-sized window: wait
       if ((seconds >= wait || (seconds >= 3 && scrollY > innerHeight * 1.2)) && ready()) { clearInterval(iv); show(); }
       else if (seconds > 180) clearInterval(iv);
     }, 1000);

@@ -13,6 +13,9 @@ a, button, summary, label, select, input, [role=button] { touch-action: manipula
 img { -webkit-touch-callout: none; }
 input, select, textarea { font-size: max(16px, 1em); }
 
+/* ---- phones: the notice strip is 44px tall (a thumb target), so the header sticks 44px up and only the tab bar stays --------- */
+@media (max-width: 699px) { .hdr, .shopify-section-group-header-group { top: -44px; } }
+
 /* ---- short screens (a phone on its side) ------------------------------------------------------------------------------------ */
 @media (max-height: 520px) and (orientation: landscape) {
   .banner.top { display: none; }

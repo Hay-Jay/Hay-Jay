@@ -34,7 +34,7 @@
   -%}
 <section class="spread dark hmag" id="vision" aria-labelledby="magH">
   <div class="wrap hm-grid">
-    <a class="hm-cover" href="{{ mag.url }}" data-tilt aria-label="{{ mag.title | strip | escape }}">
+    <a class="hm-cover" href="{{ mag.url }}" data-hm-tilt aria-label="{{ mag.title | strip | escape }}">
       <span class="hm-tilt">
         {% render 'mc-img', image: mag.featured_image, alt: '', class: 'hm-img', sizes: '(min-width:900px) 220px, 120px', widths: '240,360,480' %}
         <i class="hm-glare"></i>
@@ -64,7 +64,6 @@
     </form>
   </div>
 </section>
-<script src="{{ 'mc-home.js' | asset_url }}" defer></script>
 {%- endif -%}
 
 {% schema %}

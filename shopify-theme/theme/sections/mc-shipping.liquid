@@ -30,6 +30,7 @@
       <div class="dst-hl">
         <div class="hl hl-ng rv"><span class="mono">Field office</span><b>Nigeria</b><p>{{ section.settings.nigeria | escape }}</p></div>
         <div class="hl hl-ca rv" style="--rv:1"><span class="mono">Home base</span><b>Canada</b><p>{{ section.settings.canada | escape }}</p></div>
+        {%- if section.settings.us != blank %}<div class="hl hl-us rv" style="--rv:2"><span class="mono">Next door</span><b>USA</b><p>{{ section.settings.us | escape }}</p></div>{% endif -%}
       </div>
     </div>
     <div class="rt-radar" aria-hidden="true">{% render 'mc-radar' %}</div>
@@ -124,12 +125,13 @@
     { "type": "text", "id": "deck", "label": "One line", "info": "{countries} = how many countries.", "default": "{countries} countries. Rates at checkout." },
     { "type": "text", "id": "nigeria", "label": "Nigeria box", "default": "Delivered. Rate shown at checkout." },
     { "type": "text", "id": "canada", "label": "Canada box", "default": "Free standard shipping over $200." },
+    { "type": "text", "id": "us", "label": "United States line", "info": "Under the two boxes. Empty: hidden.", "default": "Free standard shipping over $100." },
     { "type": "text", "id": "rates_note", "label": "Under the country list", "default": "Your rate shows at checkout, before you pay." }
   ],
   "blocks": [
     {
       "type": "return_note", "name": "Returns note", "limit": 8,
-      "settings": [{ "type": "richtext", "id": "text", "label": "Text ({refund}, {shipping} = policy links)", "default": "<p>Unworn, original condition.</p>" }]
+      "settings": [{ "type": "richtext", "id": "text", "label": "Text ({refund}, {shipping} = policy links)", "default": "<p>Unworn, with tags.</p>" }]
     },
     {
       "type": "step", "name": "Order step", "limit": 6,

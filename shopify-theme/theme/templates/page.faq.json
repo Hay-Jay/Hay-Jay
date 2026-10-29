@@ -28,7 +28,7 @@
           "type": "qa",
           "settings": {
             "question": "Returns and exchanges?",
-            "answer": "<p>Contact us soon after delivery with your order number. Items must be unworn. <a href=\"/pages/shipping#returns\">Returns</a></p>"
+            "answer": "<p>Doesn't fit? We'll exchange it. Email us within 14 days of delivery with your order number. Unworn, with tags. <a href=\"/pages/shipping#returns\">Details</a></p>"
           }
         },
         "q5": {

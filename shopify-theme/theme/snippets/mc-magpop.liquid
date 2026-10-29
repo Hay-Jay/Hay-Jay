@@ -1,7 +1,9 @@
 {%- comment -%}
   The magazine corner card (markup only; timing and memory are in mc-core.js, it never shows without JavaScript).
-  A small, non-blocking card in the bottom-left corner, offered once per visitor. Rendered by layout/theme.liquid on browsing pages only
-  (home, shop, lookbook, about, shipping, FAQ), never on product, bag or account pages, and not when the magazine is already in the bag. No params.
+  A small, non-blocking card in the bottom-left corner, offered once per visitor; on phones a slim bar along the bottom edge.
+  Rendered by layout/theme.liquid on browsing pages only (shop, lookbook, about, shipping, FAQ), never on the home, product, bag or
+  account pages, and not when the magazine is already in the bag. Add to bag is a real /cart/add form (mc-cart.js makes it AJAX).
+  Param: wide_only (true = never on phones: pages where people browse photos).
 {%- endcomment -%}
 {%- liquid
   capture mag_handle
@@ -35,16 +37,17 @@
       assign kick = 'Vol. ' | append: vol
     endif
   -%}
-<aside class="magpop" id="magpop" role="dialog" aria-modal="false" aria-labelledby="magpopT" data-key="{{ mag.handle }}" hidden>
+<aside class="magpop" id="magpop" role="dialog" aria-modal="false" aria-labelledby="magpopT" data-key="{{ mag.handle }}"{% if wide_only %} data-wide-only{% endif %} hidden>
   <div class="mp-card paper">
     <a class="mp-cover" href="{{ mag.url }}" tabindex="-1" aria-hidden="true">{% render 'mc-img', image: cover, alt: '', class: 'mp-img', sizes: '(min-width:700px) 112px, 84px', widths: '120,180,240' %}<span class="stamp sm mp-stamp" style="--r:-12deg">New</span></a>
     <div class="mp-copy">
       <p class="mp-kick mono"><b class="rec" aria-hidden="true"></b>{{ kick | escape }} <span aria-hidden="true">// Print</span></p>
       <h2 class="mp-t" id="magpopT"><a href="{{ mag.url }}">{{ mtitle | escape }}</a></h2>
       {%- if settings.magpop_line != blank %}<p class="mp-line mono">{{ settings.magpop_line | escape }}</p>{% endif -%}
-      <p class="mp-cta">
-        <a class="mp-add" href="{{ routes.cart_url }}/{{ variant.id }}:1" data-mc-add="{{ variant.id }}">Add to bag<span class="mp-pr">{{ variant.price | money }}</span></a>
-      </p>
+      <form class="mp-cta" method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8">
+        <input type="hidden" name="quantity" value="1">
+        <button class="mp-add" type="submit" name="id" value="{{ variant.id }}" data-mc-add="{{ variant.id }}">Add<span class="mp-tb"> to bag</span> <span class="mp-pr">{{ variant.price | money_without_trailing_zeros }}</span></button>
+      </form>
     </div>
     <button class="mp-x" type="button" data-close aria-label="Close"><i aria-hidden="true"></i></button>
   </div>

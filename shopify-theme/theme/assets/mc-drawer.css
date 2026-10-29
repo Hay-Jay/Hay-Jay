@@ -144,10 +144,10 @@ a.bag-bump, button.bag-bump { animation: bag-ring .7s ease-out; }
 html.drawer-lock { overflow: hidden; }
 
 /* ---- the store's apps next to the theme's overlays -------------------------------------------------------- */
-/* The Inbox chat launcher floats bottom-right above everything; it steps aside while the bag, the magazine pop-up, the file index or
+/* The Inbox chat launcher floats bottom-right above everything; it steps aside while the bag, the menu or
    the photo zoom is open, and on phones while the sticky Add to bag bar is showing (it is back as soon as those close). */
 /* display, not visibility: the widget's own button sets visibility: visible inside its shadow root and would show through */
-html.drawer-lock shopify-chat, html.mp-open shopify-chat, html.menu-up shopify-chat, html.lb-lock shopify-chat { display: none !important; }
+html.drawer-lock shopify-chat, html.menu-up shopify-chat, html.lb-lock shopify-chat { display: none !important; }
 @media (max-width: 899px) { html.buy-pin shopify-chat { display: none !important; } }
 
 /* ---- app blocks section (Klarna messaging and the like) ---------------------------------------------------- */

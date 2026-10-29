@@ -372,7 +372,7 @@
       $$('.cd-cta [hidden]').forEach(el => { el.hidden = false; });
       $$('[data-cd-po]').forEach(el => el.remove());
       const btn = $('.cd-buy'), bl = $('[data-cd-buy-l]');
-      if (bl && btn && !btn.disabled) bl.textContent = 'Requisition a copy';
+      if (bl && btn && !btn.disabled) bl.textContent = 'Add to bag';
       $$('[data-live]').forEach(el => { el.textContent = el.dataset.live; });
       if (bag && bag === document.activeElement) bag.blur();
       sealBag(false);

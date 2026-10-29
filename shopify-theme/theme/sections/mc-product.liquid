@@ -55,6 +55,12 @@
   if first and first.aspect_ratio < 0.95
     assign stage_ar = '4 / 5'
   endif
+  # a ring shot small on a wide studio frame: its first photo is cropped in, as on the cards (the zoom view shows the whole frame)
+  assign crop_first = false
+  assign ring_hay = product.handle | append: ' ' | append: product.type | downcase
+  if cls == 'accessory' and ring_hay contains 'ring' and first and first.aspect_ratio > 1.4
+    assign crop_first = true
+  endif
 
   # the free Vision Issue line: jerseys and hoodies (by type or title) and the magazine itself
   assign offer = false
@@ -80,9 +86,15 @@
         <ol class="gal-track" id="galTrack" tabindex="-1">
           {%- for im in product.images -%}
             <li class="gal-slide" id="{{ gal_id }}-{{ forloop.index }}" role="group" aria-roledescription="slide" aria-label="{{ forloop.index }} of {{ n_img }}">
-              <a class="xp gal-xp" href="{{ im | image_url: width: 2000 }}" data-i="{{ forloop.index0 }}" aria-label="Zoom photo {{ forloop.index }} of {{ n_img }}">
-                {%- render 'mc-img', image: im, alt: product.title, sizes: '(min-width:900px) 54vw, 100vw', widths: '640,960,1280,1800', eager: forloop.first -%}
-              </a>
+              {%- if forloop.first and crop_first -%}
+                <a class="xp gal-xp gal-crop" href="{{ im | image_url: width: 2000 }}" data-i="0" aria-label="Zoom photo 1 of {{ n_img }}">
+                  {%- render 'mc-img', image: im, alt: product.title, sizes: '(min-width:900px) 120vw, 200vw', widths: '640,960,1280,1800', eager: true -%}
+                </a>
+              {%- else -%}
+                <a class="xp gal-xp" href="{{ im | image_url: width: 2000 }}" data-i="{{ forloop.index0 }}" aria-label="Zoom photo {{ forloop.index }} of {{ n_img }}">
+                  {%- render 'mc-img', image: im, alt: product.title, sizes: '(min-width:900px) 54vw, 100vw', widths: '640,960,1280,1800', eager: forloop.first -%}
+                </a>
+              {%- endif -%}
             </li>
           {%- endfor -%}
         </ol>
@@ -255,19 +267,47 @@
 {%- endif -%}
 
 {%- if product.available -%}
-  {%- comment -%} phones: Add to bag stays under the thumb once the main button has scrolled away (mc-product.js shows it) {%- endcomment -%}
+  {%- comment -%} phones: Add to bag stays under the thumb whenever the main button is not on screen (mc-product.js shows it) {%- endcomment -%}
+  {%- liquid
+    # the bar shows from the start, so until a size has been picked its button asks for one (no accidental "S")
+    assign pick = ''
+    for opt in product.options_with_values
+      if opt.values.size > 1 and pick == blank
+        assign pick = opt.name | downcase
+      endif
+    endfor
+    if pick contains 'size'
+      assign pick = 'size'
+    elsif pick contains 'denomination' or pick contains 'amount' or pick contains 'value'
+      assign pick = 'amount'
+    endif
+    assign need_pick = false
+    if pick != blank and product.selected_variant == blank
+      assign need_pick = true
+    endif
+  -%}
   <div class="pl-sticky" id="plSticky" inert>
     {%- if first -%}<span class="pls-ph" aria-hidden="true"><img src="{{ first | image_url: width: 120 }}" width="40" height="50" alt="" loading="lazy" decoding="async"></span>{%- endif -%}
-    <span class="pls-t"><b>{{ product.title | strip | escape }}</b><span class="mono" id="plsMeta">
+    {%- comment -%} with sizes to choose, the name is a button back up to the size tabs {%- endcomment -%}
+    {%- if pick != blank %}<button class="pls-t" type="button" id="plsBack"><span class="sr-only">Change {{ pick | escape }}: </span>{% else %}<span class="pls-t">{% endif -%}
+    <b>{{ product.title | strip | escape }}</b><span class="mono" id="plsMeta">
       {%- assign meta = '' -%}
       {%- for opt in product.options_with_values -%}
         {%- if opt.values.size > 1 -%}{%- assign meta = meta | append: cur.options[forloop.index0] | append: ' / ' -%}{%- endif -%}
       {%- endfor -%}
       {%- assign meta = meta | remove_last: ' / ' -%}
       {%- assign cur_m = cur.price | money -%}
-      {%- if meta != blank and meta != cur_m %}{{ meta | escape }} · {% endif %}{{ cur_m -}}
-    </span></span>
-    <button class="pls-go" id="plsBuy" type="submit" form="{{ product_form_id }}" name="add"{% unless cur.available %} disabled{% endunless %}>{% if cur.available %}Add to bag{% else %}Sold out{% endif %}</button>
+      {%- if need_pick -%}
+        {%- if product.price_varies %}From {{ product.price | money }}{% else %}{{ cur_m }}{% endif -%}
+      {%- else -%}
+        {%- if meta != blank and meta != cur_m %}{{ meta | escape }} · {% endif %}{{ cur_m -}}
+      {%- endif -%}
+    </span>{% if pick != blank %}</button>{% else %}</span>{% endif %}
+    {%- if need_pick -%}
+      <button class="pls-go" id="plsBuy" type="submit" form="{{ product_form_id }}" name="add" data-pick="{{ pick | escape }}">Choose {{ pick | escape }}</button>
+    {%- else -%}
+      <button class="pls-go" id="plsBuy" type="submit" form="{{ product_form_id }}" name="add" data-pick="{{ pick | escape }}"{% unless cur.available %} disabled{% endunless %}>{% if cur.available %}Add to bag{% else %}Sold out{% endif %}</button>
+    {%- endif -%}
   </div>
   <div class="pl-sticky-room" aria-hidden="true"></div>
 {%- endif -%}

@@ -40,11 +40,16 @@
               {%- assign i = 0 -%}
               {%- for item in search.results -%}
                 {%- if item.object_type == 'product' or item.variants.size > 0 -%}
-                  {%- if i < 2 -%}
-                    {% render 'mc-card', product: item, i: i, order: ord, eager: true, uid: item.handle, cur: false %}
-                  {%- else -%}
-                    {% render 'mc-card', product: item, i: i, order: ord, uid: item.handle, cur: false %}
-                  {%- endif -%}
+                  {%- liquid
+                    assign eg = false
+                    assign lz = true
+                    if i < 2
+                      assign eg = true
+                    elsif i < 4
+                      assign lz = false
+                    endif
+                  -%}
+                  {% render 'mc-card', product: item, i: i, order: ord, eager: eg, lazy: lz, uid: item.handle, cur: false %}
                   {%- assign i = i | plus: 1 -%}
                 {%- endif -%}
               {%- endfor -%}
