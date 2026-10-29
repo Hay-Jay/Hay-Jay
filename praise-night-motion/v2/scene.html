@@ -327,7 +327,7 @@ const SLOTS = [
 function drawCards(t) {
   const step = L / 4, flipDur = 0.9;
   SLOTS.forEach((S, s) => {
-    const tt = mod(t - s * 0.18, L), k = Math.floor(tt / step), within = tt - k * step;
+    const tt = mod(t, L), k = Math.floor(tt / step), within = tt - k * step;
     const fp = clamp((within - (step - flipDur)) / flipDur);
     const flipping = fp > 0 && fp < 1;
     const idx = (s + k + (fp >= 0.5 ? 1 : 0)) % 4;
