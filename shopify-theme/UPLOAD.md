@@ -8,6 +8,40 @@
 - Your existing pages `contact`, `model` and `model-ambassador` keep their templates. The new theme has a version of each.
 - Products, collections, prices, stock, apps, payments and shipping settings were **not changed**.
 
+## Shop-first redesign (29 October 2026): waiting for you to publish
+
+Theme **"MONOCHROME Classified - shop-first (preview)"** (id 189818077438) is an unpublished copy of the live theme, with the redesign uploaded to it. Customers don't see it.
+
+Preview it here: https://monochrome.com.ng/?preview_theme_id=189818077438
+
+**What changed:**
+- **Home page:** shop-first:
+  - a hero with a photo stack you can flip;
+  - "The drop" product grid;
+  - shop-by-category tiles;
+  - a compact Vision Issue banner;
+  - a film-strip lookbook;
+  - a signup.
+
+  The objectives, intel and zones sections are off the page (they can be added back in Customize), and so is the "identity verified" intro.
+- **Shop page:** a photo grid, with quick add on every card. On phones it's 2 across, on desktop 4.
+- **Product page:** a swipeable gallery with zoom; size tabs; a big Add to bag; an Add to bag bar on phones; short fold-out details; related products.
+- **Bag:** a cleaner drawer and bag page, with a free-magazine nudge.
+  - The nudge appears when a jersey or hoodie is in the bag without The Vision Issue.
+  - Turn it off in Customize → Cart (and the drawer) when the offer ends.
+- **Menu:**
+  - Shop, New in, Lookbook, Vision Issue, About.
+  - Search and Bag buttons, with a search that suggests products.
+  - A shorter footer.
+- **Magazine pop-up:** now a small corner card on desktop and a slim bottom bar on phones. It never shows on the home page, shop, product, bag or lookbook pages.
+- **Copy:** about half the words or fewer on every page. The shipping copy matches the store's rates: free standard shipping in Canada over $200 and in the US over $100. The returns copy says exchanges.
+
+**To publish:** Online Store → Themes → "MONOCHROME Classified - shop-first (preview)" → ⋯ → Publish. The current theme moves to the library, so going back is one click (⋯ → Publish on it).
+
+**Don't change the live theme in Customize before publishing.** The preview is a copy taken on 29 October, so later changes to the live theme won't carry over.
+
+Two snippets on the preview are no longer used and can't be deleted through the API: `snippets/mc-figure.liquid` and `snippets/mc-filehead.liquid`. They do nothing. You can delete them in Edit code if you like.
+
 ## Look at it before anyone else does
 
 Open https://monochrome.com.ng/?preview_theme_id=189220749566. Only people with that link see the new design. Everything works there, including the bag and checkout, so be careful not to place a real order by accident.
