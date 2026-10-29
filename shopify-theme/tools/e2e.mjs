@@ -1,4 +1,5 @@
-// node tools/e2e.mjs — end-to-end checks of the theme on the dev server (:9292): navigation, register, product buy flow, bag, popup, forms, no-JS.
+// node tools/e2e.mjs — end-to-end checks of the theme on the dev server (:9292): navigation, the photo-grid shop, card quick add (hover and
+// the phone sheet), product buy flow and sticky bar, bag and its free-magazine nudge, home photo stack, corner card, menu search, no-JS, no sideways scroll.
 import { chromium } from 'playwright-core';
 const BASE = 'http://localhost:' + (process.env.PORT || 9292);
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -11,21 +12,44 @@ async function page(opts = {}) {
   return p;
 }
 const T = async (label, fn) => { try { await fn(); } catch (e) { ok(label + ' (threw)', false, String(e.message).split('\n')[0]); } };
+const cart = async () => (await fetch(BASE + '/cart.js')).json();
+const addApi = async (handle, k = 0) => { const pr = await (await fetch(`${BASE}/products/${handle}.js`)).json(); const v = pr.variants.filter(x => x.available)[k]; await fetch(BASE + '/cart/add.js', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: v.id, quantity: 1 }) }); return v; };
+// cards of the shop grid that are on screen (not filtered out)
+const shownCards = p => p.$$eval('#grid .card', cs => cs.filter(c => c.offsetParent !== null).map(c => c.dataset.cat));
+const gridCols = p => p.$eval('#grid', g => getComputedStyle(g).gridTemplateColumns.split(' ').length);
 await fetch(BASE + '/cart/clear.js');
 // 1. every page loads without errors
 const p0 = await page();
-for (const u of ['/', '/collections/all', '/collections/all?c=print', '/collections/frontpage', '/products/monochrome-sweatshirt', '/products/white-monochrome-jersey', '/products/monochrome-gift-cards', '/products/custom-monochrome-jersey', '/products/monochrome-magazine-the-vision-issue-print', '/pages/lookbook', '/pages/about', '/pages/shipping', '/pages/faq', '/pages/contact', '/pages/model', '/pages/model-ambassador', '/cart', '/search?q=ring', '/collections', '/account/login']) {
+for (const u of ['/', '/collections/all', '/collections/all?c=print', '/collections/all?v=list', '/collections/frontpage', '/collections/new-arrivals', '/products/monochrome-sweatshirt', '/products/white-monochrome-jersey', '/products/monochrome-gift-cards', '/products/custom-monochrome-jersey', '/products/monochrome-magazine-the-vision-issue-print', '/pages/lookbook', '/pages/about', '/pages/shipping', '/pages/faq', '/pages/contact', '/pages/model', '/pages/model-ambassador', '/pages/vision-issue', '/cart', '/search?q=ring', '/collections', '/account/login']) {
   p0.errs = []; const r = await p0.goto(BASE + u); await p0.waitForTimeout(700);
   ok(`load ${u}`, r.status() === 200 && !p0.errs.length, p0.errs.join(' | '));
 }
-// 2. register: filter print, search, view toggle
-await T('2. register: filter print, search, view toggle', async () => {
+// 2. shop: a photo grid first; filter (?c= and the tabs), search, list view
+await T('2. shop: photo grid, filter, search, view toggle', async () => {
 await p0.goto(BASE + '/collections/all?c=print'); await p0.waitForTimeout(600);
-const vis = await p0.$$eval('#toc .trow', rs => rs.filter(r => r.offsetParent !== null).length);
-ok('register ?c=print shows only print rows', vis === 1, `visible ${vis}`);
-await p0.goto(BASE + '/collections/all'); await p0.fill('#q', 'ring'); await p0.waitForTimeout(400);
-const rings = await p0.$$eval('#toc .trow', rs => rs.filter(r => r.offsetParent !== null).length);
-ok('register search "ring"', rings >= 5, `visible ${rings}`);
+const vis = await shownCards(p0);
+ok('shop ?c=print shows only the print card', vis.length === 1 && vis[0] === 'print', `visible ${vis.join(',')}`);
+await p0.goto(BASE + '/collections/all'); await p0.waitForTimeout(500);
+const g = await p0.evaluate(() => { const c = document.querySelector('#grid .card'), im = c && c.querySelector('.card-ph img'); return { cards: document.querySelectorAll('#grid .card').length, grid: getComputedStyle(document.querySelector('#grid')).display, toc: getComputedStyle(document.querySelector('#toc')).display, top: im ? im.getBoundingClientRect().top : 1e9, imgs: [...document.querySelectorAll('#grid .card-ph img:not(.ph2)')].every(i => i.srcset && i.sizes && i.width && i.height) }; });
+ok('shop: every product is a photo card, the name list is hidden', g.cards === 24 && g.grid === 'grid' && g.toc === 'none', JSON.stringify(g));
+ok('shop: the first photo starts in the first screen (1440)', g.top < 900, String(Math.round(g.top)));
+ok('shop: card photos have srcset, sizes, width and height', g.imgs);
+ok('shop: 4 columns at 1440', (await gridCols(p0)) === 4, String(await gridCols(p0)));
+await p0.fill('#q', 'ring'); await p0.waitForTimeout(400);
+const rings = await shownCards(p0);
+ok('shop search "ring"', rings.length >= 5 && rings.every(c => c === 'accessory'), `visible ${rings.length}`);
+await p0.fill('#q', ''); await p0.waitForTimeout(300);
+await p0.click('.sh-chip[data-filter="top"]'); await p0.waitForTimeout(400);
+const tops = await shownCards(p0);
+ok('shop: the Tops tab shows only tops and puts ?c=top in the URL', tops.length > 0 && tops.every(c => c === 'top') && p0.url().includes('c=top'), `${tops.length} ${p0.url()}`);
+ok('shop: the Tops tab is pressed', await p0.$eval('.sh-chip[data-filter="top"]', e => e.getAttribute('aria-pressed')) === 'true');
+await p0.click('.sh-view[data-view="list"]'); await p0.waitForTimeout(400);
+ok('shop: list view swaps the grid for the name list (?v=list)', await p0.evaluate(() => getComputedStyle(document.querySelector('#grid')).display === 'none' && getComputedStyle(document.querySelector('#toc')).display !== 'none') && p0.url().includes('v=list'), p0.url());
+const pp = await page({ w: 390, h: 844 });
+await pp.goto(BASE + '/collections/all'); await pp.waitForTimeout(600);
+const top390 = await pp.$eval('#grid .card .card-ph img', i => i.getBoundingClientRect().top);
+ok('phone: 2 photo columns, the first photo in the first screen', (await gridCols(pp)) === 2 && top390 < 844, `${await gridCols(pp)} cols, top ${Math.round(top390)}`);
+await pp.context().close();
 });
 // 3. product buy flow
 let p1;
@@ -59,18 +83,14 @@ let p2;
 await T('5. magazine from home section', async () => {
 p2 = await page();
 await p2.goto(BASE + '/'); await p2.waitForTimeout(800);
-// the intro covers the first visit for ~3 s: a click on it only skips it, it never reaches the page underneath
-const introUp = await p2.$('.intro') !== null;
-if (introUp) { const c0i = (await (await fetch(BASE + '/cart.js')).json()).item_count; await p2.mouse.click(720, 450); await p2.waitForTimeout(600);
-  ok('a click on the intro skips it without following the link underneath', (await (await fetch(BASE + '/cart.js')).json()).item_count === c0i && new URL(p2.url()).pathname === '/'); }
-await p2.waitForSelector('.intro', { state: 'detached', timeout: 5000 }).catch(() => {});
-const c0 = (await (await fetch(BASE + '/cart.js')).json()).item_count;
+ok('home: no intro screen in the way', await p2.$('.intro') === null);
+const c0 = (await cart()).item_count;
 await p2.hover('#vision [data-mc-add]'); await p2.waitForTimeout(500);
-ok('hovering an add link does not change the bag', (await (await fetch(BASE + '/cart.js')).json()).item_count === c0);
+ok('hovering an add link does not change the bag', (await cart()).item_count === c0);
 await p2.click('#vision [data-mc-add]'); await p2.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
 const magLine = await p2.$$eval('#mcDrawer .ln-t', l => l.map(x => x.textContent));
 ok('home magazine button adds the magazine', magLine.some(t => /magazine/i.test(t)), magLine.join(','));
-ok('the magazine is added once', (await (await fetch(BASE + '/cart.js')).json()).item_count === c0 + 1);
+ok('the magazine is added once', (await cart()).item_count === c0 + 1);
 });
 // 6. cart page: change and remove
 await T('6. cart page: change and remove', async () => {
@@ -84,7 +104,7 @@ await p2.fill('.cart-lines .ln [data-line-qty]', '1'); await p2.press('.cart-lin
 ok('cart page: Enter in a quantity box updates, never checks out', new URL(p2.url()).pathname === '/cart' && (await p2.inputValue('.cart-lines .ln [data-line-qty]')) === '1', p2.url());
 const n1 = await p2.$$eval('.cart-lines .ln', l => l.length);
 await p2.hover('.cart-lines .ln [data-remove]'); await p2.waitForTimeout(500);
-ok('hovering remove does not change the bag', (await p2.$$eval('.cart-lines .ln', l => l.length)) === n1 && (await (await fetch(BASE + '/cart.js')).json()).items.length === n1);
+ok('hovering remove does not change the bag', (await p2.$$eval('.cart-lines .ln', l => l.length)) === n1 && (await cart()).items.length === n1);
 await p2.click('.cart-lines .ln [data-remove]'); await p2.waitForTimeout(1000);
 const n2 = await p2.$$eval('.cart-lines .ln', l => l.length);
 ok('cart page: remove a line', n2 === n1 - 1, `${n1} -> ${n2}`);
@@ -93,31 +113,184 @@ await fetch(BASE + '/cart/clear.js'); await p2.goto(BASE + '/cart'); await p2.wa
 const cols = await p2.$eval('.cart-picks .sheet', e => getComputedStyle(e).gridTemplateColumns.split(' ').length).catch(() => 0);
 ok('empty bag: suggestions sit in a 4-column grid', cols === 4, String(cols));
 });
-// 7. popup appears on the home page (fast-forward: delay 9s)
+// 7. the magazine corner card: never on the home page; on a browsing page it opens by itself (delay 8 s), once per visitor
 let p3;
-await T('7. popup appears on the home page (fast-forward: delay 9s)', async () => {
+await T('7. corner card: not on home, opens on the shop page', async () => {
+await fetch(BASE + '/cart/clear.js');
 p3 = await page();
-await p3.goto(BASE + '/'); await p3.waitForSelector('#magpop.open', { timeout: 16000 }).catch(() => {});
-ok('magazine pop-up opens on the home page', await p3.$('#magpop.open') !== null);
+await p3.goto(BASE + '/'); await p3.waitForTimeout(500);
+ok('corner card: none on the home page', await p3.$('#magpop') === null);
+await p3.goto(BASE + '/collections/all'); await p3.waitForSelector('#magpop.open', { timeout: 12000 }).catch(() => {});
+ok('corner card opens on the shop page within 12 s', await p3.$('#magpop.open') !== null);
+ok('corner card: the page stays usable (no backdrop, no scroll lock)', await p3.evaluate(() => !document.documentElement.style.overflow && document.querySelector('#magpop').getAttribute('aria-modal') === 'false'));
+await p3.click('#magpop [data-close]'); await p3.waitForTimeout(700);
+ok('corner card: Close hides it and it is remembered', await p3.evaluate(() => document.querySelector('#magpop').hidden && Object.keys(localStorage).some(k => k.startsWith('mc-magpop-'))));
+await p3.goto(BASE + '/products/monochrome-sweatshirt'); await p3.waitForTimeout(300);
+ok('corner card: not on product pages', await p3.$('#magpop') === null);
 });
-// 8. command palette + declassify
+// 8. command palette + declassify; the menu search
 let p4;
 await T('8. command palette + declassify', async () => {
-await p3.keyboard.press('Escape'); await p3.waitForTimeout(300);
+await p3.goto(BASE + '/pages/about'); await p3.waitForTimeout(500);
 await p3.keyboard.press('/'); await p3.waitForTimeout(700); await p3.keyboard.type('hood'); await p3.waitForTimeout(900);
 const hits = await p3.$$eval('#jumpList a', a => a.map(x => x.textContent));
 ok('command palette finds the hoodie (live catalogue)', hits.some(t => /hoodie/i.test(t)), hits.slice(0, 3).join(' / '));
+await p3.keyboard.press('Escape'); await p3.waitForTimeout(200); await p3.keyboard.press('Escape'); await p3.waitForTimeout(700);
+await p3.click('#findBtn'); await p3.waitForSelector('#menu.open', { timeout: 3000 }).catch(() => {});
+ok('menu search: Search opens the menu with the cursor in the search box', await p3.evaluate(() => document.querySelector('#menu').classList.contains('open') && document.activeElement && document.activeElement.id === 'jump' && document.querySelector('#findBtn').getAttribute('aria-expanded') === 'true'));
+await p3.keyboard.type('cargo skirt'); await p3.waitForTimeout(900);
+ok('menu search: results are a listbox with an active option', await p3.evaluate(() => { const j = document.querySelector('#jump'); return j.getAttribute('aria-expanded') === 'true' && !!document.getElementById(j.getAttribute('aria-activedescendant')); }));
+await Promise.all([p3.waitForURL('**/products/**', { timeout: 5000 }).catch(() => {}), p3.keyboard.press('Enter')]);
+ok('menu search: Enter opens the top result', new URL(p3.url()).pathname === '/products/monochrome-cargo-skirt', p3.url());
 p4 = await page({ w: 390, h: 844 });
 await p4.goto(BASE + '/pages/about'); await p4.waitForTimeout(500); await p4.click('#menuBtn'); await p4.waitForTimeout(700); await p4.click('#declassMenu'); await p4.waitForTimeout(300);
 ok('phone: in-menu Declassify switch', await p4.evaluate(() => document.documentElement.classList.contains('declass')));
 });
-// 9. no-JS: product form posts and lands on the cart
+// 9. no-JS: product form posts and lands on the cart; the shop grid and a card quick add work too
 let p5;
+// the pages above are done: close them so the dev server (one request at a time) only serves this one
+for (const x of [p1, p2, p3, p4]) if (x) await x.context().close().catch(() => {});
 await T('9. no-JS: product form posts and lands on the cart', async () => {
 await fetch(BASE + '/cart/clear.js');
-p5 = await page({ js: false });
+p5 = await page({ js: false }); p5.setDefaultTimeout(15000); // form posts are full page loads
 await p5.goto(BASE + '/products/royal-black'); await p5.click('#buy'); await p5.waitForLoadState('load');
 ok('no-JS: add to bag lands on the cart with the item', p5.url().endsWith('/cart') && (await p5.$$('.cart-lines .ln')).length === 1, p5.url());
+await p5.goto(BASE + '/collections/all');
+const nj = await p5.evaluate(() => ({ cards: [...document.querySelectorAll('#grid .card')].filter(c => c.offsetParent !== null).length, photos: [...document.querySelectorAll('#grid .card-ph img:not(.ph2)')].filter(i => i.offsetParent !== null).length }));
+ok('no-JS: the shop shows all 24 photo cards', nj.cards === 24 && nj.photos === 24, JSON.stringify(nj));
+await p5.hover('#grid .card[data-h="monochrome-sweatshirt"] .card-ph');
+await Promise.all([p5.waitForURL('**/cart').catch(() => {}), p5.click('#grid .card[data-h="monochrome-sweatshirt"] .qa-b:text-is("M")')]);
+ok('no-JS: a size in a card posts to the bag', new URL(p5.url()).pathname === '/cart' && (await cart()).items.some(i => /sweatshirt/i.test(i.title) && /M$/.test(i.title)), p5.url());
+await p5.goto(BASE + '/');
+ok('no-JS home: the top print of the stack is a link, the flip controls stay hidden', await p5.evaluate(() => { const a = document.querySelector('.hs-card[data-pos="0"] .hs-a'); return !!a && a.offsetParent !== null && document.querySelector('[data-hs-ctl]').hidden; }));
+});
+// 10. card quick add on desktop: the sizes slide up on hover (or keyboard focus) and one click adds that size
+await T('10. card quick add: hover (desktop)', async () => {
+await fetch(BASE + '/cart/clear.js');
+const p = await page();
+await p.goto(BASE + '/collections/all'); await p.waitForTimeout(700);
+const card = '#grid .card[data-h="monochrome-sweatshirt"]';
+const vis = () => p.$eval(card + ' .qa-p', e => getComputedStyle(e).visibility);
+const v0 = await vis();
+await p.hover(card + ' .card-ph'); await p.waitForTimeout(450);
+ok('quick add: the sizes are hidden until the card is hovered', v0 === 'hidden' && (await vis()) === 'visible', `${v0} -> ${await vis()}`);
+await p.click(card + ' .qa-b:text-is("L")'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
+const c1 = await cart();
+ok('quick add: a size click adds that size and opens the bag', await p.$('#mcDrawer.open') !== null && c1.items.length === 1 && / - L$/.test(c1.items[0].title), c1.items.map(i => i.title).join(','));
+ok('quick add: the card is stamped "In bag"', await p.$(card + ' .card-added') !== null);
+await p.keyboard.press('Escape'); await p.waitForTimeout(600);
+const one = '#grid .card[data-h="black-trinity-ring"]';
+await p.hover(one + ' .card-ph'); await p.waitForTimeout(450);
+await p.click(one + ' .qa-one .qa-b'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
+ok('quick add: a one-size piece adds with one click', (await cart()).items.some(i => /trinity ring/i.test(i.title)) && (await p.textContent('[data-cart-count]')).trim() === '2');
+await p.keyboard.press('Escape'); await p.waitForTimeout(600); await p.mouse.move(2, 2);
+await p.focus('#grid .card[data-h="monochrome-cargo-skirt"] .card-a'); await p.waitForTimeout(450);
+ok('quick add: keyboard focus on a card shows its sizes', await p.$eval('#grid .card[data-h="monochrome-cargo-skirt"] .qa-p', e => getComputedStyle(e).visibility) === 'visible');
+ok('quick add: no quick add on gift cards or personalised pieces', !(await p.$('#grid .card[data-h="monochrome-gift-cards"] .card-qa')) && !(await p.$('#grid .card[data-h="custom-monochrome-jersey"] .card-qa')));
+ok('quick add (desktop): no console errors', !p.errs.length, p.errs.join(' | '));
+await p.context().close();
+});
+// 11. card quick add on phones: "+" opens a size sheet (popover dialog); a size closes it and adds
+await T('11. card quick add: phone sheet', async () => {
+await fetch(BASE + '/cart/clear.js');
+const p = await page({ w: 390, h: 844 });
+await p.goto(BASE + '/collections/all'); await p.waitForTimeout(700);
+const card = '#grid .card[data-h="monochrome-cargo-skirt"]';
+// html has scroll-behavior: smooth; bring the card up instantly and let the cards' entrance settle, so taps land at once
+await p.$eval(card, e => e.scrollIntoView({ block: 'center', behavior: 'instant' })); await p.waitForTimeout(1200);
+const go = await p.$eval(card + ' .qa-go', e => { const r = e.getBoundingClientRect(); return [r.width, r.height, e.getAttribute('aria-label')]; });
+ok('phone quick add: "+" is a 44px+ button with a name', go[0] >= 44 && go[1] >= 44 && /cargo skirt/i.test(go[2] || ''), JSON.stringify(go));
+const open = () => p.$eval(card + ' .qa-p', e => e.matches(':popover-open'));
+await p.tap(card + ' .qa-go'); await p.waitForTimeout(500);
+ok('phone quick add: "+" opens the size sheet (a labelled dialog)', (await open()) && await p.$eval(card + ' .qa-p', e => e.getAttribute('role') === 'dialog' && !!e.getAttribute('aria-label')));
+await p.tap(card + ' .qa-x'); await p.waitForTimeout(500);
+ok('phone quick add: the close button shuts the sheet', !(await open()));
+await p.tap(card + ' .qa-go'); await p.waitForTimeout(500);
+await p.tap(card + ' .qa-p .qa-b:text-is("M")'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
+const c1 = await cart();
+ok('phone quick add: a size closes the sheet, adds it and opens the bag', !(await open()) && await p.$('#mcDrawer.open') !== null && c1.items.length === 1 && / - M$/.test(c1.items[0].title), c1.items.map(i => i.title).join(','));
+ok('phone quick add: no console errors', !p.errs.length, p.errs.join(' | '));
+await p.context().close();
+});
+// 12. product page on phones: a sticky Add to bag bar once the main button has scrolled away
+await T('12. product sticky bar', async () => {
+await fetch(BASE + '/cart/clear.js');
+const p = await page({ w: 390, h: 844 });
+await p.goto(BASE + '/products/monochrome-sweatshirt'); await p.waitForTimeout(700);
+const st = () => p.$eval('#plSticky', e => ({ on: e.classList.contains('on'), inert: e.inert }));
+const s0 = await st();
+await p.tap('.chip[data-v="M"]'); await p.waitForTimeout(200);
+await p.evaluate(() => window.scrollTo({ top: document.querySelector('#plBuy').getBoundingClientRect().bottom + scrollY + 400, behavior: 'instant' })); await p.waitForTimeout(500);
+const s1 = await st();
+ok('sticky bar: hidden (inert) at first, shown once Add to bag scrolls away', !s0.on && s0.inert && s1.on && !s1.inert, JSON.stringify([s0, s1]));
+ok('sticky bar: names the chosen size and price', /^M · \$/.test((await p.textContent('#plsMeta')).trim()), await p.textContent('#plsMeta'));
+await p.tap('#plsBuy'); await p.waitForSelector('#mcDrawer.open', { timeout: 5000 }).catch(() => {});
+const c1 = await cart();
+ok('sticky bar: Add to bag adds the chosen size and opens the bag', await p.$('#mcDrawer.open') !== null && c1.items.length === 1 && / - M$/.test(c1.items[0].title), c1.items.map(i => i.title).join(','));
+ok('sticky bar: no console errors', !p.errs.length, p.errs.join(' | '));
+await p.context().close();
+const d = await page();
+await d.goto(BASE + '/products/monochrome-sweatshirt'); await d.waitForTimeout(500);
+await d.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })); await d.waitForTimeout(500);
+ok('sticky bar: never on desktop', !(await d.$eval('#plSticky', e => e.classList.contains('on'))));
+await d.context().close();
+});
+// 13. the free-magazine nudge in the bag: offered with a jersey or hoodie, one tap adds the magazine
+await T('13. free-magazine nudge', async () => {
+await fetch(BASE + '/cart/clear.js'); await addApi('monochrome-sweatshirt');
+const p = await page();
+await p.goto(BASE + '/pages/about'); await p.waitForTimeout(500);
+await p.click('.bar-bag'); await p.waitForSelector('#mcDrawer.open', { timeout: 4000 }).catch(() => {});
+ok('nudge: not offered without a jersey or hoodie', await p.$('#mcDrawer .offer') === null);
+await p.keyboard.press('Escape'); await p.waitForTimeout(600);
+await fetch(BASE + '/cart/clear.js'); await addApi('white-monochrome-jersey');
+await p.reload(); await p.waitForTimeout(500);
+await p.click('.bar-bag'); await p.waitForSelector('#mcDrawer.open', { timeout: 4000 }).catch(() => {});
+ok('nudge: the drawer offers the free Vision Issue with a jersey', await p.$eval('#mcDrawer .offer', e => e.offsetParent !== null && /jersey/i.test(e.textContent)).catch(() => false));
+await p.click('#mcDrawer .offer-go'); await p.waitForTimeout(1800);
+const c1 = await cart();
+ok('nudge: one tap adds the magazine and the offer turns into a confirmation', c1.items.some(i => /magazine/i.test(i.title)) && c1.item_count === 2 && await p.$('#mcDrawer .offer') === null && await p.$('#mcDrawer .offer-ok') !== null, c1.items.map(i => i.title).join(','));
+await fetch(BASE + '/cart/clear.js'); await addApi('acid-washed-monochrome-hoodie');
+await p.goto(BASE + '/cart'); await p.waitForTimeout(500);
+ok('nudge: the bag page offers it with a hoodie too', await p.$eval('.cart-main .offer', e => /hoodie/i.test(e.textContent)).catch(() => false));
+ok('nudge: no console errors', !p.errs.length, p.errs.join(' | '));
+await p.context().close();
+await fetch(BASE + '/cart/clear.js');
+});
+// 14. home cover: the photo stack flips with the buttons, the arrow keys and a drag
+await T('14. home photo stack', async () => {
+const p = await page();
+await p.goto(BASE + '/'); await p.waitForTimeout(900);
+const num = () => p.textContent('[data-hs-i]');
+const st = await p.evaluate(() => { const r = document.querySelector('[data-hs]'); return { on: r.classList.contains('on'), ctl: !document.querySelector('[data-hs-ctl]').hidden, n: r.querySelectorAll('.hs-card').length, focusable: [...r.querySelectorAll('.hs-a')].filter(a => a.tabIndex >= 0).length, role: r.getAttribute('aria-roledescription') }; });
+ok('stack: armed, with flip controls and only the top print focusable', st.on && st.ctl && st.n >= 2 && st.focusable === 1 && !!st.role, JSON.stringify(st));
+const top0 = await p.$eval('.hs-card[data-pos="0"] .hs-a', a => a.getAttribute('href'));
+await p.click('[data-hs-next]'); await p.waitForTimeout(800);
+const top1 = await p.$eval('.hs-card[data-pos="0"] .hs-a', a => a.getAttribute('href'));
+ok('stack: Next brings the next print to the top', (await num()) === '02' && top1 !== top0 && /2 of/.test(await p.textContent('[data-hs-live]')), `${await num()} ${top0} -> ${top1}`);
+await p.click('[data-hs-prev]'); await p.waitForTimeout(800);
+ok('stack: Previous brings it back', (await num()) === '01' && await p.$eval('.hs-card[data-pos="0"] .hs-a', a => a.getAttribute('href')) === top0);
+await p.focus('[data-hs-next]'); await p.keyboard.press('ArrowRight'); await p.waitForTimeout(800);
+ok('stack: the arrow keys flip it', (await num()) === '02', await num());
+const r = await p.$eval('.hs-card[data-pos="0"]', e => { const b = e.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 }; });
+await p.mouse.move(r.x, r.y); await p.mouse.down(); for (let i = 1; i <= 10; i++) await p.mouse.move(r.x + i * 22, r.y + 2); await p.mouse.up(); await p.waitForTimeout(900);
+ok('stack: a drag throws the top print and does not open its link', (await num()) === '03' && new URL(p.url()).pathname === '/', `${await num()} ${p.url()}`);
+ok('stack: no console errors', !p.errs.length, p.errs.join(' | '));
+await p.context().close();
+});
+// 15. no sideways scrolling on phones
+await T('15. no sideways scroll', async () => {
+for (const w of [320, 390]) {
+  const p = await page({ w, h: 800 });
+  const wide = [];
+  for (const u of ['/', '/collections/all', '/products/monochrome-sweatshirt', '/cart', '/pages/about']) {
+    await p.goto(BASE + u); await p.waitForTimeout(400);
+    const sw = await p.evaluate(w => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - w, w);
+    if (sw > 0) wide.push(`${u} +${sw}px`);
+  }
+  ok(`no sideways scroll at ${w}px`, !wide.length, wide.join(', '));
+  await p.context().close();
+}
 });
 for (const [s, n, x] of results) console.log(s, n, x ? '— ' + x : '');
 console.log(`${results.filter(r => r[0] === 'PASS').length}/${results.length} passed`);
