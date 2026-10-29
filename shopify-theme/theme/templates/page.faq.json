@@ -14,7 +14,7 @@
           "type": "qa",
           "settings": {
             "question": "What does shipping cost?",
-            "answer": "<p>It depends on your address and shows at checkout. Canada ships free. You get an email when your order ships.</p>"
+            "answer": "<p>It depends on your address and shows at checkout. Standard shipping is free in Canada over $200 and in the US over $100. You get an email when your order ships.</p>"
           }
         },
         "q3": {

@@ -72,7 +72,7 @@
         "heading": "Shipping",
         "deck": "{countries} countries. Rates at checkout.",
         "nigeria": "Delivered. Rate shown at checkout.",
-        "canada": "Free standard shipping.",
+        "canada": "Free standard shipping over $200.",
         "rates_note": "Your rate shows at checkout, before you pay."
       }
     }
