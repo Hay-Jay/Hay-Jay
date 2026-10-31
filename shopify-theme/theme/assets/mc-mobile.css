@@ -1,0 +1,24 @@
+/* ==========================================================================
+   MONOCHROME® — CLASSIFIED: the phone and small-tablet layer
+   Linked after the page stylesheet with media="(max-width: 899px)", so none of it applies on a laptop.
+   Refinements for thumbs: safe areas, pressed states, 16px form text (no iOS zoom). The header, menu, footer and
+   corner card carry their own phone rules in mc-base.css; the pages carry theirs in their own stylesheets.
+   ========================================================================== */
+
+/* ---- basics ---------------------------------------------------------------------------------------------- */
+:root { --gut: max(clamp(16px, 3vw, 44px), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px)); }
+html { -webkit-tap-highlight-color: rgba(120, 120, 120, .28); }
+a, button, summary, label, select, input, [role=button] { touch-action: manipulation; }
+.btn:active, .send:active, .bar-btn:active, .fn-go:active, .mp-add:active { transform: translateY(1px); }
+img { -webkit-touch-callout: none; }
+input, select, textarea { font-size: max(16px, 1em); }
+
+/* ---- phones: the notice strip is 44px tall (a thumb target), so the header sticks 44px up and only the tab bar stays --------- */
+@media (max-width: 699px) { .hdr, .shopify-section-group-header-group { top: -44px; } }
+
+/* ---- short screens (a phone on its side) ------------------------------------------------------------------------------------ */
+@media (max-height: 520px) and (orientation: landscape) {
+  .banner.top { display: none; }
+  .hdr, .shopify-section-group-header-group { top: 0; }
+  .menu-in { padding-top: 16px; gap: 14px; }
+}

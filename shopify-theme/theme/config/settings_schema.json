@@ -1,0 +1,171 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Monochrome Classified",
+    "theme_version": "1.0.0",
+    "theme_author": "Monochrome",
+    "theme_documentation_url": "https://monochrome.com.ng",
+    "theme_support_url": "https://monochrome.com.ng/pages/contact"
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo_wordmark",
+        "label": "Wordmark image",
+        "info": "The distressed MonoChrome lettering shown in the header. Leave empty to use the built-in file."
+      },
+      {
+        "type": "image_picker",
+        "id": "logo_emblem",
+        "label": "Emblem image",
+        "info": "The chrome ring and star. Leave empty to use the built-in file."
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon"
+      }
+    ]
+  },
+  {
+    "name": "Bureau text",
+    "settings": [
+      {
+        "type": "text",
+        "id": "banner_mark",
+        "label": "Banner text",
+        "default": "Top secret // Eyes only // Monochrome Bureau"
+      },
+      {
+        "type": "textarea",
+        "id": "fiction_line",
+        "label": "Footer notice",
+        "default": "A work of fiction. MONOCHROME® is a clothing brand, not a government agency."
+      }
+    ]
+  },
+  {
+    "name": "Contact and social",
+    "settings": [
+      {
+        "type": "text",
+        "id": "contact_email",
+        "label": "Email",
+        "default": "info.mccanada@gmail.com"
+      },
+      {
+        "type": "url",
+        "id": "social_instagram",
+        "label": "Instagram",
+        "info": "Leave empty to hide this link."
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok",
+        "label": "TikTok",
+        "info": "Leave empty to hide this link."
+      },
+      {
+        "type": "url",
+        "id": "social_snapchat",
+        "label": "Snapchat",
+        "info": "Leave empty to hide this link."
+      }
+    ]
+  },
+  {
+    "name": "Shipping",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Shopify decides what shipping costs and where you deliver. This list only controls what the website says. Keep it in step with Settings > Shipping and delivery."
+      },
+      {
+        "type": "textarea",
+        "id": "ship_countries",
+        "label": "Countries delivered to",
+        "info": "One country per line: Name|CODE|Region",
+        "default": "Nigeria|NG|Africa\nCanada|CA|North America\nAustralia|AU|Oceania\nAustria|AT|Europe\nBelgium|BE|Europe\nCzechia|CZ|Europe\nDenmark|DK|Europe\nFinland|FI|Europe\nFrance|FR|Europe\nGermany|DE|Europe\nHong Kong SAR China|HK|Asia\nIreland|IE|Europe\nIsrael|IL|Middle East\nItaly|IT|Europe\nJapan|JP|Asia\nMalaysia|MY|Asia\nNetherlands|NL|Europe\nNew Zealand|NZ|Oceania\nNorway|NO|Europe\nPoland|PL|Europe\nPortugal|PT|Europe\nSingapore|SG|Asia\nSouth Korea|KR|Asia\nSpain|ES|Europe\nSweden|SE|Europe\nSwitzerland|CH|Europe\nUnited Arab Emirates|AE|Middle East\nUnited Kingdom|GB|Europe\nUnited States|US|North America"
+      }
+    ]
+  },
+  {
+    "name": "Photos",
+    "settings": [
+      {
+        "type": "textarea",
+        "id": "lead_photos",
+        "label": "Lead photo per product",
+        "info": "One per line: product-handle|photo number (1 = first photo). Photo used on cards and rows.",
+        "default": "monochrome-sweatshirt|5"
+      }
+    ]
+  },
+  {
+    "name": "Intro",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "loader_enable",
+        "label": "Top Secret File intro on the home page",
+        "default": true,
+        "info": "A 3-second classified-file opening on the home page: once per visit, skipped by any tap or key, never in the theme editor, a quick fade for visitors who prefer reduced motion."
+      }
+    ]
+  },
+  {
+    "name": "Magazine card",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "magpop_enable",
+        "label": "Offer the magazine in a corner card",
+        "default": true,
+        "info": "A small card in the bottom-left corner, shown once per visitor on browsing pages (never on product, bag or account pages)."
+      },
+      {
+        "type": "product",
+        "id": "magpop_product",
+        "label": "Magazine product",
+        "info": "Leave empty to use the first available product of class print (product type Magazine)."
+      },
+      {
+        "type": "range",
+        "id": "magpop_delay",
+        "label": "Seconds before it appears",
+        "info": "It also appears sooner once the visitor scrolls a good way down.",
+        "min": 4,
+        "max": 30,
+        "step": 1,
+        "default": 8
+      },
+      {
+        "type": "text",
+        "id": "magpop_line",
+        "label": "Card line",
+        "info": "One short line. Leave empty to hide it.",
+        "default": "Free with any jersey or hoodie"
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "text",
+        "id": "cart_note",
+        "label": "Shipping line in the cart",
+        "default": "Shipping and taxes at checkout."
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_dynamic_buttons",
+        "label": "Show express checkout buttons on product pages",
+        "default": true,
+        "info": "Shop Pay, PayPal and the other wallets you turned on in Settings > Payments."
+      }
+    ]
+  }
+]

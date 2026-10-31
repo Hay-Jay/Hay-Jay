@@ -1,0 +1,22 @@
+<section class="spread paper cu" aria-labelledby="cuH">
+  <div class="wrap cu-wrap">
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-109</span><span>Account</span></p>
+      <h1 class="h1 pg-h" id="cuH">Your account</h1>
+    </header>
+    <p class="mono cu-links">{{ customer.first_name | default: customer.email | escape }} <a class="link-line" href="{{ routes.account_url }}/addresses">Addresses</a> <a class="link-line" href="{{ routes.account_logout_url }}">Sign out</a></p>
+    <h2 class="h2">Orders</h2>
+    {%- if customer.orders.size > 0 -%}
+      <table class="tbl cu-orders"><thead><tr><th class="mono">Order</th><th class="mono">Date</th><th class="mono">Payment</th><th class="mono">Fulfilment</th><th class="mono">Total</th></tr></thead><tbody>
+        {%- for order in customer.orders -%}
+          <tr><th scope="row"><a class="link-line" href="{{ order.customer_url }}">{{ order.name | escape }}</a></th><td>{{ order.created_at | date: '%b %d, %Y' }}</td><td>{{ order.financial_status_label | escape }}</td><td>{{ order.fulfillment_status_label | escape }}</td><td>{{ order.total_price | money }}</td></tr>
+        {%- endfor -%}
+      </tbody></table>
+    {%- else -%}
+      <p>No orders yet. <a class="link-line" href="{{ routes.all_products_collection_url }}">Shop all</a></p>
+    {%- endif -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "Account", "settings": [] }
+{% endschema %}

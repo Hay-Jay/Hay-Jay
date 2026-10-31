@@ -1,0 +1,28 @@
+{%- comment -%}
+  File number of a product: MC-004. Params: product, order (optional: the output of mc-order, saves recomputing), plain (optional: true = number only, e.g. 004).
+{%- endcomment -%}
+{%- liquid
+  assign ord = order
+  if ord == blank
+    capture ord
+      render 'mc-order'
+    endcapture
+  endif
+  assign arr = ord | split: ','
+  assign n = 0
+  for h in arr
+    if h == product.handle
+      assign n = forloop.index
+      break
+    endif
+  endfor
+  if n == 0
+    assign n = arr.size | plus: 1
+  endif
+  assign num = n | prepend: '000' | slice: -3, 3
+  if plain
+    echo num
+  else
+    echo 'MC-' | append: num
+  endif
+-%}

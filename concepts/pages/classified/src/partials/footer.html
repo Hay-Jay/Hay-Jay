@@ -1,0 +1,37 @@
+<footer class="foot dark" id="contents">
+  {{foot_ticker}}
+  <div class="wrap">
+    <div class="foot-top">
+      <span class="ft-bc" aria-hidden="true">{{foot_barcode}}</span>
+      <p class="mono ft-file"><b>File no.</b> {{foot_file}} <span aria-hidden="true">//</span> <b>Page</b> {{folio}} of {{pages_total}} <span aria-hidden="true">//</span> <b>Clearance</b> L{{level}}</p>
+    </div>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <img class="emblem" src="{{asset:assets/emblem.webp}}" alt="" width="72" height="77" loading="lazy">
+        <img class="word" src="{{asset:assets/wordmark.webp}}" alt="Monochrome" width="360" height="32" loading="lazy">
+        <p class="mono">The Monochrome Bureau<br>Division of Wearables<br>Operation: Wear the Unknown</p>
+      </div>
+      <nav class="foot-col mono" aria-label="Footer">
+        <p class="foot-h">The dossier</p>
+        {{nav_foot}}
+      </nav>
+      <nav class="foot-col mono" aria-label="Store policies">
+        <p class="foot-h">The store</p>
+        <a data-store="/cart" href="{{store_cart}}">Bag</a>
+        <a data-store="/policies/shipping-policy" href="{{store_url}}/policies/shipping-policy">Shipping policy</a>
+        <a data-store="/policies/refund-policy" href="{{store_url}}/policies/refund-policy">Refund policy</a>
+        <a data-store="/policies/privacy-policy" href="{{store_url}}/policies/privacy-policy">Privacy policy</a>
+        <a data-store="/policies/terms-of-service" href="{{store_url}}/policies/terms-of-service">Terms of service</a>
+      </nav>
+      <div class="foot-col mono">
+        <p class="foot-h">Secure lines</p>
+        <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca</a>
+        <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
+        <p class="foot-cad">Prices in CAD</p>
+      </div>
+    </div>
+    <p class="foot-fic mono">A work of fiction. MONOCHROME® is a clothing brand and is not affiliated with any government agency.</p>
+    <p class="foot-legal mono"><span>© <span data-year>{{year}}</span> MONOCHROME®. All rights reserved. Prices in CAD.</span><span class="folio">Page {{folio}} of {{pages_total}}</span></p>
+  </div>
+  <div class="banner bottom" aria-hidden="true"><span class="bn-c">{{mark}}</span></div>
+</footer>

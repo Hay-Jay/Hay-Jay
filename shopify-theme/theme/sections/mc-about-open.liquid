@@ -1,0 +1,29 @@
+<!-- ABOUT: the formula, as the headline -->
+<section class="spread paper ab-open" aria-labelledby="aboutH">
+  <div class="wrap">
+    <header class="pg-head ab-head">
+      <p class="pg-file mono"><span class="pg-no">MC-104</span><span>{{ section.settings.kicker | escape }}</span><span>Division of Wearables</span></p>
+      <h1 class="ab-eq" id="aboutH">
+        <span class="eq eq-b">{{ section.settings.word_1 | escape }}</span><i aria-hidden="true">+</i>
+        <span class="eq eq-w">{{ section.settings.word_2 | escape }}</span><i aria-hidden="true">+</i>
+        <span class="eq eq-c">{{ section.settings.word_3 | escape }}</span>
+      </h1>
+      {%- if section.settings.deck != blank %}<p class="pg-sub ab-deck">{{ section.settings.deck | escape }}</p>{% endif -%}
+      <span class="stamp ab-stamp" style="--r:-8deg" aria-hidden="true">Top secret</span>
+    </header>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About: opening",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "About" },
+    { "type": "text", "id": "word_1", "label": "Word 1", "default": "Black" },
+    { "type": "text", "id": "word_2", "label": "Word 2", "default": "White" },
+    { "type": "text", "id": "word_3", "label": "Word 3 (chrome finish)", "default": "Chrome" },
+    { "type": "textarea", "id": "deck", "label": "One line", "default": "Three finishes. Small runs. Nothing else." }
+  ],
+  "presets": [{ "name": "About: opening" }]
+}
+{% endschema %}

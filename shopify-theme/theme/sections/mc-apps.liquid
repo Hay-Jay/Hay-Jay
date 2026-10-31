@@ -1,0 +1,24 @@
+{%- comment -%} A place for app blocks (Klarna messaging, reviews, ...). Add blocks of type "App" in the theme editor. {%- endcomment -%}
+{%- if section.blocks.size > 0 -%}
+<section class="spread {{ section.settings.tone }} mc-apps-sec">
+<div class="mc-apps wrap">
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when '@app' -%}
+        {% render block %}
+    {%- endcase -%}
+  {%- endfor -%}
+</div>
+</section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Apps",
+  "settings": [
+    { "type": "select", "id": "tone", "label": "Background", "options": [{ "value": "dark", "label": "Dark" }, { "value": "paper", "label": "Paper" }], "default": "dark" }
+  ],
+  "blocks": [{ "type": "@app" }],
+  "presets": [{ "name": "Apps" }]
+}
+{% endschema %}

@@ -1,0 +1,24 @@
+<!-- FILE INDEX: opens over any page; also the command bar (search the archive for a page or an asset) -->
+<div class="menu dark" id="menu" role="dialog" aria-modal="true" aria-label="File index and search" hidden>
+  <div class="menu-in">
+    <div class="menu-top"><p class="mono menu-kick">File index // Operation: Wear the Unknown</p><button class="menu-x mono" type="button" data-close>Close<span>Esc</span></button></div>
+    <div class="menu-find">
+      <label class="mono" for="jump">Search the archive <span class="menu-keys">/ to open anywhere</span></label>
+      <input id="jump" type="search" placeholder="shipping, hoodie, ring, nigeria…" data-hints="{{search_hints}}" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="jumpList" aria-autocomplete="list">
+      <ul class="jump-list" id="jumpList" role="listbox" aria-label="Results" hidden></ul>
+      <p class="mono jump-none" id="jumpNone" hidden>No file matches that. Try another keyword.</p>
+    </div>
+    <nav aria-label="File index"><ol class="menu-list">{{nav_menu}}</ol></nav>
+    <button class="menu-dc" id="declassMenu" type="button" data-declass aria-pressed="false">
+      <span class="dc-ico" aria-hidden="true"></span>
+      <span class="menu-dc-t"><b>Declassify the site</b><span class="mono">Lift every redaction bar on every page.</span></span>
+      <span class="menu-dc-s mono" aria-hidden="true"></span>
+    </button>
+    <div class="menu-foot mono">
+      <a data-store="/cart" href="{{store_cart}}">Bag<span class="arr" aria-hidden="true"></span></a>
+      <a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener">@monochrome.ca<span class="arr" aria-hidden="true"></span></a>
+      <a href="mailto:info.mccanada@gmail.com">info.mccanada@gmail.com</a>
+      <span>Prices in CAD</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-product",
+      "blocks": {
+        "easify": {
+          "type": "shopify://apps/easify-options/blocks/easify-product-options/d2288b18-c1ba-42f5-b3b3-26c75c8820bf",
+          "settings": {}
+        },
+        "klarna": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "credit-promotion-auto-size",
+            "locale_option": "geolocation",
+            "locale_fallback": "",
+            "theme": "dark",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        }
+      },
+      "block_order": [
+        "easify",
+        "klarna"
+      ],
+      "settings": {
+        "show_dynamic": true,
+        "offer_on": true,
+        "offer_text": "Free Vision Issue with any jersey or hoodie. Applied at checkout.",
+        "fit_top": "<p>Relaxed cut, true to size. Between sizes? Go up.</p>",
+        "fit_bottom": "<p>Not sure of your size? Message us before you order.</p>",
+        "fit_accessory": "<p>Rings: between two sizes, go up. Chains and necklaces: one size.</p>",
+        "ship_text": "<p>Ships to {countries} countries, Nigeria and Canada included. Rates are calculated at checkout.</p>",
+        "rel_title": "Also on file",
+        "rel_count": 4
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

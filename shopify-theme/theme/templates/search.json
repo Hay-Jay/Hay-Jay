@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-search",
+      "settings": {
+        "heading": "Search",
+        "kicker": "Asset register"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

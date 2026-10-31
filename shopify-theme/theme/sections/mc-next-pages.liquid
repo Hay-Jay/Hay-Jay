@@ -1,0 +1,31 @@
+<section class="spread paper ab-next" aria-label="Keep going">
+  <div class="wrap">
+    <p class="ab-big rv">{{ section.settings.big_a | escape }} <em>{{ section.settings.big_b | escape }}<i class="stop">.</i></em></p>
+    <ul class="cn-links">
+      {%- for block in section.blocks -%}
+        <li class="rv" style="--rv:{{ forloop.index }}" {{ block.shopify_attributes }}><a href="{{ block.settings.url | default: '/' }}">{% if block.settings.page != blank %}<span class="mono">{{ block.settings.page | escape }}</span>{% endif %}<b>{{ block.settings.label | escape }}</b><i class="arr" aria-hidden="true"></i></a></li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Keep going (links)",
+  "settings": [
+    { "type": "text", "id": "big_a", "label": "Big words", "default": "Wear the" },
+    { "type": "text", "id": "big_b", "label": "Big words (emphasised)", "default": "unknown" }
+  ],
+  "blocks": [
+    {
+      "type": "link", "name": "Link", "limit": 6,
+      "settings": [
+        { "type": "text", "id": "page", "label": "Small label", "info": "Optional." },
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop all" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Keep going (links)" }]
+}
+{% endschema %}

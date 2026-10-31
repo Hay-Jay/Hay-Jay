@@ -1,0 +1,268 @@
+{
+ "bpm": 150,
+ "bar1": 0.8,
+ "cuts": [
+  2.4,
+  4.8,
+  8.4,
+  15.0,
+  20.6
+ ],
+ "events": [
+  {
+   "t": 0.1,
+   "kind": "scan",
+   "note": "fingerprint scan bar"
+  },
+  {
+   "t": 0.967,
+   "kind": "beep",
+   "note": "Identity verified"
+  },
+  {
+   "t": 1.367,
+   "kind": "beep",
+   "note": "Clearance granted"
+  },
+  {
+   "t": 1.5,
+   "kind": "typing",
+   "note": "Welcome, operative."
+  },
+  {
+   "t": 2.4,
+   "kind": "cut",
+   "note": "flash"
+  },
+  {
+   "t": 2.4,
+   "kind": "whoosh",
+   "note": "emblem spins in"
+  },
+  {
+   "t": 2.7,
+   "kind": "swish",
+   "note": "wordmark wipe"
+  },
+  {
+   "t": 2.9,
+   "kind": "shimmer",
+   "note": "sheen across the emblem"
+  },
+  {
+   "t": 3.167,
+   "kind": "typing",
+   "note": "Division of wearables"
+  },
+  {
+   "t": 3.8,
+   "kind": "slam",
+   "note": "BLACK"
+  },
+  {
+   "t": 4.033,
+   "kind": "slam",
+   "note": "WHITE"
+  },
+  {
+   "t": 4.3,
+   "kind": "slam",
+   "note": "CHROME"
+  },
+  {
+   "t": 4.3,
+   "kind": "shimmer",
+   "note": "chrome chip"
+  },
+  {
+   "t": 4.8,
+   "kind": "cut",
+   "note": "flash"
+  },
+  {
+   "t": 4.967,
+   "kind": "typing",
+   "note": "Operation:"
+  },
+  {
+   "t": 5.533,
+   "kind": "slam+glitch",
+   "note": "WEAR THE"
+  },
+  {
+   "t": 5.867,
+   "kind": "slam+glitch",
+   "note": "UNKNOWN"
+  },
+  {
+   "t": 6.267,
+   "kind": "stamp",
+   "note": "TOP SECRET"
+  },
+  {
+   "t": 6.4,
+   "kind": "typing",
+   "note": "lede"
+  },
+  {
+   "t": 7.4,
+   "kind": "whoosh",
+   "note": "shop buttons slide up"
+  },
+  {
+   "t": 8.4,
+   "kind": "cut",
+   "note": "flash"
+  },
+  {
+   "t": 8.667,
+   "kind": "card",
+   "note": "card 1 lands"
+  },
+  {
+   "t": 9.167,
+   "kind": "shutter",
+   "note": "card 1 declassifies into colour"
+  },
+  {
+   "t": 9.733,
+   "kind": "stamp",
+   "note": "card 1 DECLASSIFIED"
+  },
+  {
+   "t": 10.267,
+   "kind": "card",
+   "note": "card 2 lands"
+  },
+  {
+   "t": 10.767,
+   "kind": "shutter",
+   "note": "card 2 declassifies into colour"
+  },
+  {
+   "t": 11.333,
+   "kind": "stamp",
+   "note": "card 2 DECLASSIFIED"
+  },
+  {
+   "t": 11.867,
+   "kind": "card",
+   "note": "card 3 lands"
+  },
+  {
+   "t": 12.367,
+   "kind": "shutter",
+   "note": "card 3 declassifies into colour"
+  },
+  {
+   "t": 12.933,
+   "kind": "stamp",
+   "note": "card 3 DECLASSIFIED"
+  },
+  {
+   "t": 13.467,
+   "kind": "card",
+   "note": "card 4 lands"
+  },
+  {
+   "t": 13.967,
+   "kind": "shutter",
+   "note": "card 4 declassifies into colour"
+  },
+  {
+   "t": 14.533,
+   "kind": "stamp",
+   "note": "card 4 DECLASSIFIED"
+  },
+  {
+   "t": 15.0,
+   "kind": "cut",
+   "note": "flash"
+  },
+  {
+   "t": 15.0,
+   "kind": "whoosh",
+   "note": "phone slides up"
+  },
+  {
+   "t": 15.067,
+   "kind": "typing",
+   "note": "Browse the briefing"
+  },
+  {
+   "t": 15.367,
+   "kind": "swipe",
+   "note": "screen scrolls"
+  },
+  {
+   "t": 15.867,
+   "kind": "stamp",
+   "note": "phone stamp"
+  },
+  {
+   "t": 16.767,
+   "kind": "click",
+   "note": "next screen"
+  },
+  {
+   "t": 16.8,
+   "kind": "typing",
+   "note": "Search the register"
+  },
+  {
+   "t": 16.867,
+   "kind": "swipe",
+   "note": "screen scrolls"
+  },
+  {
+   "t": 18.2,
+   "kind": "click",
+   "note": "next screen"
+  },
+  {
+   "t": 18.267,
+   "kind": "typing",
+   "note": "Open the dossier"
+  },
+  {
+   "t": 18.267,
+   "kind": "swipe",
+   "note": "screen scrolls"
+  },
+  {
+   "t": 18.967,
+   "kind": "tap",
+   "note": "Add to bag"
+  },
+  {
+   "t": 19.467,
+   "kind": "bloop",
+   "note": "bag slides up"
+  },
+  {
+   "t": 19.5,
+   "kind": "typing",
+   "note": "Requisition: add to bag"
+  },
+  {
+   "t": 20.6,
+   "kind": "boom",
+   "note": "cut to the end card"
+  },
+  {
+   "t": 21.467,
+   "kind": "stamp",
+   "note": "NEW SITE \u2014 NOW LIVE"
+  },
+  {
+   "t": 21.667,
+   "kind": "impact",
+   "note": "monochrome.com.ng pops in (boom), lands at 21.77 (slam)"
+  },
+  {
+   "t": 22.7,
+   "kind": "click",
+   "note": "shop button settles"
+  }
+ ]
+}

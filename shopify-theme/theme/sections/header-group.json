@@ -1,0 +1,143 @@
+{
+  "name": "Header",
+  "type": "header",
+  "sections": {
+    "header": {
+      "type": "mc-header",
+      "blocks": {
+        "nav-1": {
+          "type": "nav",
+          "settings": {
+            "label": "Shop",
+            "url": "/collections/all",
+            "doc": "Asset register",
+            "keywords": "store buy products all collection equipment shop"
+          }
+        },
+        "nav-2": {
+          "type": "nav",
+          "settings": {
+            "label": "New in",
+            "url": "/collections/new-arrivals",
+            "doc": "Fresh intel",
+            "keywords": "new arrivals latest drop just in"
+          }
+        },
+        "nav-3": {
+          "type": "nav",
+          "settings": {
+            "label": "Lookbook",
+            "url": "/pages/lookbook",
+            "doc": "Evidence wall",
+            "keywords": "photos photographs evidence exhibits surveillance looks"
+          }
+        },
+        "nav-4": {
+          "type": "nav",
+          "settings": {
+            "label": "Vision Issue",
+            "url": "/pages/vision-issue",
+            "doc": "The magazine",
+            "keywords": "magazine print issue vision zine read orbit"
+          }
+        },
+        "nav-5": {
+          "type": "nav",
+          "settings": {
+            "label": "About",
+            "url": "/pages/about",
+            "doc": "The mission",
+            "keywords": "story brand mission rules black white chrome team"
+          }
+        },
+        "cat-1": {
+          "type": "cat",
+          "settings": {
+            "label": "Tops",
+            "url": "/collections/all?c=top",
+            "product": "black-monochrome-jersey",
+            "photo": 4,
+            "keywords": "shirts tee jersey hoodie sweatshirt crop"
+          }
+        },
+        "cat-2": {
+          "type": "cat",
+          "settings": {
+            "label": "Bottoms",
+            "url": "/collections/all?c=bottom",
+            "product": "monochrome-cargo-shorts-black",
+            "photo": 1,
+            "keywords": "cargo shorts skirt pants"
+          }
+        },
+        "cat-3": {
+          "type": "cat",
+          "settings": {
+            "label": "Hardware",
+            "url": "/collections/all?c=accessory",
+            "product": "royal-black",
+            "photo": 1,
+            "keywords": "rings chains necklace jewellery jewelry accessories"
+          }
+        },
+        "cat-4": {
+          "type": "cat",
+          "settings": {
+            "label": "Gift cards",
+            "url": "/collections/all?c=gift",
+            "product": "monochrome-gift-cards",
+            "photo": 1,
+            "keywords": "gift card voucher present"
+          }
+        },
+        "help-1": {
+          "type": "help",
+          "settings": {
+            "label": "Shipping",
+            "url": "/pages/shipping",
+            "keywords": "delivery nigeria canada countries returns exchange refund sizing size"
+          }
+        },
+        "help-2": {
+          "type": "help",
+          "settings": {
+            "label": "FAQ",
+            "url": "/pages/faq",
+            "keywords": "questions help answers debrief"
+          }
+        },
+        "help-3": {
+          "type": "help",
+          "settings": {
+            "label": "Contact",
+            "url": "/pages/contact",
+            "keywords": "email instagram message report in"
+          }
+        }
+      },
+      "block_order": [
+        "nav-1",
+        "nav-2",
+        "nav-3",
+        "nav-4",
+        "nav-5",
+        "cat-1",
+        "cat-2",
+        "cat-3",
+        "cat-4",
+        "help-1",
+        "help-2",
+        "help-3"
+      ],
+      "settings": {
+        "notice_1": "Ships to {countries} countries — Nigeria & Canada",
+        "notice_1_url": "/pages/shipping",
+        "notice_2": "",
+        "notice_2_url": ""
+      }
+    }
+  },
+  "order": [
+    "header"
+  ]
+}

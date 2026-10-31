@@ -1,0 +1,40 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-countdown",
+      "blocks": {
+        "l1": {
+          "type": "line",
+          "settings": {
+            "text": "Package intercepted in Regina, {pages} pages."
+          }
+        },
+        "l3": {
+          "type": "line",
+          "settings": {
+            "text": "Lagos reports in. Cleared for {countries} countries."
+          }
+        }
+      },
+      "block_order": [
+        "l1",
+        "l3"
+      ],
+      "settings": {
+        "launch": "2026-10-18T12:00:00-06:00",
+        "preorder": true,
+        "kicker": "The Vision Issue",
+        "sub": "Volume 001. Sealed until the clock runs out.",
+        "live_sub": "Volume 001. Out now, in print.",
+        "signup_note": "One email at launch.",
+        "live_signup_note": "One email per drop.",
+        "tape": "The Vision Issue|Eyes only",
+        "live_heading": "Out now",
+        "live_signup_heading": "Drop alerts"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,24 @@
+  <!-- 06 THE DEBRIEF ------------------------------------------------------------------------ -->
+  <section class="spread dark faq-spread" aria-labelledby="faqH">
+    <div class="wrap fq-grid">
+      <div class="fq-head">
+        <div class="filehead-wrap">{{filehead}}</div>
+        <p class="kick mono">Debrief — transcript</p>
+        <h1 class="h1" id="faqH"><span class="tw" style="--n:3;--dl:.1s">The</span> <span class="tw caret" style="--n:7;--dl:.45s">debrief</span></h1>
+        <p class="fq-deck">{{n_q}} questions we get most, in the order we get them. Each answer is as short as it can be.</p>
+        <p class="fq-meta mono"><span><b>Subject:</b> You</span><span><b>Debriefed by:</b> Division of Wearables</span><span><b>Witness:</b> <span class="redact" tabindex="0">Agent Chrome, Desk 7</span></span></p>
+        <div class="recorder" aria-hidden="true"><i class="reel"></i><i class="reel"></i><span class="mono"><b class="rec"></b>Rec</span></div>
+      </div>
+      <div class="transcript paper">
+        <span class="clip" aria-hidden="true"></span>
+        <p class="tr-head mono"><span>Transcript</span><span>{{n_q}} entries</span></p>
+        <div class="faq-list">
+{{faq_items}}
+        </div>
+        <div class="fq-foot">
+          <p class="mono">Not here?</p>
+          <a href="{{href:contact/}}">Report in<span class="arr" aria-hidden="true"></span></a>
+        </div>
+      </div>
+    </div>
+  </section>

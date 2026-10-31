@@ -1,0 +1,61 @@
+{%- comment -%}
+  Free-magazine nudge in the bag (drawer and cart page). When the bag holds a jersey or a hoodie (by product type or title) but not the
+  free product, it offers a one-tap add; once both are in, it confirms. The store's automatic discount makes it free at checkout.
+  Params: form_id (id of an empty form posting to /cart/add, rendered by the section OUTSIDE any other form),
+          offer_product (product setting; blank = the first available product of type Magazine), title ("{item}" = jersey/hoodie),
+          name, note.
+{%- endcomment -%}
+{%- liquid
+  assign mag = offer_product
+  if mag == blank
+    assign mag = collections['all'].products | where: 'type', 'Magazine' | where: 'available' | first
+  endif
+  assign jersey = false
+  assign hoodie = false
+  assign has_mag = false
+  assign mag_disc = 0
+  if mag != blank
+    for it in cart.items
+      if it.product_id == mag.id
+        assign has_mag = true
+        assign mag_disc = mag_disc | plus: it.line_level_discount_allocations.size
+      endif
+      assign t = it.product.type | downcase
+      assign tt = it.product.title | downcase
+      if t contains 'jersey' or tt contains 'jersey'
+        assign jersey = true
+      elsif t contains 'hoodie' or tt contains 'hoodie'
+        assign hoodie = true
+      endif
+    endfor
+  endif
+  if jersey and hoodie
+    assign kind = 'jersey/hoodie'
+  elsif jersey
+    assign kind = 'jersey'
+  else
+    assign kind = 'hoodie'
+  endif
+  assign head = title | default: 'Free with your {item}' | replace: '{item}', kind
+  assign mag_name = name | default: 'The Vision Issue'
+  assign mv = mag.selected_or_first_available_variant
+-%}
+{%- if jersey or hoodie -%}
+  {%- if has_mag == false and mag.available -%}
+    <div class="offer" style="--d:0" role="group" aria-label="{{ head | escape }}">
+      <span class="offer-ph" aria-hidden="true">
+        {%- if mag.featured_image -%}<img src="{{ mag.featured_image | image_url: width: 120 }}" width="44" height="57" alt="" loading="lazy" decoding="async">{%- endif -%}
+      </span>
+      <div class="offer-t">
+        <p class="offer-k">{{ head | escape }}</p>
+        <p class="offer-n">Add {{ mag_name | escape }}</p>
+        <p class="offer-s">{{ note | default: 'Discount applies at checkout.' | escape }}</p>
+      </div>
+      <input type="hidden" name="id" value="{{ mv.id }}" form="{{ form_id }}">
+      <input type="hidden" name="quantity" value="1" form="{{ form_id }}">
+      <button class="offer-go" type="submit" form="{{ form_id }}" data-mc-add="{{ mv.id }}" aria-label="Add {{ mag_name | escape }} to your bag">Add<i aria-hidden="true">+</i></button>
+    </div>
+  {%- elsif has_mag and mag_disc == 0 -%}
+    <p class="offer-ok"><i aria-hidden="true">✓</i><span>{{ mag_name | escape }} is free with your {{ kind }}. {{ note | default: 'Discount applies at checkout.' | escape }}</span></p>
+  {%- endif -%}
+{%- endif -%}

@@ -1,0 +1,50 @@
+window.TL = {
+ "about": "The film's schedule, shared by index.html (picture) and audio/make_audio.py (sound). Strict JSON after the '=' sign. Times in seconds; the beat is 150 BPM (a beat every 0.4 s = 12 frames, a bar every 1.6 s), bar 1 starts at 0.8. Camera keys are [t, cx, cy, w, rx, ry, rz, ease]: the page point (cx, cy) sits at the frame centre and w page pixels fill the frame width (pages are 1445 x 1870). Page turns are listed by the time the new page lands (on a beat); each turn takes 'turn' seconds.",
+ "bpm": 150, "bar1": 0.8, "dur": 27.2, "turn": 0.3,
+ "shots": [
+  {"id": "st1", "t0": 0.0, "t1": 0.2, "pages": ["08"], "cut": "strobe", "cam": [[0.0, 1035, 980, 640, 0, 0, 0], [0.2, 1035, 980, 560, 0, 0, 0, "out"]]},
+  {"id": "st2", "t0": 0.2, "t1": 0.4, "pages": ["05"], "cut": "strobe", "cam": [[0.2, 268, 660, 520, 0, 0, 0], [0.4, 268, 660, 460, 0, 0, 0, "out"]]},
+  {"id": "st3", "t0": 0.4, "t1": 0.6, "pages": ["13"], "cut": "strobe", "cam": [[0.4, 610, 860, 700, 0, 0, 0], [0.6, 610, 860, 630, 0, 0, 0, "out"]]},
+  {"id": "st4", "t0": 0.6, "t1": 0.8, "pages": ["03"], "cut": "strobe", "cam": [[0.6, 600, 990, 700, 0, 0, 0], [0.8, 600, 990, 630, 0, 0, 0, "out"]]},
+  {"id": "title", "t0": 0.8, "t1": 2.4, "scene": "title", "cut": "drop"},
+  {"id": "bookA", "t0": 2.4, "t1": 7.2, "pages": ["01", "03", "05"], "turns": [6.0, 6.4], "cut": "slam", "sweeps": [2.75, 4.55],
+   "cam": [[2.4, 722, 1000, 1250, 10, -18, 7], [2.62, 722, 1069, 1815, 6, -10, -2.5, "back"], [5.6, 722, 1050, 1720, 3, 8, -1, "io"],
+           [6.0, 722, 1069, 1815, 2, 0, 0, "io"], [6.4, 722, 1069, 1815, 2, 0, 0, "lin"], [7.2, 722, 760, 1180, 0, 0, 0, "out"]]},
+  {"id": "team2", "t0": 7.2, "t1": 8.0, "pages": ["05"], "cut": "shutter", "cam": [[7.2, 470, 1100, 860, 0, 0, 0], [8.0, 975, 1100, 820, 0, 0, 0, "io"]]},
+  {"id": "bookB", "t0": 8.0, "t1": 8.8, "pages": ["05", "06", "08"], "turns": [8.4, 8.8], "cut": "zap",
+   "cam": [[8.0, 722, 1069, 1815, 3, -6, -1.5], [8.8, 722, 1069, 1815, 2, 2, 0.5, "io"]]},
+  {"id": "f77", "t0": 8.8, "t1": 10.4, "pages": ["08"], "cut": "shutter", "cam": [[8.8, 1035, 1106, 820, 0, 0, -0.6], [10.4, 1035, 1080, 680, 0, 0, 0.4, "io"]]},
+  {"id": "bookC", "t0": 10.4, "t1": 13.6, "pages": ["08", "09", "10", "12", "13"], "turns": [10.8, 11.2, 11.6, 12.0], "cut": "zap",
+   "cam": [[10.4, 722, 1069, 1815, 3, -5, -1], [12.0, 722, 1069, 1815, 2, 3, 0.5, "io"], [13.6, 660, 990, 820, 0, 0, 0, "out"]]},
+  {"id": "n15a", "t0": 13.6, "t1": 14.4, "pages": ["15"], "cut": "shutter", "cam": [[13.6, 420, 800, 700, 0, 0, 0], [14.4, 1020, 800, 680, 0, 0, 0, "io"]]},
+  {"id": "n15b", "t0": 14.4, "t1": 14.8, "pages": ["15"], "cut": "shutter", "cam": [[14.4, 1160, 1250, 580, 0, 0, 0], [14.8, 1160, 1250, 530, 0, 0, 0, "out"]]},
+  {"id": "bookD", "t0": 14.8, "t1": 15.6, "pages": ["15", "16"], "turns": [15.2], "cut": "zap",
+   "cam": [[14.8, 722, 1069, 1815, 3, -6, -1.5], [15.6, 722, 1040, 1700, 2, 2, 0, "io"]]},
+  {"id": "roll1", "t0": 15.6, "t1": 15.8, "pages": ["16"], "cut": "shutter", "rec": true, "cam": [[15.6, 295, 645, 560, 0, 0, 0], [15.8, 295, 645, 520, 0, 0, 0, "out"]]},
+  {"id": "roll2", "t0": 15.8, "t1": 16.0, "pages": ["16"], "cut": "shutter", "rec": true, "cam": [[15.8, 730, 640, 560, 0, 0, 0], [16.0, 730, 640, 520, 0, 0, 0, "out"]]},
+  {"id": "roll3", "t0": 16.0, "t1": 16.2, "pages": ["16"], "cut": "shutter", "rec": true, "cam": [[16.0, 1160, 655, 560, 0, 0, 0], [16.2, 1160, 655, 520, 0, 0, 0, "out"]]},
+  {"id": "roll4", "t0": 16.2, "t1": 16.4, "pages": ["16"], "cut": "shutter", "rec": true, "cam": [[16.2, 500, 1100, 520, 0, 0, 0], [16.4, 500, 1100, 480, 0, 0, 0, "out"]]},
+  {"id": "bookE", "t0": 16.4, "t1": 17.6, "pages": ["16", "17"], "turns": [16.8], "cut": "zap",
+   "cam": [[16.4, 722, 1069, 1815, 3, -6, -1.5], [16.8, 722, 1069, 1815, 2, 0, 0, "io"], [17.6, 720, 900, 1150, 0, 0, 0, "out"]]},
+  {"id": "store2", "t0": 17.6, "t1": 18.4, "pages": ["17"], "cut": "shutter", "cam": [[17.6, 400, 1240, 760, 0, 0, 0.5], [18.4, 400, 1230, 680, 0, 0, -0.3, "io"]]},
+  {"id": "bookF", "t0": 18.4, "t1": 20.0, "pages": ["17", "18", "20"], "turns": [18.8, 19.2], "cut": "zap",
+   "cam": [[18.4, 722, 1069, 1815, 3, -6, -1.5], [19.2, 722, 1069, 1815, 2, 0, 0, "io"], [20.0, 722, 880, 1480, 0, 0, 0, "in"]]},
+  {"id": "facts", "t0": 20.0, "t1": 23.2, "scene": "facts", "cut": "drop"},
+  {"id": "end", "t0": 23.2, "t1": 27.2, "scene": "end", "cut": "drop"}
+ ],
+ "captions": [
+  {"id": "cap1", "t0": 6.4, "t1": 8.0, "pos": "top", "kick": "Page 05", "lines": ["Meet the", "dream team"]},
+  {"id": "cap2", "t0": 8.8, "t1": 10.4, "pos": "bottom", "kick": "Page 08", "lines": ["The 77 file"]},
+  {"id": "cap3", "t0": 10.8, "t1": 12.0, "pos": "bottom", "kick": "Pages 09-12", "lines": ["Play Lab"], "chips": [["Quiz", 10.8], ["Crossword", 11.2], ["Maze", 11.6]]},
+  {"id": "cap4", "t0": 12.0, "t1": 13.6, "pos": "bottom", "kick": "Page 13", "lines": ["Fashion show"], "sub": ["One night. A whole world.", 12.4]},
+  {"id": "cap5", "t0": 16.8, "t1": 18.4, "pos": "bottom", "kick": "Page 17", "lines": ["The store edit"]}
+ ],
+ "title": {"words": [["The", 0.8], ["Vision", 1.2], ["Issue", 1.6]], "stamp": 2.0},
+ "cover": {"stamp": 3.6},
+ "facts": {"rows": [["Volume 001", 20.0], ["20 pages", 20.4], ["Printed copy", 20.8], ["$10 CAD", 21.2], ["Ships to 29 countries", 21.6]], "stamp": 22.0},
+ "end": {"cover": 23.2, "head": 23.6, "cta": 24.0, "url": 24.4, "word": 24.6, "sweep": 24.8, "last": 26.4},
+ "variants": {
+  "out": {"head": "Out now", "cta": "Requisition your copy", "date": "", "tape": "Out now // The Vision Issue // Volume 001 // monochrome.com.ng"},
+  "preorder": {"head": "Pre-order now", "cta": "Reserve your copy", "date": "Out Saturday 17 October · 12:00 Regina", "tape": "Pre-order now // Out Saturday 17 October // The Vision Issue // monochrome.com.ng"}
+ }
+};

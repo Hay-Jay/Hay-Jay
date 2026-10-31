@@ -1,0 +1,204 @@
+{%- assign tk_countries = '{countries}' -%}
+{%- liquid
+  capture pk
+    render 'mc-pagekey'
+  endcapture
+  assign pkp = pk | split: '~'
+  assign level = pkp[2] | plus: 0
+  assign nav_url = pkp[4]
+  capture hints
+    render 'mc-hints'
+  endcapture
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign wordmark = settings.logo_wordmark
+  assign emblem = settings.logo_emblem
+  assign n_notes = 0
+  if section.settings.notice_1 != blank
+    assign n_notes = n_notes | plus: 1
+  endif
+  if section.settings.notice_2 != blank
+    assign n_notes = n_notes | plus: 1
+  endif
+  assign bag_label = 'Bag, ' | append: cart.item_count | append: ' item'
+  unless cart.item_count == 1
+    assign bag_label = bag_label | append: 's'
+  endunless
+-%}
+<header class="hdr" id="bar">
+  {%- comment -%} the strip on top scrolls away: rotating store notices, the clearance micro-label, help links on wide screens {%- endcomment -%}
+  <div class="banner top">
+    <span class="bn-l mono" aria-hidden="true">{% if level > 0 %}{% render 'mc-ladder', n: level %}<span>Clearance L{{ level }}</span>{% endif %}</span>
+    <div class="bn-c" data-notes>
+      {%- if n_notes == 0 -%}
+        <span class="bn-msg" aria-hidden="true">{{ settings.banner_mark | escape }}</span>
+      {%- else -%}
+        {%- for i in (1..2) -%}
+          {%- liquid
+            assign nk = 'notice_' | append: i
+            assign uk = 'notice_' | append: i | append: '_url'
+            assign nt = section.settings[nk] | replace: tk_countries, countries.size
+            assign nu = section.settings[uk]
+          -%}
+          {%- if nt != blank -%}
+            {%- if nu != blank -%}<a class="bn-msg" href="{{ nu }}">{{ nt | escape }}</a>{%- else -%}<span class="bn-msg">{{ nt | escape }}</span>{%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- comment -%} a single notice stays put (it decrypts once); two take turns with the banner mark {%- endcomment -%}
+        {%- if n_notes > 1 %}<span class="bn-msg bn-mark" aria-hidden="true">{{ settings.banner_mark | escape }}</span>{% endif -%}
+      {%- endif -%}
+    </div>
+    <nav class="bn-r mono" aria-label="Help">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'help' -%}<a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>{%- endif -%}
+      {%- endfor -%}
+      {%- if shop.customer_accounts_enabled -%}<a href="{{ routes.account_url }}">Account</a>{%- endif -%}
+    </nav>
+  </div>
+  <div class="bar">
+    <a class="bar-brand" href="{{ routes.root_url }}"{% if template.name == 'index' %} aria-current="page"{% endif %} aria-label="MONOCHROME, home">
+      {%- if emblem != blank -%}
+        <img class="bar-emblem" src="{{ emblem | image_url: width: 120 }}" alt="" width="26" height="28">
+      {%- else -%}
+        <img class="bar-emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="26" height="28">
+      {%- endif -%}
+      {%- if wordmark != blank -%}
+        <img class="bar-word" src="{{ wordmark | image_url: width: 600 }}" alt="MONOCHROME" width="{{ wordmark.width }}" height="{{ wordmark.height }}">
+      {%- else -%}
+        <img class="bar-word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="MONOCHROME" width="1170" height="114">
+      {%- endif -%}
+    </a>
+    <nav class="tabs" aria-label="Primary">
+      {%- assign tn = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'nav' -%}
+          {%- assign tn = tn | plus: 1 -%}
+          <a class="tab" href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}><span class="tab-no" aria-hidden="true">{{ tn | prepend: '0' | slice: -2, 2 }}</span><span class="tab-t">{{ block.settings.label | escape }}</span></a>
+        {%- endif -%}
+      {%- endfor -%}
+    </nav>
+    <div class="bar-r">
+      <a class="bar-btn bar-find" id="findBtn" href="{{ routes.search_url }}" aria-controls="menu" aria-expanded="false"><i class="ico ico-find" aria-hidden="true"></i><span class="bar-lbl">Search</span></a>
+      <a class="bar-btn bar-bag" href="{{ routes.cart_url }}" data-cart-open aria-label="{{ bag_label }}"><i class="ico ico-bag" aria-hidden="true"></i><span class="bar-lbl">Bag</span><b class="bag-n" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{{ cart.item_count }}</b></a>
+      <a class="bar-btn bar-menu" id="menuBtn" href="#contents" aria-controls="menu" aria-expanded="false"><i class="ico ico-menu" aria-hidden="true"></i><span class="bar-lbl">Menu</span></a>
+    </div>
+  </div>
+</header>
+{%- comment -%} The menu: opens over any page from Menu or Search (or "/" and Ctrl+K). Search, the main links, shop shortcuts with photos, help links. {%- endcomment -%}
+<div class="menu dark" id="menu" role="dialog" aria-modal="true" aria-label="Menu and search" hidden>
+  <div class="menu-in">
+    <div class="menu-top">
+      <p class="mono menu-kick">File index <span aria-hidden="true">// MC-000</span></p>
+      <button class="menu-x mono" type="button" data-close>Close<span aria-hidden="true">Esc</span></button>
+    </div>
+    <form class="menu-find" action="{{ routes.search_url }}" method="get" role="search">
+      <label class="mono" for="jump">Search the shop <span class="menu-keys">Press / anywhere</span></label>
+      <input id="jump" name="q" type="search" placeholder="hoodie, ring, jersey…" data-hints="{{ hints | escape }}" autocomplete="off" autocapitalize="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="jumpList" aria-autocomplete="list">
+      <ul class="jump-list" id="jumpList" role="listbox" aria-label="Results" hidden></ul>
+      <p class="mono jump-none" id="jumpNone" hidden>No match. Try another word.</p>
+    </form>
+    <div class="menu-body">
+      <nav class="menu-nav" aria-label="Main">
+        <ol class="menu-list">
+          {%- assign tn = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'nav' -%}
+              {%- assign tn = tn | plus: 1 -%}
+              <li style="--i:{{ tn }}"><a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} data-kw="{{ block.settings.doc | append: ' ' | append: block.settings.keywords | escape }}"><span class="mono">{{ tn | prepend: '0' | slice: -2, 2 }}</span><b>{{ block.settings.label | escape }}</b><i class="mono">{{ block.settings.doc | escape }}</i></a></li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ol>
+      </nav>
+      <div class="menu-side">
+        <ul class="menu-cats" aria-label="Shop by category">
+          {%- assign cn = 0 -%}
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'cat' -%}
+              {%- liquid
+                assign cn = cn | plus: 1
+                assign cp = block.settings.product
+                assign pic = blank
+                if cp != blank
+                  assign pi = block.settings.photo | minus: 1
+                  assign pic = cp.images[pi] | default: cp.featured_image
+                endif
+              -%}
+              <li style="--i:{{ cn | plus: 3 }}" {{ block.shopify_attributes }}><a class="mcat" href="{{ block.settings.url }}" data-kw="{{ block.settings.keywords | escape }}">
+                <span class="mcat-ph">{%- if pic != blank -%}{% render 'mc-img', image: pic, alt: '', class: 'ph', sizes: '(min-width:900px) 150px, 132px', widths: '200,300,400' %}{%- endif -%}</span>
+                <b>{{ block.settings.label | escape }}</b>
+              </a></li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+        <nav class="menu-help mono" aria-label="Help">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'help' -%}<a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} data-kw="{{ block.settings.keywords | escape }}">{{ block.settings.label | escape }}</a>{%- endif -%}
+          {%- endfor -%}
+          {%- if shop.customer_accounts_enabled -%}<a href="{{ routes.account_url }}" data-kw="account login sign in orders">Account</a>{%- endif -%}
+        </nav>
+      </div>
+    </div>
+    <button class="menu-dc" id="declassMenu" type="button" data-declass aria-pressed="false">
+      <span class="dc-ico" aria-hidden="true"></span>
+      <span class="menu-dc-t"><b>Declassify</b><span class="mono">Lift the redaction bars</span></span>
+      <span class="menu-dc-s mono" aria-hidden="true"></span>
+    </button>
+    <div class="menu-foot mono">
+      {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif -%}
+      {%- if settings.social_tiktok != blank %}<a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener">TikTok</a>{% endif -%}
+      <a href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a>
+      <span>Prices in {{ cart.currency.iso_code }}</span>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    { "type": "header", "content": "Notices in the top strip" },
+    { "type": "paragraph", "content": "One notice stays put. Two take turns with the banner text from Theme settings. {countries} = how many countries you deliver to." },
+    { "type": "text", "id": "notice_1", "label": "Notice 1", "default": "Ships to {countries} countries — Nigeria & Canada" },
+    { "type": "url", "id": "notice_1_url", "label": "Notice 1 link" },
+    { "type": "text", "id": "notice_2", "label": "Notice 2", "info": "Optional. For a time-limited offer, empty it when the offer ends." },
+    { "type": "url", "id": "notice_2_url", "label": "Notice 2 link" }
+  ],
+  "blocks": [
+    {
+      "type": "nav",
+      "name": "Main link",
+      "limit": 7,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop" },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "text", "id": "doc", "label": "Small label (menu)", "default": "Asset register" },
+        { "type": "text", "id": "keywords", "label": "Search words", "info": "Words that find this link in the menu search." }
+      ]
+    },
+    {
+      "type": "cat",
+      "name": "Category tile (menu)",
+      "limit": 6,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Tops" },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "product", "id": "product", "label": "Photo from product" },
+        { "type": "range", "id": "photo", "label": "Photo number", "min": 1, "max": 12, "step": 1, "default": 1 },
+        { "type": "text", "id": "keywords", "label": "Search words" }
+      ]
+    },
+    {
+      "type": "help",
+      "name": "Help link",
+      "limit": 6,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shipping" },
+        { "type": "url", "id": "url", "label": "Link" },
+        { "type": "text", "id": "keywords", "label": "Search words" }
+      ]
+    }
+  ]
+}
+{% endschema %}

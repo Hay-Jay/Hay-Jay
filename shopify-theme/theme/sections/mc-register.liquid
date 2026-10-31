@@ -1,0 +1,201 @@
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+  assign order_list = ord | split: ','
+  capture hints
+    render 'mc-hints'
+  endcapture
+  assign is_all = false
+  if collection.handle == 'all'
+    assign is_all = true
+  endif
+  if is_all
+    assign h_title = section.settings.heading | default: collection.title
+  else
+    assign h_title = collection.title
+  endif
+-%}
+{%- paginate collection.products by 50 -%}
+  {%- liquid
+    assign shown = ''
+    assign n_stock = 0
+    assign c_top = 0
+    assign c_bottom = 0
+    assign c_acc = 0
+    assign c_gift = 0
+    assign c_print = 0
+    for p in collection.products
+      assign shown = shown | append: p.handle | append: ','
+      if p.available
+        assign n_stock = n_stock | plus: 1
+      endif
+      capture cls
+        render 'mc-class', product: p
+      endcapture
+      case cls
+        when 'top'
+          assign c_top = c_top | plus: 1
+        when 'bottom'
+          assign c_bottom = c_bottom | plus: 1
+        when 'accessory'
+          assign c_acc = c_acc | plus: 1
+        when 'gift'
+          assign c_gift = c_gift | plus: 1
+        when 'print'
+          assign c_print = c_print | plus: 1
+      endcase
+    endfor
+    assign shown_list = shown | remove_last: ',' | split: ','
+    assign n_shown = shown_list.size
+    # a small collection (New in: 2 pieces) needs no search, sort or filters; more pieces follow under it instead
+    assign small = false
+    if paginate.pages == 1 and n_shown < 5
+      assign small = true
+    endif
+  -%}
+{%- unless small -%}
+<script>(function(){try{var q=new URLSearchParams(location.search),c=q.get('c'),d=document.documentElement;if(/^(top|bottom|accessory|gift|print)$/.test(c))d.dataset.c=c;var v=q.get('v');d.dataset.view=(v==='list'||v==='index')?'list':'grid'}catch(e){}})()</script>
+{%- endunless -%}
+<!-- SHOP: the asset register ----------------------------------------------------- -->
+<section class="spread paper shop" id="index" aria-labelledby="indexH">
+  <div class="wrap">
+    <header class="sh-head">
+      <p class="sh-file mono"><span class="sh-no">MC-102</span><span>{{ section.settings.kicker | escape }}</span><span>Prices in {{ cart.currency.iso_code }}</span></p>
+      <h1 class="h1 sh-h" id="indexH"><span class="tw caret" style="--n:{{ h_title.size }}">{{ h_title | escape }}</span></h1>
+      {%- if section.settings.stamp != blank %}<span class="stamp sh-stamp" style="--r:-7deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>{% endif %}
+    </header>
+
+    {%- unless small -%}
+    <i class="sh-sent" id="shSent" aria-hidden="true"></i>
+    <div class="sh-tools" id="tools">
+      <div class="sh-row">
+        <form class="sh-find" action="{{ routes.search_url }}" method="get" role="search">
+          <label class="sr-only" for="q">Search the shop</label>
+          <input id="q" name="q" type="search" placeholder="Search" data-hints="{{ hints | escape }}" autocomplete="off" spellcheck="false" aria-controls="grid">
+          <input type="hidden" name="type" value="product">
+          <input type="hidden" name="options[prefix]" value="last">
+        </form>
+        <label class="sh-sort sh-js"><span class="sr-only">Sort by</span>
+          <select id="sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price: low</option><option value="high">Price: high</option></select>
+        </label>
+      </div>
+      <div class="sh-chips sh-js" id="filters" role="group" aria-label="Filter">
+        <button class="sh-chip on" data-filter="all" type="button" aria-pressed="true">All<sup>{{ n_shown }}</sup></button>
+        {%- if c_top > 0 %}<button class="sh-chip" data-filter="top" type="button" aria-pressed="false">Tops<sup>{{ c_top }}</sup></button>{% endif %}
+        {%- if c_bottom > 0 %}<button class="sh-chip" data-filter="bottom" type="button" aria-pressed="false">Bottoms<sup>{{ c_bottom }}</sup></button>{% endif %}
+        {%- if c_acc > 0 %}<button class="sh-chip" data-filter="accessory" type="button" aria-pressed="false">Hardware<sup>{{ c_acc }}</sup></button>{% endif %}
+        {%- if c_gift > 0 %}<button class="sh-chip" data-filter="gift" type="button" aria-pressed="false">Gift cards<sup>{{ c_gift }}</sup></button>{% endif %}
+        {%- if c_print > 0 %}<button class="sh-chip" data-filter="print" type="button" aria-pressed="false">Print<sup>{{ c_print }}</sup></button>{% endif %}
+      </div>
+    </div>
+    {%- endunless -%}
+    <div class="sh-meta">
+      <p class="sh-count mono" id="count" role="status" aria-live="polite">{{ n_shown }} {% if n_shown == 1 %}piece{% else %}pieces{% endif %}{% if n_stock < n_shown %} · {{ n_stock }} in stock{% endif %}</p>
+      {%- unless small -%}
+      <div class="sh-views sh-js" role="group" aria-label="View as">
+        <button class="sh-view" data-view="grid" type="button" aria-pressed="true" aria-label="Photo grid"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 1h6v6H1zM9 1h6v6H9zM1 9h6v6H1zM9 9h6v6H9z"/></svg></button>
+        <button class="sh-view" data-view="list" type="button" aria-pressed="false" aria-label="List of names"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1 2h14v2H1zM1 7h14v2H1zM1 12h14v2H1z"/></svg></button>
+      </div>
+      {%- endunless -%}
+    </div>
+    <div class="sh-empty" id="empty" hidden>
+      <p class="mono">File not found</p>
+      <p><button class="btn ghost" type="button" id="emptyReset">Show everything</button></p>
+    </div>
+
+    <div class="sh-grid{% if small %} sh-few n{{ n_shown }}{% endif %}" id="grid">
+      {%- assign i = 0 -%}
+      {%- comment -%} products come from this page of the collection: all_products[] stops after 20 handles per page.
+        The first row loads with the page (4 across on a desktop); the first two are the LCP candidates. {%- endcomment -%}
+      {%- for h in order_list -%}
+        {%- assign p = collection.products | where: 'handle', h | first -%}
+        {%- if p -%}
+          {%- liquid
+            assign eg = false
+            assign lz = true
+            if i < 2
+              assign eg = true
+            elsif i < 4
+              assign lz = false
+            endif
+          -%}
+          {% render 'mc-card', product: p, i: i, order: ord, data: true, eager: eg, lazy: lz, uid: p.handle, cur: false, feat: small %}
+          {%- assign i = i | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- unless small -%}
+    <ol class="toc" id="toc">
+      {%- assign i = 0 -%}
+      {%- for h in order_list -%}
+        {%- assign p = collection.products | where: 'handle', h | first -%}
+        {%- if p -%}
+          {% render 'mc-row', product: p, i: i, order: ord %}
+          {%- assign i = i | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+    {%- endunless -%}
+
+    {%- assign more_n = section.settings.more_count -%}
+    {%- if small and more_n > 0 -%}
+      {%- assign everything = collections['all'].products -%}
+      <div class="sh-more" role="region" aria-labelledby="moreH">
+        <h2 class="h2 sh-more-h" id="moreH">{{ section.settings.more_title | escape }}</h2>
+        <div class="sh-grid">
+          {%- assign k = 0 -%}
+          {%- for h in order_list -%}
+            {%- unless shown_list contains h or k >= more_n -%}
+              {%- assign p = everything | where: 'handle', h | first -%}
+              {%- if p -%}
+                {% render 'mc-card', product: p, i: k, order: ord, uid: p.handle, cur: false %}
+                {%- assign k = k | plus: 1 -%}
+              {%- endif -%}
+            {%- endunless -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if paginate.pages > 1 -%}
+      <nav class="mono sh-end" aria-label="Pages">
+        {%- if paginate.previous -%}<a class="link-line" href="{{ paginate.previous.url }}">Previous</a> {% endif -%}
+        <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+        {%- if paginate.next %} <a class="link-line" href="{{ paginate.next.url }}">Next<span class="arr" aria-hidden="true"></span></a>{% endif -%}
+      </nav>
+    {%- endif -%}
+    {%- unless is_all -%}
+      <p class="sh-end"><a class="btn" href="{{ routes.all_products_collection_url }}">Shop all<span class="arr" aria-hidden="true"></span></a></p>
+    {%- endunless -%}
+  </div>
+</section>
+
+{%- unless small -%}
+<!-- list view: the photo that follows the pointer over a line (desktop) -->
+<div class="plate" id="plate" aria-hidden="true"><div class="plate-in"><img alt="" id="plateImg" width="560" height="700" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><i class="plate-x"></i></div><span class="plate-cap mono" id="plateCap"></span></div>
+{%- endunless -%}
+
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "CollectionPage", "name": {{ h_title | json }}, "url": {{ shop.url | append: collection.url | json }},
+  "mainEntity": { "@type": "ItemList", "numberOfItems": {{ n_shown }}, "itemListElement": [
+    {%- for p in collection.products -%}{ "@type": "ListItem", "position": {{ forloop.index }}, "url": {{ shop.url | append: p.url | json }}, "name": {{ p.title | strip | json }} }{% unless forloop.last %},{% endunless %}{%- endfor -%}
+  ] } }
+</script>
+{%- endpaginate -%}
+
+{% schema %}
+{
+  "name": "Shop grid",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading (shop all page; other collections show their own title)", "default": "Shop all" },
+    { "type": "text", "id": "kicker", "label": "Small label above the heading", "default": "Asset register" },
+    { "type": "text", "id": "stamp", "label": "Rubber stamp beside the heading (desktop, empty = none)", "default": "Cleared for issue" },
+    { "type": "header", "content": "Small collections" },
+    { "type": "paragraph", "content": "A collection with fewer than 5 products hides search, sort and filters, and shows more products under it." },
+    { "type": "text", "id": "more_title", "label": "Heading of the extra products", "default": "More on file" },
+    { "type": "range", "id": "more_count", "label": "Number of extra products", "min": 0, "max": 12, "step": 1, "default": 8 }
+  ]
+}
+{% endschema %}

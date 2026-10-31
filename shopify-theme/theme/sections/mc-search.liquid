@@ -1,0 +1,93 @@
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+  capture hints
+    render 'mc-hints'
+  endcapture
+-%}
+<section class="spread paper shop" aria-labelledby="searchH">
+  <div class="wrap">
+    <header class="sh-head">
+      <p class="sh-file mono"><span class="sh-no">MC-102</span><span>{{ section.settings.kicker | escape }}</span><span>Prices in {{ cart.currency.iso_code }}</span></p>
+      <h1 class="h1 sh-h" id="searchH"><span class="tw caret" style="--n:{{ section.settings.heading.size }}">{{ section.settings.heading | escape }}</span></h1>
+    </header>
+    <form class="sr-form" action="{{ routes.search_url }}" method="get" role="search">
+      <div class="sh-find">
+        <label class="sr-only" for="sq">Search the shop</label>
+        <input id="sq" name="q" type="search" value="{{ search.terms | escape }}" placeholder="Search" data-hints="{{ hints | escape }}" autocomplete="off" spellcheck="false">
+      </div>
+      <input type="hidden" name="options[prefix]" value="last">
+      <button class="btn" type="submit">Search</button>
+    </form>
+    {%- if search.performed -%}
+      {%- paginate search.results by 24 -%}
+        <div class="sh-meta"><p class="sh-count mono" role="status">{{ search.results_count }} {% if search.results_count == 1 %}result{% else %}results{% endif %} for “{{ search.terms | escape }}”</p></div>
+        {%- if search.results_count > 0 -%}
+          {%- liquid
+            assign n_prod = 0
+            assign n_other = 0
+            for item in search.results
+              if item.object_type == 'product' or item.variants.size > 0
+                assign n_prod = n_prod | plus: 1
+              else
+                assign n_other = n_other | plus: 1
+              endif
+            endfor
+          -%}
+          {%- if n_prod > 0 -%}
+            <div class="sh-grid" id="grid">
+              {%- assign i = 0 -%}
+              {%- for item in search.results -%}
+                {%- if item.object_type == 'product' or item.variants.size > 0 -%}
+                  {%- liquid
+                    assign eg = false
+                    assign lz = true
+                    if i < 2
+                      assign eg = true
+                    elsif i < 4
+                      assign lz = false
+                    endif
+                  -%}
+                  {% render 'mc-card', product: item, i: i, order: ord, eager: eg, lazy: lz, uid: item.handle, cur: false %}
+                  {%- assign i = i | plus: 1 -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+          {%- if n_other > 0 -%}
+            <ul class="sr-pages" role="list">
+              {%- for item in search.results -%}
+                {%- unless item.object_type == 'product' or item.variants.size > 0 -%}
+                  <li><a href="{{ item.url }}"><b>{{ item.title | escape }}</b><span class="mono">{% if item.object_type == 'article' %}Article{% else %}Page{% endif %}<span class="arr" aria-hidden="true"></span></span></a></li>
+                {%- endunless -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+          {%- if paginate.pages > 1 -%}
+            <nav class="mono sh-end" aria-label="Pages">
+              {%- if paginate.previous -%}<a class="link-line" href="{{ paginate.previous.url }}">Previous</a> {% endif -%}
+              <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+              {%- if paginate.next %} <a class="link-line" href="{{ paginate.next.url }}">Next<span class="arr" aria-hidden="true"></span></a>{% endif -%}
+            </nav>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endpaginate -%}
+      {%- if search.results_count == 0 -%}
+        <div class="sh-empty"><p class="mono">File not found</p><p><a class="btn" href="{{ routes.all_products_collection_url }}">Shop all<span class="arr" aria-hidden="true"></span></a></p></div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</section>
+{%- comment -%} the shop script stamps a card "In bag" after a quick add (it loads once even if the layout also loads it) {%- endcomment -%}
+<script src="{{ 'mc-shop.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Search results",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Search" },
+    { "type": "text", "id": "kicker", "label": "Small label above the heading", "default": "Asset register" }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,54 @@
+/* LOOKBOOK — the film strip as its own page. Wide fine-pointer screens: the page scroll drives the strip sideways
+   (pinned). Everywhere else, and with reduced motion: a native swipeable strip. */
+.lookbook { --lbh: min(66svh, 560px); }
+.lb-pin { position: relative; padding: calc(var(--bar) + 3vh) 0 0; height: auto; overflow: hidden; }
+.lb-run { display: flex; justify-content: space-between; gap: 16px; margin: 0 var(--gut) 3vh; padding: 0 0 12px; color: var(--dim); border-bottom: 1px solid var(--rule); }
+.lb-track {
+  display: flex; align-items: flex-start; gap: clamp(26px, 5vw, 70px); padding: 0 var(--gut) 14px;
+  overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-inline: var(--gut); overscroll-behavior-x: contain; scrollbar-width: none; min-height: calc(var(--lbh) + 80px);
+}
+.lb-track::-webkit-scrollbar { display: none; }
+.lb-track:focus-visible { outline-offset: -3px; }
+.lb-intro { --intro-w: min(86vw, 520px); flex: none; width: var(--intro-w); align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; padding: 6px 0 40px; scroll-snap-align: start; }
+.lb-intro h1 { font: 500 calc(var(--intro-w) / 2.62)/.76 var(--serif); letter-spacing: -.06em; text-transform: uppercase; }
+.lb-intro h1 span { display: block; }
+.lb-intro h1 .ital { text-transform: none; font-weight: 400; padding-left: .5em; letter-spacing: -.07em; }
+.lb-intro p { max-width: 30ch; color: var(--dim); }
+.lb-fig { flex: none; position: relative; height: calc(var(--lbh) * var(--k, 1)); aspect-ratio: var(--ar, 4 / 5); margin-top: var(--mt, 0px); scroll-snap-align: center; display: block; text-decoration: none; }
+.lb-fig .xp { position: absolute; inset: 0; border: 1px solid rgba(255, 255, 255, .85); z-index: 1; }
+.lb-fig .ph { position: absolute; left: -7%; top: 0; width: 114%; height: 100%; transform: translate3d(calc(var(--pk, 0) * 1%), 0, 0); }
+.lb-no { position: absolute; z-index: 0; left: -.3em; bottom: -.34em; font: italic 900 clamp(8rem, 18vw, 16rem)/.7 var(--serif); letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, .3); pointer-events: none; }
+.lb-cap { position: absolute; z-index: 2; left: calc(100% + 10px); bottom: 0; writing-mode: vertical-rl; transform: rotate(180deg); display: flex; gap: 14px; align-items: center; color: var(--dim); white-space: nowrap; }
+.lb-cap b { font-weight: 500; color: var(--fg); }
+.lb-fig:hover .lb-cap b, .lb-fig:focus-visible .lb-cap b { text-decoration: underline; text-underline-offset: 3px; }
+.lb-fig:focus-visible { outline: 2px solid #fff; outline-offset: 6px; }
+.lb-out { flex: none; width: min(70vw, 420px); align-self: stretch; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 0 40px; scroll-snap-align: end; }
+.lb-out a { text-decoration: none; font: italic 400 clamp(3.4rem, 12vw, 8rem)/.86 var(--serif); letter-spacing: -.05em; }
+.lb-out a:hover, .lb-out a:focus-visible { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .08em; }
+.lb-out .mono { color: var(--dim); margin-bottom: 14px; display: block; }
+.lb-meter { display: flex; align-items: center; gap: 16px; padding: 14px var(--gut) 26px; color: var(--dim); }
+.lb-rail { position: relative; flex: 1; height: 1px; background: var(--rule); overflow: visible; }
+.lb-rail i { position: absolute; left: 0; top: -1px; height: 3px; width: 100%; background: var(--chrome); transform: scaleX(var(--p, 0)); transform-origin: left; }
+#lbNo { color: var(--fg); min-width: 7.5em; font-variant-numeric: tabular-nums; }
+.lb-ctrl { display: inline-flex; gap: 6px; }
+.lb-ctrl button { min-width: 44px; min-height: 44px; border: 1px solid var(--rule); font: 500 16px/1 var(--mono); transition: background .2s, color .2s, border-color .2s; }
+.lb-ctrl button[hidden] { display: none; }
+.lb-ctrl button:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.lb-ctrl button:disabled { opacity: .35; cursor: default; background: none; color: inherit; border-color: var(--rule); }
+
+/* desktop: the page scroll drives the strip sideways */
+.lookbook.pinned .lb-pin { position: sticky; top: 0; height: 100svh; min-height: 560px; padding-top: calc(var(--bar) + 2vh); display: flex; flex-direction: column; }
+.lookbook.pinned { --lbh: calc(100svh - var(--bar) - 230px); }
+.lookbook.pinned .lb-track { flex: 1; overflow: visible; scroll-snap-type: none; align-items: center; padding-right: 22vw; min-height: 0; will-change: transform; }
+.lookbook.pinned .lb-fig { align-self: center; }
+.lookbook.pinned .lb-meter { padding-bottom: 30px; }
+
+@media (max-width: 699px) {
+  .lookbook { --lbh: min(58svh, 480px); }
+  .lb-track { min-height: calc(var(--lbh) + 24px); }
+  .lb-intro { --intro-w: 58vw; padding-bottom: 28px; }
+  .lb-meter { gap: 10px; }
+  #lbHint { display: none; }
+}
+@media (max-width: 699px), (pointer: coarse) { .lb-cap { font-size: 12px; } }
+@media (prefers-reduced-motion: reduce) { .lb-fig .ph { transform: none !important; } }

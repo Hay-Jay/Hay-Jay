@@ -1,0 +1,604 @@
+{
+ "bpm": 120,
+ "bar1": 2.0,
+ "duration": 26.0,
+ "film": "magazine motion ad, 26 s, 30 fps; bar 1 (the drop) at 2.0 s, final hit at 24.0 s",
+ "music": "afro version (make_audio_afro.py); effects: the trap version's sfx.wav",
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "shimmer",
+   "note": "rings draw on"
+  },
+  {
+   "t": 0.067,
+   "kind": "typing",
+   "note": "Incoming \u2014 Monochrome Bureau"
+  },
+  {
+   "t": 0.333,
+   "kind": "whoosh",
+   "note": "the sphere streaks past"
+  },
+  {
+   "t": 0.333,
+   "kind": "typing",
+   "note": "MONOCHROME tracks in"
+  },
+  {
+   "t": 0.867,
+   "kind": "whoosh",
+   "note": "the sphere streaks past"
+  },
+  {
+   "t": 1.0,
+   "kind": "slam",
+   "note": "VOL. 001"
+  },
+  {
+   "t": 1.1,
+   "kind": "typing",
+   "note": "The Vision Issue"
+  },
+  {
+   "t": 1.267,
+   "kind": "whoosh",
+   "note": "the sphere streaks past"
+  },
+  {
+   "t": 1.467,
+   "kind": "whoosh",
+   "note": "rush through the rings"
+  },
+  {
+   "t": 1.567,
+   "kind": "whoosh",
+   "note": "the sphere streaks past"
+  },
+  {
+   "t": 1.767,
+   "kind": "whoosh",
+   "note": "the sphere streaks past"
+  },
+  {
+   "t": 2.0,
+   "kind": "boom",
+   "note": "the drop"
+  },
+  {
+   "t": 2.0,
+   "kind": "whoosh",
+   "note": "the magazine spins in"
+  },
+  {
+   "t": 2.0,
+   "kind": "slam",
+   "note": "THE"
+  },
+  {
+   "t": 2.5,
+   "kind": "slam",
+   "note": "VISION, the magazine lands"
+  },
+  {
+   "t": 3.0,
+   "kind": "slam",
+   "note": "ISSUE"
+  },
+  {
+   "t": 3.0,
+   "kind": "shimmer",
+   "note": "light across the cover"
+  },
+  {
+   "t": 3.833,
+   "kind": "whoosh",
+   "note": "the type flies out"
+  },
+  {
+   "t": 4.0,
+   "kind": "riffle",
+   "note": "the thumb runs through the issue"
+  },
+  {
+   "t": 4.0,
+   "kind": "page",
+   "note": "the cover opens"
+  },
+  {
+   "t": 4.433,
+   "kind": "page",
+   "note": "leaf 2 lands"
+  },
+  {
+   "t": 4.533,
+   "kind": "page",
+   "note": "leaf 3 lands"
+  },
+  {
+   "t": 4.6,
+   "kind": "page",
+   "note": "leaf 4 lands"
+  },
+  {
+   "t": 4.7,
+   "kind": "page",
+   "note": "leaf 5 lands"
+  },
+  {
+   "t": 4.767,
+   "kind": "page",
+   "note": "leaf 6 lands"
+  },
+  {
+   "t": 4.833,
+   "kind": "page",
+   "note": "leaf 7 lands"
+  },
+  {
+   "t": 4.9,
+   "kind": "page",
+   "note": "leaf 8 lands"
+  },
+  {
+   "t": 4.967,
+   "kind": "page",
+   "note": "leaf 9 lands"
+  },
+  {
+   "t": 5.0,
+   "kind": "page",
+   "note": "leaf 9 back"
+  },
+  {
+   "t": 5.0,
+   "kind": "page",
+   "note": "leaf 8 back"
+  },
+  {
+   "t": 5.033,
+   "kind": "page",
+   "note": "leaf 7 back"
+  },
+  {
+   "t": 5.067,
+   "kind": "page",
+   "note": "leaf 6 back"
+  },
+  {
+   "t": 5.1,
+   "kind": "page",
+   "note": "leaf 5 back"
+  },
+  {
+   "t": 5.167,
+   "kind": "page",
+   "note": "leaf 4 back"
+  },
+  {
+   "t": 5.3,
+   "kind": "whoosh",
+   "note": "push into page 05"
+  },
+  {
+   "t": 5.4,
+   "kind": "page",
+   "note": "leaf 3 back"
+  },
+  {
+   "t": 6.0,
+   "kind": "impact",
+   "note": "page 05 fills the frame"
+  },
+  {
+   "t": 6.4,
+   "kind": "card",
+   "note": "portrait 1 lands"
+  },
+  {
+   "t": 6.467,
+   "kind": "card",
+   "note": "portrait 2 lands"
+  },
+  {
+   "t": 6.5,
+   "kind": "card",
+   "note": "portrait 3 lands"
+  },
+  {
+   "t": 6.5,
+   "kind": "slam",
+   "note": "MEET"
+  },
+  {
+   "t": 6.567,
+   "kind": "card",
+   "note": "portrait 4 lands"
+  },
+  {
+   "t": 6.6,
+   "kind": "card",
+   "note": "portrait 5 lands"
+  },
+  {
+   "t": 6.667,
+   "kind": "card",
+   "note": "portrait 6 lands"
+  },
+  {
+   "t": 6.733,
+   "kind": "card",
+   "note": "portrait 7 lands"
+  },
+  {
+   "t": 6.767,
+   "kind": "slam",
+   "note": "THE"
+  },
+  {
+   "t": 7.0,
+   "kind": "slam",
+   "note": "DREAM"
+  },
+  {
+   "t": 7.1,
+   "kind": "typing",
+   "note": "One vision / many talents"
+  },
+  {
+   "t": 7.267,
+   "kind": "shimmer",
+   "note": "light across the cards"
+  },
+  {
+   "t": 7.5,
+   "kind": "slam",
+   "note": "TEAM"
+  },
+  {
+   "t": 7.6,
+   "kind": "whoosh",
+   "note": "the cards collapse into the orbit"
+  },
+  {
+   "t": 8.0,
+   "kind": "boom",
+   "note": "the ring bursts out"
+  },
+  {
+   "t": 8.0,
+   "kind": "slam",
+   "note": "STYLE"
+  },
+  {
+   "t": 8.5,
+   "kind": "slam",
+   "note": "PLAY"
+  },
+  {
+   "t": 9.0,
+   "kind": "slam",
+   "note": "CULTURE"
+  },
+  {
+   "t": 9.5,
+   "kind": "slam",
+   "note": "STYLE + PLAY + CULTURE"
+  },
+  {
+   "t": 9.7,
+   "kind": "whoosh",
+   "note": "zoom through page 08"
+  },
+  {
+   "t": 10.0,
+   "kind": "impact",
+   "note": "into the 77 file"
+  },
+  {
+   "t": 10.0,
+   "kind": "draw",
+   "note": "77 draws on"
+  },
+  {
+   "t": 10.2,
+   "kind": "typing",
+   "note": "P.08 label"
+  },
+  {
+   "t": 10.5,
+   "kind": "slam",
+   "note": "77 slams"
+  },
+  {
+   "t": 11.5,
+   "kind": "stamp",
+   "note": "FILE 77"
+  },
+  {
+   "t": 11.9,
+   "kind": "whoosh",
+   "note": "blinds slide in"
+  },
+  {
+   "t": 11.933,
+   "kind": "whoosh",
+   "note": "blinds slide in"
+  },
+  {
+   "t": 12.0,
+   "kind": "whoosh",
+   "note": "blinds slide in"
+  },
+  {
+   "t": 12.067,
+   "kind": "whoosh",
+   "note": "blinds slide in"
+  },
+  {
+   "t": 12.1,
+   "kind": "whoosh",
+   "note": "ONE NIGHT. tracks in"
+  },
+  {
+   "t": 12.2,
+   "kind": "typing",
+   "note": "P.13 label"
+  },
+  {
+   "t": 12.367,
+   "kind": "whoosh",
+   "note": "A WHOLE WORLD. tracks in"
+  },
+  {
+   "t": 13.133,
+   "kind": "flip",
+   "note": "slat 1"
+  },
+  {
+   "t": 13.167,
+   "kind": "flip",
+   "note": "slat 2"
+  },
+  {
+   "t": 13.2,
+   "kind": "flip",
+   "note": "slat 3"
+  },
+  {
+   "t": 13.233,
+   "kind": "flip",
+   "note": "slat 4"
+  },
+  {
+   "t": 13.233,
+   "kind": "flip",
+   "note": "slat 5"
+  },
+  {
+   "t": 13.267,
+   "kind": "flip",
+   "note": "slat 6"
+  },
+  {
+   "t": 13.3,
+   "kind": "flip",
+   "note": "slat 7"
+  },
+  {
+   "t": 13.333,
+   "kind": "flip",
+   "note": "slat 8"
+  },
+  {
+   "t": 13.333,
+   "kind": "flip",
+   "note": "slat 9"
+  },
+  {
+   "t": 13.367,
+   "kind": "flip",
+   "note": "slat 10"
+  },
+  {
+   "t": 13.4,
+   "kind": "flip",
+   "note": "slat 11"
+  },
+  {
+   "t": 13.433,
+   "kind": "flip",
+   "note": "slat 12"
+  },
+  {
+   "t": 13.733,
+   "kind": "whoosh",
+   "note": "blinds slide out"
+  },
+  {
+   "t": 14.0,
+   "kind": "clock",
+   "note": "the board slams in"
+  },
+  {
+   "t": 14.067,
+   "kind": "typing",
+   "note": "All 20 pages"
+  },
+  {
+   "t": 14.5,
+   "kind": "flip",
+   "note": "every tile flips (a ripple of clacks)"
+  },
+  {
+   "t": 15.0,
+   "kind": "flip",
+   "note": "every tile flips (a ripple of clacks)"
+  },
+  {
+   "t": 15.5,
+   "kind": "flip",
+   "note": "every tile flips (a ripple of clacks)"
+  },
+  {
+   "t": 15.767,
+   "kind": "whoosh",
+   "note": "page 10 flies out of the board"
+  },
+  {
+   "t": 16.0,
+   "kind": "slam",
+   "note": "PLAY LAB"
+  },
+  {
+   "t": 16.2,
+   "kind": "typing",
+   "note": "THE VISION ISSUE fills the crossword"
+  },
+  {
+   "t": 16.2,
+   "kind": "typing",
+   "note": "clue"
+  },
+  {
+   "t": 16.333,
+   "kind": "beep",
+   "note": "THE complete"
+  },
+  {
+   "t": 16.6,
+   "kind": "beep",
+   "note": "VISION complete"
+  },
+  {
+   "t": 16.833,
+   "kind": "beep",
+   "note": "ISSUE complete"
+  },
+  {
+   "t": 16.867,
+   "kind": "whoosh",
+   "note": "whip to the maze"
+  },
+  {
+   "t": 17.0,
+   "kind": "draw",
+   "note": "the maze solves itself"
+  },
+  {
+   "t": 17.4,
+   "kind": "whoosh",
+   "note": "whip to the quiz"
+  },
+  {
+   "t": 17.5,
+   "kind": "tick",
+   "note": "answer 1 circled"
+  },
+  {
+   "t": 17.633,
+   "kind": "tick",
+   "note": "answer 2 circled"
+  },
+  {
+   "t": 17.767,
+   "kind": "tick",
+   "note": "answer 3 circled"
+  },
+  {
+   "t": 18.0,
+   "kind": "shutter",
+   "note": "frame 1"
+  },
+  {
+   "t": 18.033,
+   "kind": "beep",
+   "note": "REC"
+  },
+  {
+   "t": 18.5,
+   "kind": "shutter",
+   "note": "frame 2"
+  },
+  {
+   "t": 19.0,
+   "kind": "shutter",
+   "note": "frame 3"
+  },
+  {
+   "t": 19.5,
+   "kind": "shutter",
+   "note": "frame 4"
+  },
+  {
+   "t": 20.0,
+   "kind": "slam",
+   "note": "20 PAGES"
+  },
+  {
+   "t": 20.5,
+   "kind": "stamp",
+   "note": "PRINTED COPY"
+  },
+  {
+   "t": 21.0,
+   "kind": "slam",
+   "note": "$10 CAD"
+  },
+  {
+   "t": 21.5,
+   "kind": "slam",
+   "note": "29 COUNTRIES"
+  },
+  {
+   "t": 21.867,
+   "kind": "whoosh",
+   "note": "the facts wipe out"
+  },
+  {
+   "t": 21.933,
+   "kind": "whoosh",
+   "note": "the magazine flies in"
+  },
+  {
+   "t": 22.3,
+   "kind": "impact",
+   "note": "the cover shuts"
+  },
+  {
+   "t": 22.3,
+   "kind": "whoosh",
+   "note": "one spin"
+  },
+  {
+   "t": 22.467,
+   "kind": "shimmer",
+   "note": "wordmark wipes on"
+  },
+  {
+   "t": 22.867,
+   "kind": "shimmer",
+   "note": "the orbit draws on"
+  },
+  {
+   "t": 23.0,
+   "kind": "slam",
+   "note": "OUT NOW"
+  },
+  {
+   "t": 23.533,
+   "kind": "typing",
+   "note": "Requisition your copy"
+  },
+  {
+   "t": 24.0,
+   "kind": "boom",
+   "note": "the final hit: monochrome.com.ng"
+  },
+  {
+   "t": 24.5,
+   "kind": "slam",
+   "note": "the price line (out now) / the launch date (pre-order)"
+  }
+ ]
+}

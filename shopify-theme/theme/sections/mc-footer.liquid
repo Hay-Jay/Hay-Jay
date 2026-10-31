@@ -1,0 +1,136 @@
+{%- liquid
+  capture pk
+    render 'mc-pagekey'
+  endcapture
+  assign pkp = pk | split: '~'
+  assign folio = pkp[1] | plus: 0
+  assign nav_url = pkp[4]
+  assign docno = 100 | plus: folio | prepend: 'MC-'
+  if pkp[0] == '404'
+    assign docno = 'MC-404'
+  endif
+  if template.name == 'product'
+    capture docno
+      render 'mc-fileno', product: product
+    endcapture
+  endif
+  assign bc_seed = folio | times: 977 | plus: 13
+  assign wordmark = settings.logo_wordmark
+  assign emblem = settings.logo_emblem
+  assign show_news = false
+  case section.settings.news
+    when 'all'
+      assign show_news = true
+    when 'not_home'
+      # the home page and the Vision Issue page carry their own signup
+      unless template.name == 'index' or template.suffix == 'vision-issue'
+        assign show_news = true
+      endunless
+  endcase
+-%}
+<footer class="foot dark" id="contents">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="foot-logo" href="{{ routes.root_url }}" aria-label="MONOCHROME, home">
+          {%- if emblem != blank -%}
+            <img class="emblem" src="{{ emblem | image_url: width: 160 }}" alt="" width="72" height="77" loading="lazy">
+          {%- else -%}
+            <img class="emblem" src="{{ 'mc-emblem.webp' | asset_url }}" alt="" width="72" height="77" loading="lazy">
+          {%- endif -%}
+          {%- if wordmark != blank -%}
+            <img class="word" src="{{ wordmark | image_url: width: 720 }}" alt="" width="360" height="35" loading="lazy">
+          {%- else -%}
+            <img class="word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="" width="360" height="35" loading="lazy">
+          {%- endif -%}
+        </a>
+        {%- if section.settings.tagline != blank -%}<p class="foot-tag">{{ section.settings.tagline | escape }}</p>{%- endif -%}
+        {%- if show_news -%}
+          {%- form 'customer', id: 'subscribe', class: 'foot-news' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <label for="subscribe-email" class="mono">{{ section.settings.news_label | escape }}</label>
+            <div class="fn-row">
+              <input id="subscribe-email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email" value="{{ form.email }}"{% if form.errors %} aria-invalid="true" aria-describedby="subscribe-note"{% endif %}>
+              <button class="fn-go" type="submit">Join<span class="arr" aria-hidden="true"></span></button>
+            </div>
+            {%- if form.posted_successfully? -%}
+              <p class="mono fn-note" id="subscribe-note" role="status">You're on the list.</p>
+            {%- elsif form.errors -%}
+              <p class="mono fn-note" id="subscribe-note" role="alert">{{ form.errors | default_errors }}</p>
+            {%- endif -%}
+          {%- endform -%}
+        {%- endif -%}
+      </div>
+      <nav class="foot-col" aria-labelledby="ftShop">
+        <p class="foot-h mono" id="ftShop">Shop</p>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'link' -%}<a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>{%- endif -%}
+        {%- endfor -%}
+      </nav>
+      <nav class="foot-col" aria-labelledby="ftHelp">
+        <p class="foot-h mono" id="ftHelp">Help</p>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'help' -%}<a href="{{ block.settings.url }}"{% if block.settings.url == nav_url %} aria-current="page"{% endif %} {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</a>{%- endif -%}
+        {%- endfor -%}
+      </nav>
+      <div class="foot-col foot-social">
+        <p class="foot-h mono">Follow</p>
+        {%- if settings.social_instagram != blank %}<a href="{{ settings.social_instagram }}" target="_blank" rel="noopener">Instagram</a>{% endif -%}
+        {%- if settings.social_tiktok != blank %}<a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener">TikTok</a>{% endif -%}
+        {%- if settings.social_snapchat != blank %}<a href="{{ settings.social_snapchat }}" target="_blank" rel="noopener">Snapchat</a>{% endif -%}
+        <a href="mailto:{{ settings.contact_email }}">Email</a>
+      </div>
+    </div>
+    <div class="foot-base">
+      <span class="ft-bc" aria-hidden="true">{% render 'mc-barcode', seed: bc_seed, w: 160, h: 26 %}<b class="mono">{{ docno }}</b></span>
+      <p class="foot-fic mono">{{ settings.fiction_line | escape }}</p>
+      <p class="foot-legal mono">
+        <span>© {{ 'now' | date: '%Y' }} MONOCHROME® · Prices in {{ cart.currency.iso_code }}</span>
+        {%- if shop.refund_policy.body != blank %}<a href="{{ shop.refund_policy.url }}">Refunds</a>{% endif -%}
+        {%- if shop.privacy_policy.body != blank %}<a href="{{ shop.privacy_policy.url }}">Privacy</a>{% endif -%}
+        {%- if shop.terms_of_service.body != blank %}<a href="{{ shop.terms_of_service.url }}">Terms</a>{% endif -%}
+      </p>
+    </div>
+  </div>
+  <div class="banner bottom" aria-hidden="true"><span class="bn-c">{{ settings.banner_mark | escape }}</span></div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    { "type": "text", "id": "tagline", "label": "Tagline", "default": "Wear the unknown." },
+    {
+      "type": "select", "id": "news", "label": "Newsletter signup",
+      "options": [
+        { "value": "all", "label": "On every page" },
+        { "value": "not_home", "label": "Every page but home and Vision Issue" },
+        { "value": "none", "label": "Hidden" }
+      ],
+      "default": "not_home",
+      "info": "The home page and the Vision Issue page have their own signup."
+    },
+    { "type": "text", "id": "news_label", "label": "Newsletter label", "default": "Drop alerts by email" }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Shop link",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop all" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "help",
+      "name": "Help link",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shipping" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,17 @@
+<section class="spread paper ct-open pf" aria-labelledby="pfH">
+  <div class="wrap">
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-108</span><span>{{ section.settings.kicker | escape }}</span></p>
+      <h1 class="h1 pg-h" id="pfH">{{ page.title | escape }}</h1>
+    </header>
+    <div class="pf-body rte">{{ page.content }}</div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Team (personnel file)",
+  "settings": [{ "type": "text", "id": "kicker", "label": "Small label", "default": "Personnel file" }],
+  "presets": [{ "name": "Team (personnel file)" }]
+}
+{% endschema %}

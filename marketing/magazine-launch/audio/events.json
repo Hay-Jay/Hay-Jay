@@ -1,0 +1,318 @@
+{
+ "bpm": 150,
+ "bar1": 0.8,
+ "duration": 27.2,
+ "source": "timeline.js",
+ "events": [
+  {
+   "t": 0.0,
+   "kind": "cut-strobe",
+   "note": "st1"
+  },
+  {
+   "t": 0.2,
+   "kind": "cut-strobe",
+   "note": "st2"
+  },
+  {
+   "t": 0.4,
+   "kind": "cut-strobe",
+   "note": "st3"
+  },
+  {
+   "t": 0.6,
+   "kind": "cut-strobe",
+   "note": "st4"
+  },
+  {
+   "t": 0.8,
+   "kind": "cut-drop",
+   "note": "title"
+  },
+  {
+   "t": 0.933,
+   "kind": "slam",
+   "note": "The"
+  },
+  {
+   "t": 1.333,
+   "kind": "slam",
+   "note": "Vision"
+  },
+  {
+   "t": 1.733,
+   "kind": "slam",
+   "note": "Issue"
+  },
+  {
+   "t": 2.167,
+   "kind": "stamp",
+   "note": "title stamp"
+  },
+  {
+   "t": 2.4,
+   "kind": "cut-slam",
+   "note": "bookA"
+  },
+  {
+   "t": 2.767,
+   "kind": "shimmer",
+   "note": "light across the cover"
+  },
+  {
+   "t": 3.767,
+   "kind": "stamp",
+   "note": "FIRST ISSUE"
+  },
+  {
+   "t": 4.567,
+   "kind": "shimmer",
+   "note": "light across the cover"
+  },
+  {
+   "t": 6.0,
+   "kind": "page-turn",
+   "note": "bookA"
+  },
+  {
+   "t": 6.4,
+   "kind": "page-turn",
+   "note": "bookA"
+  },
+  {
+   "t": 6.533,
+   "kind": "slam",
+   "note": "Meet the"
+  },
+  {
+   "t": 6.733,
+   "kind": "slam",
+   "note": "dream team"
+  },
+  {
+   "t": 7.2,
+   "kind": "cut-shutter",
+   "note": "team2"
+  },
+  {
+   "t": 8.0,
+   "kind": "cut-zap",
+   "note": "bookB"
+  },
+  {
+   "t": 8.4,
+   "kind": "page-turn",
+   "note": "bookB"
+  },
+  {
+   "t": 8.8,
+   "kind": "page-turn",
+   "note": "bookB"
+  },
+  {
+   "t": 8.8,
+   "kind": "cut-shutter",
+   "note": "f77"
+  },
+  {
+   "t": 8.933,
+   "kind": "slam",
+   "note": "The 77 file"
+  },
+  {
+   "t": 10.4,
+   "kind": "cut-zap",
+   "note": "bookC"
+  },
+  {
+   "t": 10.8,
+   "kind": "page-turn",
+   "note": "bookC"
+  },
+  {
+   "t": 10.933,
+   "kind": "slam",
+   "note": "Play Lab"
+  },
+  {
+   "t": 10.967,
+   "kind": "stamp",
+   "note": "Quiz"
+  },
+  {
+   "t": 11.2,
+   "kind": "page-turn",
+   "note": "bookC"
+  },
+  {
+   "t": 11.367,
+   "kind": "stamp",
+   "note": "Crossword"
+  },
+  {
+   "t": 11.6,
+   "kind": "page-turn",
+   "note": "bookC"
+  },
+  {
+   "t": 11.767,
+   "kind": "stamp",
+   "note": "Maze"
+  },
+  {
+   "t": 12.0,
+   "kind": "page-turn",
+   "note": "bookC"
+  },
+  {
+   "t": 12.133,
+   "kind": "slam",
+   "note": "Fashion show"
+  },
+  {
+   "t": 12.4,
+   "kind": "swish",
+   "note": "One night. A whole world."
+  },
+  {
+   "t": 13.6,
+   "kind": "cut-shutter",
+   "note": "n15a"
+  },
+  {
+   "t": 14.4,
+   "kind": "cut-shutter",
+   "note": "n15b"
+  },
+  {
+   "t": 14.8,
+   "kind": "cut-zap",
+   "note": "bookD"
+  },
+  {
+   "t": 15.2,
+   "kind": "page-turn",
+   "note": "bookD"
+  },
+  {
+   "t": 15.6,
+   "kind": "cut-shutter",
+   "note": "roll1"
+  },
+  {
+   "t": 15.8,
+   "kind": "cut-shutter",
+   "note": "roll2"
+  },
+  {
+   "t": 16.0,
+   "kind": "cut-shutter",
+   "note": "roll3"
+  },
+  {
+   "t": 16.2,
+   "kind": "cut-shutter",
+   "note": "roll4"
+  },
+  {
+   "t": 16.4,
+   "kind": "cut-zap",
+   "note": "bookE"
+  },
+  {
+   "t": 16.8,
+   "kind": "page-turn",
+   "note": "bookE"
+  },
+  {
+   "t": 16.933,
+   "kind": "slam",
+   "note": "The store edit"
+  },
+  {
+   "t": 17.6,
+   "kind": "cut-shutter",
+   "note": "store2"
+  },
+  {
+   "t": 18.4,
+   "kind": "cut-zap",
+   "note": "bookF"
+  },
+  {
+   "t": 18.8,
+   "kind": "page-turn",
+   "note": "bookF"
+  },
+  {
+   "t": 19.2,
+   "kind": "page-turn",
+   "note": "bookF"
+  },
+  {
+   "t": 20.0,
+   "kind": "cut-drop",
+   "note": "facts"
+  },
+  {
+   "t": 20.133,
+   "kind": "slam",
+   "note": "Volume 001"
+  },
+  {
+   "t": 20.533,
+   "kind": "slam",
+   "note": "20 pages"
+  },
+  {
+   "t": 20.933,
+   "kind": "slam",
+   "note": "Printed copy"
+  },
+  {
+   "t": 21.333,
+   "kind": "slam",
+   "note": "$10 CAD"
+  },
+  {
+   "t": 21.733,
+   "kind": "slam",
+   "note": "Ships to 29 countries"
+  },
+  {
+   "t": 22.167,
+   "kind": "stamp",
+   "note": "facts stamp"
+  },
+  {
+   "t": 23.2,
+   "kind": "cut-drop",
+   "note": "end"
+  },
+  {
+   "t": 23.333,
+   "kind": "card",
+   "note": "cover drops in"
+  },
+  {
+   "t": 23.733,
+   "kind": "slam",
+   "note": "OUT NOW / PRE-ORDER NOW"
+  },
+  {
+   "t": 24.0,
+   "kind": "click",
+   "note": "Requisition your copy"
+  },
+  {
+   "t": 24.533,
+   "kind": "slam",
+   "note": "monochrome.com.ng"
+  },
+  {
+   "t": 26.4,
+   "kind": "impact",
+   "note": "last hit"
+  }
+ ]
+}
