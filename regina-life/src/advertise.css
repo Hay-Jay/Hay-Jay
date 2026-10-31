@@ -39,3 +39,20 @@ main{max-width:880px;margin:0 auto;padding:6px 14px 30px;display:grid;gap:16px}
 .adv-mural p span{display:inline-block;margin:3px;padding:5px 11px;border-radius:999px;background:linear-gradient(135deg,#fff1f6,#ffe4ef);color:#8a1c46;font-weight:700;font-size:13px}
 .adv-foot{max-width:880px;margin:0 auto;padding:10px 18px 40px;color:var(--c-ink-3);font-size:12.5px}
 .adv-foot a{color:var(--leaf-d);font-weight:700}
+/* booking and support checkout (core/checkout.js) */
+.adv-form select{font:600 15px var(--body);padding:11px 12px;border-radius:12px;border:1.5px solid rgba(18,32,42,.15);background:#fbfdfe;color:var(--c-ink)}
+.adv-form .bad{border-color:#d6336c!important;box-shadow:0 0 0 3px rgba(214,51,108,.15)}
+.adv-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.adv-row2{grid-template-columns:1fr}}
+.adv-total{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px;padding-top:12px;border-top:1px dashed rgba(18,32,42,.15)}
+.adv-total span{font:600 14px var(--body);color:var(--c-ink-2)}
+.adv-total b{font:800 22px var(--head);color:var(--c-ink)}
+button.adv-btn{border:0;cursor:pointer}
+button.adv-btn:disabled{background:#c9d1d6;box-shadow:none;cursor:default}
+.adv-support-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}
+.adv-tier.sup{display:grid;align-content:start;gap:6px}
+.adv-tier.sup .adv-btn{justify-self:start;padding:10px 18px;font-size:14px}
+.sup-form{margin-top:8px;padding:16px;border-radius:var(--r-m);background:#fff5f9}
+.sup-form h3{margin:0}
+.sup-form[hidden]{display:none}
+.adv-support-tiers>.adv-soon,.adv-support-tiers>a{grid-column:1/-1;justify-self:start}

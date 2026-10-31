@@ -143,6 +143,33 @@ pages say "opens soon". Rows are validated (`core/sponsors.js`, tested): a bad r
   say hi). Pedestrians open umbrellas in the rain and a couple of joggers do laps ([`src/core/vignettes.js`](src/core/vignettes.js), tested).
 * **Photo-mode poses** — wave, cheer, dance, read, play guitar, check your phone or hold an umbrella for the shot.
 
+## What's new in Milestone 8: "who you are"
+
+* **The You tab** — the creator starts with who you are: Woman, Man or Non-binary (with pronouns, and a starting look to match; every hairstyle
+  and outfit stays open to everyone), up to three interests, a personality and a dream ([`src/core/profile.js`](src/core/profile.js), tested).
+  Interests make their activities more fun and quicker to learn, give a small skill head start, mark the jobs that fit you and become "Ideas for
+  you" in the Life app. A dream has a progress bar and pays P$250 when it comes true.
+* **The family you are born into** — drawn at random when you start, like real life ([`src/core/background.js`](src/core/background.js),
+  tested): money's tight 22%, getting by 45%, comfortable 24%, well-off 7%, rich parents 2%. More money and things at the start comes with less of
+  a skill head start. Well-off and rich starts get a short daily allowance; rich parents buy you the one-bedroom. A dice roll reveals it.
+* **Book a billboard for real** — tapping a free billboard in the game offers "Put your real business here", which opens the Advertise page
+  with that board picked. The page is a booking form with a live preview; "Book and pay" goes to the owner's Shopify checkout with the ad
+  attached to the order, and the Support section sells three supporter tiers the same way ([`src/core/checkout.js`](src/core/checkout.js), tested).
+
+### Owner: turning on payments
+
+The game never handles money. Payments happen on your Shopify store's own checkout page:
+
+1. In Shopify, create a product for each ad tier (Roadside board CA$25, Big board CA$50, Landmark board CA$100, each "7 days") and each support
+   tier (Coffee CA$5, Name on the mural CA$15, Founding supporter CA$50). Make them non-shipping, and make them available on the Online Store.
+2. Copy each product's **variant id** (the number in the variant's admin URL) into `CHECKOUT` in [`src/data/sponsors.js`](src/data/sponsors.js),
+   with your store's domain as `shop`, and push to `main`.
+3. Each order carries the ad (board, business, line, website, colours, dates) or the mural name as line-item properties. Review the ad; if it
+   passes, add a row to `SPONSORED` (or a name to `SUPPORTERS`) and push; if not, refund it.
+
+Until `CHECKOUT` is filled in, "Book and pay" sends the booking by email when `CONTACT_URL` is a `mailto:` address, and otherwise says booking
+opens soon.
+
 ## Economy & anti-exploit (important)
 
 Money only moves through `src/core/ledger.js`: integer cents, positive/limited amounts, no overdrafts, idempotency keys,

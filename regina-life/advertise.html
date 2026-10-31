@@ -18,18 +18,23 @@
   </header>
 
   <main>
-    <section class="adv-card adv-try">
-      <h2>Try your ad</h2>
-      <p class="muted">Type it in and watch it on a board in the game. Nothing is sent anywhere.</p>
+    <section class="adv-card adv-try" id="book">
+      <h2>Book a billboard</h2>
+      <p class="muted">Type your ad and watch it on a board in the game, then book it and pay on a secure checkout page. A person reviews every ad before it goes live; if we can't run yours, you get a full refund.</p>
       <div class="adv-try-grid">
         <div class="adv-board"><canvas id="adv-preview" width="768" height="384" aria-label="Billboard preview"></canvas><i class="adv-pole l"></i><i class="adv-pole r"></i></div>
         <form id="adv-form" class="adv-form" autocomplete="off">
+          <label>Billboard<select id="adv-board"></select></label>
           <label>Business name<input id="adv-biz" maxlength="60" placeholder="Your business" value=""></label>
           <label>Your line (up to 40 characters)<input id="adv-text" maxlength="40" placeholder="Warm bannock, cold mornings" value=""></label>
           <label>Website<input id="adv-url" maxlength="200" placeholder="https://yourbusiness.ca" inputmode="url"></label>
           <fieldset><legend>Colours</legend><div id="adv-themes" class="adv-themes"></div></fieldset>
           <label class="adv-check"><input id="adv-founding" type="checkbox" checked> Founding sponsor badge</label>
           <p id="adv-url-note" class="muted small"></p>
+          <div class="adv-row2"><label>Your email<input id="adv-email" type="email" maxlength="120" placeholder="you@yourbusiness.ca" autocomplete="email"></label>
+          <label>Start date<input id="adv-start" type="date"></label></div>
+          <div class="adv-total"><span id="adv-sum"></span><button id="adv-book" class="adv-btn" type="submit">Book and pay</button></div>
+          <p id="adv-book-note" class="muted small" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
@@ -43,8 +48,8 @@
     <section class="adv-card">
       <h2>How it works</h2>
       <ol class="adv-steps">
-        <li><b>Send us your ad.</b> Your business name, your line, your link and the board size you want.</li>
-        <li><b>We review it</b> against the ad rules below and reply with an invoice or a payment link.</li>
+        <li><b>Book it above.</b> Pick a board, write your line, add your link and pay on the secure checkout page. Your ad details travel with your order.</li>
+        <li><b>We review it</b> against the ad rules below, usually within two days. If we can't run it, we refund you in full.</li>
         <li><b>It goes live</b> for 7 days on your boards, labelled <em>Sponsored</em> with your website's name. Players who tap it see a "you're leaving the game" screen first.</li>
       </ol>
       <div id="adv-contact" class="adv-contact"></div>
@@ -66,14 +71,21 @@
         <li>No political or election ads, no alcohol, cannabis, tobacco, vaping, gambling or adult content, and nothing aimed at kids.</li>
         <li>Your own words and your own brand: no other company's marks, no misleading claims (we follow the spirit of Ad Standards Canada's code).</li>
         <li>Links must be https and go to your own site.</li>
-        <li>We may decline any ad. If we do, you pay nothing.</li>
+        <li>We may decline any ad. If we do, you get a full refund.</li>
       </ul>
     </section>
 
     <section class="adv-card adv-support" id="support">
       <h2>Love the game? Support it</h2>
       <p>Regina Life is free, and it will stay free. If you'd like to help keep it growing, you can support it directly. Supporters who want to can have their name painted on the <b>Supporters' Mural</b> in the game's Victoria Park. It's a thank-you, not a perk: support never buys anything in the game.</p>
-      <div id="adv-support"></div>
+      <div id="adv-support" class="adv-support-tiers"></div>
+      <form id="sup-form" class="adv-form sup-form" hidden autocomplete="on">
+        <h3 id="sup-title"></h3>
+        <label id="sup-name-l">Name for the mural (up to 40 characters)<input id="sup-name" maxlength="40" placeholder="Your name or a nickname"></label>
+        <label>Your email (for the receipt)<input id="sup-email" type="email" maxlength="120" autocomplete="email" placeholder="you@example.ca"></label>
+        <div class="adv-total"><span id="sup-sum"></span><button class="adv-btn alt" type="submit">Continue to checkout</button></div>
+        <p id="sup-note" class="muted small" role="status" aria-live="polite"></p>
+      </form>
       <div id="adv-mural" class="adv-mural"></div>
     </section>
   </main>

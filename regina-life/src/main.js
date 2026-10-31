@@ -750,9 +750,10 @@ async function boot() {
     return best;
   };
   /** The leaving-the-game screen every sponsored link goes through (VISION 5.7): who it is, where it goes, and a clear way to stay. */
-  const leaveFor = (a) => panels.menu(`Sponsored · ${a.business}`, `“${a.text}”. This opens ${a.host} in a new tab, outside Regina Life. Sponsors are real local businesses; they never see your game or your Prairie Dollars.`, [
+  const openAdvertise = (boardId) => { try { window.open(`./advertise.html${boardId ? `?board=${encodeURIComponent(boardId)}` : ''}#book`, '_blank', 'noopener'); } catch {} };
+  const leaveFor = (a, boardId) => panels.menu(`Sponsored · ${a.business}`, `“${a.text}”. This opens ${a.host} in a new tab, outside Regina Life. Sponsors are real local businesses; they never see your game or your Prairie Dollars.`, [
     { label: `Visit ${a.host}`, primary: true, run: () => { try { window.open(a.url, '_blank', 'noopener,noreferrer'); } catch {} } },
-    { label: 'Advertise your business', run: () => { try { window.open('./advertise.html', '_blank', 'noopener'); } catch {} } }, { label: 'Stay in Regina' }]);
+    { label: 'Advertise your business', run: () => openAdvertise(boardId) }, { label: 'Stay in Regina' }]);
   const interact = () => {
     if (!target || creator || panels.open || mapOpen || camMode || fading) return;
     if (target.npc) { const n = target.npc; const msg = ped.greet(n, { px: player.pos.x, pz: player.pos.z, temp: weather.temp, night: env?.night > 0.6 }); player.gesture('wave', 1.4); toast(`🗣️ “${msg}”`, 'info'); S().needs.mood = Math.min(100, S().needs.mood + 1.5); return; }
@@ -763,8 +764,12 @@ async function boot() {
     }
     if (it.kind === 'billboard') {   // a real sponsor on screen right now: say who it is and offer their site through the leaving-the-game screen
       const b = city.billboards.find((x) => x.id === it.boardId), a = b?.slots[b.slot % Math.max(1, b.slots.length)];
-      if (a?.sponsored) { leaveFor(a); return; }
-      ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); return;
+      if (a?.sponsored) { leaveFor(a, it.boardId); return; }
+      // a free board: book it for fun with Prairie Dollars, or put a real business on it (advertise.html, paid on the owner's checkout, outside the game)
+      panels.menu(`📢 ${b?.name ?? 'Billboard'}`, 'Two ways to use this board: a pretend ad with your Prairie Dollars, or a real ad for a real Regina business (Canadian dollars, booked on our website).', [
+        { label: '🏪 Put your real business here', primary: true, run: () => openAdvertise(it.boardId) },
+        { label: '🎲 Book it for fun (Prairie Dollars)', run: () => { ctx.adsFocus = it.boardId; phone.open(); phone.openApp('ads'); } }, { label: 'Not now' }]);
+      return;
     }
     if (it.mural) { phone.open(); phone.openApp('supporters'); return; }
     if (it.forSale) { audio.blip('tick'); phone.open(); phone.openApp('homes'); return; }

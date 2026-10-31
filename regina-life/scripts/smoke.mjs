@@ -216,7 +216,9 @@ await step('book a billboard and see it update', async () => {
   await page.evaluate(() => { __regina.tp(-30, -574); __regina.rig.yaw = 0; __regina.rig.pitch = 0.1; });
   await page.waitForFunction(() => /Billboard/.test(__regina.getTarget()?.label || ''), null, { timeout: 20000 }).catch(() => {});
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Billboard/.test(t || '')) throw new Error('no billboard prompt: ' + t);
-  await shot('21-billboard'); await page.keyboard.press('e'); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
+  await shot('21-billboard'); await page.keyboard.press('e'); await page.waitForSelector('.panel.menu', { timeout: 10000 }); await wait(300); await shot('22-board-menu');
+  const opts = await page.$$eval('.panel.menu button', (b) => b.map((x) => x.textContent)); if (!opts.some((o) => /real business/.test(o)) || !opts.some((o) => /Prairie Dollars/.test(o))) throw new Error('board menu: ' + opts);
+  await page.evaluate(() => [...document.querySelectorAll('.panel.menu button')].find((x) => /Prairie Dollars/.test(x.textContent)).click()); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
 });
 await step('gym: treadmill trains fitness', async () => {
   await page.evaluate(() => __regina.enterInterior('gym')); await page.waitForFunction(() => __regina.inInterior === 'gym'); await wait(1300); await shot('23-gym');
