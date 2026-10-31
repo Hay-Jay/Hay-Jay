@@ -38,6 +38,7 @@
         "disabled": false,
         "settings": {}
       }
-    }
+    },
+    "loader_enable": true
   }
 }

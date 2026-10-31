@@ -79,7 +79,7 @@
   h.classList.add('mcl-on');
   function off(){E.forEach(function(e){removeEventListener(e,skip,true)})}
   function end(){if(done)return;done=1;off();h.classList.remove('mcl-on');o.remove();d.dispatchEvent(new CustomEvent('mcl:done'))}
-  function skip(){off();o.style.pointerEvents='none';if(!d.getAnimations)return end();d.getAnimations().forEach(function(a){if(/^mcf/.test(a.animationName)&&a.currentTime<R){a.currentTime=R;a.playbackRate=1.4}})}
+  function skip(){off();o.style.pointerEvents='none';if(!d.getAnimations)return end();d.getAnimations().forEach(function(a){if(/^mcf/.test(a.animationName)&&R>a.currentTime){a.currentTime=R;a.playbackRate=1.4}})}
   E.forEach(function(e){addEventListener(e,skip,{capture:true,passive:true})});
   o.addEventListener('animationend',function(e){if(e.target==o)end()});
   setTimeout(end,4500);

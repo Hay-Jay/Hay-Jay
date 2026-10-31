@@ -123,6 +123,7 @@
   {{ content_for_header }}
 </head>
 <body class="pg-{{ key }}">
+  {%- if template.name == 'index' and settings.loader_enable and request.design_mode == false %}{% render 'mc-loader' %}{% endif %}
   <a class="skip" href="#main">Skip to content</a>
   {% sections 'header-group' %}
   {%- if popup %}{% render 'mc-magpop', wide_only: popup_wide_only %}{% endif %}

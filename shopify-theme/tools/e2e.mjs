@@ -1,11 +1,12 @@
 // node tools/e2e.mjs — end-to-end checks of the theme on the dev server (:9292): navigation, the photo-grid shop, card quick add (hover and
-// the phone sheet), product buy flow and sticky bar, bag and its free-magazine nudge, home photo stack, corner card, menu search, no-JS, no sideways scroll.
+// the phone sheet), product buy flow and sticky bar, bag and its free-magazine nudge, home photo stack, corner card, menu search, no-JS, no sideways scroll, the home intro.
 import { chromium } from 'playwright-core';
 const BASE = 'http://localhost:' + (process.env.PORT || 9292);
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const results = []; const ok = (name, cond, extra = '') => { results.push([cond ? 'PASS' : 'FAIL', name, extra]); };
 async function page(opts = {}) {
   const ctx = await b.newContext({ viewport: { width: opts.w || 1440, height: opts.h || 900 }, javaScriptEnabled: opts.js !== false, hasTouch: (opts.w || 1440) < 700, isMobile: (opts.w || 1440) < 700 });
+  if (!opts.intro) await ctx.addInitScript(() => { try { sessionStorage.setItem('mcl-seen', '1'); } catch (e) {} });
   const p = await ctx.newPage(); p.setDefaultTimeout(6000); p.errs = [];
   p.on('pageerror', e => p.errs.push('pageerror ' + e.message)); p.on('console', m => { if (m.type() === 'error') p.errs.push('console ' + m.text()); });
   p.on('response', r => { if (r.status() >= 400 && !r.url().includes('/nope')) p.errs.push(`http ${r.status()} ${r.url()}`); });
@@ -170,8 +171,12 @@ let p5;
 for (const x of [p1, p2, p3, p4]) if (x) await x.context().close().catch(() => {});
 await T('9. no-JS: product form posts and lands on the cart', async () => {
 await fetch(BASE + '/cart/clear.js');
+// the dev server answers one request at a time: let it finish the photos the closed pages still asked for before timing a form post
+for (let i = 0; i < 60; i++) { const t = Date.now(); await fetch(BASE + '/cart.js'); if (Date.now() - t < 300) break; }
 p5 = await page({ js: false }); p5.setDefaultTimeout(15000); // form posts are full page loads
-await p5.goto(BASE + '/products/royal-black'); await p5.click('#buy'); await p5.waitForLoadState('load');
+await p5.goto(BASE + '/products/royal-black');
+// late in a full run the one-at-a-time dev server can keep this page busy for a while: allow 30 s (it takes about 0.3 s on its own)
+await Promise.all([p5.waitForURL('**/cart', { timeout: 30000 }), p5.click('#buy', { noWaitAfter: true, timeout: 30000 })]); await p5.waitForLoadState('load');
 ok('no-JS: add to bag lands on the cart with the item', p5.url().endsWith('/cart') && (await p5.$$('.cart-lines .ln')).length === 1, p5.url());
 await p5.goto(BASE + '/collections/all');
 const nj = await p5.evaluate(() => ({ cards: [...document.querySelectorAll('#grid .card')].filter(c => c.offsetParent !== null).length, photos: [...document.querySelectorAll('#grid .card-ph img:not(.ph2)')].filter(i => i.offsetParent !== null).length }));
@@ -319,6 +324,33 @@ for (const w of [320, 390]) {
   ok(`no sideways scroll at ${w}px`, !wide.length, wide.join(', '));
   await p.context().close();
 }
+});
+// 16. the Top Secret File intro: on a first visit to the home page only, gone by itself, skipped by a tap, once per session, never without JS
+await T('16. intro', async () => {
+const p = await page({ intro: true });
+await p.goto(BASE + '/'); await p.waitForTimeout(300);
+ok('intro: plays on a first visit to the home page', await p.$eval('#mcl', o => getComputedStyle(o).display !== 'none').catch(() => false));
+ok('intro: the page behind waits (html.mcl-on)', await p.evaluate(() => document.documentElement.classList.contains('mcl-on')));
+await p.waitForSelector('#mcl', { state: 'detached', timeout: 5000 }).catch(() => {});
+ok('intro: removes itself within 4.5 s', !(await p.$('#mcl')) && !(await p.evaluate(() => document.documentElement.classList.contains('mcl-on'))));
+await p.goto(BASE + '/'); await p.waitForTimeout(300);
+ok('intro: plays once per session', !(await p.$('#mcl')));
+const q = await page({ intro: true, w: 390, h: 844 });
+await q.goto(BASE + '/'); await q.waitForTimeout(400);
+await q.mouse.click(195, 400);
+const sk = await q.evaluate(() => { const o = document.getElementById('mcl'); const an = document.getAnimations().filter(a => /^mcf/.test(a.animationName));
+  return { through: !o || getComputedStyle(o).pointerEvents === 'none', jumped: !o || an.every(a => a.playState === 'finished' || a.currentTime >= 1900) }; });
+ok('intro: a tap jumps to the reveal and lets taps through', sk.through && sk.jumped, JSON.stringify(sk));
+await q.waitForSelector('#mcl', { state: 'detached', timeout: 3000 }).catch(() => {});
+ok('intro: gone after the skipped reveal', !(await q.$('#mcl')));
+ok('intro: no console errors', !p.errs.length && !q.errs.length, [...p.errs, ...q.errs].join(' | '));
+const r = await page({ intro: true });
+await r.goto(BASE + '/products/monochrome-sweatshirt'); await r.waitForTimeout(300);
+ok('intro: not on other pages', !(await r.$('#mcl')));
+const n = await page({ intro: true, js: false });
+await n.goto(BASE + '/'); await n.waitForTimeout(300);
+ok('intro: hidden without JS', await n.$eval('#mcl', o => getComputedStyle(o).display === 'none').catch(() => true));
+for (const x of [p, q, r, n]) await x.context().close();
 });
 for (const [s, n, x] of results) console.log(s, n, x ? '— ' + x : '');
 console.log(`${results.filter(r => r[0] === 'PASS').length}/${results.length} passed`);

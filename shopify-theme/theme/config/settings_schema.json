@@ -104,6 +104,18 @@
     ]
   },
   {
+    "name": "Intro",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "loader_enable",
+        "label": "Top Secret File intro on the home page",
+        "default": true,
+        "info": "A 3-second classified-file opening on the home page: once per visit, skipped by any tap or key, never in the theme editor, a quick fade for visitors who prefer reduced motion."
+      }
+    ]
+  },
+  {
     "name": "Magazine card",
     "settings": [
       {
