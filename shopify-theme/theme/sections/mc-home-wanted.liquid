@@ -1,0 +1,203 @@
+{%- comment -%}
+  Most wanted: the store's top sellers as Bureau "wanted" posters, ranked #01, #02... in the order picked in the theme editor (empty:
+  the first available products of the Home page collection). Each poster: the rank and a WANTED stamp, the photo with a mugshot height
+  chart, the evidence tag, the name and a "last seen" line made of the price and the sizes; the whole poster is one link to the product.
+  Quick add sits outside the link, exactly as on the product cards (snippets/mc-card): one variant adds in one tap, a size option opens
+  the sizes (they slide up on hover on desktop, a sheet on phones); personalised and multi-option products open the product page.
+  The root is .card so mc-cart.js treats it like any card (the stamp lands on the photo, the second photo loads on hover).
+  Ends with one call to action: the live number of pieces and a link to the shop.
+{%- endcomment -%}
+{%- assign tk_pieces = '{pieces}' -%}
+{%- liquid
+  capture ord
+    render 'mc-order'
+  endcapture
+  assign n_pieces = collections['all'].products_count
+
+  # the picked products, in rank order. A product list gives products; a plain list of handles is looked up the same way.
+  assign handles = ''
+  for x in section.settings.products
+    assign h = x.handle | default: x
+    if h != blank
+      assign handles = handles | append: h | append: ','
+    endif
+  endfor
+  if handles == ''
+    assign col = collections['frontpage']
+    if col == blank or col.products_count == 0
+      assign col = collections['all']
+    endif
+    assign k = 0
+    for p in col.products
+      if k >= 4
+        break
+      endif
+      if p.available
+        assign handles = handles | append: p.handle | append: ','
+        assign k = k | plus: 1
+      endif
+    endfor
+  endif
+  assign handles = handles | remove_last: ',' | split: ','
+  assign n = handles.size
+  if n > 6
+    assign n = 6
+  endif
+  # each poster hangs a little crooked on the board
+  assign tilts = '-1.6,1.1,-.8,1.4,-1.2,.9' | split: ','
+
+  assign cta = section.settings.cta_label | escape
+  assign cta_n = '<b class="wf-cta-n">' | append: n_pieces | append: '</b>'
+  assign cta = cta | replace: tk_pieces, cta_n
+  assign link = section.settings.cta_url | default: routes.all_products_collection_url
+-%}
+<section class="spread dark hwant" id="wanted" aria-labelledby="wantH">
+  <div class="wrap">
+    <header class="hsec-h">
+      <div>
+        {% render 'mc-home-kick', text: section.settings.kicker, level: 4 %}
+        <h2 class="h2 hx" id="wantH">{{ section.settings.heading | escape }}</h2>
+      </div>
+    </header>
+    <ol class="wf-grid" role="list" style="--n:{{ n }}">
+      {%- assign rank = 0 -%}
+      {%- for h in handles -%}
+        {%- if rank >= 6 %}{% break %}{% endif -%}
+        {%- assign product = all_products[h] -%}
+        {%- if product == blank or product.id == blank %}{% continue %}{% endif -%}
+        {%- liquid
+          assign rank = rank | plus: 1
+          capture cls
+            render 'mc-class', product: product
+          endcapture
+          capture fno
+            render 'mc-fileno', product: product, order: ord
+          endcapture
+          capture sz
+            render 'mc-sizes', product: product, cls: cls, range: true
+          endcapture
+          capture lead
+            render 'mc-lead', product: product
+          endcapture
+          assign pn = lead | plus: 0 | minus: 1
+          if pn < 0
+            assign pn = 0
+          endif
+          assign pic = product.images[pn] | default: product.featured_image
+          assign has2 = false
+          if product.images.size > 1
+            assign pn2 = pn | plus: 1
+            if pn2 >= product.images.size
+              assign pn2 = 0
+            endif
+            if pn2 != pn
+              assign pic2 = product.images[pn2]
+              assign has2 = true
+            endif
+          endif
+          # rings shot small on a wide studio frame are cropped in (same rule as the product cards)
+          assign is_ring = false
+          assign ring_hay = product.handle | append: ' ' | append: product.type | downcase
+          if cls == 'accessory' and ring_hay contains 'ring' and pic.width > 0
+            assign pic_ar = pic.width | times: 1.0 | divided_by: pic.height
+            if pic_ar > 1.4
+              assign is_ring = true
+            endif
+          endif
+          assign ttl = product.title | strip | escape
+          assign rk = rank | prepend: '0' | slice: -2, 2
+          assign ti = rank | minus: 1
+          assign qa = ''
+          if product.available and product.gift_card? == false and cls != 'gift' and product.template_suffix != 'custom'
+            unless product.tags contains 'no-quick-add'
+              if product.variants.size == 1
+                assign qa = 'one'
+              elsif product.options.size == 1 and product.variants.size <= 14
+                assign qa = 'size'
+              endif
+            endunless
+          endif
+          assign qid = 'wq-' | append: section.id | append: '-' | append: rank
+          assign ws = '300,450,600,800'
+          assign sz_attr = '(min-width:1400px) 290px, (min-width:900px) 21vw, 42vw'
+        -%}
+        <li class="card wf paper{% unless product.available %} sold{% endunless %}" style="--i:{{ ti }};--wr:{{ tilts[ti] }}deg">
+          <a class="card-a wf-a" href="{{ product.url }}">
+            <span class="wf-hd" aria-hidden="true">
+              <b class="wf-rk"><small>#</small>{{ rk }}</b>
+              {%- if section.settings.stamp != blank %}<span class="stamp wf-st" style="--r:{% cycle '-7deg', '5deg', '-4deg', '8deg', '-6deg', '4deg' %}">{{ section.settings.stamp | escape }}</span>{% endif -%}
+            </span>
+            <span class="card-ph wf-ph{% if is_ring %} zoom{% endif %}">
+              {%- render 'mc-img', image: pic, alt: '', widths: ws, sizes: sz_attr -%}
+              {%- if has2 %}<template class="ph2-t">{% render 'mc-img', image: pic2, alt: '', class: 'ph ph2', widths: ws, sizes: sz_attr %}</template>{% endif -%}
+              <i class="wf-hc" aria-hidden="true"><b>6'</b><b>5'</b><b>4'</b></i>
+              <i class="card-vf" aria-hidden="true"></i>
+              <span class="card-tag" aria-hidden="true">{{ fno }}</span>
+              {%- unless product.available %}<span class="stamp white card-oos" style="--r:-11deg" aria-hidden="true">Sold out</span>{% endunless -%}
+            </span>
+            <span class="wf-cap">
+              <b class="wf-t">{{ ttl }}</b>
+              <span class="wf-seen">
+                {%- if section.settings.seen_label != blank %}<i>{{ section.settings.seen_label | escape }}</i> {% endif -%}
+                <span class="pr">{% if product.compare_at_price > product.price %}<s>{{ product.compare_at_price | money }}</s> {% endif %}{% render 'mc-price', product: product %} <small>{{ cart.currency.iso_code }}</small></span>
+                {%- if product.available == false %} <span class="sz">Sold out</span>{% elsif sz != blank %} <span class="sz">{{ sz | escape }}</span>{% endif -%}
+              </span>
+            </span>
+          </a>
+          {%- case qa -%}
+            {%- when 'one' -%}
+              {%- assign v1 = product.variants.first -%}
+              <form class="card-qa" method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8">
+                <input type="hidden" name="quantity" value="1">
+                <button class="qa-go" type="submit" name="id" value="{{ v1.id }}" data-mc-add="{{ v1.id }}" aria-label="Add {{ ttl }} to bag"><i aria-hidden="true"></i></button>
+                <span class="qa-p qa-one"><button class="qa-b" type="submit" name="id" value="{{ v1.id }}" data-mc-add="{{ v1.id }}">Add to bag</button></span>
+              </form>
+            {%- when 'size' -%}
+              {%- assign opt_name = product.options.first | escape -%}
+              <div class="card-qa">
+                <button class="qa-go" type="button" popovertarget="{{ qid }}" aria-label="Quick add {{ ttl }}"><i aria-hidden="true"></i></button>
+                <div class="qa-p" id="{{ qid }}" popover role="dialog" aria-label="{{ ttl }}: choose {{ opt_name | downcase }}">
+                  <form class="qa-f" method="post" action="{{ routes.cart_add_url }}" accept-charset="UTF-8">
+                    <input type="hidden" name="quantity" value="1">
+                    <p class="qa-h"><b>{{ ttl }}</b><span>{% render 'mc-price', product: product %} <small>{{ cart.currency.iso_code }}</small></span></p>
+                    <p class="qa-l">{{ opt_name }}</p>
+                    <span class="qa-sz">
+                      {%- for v in product.variants -%}
+                        {%- assign vl = v.option1 | upcase | escape -%}
+                        <button class="qa-b" type="submit" name="id" value="{{ v.id }}"{% if v.available %} data-mc-add="{{ v.id }}" aria-label="Add {{ opt_name | downcase }} {{ vl }} to bag"{% else %} disabled aria-label="{{ opt_name }} {{ vl }}, sold out"{% endif %}>{{ vl }}</button>
+                      {%- endfor -%}
+                    </span>
+                  </form>
+                  <button class="qa-x" type="button" popovertarget="{{ qid }}" popovertargetaction="hide" aria-label="Close"></button>
+                </div>
+              </div>
+          {%- endcase -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+    {%- if cta != blank -%}
+      <a class="wf-cta" href="{{ link }}">
+        <span class="wf-cta-c">{{ cta }}</span>
+        {%- if section.settings.cta_button != blank %} <span class="wf-cta-go">{{ section.settings.cta_button | escape }}<i class="arr" aria-hidden="true"></i></span>{% endif -%}
+      </a>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Most wanted",
+  "settings": [
+    { "type": "product_list", "id": "products", "label": "Products, in rank order", "limit": 6, "info": "Your top sellers: 4 fill one row. Empty: the first available products of the Home page collection." },
+    { "type": "text", "id": "kicker", "label": "Small heading", "info": "Text before \" / \" becomes the file number.", "default": "File 01 / Top sellers" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Most wanted" },
+    { "type": "text", "id": "stamp", "label": "Stamp on each poster", "default": "Wanted" },
+    { "type": "text", "id": "seen_label", "label": "Before the price", "default": "Last seen" },
+    { "type": "header", "content": "Call to action" },
+    { "type": "text", "id": "cta_label", "label": "Line ({pieces} = live number of products)", "default": "{pieces} pieces on file" },
+    { "type": "text", "id": "cta_button", "label": "Button", "default": "Open the register" },
+    { "type": "url", "id": "cta_url", "label": "Link", "info": "Empty: all products." }
+  ],
+  "presets": [{ "name": "Most wanted" }]
+}
+{% endschema %}

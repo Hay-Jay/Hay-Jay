@@ -2,6 +2,8 @@
   Lookbook strip: a roll of film, one frame per "Frame" block (a product and its photo number), each frame a link to its product.
   mc-home.js lets the roll drift slowly (it stops for hover, focus, touch and the Pause button, and never runs with reduced motion)
   and drag sideways with a mouse; on touch it is a normal swipe. Without JavaScript it is a plain sideways-scrolling row.
+  Over the frames sits a surveillance camera read-out (corner brackets, scan lines, a REC dot, the camera label and a timecode); the
+  timecode runs while the film drifts and holds, with the REC dot, while it is paused.
 {%- endcomment -%}
 {%- liquid
   assign letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -11,8 +13,8 @@
   <div class="wrap">
     <header class="hsec-h">
       <div>
-        {%- if section.settings.kicker != blank %}<p class="kick mono">{{ section.settings.kicker | escape }}</p>{% endif -%}
-        <h2 class="h2 rv" id="lbH">{{ section.settings.heading | escape }}</h2>
+        {% render 'mc-home-kick', text: section.settings.kicker, level: 3 %}
+        <h2 class="h2 hx" id="lbH">{{ section.settings.heading | escape }}</h2>
       </div>
       <p class="hl-tools">
         <button class="hl-pause" type="button" data-film-toggle aria-pressed="false" aria-label="{{ section.settings.pause_label | escape }}" hidden><i aria-hidden="true"></i></button>
@@ -41,6 +43,9 @@
         {%- endif -%}
       {%- endfor -%}
     </ul>
+    {%- if section.settings.osd != blank -%}
+      <span class="hl-osd" aria-hidden="true"><span class="hl-osd-l"><b class="rec"></b>{{ section.settings.osd | escape }}</span><span class="hl-osd-r" data-tc>00:00:00:00</span></span>
+    {%- endif -%}
   </div>
 </section>
 
@@ -48,11 +53,12 @@
 {
   "name": "Lookbook strip",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§3 / Surveillance" },
+    { "type": "text", "id": "kicker", "label": "Small heading", "info": "Text before \" / \" becomes the file number.", "default": "File 03 / Surveillance" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Lookbook" },
     { "type": "text", "id": "link_text", "label": "Link text", "default": "See it all" },
     { "type": "url", "id": "link_url", "label": "Link", "info": "Empty: /pages/lookbook." },
-    { "type": "text", "id": "pause_label", "label": "Pause button (read out by screen readers)", "default": "Pause the film" }
+    { "type": "text", "id": "pause_label", "label": "Pause button (read out by screen readers)", "default": "Pause the film" },
+    { "type": "text", "id": "osd", "label": "Camera label over the film", "info": "Empty: no camera read-out.", "default": "Field footage // Cam 03" }
   ],
   "blocks": [
     {

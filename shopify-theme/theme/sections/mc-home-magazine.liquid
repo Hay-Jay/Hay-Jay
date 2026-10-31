@@ -43,7 +43,7 @@
     </a>
     <div class="hm-copy">
       {%- if section.settings.kicker != blank %}<p class="kick mono"><b class="rec" aria-hidden="true"></b>{{ section.settings.kicker | escape }}</p>{% endif -%}
-      <h2 class="h2 rv" id="magH">{{ mtitle | escape }}</h2>
+      <h2 class="h2 hx" id="magH">{{ mtitle | escape }}</h2>
       <p class="hm-line mono">{% if line != blank %}<span>{{ line | escape }}</span>{% endif %}<b>{{ variant.price | money }} <small>{{ cart.currency.iso_code }}</small></b></p>
       {%- if section.settings.offer != blank %}<p class="hm-offer">{{ section.settings.offer | escape }}</p>{% endif -%}
     </div>

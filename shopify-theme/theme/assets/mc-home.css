@@ -1,13 +1,26 @@
-/* HOME: shop first. A short cover with a stack of evidence prints you can flip, the product grid, shop-by-category tiles, the Vision
-   Issue banner, a lookbook film strip and the drop-alert signup. Behaviour: assets/mc-home.js (the page works without it).
-   The objectives / intel / zones styles at the end are kept for the optional sections the owner can add back in the theme editor. */
+/* HOME: shop first. A short cover with a stack of evidence prints you can flip, the "most wanted" top sellers, shop-by-category tiles
+   (restricted files that declassify), the Vision Issue banner, a lookbook film strip under surveillance and the drop-alert signup.
+   Behaviour: assets/mc-home.js (the page works without it). The product grid, objectives, intel and zones styles at the end are kept
+   for the optional sections the owner can add back in the theme editor. */
 
 /* ---- shared on this page -------------------------------------------------------------------------------------------- */
-.hgrid, .hcats, .hmag, .hlb, .hnews { overflow: clip; padding-block: clamp(40px, 4vw, 58px); }
+.hgrid, .hwant, .hcats, .hmag, .hlb, .hnews { overflow: clip; padding-block: clamp(40px, 4vw, 58px); }
 .hsec-h { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; margin-bottom: clamp(18px, 2.6vw, 34px); }
 .hsec-h .kick { margin-bottom: 10px; }
 .hsec-h .h2 { font-size: clamp(2.5rem, 5vw, 4.2rem); }
 .hsec-more { flex: none; }
+/* the file line over each section head: a file-number chip, the label, a clearance ladder (snippets/mc-home-kick) */
+.kick.hk { flex-wrap: wrap; gap: 4px 10px; }
+.kick.hk::before { display: none; }
+.hk-no { background: var(--fg); color: var(--bg); padding: 3px 7px 2px; letter-spacing: .16em; }
+.hk-lv { color: var(--fg); height: 12px; }
+.hk-lv i { width: 5px; }
+.hk-lv i:nth-child(1) { height: 4px; } .hk-lv i:nth-child(2) { height: 6px; } .hk-lv i:nth-child(3) { height: 8px; } .hk-lv i:nth-child(4) { height: 10px; } .hk-lv i:nth-child(5) { height: 12px; }
+/* section heads are declassified as they come into view: a redaction bar over the words wipes away (mc-home.js arms it, so
+   without JavaScript or with reduced motion there is no bar) */
+.hx { position: relative; width: fit-content; max-width: 100%; }
+.hx.hx-arm::after { content: ""; position: absolute; inset: -.07em -.07em -.03em; background: var(--fg); transform-origin: 100% 50%; transition: transform .8s var(--ease-io) .1s; }
+.hx.hx-arm.hx-go::after { transform: scaleX(0); }
 
 /* ---- 01 cover: headline + photo stack ---------------------------------------------------------------------------------- */
 .hero { padding-block: clamp(20px, 3.2vw, 44px) 0; overflow: clip; }
@@ -95,14 +108,92 @@
   .hs { width: min(100%, 370px); margin: 26px clamp(0px, 4vw, 64px) 0 auto; }
 }
 
-/* ---- 02 product grid -------------------------------------------------------------------------------------------------- */
-.hg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
-.hg-end { margin-top: 28px; }
-.hg-end .btn { width: 100%; }
-@media (max-width: 699px) { .hgrid .hsec-more { display: none; } }
-@media (min-width: 700px) { .hg-end { display: none; } .hg-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 16px; } }
-@media (min-width: 700px) and (max-width: 1099px) { .hg-grid .card-t { font-size: 1.05rem; } }
-@media (min-width: 900px) { .hg-grid { gap: 36px 22px; } }
+/* ---- 02 most wanted: the top sellers as wanted posters taped to the dark board -------------------------------------------
+   The poster is .card (mc-cart.js and the quick-add styles in mc-base.css treat it like any product card), on paper, a little crooked.
+   --wp is the poster's margin and --wh the height of its rank row: the quick-add layer is placed exactly over the photo with them. */
+.wf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 14px; padding-top: 8px; }
+.wf {
+  --wp: 7px; --wh: 34px; --wr: 0deg;
+  padding: var(--wp) var(--wp) 11px; background: #e4e4e4 var(--grain-d); color: var(--fg);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .4), 0 20px 30px -10px rgba(0, 0, 0, .75);
+  transform: rotate(var(--wr)); transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+}
+/* a strip of tape holds each poster up */
+.wf::before {
+  content: ""; position: absolute; z-index: 7; left: 50%; top: -11px; width: 66px; height: 21px; pointer-events: none;
+  background: rgba(225, 225, 225, .72) repeating-linear-gradient(90deg, rgba(0, 0, 0, .05) 0 2px, transparent 2px 5px);
+  transform: translateX(-50%) rotate(calc(var(--wr) * -2.4)); box-shadow: 0 1px 2px rgba(0, 0, 0, .3);
+  clip-path: polygon(0 10%, 4% 0, 8% 12%, 12% 0, 16% 10%, 100% 6%, 96% 30%, 100% 55%, 96% 80%, 100% 100%, 16% 92%, 12% 100%, 8% 90%, 4% 100%, 0 92%, 3% 50%);
+}
+.wf-hd { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: var(--wh); padding-bottom: 4px; }
+.wf-rk { font: 900 1.85rem/1 var(--head); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.wf-rk small { font-size: .52em; vertical-align: .62em; margin-right: 1px; }
+.stamp.wf-st { margin: 0 2px 0 0; font-size: .74rem; padding: .3em .55em .24em; }
+.wf-ph { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5); }
+/* the mugshot wall: height lines, ticks along both edges and the marks; white, so they read on the dark backdrop and vanish on white cloth */
+.wf-hc {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: .62;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 calc(25% - 1px), rgba(255, 255, 255, .62) calc(25% - 1px) 25%),
+    repeating-linear-gradient(180deg, transparent 0 calc(12.5% - 1px), rgba(255, 255, 255, .55) calc(12.5% - 1px) 12.5%) 0 0 / 26px 100% no-repeat,
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, .7) 0 1px, transparent 1px 2.5%) 0 0 / 9px 100% no-repeat,
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, .7) 0 1px, transparent 1px 2.5%) 100% 0 / 9px 100% no-repeat;
+}
+.wf-hc b { position: absolute; left: 12px; color: #fff; font: 700 9px/1 var(--mono); letter-spacing: .04em; transform: translateY(calc(-100% - 3px)); }
+.wf-hc b:nth-child(1) { top: 25%; } .wf-hc b:nth-child(2) { top: 50%; } .wf-hc b:nth-child(3) { top: 75%; }
+.wf .card-tag { top: auto; bottom: 10px; }
+.wf-cap { display: grid; gap: 5px; padding: 10px 1px 0; }
+.wf-t { font: 800 clamp(1rem, 4.2vw, 1.32rem)/1 var(--head); letter-spacing: .02em; text-transform: uppercase; overflow-wrap: anywhere; text-decoration: underline 2px transparent; text-underline-offset: 3px; transition: text-decoration-color .2s; }
+.wf-seen { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 7px; font: 700 12px/1.3 var(--mono); letter-spacing: .03em; }
+.wf-seen i { font-style: normal; color: var(--dim); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; }
+.wf-seen .pr { white-space: nowrap; }
+.wf-seen .pr small { color: var(--dim); font-size: 9.5px; letter-spacing: .12em; }
+.wf-seen .pr s { color: var(--dim); font-weight: 400; }
+.wf-seen .sz { color: var(--dim); font-weight: 400; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.wf-seen .sz::before { content: "//"; margin-right: 6px; opacity: .6; }
+.wf.sold .pr { text-decoration: line-through; color: var(--dim); }
+.wf.sold .sz { color: var(--fg); font-weight: 700; }
+.wf .card-qa { left: var(--wp); top: calc(var(--wp) + var(--wh)); width: calc(100% - var(--wp) * 2); }
+.wf .qa-go { right: 0; bottom: 0; }
+@media (hover: hover) and (pointer: fine) {
+  .wf:hover, .wf:focus-within { z-index: 2; transform: translateY(-6px) rotate(0deg); box-shadow: 0 1px 0 rgba(0, 0, 0, .4), 0 30px 44px -12px rgba(0, 0, 0, .85); }
+  .wf:hover .wf-t { text-decoration-color: currentColor; }
+}
+/* the call to action: the live count and the way in to the full register */
+.wf-cta {
+  position: relative; isolation: isolate; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 24px;
+  margin-top: clamp(30px, 3.4vw, 46px); padding: 14px 16px; border: 2px solid var(--fg); background: var(--fg) var(--grain-d); color: var(--bg); text-decoration: none; overflow: hidden; transition: color .3s .05s;
+  box-shadow: 6px 7px 0 rgba(0, 0, 0, .55);
+}
+/* a redaction bar wipes across on hover and the line turns to white on black */
+.wf-cta::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--bg); transform: scaleX(0); transform-origin: 0 50%; transition: transform .45s var(--ease-io); }
+.wf-cta:hover, .wf-cta:focus-visible { color: var(--fg); }
+.wf-cta:hover::before, .wf-cta:focus-visible::before { transform: none; }
+.wf-cta:focus-visible { outline-offset: 4px; }
+.wf-cta-c { display: flex; align-items: center; gap: 12px; font: 700 12px/1.2 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+.wf-cta-n { font: 900 3rem/.8 var(--head); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.wf-cta-go { display: inline-flex; align-items: center; gap: 10px; font: 800 1.35rem/1 var(--head); letter-spacing: .05em; text-transform: uppercase; }
+.wf-cta-go .arr { margin: 0; transition: transform .35s var(--ease); }
+.wf-cta:hover .wf-cta-go .arr { transform: translate(3px, -3px); }
+@media (max-width: 459px) { .wf-cta-go { width: 100%; justify-content: space-between; padding-top: 10px; border-top: 1px dashed currentColor; } }
+@media (min-width: 700px) {
+  .wf-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 18px; }
+  .wf-grid[style*="--n:3"], .wf-grid[style*="--n:6"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) { .wf-grid[style*="--n:5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 900px) {
+  .wf { --wp: 10px; --wh: 46px; padding-bottom: 14px; }
+  .wf-grid { gap: 40px clamp(22px, 2.4vw, 34px); padding-top: 12px; }
+  .wf-rk { font-size: 2.6rem; }
+  .stamp.wf-st { font-size: 1rem; }
+  .wf-hc b { font-size: 10px; left: 14px; }
+  .wf-seen { font-size: 13px; }
+  .wf-seen i, .wf-seen .pr small { font-size: 10.5px; }
+  .wf-cta { padding: 16px 26px; }
+  .wf-cta-n { font-size: 4rem; }
+  .wf-cta-c { font-size: 13px; gap: 16px; }
+  .wf-cta-go { font-size: 1.7rem; }
+}
 
 /* ---- 03 shop by category ------------------------------------------------------------------------------------------------ */
 .hc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -144,6 +235,34 @@
   .hc-txt { left: 18px; right: 18px; bottom: 16px; }
   .hc-n { font-size: 12px; }
 }
+
+/* RESTRICTED ACCESS: mc-home.js arms the grid (.armed) and a tile's lock lifts on hover or keyboard focus, or (.open) on touch screens
+   as it scrolls into view: the redaction bars slide off to alternate sides, the hazard frame and the plate fall away. Without the
+   armed class (no JavaScript, reduced motion, the plate setting emptied) the lock is never drawn. */
+.hc-lock { position: absolute; inset: 0; z-index: 5; display: none; flex-direction: column; gap: 3px; pointer-events: none; }
+.hc-grid.armed .hc-lock { display: flex; }
+html.declass .hc-grid.armed .hc-lock { display: none; }
+.hc-lock i { flex: 1; background: #070707 var(--grain-l); transition: transform .5s var(--ease-io); }
+.hc-lock i:nth-child(1) { margin-right: 26%; } .hc-lock i:nth-child(2) { transition-delay: .04s; } .hc-lock i:nth-child(3) { transition-delay: .08s; margin-left: 16%; }
+.hc-lock i:nth-child(4) { transition-delay: .12s; } .hc-lock i:nth-child(5) { transition-delay: .16s; }
+.hc-lock::before { content: ""; position: absolute; inset: 0; z-index: 1; border: 7px solid transparent; border-image: repeating-linear-gradient(-45deg, #0a0a0a 0 7px, #e6e6e6 7px 14px) 7; transition: opacity .3s .05s, transform .5s var(--ease); }
+.hc-plate {
+  position: absolute; z-index: 2; left: 50%; top: 50%; display: grid; gap: 5px; justify-items: center; max-width: calc(100% - 28px); padding: 7px 11px 6px; text-align: center;
+  background: #e6e6e6 var(--grain-d); color: #0a0a0a; border: 2px solid #0a0a0a; box-shadow: 3px 3px 0 rgba(0, 0, 0, .6);
+  transform: translate(-50%, -50%) rotate(-5deg); transition: opacity .25s, transform .45s var(--ease);
+}
+.hc-plate span { font: 700 clamp(.9rem, 4vw, 1.45rem)/1.05 var(--stamp); letter-spacing: .06em; text-transform: uppercase; }
+.hc-plate small { font: 700 9px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
+.hc-grid.armed .hc-tile:is(.open, :hover, :focus-visible) .hc-lock i:nth-child(odd) { transform: translateX(140%); }
+.hc-grid.armed .hc-tile:is(.open, :hover, :focus-visible) .hc-lock i:nth-child(even) { transform: translateX(-140%); }
+/* the label is on the plate while the file is locked, and takes its place on the photo once it is open */
+.hc-grid.armed .hc-txt { opacity: 0; transition: opacity .2s; }
+.hc-grid.armed .hc-tile:is(.open, :hover, :focus-visible) .hc-txt, html.declass .hc-grid.armed .hc-txt { opacity: 1; transition: opacity .35s .22s; }
+.hc-grid.armed .hc-tile:is(.open, :hover, :focus-visible) .hc-lock::before { opacity: 0; transform: scale(1.06); }
+.hc-grid.armed .hc-tile:is(.open, :hover, :focus-visible) .hc-plate { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1.35); }
+/* once declassified on a touch screen it stays open; the lock leaves the page's text (and screen) when it is out of the way */
+.hc-grid.armed .hc-tile.open .hc-lock { visibility: hidden; transition: visibility 0s .7s; }
+@media (min-width: 900px) { .hc-plate { padding: 10px 18px 9px; } .hc-plate small { font-size: 10.5px; } .hc-lock { gap: 4px; } }
 
 /* ---- 04 the Vision Issue, compact ---------------------------------------------------------------------------------------- */
 .hmag { background-image: radial-gradient(60% 140% at 12% 50%, rgba(255, 255, 255, .13), transparent 62%), var(--grain-l); }
@@ -202,6 +321,21 @@
 .hl-a:focus-visible { outline: 3px solid #f2f2f2; outline-offset: -3px; }
 .hl-no { position: absolute; left: 8px; bottom: 6px; z-index: 2; color: #f2f2f2; font-size: 11px; text-shadow: 0 1px 2px #000; }
 .hl-no::after { content: attr(data-l); }
+/* field footage: the camera read-out stays put over the frames while they roll underneath (brackets, scan lines, REC, timecode) */
+.hl-osd { position: absolute; inset: 24px 0; z-index: 3; pointer-events: none; color: #fff; font: 700 10.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 0 4px #000, 0 1px 0 #000; }
+.hl-osd::before { content: ""; position: absolute; inset: 8px var(--in); opacity: .9; background:
+  linear-gradient(#fff, #fff) 0 0 / 16px 2px, linear-gradient(#fff, #fff) 0 0 / 2px 16px,
+  linear-gradient(#fff, #fff) 100% 0 / 16px 2px, linear-gradient(#fff, #fff) 100% 0 / 2px 16px,
+  linear-gradient(#fff, #fff) 0 100% / 16px 2px, linear-gradient(#fff, #fff) 0 100% / 2px 16px,
+  linear-gradient(#fff, #fff) 100% 100% / 16px 2px, linear-gradient(#fff, #fff) 100% 100% / 2px 16px; background-repeat: no-repeat; }
+.hl-osd::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 3px); }
+.hl-osd { --in: max(10px, calc(var(--gut) - 8px)); }
+.hl-osd-l, .hl-osd-r { position: absolute; top: 20px; display: flex; align-items: center; gap: 7px; }
+.hl-osd-l { left: calc(var(--in) + 22px); }
+.hl-osd-r { right: calc(var(--in) + 22px); font-variant-numeric: tabular-nums; }
+.hl-osd .rec { margin: 0; }
+.hl-film.held .hl-osd .rec { animation-play-state: paused; opacity: .4; }
+@media (max-width: 459px) { .hl-osd { font-size: 9.5px; letter-spacing: .08em; } .hl-osd-l, .hl-osd-r { top: 18px; } .hl-osd-l { left: calc(var(--in) + 16px); } .hl-osd-r { right: calc(var(--in) + 16px); } }
 
 /* ---- 06 drop alerts ------------------------------------------------------------------------------------------------------------ */
 .hnews { padding-block: clamp(36px, 4.6vw, 64px); border-top: 1px solid var(--rule); }
@@ -220,9 +354,10 @@
 
 /* ---- motion preferences ------------------------------------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .hs-card, .hm-tilt, .hc-tile, .hc-ph .ph, .hl-a .ph { transition: none; }
-  .hero-x::after { display: none; }
+  .hs-card, .hm-tilt, .hc-tile, .hc-ph .ph, .hl-a .ph, .wf, .wf-cta, .wf-cta::before { transition: none; }
+  .hero-x::after, .hx::after, .hc-lock { display: none !important; }
 }
+@media print { .hx::after, .hc-lock { display: none !important; } }
 
 /* ==========================================================================================================================
    Optional sections (not on the page by default; the owner can add them back in the theme editor):
@@ -278,3 +413,13 @@
 .dist-cell:hover .mono, .dist-cell:focus-visible .mono { color: inherit; }
 .dist-copy { max-width: 36em; color: var(--dim); }
 @media (min-width: 900px) { .zn-grid { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); } .dist-cells { grid-template-columns: 1fr 1fr; } }
+
+/* Product grid (mc-home-picks): the frontpage collection as product cards */
+/* ---- product grid -------------------------------------------------------------------------------------------------- */
+.hg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 12px; }
+.hg-end { margin-top: 28px; }
+.hg-end .btn { width: 100%; }
+@media (max-width: 699px) { .hgrid .hsec-more { display: none; } }
+@media (min-width: 700px) { .hg-end { display: none; } .hg-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 16px; } }
+@media (min-width: 700px) and (max-width: 1099px) { .hg-grid .card-t { font-size: 1.05rem; } }
+@media (min-width: 900px) { .hg-grid { gap: 36px 22px; } }

@@ -2,8 +2,8 @@
 <section class="spread dark hnews" id="subscribe" aria-labelledby="subH">
   <div class="wrap hn-grid">
     <div class="hn-head">
-      {%- if section.settings.kicker != blank %}<p class="kick mono">{{ section.settings.kicker | escape }}</p>{% endif -%}
-      <h2 class="h2 rv" id="subH">{{ section.settings.heading | escape }}</h2>
+      {% render 'mc-home-kick', text: section.settings.kicker, level: 1 %}
+      <h2 class="h2 hx" id="subH">{{ section.settings.heading | escape }}</h2>
     </div>
     {% render 'mc-newsletter', id: 'home-news', submit: section.settings.button, label: section.settings.label, note: section.settings.note, quiet: true %}
     {%- if section.settings.stamp != blank %}<span class="stamp white hn-stamp" style="--r:-6deg" aria-hidden="true">{{ section.settings.stamp | escape }}</span>{% endif -%}
@@ -14,7 +14,7 @@
 {
   "name": "Drop alerts (signup)",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§4 / Drop alerts" },
+    { "type": "text", "id": "kicker", "label": "Small heading", "info": "Text before \" / \" becomes the file number.", "default": "File 04 / Drop alerts" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Get the drop first" },
     { "type": "text", "id": "label", "label": "Field label", "default": "Email" },
     { "type": "text", "id": "button", "label": "Button", "default": "Join" },

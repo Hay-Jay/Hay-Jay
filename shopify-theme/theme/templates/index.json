@@ -12,12 +12,10 @@
       "block_order": ["photo-1", "photo-2", "photo-3", "photo-4", "photo-5"],
       "settings": {}
     },
-    "picks": {
-      "type": "mc-home-picks",
+    "wanted": {
+      "type": "mc-home-wanted",
       "settings": {
-        "collection": "frontpage",
-        "count": 8,
-        "hide_sold": true
+        "products": ["custom-monochrome-jersey", "acid-washed-monochrome-hoodie", "monochrome-sleeveless-crop-top", "trinity-fidget-ring"]
       }
     },
     "apps": {
@@ -74,5 +72,5 @@
       "settings": {}
     }
   },
-  "order": ["cover", "picks", "apps", "categories", "magazine", "lookbook", "subscribe"]
+  "order": ["cover", "wanted", "apps", "categories", "magazine", "lookbook", "subscribe"]
 }

@@ -4,7 +4,11 @@
      touch and the Pause button, and never drifts with reduced motion.
    - Magazine cover [data-hm-tilt]: tilts towards the pointer with a glare (fine pointers only, no reduced motion). Its own hook, so
      core.js's [data-tilt] (the about page's pinned prints) never tilts it a second time.
-   Everything here only enhances server-rendered links and forms: without it the page still works. */
+   - Section heads (.hx): a redaction bar is drawn over the words and wipes away as the head comes into view.
+   - Category tiles [data-hc]: armed as RESTRICTED files; on hover or focus the CSS lifts the lock, on touch screens it lifts (.open)
+     as the tile scrolls into view.
+   - Lookbook camera read-out [data-tc]: the timecode runs while the film drifts and holds while it is paused.
+   None of the effects run with reduced motion. Everything here only enhances server-rendered links and forms: without it the page still works. */
 (() => {
   'use strict';
   if (window.__mcHome) return;
@@ -145,8 +149,9 @@
     const btn = $('[data-film-toggle]', section);
     const drift = !reduce;
     const SPEED = 0.028; // px per ms
+    const tcEl = $('[data-tc]', root);
     let grab = null, moved = false, firstClone = null;
-    let pos = 0, mine = -1, raf = 0, last = 0, playing = true, over = false, inView = false, until = 0;
+    let pos = 0, mine = -1, raf = 0, last = 0, playing = true, over = false, inView = false, until = 0, tc = 0, tcF = -1, held = null;
     const hold = ms => { until = performance.now() + ms; };
     const span = () => (firstClone ? firstClone.offsetLeft - frames[0].offsetLeft : 0);
     root.classList.add('on');
@@ -191,12 +196,20 @@
       raf = 0;
       const dt = Math.min(250, now - (last || now));
       last = now;
-      if (running()) {
+      const go = running();
+      if (go) {
         const w = span();
         pos += dt * SPEED;
         if (w > 0 && pos >= w) pos -= w;
         row.scrollLeft = pos;
         mine = row.scrollLeft;
+        tc += dt;
+      }
+      // the camera read-out: HH:MM:SS:FF at 24 frames a second while the film rolls; REC holds with it
+      if (go !== held) { held = go; root.classList.toggle('held', !go); }
+      if (tcEl) {
+        const f = Math.floor(tc / (1000 / 24));
+        if (f !== tcF) { tcF = f; const s = Math.floor(f / 24); tcEl.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}:${pad(f % 24)}`; }
       }
       if (inView) raf = requestAnimationFrame(tick);
     }
@@ -258,10 +271,44 @@
     });
   }
 
+  // ---- section heads: the redaction bar over the words wipes away as each head comes into view -----------------------------
+  function heads() {
+    const hs = $$('.hx');
+    if (reduce || !hs.length || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      requestAnimationFrame(() => e.target.classList.add('hx-go'));
+    }), { threshold: 0.6, rootMargin: '0px 0px -6% 0px' });
+    hs.forEach(h => { h.classList.add('hx-arm'); io.observe(h); });
+    addEventListener('beforeprint', () => hs.forEach(h => h.classList.add('hx-go')));
+  }
+
+  // ---- category tiles: RESTRICTED files. Hover and focus are CSS; touch screens declassify each tile as it scrolls into view ----
+  function cats(grid) {
+    if (reduce || !$('.hc-lock', grid)) return;
+    grid.classList.add('armed');
+    if (fine || !('IntersectionObserver' in window)) {
+      if (!fine) $$('.hc-tile', grid).forEach(t => t.classList.add('open'));
+      return;
+    }
+    // the tiles that arrive together lift one after another
+    const io = new IntersectionObserver(es => {
+      es.filter(e => e.isIntersecting).forEach((e, k) => {
+        io.unobserve(e.target);
+        setTimeout(() => e.target.classList.add('open'), 420 + k * 180);
+      });
+    }, { threshold: 0.55 });
+    $$('.hc-tile', grid).forEach(t => io.observe(t));
+    addEventListener('beforeprint', () => $$('.hc-tile', grid).forEach(t => t.classList.add('open')));
+  }
+
   const boot = () => {
     $$('[data-hs]').forEach(stack);
     $$('[data-film]').forEach(film);
     $$('[data-hm-tilt]').forEach(tilt);
+    $$('[data-hc]').forEach(cats);
+    heads();
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

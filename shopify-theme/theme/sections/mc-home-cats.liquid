@@ -2,6 +2,9 @@
   Shop by category: big photo tiles, one per "Tile" block. A tile picks a shop filter (tops, bottoms, hardware, gift cards, print or
   everything): it links to /collections/all?c=<filter> (print goes straight to the magazine when there is one) and shows the live
   number of pieces. The photo is the block's image, else a product photo, else the first product of that filter.
+  Each tile is a RESTRICTED ACCESS file: mc-home.js arms the lock (redaction bars, a hazard frame and a plate) and it declassifies on
+  hover or keyboard focus, or on touch screens as the tile scrolls into view. Without JavaScript, or with reduced motion, the lock is
+  never shown: the tiles are plain photo links.
 {%- endcomment -%}
 {%- liquid
   assign n_top = 0
@@ -57,11 +60,11 @@
   <div class="wrap">
     <header class="hsec-h">
       <div>
-        {%- if section.settings.kicker != blank %}<p class="kick mono">{{ section.settings.kicker | escape }}</p>{% endif -%}
-        <h2 class="h2 rv" id="catsH">{{ section.settings.heading | escape }}</h2>
+        {% render 'mc-home-kick', text: section.settings.kicker, level: 2 %}
+        <h2 class="h2 hx" id="catsH">{{ section.settings.heading | escape }}</h2>
       </div>
     </header>
-    <ul class="hc-grid" role="list">
+    <ul class="hc-grid" role="list" data-hc>
       {%- for block in section.blocks -%}
         {%- liquid
           assign f = block.settings.filter
@@ -120,6 +123,9 @@
             <span class="hc-no mono" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
             <span class="hc-txt"><b class="hc-lbl"><span>{{ block.settings.label | escape }}</span></b><span class="hc-n mono">{{ meta | escape }}</span></span>
             <i class="arr hc-arr" aria-hidden="true"></i>
+            {%- if section.settings.lock_label != blank -%}
+              <span class="hc-lock" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><b class="hc-plate"><small>{{ section.settings.lock_label | escape }} // {{ forloop.index | prepend: '0' | slice: -2, 2 }}</small> <span>{{ block.settings.label | escape }}</span></b></span>
+            {%- endif -%}
           </a>
         </li>
       {%- endfor -%}
@@ -131,10 +137,13 @@
 {
   "name": "Shop by category",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Small heading", "default": "§2 / Departments" },
+    { "type": "text", "id": "kicker", "label": "Small heading", "info": "Text before \" / \" becomes the file number.", "default": "File 02 / Departments" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by category" },
     { "type": "text", "id": "many_label", "label": "Count text ({n} = live number)", "default": "{n} pieces" },
-    { "type": "text", "id": "one_label", "label": "Count text for a single piece", "default": "1 piece" }
+    { "type": "text", "id": "one_label", "label": "Count text for a single piece", "default": "1 piece" },
+    { "type": "header", "content": "Restricted access" },
+    { "type": "paragraph", "content": "Each tile starts under redaction bars, with its label on a plate; they lift on hover, or as the tile scrolls into view on phones." },
+    { "type": "text", "id": "lock_label", "label": "Plate marking (the tile number follows)", "info": "Empty: no bars, plain photo tiles.", "default": "Restricted" }
   ],
   "blocks": [
     {
