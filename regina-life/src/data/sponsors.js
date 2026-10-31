@@ -11,30 +11,24 @@ export const SUPPORT_URL = '';
 
 /** The sponsored product, from VISION 6.2: Canadian dollars per 7 days, a share of a board's rotation, an image or a line of text plus a link. */
 export const SPONSOR_TIERS = [
-  { id: 'standard', name: 'Roadside board', cad: 25, boards: 'Any of the standard boards along downtown streets', share: 'One of up to 4 ads in rotation' },
-  { id: 'big', name: 'Big board', cad: 50, boards: 'The big screens on the arterials and the gateways', share: 'One of up to 3 ads in rotation' },
-  { id: 'landmark', name: 'Landmark board', cad: 100, boards: 'The landmark screens by Wascana and the stadium', share: 'One of up to 2 ads in rotation' },
+  { id: 'standard', name: 'Roadside board', cad: 10, boards: 'Any of the standard boards along downtown streets', share: 'One of up to 4 ads in rotation' },
+  { id: 'big', name: 'Big board', cad: 20, boards: 'The big screens on the arterials and the gateways', share: 'One of up to 3 ads in rotation' },
+  { id: 'landmark', name: 'Landmark board', cad: 40, boards: 'The landmark screens by Wascana and the stadium', share: 'One of up to 2 ads in rotation' },
 ];
 
 /** Ways to support the game (advertise.html#support). The mural tiers ask for the name to paint in Victoria Park. */
 export const SUPPORT_TIERS = [
-  { id: 'coffee', name: 'Buy the team a coffee', cad: 5, blurb: 'A plain thank-you. It keeps the servers on and the city growing.' },
-  { id: 'mural', name: 'Your name on the mural', cad: 15, blurb: 'Your name, or a nickname, painted on the Supporters\' Mural in Victoria Park.', mural: true },
-  { id: 'founding', name: 'Founding supporter', cad: 50, blurb: 'Your name in gold on the mural, as one of the first to back Regina Life.', mural: true },
+  { id: 'coffee', name: 'Buy the team a coffee', cad: 3, blurb: 'A plain thank-you. It keeps the servers on and the city growing.' },
+  { id: 'mural', name: 'Your name on the mural', cad: 10, blurb: 'Your name, or a nickname, painted on the Supporters\' Mural in Victoria Park.', mural: true },
+  { id: 'founding', name: 'Founding supporter', cad: 25, blurb: 'Your name in gold on the mural, as one of the first to back Regina Life.', mural: true },
 ];
 
 /**
- * Online checkout (core/checkout.js): the owner's own Shopify store takes the payment on its own checkout page; the game never handles money.
- *   shop:    the store's domain (e.g. 'yourstore.myshopify.com' or your custom domain)
- *   ads:     the Shopify variant id (digits) of the product for each SPONSOR_TIERS id
- *   support: the variant id for each SUPPORT_TIERS id
- * Leave a value empty and that button falls back to an email booking (if CONTACT_URL is a mailto:) or says it opens soon.
+ * Payments on the site (core/checkout.js): PayPal Checkout buttons on the Advertise page (PayPal, or a debit or credit card), paid into the owner's
+ * PayPal Business account. The game itself never handles money. Paste the LIVE app's Client ID from developer.paypal.com (it is public by design;
+ * never paste the secret). Empty = no payment buttons: a booking goes out by email (a mailto: CONTACT_URL) or the page says it opens soon.
  */
-export const CHECKOUT = {
-  shop: '',
-  ads: { standard: '', big: '', landmark: '' },
-  support: { coffee: '', mural: '', founding: '' },
-};
+export const PAYPAL = { clientId: '', currency: 'CAD' };
 
 /**
  * Booked sponsored ads, added by the owner after the advertiser paid and the creative was reviewed. Shape (all required unless noted):

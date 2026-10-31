@@ -1,8 +1,11 @@
 /**
- * Real-money checkout for the owner (advertise.html): a billboard booking or a support tier becomes a link to the owner's own Shopify checkout
- * (data/sponsors.js CHECKOUT). The buyer pays on Shopify's page, never in the game; the details travel with the order as line-item properties, so
- * the owner can review an ad before adding it to SPONSORED. Until the owner fills CHECKOUT, a booking can go out as an email instead (CONTACT_URL
- * as a mailto:), and otherwise the page says booking opens soon. Pure and tested (tests/checkout.test.js), so it can move to a server unchanged.
+ * Real-money checkout on the Advertise page (advertise.html): a billboard booking or a support tier is paid with PayPal Checkout buttons right on
+ * the page (PayPal, or a debit or credit card), into the owner's PayPal Business account (data/sponsors.js PAYPAL). The game never touches the
+ * money, and Prairie Dollars never change hands. The ad travels with the payment (item name and description, the website and the run dates), so
+ * the owner reviews it in PayPal before adding it to SPONSORED, and refunds it if it can't run. The amount is set on the page, so the owner also
+ * checks that the amount paid matches the tier (README "Owner: turning on payments").
+ * Until PAYPAL.clientId is set, a booking can go out by email instead (CONTACT_URL as a mailto:), and otherwise the page says booking opens soon.
+ * Pure and tested (tests/checkout.test.js).
  */
 import { BOARD_BY_ID, THEMES } from '../data/billboards.js';
 import { SPONSOR_TIERS, SUPPORT_TIERS } from '../data/sponsors.js';
@@ -12,16 +15,19 @@ import { moderate } from './ads.js';
 const own = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL = /^[^\s@<>"']{1,64}@[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
-const SHOP = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
-const VARIANT = /^\d{6,20}$/;
+const CLIENT_ID = /^[A-Za-z0-9_-]{20,128}$/;
 const clean = (s, max) => (typeof s === 'string' ? s.replace(/\s+/g, ' ').trim().slice(0, max) : '');
+const cut = (s, max) => (s.length > max ? s.slice(0, max - 1) + '…' : s);   // PayPal's text fields take 127 characters
 const addDays = (d, n) => new Date(Date.parse(d + 'T12:00:00Z') + n * 86400e3).toISOString().slice(0, 10);
 
 /** The price tier of a board: { id, name, cad }. */
 export const boardTier = (boardId) => (own(BOARD_BY_ID, boardId) ? SPONSOR_TIERS.find((t) => t.id === BOARD_BY_ID[boardId].adTier) ?? null : null);
-
-/** Is checkout set up for this product? kind 'ads' (tier id) or 'support' (tier id). */
-export const checkoutReady = (cfg, kind, id) => !!cfg && SHOP.test(cfg.shop ?? '') && VARIANT.test(String(cfg[kind]?.[id] ?? ''));
+/** Are the PayPal buttons set up? */
+export const paypalReady = (cfg) => !!cfg && CLIENT_ID.test(cfg.clientId ?? '') && cfg.currency === 'CAD';
+/** The PayPal JavaScript SDK for this site (loaded only on the Advertise page, only when set up). */
+export const paypalSdkUrl = (cfg) => (paypalReady(cfg) ? `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(cfg.clientId)}&currency=CAD&intent=capture&components=buttons` : null);
+/** Dollars as PayPal wants them: '10.00'. */
+export const money = (cad) => (Math.round(cad * 100) / 100).toFixed(2);
 
 /**
  * Check a billboard booking from the form. `today` = Regina date YYYY-MM-DD. Returns { ok, errors: { field: message }, booking }.
@@ -39,21 +45,20 @@ export function validateBooking(f, today) {
   return { ok: !Object.keys(e).length, errors: e, booking: Object.keys(e).length ? null : b };
 }
 
-/** Base64url of a UTF-8 JSON object (what Shopify cart permalinks take for line-item properties). */
-export function b64url(obj) {
-  const bytes = new TextEncoder().encode(JSON.stringify(obj)); let bin = ''; for (const x of bytes) bin += String.fromCharCode(x);
-  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-const cartLink = (shop, variant, email, props) => {
-  const q = new URLSearchParams(); if (email) q.set('checkout[email]', email); q.set('properties', b64url(props)); q.set('ref', 'regina-life');
-  const url = `https://${shop}/cart/${variant}:1?${q.toString()}`; return url.length <= 2048 ? url : null;
-};
-
-/** The Shopify checkout link for a validated booking, or null if checkout is not set up. */
-export function adCheckoutUrl(cfg, booking) {
-  if (!booking?.tier || !checkoutReady(cfg, 'ads', booking.tier.id)) return null;
-  return cartLink(cfg.shop, cfg.ads[booking.tier.id], booking.email, { Board: `${BOARD_BY_ID[booking.board].name} (${booking.board})`, Business: booking.business, 'Ad line': booking.text,
-    Website: booking.url, Colours: booking.theme, Runs: `${booking.start} to ${booking.end}`, 'Founding badge': booking.founding ? 'Yes' : 'No' });
+/** One PayPal order (v2 Orders API shape) for one item, with the details the owner needs to review it. */
+const order = (cad, item, unit) => ({
+  intent: 'CAPTURE',
+  purchase_units: [{ ...unit, amount: { currency_code: 'CAD', value: money(cad), breakdown: { item_total: { currency_code: 'CAD', value: money(cad) } } },
+    items: [{ ...item, quantity: '1', category: 'DIGITAL_GOODS', unit_amount: { currency_code: 'CAD', value: money(cad) } }] }],
+  application_context: { brand_name: 'Regina Life', shipping_preference: 'NO_SHIPPING', user_action: 'PAY_NOW' },
+});
+/** The PayPal order for a validated booking. `ref` makes the invoice id unique (e.g. a timestamp). */
+export function adOrder(booking, ref = '') {
+  if (!booking?.tier) return null;
+  return order(booking.tier.cad,
+    { name: cut(`Billboard: ${BOARD_BY_ID[booking.board].name}, 7 days`, 127), description: cut(`"${booking.text}" for ${booking.business}`, 127), sku: `ad-${booking.board}`.slice(0, 127) },
+    { description: cut(`Runs ${booking.start} to ${booking.end} · ${booking.theme}${booking.founding ? ' · founding badge' : ''} · reply to ${booking.email}`, 127),
+      custom_id: cut(booking.url, 127), invoice_id: cut(`RL-AD-${booking.board}-${booking.start}-${ref}`, 127) });
 }
 
 /** Check a support pick: { tier, name (for the mural tiers), email }. */
@@ -63,10 +68,15 @@ export function validateSupport(f) {
   const email = clean(f?.email, 120); if (!EMAIL.test(email)) e.email = 'An email for your receipt.';
   return { ok: !Object.keys(e).length, errors: e, support: Object.keys(e).length ? null : { tier: t, name: t.mural ? name : '', email } };
 }
-export function supportCheckoutUrl(cfg, sup) {
-  if (!sup?.tier || !checkoutReady(cfg, 'support', sup.tier.id)) return null;
-  return cartLink(cfg.shop, cfg.support[sup.tier.id], sup.email, sup.tier.mural ? { 'Name on the mural': sup.name } : { Thanks: 'Regina Life supporter' });
+/** The PayPal order for a support tier. */
+export function supportOrder(sup, ref = '') {
+  if (!sup?.tier) return null;
+  return order(sup.tier.cad, { name: cut(`Regina Life: ${sup.tier.name}`, 127), description: cut(sup.tier.mural ? `Name on the mural: ${sup.name}` : 'Thank you for supporting Regina Life', 127), sku: `support-${sup.tier.id}` },
+    { description: cut(`Supporter · reply to ${sup.email}`, 127), invoice_id: cut(`RL-SUP-${sup.tier.id}-${ref}`, 127) });
 }
+
+/** Did PayPal capture what the tier costs? (A page-side check; the owner's review is the real one.) */
+export const paidInFull = (capture, cad) => capture?.status === 'COMPLETED' && (capture.purchase_units?.[0]?.payments?.captures ?? []).some((c) => c.status === 'COMPLETED' && c.amount?.currency_code === 'CAD' && c.amount?.value === money(cad));
 
 /** The fallback: the same booking as an email to the owner (a mailto: CONTACT_URL), or null. */
 export function bookingEmail(contact, booking) {

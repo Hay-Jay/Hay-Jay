@@ -20,7 +20,7 @@
   <main>
     <section class="adv-card adv-try" id="book">
       <h2>Book a billboard</h2>
-      <p class="muted">Type your ad and watch it on a board in the game, then book it and pay on a secure checkout page. A person reviews every ad before it goes live; if we can't run yours, you get a full refund.</p>
+      <p class="muted">Type your ad and watch it on a board in the game, then book it and pay right here with PayPal or a card. A person reviews every ad before it goes live; if we can't run yours, you get a full refund.</p>
       <div class="adv-try-grid">
         <div class="adv-board"><canvas id="adv-preview" width="768" height="384" aria-label="Billboard preview"></canvas><i class="adv-pole l"></i><i class="adv-pole r"></i></div>
         <form id="adv-form" class="adv-form" autocomplete="off">
@@ -34,6 +34,7 @@
           <div class="adv-row2"><label>Your email<input id="adv-email" type="email" maxlength="120" placeholder="you@yourbusiness.ca" autocomplete="email"></label>
           <label>Start date<input id="adv-start" type="date"></label></div>
           <div class="adv-total"><span id="adv-sum"></span><button id="adv-book" class="adv-btn" type="submit">Book and pay</button></div>
+          <div id="adv-pay" class="adv-pay" hidden></div>
           <p id="adv-book-note" class="muted small" role="status" aria-live="polite"></p>
         </form>
       </div>
@@ -48,7 +49,7 @@
     <section class="adv-card">
       <h2>How it works</h2>
       <ol class="adv-steps">
-        <li><b>Book it above.</b> Pick a board, write your line, add your link and pay on the secure checkout page. Your ad details travel with your order.</li>
+        <li><b>Book it above.</b> Pick a board, write your line, add your link and pay right here with PayPal or a debit or credit card. Your ad details travel with your payment.</li>
         <li><b>We review it</b> against the ad rules below, usually within two days. If we can't run it, we refund you in full.</li>
         <li><b>It goes live</b> for 7 days on your boards, labelled <em>Sponsored</em> with your website's name. Players who tap it see a "you're leaving the game" screen first.</li>
       </ol>
@@ -83,7 +84,8 @@
         <h3 id="sup-title"></h3>
         <label id="sup-name-l">Name for the mural (up to 40 characters)<input id="sup-name" maxlength="40" placeholder="Your name or a nickname"></label>
         <label>Your email (for the receipt)<input id="sup-email" type="email" maxlength="120" autocomplete="email" placeholder="you@example.ca"></label>
-        <div class="adv-total"><span id="sup-sum"></span><button class="adv-btn alt" type="submit">Continue to checkout</button></div>
+        <div class="adv-total"><span id="sup-sum"></span><button class="adv-btn alt" type="submit">Continue to payment</button></div>
+        <div id="sup-pay" class="adv-pay" hidden></div>
         <p id="sup-note" class="muted small" role="status" aria-live="polite"></p>
       </form>
       <div id="adv-mural" class="adv-mural"></div>

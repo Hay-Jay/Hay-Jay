@@ -130,7 +130,7 @@ describe('billboard tier ladder', () => {
     }
   });
   it('real-money advertiser benchmarks are CA$25 / CA$50 / CA$100 per week and stay disabled', () => {
-    expect(AD_TIER_ORDER.map((id) => AD_TIERS[id].realMoney.cents)).toEqual([2500, 5000, 10000]);
+    expect(AD_TIER_ORDER.map((id) => AD_TIERS[id].realMoney.cents)).toEqual([1000, 2000, 4000]);   // the owner's founding prices (October 2026)
     for (const x of Object.values(AD_TIERS)) { expect(x.realMoney.currency).toBe('CAD'); expect(x.realMoney.enabled).toBe(false); }
   });
   it('standard is about one normal entry-level week, big a few weeks, landmark takes months of saving', () => {

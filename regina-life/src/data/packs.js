@@ -9,7 +9,7 @@
  *  - no pay-to-win: Prairie Dollars only buy things earnable for free (furniture, clothes, trips, billboards); packs add
  *    no items, XP, skills, wages or exclusive content;
  *  - never undercuts a real advertiser: even at the best pack rate, a billboard costs at least its real-money price in CAD
- *    (standard CA$25+, big CA$50+, landmark CA$100+ — see AD_TIERS[...].realMoney).
+ *    (standard CA$10+, big CA$20+, landmark CA$40+ — see AD_TIERS[...].realMoney).
  * amount = cents of Prairie Dollars credited; priceCad = cents of Canadian dollars charged.
  */
 export const PACKS_ENABLED = false;

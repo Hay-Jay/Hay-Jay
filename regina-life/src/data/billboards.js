@@ -12,13 +12,13 @@ export const AD_DAYS = 7;
 export const AD_TIER_ORDER = ['standard', 'big', 'landmark'];
 export const AD_TIERS = {
   standard: { id: 'standard', name: 'Standard board', blurb: 'Roadside boards in the neighbourhoods and on side streets.', size: { w: 10.5, h: 5.25, label: '10.5 × 5.25 m' },
-    price: 120000, days: AD_DAYS, maxRotation: 4, realMoney: { currency: 'CAD', cents: 2500, enabled: false },
+    price: 120000, days: AD_DAYS, maxRotation: 4, realMoney: { currency: 'CAD', cents: 1000, enabled: false },
     placement: { sizeClass: 'standard', minTraffic: 0, maxTraffic: 2099, text: 'Standard-size boards with under 2,100 passers-by a day' } },
   big: { id: 'big', name: 'Big board', blurb: 'Large screens on the arterial roads into the city.', size: { w: 15, h: 7.5, label: '15 × 7.5 m' },
-    price: 300000, days: AD_DAYS, maxRotation: 3, realMoney: { currency: 'CAD', cents: 5000, enabled: false },
+    price: 300000, days: AD_DAYS, maxRotation: 3, realMoney: { currency: 'CAD', cents: 2000, enabled: false },
     placement: { sizeClass: 'mega', minTraffic: 2100, maxTraffic: 2799, text: 'Large boards with 2,100-2,799 passers-by a day' } },
   landmark: { id: 'landmark', name: 'Landmark board', blurb: 'The most-seen sites in Regina: the downtown gateway and the stadium.', size: { w: 15, h: 7.5, label: '15 × 7.5 m, prime site' },
-    price: 1000000, days: AD_DAYS, maxRotation: 2, realMoney: { currency: 'CAD', cents: 10000, enabled: false },
+    price: 1000000, days: AD_DAYS, maxRotation: 2, realMoney: { currency: 'CAD', cents: 4000, enabled: false },
     placement: { sizeClass: 'mega', minTraffic: 2800, maxTraffic: 1e9, text: 'Large boards at city landmarks (2,800+ passers-by a day)' } },
 };
 /** Does `board` satisfy a tier's placement rule? (sizeClass is the physical `tier` of the board: 'standard' | 'mega'.) */

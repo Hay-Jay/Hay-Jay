@@ -153,21 +153,23 @@ pages say "opens soon". Rows are validated (`core/sponsors.js`, tested): a bad r
   tested): money's tight 22%, getting by 45%, comfortable 24%, well-off 7%, rich parents 2%. More money and things at the start comes with less of
   a skill head start. Well-off and rich starts get a short daily allowance; rich parents buy you the one-bedroom. A dice roll reveals it.
 * **Book a billboard for real** — tapping a free billboard in the game offers "Put your real business here", which opens the Advertise page
-  with that board picked. The page is a booking form with a live preview; "Book and pay" goes to the owner's Shopify checkout with the ad
-  attached to the order, and the Support section sells three supporter tiers the same way ([`src/core/checkout.js`](src/core/checkout.js), tested).
+  with that board picked. The page is a booking form with a live preview, and you pay right on the page with **PayPal or a debit or credit card**
+  (PayPal Checkout buttons). The Support section sells three supporter tiers the same way ([`src/core/checkout.js`](src/core/checkout.js), tested).
+  Founding prices: billboards CA$10 / 20 / 40 for 7 days; support CA$3 (coffee), CA$10 (name on the mural), CA$25 (founding supporter).
 
 ### Owner: turning on payments
 
-The game never handles money. Payments happen on your Shopify store's own checkout page:
+The game itself never handles money; payments go to your PayPal Business account through PayPal's own buttons on the Advertise page.
 
-1. In Shopify, create a product for each ad tier (Roadside board CA$25, Big board CA$50, Landmark board CA$100, each "7 days") and each support
-   tier (Coffee CA$5, Name on the mural CA$15, Founding supporter CA$50). Make them non-shipping, and make them available on the Online Store.
-2. Copy each product's **variant id** (the number in the variant's admin URL) into `CHECKOUT` in [`src/data/sponsors.js`](src/data/sponsors.js),
-   with your store's domain as `shop`, and push to `main`.
-3. Each order carries the ad (board, business, line, website, colours, dates) or the mural name as line-item properties. Review the ad; if it
-   passes, add a row to `SPONSORED` (or a name to `SUPPORTERS`) and push; if not, refund it.
+1. Open a free **PayPal Business** account (paypal.com/ca/business) if you don't have one.
+2. At **developer.paypal.com**, log in, open **Apps & Credentials**, switch to **Live**, create an app, and copy its **Client ID** (it is public
+   by design; never share the Secret).
+3. Paste it into `PAYPAL.clientId` in [`src/data/sponsors.js`](src/data/sponsors.js) and push to `main`. The payment buttons appear on the next deploy.
+4. Each payment carries the ad in PayPal: the item name (board), the item description (the line and the business), the custom field (the
+   website), the note (run dates, colours, reply-to email). Check that the amount matches the tier, review the ad, then add a row to `SPONSORED`
+   (or a name to `SUPPORTERS`) and push. If the ad can't run, refund it in PayPal.
 
-Until `CHECKOUT` is filled in, "Book and pay" sends the booking by email when `CONTACT_URL` is a `mailto:` address, and otherwise says booking
+Until a Client ID is set, "Book and pay" sends the booking by email when `CONTACT_URL` is a `mailto:` address, and otherwise says booking
 opens soon.
 
 ## Economy & anti-exploit (important)
