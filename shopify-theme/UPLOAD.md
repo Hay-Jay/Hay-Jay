@@ -36,6 +36,16 @@ Preview it here: https://monochrome.com.ng/?preview_theme_id=189818077438
 - **Magazine pop-up:** now a small corner card on desktop and a slim bottom bar on phones. It never shows on the home page, shop, product, bag or lookbook pages.
 - **Copy:** about half the words or fewer on every page. The shipping copy matches the store's rates: free standard shipping in Canada over $200 and in the US over $100. The returns copy says exchanges.
 
+**Added on 31 October (round 2):**
+- **Home intro "Top Secret File":** a 3-second opening on the home page. A TOP SECRET folder appears, its redactions burn off, DECLASSIFIED is stamped on it, and the cover flips open onto the site.
+  - It plays once per visit; any tap or key skips it.
+  - It never plays in the theme editor, and visitors who prefer reduced motion get a quick fade instead.
+  - Turn it off in Customize → Theme settings → Intro.
+  - The other two concepts (vault, identity check) are in marketing/loaders/.
+- **"Most Wanted" on the home page:** 4 products shown as wanted posters, instead of the 8-product grid. Pick them in Customize → Most wanted.
+- **Restricted-access category tiles:** the redaction bars lift away on hover, on tap, or as the tile scrolls into view.
+- **Lookbook strip:** a surveillance-camera look.
+
 **To publish:** Online Store → Themes → "MONOCHROME Classified - shop-first (preview)" → ⋯ → Publish. The current theme moves to the library, so going back is one click (⋯ → Publish on it).
 
 **Don't change the live theme in Customize before publishing.** The preview is a copy taken on 29 October, so later changes to the live theme won't carry over.
