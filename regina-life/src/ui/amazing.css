@@ -214,3 +214,36 @@ body.shell-on.touch-mode #hud .needs span{font-size:12px}
 .cam-poses::-webkit-scrollbar{display:none}
 .cam-poses button{flex:none;border:0;border-radius:999px;padding:8px 13px;background:rgba(18,32,42,.55);color:#fff;font:700 13px var(--body);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
 .cam-poses button.on{background:#2fbf7a}
+/* the creator's You tab (core/profile.js) */
+.panel.char .chips-sel button small{opacity:.65;font-weight:600;margin-left:2px}
+.you-note{margin:8px 0 2px;padding:8px 12px;border-radius:12px;background:#eef6f0;color:#245c3c;font:600 12.5px/1.4 var(--body)}
+.dream-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.dream-pick button{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;text-align:left;border:0;border-radius:14px;padding:10px 12px;background:#f1f4f6;color:var(--c-ink);cursor:pointer;font:inherit}
+.dream-pick button span{grid-row:1/3;font-size:22px}
+.dream-pick button b{font:800 12.5px/1.2 var(--body)}
+.dream-pick button small{font:600 11px/1.3 var(--body);color:#5c6a73}
+.dream-pick button.on{background:#dff5e8;box-shadow:inset 0 0 0 2px #2fbf7a}
+/* the family reveal (core/background.js) */
+#panels.on .panel.bg-panel{width:min(92vw,420px);text-align:center}
+.bg-roll .bg-dice{font-size:44px;animation:jDrop .6s var(--spring) both}
+.bg-slot{display:flex;align-items:center;justify-content:center;gap:10px;margin:14px auto 6px;padding:14px 18px;border-radius:16px;background:#f3f6f8;font:800 20px var(--head);min-height:64px}
+.bg-slot .bg-ic{font-size:30px}
+.bg-card .bg-big{font-size:58px;line-height:1;animation:jDrop .7s var(--spring) both}
+.bg-card .bg-odds{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;background:#eef0f3;color:#58626b;font:800 11px var(--body)}
+.bg-card h3{margin:8px 0 6px;font:800 24px var(--head)}
+.bg-card p{margin:0 0 10px;color:#44545f;font:600 14px/1.45 var(--body)}
+.bg-card h4{margin:8px 0 6px;text-align:left}
+.bg-gets{margin:0 0 8px;padding:0;list-style:none;text-align:left;display:grid;gap:6px}
+.bg-gets li{padding:8px 12px;border-radius:12px;background:#eef6f0;color:#1f4f34;font:700 13px/1.35 var(--body);animation:jRise .5s var(--spring) both}
+.bg-gets li:nth-child(2){animation-delay:.08s}.bg-gets li:nth-child(3){animation-delay:.16s}.bg-gets li:nth-child(4){animation-delay:.24s}.bg-gets li:nth-child(5){animation-delay:.32s}
+.bg-costs{padding:8px 12px;border-radius:12px;background:#fdf1e4;color:#8a4b12!important;font-size:13px!important;text-align:left}
+.bg-card.t-rich .bg-big,.bg-card.t-welloff .bg-big{filter:drop-shadow(0 6px 16px rgba(242,169,0,.55))}
+/* jobs that fit you, and your story in the Life app */
+.fit-tag{display:table;margin-top:5px;padding:3px 9px;border-radius:999px;background:#fff3cf;color:#8a5a00;font:800 11px var(--body)}
+.card.story h4{margin:0 0 4px}
+.card.story>p{margin:0 0 8px;font:700 13px var(--body);color:#44545f}
+.card.story .dream{margin:8px 0;display:grid;gap:4px}
+.card.story .dream small{color:#5c6a73;font:600 12px var(--body)}
+.card.story .dream .bar{height:8px;border-radius:999px;background:rgba(127,140,150,.28);overflow:hidden}
+.card.story .dream .bar i{display:block;height:100%;background:linear-gradient(90deg,#2fbf7a,#f2c43b);border-radius:999px}
+.story-tips{margin:4px 0 0;padding-left:0;list-style:none;display:grid;gap:6px;font:600 12.5px/1.4 var(--body)}

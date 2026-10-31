@@ -13,6 +13,8 @@ import { collectRent } from './core/lodger.js';
 import { bundledLook, bundleWeather, bundleGaps, dressedWarm } from './core/bundle.js';
 import { ACTIVITY_POSE, GIG_POSE } from './player/poses.js';
 import { homeLots, currentLot } from './core/homeLots.js';
+import { rollBackground, applyBackground, collectAllowance } from './core/background.js';
+import { INTERESTS, sanitizeProfile, interestHeadStart, claimDream, dreamStatus } from './core/profile.js';
 import { HOME_LOTS } from './data/homeLots.js';
 import { CRAFTS, marketOpen, craftPrice, makeCraft, sellCraft, sanitizeCrafts, STALL_DAILY_CAP } from './core/stall.js';
 import { RES_BY_ID } from './data/residents.js';
@@ -1097,13 +1099,21 @@ async function boot() {
     const off = () => camera.setViewOffset(innerWidth, innerHeight, innerWidth * (innerWidth > 760 ? 0.17 : 0), innerWidth > 760 ? 0 : innerHeight * 0.18, innerWidth, innerHeight);
     off();
     panels.characterPanel({ creator: true, onDone: () => {
-      showCreatorSet(false); const f = S().flags ||= {}; f.welcomed = true;
-      G.receiveMessage(store, 'dani', `Welcome to Regina, ${S().player.name}! 🌾 Grab groceries at the Market across Victoria Ave and check the Jobs app on your phone (press P).`, 20000);
-      G.receiveMessage(store, 'mom', 'Settled in? Remember to eat and stay warm. Love you!', 55000);
-      startPlay(); toast(`Welcome to Regina, ${S().player.name}!`, 'good');
-      if (pendingStart) { placeAt(pendingStart); rig.snapBehind(player.yaw); rig.snap(player); pendingStart = null; }
-      else goHome().then(() => player.gesture('wave', 1.6));   // a new life starts in your own bright little home, not on a street corner (playtests)
+      // the family you were born into is drawn now, like real life (core/background.js), and revealed before you step out
+      const tier = nextBackground ?? rollBackground(), skillsFrom = interestHeadStart(S().profile); nextBackground = null;
+      panels.backgroundReveal(tier, () => { applyBackground(store, tier, { skillsFrom }); beginLife(tier); });
     } });
+  };
+  let nextBackground = null;   // tests fix the next draw (__regina.setNextBackground) so a run is repeatable
+  /** After the creator and the family reveal: the welcome messages fit who you are, then your first day starts at home. */
+  const beginLife = (tier) => {
+    showCreatorSet(false); const f = S().flags ||= {}; f.welcomed = true;
+    const first = sanitizeProfile(S().profile).interests[0], idea = first ? ` You're into ${INTERESTS[first].name.toLowerCase()}, so: ${INTERESTS[first].tip}` : ' Grab groceries at the Market across Victoria Ave.';
+    G.receiveMessage(store, 'dani', `Welcome to Regina, ${S().player.name}! 🌾${idea} And check the Jobs app on your phone (press P).`, 20000);
+    G.receiveMessage(store, 'mom', ({ tight: 'So proud of you for going. Money is tight here, but call me any time and we will figure it out. ❤️', getting: 'Settled in? I packed some groceries in your bag. Remember to eat and stay warm. Love you!', comfortable: 'We put a little in your account for the move. Stay warm out there! Love you.', welloff: 'Your allowance is set up for the first two weeks. Make good choices! 😊', rich: 'Your father and I are so proud. The condo is all yours. Do try to eat real food, sweetheart.' })[tier] ?? 'Settled in? Remember to eat and stay warm. Love you!', 55000);
+    startPlay(); toast(`Welcome to Regina, ${S().player.name}!`, 'good');
+    if (pendingStart) { placeAt(pendingStart); rig.snapBehind(player.yaw); rig.snap(player); pendingStart = null; }
+    else goHome().then(() => player.gesture('wave', 1.6));   // a new life starts in your own bright little home, not on a street corner (playtests)
   };
   const hasLife = () => store.hasSave() && S().started;
   $('btn-new').onclick = () => {
@@ -1265,6 +1275,10 @@ async function boot() {
     phone.tick(); tickFirstDay(); if ((Date.now() / 1000 | 0) % 30 === 0) tellFestival();
     stall.visible = !inInterior && marketOpen(marketWhen());   // the Farmers' Market stall: Wednesdays and Saturdays, 9 to 1
     if ((Date.now() / 1000 | 0) % 10 === 0) { const rent = collectRent(store); if (rent) { juice.pay(rent, null, 'rent'); toast(`Rent from Robin, your lodger: +${fmtMoney(rent)}`, 'good'); } }
+    if ((Date.now() / 1000 | 0) % 10 === 5) {   // the family allowance (well-off and rich starts), and a dream that just came true
+      const al = collectAllowance(store); if (al) { juice.pay(al, null, 'from home'); toast(`💌 Allowance from home: +${fmtMoney(al)}`, 'good'); }
+      const dr = claimDream(store); if (dr) { const d = dreamStatus(S()); juice.confetti(120); audio.chime('fanfare'); player.gesture('cheer', 2); toast(`${d.icon} Dream come true: ${d.name}! +${fmtMoney(dr)}`, 'good'); }
+    }
   }, 1000);
   setInterval(() => { if (gameMode === 'play') { phone.tick(); } }, 30000);
   setInterval(() => {   // the soundscape follows where you are, the hour, the season and the real wind
@@ -1358,7 +1372,7 @@ async function boot() {
     dbg: () => ({ mapOpen, mapOverview, camMode, creator, fading, homeView, inInterior, gameMode, panelsOpen: panels.open, phoneOpen: phone.isOpen, building: build.active, pos: [player.pos.x, player.pos.z], disableEvents: S().flags?.disableEvents, nCity: city.interactables.length, near: city.interactables.map((it) => [it.id, Math.round(Math.hypot(it.x - player.pos.x, it.z - player.pos.z)), it.radius, typeof it.enabled]).filter((r) => r[1] < 25) }),
     radio, build, SOC, POL, fullMap: () => fullMap, openMap2D: () => openFullMap(), closeMap2D: () => closeMap(), ovHub, goTab, get homeView() { return homeView; }, get mapOverview() { return mapOverview; },
     hub, startAt: (id) => { hub.select(id); }, showEvent, news: () => ctx.news(),
-    tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,
+    tp: (x, z) => { player.teleport(x, z); rig.snap(player); }, setNextBackground: (id) => { nextBackground = id; }, setWeather: (w) => { weather = { ...weather, ...w }; updateEnv(true); }, qLevel: () => qLevel, setQuality,
     skipTitle: () => { $('btn-continue').style.display === 'none' ? newLife() : $('btn-continue').click(); },
   };
 }

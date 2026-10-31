@@ -1,4 +1,6 @@
 import { FOOD, CLOTHES, SLOTS, SLOT_KEY, SKIN_TONES, HAIR_COLORS, EYE_COLORS, HAIR_STYLES, FACE_SHAPES, BODY_TYPES, FACIAL_HAIR, EXPRESSIONS, STORE_STOCK, ITEM_NAME } from '../data/catalog.js';
+import { GENDERS, GENDER_LOOKS, INTERESTS, PERSONALITIES, DREAMS, MAX_INTERESTS, sanitizeProfile, toggleInterest } from '../core/profile.js';
+import { BACKGROUNDS, BACKGROUND_BY_ID, backgroundOdds } from '../core/background.js';
 import { RECIPES } from '../core/game.js';
 import { fmtMoney } from '../core/ledger.js';
 import { ICON } from './icons.js';
@@ -153,13 +155,21 @@ export class Panels {
   characterPanel({ creator = false, onDone } = {}) {
     const { store, G } = this.ctx; const look = store.state.player.look;
     const groups = creator
-      ? [['Face', 'face'], ['Hair', 'hair'], ['Body', 'body'], ['Outfit', 'outfit']]
+      ? [['You', 'you'], ['Face', 'face'], ['Hair', 'hair'], ['Body', 'body'], ['Outfit', 'outfit']]
       : [['Outfit', 'outfit']];
     let tab = groups[0][1];
     const sw = (arr, key, isIdx = true) => `<div class="swatches">${arr.map((c, i) => `<button class="sw ${look[key] === (isIdx ? i : c) ? 'on' : ''}" style="background:${c}" data-k="${key}" data-v="${isIdx ? i : c}" aria-label="${key} ${i + 1}"></button>`).join('')}</div>`;
     const chips = (arr, key) => `<div class="chips-sel">${arr.map((c) => `<button class="${look[key] === c ? 'on' : ''}" data-k="${key}" data-v="${c}">${esc(c.replace('-', ' '))}</button>`).join('')}</div>`;
     const body = () => {
       const s = store.state;
+      if (tab === 'you') {   // who you are (core/profile.js): it shapes what fits you, not what you are allowed to do
+        const pr = sanitizeProfile(s.profile), g = s.player.gender, pers = pr.personality ? PERSONALITIES[pr.personality] : null;
+        return `<h4>I am</h4><div class="chips-sel">${Object.entries(GENDERS).map(([id, x]) => `<button class="${g === id ? 'on' : ''}" data-gender="${id}">${x.name} <small>${x.pronouns}</small></button>`).join('')}</div>
+          <h4>Into <small class="muted">· pick up to ${MAX_INTERESTS}</small></h4><div class="chips-sel">${Object.entries(INTERESTS).map(([id, x]) => `<button class="${pr.interests.includes(id) ? 'on' : ''}" data-interest="${id}">${x.icon} ${x.name}</button>`).join('')}</div>
+          <h4>Personality</h4><div class="chips-sel">${Object.entries(PERSONALITIES).map(([id, x]) => `<button class="${pr.personality === id ? 'on' : ''}" data-personality="${id}">${x.icon} ${x.name}</button>`).join('')}</div>${pers ? `<p class="you-note">${pers.icon} ${esc(pers.blurb)}</p>` : ''}
+          <h4>Your dream</h4><div class="dream-pick">${Object.entries(DREAMS).map(([id, x]) => `<button class="${pr.dream === id ? 'on' : ''}" data-dream="${id}"><span>${x.icon}</span><b>${x.name}</b><small>${x.goal}</small></button>`).join('')}</div>
+          <p class="you-note">Your family background is drawn at random when you start, like real life: most people get by, and rich parents are rare.</p>`;
+      }
       if (tab === 'face') return `<h4>Skin tone</h4>${sw(SKIN_TONES, 'skin')}<h4>Face shape</h4>${chips(FACE_SHAPES, 'face')}<h4>Eye colour</h4>${sw(EYE_COLORS, 'eyes')}<h4>Expression</h4>${chips(EXPRESSIONS, 'expression')}<h4>Facial hair</h4>${chips(FACIAL_HAIR, 'facialHair')}`;
       if (tab === 'hair') return `<h4>Style</h4>${chips(HAIR_STYLES, 'hair')}<h4>Colour</h4>${sw(HAIR_COLORS, 'hairColor')}`;
       if (tab === 'body') return `<h4>Build</h4>${chips(BODY_TYPES, 'body')}<h4>Height</h4><input type="range" min="0.92" max="1.08" step="0.01" value="${look.height}" data-h aria-label="Height"><small class="muted">${Math.round(175 * look.height)} cm</small>`;
@@ -177,16 +187,48 @@ export class Panels {
     p.addEventListener('click', (e) => {
       if (e.target.closest('[data-x]')) return this.close();
       const t = e.target.closest('[data-tab]'); if (t) { tab = t.dataset.tab; render(); return; }
+      const gd = e.target.closest('[data-gender]');
+      if (gd) {   // a starting look to go with it (hair, build, facial hair); every style stays open on the other tabs
+        const id = gd.dataset.gender, L = GENDER_LOOKS[id], pick = (a) => a[Math.floor(Math.random() * a.length)];
+        if (store.state.player.gender !== id) { Object.assign(look, { hair: pick(L.hair), facialHair: pick(L.facialHair), body: pick(L.body) }); this.ctx.rebuildPlayer(); }
+        store.state.player.gender = id; store.commit('look'); render(); return;
+      }
+      const it = e.target.closest('[data-interest]'); if (it) { const pr = sanitizeProfile(store.state.profile); const next = toggleInterest(pr, it.dataset.interest); if (next.length === pr.interests.length && !pr.interests.includes(it.dataset.interest)) this.ctx.toast(`Pick up to ${MAX_INTERESTS}: tap one to swap it out.`, 'info'); store.state.profile = { ...pr, interests: next }; render(); return; }
+      const ps = e.target.closest('[data-personality]'); if (ps) { store.state.profile = { ...sanitizeProfile(store.state.profile), personality: ps.dataset.personality }; render(); return; }
+      const dr = e.target.closest('[data-dream]'); if (dr) { store.state.profile = { ...sanitizeProfile(store.state.profile), dream: dr.dataset.dream }; render(); return; }
       const k = e.target.closest('[data-k]'); if (k) { const v = k.dataset.v; look[k.dataset.k] = /^\d+$/.test(v) ? +v : v; this.ctx.rebuildPlayer(); render(); store.commit('look'); return; }
       const cl = e.target.closest('[data-cloth]'); if (cl) { G.equip(store, cl.dataset.cloth); this.ctx.rebuildPlayer(); render(); return; }
       if (e.target.closest('[data-rand]')) {
-        const pick = (a) => a[Math.floor(Math.random() * a.length)];
-        Object.assign(look, { skin: Math.floor(Math.random() * SKIN_TONES.length), hair: pick(HAIR_STYLES), hairColor: Math.floor(Math.random() * HAIR_COLORS.length), eyes: Math.floor(Math.random() * EYE_COLORS.length), face: pick(FACE_SHAPES), body: pick(BODY_TYPES), facialHair: pick(FACIAL_HAIR), expression: pick(['neutral', 'smile', 'smile']), height: 0.95 + Math.random() * 0.1 });
+        const pick = (a) => a[Math.floor(Math.random() * a.length)], L = GENDER_LOOKS[store.state.player.gender];
+        Object.assign(look, { skin: Math.floor(Math.random() * SKIN_TONES.length), hair: pick(L?.hair ?? HAIR_STYLES), hairColor: Math.floor(Math.random() * HAIR_COLORS.length), eyes: Math.floor(Math.random() * EYE_COLORS.length), face: pick(FACE_SHAPES), body: pick(L?.body ?? BODY_TYPES), facialHair: pick(L?.facialHair ?? FACIAL_HAIR), expression: pick(['neutral', 'smile', 'smile']), height: 0.95 + Math.random() * 0.1 });
         this.ctx.rebuildPlayer(); render(); return;
       }
       if (e.target.closest('[data-done]')) { const nm = p.querySelector('[data-name]').value.trim() || 'Alex'; store.state.player.name = nm.slice(0, 16); this.close(); }
     });
     p.addEventListener('input', (e) => { if (e.target.dataset.h !== undefined) { look.height = +e.target.value; cancelAnimationFrame(rafH); rafH = requestAnimationFrame(() => this.ctx.rebuildPlayer()); } });
+  }
+
+  /**
+   * The family you were born into (core/background.js): a short roll through the possibilities, then where you landed, the odds, what it gives
+   * you and what it costs you. `onDone` starts the life.
+   */
+  backgroundReveal(tierId, onDone) {
+    const b = BACKGROUND_BY_ID[tierId]; if (!b) { onDone?.(); return; }
+    const p = this._show(`<div class="bg-roll"><div class="bg-dice" aria-hidden="true">🎲</div><h3>Your family</h3><div class="bg-slot"><span class="bg-ic">${BACKGROUNDS[0].icon}</span><b>${esc(BACKGROUNDS[0].name)}</b></div><p class="muted">Rolling the dice on the family you were born into…</p></div>`, 'menu bg-panel', { dismissable: false });
+    const slot = p.querySelector('.bg-slot'); let i = 0, delay = 70; const reduce = matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    const land = () => {
+      const odds = backgroundOdds(b.id);
+      p.innerHTML = `<div class="bg-card t-${b.id}"><div class="bg-big">${b.icon}</div><small class="bg-odds">${odds}% of people start here</small><h3>${esc(b.name)}</h3><p>${esc(b.story)}</p>
+        <h4>You start with</h4><ul class="bg-gets">${b.gets.map((g) => `<li>${esc(g)}</li>`).join('')}</ul>${b.costs ? `<p class="bg-costs">The catch: ${esc(b.costs)}</p>` : ''}
+        <div class="pbtns"><button class="btn primary wide" data-go>Start my life in Regina</button></div></div>`;
+      this.ctx.audio?.chime?.(b.weight <= 7 ? 'fanfare' : 'gain'); if (b.weight <= 7) this.ctx.fx?.juice?.confetti?.(b.id === 'rich' ? 110 : 60);
+      p.querySelector('[data-go]').onclick = () => { this.close(); onDone?.(); };
+    };
+    const spin = () => {   // slows down like a wheel, then lands on the result
+      const x = BACKGROUNDS[i++ % BACKGROUNDS.length]; slot.innerHTML = `<span class="bg-ic">${x.icon}</span><b>${esc(x.name)}</b>`; this.ctx.audio?.blip?.('tick');
+      delay *= 1.16; if (delay > 420) { setTimeout(land, 380); return; } setTimeout(spin, delay);
+    };
+    if (reduce) land(); else setTimeout(spin, 300);
   }
 
   /** Furniture catalogue: buy (and sell unplaced pieces). */

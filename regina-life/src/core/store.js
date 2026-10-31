@@ -9,7 +9,8 @@ export const SAVE_VERSION = 1;
 export function freshState(now = Date.now()) {
   return {
     v: SAVE_VERSION, created: now, started: false,
-    player: { name: 'Alex', look: { ...DEFAULT_LOOK } },
+    player: { name: 'Alex', look: { ...DEFAULT_LOOK }, gender: null },
+    profile: { interests: [], personality: null, dream: null, dreamDone: false }, background: null,
     wardrobe: [...STARTER_WARDROBE],
     bank: { balance: STARTING_BALANCE, history: [] },
     inventory: {},
