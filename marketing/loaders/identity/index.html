@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MONOCHROME loader — Identity Check</title>
+<!-- Prototype page. Everything between SNIPPET START and SNIPPET END is the loader (theme file: mc-loader-identity.liquid).
+     The page behind it is a screenshot of the new home page. Add ?replay to the URL, or use the Replay button, to see it again. -->
+<link rel="preload" href="../../../shopify-theme/theme/assets/mc-font-stardos-stencil-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../../shopify-theme/theme/assets/mc-font-courier-prime-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../../shopify-theme/theme/assets/mc-font-big-shoulders-display.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:100 900;font-display:swap;src:url(../../../shopify-theme/theme/assets/mc-font-big-shoulders-display.woff2) format('woff2')}
+@font-face{font-family:'Courier Prime';font-style:normal;font-weight:400;font-display:swap;src:url(../../../shopify-theme/theme/assets/mc-font-courier-prime-400.woff2) format('woff2')}
+@font-face{font-family:'Courier Prime';font-style:normal;font-weight:700;font-display:swap;src:url(../../../shopify-theme/theme/assets/mc-font-courier-prime-700.woff2) format('woff2')}
+@font-face{font-family:'Special Elite';font-style:normal;font-weight:400;font-display:swap;src:url(../../../shopify-theme/theme/assets/mc-font-special-elite-400.woff2) format('woff2')}
+@font-face{font-family:'Stardos Stencil';font-style:normal;font-weight:700;font-display:swap;src:url(../../../shopify-theme/theme/assets/mc-font-stardos-stencil-700.woff2) format('woff2')}
+html,body{margin:0;background:#0d0d0d}
+.site img{display:block;width:100vw;height:100vh;height:100dvh;object-fit:cover;object-position:top center}
+.replay{position:fixed;left:12px;bottom:12px;z-index:5;min-height:44px;padding:0 16px;border:2px solid #0a0a0a;background:#f4f4f4;color:#0a0a0a;font:700 13px/1 'Courier Prime',monospace;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+.rec .replay{display:none}
+</style>
+<script>try{if(/replay/.test(location.search))sessionStorage.removeItem('mcl-seen')}catch(e){}if(/rec/.test(location.search))document.documentElement.classList.add('rec')</script>
+</head>
+<body>
+<!-- ===== SNIPPET START ===== -->
+<!--
+  MONOCHROME loader: IDENTITY CHECK. Render once, straight after <body>.
+  Plays once per session (sessionStorage), any tap / click / key / Skip jumps to the reveal,
+  no JS = no loader, reduced motion = a 300 ms fade. Animates transform + opacity only.
+-->
+<style>
+.mci{display:none;position:fixed;inset:0;z-index:2147483000;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;color:#e6e6e6;font:400 13px/1.5 "Courier Prime",monospace;letter-spacing:.08em;text-transform:uppercase;--e:min(76vmin,470px);--cy:40%;--red:#d81e1e;animation:mci-out .25s ease-in 2.78s both}
+.mcl-on .mci{display:block}
+.mci div,.mci i,.mci svg,.mci img{position:absolute}.mci i,.mci svg,.mci img{display:block}
+.mci-glow{top:0;bottom:0;left:20%;right:20%;opacity:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95) 50%,transparent);animation:mci-glow .8s ease-out 2s both}
+.mci-door{top:0;bottom:0;left:0;right:calc(50% - 1px);overflow:hidden;background:linear-gradient(#000,#000) right 18px top 0/3px 100% no-repeat,repeating-linear-gradient(-45deg,#e2e2e2 0 9px,#0b0b0b 9px 18px) right 0 top 0/18px 100% no-repeat,radial-gradient(circle,#6e6e6e 0 1.6px,#000 2.2px,transparent 2.8px) 22px 10px/12px 38px repeat-y,linear-gradient(90deg,rgba(255,255,255,.07),transparent 35%,rgba(255,255,255,.035) 70%,rgba(0,0,0,.45)),repeating-linear-gradient(0deg,transparent 0 calc(20% - 3px),#050505 calc(20% - 3px) calc(20% - 1px),rgba(255,255,255,.08) calc(20% - 1px) 20%),#161616;animation:mci-l .78s cubic-bezier(.6,0,.15,1) 2s both}
+.mci-r{left:calc(50% - 1px);right:0;background:linear-gradient(#000,#000) left 18px top 0/3px 100% no-repeat,repeating-linear-gradient(45deg,#e2e2e2 0 9px,#0b0b0b 9px 18px) left 0 top 0/18px 100% no-repeat,radial-gradient(circle,#6e6e6e 0 1.6px,#000 2.2px,transparent 2.8px) right 22px top 10px/12px 38px repeat-y,linear-gradient(270deg,rgba(255,255,255,.05),transparent 35%,rgba(255,255,255,.035) 70%,rgba(0,0,0,.45)),repeating-linear-gradient(0deg,transparent 0 calc(20% - 3px),#050505 calc(20% - 3px) calc(20% - 1px),rgba(255,255,255,.08) calc(20% - 1px) 20%),#161616;animation-name:mci-r}
+.mci-r .mci-in{left:-100%}
+.mci-in{top:0;bottom:0;left:0;width:200%}
+.mci-s{inset:0;animation:mci-sh .3s 1.76s,mci-sh .16s 2s}
+.mci-c{left:50%;top:var(--cy);width:var(--e);height:var(--e);margin:calc(var(--e)/-2) 0 0 calc(var(--e)/-2);border-radius:50%}
+.mci-hs{background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),radial-gradient(circle,#101010 55%,#050505 70%);box-shadow:0 0 0 calc(var(--e)*.012) #0a0a0a,0 0 0 calc(var(--e)*.03) #9a9a9a,0 0 0 calc(var(--e)*.036) #0a0a0a,0 0 calc(var(--e)*.1) rgba(0,0,0,.9)}
+.mci-hud{animation:mci-boot .35s cubic-bezier(.2,.9,.3,1.2) .05s both}
+.mci-r1{animation:mci-rot 3s linear both}
+.mci-r2{animation:mci-rot 3s linear reverse both}
+.mci-br{left:50%;top:var(--cy);width:calc(var(--e)*.64);height:calc(var(--e)*.46);margin:calc(var(--e)*-.23) 0 0 calc(var(--e)*-.32);--b:linear-gradient(#f2f2f2,#f2f2f2);background:var(--b) 0 0/22px 2px,var(--b) 0 0/2px 22px,var(--b) 100% 0/22px 2px,var(--b) 100% 0/2px 22px,var(--b) 0 100%/22px 2px,var(--b) 0 100%/2px 22px,var(--b) 100% 100%/22px 2px,var(--b) 100% 100%/2px 22px;background-repeat:no-repeat;animation:mci-br 1.5s ease-out .1s both}
+.mci-eye{animation:mci-open .34s cubic-bezier(.3,1.4,.5,1) .28s both}
+.mci-ir{left:33%;top:33%;width:34%;height:34%;animation:mci-rot 3s linear both}
+.mci-pu{left:43.2%;top:43.2%;width:13.6%;height:13.6%;border-radius:50%;background:radial-gradient(circle at 38% 34%,#3a3a3a 0 8%,#000 12%);box-shadow:0 0 0 1px #000;animation:mci-pupil .9s ease-in-out .7s both}
+.mci-gl{left:44.6%;top:40.6%;width:4.4%;height:3.4%;border-radius:50%;background:#fff;opacity:.85}
+.mci-ln{left:12%;right:12%;top:27%;height:2px;background:#fff;box-shadow:0 0 10px 2px rgba(255,255,255,.8),0 -24px 26px rgba(255,255,255,.12);opacity:0;animation:mci-scan .9s ease-in-out .5s both}
+.mci .mci-rd{left:50%;top:calc(var(--cy) + var(--e)*.56);width:min(330px,86vw);margin-left:max(-165px,-43vw);padding:12px 16px;background:#0b0b0b;border:1px solid #3a3a3a;box-shadow:0 10px 30px rgba(0,0,0,.6);animation:mci-in .3s .4s both}
+.mci .mci-rd p{position:relative;margin:0;white-space:pre}
+.mci-rd p span{animation:mci-in .01s var(--t) both}
+.mci-rd b{color:#fff}
+.mci .mci-n{position:static;display:inline-block;height:1.5em;overflow:hidden;vertical-align:top;animation:mci-in .01s 1.36s both}
+.mci .mci-n i{position:static;animation:mci-roll .34s steps(9) var(--t) both}
+.mci .mci-top{left:50%;top:max(5vh,26px);width:260px;margin-left:-130px;padding:10px 12px 8px;text-align:center;background:#0b0b0b;border:1px solid #3a3a3a;font-size:10px;letter-spacing:.2em;color:#9a9a9a;animation:mci-in .3s .1s both}
+.mci .mci-top img{position:static;width:190px;height:auto;margin:0 auto 6px;mix-blend-mode:screen}
+.mci-rec{display:inline-block;width:7px;height:7px;margin-right:8px;border-radius:50%;background:var(--red);vertical-align:1px;animation:mci-blink .5s steps(2) 6}
+.mci-st{left:50%;top:var(--cy);width:0;height:0}
+.mci-st span{position:absolute;left:0;top:0;transform:translate(-50%,-50%) rotate(-9deg);white-space:nowrap;padding:.32em .6em .26em;font:700 clamp(26px,9vw,52px)/1 "Stardos Stencil",Impact,sans-serif;letter-spacing:.08em;color:var(--red);border:.12em solid;border-radius:.12em;background:rgba(10,10,10,.55);box-shadow:inset 0 0 0 .08em rgba(10,10,10,.55),inset 0 0 0 .13em;-webkit-mask:var(--rough);mask:var(--rough);animation:mci-stamp .32s cubic-bezier(.2,.9,.25,1.05) 1.62s both}
+.mci-fx{inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 42%,transparent 50%,rgba(0,0,0,.6)),var(--grain);animation:mci-gone .4s 2.3s both}
+.mci-skip{position:absolute;right:16px;bottom:max(16px,env(safe-area-inset-bottom));min-width:76px;min-height:44px;padding:0 14px;border:1px solid rgba(255,255,255,.45);border-radius:0;background:rgba(0,0,0,.5);color:#eee;font:700 11px/1 "Courier Prime",monospace;text-transform:inherit;letter-spacing:.24em;cursor:pointer}
+@keyframes mci-out{to{opacity:0;visibility:hidden}}
+@keyframes mci-in{from{opacity:0}}
+@keyframes mci-gone{to{opacity:0}}
+@keyframes mci-blink{50%{opacity:0}}
+@keyframes mci-boot{from{opacity:0;transform:scale(.86)}}
+@keyframes mci-br{0%{opacity:0;transform:scale(1.35)}18%,90%{opacity:1;transform:none}95%{transform:scale(.86)}100%{transform:scale(.9)}}
+@keyframes mci-rot{to{transform:rotate(120deg)}}
+@keyframes mci-open{from{transform:scaleY(.03)}}
+@keyframes mci-pupil{0%{transform:none}25%{transform:scale(.62)}70%{transform:scale(.7)}100%{transform:scale(.82)}}
+@keyframes mci-scan{6%{opacity:1}50%{transform:translateY(calc(var(--e)*.46))}94%{opacity:1}100%{opacity:0;transform:none}}
+@keyframes mci-roll{to{transform:translateY(-13.5em)}}
+@keyframes mci-stamp{0%{opacity:0;transform:translate(-50%,-50%) rotate(-9deg) scale(2.6)}55%{opacity:1;transform:translate(-50%,-50%) rotate(-9deg) scale(.93)}78%{transform:translate(-50%,-50%) rotate(-9deg) scale(1.03)}}
+@keyframes mci-sh{10%{transform:translate(3px,4px)}30%{transform:translate(-3px,-2px)}55%{transform:translate(2px,1px)}80%{transform:translate(-1px,0)}}
+@keyframes mci-l{0%{transform:none}12%{transform:translateX(-9px)}20%{transform:translateX(-6px)}100%{transform:translateX(-102%)}}
+@keyframes mci-r{0%{transform:none}12%{transform:translateX(9px)}20%{transform:translateX(6px)}100%{transform:translateX(102%)}}
+@keyframes mci-glow{0%{opacity:0;transform:scaleX(.05)}20%{opacity:1;transform:scaleX(.3)}100%{opacity:0;transform:scaleX(1.6)}}
+@media (min-aspect-ratio:5/4){.mci{--cy:44%;--e:min(62vmin,480px)}.mci .mci-rd{top:calc(var(--cy) + var(--e)*.56);width:400px;margin-left:-200px;font-size:15px}.mci .mci-top{width:300px;margin-left:-150px;font-size:11px}.mci .mci-top img{width:240px}}
+@media (prefers-reduced-motion:reduce){.mci *,.mci ::before,.mci ::after{animation:none!important}.mci{animation:mci-out .3s ease-out both}}
+.mci{--rough:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 7 0 0 0 -2.05'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23r)'/%3E%3C/svg%3E");--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .3 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+</style>
+<div class="mci" id="mcl" aria-hidden="true">
+  <div class="mci-glow"></div>
+  <div class="mci-s">
+    <div class="mci-door mci-l"><div class="mci-in">
+      <div class="mci-top"><img src="../../../shopify-theme/theme/assets/mc-wordmark.webp" alt="" width="1170" height="114"><i class="mci-rec"></i>Identity check // Gate 07</div>
+      <div class="mci-c mci-hs"></div>
+      <div class="mci-c mci-hud">
+        <svg class="mci-c mci-r1" viewBox="-100 -100 200 200" style="left:0;top:0;margin:0"><circle r="96" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5" stroke-dasharray="1 4.03"/><path d="M0-100v12M0 100V88M-100 0h12M100 0H88" stroke="#fff" stroke-width="2"/></svg>
+        <svg class="mci-c mci-r2" viewBox="-100 -100 200 200" style="left:0;top:0;margin:0"><circle r="85" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="1.4" stroke-dasharray="70 18 8 18 40 20"/><path d="M-70 0h-14M70 0h14M0-56v-10M0 56v10" stroke="#fff" stroke-opacity=".5"/></svg>
+      </div>
+      <div class="mci-br"></div>
+      <div class="mci-c mci-eye">
+        <svg class="mci-c" viewBox="-100 -100 200 200" style="left:0;top:0;margin:0">
+          <defs><clipPath id="mciA"><path d="M-84 0Q0-66 84 0Q0 66-84 0Z"/></clipPath><radialGradient id="mciI"><stop offset=".2" stop-color="#1c1c1c"/><stop offset=".42" stop-color="#b4b4b4"/><stop offset=".7" stop-color="#6c6c6c"/><stop offset="1" stop-color="#222"/></radialGradient><radialGradient id="mciW"><stop offset=".3" stop-color="#3a3a3a"/><stop offset="1" stop-color="#0c0c0c"/></radialGradient></defs>
+          <path d="M-84 0Q0-66 84 0Q0 66-84 0Z" fill="url(#mciW)"/>
+          <g clip-path="url(#mciA)"><circle r="34" fill="url(#mciI)"/><circle r="34" fill="none" stroke="#000" stroke-width="3"/><circle r="35.5" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/></g>
+          <path d="M-84 0Q0-66 84 0Q0 66-84 0Z" fill="none" stroke="#f2f2f2" stroke-width="1.6"/>
+          <path d="M-98 0h10M88 0h10" stroke="#fff" stroke-width="1"/>
+        </svg>
+        <svg class="mci-ir" viewBox="-34 -34 68 68"><defs><clipPath id="mciB"><circle r="32.5"/></clipPath></defs><g clip-path="url(#mciB)" fill="none"><circle r="19" stroke="#efefef" stroke-opacity=".42" stroke-width="28" stroke-dasharray=".45 .95"/><circle r="23" stroke="#000" stroke-opacity=".55" stroke-width="16" stroke-dasharray=".35 1.7"/><circle r="12.5" stroke="#fff" stroke-opacity=".6" stroke-width="1.4" stroke-dasharray="2.2 1.3"/><circle r="27" stroke="#fff" stroke-opacity=".18" stroke-width="5" stroke-dasharray="6 3 2 4"/></g></svg>
+        <i class="mci-pu"></i><i class="mci-gl"></i>
+        <i class="mci-ln"></i>
+      </div>
+      <div class="mci-rd"><p data-t=".55">Agent ID ...... <b>MC-0719</b></p><p data-t=".85">Clearance ......... <b>L5</b></p><p data-t="1.12">Match ........ <b><i class="mci-n">9</i><i class="mci-n">9</i>.<i class="mci-n">7</i>%</b></p></div>
+      <div class="mci-st"><span>Access granted</span></div>
+    </div></div>
+    <div class="mci-door mci-r"></div>
+  </div>
+  <div class="mci-fx"></div>
+  <button class="mci-skip" type="button" tabindex="-1">Skip</button>
+</div>
+<script>
+(function(){
+  var d=document,h=d.documentElement,o=d.getElementById('mcl'),K='mcl-seen',R=2000,done=0,E=['pointerdown','keydown','wheel','touchstart'];
+  if(!o)return;
+  try{if(sessionStorage.getItem(K))return o.remove();sessionStorage.setItem(K,1)}catch(e){if(d.referrer.indexOf(location.host)>0)return o.remove()}
+  o.querySelectorAll('.mci-n').forEach(function(n,j){var v=+n.textContent,s='';for(var k=9;k>=0;k--)s+=(v-k+10)%10+'<br>';n.innerHTML='<i style="--t:'+(1.3+j*.07)+'s">'+s+'</i>'});
+  o.querySelectorAll('.mci-rd p').forEach(function(p){var t=+p.dataset.t,c=0;(function w(n){[].slice.call(n.childNodes).forEach(function(x){if(x.nodeType==3){var f=d.createDocumentFragment();x.textContent.split('').forEach(function(ch){var s=d.createElement('span');s.textContent=ch;s.style.setProperty('--t',(t+c++*.016).toFixed(3)+'s');f.appendChild(s)});x.replaceWith(f)}else if(!/mci-n/.test(x.className))w(x)})})(p)});
+  o.querySelector('.mci-r').appendChild(o.querySelector('.mci-in').cloneNode(true));
+  h.classList.add('mcl-on');
+  function off(){E.forEach(function(e){removeEventListener(e,skip,true)})}
+  function end(){if(done)return;done=1;off();h.classList.remove('mcl-on');o.remove();d.dispatchEvent(new CustomEvent('mcl:done'))}
+  function skip(){off();o.style.pointerEvents='none';if(!d.getAnimations)return end();d.getAnimations().forEach(function(a){if(/^mci/.test(a.animationName)&&a.currentTime<R){a.currentTime=R;a.playbackRate=1.4}})}
+  E.forEach(function(e){addEventListener(e,skip,{capture:true,passive:true})});
+  o.addEventListener('animationend',function(e){if(e.target==o)end()});
+  setTimeout(end,4500);
+})();
+</script>
+<!-- ===== SNIPPET END ===== -->
+<main class="site"><picture><source media="(min-width: 700px)" srcset="../bg/home-1440.png"><img src="../bg/home-390.png" alt="MONOCHROME home page (screenshot)"></picture></main>
+<button class="replay" type="button" onclick="try{sessionStorage.removeItem('mcl-seen')}catch(e){}location.reload()">Replay</button>
+</body>
+</html>

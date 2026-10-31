@@ -1,7 +1,7 @@
 {%- comment -%}
   Most wanted: the store's top sellers as Bureau "wanted" posters, ranked #01, #02... in the order picked in the theme editor (empty:
   the first available products of the Home page collection). Each poster: the rank and a WANTED stamp, the photo with a mugshot height
-  chart, the evidence tag, the name and a "last seen" line made of the price and the sizes; the whole poster is one link to the product.
+  chart, the name and a "last seen" line made of the price and the sizes; the whole poster is one link to the product.
   Quick add sits outside the link, exactly as on the product cards (snippets/mc-card): one variant adds in one tap, a size option opens
   the sizes (they slide up on hover on desktop, a sheet on phones); personalised and multi-option products open the product page.
   The root is .card so mc-cart.js treats it like any card (the stamp lands on the photo, the second photo loads on hover).
@@ -9,9 +9,6 @@
 {%- endcomment -%}
 {%- assign tk_pieces = '{pieces}' -%}
 {%- liquid
-  capture ord
-    render 'mc-order'
-  endcapture
   assign n_pieces = collections['all'].products_count
 
   # the picked products, in rank order. A product list gives products; a plain list of handles is looked up the same way.
@@ -70,9 +67,6 @@
           capture cls
             render 'mc-class', product: product
           endcapture
-          capture fno
-            render 'mc-fileno', product: product, order: ord
-          endcapture
           capture sz
             render 'mc-sizes', product: product, cls: cls, range: true
           endcapture
@@ -130,9 +124,8 @@
             <span class="card-ph wf-ph{% if is_ring %} zoom{% endif %}">
               {%- render 'mc-img', image: pic, alt: '', widths: ws, sizes: sz_attr -%}
               {%- if has2 %}<template class="ph2-t">{% render 'mc-img', image: pic2, alt: '', class: 'ph ph2', widths: ws, sizes: sz_attr %}</template>{% endif -%}
-              <i class="wf-hc" aria-hidden="true"><b>6'</b><b>5'</b><b>4'</b></i>
+              <i class="wf-hc" aria-hidden="true"><b data-m="6'"></b><b data-m="5'"></b><b data-m="4'"></b></i>
               <i class="card-vf" aria-hidden="true"></i>
-              <span class="card-tag" aria-hidden="true">{{ fno }}</span>
               {%- unless product.available %}<span class="stamp white card-oos" style="--r:-11deg" aria-hidden="true">Sold out</span>{% endunless -%}
             </span>
             <span class="wf-cap">
