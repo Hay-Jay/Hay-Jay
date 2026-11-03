@@ -10,6 +10,7 @@ Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian
 | 4 | Know the candidates | `videos/know-the-candidates.mp4` | Tinubu, Atiku and Obi side by side, why we need change, choose for yourself |
 | 5 | How to make your vote count | `videos/protect-your-vote.mp4` | PVC → polling unit → stay for the count → IReV |
 | 6 | Promise vs reality | `videos/promise-vs-reality.mp4` | 2022 promises vs 2026 data, shown with real news clippings, highlighted, with verdict stamps; includes what improved |
+| 7 | Fact-check: what the presidency said | `videos/fact-check.mp4` | Presidency claims rated FALSE / MISLEADING by FactCheckHub and Dubawa, claims rated TRUE, and fakes about the President not to share |
 
 - `stills/<video>-NN.png`: one 1080×1920 PNG per scene. Post them as an Instagram carousel or as Stories.
 - `index.html`: stats page with every video, a copy-caption button for each, and the full source list.

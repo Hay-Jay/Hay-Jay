@@ -49,7 +49,7 @@ const receipt = (id, { kind = 'real', label, t = .3, stamp, stampCls = '', tall,
   if (!c) return `<div class="card"><div class="body">[missing clipping: ${id}. Run node clip.mjs]</div></div>`;
   const onHead = c.marksOn === 'head';
   return `
-    <div class="a" data-a="up" data-t="${t - .2}"><span class="srcpill ${kind === 'prom' ? 'prom' : 'real'}">${label || (kind === 'prom' ? 'Promised' : 'Reality')} <span>${c.outlet} · ${fmtDate(c.date)}</span></span></div>
+    <div class="a" data-a="up" data-t="${t - .2}"><span class="srcpill ${kind === 'prom' || stampCls === 'green' ? 'prom' : 'real'}">${label || (kind === 'prom' ? 'Promised' : 'Reality')} <span>${c.outlet} · ${fmtDate(c.date)}</span></span></div>
     <div class="rcpt">
       <div class="paper head ${tall || onHead ? 'tall' : ''} a" data-a="up" data-t="${t}"><img src="assets/clips/${id}-head.png" alt="">${onHead ? marksHtml(c, t + .8) : ''}</div>
       ${onHead ? '' : `<div class="paper quote a" data-a="right" data-t="${t + .5}"><img src="assets/clips/${id}-quote.png" alt="">${marksHtml(c, t + 1.1)}</div>`}
@@ -60,6 +60,11 @@ const promiseCard = (text, src) => `
   <div class="a" data-a="up" data-t=".1"><span class="srcpill prom">Promised <span>${src}</span></span></div>
   <div class="gap"></div>
   <div class="h2 a" data-a="up" data-t=".3">“${text}”</div>`;
+
+const claimCard = (text, who, label = 'Claim') => `
+  <div class="a" data-a="up" data-t=".1"><span class="srcpill">${label} <span>${who}</span></span></div>
+  <div class="gap"></div>
+  <div class="h2 a" data-a="up" data-t=".3" style="font-size:88px">“${text}”</div>`;
 
 const sources = (items) => ({
   dur: 3.2,
@@ -385,6 +390,46 @@ window.VIDEOS = [
       ]),
     ],
   },
+  /* ------------------------------------------------------------------ */
+  {
+    id: 'fact-check',
+    title: '7 · Fact-check: what the presidency said',
+    caption: '"$30 billion in foreign investment." "Ways and Means debt cleared." Independent fact-checkers looked at the presidency\'s claims: here are the verdicts, the ones that were TRUE, and fakes about the President you should not share either. 🇳🇬 #Nigeria2027 #FactCheck #Dubawa #FactCheckHub',
+    scenes: [
+      { dur: 4, html: `
+        <div class="kicker a" data-a="up">Independent fact-checkers</div>
+        <div class="h1 a" data-a="up" data-t=".1">Fact-check:<br>what the<br><span class="mark">presidency</span><br>said</div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t=".8">Claims from official speeches and accounts, and the verdicts.</div>` },
+      { dur: 4.5, html: `<div class="kicker a" data-a="up">Claim 1 · Investment</div>${claimCard('Nigeria attracted foreign direct investments worth more than $30 billion in the last year.', 'President Tinubu · Independence Day broadcast, 1 Oct 2024')}` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">Claim 1 · Investment</div>${receipt('fc-fdi', { label: 'Verdict', stamp: 'False', note: 'NBS: about $363M in 9 months' })}` },
+      { dur: 4.5, html: `<div class="kicker a" data-a="up">Claim 2 · Debt</div>${claimCard('We have cleared the Ways and Means debt of over ₦30 trillion.', 'President Tinubu · Independence Day broadcast, 1 Oct 2024')}` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">Claim 2 · Debt</div>${receipt('fc-waysmeans', { label: 'Verdict', stamp: 'Misleading', stampCls: 'amber', note: 'Turned into a 40-year loan, not paid off' })}` },
+      { dur: 4.5, html: `<div class="kicker a" data-a="up">Claim 3 · A "new" message</div>${claimCard('A video of the President asking Nigerians to look beyond temporary pains, posted during the #EndBadGovernance protests.', '@NGRPresident and @officialABAT on X · 7 Aug 2024', 'Posted')}` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">Claim 3 · A "new" message</div>${receipt('fc-oldvideo', { label: 'Verdict', stamp: 'Misleading', stampCls: 'amber', note: 'Old July 2023 video, not new' })}` },
+      { dur: 6.5, html: `<div class="kicker a" data-a="up">To be fair: claims rated TRUE</div>${receipt('factcheck-economy', { label: 'Verdict', stamp: 'True', stampCls: 'green', note: 'Growth, inflation, oil theft, exports (Oct 2026)' })}` },
+      { dur: 6, html: `
+        <div class="kicker a" data-a="up">Fakes about the President: don't share them</div>
+        <div class="vs">
+          <div class="card a" data-a="left" data-t=".2"><div class="small red">Misleading</div><div class="h3">"Named the world's 3rd most corrupt person"</div><div class="sub" style="margin-top:6px">He got the 3rd most nominations in an OCCRP reader poll. Not a ranking. (Dubawa)</div></div>
+          <div class="card a" data-a="left" data-t=".6"><div class="small gold">Unproven</div><div class="h3">"He lives in France and rules remotely"</div><div class="sub" style="margin-top:6px">No evidence. Two trips to France in 2026. (FactCheckHub)</div></div>
+        </div>
+        <div class="gap"></div>
+        <div class="h3 a" data-a="up" data-t="1.4">Fakes make the real facts easier to dismiss.</div>` },
+      { dur: 4.5, html: `
+        <div class="kicker a" data-a="up">The rule</div>
+        <div class="h1 a" data-a="up" data-t=".1">Check<br>every claim.</div>
+        <div class="h1 a hl" data-a="pop" data-t=".7">From every side.</div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t="1.3">Then vote on January 16.</div>` },
+      sources([
+        '<b>Claims 1–2:</b> FactCheckHub, “Fact-checking Tinubu’s independence day speech”, Oct 2024',
+        '<b>Claim 3:</b> Dubawa, 10 Aug 2024 (presidency X pages, old video)',
+        '<b>TRUE claims:</b> FactCheckHub, 2 Oct 2026',
+        '<b>Fakes:</b> Dubawa (OCCRP “3rd most corrupt”) · FactCheckHub (France claim)',
+      ]),
+    ],
+  },
 ];
 /* Narration: one line per scene, in order, as [emotion, words].
    Emotions: 'calm' 'serious' 'grave' 'urgent' 'hopeful' 'fired'
@@ -448,5 +493,18 @@ window.NARRATION = {
     ['calm',    'To be fair, some things improved. Inflation is down from its peak. Foreign reserves are up. Oil theft is the lowest since two thousand and nine. And non-oil exports hit a record. Fact-checkers rated these claims true.'],
     ['fired',   'The scorecard. Five big promises. None fully kept. Some numbers are up, but the big promises are not met. Judge the record, and vote on January sixteenth!'],
     ['calm',    'Every article is on screen. Look them up, then share this.'],
+  ],
+  'fact-check': [
+    ['serious', 'What has the presidency told Nigerians... and what did independent fact-checkers find?'],
+    ['serious', 'Claim one. On Independence Day twenty twenty-four, the President said Nigeria attracted more than thirty billion dollars in foreign direct investment in a year.'],
+    ['grave',   'The verdict: false. Official NBS data shows about three hundred and sixty-three million dollars over nine months. Not thirty billion.'],
+    ['serious', 'Claim two. In the same speech: we have cleared the Ways and Means debt of over thirty trillion naira.'],
+    ['grave',   'The verdict: misleading. The debt was not paid off. It was turned into a forty-year loan that Nigerians will keep paying.'],
+    ['serious', 'Claim three. During the hunger protests in August twenty twenty-four, the presidency posted a video of the President asking Nigerians to look beyond temporary pains.'],
+    ['grave',   'The verdict: misleading. It was an old video from July twenty twenty-three, posted without saying so.'],
+    ['calm',    'To be fair, some claims checked out. In October twenty twenty-six, fact-checkers rated his claims on growth, inflation, oil theft and exports... true.'],
+    ['urgent',  'And fakes about the President? Don\'t share them. He was never named the world\'s third most corrupt person. And there is no evidence he lives in France. Fakes make the real facts easier to dismiss.'],
+    ['fired',   'So check every claim. From every side. Then vote on January sixteenth!'],
+    ['calm',    'Every fact-check is on screen. Look them up, then share this.'],
   ],
 };

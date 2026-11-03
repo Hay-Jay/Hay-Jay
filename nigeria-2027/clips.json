@@ -1,10 +1,102 @@
 [
-  { "id": "promise-growth", "outlet": "BusinessDay", "date": "2022", "url": "https://businessday.ng/politics/article/tinubu-targets-12-gdp-growth-in-economic-agenda/", "headline": true, "below": 150 },
-  { "id": "reality-growth", "outlet": "Nairametrics", "date": "2026-08-31", "url": "https://nairametrics.com/2026/08/31/nigerias-gdp-grows-by-4-43-in-q2-2026/", "find": ["4.43%"] },
-  { "id": "promise-power", "outlet": "Nairametrics", "date": "2022-06-10", "url": "https://nairametrics.com/2022/06/10/tinubu-says-his-administration-will-focus-on-building-15000mw-power-generation/", "find": ["15,000"] },
-  { "id": "reality-power", "outlet": "Nairametrics", "date": "2025-03-06", "url": "https://nairametrics.com/2025/03/06/nigerias-power-generation-hits-record-5801-84mw-tcn", "find": ["5,801.84"] },
-  { "id": "reality-meters", "outlet": "Nairametrics", "date": "2026-10-02", "url": "https://nairametrics.com/2026/10/02/fg-installs-707765-meters-in-q2-4-8-million-electricity-customers-remain-unmetered/", "headline": true },
-  { "id": "reality-poverty", "outlet": "Nairametrics", "date": "2026-04-10", "url": "https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/", "find": ["63%", "63 per cent"] },
-  { "id": "reality-refinery", "outlet": "Nairametrics", "date": "2026-02-05", "url": "https://nairametrics.com/2026/02/05/nnpc-shuts-state-owned-refineries-after-assessments-show-value-leakage-ojulari", "find": ["shut", "value leakage"] },
-  { "id": "factcheck-economy", "outlet": "FactCheckHub", "date": "2026-10-02", "url": "https://factcheckhub.com/nigeria-at-66-fact-checking-tinubus-independence-day-economics/", "find": ["highest quarterly", "4.43 per cent"] }
+ {
+  "id": "promise-growth",
+  "outlet": "BusinessDay",
+  "date": "2022",
+  "url": "https://businessday.ng/politics/article/tinubu-targets-12-gdp-growth-in-economic-agenda/",
+  "headline": true,
+  "below": 150
+ },
+ {
+  "id": "reality-growth",
+  "outlet": "Nairametrics",
+  "date": "2026-08-31",
+  "url": "https://nairametrics.com/2026/08/31/nigerias-gdp-grows-by-4-43-in-q2-2026/",
+  "find": [
+   "4.43%"
+  ]
+ },
+ {
+  "id": "promise-power",
+  "outlet": "Nairametrics",
+  "date": "2022-06-10",
+  "url": "https://nairametrics.com/2022/06/10/tinubu-says-his-administration-will-focus-on-building-15000mw-power-generation/",
+  "find": [
+   "15,000"
+  ]
+ },
+ {
+  "id": "reality-power",
+  "outlet": "Nairametrics",
+  "date": "2025-03-06",
+  "url": "https://nairametrics.com/2025/03/06/nigerias-power-generation-hits-record-5801-84mw-tcn",
+  "find": [
+   "5,801.84"
+  ]
+ },
+ {
+  "id": "reality-meters",
+  "outlet": "Nairametrics",
+  "date": "2026-10-02",
+  "url": "https://nairametrics.com/2026/10/02/fg-installs-707765-meters-in-q2-4-8-million-electricity-customers-remain-unmetered/",
+  "headline": true
+ },
+ {
+  "id": "reality-poverty",
+  "outlet": "Nairametrics",
+  "date": "2026-04-10",
+  "url": "https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/",
+  "find": [
+   "63%",
+   "63 per cent"
+  ]
+ },
+ {
+  "id": "reality-refinery",
+  "outlet": "Nairametrics",
+  "date": "2026-02-05",
+  "url": "https://nairametrics.com/2026/02/05/nnpc-shuts-state-owned-refineries-after-assessments-show-value-leakage-ojulari",
+  "find": [
+   "shut",
+   "value leakage"
+  ]
+ },
+ {
+  "id": "factcheck-economy",
+  "outlet": "FactCheckHub",
+  "date": "2026-10-02",
+  "url": "https://factcheckhub.com/nigeria-at-66-fact-checking-tinubus-independence-day-economics/",
+  "find": [
+   "highest quarterly",
+   "4.43 per cent"
+  ]
+ },
+ {
+  "id": "fc-fdi",
+  "outlet": "FactCheckHub",
+  "date": "2024-10",
+  "url": "https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/",
+  "find": [
+   "worth more than $30 billion in 2023 is FALSE"
+  ]
+ },
+ {
+  "id": "fc-waysmeans",
+  "outlet": "FactCheckHub",
+  "date": "2024-10",
+  "url": "https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/",
+  "find": [
+   "ways and means debt of over N30 trillion is MISLEADING"
+  ]
+ },
+ {
+  "id": "fc-oldvideo",
+  "outlet": "Dubawa",
+  "date": "2024-08-10",
+  "url": "https://dubawa.org/presidency-tinubus-x-pages-circulate-old-video-amid-endbadgovernance-protest/",
+  "find": [
+   "recycled from a July 2023 broadcast",
+   "old and, therefore, misleading"
+  ]
+ }
 ]
