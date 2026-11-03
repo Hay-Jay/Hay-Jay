@@ -15,7 +15,7 @@ const tl = JSON.parse(fs.readFileSync(path.join(dir, 'timeline.json')));
   const n = Math.ceil(tl.duration * tl.fps);
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-framerate', String(tl.fps),
     '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'medium',
-    '-crf', '20', path.join(dir, 'video.mp4')], { stdio: ['pipe', 'inherit', 'inherit'] });
+    '-crf', '16', path.join(dir, 'video.mp4')], { stdio: ['pipe', 'inherit', 'inherit'] });
   for (let f = 0; f < n; f++) {
     const b64 = await page.evaluate(t => window.frame(t), f / tl.fps);
     if (!ff.stdin.write(Buffer.from(b64, 'base64'))) await new Promise(r => ff.stdin.once('drain', r));

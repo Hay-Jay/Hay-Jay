@@ -1,7 +1,7 @@
 // Channel: Greek mythology, hosted by Glaux, Athena's owl.
 // Look: a moonlit temple for the host, and story scenes painted like animated red-figure Greek vases.
 CAP_HI = '#ffd36b';
-Object.assign(FX, { blur: 4, shutter: 0.6, grain: 0.075, vignette: 0.55, grade: { color: '#ffb35c', op: 'soft-light', alpha: 0.12 }, punch: false });
+Object.assign(FX, { blur: 4, shutter: 0.6, grain: 0.045, vignette: 0.55, grade: { color: '#ffb35c', op: 'soft-light', alpha: 0.12 }, punch: false });
 drawBg = () => {};
 
 const SERIF = '"Cinzel", "DejaVu Serif", serif';

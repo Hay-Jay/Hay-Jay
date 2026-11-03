@@ -32,13 +32,16 @@ def main():
             if not os.path.exists(mp4):
                 print(f"  skip {acc['id']}/{name} (not built yet)")
                 continue
-            if os.path.getsize(mp4) > LIMIT:
-                print(f"  WARNING {acc['id']}/{name}: {os.path.getsize(mp4)/1e6:.1f} MB is over the 15 MB page limit")
             ep = json.load(open(ep_path)); post = ep.get("post", {})
             video_rel, poster_rel = f"videos/{acc['id']}/{name}.mp4", f"posters/{acc['id']}/{name}.jpg"
             os.makedirs(os.path.join(OUT, os.path.dirname(video_rel)), exist_ok=True)
             os.makedirs(os.path.join(OUT, os.path.dirname(poster_rel)), exist_ok=True)
-            shutil.copy(mp4, os.path.join(OUT, video_rel))
+            if os.path.getsize(mp4) > LIMIT:   # smaller web copy so the page can host it
+                subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", mp4, "-c:v", "libx264", "-preset", "slow", "-crf", "23",
+                                "-maxrate", "3200k", "-bufsize", "6400k", "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart",
+                                os.path.join(OUT, video_rel)], check=True)
+            else:
+                shutil.copy(mp4, os.path.join(OUT, video_rel))
             Image.open(os.path.join(src_dir, "thumb.png")).convert("RGB").resize((360, 640), Image.LANCZOS) \
                 .save(os.path.join(OUT, poster_rel), quality=82)
             if not acc.get("avatar") :

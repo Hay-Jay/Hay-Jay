@@ -15,7 +15,7 @@ for EP in "$@"; do
   echo "2/4 frames"; node "$HERE/render.js" "$OUT"
   echo "3/4 audio";  python3 "$HERE/mix.py" "$OUT"
   echo "4/4 encode"
-  ffmpeg -y -v error -i "$OUT/video.mp4" -i "$OUT/mix.wav" -map 0:v -map 1:a -c:v copy \
+  ffmpeg -y -v error -i "$OUT/video.mp4" -i "$OUT/mix.wav" -map 0:v -map 1:a -c:v libx264 -preset slow -crf 22 -tune film -pix_fmt yuv420p \
     -af "loudnorm=I=-14:TP=-1.5:LRA=11" -ar 48000 -c:a aac -b:a 192k -shortest -movflags +faststart "$OUT/$NAME.mp4"
   echo "Done: $OUT/$NAME.mp4"
 done

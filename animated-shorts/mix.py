@@ -64,7 +64,8 @@ def sfx(kind, rnd):
         return 1.6 * band * np.sin(np.pi * tt / 1.0) ** 1.5 + 0.5 * crackle * np.exp(-tt * 1.5)
     if kind == "smokeburst":
         tt = t(1.8); n = lp(rnd.standard_normal(len(tt)), 40)
-        return 2.2 * n * np.minimum(1, tt / 0.08) * np.exp(-tt * 1.6) + 0.5 * sfx("boom", rnd)[:len(tt)]
+        b = sfx("boom", rnd); b = np.pad(b, (0, max(0, len(tt) - len(b))))[:len(tt)]
+        return 2.2 * n * np.minimum(1, tt / 0.08) * np.exp(-tt * 1.6) + 0.5 * b
     if kind == "hush":
         tt = t(1.4); n = rnd.standard_normal(len(tt)); air = n - lp(n, 4)
         return 0.05 * air * np.sin(np.pi * tt / 1.4)
