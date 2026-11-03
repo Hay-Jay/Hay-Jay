@@ -1,0 +1,20 @@
+{
+  "channel": "football",
+  "title": "Messi vs Ronaldo: trophies only",
+  "voice": "en-GB-RyanNeural",
+  "rate": "+12%",
+  "post": {
+    "caption": "Messi vs Ronaldo, trophies ONLY. No feelings 🏆⚽ Who's your GOAT? #messi #ronaldo #goat #football #soccer #messivsronaldo #ballondor",
+    "youtube_title": "Messi vs Ronaldo: Trophies Only (No Feelings) #shorts",
+    "youtube_description": "Ballon d'Or, Champions League, World Cup and international goals. Four categories, one point each. Who wins? Comment your GOAT.\n\n#messi #ronaldo #football #shorts"
+  },
+  "lines": [
+    {"scene": "hook",   "text": "Messi or Ronaldo? Let's settle it with trophies only. No feelings."},
+    {"scene": "ballon", "text": "Ballon d'Or. Messi has eight. Ronaldo has five. Point, Messi."},
+    {"scene": "ucl",    "text": "Champions League. Ronaldo has five. Messi has four. Point, Ronaldo."},
+    {"scene": "wc",     "text": "World Cup. Messi lifted it in 2022. Ronaldo never has. Point, Messi."},
+    {"scene": "intl",   "text": "International goals. Ronaldo is the all-time top scorer in men's international football. Point, Ronaldo."},
+    {"scene": "draw",   "text": "That's two all. So it comes down to you."},
+    {"scene": "cta",    "text": "Messi or Ronaldo? Drop your pick in the comments, and follow for round two!"}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "channel": "whatif",
+  "title": "What if the Moon disappeared?",
+  "voice": "en-US-BrianNeural",
+  "rate": "+8%",
+  "post": {
+    "caption": "What if the Moon disappeared tonight? 🌕➡️💨 #whatif #space #moon #science #hypothetical #learnontiktok",
+    "youtube_title": "What If The Moon Disappeared Tonight? #shorts",
+    "youtube_description": "Darker nights, tides about a third the size, confused wildlife and a wobbling Earth. Here's what would happen if the Moon vanished.\n\n#whatif #space #shorts"
+  },
+  "lines": [
+    {"scene": "hook",    "text": "What if the Moon just vanished tonight?"},
+    {"scene": "night",   "text": "First, nights would get way darker. No more moonlight. Ever."},
+    {"scene": "tides",   "text": "Ocean tides would shrink to about a third of their size, because only the Sun would be pulling on the water."},
+    {"scene": "animals", "text": "Animals that hunt, migrate or breed by moonlight would be thrown into chaos. Some corals only spawn after a full moon."},
+    {"scene": "tilt",    "text": "And over millions of years, Earth's tilt could wobble much more, bringing wild swings in climate."},
+    {"scene": "good",    "text": "The good news? The Moon isn't going anywhere. It only drifts away about four centimetres a year."},
+    {"scene": "cta",     "text": "What should disappear next? Comment, and follow for more what ifs!"}
+  ]
+}

@@ -4,7 +4,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 EP="$1"; NAME="$(basename "$EP" .json)"; OUT="${2:-$HERE/build/$NAME}"
 mkdir -p "$OUT"
-echo "1/4 voice";  python3 "$HERE/make_voice.py" "$EP" "$OUT"
+if [ -f "$OUT/timeline.json" ] && [ "$OUT/timeline.json" -nt "$EP" ]; then echo "1/4 voice (cached)"; else echo "1/4 voice"; python3 "$HERE/make_voice.py" "$EP" "$OUT"; fi
 echo "2/4 frames"; node "$HERE/render.js" "$OUT"
 echo "3/4 audio";  python3 "$HERE/mix.py" "$OUT"
 echo "4/4 encode"

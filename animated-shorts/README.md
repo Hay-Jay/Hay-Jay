@@ -2,7 +2,19 @@
 
 Turns a short script into a finished vertical (1080×1920) animated video with voiceover, word-by-word captions, sound effects and background music. The output is ready for TikTok, YouTube Shorts and Instagram Reels.
 
-Starring **Inky**, an original octopus character.
+## Channels
+
+Each channel has its own host, look, voice and music. The episode file's `channel` field picks one.
+
+| Channel | Host | Voice | Example episode |
+|---|---|---|---|
+| `naija`: Nigerian history | Ìjàpá the tortoise | Nigerian English (`en-NG-AbeoNeural`) | `episodes/naija-name.json` |
+| `football`: Messi vs Ronaldo debates | two cartoon players + live scoreboard | `en-GB-RyanNeural` | `episodes/goat-trophies.json` |
+| `whatif`: hypotheticals | Orbit the robot | `en-US-BrianNeural` | `episodes/whatif-moon.json` |
+| `myth`: Greek mythology | Glaux the owl | `en-GB-SoniaNeural` | `episodes/myth-pandora.json` |
+| `ocean`: animal facts | Inky the octopus | `en-US-AndrewNeural` | `episodes/octopus-hearts.json` |
+
+The shared engine (captions, titles, props, render loop) is in `engine.js`. Each channel's background, host and scenes are in `channels/<name>.js`.
 
 ## Make a video
 
@@ -23,4 +35,4 @@ The output goes to `build/<episode>/`:
 4. `make.sh` combines the video and audio into the final MP4.
 
 ## New episodes
-Copy an episode JSON and change the lines. Each line uses a `scene`, which is a drawing function in `scenes.html` (`S.<name>`), with optional sound cues in `EV.<name>`. A new topic needs new scene functions. The character, captions, background and props can be reused.
+Copy an episode JSON and change the lines. Each line uses a `scene`, which is a drawing function in `channels/<channel>.js` (`S.<name>`), with optional sound cues in `EV.<name>`. Use `wl(line, 'word')` to time an animation to the moment a word is spoken. A new topic needs new scene functions. The character, captions, background and props can be reused.

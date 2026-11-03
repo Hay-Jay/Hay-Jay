@@ -1,0 +1,20 @@
+{
+  "channel": "myth",
+  "title": "Pandora's box was never a box",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "+6%",
+  "post": {
+    "caption": "Pandora's box was never a box 🏺⚡ #greekmythology #mythology #pandora #history #mythtok #learnontiktok",
+    "youtube_title": "Pandora's Box Was Never A Box #shorts",
+    "youtube_description": "In Hesiod's original myth it was a large jar, a pithos. Erasmus translated it as a box in the 1500s and the mistake stuck. And hope stayed inside.\n\n#greekmythology #pandora #shorts"
+  },
+  "lines": [
+    {"scene": "hook",  "text": "Pandora's box was never actually a box."},
+    {"scene": "jar",   "text": "In the original Greek story, it was a large jar, called a pithos."},
+    {"scene": "fire",  "text": "Zeus had Pandora created as a punishment, after Prometheus stole fire and gave it to humans."},
+    {"scene": "open",  "text": "When she opened the jar, out flew sickness, hard work, and every kind of trouble."},
+    {"scene": "hope",  "text": "Only one thing stayed inside. Hope."},
+    {"scene": "box",   "text": "So where did the box come from? About five hundred years ago, the scholar Erasmus translated it as a box, and the mistake stuck."},
+    {"scene": "cta",   "text": "Follow for more myths you were told wrong!"}
+  ]
+}
