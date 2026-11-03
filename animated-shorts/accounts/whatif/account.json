@@ -7,9 +7,8 @@
   "host": "Orbit the robot",
   "voice": "American (Brian)",
   "name_ideas": [
-    "Orbit Asks What If",
-    "What If Orbit",
-    "Hypothetically Orbit"
+    "Orbit Asks (@orbitasks)",
+    "Orbit Imagines (@orbitimagines)"
   ],
   "bio": "Wild what-ifs, real science 🤖🌍 Comment the next one.",
   "hashtags": "#whatif #science #space #hypothetical #learnontiktok",
@@ -21,5 +20,14 @@
   "rule": "Every claim needs a real source. Say 'could' or 'might' when scientists aren't sure.",
   "avatar_focus_y": 1080,
   "host_focus_y": 1240,
-  "host_episode": "whatif-moon"
+  "host_episode": "whatif-moon",
+  "brand_name": "Orbit Asks",
+  "handle": "orbitasks",
+  "tagline": "Wild what-ifs, real science",
+  "handles_checked": "3 Nov 2026",
+  "brand_crop": {
+    "profile_y": 1195,
+    "profile_half": 285,
+    "banner_top": 900
+  }
 }

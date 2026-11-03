@@ -165,6 +165,24 @@ details.kit summary::-webkit-details-marker { display: none; }
 .steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 14px 58px; position: relative; display: grid; gap: 4px; }
 .steps li::before { content: counter(s, decimal-leading-zero); position: absolute; left: 14px; top: 14px; font: 700 15px var(--mono); color: var(--tally); }
 .steps b { font-family: var(--display); font-size: 18px; }
+.brand-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.pfp { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 3px solid var(--acc); flex: none; }
+.brand-name { display: grid; gap: 2px; min-width: 0; }
+.brand-name b { font: 800 28px/1.05 var(--display); letter-spacing: -.02em; }
+.ytbanner { width: 100%; max-width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); display: block; }
+.brand-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.setup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+.setup-card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; align-content: start; }
+.setup-head { display: flex; gap: 10px; align-items: center; }
+.setup-head img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--acc); }
+.setup-head div { min-width: 0; display: grid; }
+.step { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 7px 10px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel-2); cursor: pointer; text-align: left; font-size: 14px; }
+.step i { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--faint); flex: none; display: grid; place-items: center; }
+.step[aria-pressed="true"] { border-color: color-mix(in srgb, var(--clear) 60%, var(--line)); color: var(--muted); }
+.step[aria-pressed="true"] i { background: var(--clear); border-color: var(--clear); }
+.step[aria-pressed="true"] i::after { content: ""; width: 9px; height: 5px; border: solid #0d0c10; border-width: 0 0 3px 3px; transform: rotate(-45deg) translate(1px, -1px); }
+.step[disabled] { cursor: default; opacity: .6; }
+.step .auto { margin-left: auto; font: 700 10px var(--mono); letter-spacing: .1em; color: var(--faint); }
 #toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
 #sync { font-size: 13px; color: var(--muted); }
 #sync.warn { color: var(--amber); }
@@ -194,7 +212,13 @@ const nf = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDig
 const fmt = n => n == null ? '—' : nf.format(n);
 const acc = id => DATA.accounts.find(a => a.id === id);
 const col = a => BRIGHT[a.id] || a.color;
-let posted = {}, links = {}, stats = {}, db = null, canWrite = true;
+let posted = {}, links = {}, stats = {}, setup = {}, db = null, canWrite = true;
+const SETUP_STEPS = [['email', 'Make its own Gmail'], ['tiktok', 'Create the TikTok account with the handle'], ['youtube', 'Create the YouTube channel with the handle'], ['pics', 'Add the profile picture on both'], ['banner', 'Upload the YouTube banner'], ['bio', 'Paste the bio and hashtags'], ['links', 'Save its links in this studio', 'auto'], ['first', 'Post the first video', 'auto']];
+function stepDone(a, k) {
+  if (k === 'links') { const l = links[a.id] || {}; if (l.tiktok && l.youtube) return true; }
+  if (k === 'first') { if (a.episodes.some(e => { const p = posted[`${a.id}--${e.id}`] || {}; return p.tiktok || p.youtube; })) return true; }
+  return !!((setup[a.id] || {}).done || {})[k];
+}
 
 const TICK = '<svg class="tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const RING = '<svg class="ring" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
@@ -304,6 +328,15 @@ function viewChannel(a) {
     <div style="min-width:0"><span class="label" style="color:${col(a)}">Channel ${String(a.order || 0).padStart(2, '0')} · ${esc(a.days.join(' · '))}</span><h2>${esc(a.label)}</h2><p class="muted">${esc(a.host)} · ${esc(a.voice)}</p>
       <div class="links">${lk.tiktok ? `<a class="btn solid" href="${esc(lk.tiktok)}" target="_blank" rel="noopener">Open TikTok ↗</a>` : ''}${lk.youtube ? `<a class="btn solid" href="${esc(lk.youtube)}" target="_blank" rel="noopener">Open YouTube ↗</a>` : ''}${!lk.tiktok && !lk.youtube ? '<span class="muted" style="font-size:13px">Add your account links below to open them from here.</span>' : ''}</div></div>
   </div></section>
+  ${a.brand_profile ? `<section class="panel" style="--acc:${col(a)}"><div class="panel-head"><h3 style="font-size:20px">Brand kit</h3><span class="label">${a.handles_checked ? 'Handle free on ' + esc(a.handles_checked) : ''}</span></div>
+    <div class="panel-body">
+      <div class="brand-row"><img class="pfp" src="${a.brand_profile}" alt="Profile picture for ${esc(a.brand_name || a.label)}">
+        <div class="brand-name"><span class="label">Suggested name</span><b>${esc(a.brand_name || a.label)}</b><span class="mono muted">@${esc(a.handle || '')}</span></div></div>
+      <div class="brand-btns"><button class="btn" type="button" data-copytext="${esc(a.brand_name || '')}">Copy name</button><button class="btn" type="button" data-copytext="${esc(a.handle || '')}">Copy handle</button></div>
+      <img class="ytbanner" src="${a.brand_banner}" alt="YouTube banner for ${esc(a.brand_name || a.label)}">
+      <div class="brand-btns"><button class="btn solid save" type="button" data-src="${a.brand_profile}" data-file="${a.id}-profile-picture.jpg" hidden>Save profile picture</button><button class="btn solid save" type="button" data-src="${a.brand_banner}" data-file="${a.id}-youtube-banner.jpg" hidden>Save YouTube banner</button></div>
+      <p class="muted" style="font-size:13px">The handle was free on both YouTube and TikTok when checked. Anyone can take it, so claim it soon. The banner keeps its text inside YouTube's safe area, so it shows on phones, TVs and computers.</p>
+    </div></section>` : ''}
   <div class="grid2" style="--acc:${col(a)}">
     <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Road to getting paid</h3><span class="label">${l.d ? 'Logged ' + esc(l.d) : 'Not logged yet'}</span></div>
       <div class="panel-body">${meters}${short ? `<p class="note">TikTok's Creator Rewards only pays for videos over 1 minute. These videos are under a minute, so they count toward growth, not TikTok payouts. YouTube Shorts are fine.</p>` : ''}</div></section>
@@ -332,15 +365,31 @@ function viewChannel(a) {
 }
 
 function viewSetup() {
-  return `<section style="display:grid;gap:14px"><h2 style="font-size:30px">Keep each account separate</h2>
-  <ol class="steps">
-    <li><b>Make one email per account</b><span class="muted">A new Gmail for each brand, used for that brand's TikTok and YouTube and nothing else.</span></li>
-    <li><b>Use one name everywhere</b><span class="muted">The same name and @handle on TikTok and YouTube, so fans find you on both.</span></li>
-    <li><b>Add every account to the TikTok app</b><span class="muted">Profile, tap your username at the top, then Add account. The same menu switches between them.</span></li>
-    <li><b>Give each brand its own YouTube channel</b><span class="muted">Sign in with each brand's Gmail. Switch from your profile picture, then Switch account.</span></li>
-    <li><b>Save each account's links here</b><span class="muted">Open a channel, then Profile kit and links. Its Open TikTok and Open YouTube buttons then take you straight there.</span></li>
-    <li><b>Log your numbers once a week</b><span class="muted">Followers and views from each app's analytics. The rings, meters and growth chart update for every device you use.</span></li>
-  </ol></section>`;
+  const all = DATA.accounts.length * SETUP_STEPS.length, done = DATA.accounts.reduce((n, a) => n + SETUP_STEPS.filter(([k]) => stepDone(a, k)).length, 0);
+  const cards = DATA.accounts.map(a => {
+    const n = SETUP_STEPS.filter(([k]) => stepDone(a, k)).length;
+    return `<div class="setup-card" style="--acc:${col(a)}">
+      <div class="setup-head"><img src="${a.brand_profile || a.avatar}" alt=""><div><b>${esc(a.brand_name || a.label)}</b><span class="mono muted" style="font-size:13px">@${esc(a.handle || '')} · ${n}/${SETUP_STEPS.length}</span></div></div>
+      <div class="meterline"><i style="width:${n / SETUP_STEPS.length * 100}%"></i></div>
+      ${SETUP_STEPS.map(([k, label, auto]) => `<button class="step" type="button" data-step="${a.id}:${k}" aria-pressed="${stepDone(a, k)}"${auto ? ' data-auto="1"' : ''}><i></i><span>${esc(label)}</span>${auto ? '<span class="auto">AUTO</span>' : ''}</button>`).join('')}
+    </div>`;
+  }).join('');
+  return `<section style="display:grid;gap:14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap"><h2 style="font-size:30px">Launch checklist</h2><span class="label">${done}/${all} steps done</span></div>
+    <p class="muted">Tick each step as you go. The last two tick themselves when you save an account's links or mark its first video posted.</p>
+    <div class="setup-grid">${cards}</div>
+    <div class="panel"><div class="panel-head"><h3 style="font-size:20px">Umbrella brand</h3><span class="label">Optional</span></div><div class="panel-body"><p><b class="mono">@hayjaystudios</b> was free on YouTube and TikTok on 3 Nov 2026. Claim it on both and add "A Hay-Jay Studios channel" to each bio, so the accounts promote each other.</p></div></div>
+    <h2 style="font-size:26px;margin-top:8px">How to set up each account</h2>
+    <ol class="steps">
+      <li><b>One Gmail per account</b><span class="muted">Each brand gets its own Gmail, used for that brand's TikTok and YouTube and nothing else. Turn on 2-step verification.</span></li>
+      <li><b>TikTok: a personal account, not Business</b><span class="muted">Sign up with the Gmail and set the @handle from the brand kit. Business accounts lose most music and can't join Creator Rewards. Add each account from Profile, your username at the top, then Add account.</span></li>
+      <li><b>YouTube: one channel per Gmail</b><span class="muted">Sign in, create the channel with the brand name and @handle, then upload the profile picture and banner from the brand kit, and paste the bio as the description.</span></li>
+      <li><b>Audience: "No, it's not made for kids"</b><span class="muted">Choose this only if it's true. These videos are aimed at teens and adults, but YouTube judges the content, not the cartoon style.</span></li>
+      <li><b>Same look everywhere</b><span class="muted">Same name, handle, picture and bio on both platforms, so people can find you on either.</span></li>
+      <li><b>Post natively, with labels</b><span class="muted">Upload the clean video from here to each app; never re-upload a TikTok with its watermark. Turn on the AI-generated content label, since the voices are synthetic.</span></li>
+      <li><b>First hour after posting</b><span class="muted">Reply to comments and pin a question comment. The videos already end with one.</span></li>
+      <li><b>Log numbers weekly</b><span class="muted">Every Sunday, copy followers and views into each channel's log, so the rings and growth chart stay current.</span></li>
+    </ol></section>`;
 }
 
 // ---------- routing + paint ----------
@@ -356,6 +405,7 @@ function render() {
   paint();
 }
 function paint() {
+  document.querySelectorAll('.step').forEach(b => { b.disabled = !db || !canWrite; });
   document.querySelectorAll('.post').forEach(b => { const on = !!(posted[b.dataset.key] || {})[b.dataset.platform]; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.disabled = !db || !canWrite; b.title = on ? 'Posted. Tap to undo.' : 'Tap after you post it'; });
   const d = today(), key = DAY_KEYS[d.getDay()];
   const due = DATA.accounts.filter(a => a.days.includes(key)).some(a => { const e = nextVideo(a); return !!e; });
@@ -380,6 +430,16 @@ document.addEventListener('click', async ev => {
   if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copytext); toast('Copied'); } catch { toast("Couldn't copy here. Press and hold the text instead."); } return; }
   const pl = ev.target.closest('[data-play]');
   if (pl) { const box = pl.closest('.thumb'); box.innerHTML = `<video controls playsinline autoplay src="${pl.dataset.play}"></video>`; return; }
+  const step = ev.target.closest('[data-step]');
+  if (step) {
+    if (!db || !canWrite) { toast('Sign in to claude.ai to save progress.'); return; }
+    const [id, k] = step.dataset.step.split(':'), a = acc(id);
+    if (step.dataset.auto && stepDone(a, k) && !((setup[id] || {}).done || {})[k]) { toast(k === 'links' ? 'Done automatically: links are saved.' : 'Done automatically: a video is marked posted.'); return; }
+    const before = (setup[id] || {}).done || {}, done = { ...before, [k]: !before[k] };
+    setup = { ...setup, [id]: { done } }; render();
+    try { await db.collection('setup').doc(id).set({ done }); } catch { setup = { ...setup, [id]: { done: before } }; render(); toast("Couldn't save. Check your connection and tap again."); }
+    return;
+  }
   const post = ev.target.closest('.post');
   if (post && db && canWrite) {
     const k = post.dataset.key, p = post.dataset.platform, before = posted[k] || {};
@@ -428,10 +488,10 @@ render();
   if (!db) { sync.textContent = 'Sign in to claude.ai to track posts and growth.'; sync.classList.add('warn'); paint(); return; }
   const user = await claude.use('user');
   if (user) { const w = await user.can('data.write'); if (w === false) canWrite = false; }
-  let first = 3;
+  let first = 4;
   const timer = setTimeout(() => { sync.textContent = "Can't reach your progress yet. Changes may not save until it loads."; sync.classList.add('warn'); }, 10000);
   const settle = snap => { if (!snap.metadata.fromCache && --first <= 0) { clearTimeout(timer); sync.classList.remove('warn'); sync.textContent = canWrite ? 'Progress syncs across your devices.' : 'View only: you can see progress but not change it.'; } };
   const sub = (name, apply) => db.collection(name).onSnapshot(snap => { const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); }); apply(m); render(); settle(snap); }, () => { clearTimeout(timer); sync.textContent = 'Sync stopped. Reload the page to try again.'; sync.classList.add('warn'); });
-  sub('posted', m => posted = m); sub('links', m => links = m); sub('stats', m => stats = m);
+  sub('posted', m => posted = m); sub('links', m => links = m); sub('stats', m => stats = m); sub('setup', m => setup = m);
 })();
 </script>

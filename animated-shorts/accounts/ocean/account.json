@@ -7,8 +7,8 @@
   "host": "Inky the octopus",
   "voice": "American (Andrew)",
   "name_ideas": [
-    "Inky's Ocean Facts",
-    "Weird Sea Facts"
+    "Weird Sea Facts (@weirdseafacts)",
+    "Inky's Ocean (@inkysocean)"
   ],
   "bio": "Weird animal facts with Inky the octopus 🐙",
   "hashtags": "#animalfacts #ocean #weirdfacts #science #learnontiktok",
@@ -19,5 +19,14 @@
   "rule": "One surprising fact per video, checked against a reliable source.",
   "avatar_focus_y": 1000,
   "host_focus_y": 980,
-  "host_episode": "octopus-hearts"
+  "host_episode": "octopus-hearts",
+  "brand_name": "Weird Sea Facts",
+  "handle": "weirdseafacts",
+  "tagline": "Weird animal facts with Inky",
+  "handles_checked": "3 Nov 2026",
+  "brand_crop": {
+    "profile_y": 1030,
+    "profile_half": 320,
+    "banner_top": 700
+  }
 }

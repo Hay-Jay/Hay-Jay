@@ -7,9 +7,8 @@
   "host": "Messi #10 and Ronaldo #7 with a live scoreboard",
   "voice": "British, energetic (Ryan)",
   "name_ideas": [
-    "GOAT Scoreboard",
-    "The GOAT Debate",
-    "Settle It FC"
+    "GOAT Scoreboard (@goatscoreboard)",
+    "Stat Settlers (@statsettlers)"
   ],
   "bio": "Messi vs Ronaldo, settled with stats. Pick your side in the comments ⚽🐐",
   "hashtags": "#messi #ronaldo #goat #football #soccer #messivsronaldo",
@@ -22,5 +21,9 @@
   "avatar_focus_y": 960,
   "host_focus_y": 1000,
   "host_episode": "goat-trophies",
-  "host_image": "thumb.png"
+  "host_image": "thumb.png",
+  "brand_name": "GOAT Scoreboard",
+  "handle": "goatscoreboard",
+  "tagline": "Messi vs Ronaldo, settled with stats",
+  "handles_checked": "3 Nov 2026"
 }

@@ -7,9 +7,10 @@
   "host": "Ìjàpá the tortoise, in Ankara pop-art",
   "voice": "Nigerian English (Abeo)",
   "name_ideas": [
-    "Ìjàpá History",
-    "Naija Back Then",
-    "Gist of Naija"
+    "Ìjàpá Tells (@ijapatells)",
+    "Gist of Naija (@gistofnaija)",
+    "Old Naija Gist (@oldnaijagist)",
+    "Ìjàpá History (@ijapahistory)"
   ],
   "bio": "Nigerian history and politics in 60 seconds, told by Ìjàpá the tortoise 🐢🇳🇬 New story Mon, Wed, Fri.",
   "hashtags": "#nigeria #naija #nigerianhistory #history #africa #learnontiktok",
@@ -21,5 +22,9 @@
   "rule": "Explain, don't campaign. Stick to dates and facts, give each side fairly, and never endorse a party or candidate.",
   "avatar_focus_y": 1010,
   "host_focus_y": 1150,
-  "host_episode": "naija-name"
+  "host_episode": "naija-name",
+  "brand_name": "Ìjàpá Tells",
+  "handle": "ijapatells",
+  "tagline": "Nigerian history told by Ìjàpá",
+  "handles_checked": "3 Nov 2026"
 }

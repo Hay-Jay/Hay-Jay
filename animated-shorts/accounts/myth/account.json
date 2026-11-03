@@ -7,9 +7,10 @@
   "host": "Glaux, Athena's owl",
   "voice": "British storyteller (Sonia)",
   "name_ideas": [
-    "Myths, Corrected",
-    "Glaux Myths",
-    "Owl of Olympus"
+    "Myths Corrected (@mythscorrected)",
+    "Glaux Myths (@glauxmyths)",
+    "Olympus Uncut (@olympusuncut)",
+    "Myths Fixed (@mythsfixed)"
   ],
   "bio": "Greek myths told right, by Athena's owl 🦉⚡ New myth Tue, Fri, Sun.",
   "hashtags": "#greekmythology #mythology #mythtok #history #greekgods",
@@ -21,5 +22,9 @@
   "rule": "Say which ancient source a version comes from (Hesiod, Homer, Ovid). Myths often have more than one version.",
   "avatar_focus_y": 1030,
   "host_focus_y": 1000,
-  "host_episode": "myth-pandora"
+  "host_episode": "myth-pandora",
+  "brand_name": "Myths Corrected",
+  "handle": "mythscorrected",
+  "tagline": "Greek myths, told right",
+  "handles_checked": "3 Nov 2026"
 }

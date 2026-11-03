@@ -65,6 +65,15 @@ def main():
                             tiktok=post.get("caption", ""), yt_title=post.get("youtube_title", ""),
                             yt_desc=post.get("youtube_description", "")))
         acc["episodes"] = eps
+        # brand kit (from make_brand.py): web-friendly JPEGs the page can show and save
+        bdir = os.path.join(HERE, "build", "brand", acc["id"])
+        if os.path.exists(os.path.join(bdir, "profile.png")):
+            os.makedirs(os.path.join(OUT, "brand", acc["id"]), exist_ok=True)
+            for src, dst, q in (("profile.png", "profile.jpg", 92), ("banner.png", "banner.jpg", 90)):
+                rel = f"brand/{acc['id']}/{dst}"
+                Image.open(os.path.join(bdir, src)).convert("RGB").save(os.path.join(OUT, rel), quality=q)
+                files[rel] = os.path.join(OUT, rel)
+            acc["brand_profile"], acc["brand_banner"] = f"brand/{acc['id']}/profile.jpg", f"brand/{acc['id']}/banner.jpg"
         accounts.append(acc)
     accounts.sort(key=lambda a: a.get("order", 99))
     data = json.dumps({"accounts": accounts}, ensure_ascii=False).replace("</", "<\\/")
