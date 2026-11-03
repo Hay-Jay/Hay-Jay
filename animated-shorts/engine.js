@@ -357,7 +357,7 @@ function finishFrame(t, y) {
   const fo = clamp((t - (TL.duration - 0.5)) / 0.5);
   if (fo > 0) { ctx.fillStyle = `rgba(0,0,0,${fo})`; ctx.fillRect(0, 0, W, H); }
 }
-window.setup = async tl => { TL = tl; buildChunks(); chInit(tl); await document.fonts.load(`80px "Noto Color Emoji"`); await document.fonts.load(`900 80px Inter`); await document.fonts.load(`800 40px Inter`); for (const f of ['900 80px Cinzel', '700 80px Cinzel', '900 80px "Cinzel Decorative"']) { try { await document.fonts.load(f); } catch (e) {} } };
+window.setup = async tl => { TL = tl; buildChunks(); chInit(tl); await document.fonts.load(`80px "Noto Color Emoji"`); await document.fonts.load(`900 80px Inter`); await document.fonts.load(`800 40px Inter`); for (const f of ['900 80px Cinzel', '700 80px Cinzel', '900 80px "Cinzel Decorative"', '80px "Lilita One"']) { try { await document.fonts.load(f); } catch (e) {} } };
 window.frame = t => {
   const n = Math.max(1, FX.blur | 0), sh = FX.shutter / TL.fps;
   ACX.globalCompositeOperation = 'source-over';

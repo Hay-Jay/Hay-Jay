@@ -1,0 +1,41 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "Queen Amina of Zazzau",
+  "post": {
+    "caption": "Queen Amina of Zazzau: warrior queen of the Hausa. How much is history and how much is legend? 👑⚔️ #nigeria #queenamina #zaria #nigerianhistory #history #naija",
+    "youtube_title": "Queen Amina of Zazzau: History or Legend? #shorts",
+    "youtube_description": "The Hausa warrior queen of Zazzau, around today's Zaria. Amina's walls, the Kano Chronicle, and what historians still debate.\n\n#nigeria #queenamina #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Queen Amina of Zazzau was a warrior queen. But how much of her story is real?"
+    },
+    {
+      "scene": "zazzau",
+      "text": "Zazzau was a Hausa kingdom, around today's Zaria, in northern Nigeria."
+    },
+    {
+      "scene": "battle",
+      "text": "Tradition says Amina led her own soldiers into battle, and grew the kingdom's lands."
+    },
+    {
+      "scene": "walls",
+      "text": "Earthen walls around many Hausa towns are still called Ganuwar Amina: Amina's walls."
+    },
+    {
+      "scene": "chronicle",
+      "text": "The oldest written account, the Kano Chronicle, was written down centuries later. It says she conquered towns as far as Nupe and Kwararafa."
+    },
+    {
+      "scene": "debate",
+      "text": "So historians still debate her dates and details. But her legend lives on, from Zaria to a statue in Lagos."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow for more Naija history!"
+    }
+  ]
+}

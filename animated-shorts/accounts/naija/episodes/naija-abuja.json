@@ -1,0 +1,41 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "Why Abuja replaced Lagos",
+  "post": {
+    "caption": "Lagos was the capital. So why is it Abuja now? 🏙️➡️🏛️ #nigeria #abuja #lagos #naija #nigerianhistory #history",
+    "youtube_title": "Why Is Abuja Nigeria's Capital, Not Lagos? #shorts",
+    "youtube_description": "Chosen in 1976 for its central, neutral location, planned from scratch with a city centre by Kenzo Tange, and made the capital on 12 December 1991.\n\n#nigeria #abuja #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Lagos was Nigeria's capital for years. So why is it Abuja now?"
+    },
+    {
+      "scene": "lagos",
+      "text": "By the 1970s, Lagos was overcrowded, and it sat at the edge of the country, in the south west."
+    },
+    {
+      "scene": "choose",
+      "text": "In 1976, the government chose a new site, right in the centre of Nigeria, on land not tied to any one big ethnic group."
+    },
+    {
+      "scene": "plan",
+      "text": "Abuja was planned from scratch. The Japanese architect Kenzo Tange designed its city centre."
+    },
+    {
+      "scene": "move",
+      "text": "On December twelfth, 1991, the capital officially moved."
+    },
+    {
+      "scene": "still",
+      "text": "But Lagos is still Nigeria's biggest city, and its business hub."
+    },
+    {
+      "scene": "cta",
+      "text": "Lagos or Abuja? Tell me in the comments, and follow for more Naija history!"
+    }
+  ]
+}

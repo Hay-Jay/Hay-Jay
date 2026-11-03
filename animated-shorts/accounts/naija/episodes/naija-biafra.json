@@ -1,0 +1,41 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "The Biafran War, explained",
+  "post": {
+    "caption": "Nigeria's civil war, 1967 to 1970, explained in one minute. 🇳🇬 #nigeria #biafra #nigerianhistory #history #naija #africa",
+    "youtube_title": "The Biafran War (Nigerian Civil War) Explained #shorts",
+    "youtube_description": "From the 1966 coups to the declaration of Biafra on 30 May 1967, the blockade, and 'no victor, no vanquished' in January 1970.\n\n#nigeria #biafra #history #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Nigeria's civil war lasted two and a half years. And it began with one declaration."
+    },
+    {
+      "scene": "coups",
+      "text": "In 1966, two military coups and deadly violence against Igbo people in the North drove many back to the East."
+    },
+    {
+      "scene": "declare",
+      "text": "On May thirtieth, 1967, Lieutenant Colonel Ojukwu declared the Eastern Region independent, as the Republic of Biafra."
+    },
+    {
+      "scene": "gowon",
+      "text": "The federal government, led by General Yakubu Gowon, went to war to keep Nigeria one."
+    },
+    {
+      "scene": "blockade",
+      "text": "A blockade cut Biafra off. Historians estimate between half a million and three million people died, most of them from hunger."
+    },
+    {
+      "scene": "end",
+      "text": "In January 1970, Biafra surrendered, and Gowon declared: no victor, no vanquished."
+    },
+    {
+      "scene": "cta",
+      "text": "Remember the past. Follow for more Naija history."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "A student designed Nigeria's flag",
+  "post": {
+    "caption": "Nigeria's flag was designed by a student, and the judges cut part of it ✂️🇳🇬 #nigeria #naija #nigerianflag #nigerianhistory #history",
+    "youtube_title": "A Student Designed Nigeria's Flag (And The Judges Cut His Sun) #shorts",
+    "youtube_description": "Taiwo Akinkunmi's design beat nearly 3,000 entries in 1959. The judges removed the red sun from the middle. He won £100, and the flag rose on 1 October 1960.\n\n#nigeria #flag #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Nigeria's flag was designed by a student. And the judges cut part of his design."
+    },
+    {
+      "scene": "advert",
+      "text": "In 1959, Taiwo Akinkunmi, a young Nigerian studying in Britain, saw a newspaper advert: design the flag of a soon to be independent Nigeria."
+    },
+    {
+      "scene": "entries",
+      "text": "His design beat nearly three thousand entries."
+    },
+    {
+      "scene": "colours",
+      "text": "Green for the land and farming. White for peace and unity."
+    },
+    {
+      "scene": "sun",
+      "text": "But his original had a red sun with rays in the middle. The judges removed it."
+    },
+    {
+      "scene": "prize",
+      "text": "He won one hundred pounds. And on October first, 1960, his flag went up."
+    },
+    {
+      "scene": "cta",
+      "text": "Next time you see the green white green, remember him. Follow for more Naija history!"
+    }
+  ]
+}

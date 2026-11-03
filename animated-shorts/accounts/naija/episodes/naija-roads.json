@@ -1,0 +1,41 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "The day Nigeria switched sides of the road",
+  "post": {
+    "caption": "In 1972 every car in Nigeria switched sides of the road 🚗↔️ #nigeria #naija #nigerianhistory #history #lagos #funfacts",
+    "youtube_title": "The Day Nigeria Switched Sides Of The Road (1972) #shorts",
+    "youtube_description": "Nigeria drove on the left under British rule. On 2 April 1972 it changed to the right, like its neighbours. Ghana followed in 1974, and in 1973 the naira replaced the pound.\n\n#nigeria #history #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "One day in 1972, every car in Nigeria switched sides of the road."
+    },
+    {
+      "scene": "left",
+      "text": "Under British rule, Nigerians drove on the left, like in the UK."
+    },
+    {
+      "scene": "neighbours",
+      "text": "But Nigeria's neighbours, Benin, Niger, Chad and Cameroon, all drive on the right."
+    },
+    {
+      "scene": "switch",
+      "text": "So on April second, 1972, Nigeria changed over to driving on the right."
+    },
+    {
+      "scene": "ghana",
+      "text": "Ghana made the same switch two years later, in 1974."
+    },
+    {
+      "scene": "naira",
+      "text": "And in 1973, Nigeria swapped the pound for a brand new currency: the naira."
+    },
+    {
+      "scene": "cta",
+      "text": "Did your parents remember the switch? Tell me in the comments, and follow for more Naija history!"
+    }
+  ]
+}

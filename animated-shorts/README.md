@@ -8,7 +8,7 @@ Each channel has its own host, look, voice and music. Each lives in its own fold
 
 | Channel | Host | Voice | Example episode |
 |---|---|---|---|
-| `naija`: Nigerian history | Ìjàpá the tortoise | Nigerian English (`en-NG-AbeoNeural`) | `accounts/naija/episodes/naija-name.json` |
+| `naija`: Nigerian history | Ìjàpá the tortoise; Ankara wax-print pop-art scenes | Nigerian English (`en-NG-AbeoNeural`) | `accounts/naija/episodes/naija-name.json` |
 | `football`: Messi vs Ronaldo debates | two cartoon players + live scoreboard | `en-GB-RyanNeural` | `accounts/football/episodes/goat-trophies.json` |
 | `whatif`: hypotheticals | Orbit the robot | `en-US-BrianNeural` | `accounts/whatif/episodes/whatif-moon.json` |
 | `myth`: Greek mythology | Glaux the owl; stories painted as animated red-figure vases | `en-GB-SoniaNeural` | `accounts/myth/episodes/myth-pandora.json` |
