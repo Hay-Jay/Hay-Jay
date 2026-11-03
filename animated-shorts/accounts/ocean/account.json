@@ -1,0 +1,21 @@
+{
+  "id": "ocean",
+  "order": 5,
+  "label": "Animal facts (spare)",
+  "short": "Animals",
+  "color": "#8b5cf6",
+  "host": "Inky the octopus",
+  "voice": "American (Andrew)",
+  "name_ideas": [
+    "Inky's Ocean Facts",
+    "Weird Sea Facts"
+  ],
+  "bio": "Weird animal facts with Inky the octopus 🐙",
+  "hashtags": "#animalfacts #ocean #weirdfacts #science #learnontiktok",
+  "days": [
+    "Wed",
+    "Sun"
+  ],
+  "rule": "One surprising fact per video, checked against a reliable source.",
+  "avatar_focus_y": 1000
+}

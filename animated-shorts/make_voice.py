@@ -77,7 +77,7 @@ def main(ep_path, out):
     env = np.clip(env / (np.percentile(env[env > 0.01], 90) if (env > 0.01).any() else 1), 0, 1)
     env = np.convolve(env, [0.25, 0.5, 0.25], mode="same")
     tl = {"fps": FPS, "width": 1080, "height": 1920, "duration": round(total, 3),
-          "title": ep.get("title", ""), "channel": ep.get("channel", "ocean"), "lines": lines, "env": [round(float(x), 3) for x in env]}
+          "title": ep.get("title", ""), "channel": ep.get("channel") or os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(ep_path)))), "lines": lines, "env": [round(float(x), 3) for x in env]}
     json.dump(tl, open(os.path.join(out, "timeline.json"), "w"))
     if "post" in ep:
         p = ep["post"]

@@ -1,0 +1,317 @@
+<title>Hay-Jay Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one column. Account switcher on top; each account = header, profile kit, then its videos. Posting status is the at-a-glance signal. */
+:root {
+  --bg: #f2f3f6; --surface: #ffffff; --sunken: #e9ebf0; --ink: #15171d; --muted: #5a606e; --line: #d9dce4;
+  --ok: #12804a; --ok-soft: #dff3e7; --warn: #9a5b00; --focus: #2b46c9;
+  --acc: #2b46c9;
+  --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1116; --surface: #171a22; --sunken: #20242e; --ink: #edeff4; --muted: #9ba2b3; --line: #2b303c;
+    --ok: #2bb36b; --ok-soft: #173826; --warn: #f0b04a; --focus: #8ea0ff; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1116; --surface: #171a22; --sunken: #20242e; --ink: #edeff4; --muted: #9ba2b3; --line: #2b303c;
+  --ok: #2bb36b; --ok-soft: #173826; --warn: #f0b04a; --focus: #8ea0ff; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 18px; }
+h1, h2, h3, h4 { font-family: var(--display); margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: clamp(30px, 7vw, 44px); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+h4 { font-size: 18px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow, .label { font: 600 11.5px/1.2 var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+
+.top { display: grid; gap: 6px; }
+#sync { font-size: 13.5px; color: var(--muted); }
+#sync.warn { color: var(--warn); }
+
+/* account switcher */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab {
+  --acc: inherit; display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; min-height: 44px;
+  border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); cursor: pointer; font-weight: 600;
+}
+.tab .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--acc); flex: none; }
+.tab .count { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tab[aria-selected="true"] { border-color: var(--acc); box-shadow: inset 0 0 0 1.5px var(--acc); }
+.tab.done .count { color: var(--ok); }
+
+/* account panel */
+.panel { display: grid; gap: 16px; }
+.acct-head { display: flex; gap: 14px; align-items: center; padding-bottom: 14px; border-bottom: 3px solid var(--acc); }
+.avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: var(--acc); flex: none; border: 3px solid var(--acc); }
+.acct-head > div { min-width: 0; display: grid; gap: 4px; }
+
+.kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.kit-item { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.kit-item.wide { grid-column: 1 / -1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 4px 10px; border-radius: 999px; background: var(--sunken); font-weight: 600; font-size: 14px; }
+.hint { font-size: 13px; color: var(--muted); }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.week span { text-align: center; font: 500 12px var(--mono); padding: 7px 0; border-radius: 8px; background: var(--sunken); color: var(--muted); }
+.week span.on { background: var(--acc); color: #fff; }
+.copyline { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.copyline p { min-width: 0; overflow-wrap: anywhere; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 12px;
+  border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 13.5px; flex: none;
+}
+.btn:hover { border-color: var(--acc); }
+.btn.solid { background: var(--acc); border-color: var(--acc); color: #fff; }
+.btn[disabled] { opacity: .55; cursor: default; }
+
+.eps-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.eps { display: grid; gap: 12px; }
+.ep {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px;
+  display: grid; grid-template-columns: 124px minmax(0, 1fr); grid-template-areas: "player head" "copy copy"; gap: 12px 14px;
+}
+.player { grid-area: player; }
+.player video { width: 100%; aspect-ratio: 9 / 16; max-width: 100%; border-radius: 10px; background: #000; display: block; }
+.ep-head { grid-area: head; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.ep-copy { grid-area: copy; display: grid; gap: 8px; min-width: 0; }
+.spec { font: 500 12px/1.4 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.status { display: flex; flex-wrap: wrap; gap: 6px; }
+.post {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 11px; border-radius: 999px;
+  border: 1.5px dashed var(--line); background: transparent; cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--muted);
+}
+.post svg { width: 15px; height: 15px; }
+.post .tick { display: none; }
+.post[aria-pressed="true"] { border-style: solid; border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.post[aria-pressed="true"] .tick { display: block; }
+.post[aria-pressed="true"] .ring { display: none; }
+.post[disabled] { cursor: default; opacity: .6; }
+.copyblock { background: var(--sunken); border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; min-width: 0; }
+.copyblock .copyline { align-items: center; }
+.copyblock .text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+details.copyblock summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 36px; }
+details.copyblock summary::-webkit-details-marker { display: none; }
+details.copyblock summary .label::after { content: " ▸"; }
+details[open].copyblock summary .label::after { content: " ▾"; }
+.save-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+@media (min-width: 720px) {
+  .ep { grid-template-columns: 210px minmax(0, 1fr); grid-template-areas: "player head" "player copy"; padding: 14px; }
+}
+
+/* setup steps */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
+.steps li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 14px 56px; position: relative; display: grid; gap: 4px; }
+.steps li::before { content: counter(s); position: absolute; left: 14px; top: 13px; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font: 700 14px var(--mono); }
+.steps b { font-family: var(--display); font-size: 17px; font-weight: 600; }
+.map { display: grid; gap: 8px; }
+.map-row { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.map-row .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--acc); }
+.map-row .email { font: 500 12.5px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
+
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { .panel { animation: in .18s ease-out; } @keyframes in { from { transform: translateY(4px); } to { transform: none; } } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Hay-Jay · content studio</p>
+    <h1>Your accounts</h1>
+    <p id="summary" class="muted"></p>
+    <p id="sync" aria-live="polite">Loading your posted list…</p>
+  </header>
+  <nav class="tabs" role="tablist" aria-label="Accounts" id="tabs"></nav>
+  <main id="panels"></main>
+</div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const PLATFORMS = [['tiktok', 'TikTok'], ['youtube', 'YouTube Shorts']];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let posted = {};            // "<account>--<episode>" -> { tiktok, youtube }
+let db = null, canWrite = true;
+
+const tick = '<svg class="tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ring = '<svg class="ring" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+
+function copyBlock(label, text, key, collapsible) {
+  const body = `<p class="text" id="t-${key}">${esc(text)}</p>`;
+  const btn = `<button class="btn copy" data-copy="t-${key}" type="button">Copy</button>`;
+  if (collapsible) return `<details class="copyblock"><summary><span class="label">${label}</span>${btn}</summary>${body}</details>`;
+  return `<div class="copyblock"><div class="copyline"><span class="label">${label}</span>${btn}</div>${body}</div>`;
+}
+
+function render() {
+  const tabs = DATA.accounts.map(a => `<button class="tab" role="tab" id="tab-${a.id}" aria-controls="p-${a.id}" data-go="${a.id}" style="--acc:${a.color}"><span class="dot"></span>${esc(a.short)}<span class="count" data-count="${a.id}"></span></button>`);
+  tabs.push(`<button class="tab" role="tab" id="tab-setup" aria-controls="p-setup" data-go="setup" style="--acc:var(--ink)"><span class="dot"></span>Account setup</button>`);
+  document.getElementById('tabs').innerHTML = tabs.join('');
+
+  const panels = DATA.accounts.map(a => {
+        const eps = a.episodes.map(e => {
+      const key = `${a.id}--${e.id}`;
+      return `<article class="ep">
+        <div class="player"><video controls playsinline preload="none" poster="${e.poster}" src="${e.video}" aria-label="${esc(e.title)}"></video></div>
+        <div class="ep-head">
+          <h4>${esc(e.title)}</h4>
+          <p class="spec">${e.duration} · 1080×1920 · 9:16 · −14 LUFS</p>
+          <div class="status">${PLATFORMS.map(([p, name]) => `<button class="post" type="button" data-key="${key}" data-platform="${p}" aria-pressed="false">${ring}${tick}<span>${name}</span></button>`).join('')}</div>
+          <div class="save-row"><button class="btn solid save" type="button" data-src="${e.video}" data-file="${esc(e.file)}" hidden>Save video</button><span class="hint">${esc(e.file)}</span></div>
+        </div>
+        <div class="ep-copy">
+          ${copyBlock('TikTok caption', e.tiktok, key + '-tt')}
+          ${copyBlock('YouTube title', e.yt_title, key + '-yt')}
+          ${copyBlock('YouTube description', e.yt_desc, key + '-yd', true)}
+        </div>
+      </article>`;
+    }).join('');
+    return `<section class="panel" id="p-${a.id}" role="tabpanel" aria-labelledby="tab-${a.id}" style="--acc:${a.color}" hidden>
+      <div class="acct-head">
+        ${a.avatar ? `<img class="avatar" src="${a.avatar}" alt="${esc(a.host)}">` : ''}
+        <div><h2>${esc(a.label)}</h2><p class="muted">Host: ${esc(a.host)} · Voice: ${esc(a.voice)}</p></div>
+      </div>
+      <div class="kit">
+        <div class="kit-item"><span class="label">Name ideas</span><div class="chips">${a.name_ideas.map(n => `<span class="chip">${esc(n)}</span>`).join('')}</div><p class="hint">Check the name is free on TikTok and YouTube, then use the same one on both.</p></div>
+        <div class="kit-item"><div class="copyline"><span class="label">Bio</span><button class="btn copy" data-copy="bio-${a.id}" type="button">Copy</button></div><p id="bio-${a.id}">${esc(a.bio)}</p></div>
+        <div class="kit-item"><div class="copyline"><span class="label">Hashtags</span><button class="btn copy" data-copy="tags-${a.id}" type="button">Copy</button></div><p id="tags-${a.id}">${esc(a.hashtags)}</p></div>
+        <div class="kit-item"><span class="label">Post on</span><div class="week">${DAYS.map(d => `<span class="${a.days.includes(d) ? 'on' : ''}">${d}</span>`).join('')}</div></div>
+        <div class="kit-item wide"><span class="label">House rule</span><p>${esc(a.rule)}</p></div>
+      </div>
+      <div class="eps-head"><h3 class="label">Videos · ${a.episodes.length}</h3></div>
+      <div class="eps">${eps || '<p class="muted">No videos yet for this account.</p>'}</div>
+    </section>`;
+  });
+  panels.push(`<section class="panel" id="p-setup" role="tabpanel" aria-labelledby="tab-setup" hidden>
+    <div class="acct-head" style="--acc:var(--ink)"><div><h2>Keep each account separate</h2><p class="muted">One login per brand, so you always post the right video to the right account.</p></div></div>
+    <ol class="steps">
+      <li><b>Make one email per account</b><span>Create a new Gmail for each brand. Use it for that brand's TikTok and YouTube and nothing else.</span></li>
+      <li><b>Use one name everywhere</b><span>Pick a name from each account's ideas and use the same name and @handle on TikTok and YouTube, so fans can find you on both.</span></li>
+      <li><b>Add every account to the TikTok app</b><span>Go to Profile, tap your username at the top, then Add account. After that, the same menu switches between accounts.</span></li>
+      <li><b>Give each brand its own YouTube channel</b><span>Sign in to the YouTube app with each brand's Gmail. Switch channels from your profile picture, then Switch account.</span></li>
+      <li><b>Save the passwords</b><span>Keep all the logins in a password manager, such as Google Password Manager on Android.</span></li>
+      <li><b>Check the account before you post</b><span>Open the account's tab here, save the video, then check the profile picture at the top of TikTok or YouTube matches before you upload. Mark it posted when you're done.</span></li>
+    </ol>
+    <h3 class="label">Which videos go where</h3>
+    <div class="map">${DATA.accounts.map(a => `<div class="map-row" style="--acc:${a.color}"><span class="dot"></span><span><b>${esc(a.label)}</b><br><span class="email">${a.episodes.map(e => esc(e.file)).join(', ') || 'no videos yet'}</span></span><button class="btn" type="button" data-go="${a.id}">Open</button></div>`).join('')}</div>
+  </section>`);
+  document.getElementById('panels').innerHTML = panels.join('');
+}
+
+function paintStatus() {
+  let total = 0, done = 0;
+  for (const a of DATA.accounts) {
+    let aDone = 0;
+    for (const e of a.episodes) {
+      const s = posted[`${a.id}--${e.id}`] || {};
+      if (PLATFORMS.every(([p]) => s[p])) aDone++;
+    }
+    total += a.episodes.length; done += aDone;
+    const c = document.querySelector(`[data-count="${a.id}"]`);
+    if (c) { c.textContent = `${aDone}/${a.episodes.length}`; c.closest('.tab').classList.toggle('done', a.episodes.length > 0 && aDone === a.episodes.length); }
+  }
+  document.querySelectorAll('.post').forEach(b => {
+    const on = !!(posted[b.dataset.key] || {})[b.dataset.platform];
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.title = on ? 'Posted. Tap to mark as not posted.' : 'Tap after you post it here.';
+    b.disabled = !db || !canWrite;
+  });
+  document.getElementById('summary').textContent = `${DATA.accounts.length} accounts · ${total} videos ready · ${done} posted on both TikTok and YouTube`;
+}
+
+function show(id) {
+  const known = id === 'setup' || DATA.accounts.some(a => a.id === id);
+  if (!known) id = DATA.accounts[0].id;
+  document.querySelectorAll('.panel').forEach(p => { p.hidden = p.id !== `p-${id}`; });
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.go === id ? 'true' : 'false'));
+  document.querySelectorAll('video').forEach(v => { if (!v.closest('.panel').hidden) return; v.pause(); });
+}
+
+let toastTimer;
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2200); }
+
+document.addEventListener('click', async ev => {
+  const go = ev.target.closest('[data-go]');
+  if (go) { location.hash = go.dataset.go; show(go.dataset.go); window.scrollTo({ top: 0 }); return; }
+
+  const cp = ev.target.closest('[data-copy]');
+  if (cp) {
+    ev.preventDefault();
+    const node = document.getElementById(cp.dataset.copy);
+    const text = node.textContent;
+    try { await navigator.clipboard.writeText(text); toast('Copied'); }
+    catch { const r = document.createRange(); r.selectNodeContents(node); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected. Press and hold to copy.'); }
+    return;
+  }
+
+  const post = ev.target.closest('.post');
+  if (post && db && canWrite) {
+    const key = post.dataset.key, p = post.dataset.platform;
+    const before = posted[key] || {};
+    const next = { tiktok: !!before.tiktok, youtube: !!before.youtube, [p]: !before[p], updatedAt: new Date().toISOString() };
+    posted = { ...posted, [key]: next }; paintStatus();
+    try { await db.collection('posted').doc(key).set(next); }
+    catch (e) { posted = { ...posted, [key]: before }; paintStatus(); toast(e && e.code === 'permission_denied' ? 'You can view this page but not change it.' : "Couldn't save. Check your connection and tap again."); }
+    return;
+  }
+
+  const save = ev.target.closest('.save');
+  if (save) {
+    const dl = await claude.use('downloads');
+    if (!dl) { save.hidden = true; return; }
+    const label = save.textContent; save.disabled = true; save.textContent = 'Preparing…';
+    try {
+      const blob = await (await fetch(save.dataset.src)).blob();
+      await dl.save({ filename: save.dataset.file, data: blob });
+      save.textContent = 'Saved'; setTimeout(() => { save.textContent = label; save.disabled = false; }, 2500);
+      return;
+    } catch (e) {
+      const code = e && e.code;
+      if (code === 'declined') toast('Not saved');
+      else if (code === 'rate_limited') toast('Another save is open. Try again in a moment.');
+      else if (code === 'unavailable' || code === 'not_granted') { toast('Saving isn’t available here.'); document.querySelectorAll('.save').forEach(b => b.hidden = true); }
+      else toast("Couldn't prepare the video. Try again.");
+    }
+    save.textContent = label; save.disabled = false;
+  }
+});
+window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+
+render();
+show(location.hash.slice(1));
+paintStatus();
+
+(async () => {
+  const sync = document.getElementById('sync');
+  if (!window.claude || !window.claude.use) { sync.textContent = 'Open this page on claude.ai to track what you’ve posted.'; sync.classList.add('warn'); return; }
+  claude.use('downloads').then(dl => { if (dl) document.querySelectorAll('.save').forEach(b => b.hidden = false); });
+  db = await claude.use('db');
+  if (!db) { sync.textContent = 'Sign in to claude.ai to track what you’ve posted.'; sync.classList.add('warn'); paintStatus(); return; }
+  const user = await claude.use('user');
+  if (user) { const w = await user.can('data.write'); if (w === false) canWrite = false; }
+  paintStatus();
+  const timer = setTimeout(() => { sync.textContent = 'Can’t reach your posted list yet. Ticks may not save until it loads.'; sync.classList.add('warn'); }, 10000);
+  db.collection('posted').onSnapshot(snap => {
+    const next = {};
+    snap.docs.forEach(d => { if (d.exists) next[d.id] = d.data(); });
+    posted = next; paintStatus();
+    if (!snap.metadata.fromCache) { clearTimeout(timer); sync.classList.remove('warn'); sync.textContent = canWrite ? 'Tap TikTok or YouTube Shorts under a video once you’ve posted it there.' : 'You can view posting status but not change it.'; }
+  }, () => { clearTimeout(timer); sync.textContent = 'Posted tracking stopped working. Reload the page to try again.'; sync.classList.add('warn'); });
+})();
+</script>

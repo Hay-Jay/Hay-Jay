@@ -1,0 +1,23 @@
+{
+  "id": "myth",
+  "order": 4,
+  "label": "Greek mythology",
+  "short": "Myths",
+  "color": "#b8862b",
+  "host": "Glaux, Athena's owl",
+  "voice": "British storyteller (Sonia)",
+  "name_ideas": [
+    "Myths, Corrected",
+    "Glaux Myths",
+    "Owl of Olympus"
+  ],
+  "bio": "Greek myths told right, by Athena's owl 🦉⚡ New myth Tue, Fri, Sun.",
+  "hashtags": "#greekmythology #mythology #mythtok #history #greekgods",
+  "days": [
+    "Tue",
+    "Fri",
+    "Sun"
+  ],
+  "rule": "Say which ancient source a version comes from (Hesiod, Homer, Ovid). Myths often have more than one version.",
+  "avatar_focus_y": 1030
+}

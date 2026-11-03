@@ -1,0 +1,23 @@
+{
+  "id": "whatif",
+  "order": 3,
+  "label": "What if",
+  "short": "What If",
+  "color": "#4f5bd5",
+  "host": "Orbit the robot",
+  "voice": "American (Brian)",
+  "name_ideas": [
+    "Orbit Asks What If",
+    "What If Orbit",
+    "Hypothetically Orbit"
+  ],
+  "bio": "Wild what-ifs, real science 🤖🌍 Comment the next one.",
+  "hashtags": "#whatif #science #space #hypothetical #learnontiktok",
+  "days": [
+    "Mon",
+    "Thu",
+    "Sat"
+  ],
+  "rule": "Every claim needs a real source. Say 'could' or 'might' when scientists aren't sure.",
+  "avatar_focus_y": 1080
+}

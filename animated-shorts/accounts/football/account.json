@@ -1,0 +1,23 @@
+{
+  "id": "football",
+  "order": 2,
+  "label": "Football debates",
+  "short": "Football",
+  "color": "#d6334f",
+  "host": "Messi #10 and Ronaldo #7 with a live scoreboard",
+  "voice": "British, energetic (Ryan)",
+  "name_ideas": [
+    "GOAT Scoreboard",
+    "The GOAT Debate",
+    "Settle It FC"
+  ],
+  "bio": "Messi vs Ronaldo, settled with stats. Pick your side in the comments ⚽🐐",
+  "hashtags": "#messi #ronaldo #goat #football #soccer #messivsronaldo",
+  "days": [
+    "Tue",
+    "Thu",
+    "Sat"
+  ],
+  "rule": "Use settled numbers (trophies, records). Re-check any stat from the current season the day you post.",
+  "avatar_focus_y": 960
+}
