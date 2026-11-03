@@ -30,7 +30,7 @@ const run = (cmd, a) => new Promise((res, rej) => {
 const probe = f => +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim();
 const nn = i => String(i + 1).padStart(2, '0');
 // Emotion -> delivery for the Edge voice: [rate offset %, pitch Hz, volume %].
-const MOODS = { calm: [-4, 0, 0], serious: [-2, -2, 0], grave: [-12, -6, 0], hopeful: [0, 3, 0], urgent: [6, 4, 5], fired: [8, 8, 10] };
+const MOODS = { calm: [-4, 0, 0], serious: [-2, -2, 0], grave: [-10, -6, 0], hopeful: [0, 3, 0], urgent: [8, 4, 5], fired: [12, 8, 10] };
 function moodProsody(mood, base) {
   const [r, p, v] = MOODS[mood] || MOODS.serious;
   const sign = n => (n >= 0 ? '+' : '') + n;
