@@ -7,7 +7,7 @@ Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian
 | 1 | Nigeria 2027: what you need to know | `videos/countdown.mp4` | Jan 16 · 110M voters · the big three · 26.7% turnout |
 | 2 | Your money: 2023 vs now | `videos/your-money.mp4` | Petrol 7×, naira −66%, poverty 63%, food inflation |
 | 3 | 2023 rewind | `videos/rewind-2023.mp4` | 68.5M registered voters stayed home; margin was 2.69M |
-| 4 | Why Peter Obi | `videos/why-obi.mp4` | Record, plan, why change, Obi–Kwankwaso |
+| 4 | Know the candidates | `videos/know-the-candidates.mp4` | Tinubu, Atiku and Obi side by side, why we need change, choose for yourself |
 | 5 | How to make your vote count | `videos/protect-your-vote.mp4` | PVC → polling unit → stay for the count → IReV |
 
 - `stills/<video>-NN.png`: one 1080×1920 PNG per scene. Post them as an Instagram carousel or as Stories.
@@ -49,8 +49,9 @@ node render.mjs why-obi
 | Naira | ~₦461/$ (May 2023) → ₦1,330–1,358/$ official (Aug–Sep 2026) | CBN / SEC via press |
 | Poverty | 56% (2023) → 63% (2025), ≈140M people | World Bank Nigeria Development Update, Apr 2026 |
 | Inflation | 14.63% headline, 19.59% food (Sept 2026) | NBS CPI (rebased Jan 2025) |
-| Obi record | Anambra governor 2006–2014; ThisDay "Most Prudent Governor" 2009; Sun Man of the Year 2007 | Wikipedia: Peter Obi |
+| Candidate records | Tinubu: President since 2023, Lagos governor 1999–2007 · Atiku: Vice President 1999–2007, PDP candidate 2019 & 2023 · Obi: Anambra governor 2006–2014, LP candidate 2023 | Wikipedia |
+| 2023 states won | Tinubu 12 · Atiku 12 · Obi 11 + FCT · Kwankwaso 1 | INEC |
 
 Before posting, double-check the dates and numbers against INEC and NBS. They can change.
 
-Peter Obi's photo is `Peter_Obi.png` from Wikimedia Commons (free licence; check its Commons page for attribution). The other candidates appear as initials. To use photos, add freely licensed images and set their paths in `IMG` in `videos.js`.
+This kit is independent civic information and is not affiliated with any party or candidate. Every candidate is shown the same way, with initials. To use photos, add a freely licensed photo for **each** candidate and set all their paths in `IMG` in `videos.js`.

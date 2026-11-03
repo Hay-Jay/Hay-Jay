@@ -9,11 +9,11 @@ window.HANDLE = '#Nigeria2027';
 window.VOICE = { name: 'en-NG-AbeoNeural', rate: '+10%' };
 
 const IMG = {
-  obi: 'assets/img/peter-obi.png',
-  // Rivals show initials (no photo) so the ballot cards stay consistent.
-  // Drop a freely licensed photo in assets/img/ and put its path here to use one.
+  // Every candidate is shown the same way (initials, no photo) to keep the videos neutral.
+  // To use photos, add a freely licensed one for EACH candidate and set all three paths.
   tinubu: '',
   atiku: '',
+  obi: '',
 };
 
 const hbar = (label, value, w, color, t) => `
@@ -29,6 +29,17 @@ const cand = (img, initials, name, party, color, meta, t, star) => `
     <div class="ph"${img ? ` style="background-image:url('${img}')"` : ''}>${img ? '' : initials}</div>
     <div><div class="nm">${name}</div><div class="meta"><span class="party">${party}</span>${meta}</div></div>
   </div>`;
+
+const profile = (initials, name, party, color, facts) => ({
+  dur: 5.6,
+  html: `
+    <div class="row a" data-a="up" style="align-items:center;gap:36px">
+      <div class="cand" style="--c:${color};padding:0;border:0;background:none"><div class="ph" style="width:220px;height:220px;font-size:96px">${initials}</div></div>
+      <div><span class="pill" style="background:${color};color:#021;border-color:transparent">${party}</span><div class="h2" style="margin-top:18px">${name}</div></div>
+    </div>
+    <div class="gap"></div>
+    ${facts.map(([k, v, note], i) => `<div class="card a" data-a="left" data-t="${.4 + i * .3}" style="margin-bottom:22px"><div class="small">${k}</div><div class="h3">${v}</div>${note ? `<div class="sub" style="margin-top:6px">${note}</div>` : ''}</div>`).join('')}`,
+});
 
 const sources = (items) => ({
   dur: 3.2,
@@ -72,7 +83,7 @@ window.VIDEOS = [
         <div class="cands">
           ${cand(IMG.tinubu, 'BT', 'Bola Tinubu', 'APC', 'var(--apc)', 'Incumbent · VP: Kashim Shettima', .5)}
           ${cand(IMG.atiku, 'AA', 'Atiku Abubakar', 'ADC', 'var(--adc)', 'Running mate: Rotimi Amaechi', .8)}
-          ${cand(IMG.obi, 'PO', 'Peter Obi', 'NDC', 'var(--ndc)', 'Running mate: Rabiu Kwankwaso', 1.1, true)}
+          ${cand(IMG.obi, 'PO', 'Peter Obi', 'NDC', 'var(--ndc)', 'Running mate: Rabiu Kwankwaso', 1.1)}
         </div>
         <div class="small a" data-a="up" data-t="1.6" style="margin-top:28px">+ other parties' candidates on the INEC list</div>` },
       { dur: 5, mood: 'red', html: `
@@ -105,7 +116,7 @@ window.VIDEOS = [
   {
     id: 'your-money',
     title: '2 · Your money: 2023 vs now',
-    caption: 'Petrol: ₦185 → ₦1,335. Dollar: ₦461 → ~₦1,350. Poverty: 56% → 63%. Prices don\'t vote. You do. 🇳🇬 #Nigeria2027 #CostOfLiving #Naira #Fuel #Obidient',
+    caption: 'Petrol: ₦185 → ₦1,335. Dollar: ₦461 → ~₦1,350. Poverty: 56% → 63%. Prices don\'t vote. You do. 🇳🇬 #Nigeria2027 #CostOfLiving #Naira #Fuel #NigeriaDecides2027',
     scenes: [
       { dur: 3.4, html: `
         <div class="kicker a" data-a="up">May 2023 → today</div>
@@ -167,7 +178,7 @@ window.VIDEOS = [
   {
     id: 'rewind-2023',
     title: '3 · 2023 rewind: the votes that never came',
-    caption: '68.5 million registered Nigerians didn\'t vote in 2023. The winning margin was 2.7 million. Do the maths. 🇳🇬 #Nigeria2027 #Election2023 #PVC #EveryVoteCounts',
+    caption: '68.5 million registered Nigerians didn\'t vote in 2023. The winning margin was 1.8 million. Do the maths. 🇳🇬 #Nigeria2027 #Election2023 #PVC #EveryVoteCounts',
     scenes: [
       { dur: 4.2, mood: 'red', html: `
         <div class="kicker a red" data-a="up">2023 presidential election</div>
@@ -184,27 +195,27 @@ window.VIDEOS = [
         ${hbar('Peter Obi · LP', '6.10M · 25.4%', 69.4, 'var(--ndc)', 1.0)}
         ${hbar('Rabiu Kwankwaso · NNPP', '1.50M · 6.2%', 17, 'var(--nnpp)', 1.3)}
         <div class="gap"></div>
-        <div class="body a" data-a="up" data-t="2.2">Obi won <span class="mark">Lagos</span> and <span class="mark">Abuja (FCT)</span>.</div>` },
+        <div class="body a" data-a="up" data-t="2.2">States won: Tinubu <b>12</b> · Atiku <b>12</b> · Obi <b>11 + FCT</b> · Kwankwaso <b>1</b></div>` },
       { dur: 6, html: `
         <div class="kicker a" data-a="up">Do the maths</div>
-        <div class="body a" data-a="up" data-t=".1">Gap between 1st and Obi</div>
-        <div class="big a" data-a="count" data-t=".3" data-to="2.69" data-dec="2" data-suf="M">2.69M</div>
+        <div class="body a" data-a="up" data-t=".1">Gap between 1st and 2nd place</div>
+        <div class="big a" data-a="count" data-t=".3" data-to="1.81" data-dec="2" data-suf="M">1.81M</div>
         <div class="gap"></div>
         <div class="body a" data-a="up" data-t="1">Registered voters who stayed home</div>
         <div class="big a red" data-a="count" data-t="1.2" data-to="68.5" data-dec="1" data-suf="M">68.5M</div>
         <div class="gap"></div>
-        <div class="h3 a" data-a="up" data-t="2.2">The margin was less than <span class="mark">4%</span> of the people who didn't vote.</div>` },
+        <div class="h3 a" data-a="up" data-t="2.2">The margin was less than <span class="mark">3%</span> of the people who didn't vote.</div>` },
       { dur: 5.4, html: `
-        <div class="kicker a" data-a="up">2027 is a new ticket</div>
-        <div class="body a" data-a="up" data-t=".1">Obi + Kwankwaso ran <b>separately</b> in 2023:</div>
+        <div class="kicker a" data-a="up">2027 is a new race</div>
+        <div class="h2 a" data-a="up" data-t=".1">New parties.<br>New tickets.</div>
         <div class="gap"></div>
-        <div class="row a" data-a="up" data-t=".4" style="align-items:center;gap:20px">
-          <div class="h2" style="color:var(--ndc)">6.10M</div><div class="h2">+</div><div class="h2" style="color:var(--nnpp)">1.50M</div>
-        </div>
-        <div class="mega a hl" data-a="count" data-t="1" data-to="7.6" data-dec="1" data-suf="M">7.6M</div>
+        <div class="card a" data-a="left" data-t=".5"><div class="body">Tinubu: <b>APC</b>, now the incumbent</div></div>
         <div class="gap-s"></div>
-        <div class="body a" data-a="up" data-t="1.8">Now they're on <span class="mark">one ticket</span> (NDC).</div>
-        <div class="sub a" data-a="up" data-t="2.2">Past votes don't transfer automatically. Turnout decides.</div>` },
+        <div class="card a" data-a="left" data-t=".8"><div class="body">Atiku: PDP → <b>ADC</b></div></div>
+        <div class="gap-s"></div>
+        <div class="card a" data-a="left" data-t="1.1"><div class="body">Obi: LP → <b>NDC</b>, with Kwankwaso</div></div>
+        <div class="gap"></div>
+        <div class="h3 a" data-a="up" data-t="1.8">2023 results don't carry over. <span class="mark">Turnout decides.</span></div>` },
       { dur: 3.6, html: `
         <div class="h1 a" data-a="up">Don't let<br>68.5 million<br>stay home</div>
         <div class="gap"></div>
@@ -213,40 +224,38 @@ window.VIDEOS = [
         '<b>INEC</b> declared results, 1 March 2023',
         '<b>Registered:</b> 93,469,008 · <b>Votes cast:</b> 24,965,218',
         '<b>Tinubu</b> 8,794,726 · <b>Atiku</b> 6,984,520 · <b>Obi</b> 6,101,533 · <b>Kwankwaso</b> 1,496,687',
-        '<b>2027 ticket:</b> INEC nomination publication, Aug 2026',
+        '<b>2027 tickets:</b> INEC nomination publication, Aug 2026',
       ]),
     ],
   },
 
   /* ------------------------------------------------------------------ */
   {
-    id: 'why-obi',
-    title: '4 · Why Peter Obi',
-    caption: 'Former Anambra governor. Named "Most Prudent Governor in Nigeria". Pitch: move Nigeria from consuming to producing. Obi–Kwankwaso, NDC, 16 Jan 2027. 🇳🇬 #PeterObi #Obidient #Nigeria2027 #NDC',
+    id: 'know-the-candidates',
+    title: '4 · Know the candidates',
+    caption: 'Three leading tickets for 16 January 2027: their records, side by side. Compare them, ask hard questions, then choose for yourself. 🇳🇬 #Nigeria2027 #NigeriaDecides2027 #KnowYourCandidates #INEC',
     scenes: [
-      { dur: 4.6, cls: 'hero', html: `
-        <div class="hero-ph a" data-a="zoom" style="background-image:url('${IMG.obi}')"></div>
-        <div style="position:relative">
-          <div class="kicker a" data-a="up" data-t=".3">NDC presidential candidate · 2027</div>
-          <div class="mega a" data-a="up" data-t=".5" style="font-size:230px">PETER<br>OBI</div>
-          <div class="gap-s"></div>
-          <div class="body a" data-a="up" data-t="1">Running mate: <span class="hl">Rabiu Kwankwaso</span></div>
-        </div>` },
-      { dur: 6, html: `
-        <div class="kicker a" data-a="up">The record</div>
-        <div class="card a" data-a="left" data-t=".2"><div class="small">Governor of Anambra State</div><div class="h2">2006 – 2014</div><div class="sub">Won his 2003 mandate back in court, re-elected in 2010.</div></div>
-        <div class="gap-s"></div>
-        <div class="card a" data-a="left" data-t=".6"><div class="small">ThisDay, 2009</div><div class="h3">"Most Prudent Governor in Nigeria"</div></div>
-        <div class="gap-s"></div>
-        <div class="card a" data-a="left" data-t="1"><div class="small">The Sun, 2007</div><div class="h3">Man of the Year</div></div>` },
-      { dur: 5.6, html: `
-        <div class="kicker a" data-a="up">The plan</div>
-        <div class="h1 a" data-a="up" data-t=".1">From<br><span class="red">consumption</span></div>
-        <div class="h1 a" data-a="pop" data-t=".6">↓</div>
-        <div class="h1 a" data-a="up" data-t=".9">to <span class="mark">production</span></div>
+      { dur: 4, html: `
+        <div class="kicker a" data-a="up">Before you vote</div>
+        <div class="h1 a" data-a="up" data-t=".1">Know the<br><span class="mark">candidates</span></div>
         <div class="gap"></div>
-        <div class="body a" data-a="up" data-t="1.6">Grow food, make goods, create jobs here, not import them.</div>
-        <div class="src a" data-a="fade" data-t="1.9">Obi campaign manifesto launch, Onitsha, Aug 2026</div>` },
+        <div class="body a" data-a="up" data-t=".8">Three leading tickets. The same questions for all of them.</div>
+        <div class="sub a" data-a="up" data-t="1.1">Listed by their 2023 vote totals.</div>` },
+      profile('BT', 'Bola Tinubu', 'APC', 'var(--apc)', [
+        ['President', 'since May 2023'],
+        ['Governor of Lagos', '1999 – 2007'],
+        ['Running mate', 'Kashim Shettima', 'Vice President, former Borno governor'],
+      ]),
+      profile('AA', 'Atiku Abubakar', 'ADC', 'var(--adc)', [
+        ['Vice President', '1999 – 2007'],
+        ['PDP presidential candidate', '2019 and 2023'],
+        ['Running mate', 'Rotimi Amaechi', 'Former Rivers governor and transport minister'],
+      ]),
+      profile('PO', 'Peter Obi', 'NDC', 'var(--ndc)', [
+        ['Governor of Anambra', '2006 – 2014'],
+        ['Labour Party presidential candidate', '2023'],
+        ['Running mate', 'Rabiu Kwankwaso', 'Former Kano governor, 2023 NNPP candidate'],
+      ]),
       { dur: 6, mood: 'red', html: `
         <div class="kicker a red" data-a="up">Why we need change</div>
         <div class="card a" data-a="left" data-t=".2"><div class="row" style="justify-content:space-between;align-items:center"><div class="body">Poverty</div><div class="h3 red">56% → 63%</div></div></div>
@@ -257,19 +266,17 @@ window.VIDEOS = [
         <div class="gap-s"></div>
         <div class="card a" data-a="left" data-t="1.1"><div class="row" style="justify-content:space-between;align-items:center"><div class="body">Food inflation</div><div class="h3 red">19.6%</div></div></div>
         <div class="gap"></div>
-        <div class="h3 a" data-a="up" data-t="1.8">Same choices, same results.</div>` },
+        <div class="h3 a" data-a="up" data-t="1.8">Ask every candidate: <span class="mark">what is your plan?</span></div>` },
       { dur: 4.4, html: `
         <div class="kicker a" data-a="up">16 January 2027</div>
-        <div class="mega a hl" data-a="pop" data-t=".1" style="font-size:190px">OBI–<br>KWANKWASO</div>
+        <div class="h1 a" data-a="up" data-t=".1">Compare.<br>Question.</div>
+        <div class="h1 a hl" data-a="pop" data-t=".7">Choose for yourself.</div>
         <div class="gap"></div>
-        <div class="h2 a" data-a="up" data-t=".9">Vote NDC.</div>
-        <div class="body a" data-a="up" data-t="1.3">Then protect your vote.</div>` },
+        <div class="body a" data-a="up" data-t="1.3">Then vote, and protect your vote.</div>` },
       sources([
-        '<b>Wikipedia:</b> Peter Obi (offices, awards, party history)',
-        '<b>INEC</b> nomination publication, Aug 2026 (Obi–Kwankwaso, NDC)',
-        '<b>Voice of Nigeria:</b> Obi launches 2027 campaign',
+        '<b>INEC</b> nomination publication, Aug 2026 (tickets and parties)',
+        '<b>Wikipedia:</b> Bola Tinubu · Atiku Abubakar · Peter Obi (offices held)',
         '<b>World Bank</b> Apr 2026 · <b>NBS</b> CPI Sept 2026',
-        '<b>Photo:</b> Wikimedia Commons, “Peter Obi.png” (free licence)',
       ]),
     ],
   },
@@ -335,18 +342,19 @@ window.NARRATION = {
   ],
   'rewind-2023': [
     ['grave',   'In twenty twenty-three, sixty-eight and a half million registered Nigerians... did not vote. Only about twenty-five million, out of ninety-three million, turned up.'],
-    ['calm',    'Here is the official result. Tinubu, eight point seven nine million. Atiku, six point nine eight million. Peter Obi, six point one million. Kwankwaso, one point five million. And Obi won Lagos, and Abuja.'],
-    ['urgent',  'Now do the maths. The gap between first place and Obi was two point seven million votes. That is less than four percent of the people who stayed home!'],
-    ['hopeful', 'In twenty twenty-three, Obi and Kwankwaso ran separately, and together they got seven point six million votes. Now, they are on one ticket. But votes don\'t move by themselves. Turnout decides.'],
+    ['calm',    'Here is the official result. Tinubu, eight point seven nine million. Atiku, six point nine eight million. Peter Obi, six point one million. Kwankwaso, one point five million. Tinubu and Atiku won twelve states each, Obi won eleven and Abuja, and Kwankwaso won Kano.'],
+    ['urgent',  'Now do the maths. The gap between first and second place was one point eight million votes. That is less than three percent of the people who stayed home!'],
+    ['serious', 'And twenty twenty-seven is a new race. Atiku has moved to the ADC. Obi has moved to the NDC, with Kwankwaso as his running mate. Tinubu runs as the incumbent. Old results don\'t carry over. Turnout decides.'],
     ['fired',   'Don\'t let sixty-eight million people stay home again!'],
     ['calm',    'Every number is from INEC. Check it. Then share it.'],
   ],
-  'why-obi': [
-    ['hopeful', 'Peter Obi. The NDC presidential candidate for twenty twenty-seven... with Rabiu Kwankwaso as his running mate.'],
-    ['serious', 'His record. Governor of Anambra State, from two thousand and six to twenty fourteen. He fought for his mandate in court, and won. He was re-elected in twenty ten. ThisDay named him the most prudent governor in Nigeria.'],
-    ['hopeful', 'His plan? Move Nigeria from consumption... to production. Grow our own food. Make our own goods. Create jobs here, instead of importing them.'],
-    ['grave',   'Why do we need change? Poverty, up to sixty-three percent. Petrol, seven times more expensive. The naira has lost two thirds of its value. The same choices... will give us the same results.'],
-    ['fired',   'On January sixteenth, vote Obi, Kwankwaso. Vote NDC! Then protect your vote.'],
+  'know-the-candidates': [
+    ['calm',    'Before you vote, know the candidates. Three leading tickets... and the same questions for all of them.'],
+    ['serious', 'Bola Tinubu, APC. President since May twenty twenty-three, and governor of Lagos State from nineteen ninety-nine to two thousand and seven. His running mate is Vice President Kashim Shettima.'],
+    ['serious', 'Atiku Abubakar, ADC. Vice President from nineteen ninety-nine to two thousand and seven, and the PDP candidate in twenty nineteen and twenty twenty-three. His running mate is Rotimi Amaechi.'],
+    ['serious', 'Peter Obi, NDC. Governor of Anambra State from two thousand and six to twenty fourteen, and the Labour Party candidate in twenty twenty-three. His running mate is Rabiu Kwankwaso.'],
+    ['grave',   'Why do we need change? Poverty, up to sixty-three percent. Petrol, seven times more expensive. The naira has lost two thirds of its value. So ask every candidate... what is your plan?'],
+    ['fired',   'Compare them. Question them. Then choose for yourself. Vote on January sixteenth, and protect your vote!'],
     ['calm',    'The sources are on screen. Share this, and let the facts travel.'],
   ],
   'protect-your-vote': [
