@@ -6,9 +6,10 @@ window.HANDLE = '#Nigeria2027';
 
 const IMG = {
   obi: 'assets/img/peter-obi.png',
-  tinubu: 'assets/img/bola-tinubu.jpg',
-  atiku: 'assets/img/atiku-abubakar.jpg',
-  kwankwaso: 'assets/img/rabiu-kwankwaso.jpg',
+  // Rivals show initials (no photo) so the ballot cards stay consistent.
+  // Drop a freely licensed photo in assets/img/ and put its path here to use one.
+  tinubu: '',
+  atiku: '',
 };
 
 const hbar = (label, value, w, color, t) => `
@@ -21,7 +22,7 @@ const people = (n, t) => `<div class="people a" data-a="people" data-t="${t}" da
 
 const cand = (img, initials, name, party, color, meta, t, star) => `
   <div class="cand a ${star ? 'star' : ''}" data-a="left" data-t="${t}" style="--c:${color}">
-    <div class="ph" style="background-image:url('${img}')">${img ? '' : initials}</div>
+    <div class="ph"${img ? ` style="background-image:url('${img}')"` : ''}>${img ? '' : initials}</div>
     <div><div class="nm">${name}</div><div class="meta"><span class="party">${party}</span>${meta}</div></div>
   </div>`;
 

@@ -52,4 +52,4 @@ node render.mjs why-obi
 
 Before posting, double-check the dates and numbers against INEC and NBS. They can change.
 
-Photos are from Wikimedia Commons under free licences: `Peter_Obi.png`, `Bola_Tinubu_portrait.jpg`, and `Atiku_Abubakar-2010_(cropped).jpg` if it is present. Check each file's Commons page for the exact attribution.
+Peter Obi's photo is `Peter_Obi.png` from Wikimedia Commons (free licence; check its Commons page for attribution). The other candidates appear as initials. To use photos, add freely licensed images and set their paths in `IMG` in `videos.js`.
