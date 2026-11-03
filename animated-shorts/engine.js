@@ -349,8 +349,11 @@ function renderAt(t) {
   (S[ln.scene] || S.cta)({ t, lt, d, ln, talk });
   ctx.restore();
   overlay(t);
+}
+// captions and the closing fade are drawn once per output frame, after motion blur, so text stays crisp
+function finishFrame(t, y) {
+  capY = y;
   drawCaptions(t);
-  // fade to black on the last half second
   const fo = clamp((t - (TL.duration - 0.5)) / 0.5);
   if (fo > 0) { ctx.fillStyle = `rgba(0,0,0,${fo})`; ctx.fillRect(0, 0, W, H); }
 }
@@ -358,11 +361,15 @@ window.setup = async tl => { TL = tl; buildChunks(); chInit(tl); await document.
 window.frame = t => {
   const n = Math.max(1, FX.blur | 0), sh = FX.shutter / TL.fps;
   ACX.globalCompositeOperation = 'source-over';
+  let y = 1440;
   for (let k = 0; k < n; k++) {
     renderAt(n === 1 ? t : t + (k / (n - 1) - 0.5) * sh);
+    if (k === Math.floor((n - 1) / 2)) y = capY;   // a scene may move the captions; use the middle sub-frame's choice
     ACX.globalAlpha = 1 / (k + 1); ACX.drawImage(cv, 0, 0);
   }
-  ACX.globalAlpha = 1; post(t);
+  ACX.globalAlpha = 1;
+  { const prev = ctx; ctx = ACX; finishFrame(t, y); ctx = prev; }
+  post(t);
   MAIN.drawImage(ACC, 0, 0);
   return cv.toDataURL('image/jpeg', 0.93).split(',')[1];
 };
