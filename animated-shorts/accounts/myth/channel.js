@@ -136,7 +136,7 @@ function tongueBand(x0, x1, y) {
 function vaseWorld(t, main, o = {}) {
   layer(0.15, () => ctx.drawImage(vaseC(), -210, -240));
   layer(1, () => {
-    tongueBand(-400, 1500, 190);
+    tongueBand(-400, 1500, 110);
     meanderBand(-400, 1500, 1290, 64);
     if (main) main();
   });
@@ -155,11 +155,11 @@ function inscription(str, x, y, size, k = 1, vertical = false) {
   ctx.font = `700 ${size}px ${GREEK}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = CLAY_L;
   ctx.fillText(str, 0, 0); ctx.restore();
 }
-function namePlate(str, x, y, k = 1) {
+function namePlate(str, x, y, k = 1, size = 48) {
   if (k <= 0) return;
   ctx.save(); ctx.translate(x, y); ctx.scale(easeBack(k), easeBack(k));
-  ctx.font = `900 48px ${SERIF}`; const w = ctx.measureText(str).width + 60;
-  ctx.beginPath(); ctx.roundRect(-w / 2, -38, w, 76, 8); ctx.fillStyle = 'rgba(19,11,7,.88)'; ctx.fill();
+  ctx.font = `900 ${size}px ${SERIF}`; const w = ctx.measureText(str).width + size * 1.25;
+  ctx.beginPath(); ctx.roundRect(-w / 2, -size * 0.8, w, size * 1.6, 8); ctx.fillStyle = 'rgba(19,11,7,.88)'; ctx.fill();
   ctx.lineWidth = 3; ctx.strokeStyle = '#e7b766'; ctx.stroke();
   ctx.fillStyle = '#f6d58a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(str, 0, 3); ctx.restore();
 }
@@ -265,94 +265,416 @@ function owl(x, y, s, o) {
 const HEAD_PATH = [['m', -34, -6], ['c', -38, -30, -30, -42, -18, -44], ['c', -4, -48, 14, -46, 24, -36], ['c', 32, -28, 34, -18, 34, -10], ['l', 46, 12], ['l', 35, 15],
   ['l', 38, 20], ['l', 33, 23], ['l', 36, 27], ['c', 36, 34, 32, 40, 24, 41], ['c', 16, 42, 9, 39, 4, 35], ['l', 7, 60], ['l', -16, 60], ['c', -17, 36, -36, 16, -34, -6]];
 function tracePath(P) { ctx.beginPath(); for (const p of P) { if (p[0] === 'm') ctx.moveTo(p[1], p[2]); else if (p[0] === 'l') ctx.lineTo(p[1], p[2]); else ctx.bezierCurveTo(p[1], p[2], p[3], p[4], p[5], p[6]); } ctx.closePath(); }
+// palette for the figure being drawn (stone statues and marble swap it)
+let PAL = { fill: CLAY, ink: INK, hair: HAIR };
+const STONE = { fill: '#a39d92', ink: '#3b3732', hair: '#7d776e' };
+const MARBLE_PAL = { fill: '#ece4d4', ink: '#7c7062', hair: '#cfc4b0' };
 function limb(ax, ay, a1, l1, a2, l2, w1, w2) {
   const kx = ax + Math.sin(a1) * l1, ky = ay + Math.cos(a1) * l1, ex = kx + Math.sin(a2) * l2, ey = ky + Math.cos(a2) * l2;
-  for (const [col, extra] of [[INK, 6], [CLAY, 0]]) {
+  for (const [col, extra] of [[PAL.ink, 6], [PAL.fill, 0]]) {
     ctx.strokeStyle = col; ctx.lineCap = 'round';
     ctx.lineWidth = w1 + extra; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(kx, ky); ctx.stroke();
     ctx.lineWidth = w2 + extra; ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(ex, ey); ctx.stroke();
   }
   return [ex, ey, kx, ky];
 }
-// kind: 'zeus' | 'prometheus' | 'pandora' | 'human' ; o: {t, f (1 right / -1 left), walk, phase, armF:[a,b], armB:[a,b], lean, hold, reveal (0..1 build-up from light)}
+// Each character is a preset: robe length, hair, beard, headgear, wings.
+const PRESET = {
+  zeus: { robe: 'mid', hair: 'curly', beard: 1, wreath: true },
+  poseidon: { robe: 'mid', hair: 'curly', beard: 1 },
+  hades: { robe: 'long', hair: 'curly', beard: 1, crown: true },
+  laocoon: { robe: 'long', hair: 'curly', beard: 0.8, wreath: true },
+  prometheus: { robe: 'short', hair: 'curly', beard: 0.6 },
+  daedalus: { robe: 'short', hair: 'curly', beard: 0.75 },
+  human: { robe: 'short', hair: 'short' },
+  icarus: { robe: 'short', hair: 'short' },
+  hero: { robe: 'short', hair: 'short', helmet: 'corinthian' },
+  paris: { robe: 'short', hair: 'short', helmet: 'phrygian' },
+  apollo: { robe: 'drape', hair: 'long', wreath: true },
+  pandora: { robe: 'long', hair: 'bun', female: true },
+  maiden: { robe: 'long', hair: 'long', female: true },
+  persephone: { robe: 'long', hair: 'long', female: true, wreath: true },
+  medusa: { robe: 'long', hair: 'snakes', female: true },
+  gorgon: { robe: 'mid', hair: 'snakes', female: true, wings: 0.7 },
+  athena: { robe: 'long', hair: 'long', female: true, helmet: 'corinthian' },
+  demeter: { robe: 'long', hair: 'bun', female: true, veil: true },
+  thetis: { robe: 'long', hair: 'long', female: true },
+};
+// feathered wings fixed at the shoulder. spread 0 folded .. 1 open; o.flap animates, o.loss (0..1) strips feathers
+function featherWings(ax, ay, spread, o) {
+  const t = o.t, flap = (o.flap || 0) * Math.sin(t * (o.flapSpeed || 9)) * 0.35, loss = o.loss || 0;
+  for (const [layer, len, n, off] of [[0, 230, 9, -0.06], [1, 150, 8, 0.06]]) {
+    for (let i = 0; i < n; i++) {
+      if (layer === 0 && i / n > 1 - loss * 1.05) continue;
+      const u = i / (n - 1), a = lerp(lerp(-0.7, 0.05, spread), lerp(0.35, 1.95, spread), u) + flap * (0.4 + u) + off;
+      const l = len * (0.55 + 0.45 * Math.sin(Math.PI * (0.25 + 0.75 * u)));
+      ctx.save(); ctx.translate(ax, ay); ctx.rotate(a);
+      ctx.beginPath(); ctx.ellipse(-l / 2, 0, l / 2, 15 - layer * 3, 0, 0, Math.PI * 2);
+      ctx.fillStyle = layer ? PAL.fill : '#c26a33'; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-l + 8, 0); ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.restore();
+    }
+  }
+}
+function snakeHair(t) {
+  for (let k = 0; k < 9; k++) {
+    const a0 = lerp(-2.7, 0.15, k / 8), bx = Math.cos(a0) * 36 - 4, by = Math.sin(a0) * 38 - 10;
+    const pts = [[bx, by]];
+    for (let j = 1; j <= 8; j++) {
+      const u = j / 8, w = Math.sin(t * 5 + k * 1.3 - u * 5) * 0.55;
+      const a = a0 + w * u + (k < 4 ? -0.2 : 0.15) * u;
+      const p = pts[pts.length - 1]; pts.push([p[0] + Math.cos(a) * 10, p[1] + Math.sin(a) * 10]);
+    }
+    for (const [col, wd] of [[PAL.ink, 11], [PAL.fill === CLAY ? '#b8d26a' : PAL.fill, 6]]) {
+      ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py));
+      ctx.strokeStyle = col; ctx.lineWidth = wd; ctx.lineCap = 'round'; ctx.stroke();
+    }
+    const [hx, hy] = pts[pts.length - 1];
+    ctx.beginPath(); ctx.ellipse(hx, hy, 8, 5.5, Math.atan2(hy - pts[7][1], hx - pts[7][0]), 0, Math.PI * 2);
+    ctx.fillStyle = PAL.fill === CLAY ? '#9cba4a' : PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 2; ctx.stroke();
+  }
+}
+function rod(x0, y0, x1, y1, w) { ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = PAL.ink; ctx.lineWidth = w + 5; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.strokeStyle = PAL.fill; ctx.lineWidth = w; ctx.stroke(); ctx.restore(); }
+// props held in a hand. ang = direction the prop points (0 = straight up, + = forward)
+function handProp(kind, hx, hy, ang, o) {
+  const t = o.t;
+  ctx.save(); ctx.translate(hx, hy); ctx.rotate(ang);
+  ctx.strokeStyle = PAL.ink; ctx.fillStyle = PAL.fill; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (kind === 'spear' || kind === 'trident' || kind === 'bident') {
+    rod(0, 150, 0, -250, 6);
+    if (kind === 'spear') { ctx.beginPath(); ctx.moveTo(0, -300); ctx.quadraticCurveTo(12, -268, 0, -246); ctx.quadraticCurveTo(-12, -268, 0, -300); ctx.fill(); ctx.lineWidth = 3; ctx.stroke(); }
+    else {
+      const xs = kind === 'trident' ? [-22, 0, 22] : [-14, 14];
+      rod(xs[0], -250, xs[xs.length - 1], -250, 5);
+      for (const px of xs) { rod(px, -250, px, -300, 5); rod(px - 7, -288, px, -306, 3); rod(px + 7, -288, px, -306, 3); }
+    }
+  } else if (kind === 'sword') {
+    ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(0, 14); ctx.lineTo(0, -14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-6, -14); ctx.lineTo(0, -120); ctx.quadraticCurveTo(26, -140, 22, -110); ctx.lineTo(6, -14); ctx.closePath(); ctx.fill(); ctx.lineWidth = 3; ctx.stroke();
+    if (o.glint) glow(4, -90, 70, 'rgba(255,250,220,.8)', o.glint);
+  } else if (kind === 'bow') {
+    const d = o.draw || 0;
+    for (const [c, w] of [[PAL.ink, 11], [PAL.fill, 6]]) { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(0, -110); ctx.quadraticCurveTo(46, 0, 0, 110); ctx.stroke(); }
+    ctx.strokeStyle = PAL.fill; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(0, -110); ctx.lineTo(-70 * d, 0); ctx.lineTo(0, 110); ctx.stroke();
+    if (o.arrowNocked) { rod(-70 * d, 0, 70, 0, 4); ctx.fillStyle = PAL.fill; ctx.beginPath(); ctx.moveTo(70, -9); ctx.lineTo(88, 0); ctx.lineTo(70, 9); ctx.fill(); }
+  } else if (kind === 'torch') {
+    rod(0, 50, 0, -60, 7); ctx.restore();
+    const fx = hx + Math.sin(ang) * 60, fy = hy - Math.cos(ang) * 60; flame(fx, fy, 30, t, hx); glow(fx, fy - 30, 260, 'rgba(255,150,50,.55)', 1); return;
+  } else if (kind === 'wheat') {
+    for (let k = -2; k <= 2; k++) { ctx.save(); ctx.rotate(k * 0.12); ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 30); ctx.lineTo(0, -130); ctx.stroke();
+      for (let g = 0; g < 6; g++) { ctx.beginPath(); ctx.ellipse(g % 2 ? 6 : -6, -100 - g * 9, 4, 8, g % 2 ? 0.4 : -0.4, 0, Math.PI * 2); ctx.fill(); ctx.lineWidth = 1.5; ctx.stroke(); } ctx.restore(); }
+  } else if (kind === 'pomegranate') {
+    ctx.restore(); pomegranate(hx, hy - 20, 26, 0, t); return;
+  } else if (kind === 'seed') {
+    ctx.restore(); glow(hx, hy - 6, 60, 'rgba(255,40,60,.8)', 0.8 + 0.2 * Math.sin(t * 6)); circle(hx, hy - 6, 9, '#e0213a'); circle(hx - 3, hy - 9, 3, '#ffd0d6'); return;
+  } else if (kind === 'flower') {
+    ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(0, -60); ctx.stroke(); ctx.restore(); narcissus(hx + Math.sin(ang) * 64, hy - Math.cos(ang) * 64, 16, t); return;
+  } else if (kind === 'babyHeel') {
+    ctx.restore(); ctx.save(); ctx.translate(hx, hy);
+    ctx.lineWidth = 3; ctx.strokeStyle = PAL.ink; ctx.fillStyle = PAL.fill;
+    ctx.beginPath(); ctx.ellipse(0, 50, 20, 44, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 108, 24, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-4, 10); ctx.lineTo(-6, -6); ctx.lineWidth = 9; ctx.stroke(); ctx.strokeStyle = PAL.fill; ctx.lineWidth = 5; ctx.stroke();
+    if (o.heelGlow) { glow(-6, -6, 70, 'rgba(255,90,60,.9)', o.heelGlow); ctx.strokeStyle = '#ff5a3a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(-6, -6, 22, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore(); return;
+  }
+  ctx.restore();
+}
+function shieldAt(x, y, r, emblem, t) {
+  ctx.save(); ctx.translate(x, y);
+  if (emblem === 'mirror') {
+    const g = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 4, 0, 0, r); g.addColorStop(0, '#fff6e0'); g.addColorStop(0.5, '#d9b06a'); g.addColorStop(1, '#8a5a1a');
+    circle(0, 0, r, g);
+  } else { circle(0, 0, r, PAL.fill); }
+  ctx.lineWidth = 5; ctx.strokeStyle = PAL.ink; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r - 12, 0, Math.PI * 2); ctx.stroke();
+  if (emblem === 'owl') { ctx.fillStyle = PAL.ink; circle(-12, -6, 9, PAL.ink); circle(12, -6, 9, PAL.ink); circle(-12, -6, 4, PAL.fill); circle(12, -6, 4, PAL.fill); ctx.beginPath(); ctx.moveTo(-4, 6); ctx.lineTo(4, 6); ctx.lineTo(0, 16); ctx.fill(); }
+  else if (emblem === 'star') { ctx.fillStyle = PAL.ink; ctx.beginPath(); for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, rr = k % 2 ? 14 : 34; ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } ctx.fill(); }
+  else if (emblem === 'gorgon') { ctx.save(); ctx.scale(0.55, 0.55); snakeHair(t); ctx.restore(); circle(0, 0, 18, PAL.fill); ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.restore();
+}
+// kind: a PRESET name. o: {t, f (1 right / -1 left), walk, phase, armF:[a,b], armB:[a,b], lean, headTilt, hold, holdB, propAng, propAngB,
+//   wings, flap, loss, pal, alpha, emblem, draw, arrowNocked, glint, heelGlow}
 function fig(kind, x, y, s, o) {
+  const P = Object.assign({}, PRESET[kind] || PRESET.human, o.style || {});
   const t = o.t, f = o.f || 1, wk = o.walk || 0, ph = o.phase ?? t * 7;
-  const robed = kind === 'zeus' || kind === 'pandora';
-  ctx.save(); ctx.translate(x, y); ctx.scale(s * f, s);
-  ctx.lineJoin = 'round';
+  const prevPal = PAL; PAL = Object.assign({ fill: CLAY, ink: INK, hair: HAIR }, o.pal || {});
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * f, s); ctx.lineJoin = 'round';
+  if (o.alpha !== undefined) ctx.globalAlpha = clamp(o.alpha);
   const hipX = 0, hipY = -205;
-  // legs
+  const wg = o.wings ?? P.wings;
+  if (wg) featherWings(-14, -318, wg, o);
   const legs = side => {
-    const a = side * 0.45 * Math.sin(ph) * wk, bend = wk * 0.7 * (1 - Math.cos(ph + (side > 0 ? 0 : Math.PI))) / 2;
+    const a = side * 0.45 * Math.sin(ph) * wk + (o.legSpread || 0) * side, bend = wk * 0.7 * (1 - Math.cos(ph + (side > 0 ? 0 : Math.PI))) / 2;
     const [fx, fy] = limb(hipX + side * 6, hipY, a, 104, a - bend, 100, 32, 25);
-    ctx.fillStyle = CLAY; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+    ctx.fillStyle = PAL.fill; ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.ellipse(fx + 14, fy + 4, 22, 9, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   };
-  ctx.save(); ctx.translate(0, 0);
   legs(-1); legs(1);
-  ctx.restore();
   ctx.save(); ctx.translate(hipX, hipY); ctx.rotate(o.lean || 0); ctx.translate(-hipX, -hipY);
-  // robe / tunic
+  // back arm (+ anything held in it except a shield, which goes in front of the body)
+  const armB = o.armB || [-0.15 - 0.4 * Math.sin(ph) * wk, -0.4];
+  const [bx, by] = limb(-4, -318, armB[0], 78, armB[1], 72, 24, 19);
+  circle(bx, by, 12, PAL.fill);
+  if (o.holdB && o.holdB !== 'shield') handProp(o.holdB, bx, by, o.propAngB ?? 0, o);
+  if (o.hold === 'scepter') { ctx.strokeStyle = PAL.ink; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(bx, by - 170); ctx.lineTo(bx, by + 150); ctx.stroke(); circle(bx, by - 175, 12, PAL.fill); }
+  // robe
   const sway = Math.sin(ph) * 14 * wk + Math.sin(t * 2) * 4;
-  if (robed || kind === 'prometheus' || kind === 'human') {
-    const hem = kind === 'pandora' ? -6 : kind === 'zeus' ? -50 : -112;
-    const half = kind === 'pandora' ? 78 : kind === 'zeus' ? 84 : 66;
-    ctx.beginPath(); ctx.moveTo(-50, -330); ctx.lineTo(54, -330); ctx.lineTo(half + sway, hem); ctx.quadraticCurveTo(0 + sway, hem + 12, -half + sway * 0.6, hem); ctx.closePath();
-    ctx.fillStyle = CLAY; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
+  const robe = { long: [-6, 78], mid: [-50, 84], short: [-112, 66], drape: [-150, 60] }[P.robe];
+  if (robe) {
+    const [hem, half] = robe;
+    ctx.beginPath(); ctx.moveTo(-50, P.robe === 'drape' ? -230 : -330); ctx.lineTo(54, P.robe === 'drape' ? -230 : -330); ctx.lineTo(half + sway, hem); ctx.quadraticCurveTo(sway, hem + 12, -half + sway * 0.6, hem); ctx.closePath();
+    ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 4; ctx.stroke();
     ctx.lineWidth = 2.6;
     for (let k = -3; k <= 3; k++) { ctx.beginPath(); ctx.moveTo(k * 12, -218); ctx.quadraticCurveTo(k * 18 + sway * 0.4, (hem - 218) / 2 - 100, k * 22 + sway * 0.8, hem - 6); ctx.stroke(); }
     ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-40, -222); ctx.lineTo(44, -222); ctx.stroke();
-    if (kind === 'zeus') { ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-50, -330); ctx.quadraticCurveTo(10, -270, 60, -150); ctx.stroke(); }
+    if (P.robe === 'mid') { ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-50, -330); ctx.quadraticCurveTo(10, -270, 60, -150); ctx.stroke(); }
   }
-  // back arm
-  const armB = o.armB || [-0.15 - 0.4 * Math.sin(ph) * wk, -0.4];
-  const [bx, by] = limb(-4, -318, armB[0], 78, armB[1], 72, 24, 19);
-  circle(bx, by, 12, CLAY);
-  if (o.hold === 'scepter') { ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(bx, by - 170); ctx.lineTo(bx, by + 150); ctx.stroke(); circle(bx, by - 175, 12, CLAY); }
   // torso
   ctx.beginPath(); ctx.moveTo(-42, -334); ctx.quadraticCurveTo(-48, -270, -34, -206); ctx.lineTo(38, -206); ctx.quadraticCurveTo(60, -270, 52, -334); ctx.closePath();
-  ctx.fillStyle = CLAY; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
+  ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 4; ctx.stroke();
   ctx.lineWidth = 2.6;
-  if (kind === 'prometheus' || kind === 'human') { ctx.beginPath(); ctx.arc(30, -300, 20, 0.3, 1.7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-30, -330); ctx.quadraticCurveTo(10, -290, 44, -322); ctx.stroke(); }
-  else { for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(-30 + k * 8, -330); ctx.quadraticCurveTo(0 + k * 10, -280, 30 + k * 4, -226); ctx.stroke(); } }
+  if (P.robe === 'short' || P.robe === 'drape') { ctx.beginPath(); ctx.arc(30, -300, 20, 0.3, 1.7); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-30, -330); ctx.quadraticCurveTo(10, -290, 44, -322); ctx.stroke(); }
+  else { for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.moveTo(-30 + k * 8, -330); ctx.quadraticCurveTo(k * 10, -280, 30 + k * 4, -226); ctx.stroke(); } }
   // head
   ctx.save(); ctx.translate(12, -392); ctx.rotate(o.headTilt || 0);
-  if (kind === 'pandora') { ctx.beginPath(); ctx.moveTo(-28, 10); ctx.quadraticCurveTo(-40, 50, -30, 96); ctx.lineTo(-16, 96); ctx.quadraticCurveTo(-22, 50, -12, 16); ctx.fillStyle = HAIR; ctx.fill(); }
-  tracePath(HEAD_PATH); ctx.fillStyle = CLAY; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 3.5; ctx.stroke();
-  ctx.fillStyle = INK; ctx.beginPath(); ctx.moveTo(13, -8); ctx.quadraticCurveTo(21, -15, 29, -8); ctx.quadraticCurveTo(21, -3, 13, -8); ctx.fill();
+  const longLocks = () => { const sw = Math.sin(t * 2.2) * 6; ctx.beginPath(); ctx.moveTo(-26, -20); ctx.quadraticCurveTo(-58 + sw, 40, -44 + sw, 120); ctx.lineTo(-20 + sw * 0.5, 118); ctx.quadraticCurveTo(-26, 50, -8, 10); ctx.closePath(); ctx.fillStyle = PAL.hair; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke(); for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.moveTo(-30 + k * 6, 0); ctx.quadraticCurveTo(-44 + k * 6 + sw, 60, -34 + k * 6 + sw, 110); ctx.lineWidth = 1.8; ctx.stroke(); } };
+  if (P.hair === 'bun' || P.hair === 'long') longLocks();
+  if (P.veil) { ctx.beginPath(); ctx.moveTo(24, -40); ctx.quadraticCurveTo(-30, -70, -56, 0); ctx.quadraticCurveTo(-70, 80, -60, 150); ctx.lineTo(-20, 150); ctx.quadraticCurveTo(-30, 60, -10, -10); ctx.closePath(); ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke(); }
+  tracePath(HEAD_PATH); ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3.5; ctx.stroke();
+  ctx.fillStyle = PAL.ink; ctx.beginPath(); ctx.moveTo(13, -8); ctx.quadraticCurveTo(21, -15, 29, -8); ctx.quadraticCurveTo(21, -3, 13, -8); ctx.fill();
+  if (o.eyeGlow) { glow(21, -8, 70, o.eyeGlow, 1); circle(21, -8, 5, '#eaffd0'); }
   ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(10, -19); ctx.quadraticCurveTo(22, -24, 32, -16); ctx.stroke();
   ctx.beginPath(); ctx.arc(-6, 2, 7, -1.2, 1.6); ctx.stroke();
-  const curls = (pts, r) => { ctx.strokeStyle = INK; ctx.lineWidth = 2.2; for (const [cx, cy] of pts) { ctx.beginPath(); ctx.arc(cx, cy, r, 0, 5); ctx.stroke(); } };
-  if (kind === 'zeus' || kind === 'prometheus' || kind === 'human') {
-    ctx.beginPath(); ctx.moveTo(26, -36); ctx.quadraticCurveTo(0, -60, -30, -40); ctx.quadraticCurveTo(-48, -10, -26, kind === 'human' ? 20 : 36); ctx.quadraticCurveTo(-14, 0, -6, -12); ctx.quadraticCurveTo(10, -30, 26, -36);
-    ctx.fillStyle = HAIR; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.stroke();
+  const curls = (pts, r) => { ctx.strokeStyle = PAL.ink; ctx.lineWidth = 2.2; for (const [cx, cy] of pts) { ctx.beginPath(); ctx.arc(cx, cy, r, 0, 5); ctx.stroke(); } };
+  if (P.hair === 'curly' || P.hair === 'short') {
+    ctx.beginPath(); ctx.moveTo(26, -36); ctx.quadraticCurveTo(0, -60, -30, -40); ctx.quadraticCurveTo(-48, -10, -26, P.hair === 'short' ? 20 : 36); ctx.quadraticCurveTo(-14, 0, -6, -12); ctx.quadraticCurveTo(10, -30, 26, -36);
+    ctx.fillStyle = PAL.hair; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke();
     curls([[-20, -36], [-34, -18], [-30, 4], [0, -44], [-10, -22]], 6);
   }
-  if (kind === 'zeus' || kind === 'prometheus') {
-    const long = kind === 'zeus' ? 1 : 0.6;
+  if (P.hair === 'bun' || P.hair === 'long') {
+    ctx.beginPath(); ctx.moveTo(26, -36); ctx.quadraticCurveTo(0, -58, -30, -40); ctx.quadraticCurveTo(-46, -16, -30, 10); ctx.quadraticCurveTo(-12, -8, 26, -36); ctx.fillStyle = PAL.hair; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke();
+    if (P.hair === 'bun') { circle(-40, -30, 20, PAL.hair); ctx.beginPath(); ctx.arc(-40, -30, 20, 0, 7); ctx.stroke(); curls([[-40, -30], [-46, -38]], 7); }
+    ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(20, -38); ctx.quadraticCurveTo(-6, -50, -26, -34); ctx.stroke();
+    circle(-4, 14, 4, PAL.ink);
+  }
+  if (P.hair === 'snakes') { ctx.beginPath(); ctx.moveTo(26, -36); ctx.quadraticCurveTo(0, -56, -30, -38); ctx.quadraticCurveTo(-42, -16, -28, 8); ctx.quadraticCurveTo(-12, -8, 26, -36); ctx.fillStyle = PAL.hair; ctx.fill(); snakeHair(t); }
+  if (P.beard) {
+    const long = P.beard;
     ctx.beginPath(); ctx.moveTo(34, 22); ctx.quadraticCurveTo(34, 50 * long + 20, 22, 60 * long + 26); ctx.quadraticCurveTo(0, 62 * long + 20, -8, 30); ctx.quadraticCurveTo(-4, 10, 8, 12); ctx.quadraticCurveTo(22, 28, 34, 22);
-    ctx.fillStyle = HAIR; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = PAL.hair; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke();
     curls([[20, 40], [6, 34], [14, 56 * long]], 5);
   }
-  if (kind === 'zeus') { ctx.fillStyle = INK; for (let k = 0; k < 7; k++) { ctx.save(); ctx.translate(-34 + k * 9, -44 + Math.abs(k - 3) * 2); ctx.rotate(-0.6 + k * 0.2); ctx.beginPath(); ctx.ellipse(0, -8, 4, 9, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } }
-  if (kind === 'pandora') {
-    ctx.beginPath(); ctx.moveTo(26, -36); ctx.quadraticCurveTo(0, -58, -30, -40); ctx.quadraticCurveTo(-46, -16, -30, 10); ctx.quadraticCurveTo(-12, -8, 26, -36); ctx.fillStyle = HAIR; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.stroke();
-    circle(-40, -30, 20, HAIR); ctx.beginPath(); ctx.arc(-40, -30, 20, 0, 7); ctx.stroke(); curls([[-40, -30], [-46, -38]], 7);
-    ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(20, -38); ctx.quadraticCurveTo(-6, -50, -26, -34); ctx.stroke();
-    circle(-4, 14, 4, INK);
+  if (P.wreath) { ctx.fillStyle = PAL.ink; for (let k = 0; k < 7; k++) { ctx.save(); ctx.translate(-34 + k * 9, -44 + Math.abs(k - 3) * 2); ctx.rotate(-0.6 + k * 0.2); ctx.beginPath(); ctx.ellipse(0, -8, 4, 9, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); } }
+  if (P.crown) { ctx.fillStyle = PAL.ink; ctx.beginPath(); ctx.moveTo(-34, -40); for (let k = 0; k <= 6; k++) { ctx.lineTo(-34 + k * 10, -40 - (k % 2 ? 0 : 26)); } ctx.lineTo(28, -36); ctx.closePath(); ctx.fill(); }
+  if (P.helmet === 'corinthian') {
+    ctx.beginPath(); ctx.moveTo(30, -26); ctx.quadraticCurveTo(26, -58, -6, -60); ctx.quadraticCurveTo(-46, -56, -42, 0); ctx.lineTo(-30, 34); ctx.lineTo(-12, 30); ctx.quadraticCurveTo(-16, -6, 0, -24); ctx.quadraticCurveTo(14, -32, 30, -26);
+    ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-40, -50); ctx.quadraticCurveTo(-14, -128, 32, -70); ctx.quadraticCurveTo(-10, -96, -36, -46); ctx.fillStyle = PAL.ink; ctx.fill();
+    ctx.strokeStyle = PAL.fill; ctx.lineWidth = 1.6; for (let k = 0; k < 8; k++) { ctx.beginPath(); ctx.moveTo(-34 + k * 8, -60 - Math.sin(k / 7 * Math.PI) * 30); ctx.lineTo(-30 + k * 8, -52 - Math.sin(k / 7 * Math.PI) * 18); ctx.stroke(); }
+  }
+  if (P.helmet === 'phrygian') {
+    ctx.beginPath(); ctx.moveTo(30, -24); ctx.quadraticCurveTo(30, -70, -10, -66); ctx.quadraticCurveTo(10, -96, 40, -78); ctx.quadraticCurveTo(14, -110, -26, -70); ctx.quadraticCurveTo(-50, -40, -40, 40); ctx.lineTo(-18, 40); ctx.quadraticCurveTo(-20, -10, 0, -24); ctx.closePath();
+    ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3.5; ctx.stroke();
+    ctx.lineWidth = 2; for (let k = 0; k < 4; k++) { ctx.beginPath(); ctx.arc(-20 + k * 10, -50, 4, 0, Math.PI * 2); ctx.stroke(); }
   }
   ctx.restore();
-  // front arm + held objects
+  if (o.holdB === 'shield') shieldAt(bx + 18, by - 10, 80, o.emblem || 'star', t);
+  // front arm + held prop
   const armF = o.armF || [0.15 + 0.4 * Math.sin(ph) * wk, 0.5];
   const [hx, hy] = limb(16, -318, armF[0], 78, armF[1], 72, 24, 19);
-  circle(hx, hy, 12, CLAY);
+  circle(hx, hy, 12, PAL.fill);
+  if (o.hold && o.hold !== 'scepter') handProp(o.hold, hx, hy, o.propAng ?? 0, o);
   ctx.restore();
   ctx.restore();
-  // world-space hand position for props
-  const ang = o.lean || 0, lx = 16 + Math.sin(armF[0]) * 78 + Math.sin(armF[1]) * 72, ly = -318 + Math.cos(armF[0]) * 78 + Math.cos(armF[1]) * 72;
-  const rx = hipX + (lx - hipX) * Math.cos(ang) - (ly - hipY) * Math.sin(ang), ry = hipY + (lx - hipX) * Math.sin(ang) + (ly - hipY) * Math.cos(ang);
-  return { hand: [x + rx * s * f, y + ry * s] };
+  PAL = prevPal;
+  const ang = o.lean || 0, toWorld = (lx, ly) => { const rx = hipX + (lx - hipX) * Math.cos(ang) - (ly - hipY) * Math.sin(ang), ry = hipY + (lx - hipX) * Math.sin(ang) + (ly - hipY) * Math.cos(ang); return [x + rx * s * f, y + ry * s]; };
+  return { hand: toWorld(hx, hy), handB: toWorld(bx, by), head: toWorld(24, -392) };
 }
+
+// ---- more props for the myth episodes ----
+function horse(x, y, s, o) {
+  const t = o.t, g = o.gallop || 0, wood = !!o.wood, f = o.f || 1;
+  const prev = PAL; PAL = wood ? { fill: '#b07a3e', ink: '#2a1608', hair: '#7a4a1e' } : Object.assign({ fill: CLAY, ink: INK, hair: HAIR }, o.pal || {});
+  ctx.save(); ctx.translate(x, y - (o.lift || 0)); ctx.scale(s * f, s); ctx.lineJoin = 'round';
+  if (o.alpha !== undefined) ctx.globalAlpha = clamp(o.alpha);
+  if (wood) {
+    ctx.fillStyle = '#5a3a18'; ctx.fillRect(-230, -6, 480, 40); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 4; ctx.strokeRect(-230, -6, 480, 40);
+    for (const wx of [-190, -70, 70, 200]) { circle(wx, 40, 30, '#7a4a1e'); ctx.beginPath(); ctx.arc(wx, 40, 30, 0, Math.PI * 2); ctx.stroke(); for (let k = 0; k < 4; k++) { const a = k * Math.PI / 4 + (o.roll || 0); ctx.beginPath(); ctx.moveTo(wx - Math.cos(a) * 26, 40 - Math.sin(a) * 26); ctx.lineTo(wx + Math.cos(a) * 26, 40 + Math.sin(a) * 26); ctx.lineWidth = 3; ctx.stroke(); } }
+  }
+  if (o.wings) featherWings(-10, -262, o.wings, { t, flap: o.flap || 0, flapSpeed: 7 });
+  const leg = (lx, a1, a2) => { const [ex, ey] = limb(lx, -175, a1, 88, a2, 92, 28, 18); ctx.fillStyle = PAL.ink; ctx.fillRect(ex - 13, ey - 4, 26, 14); };
+  const gp = t * 9;
+  leg(-120, wood ? 0.05 : -0.2 + 0.5 * Math.sin(gp) * g, wood ? 0.05 : -0.1 + 0.6 * Math.sin(gp + 1) * g);
+  leg(95, wood ? -0.05 : 0.15 + 0.6 * Math.sin(gp + 2) * g, wood ? -0.05 : 0.05 - 0.9 * Math.max(0, Math.sin(gp + 2.6)) * g);
+  // tail
+  ctx.beginPath(); ctx.moveTo(-150, -230); ctx.quadraticCurveTo(-230, -200 + Math.sin(t * 4) * 10, -210, -80); ctx.quadraticCurveTo(-190, -160, -140, -200); ctx.closePath(); ctx.fillStyle = PAL.hair; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 3; ctx.stroke();
+  // body + neck + head
+  ctx.beginPath(); ctx.moveTo(-160, -220); ctx.bezierCurveTo(-160, -280, 60, -290, 110, -260); ctx.lineTo(190, -380); ctx.lineTo(214, -392);
+  ctx.lineTo(296, -326); ctx.quadraticCurveTo(300, -300, 282, -296); ctx.lineTo(214, -312); ctx.lineTo(150, -200); ctx.bezierCurveTo(120, -140, -120, -140, -160, -200); ctx.closePath();
+  ctx.fillStyle = PAL.fill; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 4; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(196, -386); ctx.lineTo(204, -420); ctx.lineTo(218, -390); ctx.fill(); ctx.stroke();
+  circle(236, -352, 6, PAL.ink); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(282, -312, 6, 0, Math.PI * 2); ctx.stroke();
+  ctx.fillStyle = PAL.hair; ctx.beginPath(); ctx.moveTo(110, -262); for (let k = 0; k <= 8; k++) ctx.lineTo(110 + k * 10 - 16, -262 - k * 15 - (k % 2 ? 14 : 0)); ctx.lineTo(196, -386); ctx.lineTo(130, -250); ctx.closePath(); ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 2.5; ctx.stroke();
+  if (wood) {
+    ctx.strokeStyle = PAL.ink; ctx.lineWidth = 2.5;
+    for (let k = 0; k < 6; k++) { ctx.beginPath(); ctx.moveTo(-150, -260 + k * 20); ctx.lineTo(130, -260 + k * 20); ctx.stroke(); }
+    for (let k = 0; k < 9; k++) circle(-140 + k * 34, -150, 3.5, PAL.ink);
+    const hatch = o.hatch || 0;
+    ctx.fillStyle = '#1a0d06'; ctx.fillRect(-60, -240, 90, 60);
+    ctx.save(); ctx.translate(-60, -180); ctx.rotate(hatch * 1.4); ctx.fillStyle = '#946232'; ctx.fillRect(0, -60, 90, 60); ctx.strokeRect(0, -60, 90, 60); ctx.restore();
+  } else {
+    ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(-40, -215, 60, 0.6, 2.4); ctx.stroke();
+  }
+  leg(-95, wood ? -0.05 : 0.2 - 0.5 * Math.sin(gp) * g, wood ? -0.05 : 0.1 - 0.6 * Math.sin(gp + 1) * g);
+  leg(120, wood ? 0.05 : -0.15 - 0.6 * Math.sin(gp + 2) * g, wood ? 0.05 : -0.05 + 0.9 * Math.max(0, Math.sin(gp + 2.6)) * g);
+  ctx.restore(); PAL = prev;
+}
+function serpent(x0, y0, x1, y1, t, s, o = {}) {
+  const n = 26, pts = [];
+  for (let i = 0; i <= n; i++) { const u = i / n; pts.push([lerp(x0, x1, u) + Math.sin(u * 9 + t * 4 + (o.seed || 0)) * 70 * s * (1 - u * 0.4), lerp(y0, y1, u) + Math.cos(u * 6 + t * 3) * 30 * s]); }
+  for (const [col, wd] of [[INK, 54], ['#7c8f3a', 42], ['#a9b85a', 18]]) {
+    ctx.beginPath(); pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.strokeStyle = col; ctx.lineWidth = wd * s; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+  }
+  const [hx, hy] = pts[n], [px, py] = pts[n - 1], a = Math.atan2(hy - py, hx - px);
+  ctx.save(); ctx.translate(hx, hy); ctx.rotate(a); ctx.scale(s, s);
+  ctx.beginPath(); ctx.ellipse(18, 0, 46, 28, 0, 0, Math.PI * 2); ctx.fillStyle = '#7c8f3a'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(30, 6); ctx.lineTo(70 + (o.jaw || 0) * 20, 20 + (o.jaw || 0) * 30); ctx.lineTo(40, 18); ctx.fillStyle = '#3a0d0d'; ctx.fill();
+  glow(30, -10, 40, 'rgba(255,220,60,.9)', 1); circle(30, -10, 6, '#fff3a0');
+  ctx.restore();
+}
+function seaBand(y, t, o = {}) {
+  const g = ctx.createLinearGradient(0, y, 0, y + 700); g.addColorStop(0, o.top || '#13263a'); g.addColorStop(1, GLAZE);
+  ctx.fillStyle = g; ctx.fillRect(-500, y, 2200, 900);
+  ctx.strokeStyle = CLAY; ctx.lineWidth = 5; ctx.lineCap = 'round';
+  for (let r = 0; r < 4; r++) {
+    const yy = y + 20 + r * 52, sp = (t * (40 - r * 6)) % 120;
+    ctx.beginPath();
+    for (let x = -540 - sp; x < 1700; x += 120) { ctx.moveTo(x, yy); ctx.quadraticCurveTo(x + 30, yy - 26, x + 60, yy - 8); ctx.arc(x + 54, yy - 2, 9, -0.6, Math.PI * 1.2); ctx.moveTo(x + 60, yy); ctx.lineTo(x + 120, yy); }
+    ctx.globalAlpha = 1 - r * 0.2; ctx.stroke(); ctx.globalAlpha = 1;
+  }
+}
+function sunDisc(x, y, r, t, heat = 0) {
+  glow(x, y, r * 4.5, 'rgba(255,140,40,.55)', 1); glow(x, y, r * 2.2, 'rgba(255,210,120,.7)', 1);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(t * 0.15);
+  ctx.fillStyle = CLAY_L; for (let k = 0; k < 16; k++) { ctx.rotate(Math.PI / 8); ctx.beginPath(); ctx.moveTo(-14, -r - 6); ctx.lineTo(0, -r - 46 - (k % 2) * 22); ctx.lineTo(14, -r - 6); ctx.fill(); }
+  ctx.restore();
+  const g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.3, 4, x, y, r); g.addColorStop(0, '#fff3c4'); g.addColorStop(1, '#f2a33a');
+  circle(x, y, r, g);
+  if (heat) glow(x, y, r * 6, 'rgba(255,90,20,.5)', heat);
+}
+function maze(x, y, size, t) {
+  ctx.save(); ctx.translate(x, y); ctx.strokeStyle = CLAY; ctx.lineWidth = 12; ctx.lineCap = 'square';
+  for (let k = 0; k < 5; k++) {
+    const h = size / 2 - k * size / 11, gap = (k % 2 ? 1 : -1) * 0.6;
+    ctx.beginPath(); ctx.moveTo(-h + h * 0.4 * gap + h * 0.25, -h); ctx.lineTo(h, -h); ctx.lineTo(h, h); ctx.lineTo(-h, h); ctx.lineTo(-h, -h); ctx.lineTo(-h + h * 0.4 * gap, -h); ctx.stroke();
+  }
+  ctx.restore();
+}
+function wheat(x, y, h, wilt, t, seed = 0) {
+  const sw = Math.sin(t * 1.5 + seed) * 0.05 * (1 - wilt);
+  const col = mix('#eea05f', '#6b5a48', wilt);
+  ctx.save(); ctx.translate(x, y); ctx.strokeStyle = INK; ctx.lineWidth = 6;
+  const tipA = sw + wilt * 2.2 * (seed % 2 ? 1 : -0.7);
+  const mx = Math.sin(sw) * h * 0.5, my = -h * 0.55, tx = Math.sin(tipA) * h * 0.45 + mx, ty = my - Math.cos(tipA) * h * 0.45;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(mx, my, tx, ty); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke();
+  for (let g = 0; g < 7; g++) {
+    const u = g / 7, gx = lerp(mx, tx, 0.5 + u * 0.5), gy = lerp(my, ty, 0.5 + u * 0.5);
+    ctx.beginPath(); ctx.ellipse(gx + (g % 2 ? 7 : -7), gy, 5, 11, tipA + (g % 2 ? 0.5 : -0.5), 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = INK; ctx.stroke();
+  }
+  ctx.restore();
+}
+function pomegranate(x, y, r, open, t) {
+  ctx.save(); ctx.translate(x, y);
+  glow(0, 0, r * 2.4, 'rgba(255,60,60,.35)', 1);
+  const half = side => {
+    ctx.save(); ctx.translate(side * open * r * 0.6, 0); ctx.rotate(side * open * 0.25);
+    ctx.beginPath(); ctx.arc(0, 0, r, side > 0 ? -Math.PI / 2 : Math.PI / 2, side > 0 ? Math.PI / 2 : Math.PI * 1.5); ctx.closePath();
+    const g = ctx.createRadialGradient(-r * 0.3, -r * 0.4, 2, 0, 0, r); g.addColorStop(0, '#ff6b5a'); g.addColorStop(0.6, '#c1272d'); g.addColorStop(1, '#6e0f16');
+    ctx.fillStyle = g; ctx.fill();
+    if (open > 0.02) { ctx.save(); ctx.clip(); const pith = ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, r); pith.addColorStop(0, 'rgba(120,10,30,.9)'); pith.addColorStop(0.85, 'rgba(160,20,40,.9)'); pith.addColorStop(1, 'rgba(246,217,184,1)'); ctx.fillStyle = pith; ctx.fillRect(-r, -r, 2 * r, 2 * r);
+      for (let k = 0; k < 14; k++) { const a = k * 2.4, rr = r * 0.25 + (k % 5) * r * 0.13; const sx = side * Math.abs(Math.cos(a) * rr) * 0.8 + side * r * 0.12, sy = Math.sin(a) * rr; glow(sx, sy, 16, 'rgba(255,40,70,.7)', 0.7); circle(sx, sy, r * 0.08, '#e3183a'); circle(sx - 2, sy - 2, r * 0.03, '#ffd0d8'); }
+      ctx.restore(); }
+    ctx.restore();
+  };
+  half(-1); half(1);
+  if (open < 0.02) { ctx.fillStyle = '#8a1a1e'; ctx.beginPath(); ctx.moveTo(-r * 0.25, -r * 0.92); ctx.lineTo(-r * 0.15, -r * 1.22); ctx.lineTo(0, -r * 1.02); ctx.lineTo(r * 0.15, -r * 1.22); ctx.lineTo(r * 0.25, -r * 0.92); ctx.fill(); circle(-r * 0.35, -r * 0.35, r * 0.12, 'rgba(255,255,255,.35)'); }
+  ctx.restore();
+}
+function narcissus(x, y, r, t) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(t * 2 + x) * 0.1);
+  ctx.fillStyle = '#f6ecd6'; for (let k = 0; k < 6; k++) { ctx.rotate(Math.PI / 3); ctx.beginPath(); ctx.ellipse(0, -r * 0.7, r * 0.35, r * 0.7, 0, 0, Math.PI * 2); ctx.fill(); }
+  circle(0, 0, r * 0.38, '#f2b33a'); ctx.restore();
+}
+function groundCrack(x, y, w, open, t) {
+  if (open <= 0) return;
+  glow(x, y - 40, w * 1.4, 'rgba(150,40,220,.55)', open);
+  ctx.beginPath(); ctx.moveTo(x - w * open, y);
+  for (let k = 0; k <= 10; k++) { const u = k / 10; ctx.lineTo(x - w * open + u * 2 * w * open, y + (k % 2 ? 26 : -18) * open); }
+  for (let k = 10; k >= 0; k--) { const u = k / 10; ctx.lineTo(x - w * open + u * 2 * w * open, y + 50 + (k % 2 ? 10 : 30) * open); }
+  ctx.closePath(); ctx.fillStyle = '#05010a'; ctx.fill();
+}
+function ship(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y + Math.sin(t * 2 + x) * 6); ctx.scale(s, s); ctx.rotate(Math.sin(t * 1.6 + x) * 0.03);
+  ctx.beginPath(); ctx.moveTo(-170, -30); ctx.quadraticCurveTo(-170, 30, -100, 30); ctx.lineTo(120, 30); ctx.quadraticCurveTo(190, 10, 200, -50); ctx.lineTo(160, -20); ctx.lineTo(-130, -20); ctx.closePath();
+  ctx.fillStyle = CLAY; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
+  ctx.lineWidth = 3; for (let k = 0; k < 7; k++) { ctx.beginPath(); ctx.moveTo(-100 + k * 30, 10); ctx.lineTo(-120 + k * 30 + Math.sin(t * 5 + k) * 10, 70); ctx.stroke(); }
+  rod(10, -20, 10, -220, 6); ctx.strokeStyle = INK;
+  ctx.beginPath(); ctx.moveTo(-70, -200); ctx.quadraticCurveTo(10 + Math.sin(t * 2) * 10, -150, 90, -200); ctx.lineTo(80, -60); ctx.quadraticCurveTo(10, -90, -60, -60); ctx.closePath(); ctx.fillStyle = CLAY_L; ctx.fill(); ctx.lineWidth = 3; ctx.stroke();
+  ctx.restore();
+}
+function troyWall(x0, x1, y, h, gate = 0, gx = 540) {
+  ctx.fillStyle = '#c2793f'; ctx.fillRect(x0, y - h, x1 - x0, h);
+  ctx.strokeStyle = INK; ctx.lineWidth = 3;
+  for (let r = 0; r * 44 < h; r++) for (let c = 0; c * 90 < x1 - x0 + 90; c++) ctx.strokeRect(x0 + c * 90 - (r % 2) * 45, y - h + r * 44, 90, 44);
+  for (const tx of [x0 + 60, gx - 190, gx + 190, x1 - 60]) { ctx.fillStyle = '#b06a34'; ctx.fillRect(tx - 60, y - h - 90, 120, h + 90); ctx.strokeRect(tx - 60, y - h - 90, 120, h + 90); for (let k = 0; k < 4; k++) { ctx.fillRect(tx - 60 + k * 34, y - h - 120, 18, 30); ctx.strokeRect(tx - 60 + k * 34, y - h - 120, 18, 30); } }
+  ctx.fillStyle = '#05020a'; ctx.beginPath(); ctx.moveTo(gx - 110, y); ctx.lineTo(gx - 110, y - h * 0.62); ctx.quadraticCurveTo(gx, y - h * 0.9, gx + 110, y - h * 0.62); ctx.lineTo(gx + 110, y); ctx.fill();
+  for (const side of [-1, 1]) { ctx.save(); ctx.translate(gx + side * 110, y); ctx.scale(Math.cos(gate * 1.3), 1); ctx.fillStyle = '#7a4a1e'; ctx.fillRect(side > 0 ? -110 : 0, -h * 0.68, 110, h * 0.68); ctx.strokeRect(side > 0 ? -110 : 0, -h * 0.68, 110, h * 0.68); ctx.restore(); }
+}
+function pyre(x, y, s, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.strokeStyle = INK; ctx.lineWidth = 4;
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5 - r; c++) { ctx.fillStyle = r % 2 ? '#8a4a1e' : CLAY; ctx.fillRect(-130 + r * 26 + c * 52, -40 - r * 36, 48, 32); ctx.strokeRect(-130 + r * 26 + c * 52, -40 - r * 36, 48, 32); }
+  ctx.restore();
+  for (let k = 0; k < 5; k++) flame(x - 70 * s + k * 35 * s, y - 150 * s, 60 * s * (0.8 + 0.4 * hash1(k)), t, k * 3);
+  glow(x, y - 220 * s, 420 * s, 'rgba(255,140,40,.55)', 1);
+}
+function scrollIcon(x, y, s, label, k = 1, o = {}) {
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(s * easeBack(k), s * easeBack(k));
+  if (o.glow) glow(0, 0, 260, 'rgba(255,200,100,.5)', o.glow);
+  ctx.fillStyle = '#f1e2bf'; ctx.fillRect(-120, -150, 240, 300);
+  ctx.strokeStyle = '#3a2412'; ctx.lineWidth = 4; ctx.strokeRect(-120, -150, 240, 300);
+  for (const yy of [-150, 150]) { ctx.beginPath(); ctx.ellipse(0, yy, 140, 20, 0, 0, Math.PI * 2); ctx.fillStyle = '#d9c49c'; ctx.fill(); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(58,36,18,.35)'; ctx.lineWidth = 3; for (let r = 0; r < 7; r++) { ctx.beginPath(); ctx.moveTo(-90, -60 + r * 26); ctx.lineTo(90 - (r % 3) * 30, -60 + r * 26); ctx.stroke(); }
+  ctx.font = `900 40px ${SERIF}`; ctx.fillStyle = '#3a2412'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, 0, -100);
+  if (o.sub) { ctx.font = `700 26px ${SERIF}`; ctx.fillText(o.sub, 0, 120); }
+  ctx.restore();
+}
+// dark card with a gold border, for quotes and number comparisons
+function card(x, y, w, h, title, body, k = 1, o = {}) {
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(easeBack(k), easeBack(k)); ctx.globalAlpha = clamp(k * 2);
+  ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, 18); ctx.fillStyle = o.bg || 'rgba(19,11,7,.92)'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = o.border || '#e7b766'; ctx.stroke();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = `900 ${o.titleSize || 40}px ${SERIF}`; ctx.fillStyle = o.titleColor || '#f6d58a'; ctx.fillText(title, 0, -h / 2 + 46);
+  ctx.font = `700 ${o.bodySize || 34}px ${SERIF}`; ctx.fillStyle = o.bodyColor || '#f3e6cc';
+  (Array.isArray(body) ? body : [body]).forEach((ln, i) => ctx.fillText(ln, 0, -h / 2 + 108 + i * (o.lineH || 46)));
+  ctx.restore();
+}
+function stamp(str, x, y, st, o = {}) {
+  const k = clamp(st / 0.2); if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(o.rot ?? -0.08); ctx.scale(lerp(1.8, 1, k), lerp(1.8, 1, k)); ctx.globalAlpha = k;
+  ctx.font = `900 ${o.size || 76}px ${SERIF}`; const w = ctx.measureText(str).width + 70;
+  ctx.lineWidth = 11; ctx.strokeStyle = o.color || '#d0242c'; ctx.beginPath(); ctx.roundRect(-w / 2, -(o.size || 76) * 0.95, w, (o.size || 76) * 1.9, 18); ctx.stroke();
+  ctx.fillStyle = o.color || '#e0303a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(str, 0, 6); ctx.restore();
+}
+function parchWorld(t, main) {
+  layer(0.15, () => ctx.drawImage(parchC(), -210, -240));
+  layer(1, () => main && main());
+}
+function inkText(str, x, y, size, o = {}) { ctx.save(); ctx.font = `${o.weight || 900} ${size}px ${o.font || SERIF}`; ctx.fillStyle = o.color || '#3a2412'; ctx.textAlign = o.align || 'center'; ctx.textBaseline = 'middle'; if (o.alpha !== undefined) ctx.globalAlpha = clamp(o.alpha); ctx.fillText(str, x, y); ctx.restore(); }
+
 function bolt(x, y, s, rot, t, k = 1) {
   if (k <= 0) return;
   ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s * k, s * k);
@@ -493,222 +815,28 @@ function scholarScene(t, st, o) {
   });
 }
 
-// ======================= scenes =======================
-S.hook = ({ t, lt, ln }) => {
-  const never = wl(ln, 'never', 0.4), last = wlLast(ln, 'box', 0.85);
-  const z = lerp(1.32, 1.12, easeInOut(lt / 2)) + (lt > last ? easeOut((lt - last) / 0.5) * 0.12 : 0);
-  camera(540, 900, z);
-  shake(t, lt > last ? 18 * Math.exp(-(lt - last) * 6) : 0);
-  templeWorld(t, { main: () => {
-    // pedestal
-    const pg = ctx.createLinearGradient(380, 0, 700, 0); pg.addColorStop(0, '#9c8e7c'); pg.addColorStop(0.4, '#e9dfcf'); pg.addColorStop(1, '#7d6f62');
-    ctx.fillStyle = pg; ctx.fillRect(390, 1000, 300, 380); ctx.fillStyle = '#efe6d6'; ctx.fillRect(360, 980, 360, 30); ctx.fillRect(360, 1370, 360, 30);
-    goldBox(540, 985, 0.72, t, { rattle: lt < never ? 0.6 : 0.15, lid: 0.04 + 0.03 * Math.sin(t * 9) });
-    owl(900, 1120 + 380 * (1 - easeOut((lt - never + 0.3) / 0.5)), 0.6, { t, mood: lt > last ? 'wise' : 'calm', look: -1, tilt: -0.08 });
-  } });
-  goldText("PANDORA'S BOX", 540, 330, 112, lt + 0.2);
-  if (lt > last) {
-    const k = clamp((lt - last) / 0.22);
-    ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = '#e0242f'; ctx.lineWidth = 26; ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 12;
-    ctx.beginPath(); ctx.moveTo(620, 300); ctx.lineTo(lerp(620, 980, k), lerp(300, 380, k)); ctx.stroke(); ctx.restore();
-    goldText('NOT A BOX', 540, 470, 88, lt - last - 0.1, { mid: '#ff7a5a', bot: '#a8201a', top: '#ffd0c0', glow: 'rgba(255,80,60,.5)' });
+// ---- small shared helpers for episode scene files ----
+function vaseColumns(x0, x1, ground, h) {
+  ctx.strokeStyle = INK; ctx.lineWidth = 4;
+  ctx.fillStyle = CLAY; ctx.fillRect(x0 - 30, ground - h - 70, x1 - x0 + 60, 44); ctx.strokeRect(x0 - 30, ground - h - 70, x1 - x0 + 60, 44);
+  for (let x = x0; x <= x1; x += (x1 - x0) / 2) {
+    ctx.fillStyle = CLAY; ctx.fillRect(x - 34, ground - h - 26, 68, h + 26); ctx.strokeRect(x - 34, ground - h - 26, 68, h + 26);
+    ctx.lineWidth = 2.5; for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.moveTo(x + k * 12, ground - h - 20); ctx.lineTo(x + k * 12, ground - 6); ctx.stroke(); } ctx.lineWidth = 4;
+    ctx.fillRect(x - 50, ground - h - 40, 100, 18); ctx.strokeRect(x - 50, ground - h - 40, 100, 18);
   }
-};
-EV.hook = ln => [{ t: 0.05, type: 'boom' }, { t: wl(ln, 'never', 0.4) - 0.2, type: 'whoosh' }, { t: wlLast(ln, 'box', 0.85), type: 'stamp' }];
+}
+function vaseStars(t, n = 50, seed = 4) { const R = rng(seed); for (let i = 0; i < n; i++) { const x = R() * 1300 - 110, y = 120 + R() * 900; sparkle(x, y, 5 + R() * 6, 0.35 + 0.35 * Math.sin(t * 2 + i)); } }
+function arrow(x, y, ang, s = 1, trail = 0, col = 'rgba(255,210,110,.8)') {
+  if (trail) for (let k = 1; k < 10; k++) glow(x - Math.cos(ang) * k * 22, y - Math.sin(ang) * k * 22, 40 - k * 3, col, trail * (1 - k / 10));
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(s, s);
+  rod(-90, 0, 10, 0, 5);
+  ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.fillStyle = CLAY_L; ctx.beginPath(); ctx.moveTo(26, 0); ctx.lineTo(6, -9); ctx.lineTo(6, 9); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = CLAY; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(-90, 0); ctx.lineTo(-74, sd * 14); ctx.lineTo(-62, 0); ctx.fill(); }
+  ctx.restore();
+}
+function nightTint(a) { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = `rgba(10,16,48,${a})`; ctx.fillRect(0, 0, W, H); ctx.restore(); }
 
-S.jar = ({ t, lt, ln }) => {
-  const jar = wl(ln, 'jar', 0.55), pi = wl(ln, 'pithos', 0.85);
-  const [shot, st] = shotOf(lt, [jar - 0.1]);
-  if (shot === 0) {
-    camera(lerp(380, 470, easeInOut(lt / jar)), 860, lerp(1.25, 1.12, easeInOut(lt / jar)));
-    // zoom-through from the temple into the painting
-    CAM.z *= 1 + 1.5 * Math.pow(1 - clamp(lt / 0.35), 2);
-    vaseWorld(t, () => {
-      fig('pandora', lerp(120, 430, easeOut(lt / jar)), 1290, 1.45, { t, walk: 1 - clamp((lt - jar + 0.6) / 0.5), phase: lt * 7 });
-      inscription('ΠΑΝΔΩΡΑ', 760, 820, 54, clamp(lt / 0.6), true);
-    });
-    namePlate('HESIOD · c. 700 BC', 540, 330, clamp((lt - 0.3) / 0.4));
-  } else {
-    camera(560, lerp(980, 760, easeInOut(st / 1.6)), lerp(1.05, 1.2, easeInOut(st / 2)));
-    whip(st, -1, 600);
-    vaseWorld(t, () => {
-      fig('pandora', 300, 1290, 1.3, { t, armF: [0.9, 0.2], headTilt: -0.05 });
-      const rise = easeBack(clamp(st / 0.6));
-      pithos(700, 1290 + (1 - rise) * 300, 1.35 * (0.6 + 0.4 * rise), { gleam: clamp((st - 0.3) / 0.7) });
-    });
-    goldText('A JAR', 540, 330, 130, st - 0.1);
-    if (lt > pi - 0.15) { goldText('PITHOS', 540, 470, 86, lt - pi + 0.15, { step: 0.05 }); ctx.save(); ctx.font = `italic 700 46px ${GREEK}`; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,230,180,' + clamp((lt - pi) / 0.4) + ')'; ctx.fillText('πίθος', 540, 560); ctx.restore(); }
-  }
-};
-EV.jar = ln => [{ t: 0.0, type: 'whoosh' }, { t: wl(ln, 'jar', 0.55) - 0.1, type: 'boom' }, { t: wl(ln, 'pithos', 0.85) - 0.1, type: 'chime' }];
-
-S.fire = ({ t, lt, ln }) => {
-  const pan = wl(ln, 'pandora', 0.2), aft = wl(ln, 'after', 0.45), gave = wl(ln, 'gave', 0.8);
-  const [shot, st] = shotOf(lt, [pan - 0.05, aft - 0.05, gave - 0.1]);
-  if (shot === 0) {
-    camera(560, 820, lerp(1.0, 1.18, easeInOut(st / 1.2)));
-    shake(t, 26 * Math.exp(-st * 5));
-    vaseWorld(t, () => {
-      cloud(560, 1250, 1.6);
-      const z = fig('zeus', 520, 1240, 1.45, { t, armF: [-2.5 + Math.sin(t * 3) * 0.05, -2.9], armB: [-0.3, -0.6], hold: 'scepter' });
-      bolt(z.hand[0], z.hand[1] - 40, 0.9, 0.3, t);
-      lightning(z.hand[0], z.hand[1] - 100, z.hand[0] - 200, -200, Math.floor(t * 12), 1 - clamp(st / 0.35));
-      inscription('ΖΕΥΣ', 200, 760, 58, clamp(st / 0.4), true);
-    });
-    flash(st, 0.2, '255,250,230', 0.85);
-    namePlate('ZEUS', 540, 330, clamp(st / 0.3));
-  } else if (shot === 1) {
-    camera(540, 900, lerp(1.12, 1.0, easeInOut(st / 1.4)));
-    whip(st, 1);
-    vaseWorld(t, () => {
-      const rv = clamp(st / 0.9);
-      ctx.save(); ctx.beginPath(); ctx.rect(0, 1290 - 640 * rv, 1080, 700); ctx.clip();
-      fig('pandora', 540, 1290, 1.45, { t, armF: [0.3, 0.6], armB: [-0.2, -0.3] });
-      ctx.restore();
-      for (let i = 0; i < 26; i++) { const yy = 1290 - 640 * rv + Math.sin(i * 7.7) * 20, xx = 420 + hash1(i) * 260; sparkle(xx, yy, 10 + 10 * hash1(i + 3), (1 - rv * 0.6) * (0.5 + 0.5 * Math.sin(t * 10 + i))); }
-      glow(540, 1290 - 640 * rv, 260, 'rgba(255,210,120,.5)', 1 - rv * 0.5);
-    });
-    namePlate('PANDORA', 540, 330, clamp(st / 0.3));
-    if (lt > wl(ln, 'punishment', 0.5) - 0.1) goldText('A PUNISHMENT', 540, 450, 84, lt - wl(ln, 'punishment', 0.5) + 0.1, { mid: '#ff9a6a', bot: '#a8321a' });
-  } else if (shot === 2) {
-    const runX = lerp(-80, 1160, st / 1.9);
-    camera(lerp(420, 660, st / 1.9), 880, 1.08);
-    whip(st, 1);
-    vaseWorld(t, () => {
-      const p = fig('prometheus', runX, 1290, 1.35, { t, walk: 1.4, phase: st * 11, lean: 0.22, armF: [-1.4, -2.2] });
-      for (let i = 0; i < 12; i++) glow(p.hand[0] - i * 34, p.hand[1] - 30 + Math.sin(t * 9 + i) * 10, 70 - i * 4, 'rgba(255,140,40,.6)', 1 - i / 12);
-      ctx.strokeStyle = INK; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(p.hand[0], p.hand[1] + 40); ctx.lineTo(p.hand[0] + 8, p.hand[1] - 50); ctx.stroke();
-      flame(p.hand[0] + 8, p.hand[1] - 48, 34, t, 1); glow(p.hand[0], p.hand[1] - 80, 300, 'rgba(255,150,50,.6)', 1);
-      particles(17, 30, t, { x0: runX - 400, x1: runX, y0: 700, y1: 1000, vy: -40, vx: -80, size: 3, color: 'rgba(255,150,50,1)', core: '#ffe0a0', glow: true, life: 1.6, wobble: 20 });
-      inscription('ΠΡΟΜΗΘΕΥΣ', runX - 60, 600, 46, 1);
-    }, { tint: 'rgba(255,120,40,.06)' });
-    namePlate('PROMETHEUS', 540, 330, clamp(st / 0.3));
-    goldText('STOLE FIRE', 540, 450, 84, st - 0.5, { mid: '#ffb04a' });
-  } else {
-    camera(560, 900, lerp(1.0, 1.1, easeInOut(st / 1.5)));
-    whip(st, 1, 500);
-    vaseWorld(t, () => {
-      fig('prometheus', 260, 1290, 1.25, { t, armF: [-1.2, -1.6] });
-      const hand = [260 + 1.25 * (16 + Math.sin(-1.2) * 78 + Math.sin(-1.6) * 72) * 1, 1290 + 1.25 * (-318 + Math.cos(-1.2) * 78 + Math.cos(-1.6) * 72)];
-      flame(hand[0], hand[1] - 10, 30, t, 2);
-      const lit = clamp((st - 0.4) / 0.6);
-      [[600, 0.9, -1], [760, 0.85, -1], [900, 0.95, -1]].forEach(([hx, sc, f], i) => {
-        fig('human', hx, 1290, sc, { t, f, armF: [-1.0 * lit - 0.2, -1.4 * lit], walk: 0 });
-        glow(hx - 60, 900, 220, 'rgba(255,150,60,.45)', lit);
-      });
-      ctx.fillStyle = INK; ctx.fillRect(700, 1262, 120, 26); flame(760, 1262, 40 * lit, t, 4); glow(760, 1200, 320, 'rgba(255,140,50,.6)', lit);
-      inscription('ΑΝΘΡΩΠΟΙ', 760, 780, 44, lit);
-    }, { tint: 'rgba(255,120,40,.06)' });
-    namePlate('HUMANS', 540, 330, clamp(st / 0.3));
-  }
-};
-EV.fire = ln => [{ t: 0, type: 'thunder' }, { t: wl(ln, 'pandora', 0.2) - 0.05, type: 'shimmer' }, { t: wl(ln, 'after', 0.45) - 0.05, type: 'firewhoosh' }, { t: wl(ln, 'gave', 0.8) - 0.1, type: 'whoosh' }];
-
-S.open = ({ t, lt, ln }) => {
-  const op = wl(ln, 'opened', 0.2);
-  const [shot, st] = shotOf(lt, [op + 0.2]);
-  if (shot === 0) {
-    camera(600, 900, lerp(1.1, 1.3, easeInOut(st / 1.2)));
-    whip(st, -1);
-    vaseWorld(t, () => {
-      const lift = clamp((lt - op + 0.25) / 0.45);
-      fig('pandora', 400, 1290, 1.35, { t, armF: [lerp(0.6, -1.6, lift), lerp(0.3, -1.9, lift)], headTilt: -0.05 });
-      pithos(760, 1290, 1.2, { lid: lift * 0.4 });
-      glow(760, 800, 220, 'rgba(170,60,255,.6)', lift);
-    });
-  } else {
-    camera(640, lerp(820, 900, easeOut(st / 1)), lerp(1.35, 1.0, easeOut(st / 0.9)));
-    shake(t, 22 * Math.exp(-st * 2.5));
-    vaseWorld(t, () => {
-      fig('pandora', 300, 1290, 1.25, { t, armF: [2.0, 2.85], armB: [1.7, 2.6], lean: -0.14, headTilt: -0.12 });
-      pithos(700, 1290, 1.12, { lid: 1 });
-      glow(700, 860, 420, 'rgba(170,60,255,.45)', clamp(st / 0.3) * (1 - clamp((st - 2.5) / 1.5)));
-      smoke(700, 830, st, 21);
-      const sp = [['sickness', 'SICKNESS', '#7dff6a', -1], ['work', 'TOIL', '#ffd23a', 1], ['trouble', 'TROUBLE', '#ff4a4a', 0]];
-      sp.forEach(([w, label, eye, dir], i) => {
-        const at = wl(ln, w, 0.4 + i * 0.2) - ln.start * 0 - (op + 0.2) - 0.15, u = clamp((st - at) / 1.4);
-        if (u <= 0) return;
-        const x = 700 + dir * 330 * easeOut(u) + Math.sin(t * 3 + i) * 30, y = 820 - 330 * easeOut(u) - i * 40;
-        spirit(x, y, 1.6, t, eye, i * 3);
-        namePlate(label, x, y - 110, clamp(u * 3));
-      });
-    }, { tint: `rgba(60,0,60,${0.25 * clamp(st / 0.6)})` });
-  }
-};
-EV.open = ln => [{ t: wl(ln, 'opened', 0.2) + 0.2, type: 'smokeburst' }, { t: wl(ln, 'sickness', 0.5) - 0.15, type: 'whoosh' }, { t: wl(ln, 'work', 0.65) - 0.15, type: 'whoosh' }, { t: wl(ln, 'trouble', 0.85) - 0.15, type: 'boom' }];
-
-S.hope = ({ t, lt, ln }) => {
-  const h = wl(ln, 'hope', 0.8);
-  const [shot, st] = shotOf(lt, [h - 0.2]);
-  if (shot === 0) {
-    camera(700, lerp(900, 860, easeInOut(st / 1.6)), lerp(1.0, 1.7, easeInOut(st / (h - 0.2))));
-    vaseWorld(t, () => {
-      fig('pandora', 330, 1290, 1.25, { t, armF: [0.4, 0.2], headTilt: 0.12 });
-      pithos(700, 1290, 1.12, { lid: 1 });
-      smoke(700, 830, 1.6 + lt * 0.3, 21, 30);
-    }, { tint: `rgba(10,0,20,${0.35 - 0.25 * clamp(st / 1.2)})` });
-    goldText('ONLY ONE THING...', 540, 330, 84, st - 0.1, { step: 0.03 });
-  } else {
-    camera(540, 900, lerp(0.92, 1.05, easeInOut(st / 2)));
-    ctx.fillStyle = '#0b0604'; ctx.fillRect(0, 0, W, H);
-    layer(1, () => {
-      const r = 420 + 30 * Math.sin(t * 2);
-      glow(540, 860, 900, 'rgba(255,190,90,.35)', 1);
-      godRays(540, 860, Math.PI, Math.PI * 2, 18, 900, 'rgba(255,220,150,.35)', 0.5 * clamp(st / 0.6), t);
-      glow(540, 860, r * 0.55, 'rgba(255,240,200,.95)', 1);
-      circle(540, 860, 46 + 4 * Math.sin(t * 4), '#fffbea');
-      for (let i = 0; i < 16; i++) { const a = t * 0.6 + i / 16 * Math.PI * 2, rr = 150 + 70 * Math.sin(t * 1.3 + i); sparkle(540 + Math.cos(a) * rr, 860 + Math.sin(a) * rr * 0.7, 10 + 8 * hash1(i), 0.6 + 0.4 * Math.sin(t * 5 + i)); }
-      particles(31, 40, t, { x0: 200, x1: 880, y0: 600, y1: 1200, vy: -30, size: 2.5, color: 'rgba(255,220,150,1)', core: '#fff4d0', glow: true, life: 3, wobble: 30 });
-    });
-    goldText('HOPE', 540, 380, 190, st, { font: '"Cinzel Decorative", "Cinzel", serif', step: 0.08 });
-    inscription('ἐλπίς', 540, 520, 54, clamp((st - 0.6) / 0.5));
-  }
-};
-EV.hope = ln => [{ t: 0.05, type: 'hush' }, { t: wl(ln, 'hope', 0.8) - 0.2, type: 'chime' }];
-
-S.box = ({ t, lt, ln }) => {
-  const ab = wl(ln, 'about', 0.3), mi = wl(ln, 'mistake', 0.85), bx = wlLast(ln, 'box', 0.7);
-  const [shot, st] = shotOf(lt, [ab - 0.05, mi - 0.15]);
-  if (shot === 0) {
-    camera(540, 960, lerp(1.25, 1.35, easeInOut(st / 2)));
-    templeWorld(t, { main: () => owl(540, 1080, 1.05, { t, mood: 'calm', look: Math.sin(t * 1.5) * 0.6, tilt: Math.sin(t * 1.2) * 0.1, wingR: 0.35 + 0.05 * Math.sin(t * 3) }) });
-    goldText('SO... THE BOX?', 540, 330, 104, st);
-  } else if (shot === 1) {
-    camera(lerp(560, 640, easeInOut(st / 3)), 900, lerp(1.0, 1.12, easeInOut(st / 3)));
-    whip(st, 1);
-    scholarScene(t, st, { words: () => {
-      ctx.save(); ctx.translate(700, 1080); ctx.rotate(-0.05);
-      const wr = clamp((lt - (ab + 0.2)) / 1.0);
-      ctx.font = `italic 700 50px ${GREEK}`; ctx.fillStyle = '#3a2412'; ctx.textAlign = 'center';
-      ctx.save(); ctx.beginPath(); ctx.rect(-230, -60, 220 * wr + 10, 120); ctx.clip(); ctx.fillText('πίθος', -120, 20); ctx.restore();
-      const cr = clamp((lt - bx + 0.5) / 0.3);
-      if (cr > 0) { ctx.strokeStyle = '#a3201a'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-200, 6); ctx.lineTo(lerp(-200, -40, cr), 6); ctx.stroke(); }
-      const w2 = clamp((lt - bx + 0.2) / 0.8);
-      ctx.save(); ctx.beginPath(); ctx.rect(10, -60, 220 * w2, 120); ctx.clip(); ctx.font = `italic 700 50px "DejaVu Serif", serif`; ctx.fillText('pyxis', 120, 20); ctx.restore();
-      ctx.restore();
-    } });
-    namePlate('ERASMUS · 1500s', 540, 330, clamp(st / 0.3));
-    if (lt > bx - 0.2) goldText('"PYXIS" = BOX', 540, 470, 80, lt - bx + 0.2, { mid: '#ffcf7a' });
-  } else {
-    camera(540, 900, lerp(1.0, 1.08, easeOut(st / 1.5)));
-    whip(st, -1);
-    shake(t, st > 0.6 ? 16 * Math.exp(-(st - 0.6) * 6) : 0);
-    vaseWorld(t, () => {
-      const mo = easeInOut(clamp(st / 0.7));
-      ctx.save(); ctx.globalAlpha = 1 - mo; ctx.translate(540, 1290); ctx.scale(1 + mo * 0.3, 1 - mo * 0.5); pithos(0, 0, 1.15); ctx.restore();
-      ctx.save(); ctx.globalAlpha = mo; goldBox(540, 1290, 0.95 * (0.6 + 0.4 * mo), t, {}); ctx.restore();
-    });
-    if (st > 0.6) {
-      const k = clamp((st - 0.6) / 0.2);
-      ctx.save(); ctx.translate(540, 470); ctx.rotate(-0.08); ctx.scale(lerp(1.8, 1, k), lerp(1.8, 1, k)); ctx.globalAlpha = k;
-      ctx.lineWidth = 12; ctx.strokeStyle = '#d0242c'; ctx.beginPath(); ctx.roundRect(-380, -80, 760, 160, 20); ctx.stroke();
-      ctx.font = `900 84px ${SERIF}`; ctx.fillStyle = '#e0303a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('IT STUCK', 0, 6); ctx.restore();
-    }
-    goldText('500 YEARS LATER...', 540, 300, 76, st - 0.1, { step: 0.025 });
-  }
-};
-EV.box = ln => [{ t: wl(ln, 'about', 0.3) - 0.05, type: 'whoosh' }, { t: wl(ln, 'about', 0.3) + 0.2, type: 'quill' }, { t: wl(ln, 'mistake', 0.85) - 0.15, type: 'whoosh' }, { t: wl(ln, 'mistake', 0.85) + 0.45, type: 'stamp' }];
-
+// ======================= shared closing scene (every episode ends here) =======================
 S.cta = ({ t, lt }) => {
   camera(540, 980, lerp(1.2, 1.08, easeOut(lt / 1.2)));
   templeWorld(t, { main: () => owl(540, 1100, 1.05, { t, mood: lt > 1 ? 'wink' : 'calm', wingL: 0.75 + 0.08 * Math.sin(t * 4), wingR: 0.75 + 0.08 * Math.sin(t * 4 + 1) }) });

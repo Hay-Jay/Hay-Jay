@@ -31,6 +31,7 @@ build/<account>/<episode>/<episode>.mp4                   finished videos, kept 
 - `account.json`: the account's profile kit (name ideas, bio, hashtags, posting days, house rule, colour).
 - `channel.js`: the host character, background and scenes for that account.
 - `episodes/*.json`: one script per video, with its TikTok caption and YouTube title and description.
+- `scenes/<episode>.js` (optional): scenes for one episode only. The Greek mythology account keeps its shared world and characters in `channel.js` and each episode's scenes here.
 
 The shared engine (captions, titles, props, render loop) is in `engine.js`.
 

@@ -1,0 +1,45 @@
+{
+  "channel": "myth",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "+6%",
+  "title": "Medusa wasn't born a monster",
+  "post": {
+    "caption": "Medusa wasn't born a monster 🐍🗿 #greekmythology #medusa #mythology #mythtok #history #learnontiktok",
+    "youtube_title": "Medusa Wasn't Born A Monster #shorts",
+    "youtube_description": "Hesiod made her the only mortal Gorgon. Ovid made her a young woman cursed by Athena after Poseidon attacked her. Then Perseus, a mirrored shield, and Pegasus.\n\n#greekmythology #medusa #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Medusa wasn't born a monster."
+    },
+    {
+      "scene": "sisters",
+      "text": "In the oldest stories, she was one of three Gorgon sisters, and the only one who could die."
+    },
+    {
+      "scene": "ovid",
+      "text": "But the Roman poet Ovid tells it differently. In his version, she was a beautiful young woman, famous for her hair."
+    },
+    {
+      "scene": "curse",
+      "text": "The sea god Poseidon attacked her inside Athena's temple. And Athena punished Medusa, turning her hair into snakes."
+    },
+    {
+      "scene": "stone",
+      "text": "From then on, one look from her turned people to stone."
+    },
+    {
+      "scene": "perseus",
+      "text": "The hero Perseus beheaded her by watching her reflection in a polished shield."
+    },
+    {
+      "scene": "pegasus",
+      "text": "And from her neck sprang Pegasus, the winged horse."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow for more myths you were told wrong!"
+    }
+  ]
+}

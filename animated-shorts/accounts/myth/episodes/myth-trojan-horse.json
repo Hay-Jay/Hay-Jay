@@ -1,0 +1,41 @@
+{
+  "channel": "myth",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "+6%",
+  "title": "The Trojan Horse isn't in the Iliad",
+  "post": {
+    "caption": "The Trojan Horse isn't in the Iliad 🐴🏛️ #greekmythology #trojanhorse #troy #iliad #mythtok #history",
+    "youtube_title": "The Trojan Horse Isn't In The Iliad #shorts",
+    "youtube_description": "The Iliad ends with a funeral, not a horse. The Odyssey mentions it briefly, and the full story comes from Virgil's Aeneid, including Laocoon's famous warning.\n\n#greekmythology #troy #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "The Trojan Horse isn't in the Iliad."
+    },
+    {
+      "scene": "iliad",
+      "text": "Homer's Iliad covers just a few weeks of the ten year Trojan War, and it ends with a funeral, not a horse."
+    },
+    {
+      "scene": "virgil",
+      "text": "The horse gets brief mentions in the Odyssey. The full story comes from the Roman poet Virgil, centuries later."
+    },
+    {
+      "scene": "trick",
+      "text": "The Greeks built a giant wooden horse, hid soldiers inside, and pretended to sail away."
+    },
+    {
+      "scene": "laocoon",
+      "text": "A Trojan priest named Laocoon warned: I fear the Greeks, even when they bring gifts. Then two sea serpents killed him."
+    },
+    {
+      "scene": "fall",
+      "text": "So the Trojans dragged the horse inside their walls. That night, the soldiers climbed out and opened the gates."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow for more myths you were told wrong!"
+    }
+  ]
+}

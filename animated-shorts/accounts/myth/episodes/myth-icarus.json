@@ -1,0 +1,45 @@
+{
+  "channel": "myth",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "+6%",
+  "title": "Icarus got two warnings",
+  "post": {
+    "caption": "'Don't fly too close to the sun' was only HALF the warning ☀️🌊 #greekmythology #icarus #mythology #mythtok #history",
+    "youtube_title": "Icarus Got TWO Warnings, Not One #shorts",
+    "youtube_description": "In Ovid's version, Daedalus warned Icarus not to fly too high or too low. The sea where he fell is still called the Icarian Sea.\n\n#greekmythology #icarus #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Everyone remembers: don't fly too close to the sun. But that was only half the warning."
+    },
+    {
+      "scene": "prison",
+      "text": "The inventor Daedalus and his son Icarus were trapped on Crete by King Minos."
+    },
+    {
+      "scene": "wings",
+      "text": "So Daedalus built wings, from feathers, thread and wax."
+    },
+    {
+      "scene": "warning",
+      "text": "His warning: don't fly too high, or the sun will melt the wax. And don't fly too low, or the sea spray will soak the feathers."
+    },
+    {
+      "scene": "fall",
+      "text": "Icarus flew higher and higher. The wax melted, and he fell into the sea."
+    },
+    {
+      "scene": "name",
+      "text": "That sea is still called the Icarian Sea, beside the Greek island of Icaria."
+    },
+    {
+      "scene": "lesson",
+      "text": "The real lesson? Fly the middle path."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow for more myths you were told wrong!"
+    }
+  ]
+}

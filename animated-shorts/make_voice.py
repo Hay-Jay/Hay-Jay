@@ -41,7 +41,12 @@ def main(ep_path, out):
                 mp3, words = asyncio.run(tts(ln["text"], ep.get("voice", "en-US-AndrewNeural"),
                                              ep.get("rate", "+0%"), ep.get("pitch", "+0Hz")))
                 if mp3:
-                    break
+                    got = len(decode(mp3)) / SR
+                    need = max([w["e"] for w in words] or [0])
+                    if words and got + 0.25 >= need and got >= 0.18 * len(ln["text"].split()):
+                        break
+                    print(f"  retrying TTS (audio cut short: {got:.2f}s for {len(ln['text'].split())} words)")
+                    time.sleep(2 * (attempt + 1))
             except Exception as e:
                 print(f"  retrying TTS ({e.__class__.__name__})")
                 time.sleep(2 * (attempt + 1))

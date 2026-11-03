@@ -1,0 +1,41 @@
+{
+  "channel": "myth",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "+6%",
+  "title": "Persephone didn't eat six seeds",
+  "post": {
+    "caption": "Persephone didn't eat six pomegranate seeds. Not in the oldest version 🍎🌑 #greekmythology #persephone #hades #mythology #mythtok",
+    "youtube_title": "Persephone Didn't Eat Six Seeds #shorts",
+    "youtube_description": "In the Homeric Hymn to Demeter it's a single pomegranate seed and a third of the year below. Ovid says seven. The six seeds come from much later retellings.\n\n#greekmythology #persephone #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Persephone didn't eat six pomegranate seeds. Not in the oldest version."
+    },
+    {
+      "scene": "abduct",
+      "text": "Hades, god of the underworld, carried Persephone off to be his queen."
+    },
+    {
+      "scene": "grief",
+      "text": "Her mother Demeter, goddess of the harvest, was so heartbroken that the crops stopped growing."
+    },
+    {
+      "scene": "seed",
+      "text": "Zeus ordered her return. But Hades secretly gave her a pomegranate seed, and anyone who eats food from the underworld must come back."
+    },
+    {
+      "scene": "count",
+      "text": "In the oldest telling, the Homeric Hymn, it's one seed, and she spends a third of the year below. Ovid says seven seeds. The six came much later."
+    },
+    {
+      "scene": "winter",
+      "text": "So every year, while Persephone is gone, Demeter grieves. And that's winter."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow for more myths you were told wrong!"
+    }
+  ]
+}

@@ -10,7 +10,9 @@ const tl = JSON.parse(fs.readFileSync(path.join(dir, 'timeline.json')));
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
   page.on('pageerror', e => { console.error('page error:', e); process.exit(1); });
-  await page.goto('file://' + path.join(__dirname, 'scenes.html') + '?ch=' + (tl.channel || 'ocean'));
+  const ch = tl.channel || 'ocean', ep = path.basename(dir);
+  const epScenes = fs.existsSync(path.join(__dirname, 'accounts', ch, 'scenes', ep + '.js')) ? '&ep=' + ep : '';
+  await page.goto('file://' + path.join(__dirname, 'scenes.html') + '?ch=' + ch + epScenes);
   await page.evaluate(tl => window.setup(tl), tl);
   const n = Math.ceil(tl.duration * tl.fps);
   const ff = spawn('ffmpeg', ['-y', '-v', 'error', '-f', 'image2pipe', '-framerate', String(tl.fps),

@@ -10,5 +10,8 @@
   // load the account's channel (host, background, scenes): scenes.html?ch=<account>
   const ch = (new URLSearchParams(location.search).get('ch') || 'ocean').replace(/[^a-z0-9_-]/gi, '');
   document.write(`<script src="accounts/${ch}/channel.js"><\/script>`);
+  // episode-specific scenes, when the account keeps them in accounts/<account>/scenes/<episode>.js
+  const ep = (new URLSearchParams(location.search).get('ep') || '').replace(/[^a-z0-9_-]/gi, '');
+  if (ep) document.write(`<script src="accounts/${ch}/scenes/${ep}.js"><\/script>`);
 </script>
 </body></html>

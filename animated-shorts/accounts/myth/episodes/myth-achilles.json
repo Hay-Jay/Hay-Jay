@@ -1,0 +1,41 @@
+{
+  "channel": "myth",
+  "voice": "en-GB-SoniaNeural",
+  "rate": "+6%",
+  "title": "The Iliad never mentions Achilles' heel",
+  "post": {
+    "caption": "The Iliad never mentions Achilles' heel 🏹🦶 #greekmythology #achilles #iliad #mythology #mythtok #history",
+    "youtube_title": "The Iliad Never Mentions Achilles' Heel #shorts",
+    "youtube_description": "The River Styx dip comes from the Roman poet Statius, about 800 years after Homer. In the Iliad, Achilles even gets wounded in the arm.\n\n#greekmythology #achilles #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Homer's Iliad never mentions Achilles' heel."
+    },
+    {
+      "scene": "styx",
+      "text": "The famous story, where his mother dips baby Achilles in the River Styx, holding him by the heel, comes from a Roman poet named Statius."
+    },
+    {
+      "scene": "gap",
+      "text": "That's around eight hundred years after Homer."
+    },
+    {
+      "scene": "wound",
+      "text": "In the Iliad, Achilles isn't magically protected at all. He even gets wounded by a spear, in the arm."
+    },
+    {
+      "scene": "death",
+      "text": "And the poem ends before he dies. Later stories say Paris shot him with an arrow, guided by the god Apollo."
+    },
+    {
+      "scene": "word",
+      "text": "Today, an Achilles' heel means a fatal weakness, and the tendon in your heel is named after him."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow for more myths you were told wrong!"
+    }
+  ]
+}
