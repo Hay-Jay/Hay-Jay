@@ -19,11 +19,13 @@
 
   let video, scenes = [], total = 0;
 
-  function build(id) {
+  function build(id, durs) {
     video = VIDEOS.find(v => v.id === id) || VIDEOS[0];
+    durs = durs || (window.VO_TIMING || {})[video.id] || [];
     scenesEl.innerHTML = ''; barsEl.innerHTML = '';
     scenes = []; total = 0;
-    video.scenes.forEach(s => {
+    video.scenes.forEach((s, si) => {
+      const dur = durs[si] || s.dur;
       const el = document.createElement('section');
       el.className = 'scene ' + (s.cls || '');
       el.innerHTML = s.html;
@@ -34,8 +36,8 @@
         text: n.textContent,
         dots: n.dataset.a === 'people' ? [...n.children] : null,
       }));
-      scenes.push({ el, start: total, dur: s.dur, mood: s.mood || video.mood || '', anims });
-      total += s.dur;
+      scenes.push({ el, start: total, dur, mood: s.mood || video.mood || '', anims });
+      total += dur;
       const b = document.createElement('div'); b.appendChild(document.createElement('i')); barsEl.appendChild(b);
     });
     window.__duration = total;
@@ -91,6 +93,7 @@
       b.style.transform = `translate(${Math.sin(p + i * 2) * 140}px, ${Math.cos(p * .8 + i) * 120}px)`;
     });
     window.__t = t;
+    return idx;
   }
   window.__seek = seek;
   window.__build = build;
@@ -114,17 +117,30 @@
 
   const playBtn = document.getElementById('play'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
   let playing = false, t0 = 0, base = 0, cur = 0;
-  function show(t) { cur = t; seek(t); scrub.value = Math.round(t / total * 1000); timeEl.textContent = t.toFixed(1) + 's'; }
+  // narration in preview (files made by render.mjs in vo/<id>/NN.mp3)
+  let audio = null, audioIdx = -1;
+  function stopAudio() { if (audio) audio.pause(); audio = null; audioIdx = -1; }
+  function syncAudio(idx, t) {
+    if (!playing || !window.VO_TIMING) return;
+    if (idx === audioIdx) return;
+    stopAudio(); audioIdx = idx;
+    const off = t - scenes[idx].start - .25;
+    const a = new Audio(`vo/${video.id}/${String(idx + 1).padStart(2, '0')}.mp3`);
+    audio = a;
+    const go = () => { a.currentTime = Math.max(0, off); a.play().catch(() => {}); };
+    if (off <= 0) setTimeout(() => { if (audio === a) a.play().catch(() => {}); }, -off * 1000); else a.addEventListener('loadedmetadata', go, { once: true });
+  }
+  function show(t) { cur = t; const idx = seek(t); syncAudio(idx, t); scrub.value = Math.round(t / total * 1000); timeEl.textContent = t.toFixed(1) + 's'; }
   function loop(now) {
     if (!playing) return;
     const t = base + (now - t0) / 1000;
-    if (t >= total) { playing = false; playBtn.textContent = 'Play'; show(total); return; }
+    if (t >= total) { playing = false; playBtn.textContent = 'Play'; stopAudio(); show(total); return; }
     show(t); requestAnimationFrame(loop);
   }
   function play() { if (cur >= total - .05) cur = 0; playing = true; base = cur; t0 = performance.now(); playBtn.textContent = 'Pause'; requestAnimationFrame(loop); }
-  playBtn.onclick = () => { if (playing) { playing = false; playBtn.textContent = 'Play'; } else play(); };
-  document.getElementById('restart').onclick = () => { show(0); if (!playing) play(); else { base = 0; t0 = performance.now(); } };
-  scrub.oninput = () => { playing = false; playBtn.textContent = 'Play'; show(scrub.value / 1000 * total); };
-  pick.onchange = () => { playing = false; playBtn.textContent = 'Play'; build(pick.value); history.replaceState(null, '', '?v=' + pick.value); show(0); };
+  playBtn.onclick = () => { if (playing) { playing = false; playBtn.textContent = 'Play'; stopAudio(); } else play(); };
+  document.getElementById('restart').onclick = () => { stopAudio(); show(0); if (!playing) play(); else { base = 0; t0 = performance.now(); } };
+  scrub.oninput = () => { playing = false; playBtn.textContent = 'Play'; stopAudio(); show(scrub.value / 1000 * total); };
+  pick.onchange = () => { playing = false; playBtn.textContent = 'Play'; stopAudio(); build(pick.value); history.replaceState(null, '', '?v=' + pick.value); show(0); };
   document.fonts.ready.then(() => { show(0); if (qs.has('autoplay')) play(); });
 })();

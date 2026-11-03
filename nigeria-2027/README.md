@@ -1,6 +1,6 @@
 # Nigeria 2027 in numbers: TikTok / Instagram video kit
 
-Five ready-to-post vertical videos (1080×1920, 30fps MP4) about Nigeria's 16 January 2027 presidential election, plus Instagram carousel slides and a stats page.
+Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian-English voiceover) about Nigeria's 16 January 2027 presidential election, plus Instagram carousel slides and a stats page.
 
 | # | Video | File | Hook |
 |---|-------|------|------|
@@ -16,16 +16,17 @@ Five ready-to-post vertical videos (1080×1920, 30fps MP4) about Nigeria's 16 Ja
 
 ## Posting tips
 
-- The videos are **silent on purpose**. Add a trending sound in the TikTok / IG editor; trending audio gets more reach than baked-in music.
+- Each video has a **narrator** (Microsoft Edge neural voice `en-NG-AbeoNeural`, a Nigerian-English male voice). For music, add a trending sound in the TikTok / IG editor and turn its volume down to about 15–20% so the voice stays clear.
+- To use the female voice, set `window.VOICE = { name: 'en-NG-EzinneNeural', rate: '+6%' }` in `videos.js` and re-render. To record your own voice instead, replace the clips in `vo/<video>/NN.mp3` (keep the `.txt` files) and re-render.
 - Text stays out of the bottom ~380px and the right edge, so the app's caption, buttons and progress bar won't cover it.
 - Captions with hashtags are in `videos.js` (`caption:`), and the page has a **Copy caption** button for each.
 - Every video ends on a sources card. Keep it: fact-checked posts are harder to dismiss and less likely to be flagged.
 
 ## Edit and re-render
 
-1. Change the words, numbers or your handle in `videos.js` (`window.HANDLE = '@yourname'`).
+1. Change the words, numbers or your handle in `videos.js` (`window.HANDLE = '@yourname'`). The spoken script is `window.NARRATION` at the bottom of the same file, one line per scene. Write numbers the way they should be said.
 2. Preview: open `studio.html` in a browser.
-3. Render (needs Node 18+, Playwright with Chromium, and ffmpeg):
+3. Render (needs Node 18+, Playwright with Chromium, ffmpeg, and `pip install edge-tts` for the voice). Scenes stretch to fit their narration:
 
 ```bash
 node render.mjs
