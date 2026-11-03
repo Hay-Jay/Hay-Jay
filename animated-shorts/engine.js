@@ -1,6 +1,8 @@
 // Frame-exact animation renderer. window.frame(t) draws time t (seconds) and returns a JPEG.
 const W = 1080, H = 1920, FONT = 'Inter, "DejaVu Sans", sans-serif';
-const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const cv = document.getElementById('c');
+let ctx = cv.getContext('2d');   // swapped to offscreen canvases while drawing blurred layers / caches
+const MAIN = ctx;
 let TL, CHUNKS = [], capY = 1440, CAP_HI = '#FFE14D';
 const S = {}, EV = {};
 let drawBg = () => {}, chInit = () => {}, overlay = () => {};
@@ -153,6 +155,147 @@ function monitor(x, y, w, h, t, lt, st) {
   ctx.fillText(stopped ? '0' : '84', x + w - 40, y + 55);
 }
 
+
+// ---------- v2: cinematic toolkit (camera, depth layers, motion blur, light, particles, lip-sync) ----------
+// Channels tune these. blur = sub-frames averaged per frame (motion blur); grain/vignette/grade = film finish.
+const FX = { blur: 3, shutter: 0.5, grain: 0, vignette: 0, grade: null, punch: true };
+const CAM = { x: 540, y: 960, z: 1, r: 0, sx: 0, sy: 0 };
+function camera(x, y, z = 1, r = 0) { CAM.x = x; CAM.y = y; CAM.z = z; CAM.r = r; }
+function hash1(n) { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); }
+function noise1(x) { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return lerp(hash1(i), hash1(i + 1), u); }
+function shake(t, amp, freq = 22) { if (amp <= 0) return; CAM.sx += (noise1(t * freq) - 0.5) * 2 * amp; CAM.sy += (noise1(t * freq + 91.3) - 0.5) * 2 * amp; }
+const easeInOut = t => { t = clamp(t); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+// which shot of a line we are in, given cut times (seconds into the line): [index, seconds into that shot]
+function shotOf(lt, cuts) { let i = 0; while (i < cuts.length && lt >= cuts[i]) i++; return [i, lt - (i ? cuts[i - 1] : 0)]; }
+
+const OFF = document.createElement('canvas'); OFF.width = W; OFF.height = H; const OFFX = OFF.getContext('2d');
+// Draw fn in world space as seen by the camera. depth 0 = fixed to screen, 1 = main plane, >1 = foreground.
+function layer(depth, fn, o = {}) {
+  const blurred = !!o.blur;
+  const prev = ctx;
+  if (blurred) { OFFX.setTransform(1, 0, 0, 1, 0, 0); OFFX.clearRect(0, 0, W, H); ctx = OFFX; }
+  ctx.save();
+  const z = 1 + (CAM.z - 1) * depth;
+  ctx.translate(W / 2 + CAM.sx * depth, H / 2 + CAM.sy * depth);
+  ctx.rotate(CAM.r * depth); ctx.scale(z, z);
+  ctx.translate(-(540 + (CAM.x - 540) * depth), -(960 + (CAM.y - 960) * depth));
+  fn();
+  ctx.restore();
+  ctx = prev;
+  if (blurred) { ctx.save(); ctx.filter = `blur(${o.blur}px)`; ctx.globalAlpha = o.alpha ?? 1; ctx.drawImage(OFF, 0, 0); ctx.restore(); }
+}
+const CACHE = {};
+function cached(key, w, h, draw) {
+  if (!CACHE[key]) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const prev = ctx; ctx = c.getContext('2d'); draw(w, h); ctx = prev; CACHE[key] = c;
+  }
+  return CACHE[key];
+}
+function glow(x, y, r, color, alpha = 1) {
+  if (r <= 0 || alpha <= 0) return;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = clamp(alpha);
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore();
+}
+function godRays(x, y, ang, spread, n, len, color, alpha, t) {
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < n; i++) {
+    const a = ang + (i / (n - 1) - 0.5) * spread + Math.sin(t * 0.4 + i * 2.1) * 0.02, w = 0.025 + 0.02 * hash1(i * 7.3);
+    const g = ctx.createLinearGradient(x, y, x + Math.sin(a) * len, y + Math.cos(a) * len);
+    g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.globalAlpha = alpha * (0.6 + 0.4 * Math.sin(t * 0.7 + i * 1.7));
+    ctx.beginPath(); ctx.moveTo(x, y);
+    ctx.lineTo(x + Math.sin(a - w) * len, y + Math.cos(a - w) * len); ctx.lineTo(x + Math.sin(a + w) * len, y + Math.cos(a + w) * len);
+    ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+  }
+  ctx.restore();
+}
+// deterministic drifting particles (dust, embers, sparks). o: {x0,x1,y0,y1,vx,vy,size,color,life,wobble,alpha,glow}
+function particles(seed, n, t, o) {
+  const R = rng(seed);
+  ctx.save(); if (o.glow) ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < n; i++) {
+    const px = R(), py = R(), ph = R(), sz = R(), life = (o.life || 4) * (0.7 + 0.6 * R());
+    const age = ((t / life + ph) % 1 + 1) % 1;
+    const x = lerp(o.x0, o.x1, px) + Math.sin(t * 1.3 + ph * 20) * (o.wobble ?? 20) + (o.vx || 0) * age * life;
+    const y = lerp(o.y0, o.y1, py) + (o.vy ?? -60) * age * life;
+    const a = Math.sin(Math.PI * age) * (o.alpha ?? 1);
+    const r = (o.size || 4) * (0.5 + sz);
+    if (o.glow) glow(x, y, r * 4, o.color, a);
+    ctx.globalAlpha = a; circle(x, y, r, o.core || o.color); ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+// Mouth shape from the word being spoken: {open 0..1, wide 0..1, round 0..1}
+function mouthAt(t) {
+  const env = clamp((TL.env[Math.floor(t * TL.fps)] || 0) * 1.4);
+  let w = null;
+  for (const ln of TL.lines) { if (t < ln.start - 0.05 || t > ln.end + 0.05) continue; w = ln.words.find(x => t >= x.s && t < x.e + 0.04); break; }
+  if (!w || env < 0.05) return { open: env * 0.25, wide: 0.5, round: 0 };
+  const letters = w.w.toLowerCase().replace(/[^a-z]/g, '') || 'a';
+  const p = clamp((t - w.s) / Math.max(0.05, w.e - w.s), 0, 0.999), ch = letters[Math.floor(p * letters.length)];
+  let sh = { open: 0.35, wide: 0.5, round: 0.1 };
+  if ('ah'.includes(ch)) sh = { open: 0.95, wide: 0.6, round: 0.1 };
+  else if (ch === 'o') sh = { open: 0.7, wide: 0.3, round: 0.9 };
+  else if ('uwq'.includes(ch)) sh = { open: 0.35, wide: 0.15, round: 1 };
+  else if ('eiy'.includes(ch)) sh = { open: 0.5, wide: 1, round: 0 };
+  else if ('mbp'.includes(ch)) sh = { open: 0.03, wide: 0.6, round: 0 };
+  else if ('fv'.includes(ch)) sh = { open: 0.15, wide: 0.7, round: 0 };
+  sh.open *= 0.45 + 0.55 * env;
+  return sh;
+}
+// Gold engraved title with a letter-by-letter reveal
+function goldText(str, x, y, size, lt, o = {}) {
+  if (lt < 0) return;
+  const font = o.font || '"Cinzel", "DejaVu Serif", serif';
+  ctx.save(); ctx.font = `900 ${size}px ${font}`;
+  let full = ctx.measureText(str).width; const fit = Math.min(1, (o.maxW || 960) / full);
+  ctx.translate(x, y); ctx.scale(fit, fit); ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const g = ctx.createLinearGradient(0, -size * 0.55, 0, size * 0.5);
+  g.addColorStop(0, o.top || '#fff4cc'); g.addColorStop(0.45, o.mid || '#f2c45a'); g.addColorStop(1, o.bot || '#a8640f');
+  const x0 = -full / 2, step = o.step ?? 0.035;
+  for (let i = 0; i < str.length; i++) {
+    const k = clamp((lt - i * step) / 0.25); if (k <= 0) continue;
+    const xi = x0 + ctx.measureText(str.slice(0, i)).width, dy = (1 - easeOut(k)) * size * 0.35;
+    ctx.globalAlpha = k * (o.alpha ?? 1);
+    ctx.lineJoin = 'round'; ctx.lineWidth = size * 0.14; ctx.strokeStyle = o.stroke || 'rgba(20,10,4,.9)';
+    ctx.shadowColor = o.glow || 'rgba(255,190,80,.55)'; ctx.shadowBlur = size * 0.35;
+    ctx.strokeText(str[i], xi, dy); ctx.shadowBlur = 0;
+    ctx.fillStyle = g; ctx.fillText(str[i], xi, dy);
+  }
+  ctx.restore();
+}
+function whip(st, dir = 1, dist = 700, dur = 0.24) { if (st < dur) CAM.sx += dir * dist * Math.pow(1 - st / dur, 2); }
+function flash(st, dur = 0.18, color = '255,255,255', max = 0.8) {
+  const a = max * (1 - st / dur); if (a <= 0) return;
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = `rgba(${color},${a})`; ctx.fillRect(0, 0, W, H); ctx.restore();
+}
+
+// film finish applied once per output frame
+const ACC = document.createElement('canvas'); ACC.width = W; ACC.height = H; const ACX = ACC.getContext('2d');
+const GRAIN = document.createElement('canvas'); GRAIN.width = GRAIN.height = 256;
+(() => { const g = GRAIN.getContext('2d'), im = g.createImageData(256, 256), R = rng(99);
+  for (let i = 0; i < im.data.length; i += 4) { const v = R() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  g.putImageData(im, 0, 0); })();
+function post(t) {
+  ACX.save();
+  if (FX.grade) { ACX.globalCompositeOperation = FX.grade.op || 'soft-light'; ACX.globalAlpha = FX.grade.alpha; ACX.fillStyle = FX.grade.color; ACX.fillRect(0, 0, W, H); }
+  if (FX.vignette) {
+    ACX.globalCompositeOperation = 'source-over'; ACX.globalAlpha = 1;
+    const g = ACX.createRadialGradient(W / 2, H * 0.45, H * 0.28, W / 2, H * 0.45, H * 0.72);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${FX.vignette})`);
+    ACX.fillStyle = g; ACX.fillRect(0, 0, W, H);
+  }
+  if (FX.grain) {
+    const f = Math.floor(t * 30);
+    ACX.globalCompositeOperation = 'overlay'; ACX.globalAlpha = FX.grain;
+    ACX.translate(-Math.floor(hash1(f) * 256), -Math.floor(hash1(f + 17) * 256));
+    ACX.fillStyle = ACX.createPattern(GRAIN, 'repeat'); ACX.fillRect(0, 0, W + 256, H + 256);
+  }
+  ACX.restore();
+}
+
 // ---------- captions ----------
 function buildChunks() {
   CHUNKS = [];
@@ -198,8 +341,9 @@ function renderAt(t) {
   const lt = t - ln.start, d = (li + 1 < TL.lines.length ? TL.lines[li + 1].start : TL.duration) - ln.start;
   const talk = TL.env[Math.floor(t * TL.fps)] || 0;
   capY = 1440;
+  camera(540, 960, 1, 0); CAM.sx = 0; CAM.sy = 0;
   ctx.save();
-  const punch = li === 0 ? 1 : 1 + 0.07 * (1 - easeOut(lt / 0.35));
+  const punch = (li === 0 || !FX.punch) ? 1 : 1 + 0.07 * (1 - easeOut(lt / 0.35));
   ctx.translate(W / 2, H / 2); ctx.scale(punch, punch); ctx.translate(-W / 2, -H / 2);
   drawBg(t);
   (S[ln.scene] || S.cta)({ t, lt, d, ln, talk });
@@ -210,8 +354,18 @@ function renderAt(t) {
   const fo = clamp((t - (TL.duration - 0.5)) / 0.5);
   if (fo > 0) { ctx.fillStyle = `rgba(0,0,0,${fo})`; ctx.fillRect(0, 0, W, H); }
 }
-window.setup = async tl => { TL = tl; buildChunks(); chInit(tl); await document.fonts.load(`80px "Noto Color Emoji"`); await document.fonts.load(`900 80px Inter`); await document.fonts.load(`800 40px Inter`); };
-window.frame = t => { renderAt(t); return cv.toDataURL('image/jpeg', 0.92).split(',')[1]; };
+window.setup = async tl => { TL = tl; buildChunks(); chInit(tl); await document.fonts.load(`80px "Noto Color Emoji"`); await document.fonts.load(`900 80px Inter`); await document.fonts.load(`800 40px Inter`); for (const f of ['900 80px Cinzel', '700 80px Cinzel', '900 80px "Cinzel Decorative"']) { try { await document.fonts.load(f); } catch (e) {} } };
+window.frame = t => {
+  const n = Math.max(1, FX.blur | 0), sh = FX.shutter / TL.fps;
+  ACX.globalCompositeOperation = 'source-over';
+  for (let k = 0; k < n; k++) {
+    renderAt(n === 1 ? t : t + (k / (n - 1) - 0.5) * sh);
+    ACX.globalAlpha = 1 / (k + 1); ACX.drawImage(cv, 0, 0);
+  }
+  ACX.globalAlpha = 1; post(t);
+  MAIN.drawImage(ACC, 0, 0);
+  return cv.toDataURL('image/jpeg', 0.93).split(',')[1];
+};
 window.sfxEvents = () => {
   const ev = [];
   TL.lines.forEach((ln, i) => {
