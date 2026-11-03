@@ -19,5 +19,7 @@
     "Sun"
   ],
   "rule": "Say which ancient source a version comes from (Hesiod, Homer, Ovid). Myths often have more than one version.",
-  "avatar_focus_y": 1030
+  "avatar_focus_y": 1030,
+  "host_focus_y": 1000,
+  "host_episode": "myth-pandora"
 }

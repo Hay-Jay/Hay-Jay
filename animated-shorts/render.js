@@ -27,8 +27,9 @@ const tl = JSON.parse(fs.readFileSync(path.join(dir, 'timeline.json')));
   await new Promise(r => ff.on('close', r));
   fs.writeFileSync(path.join(dir, 'events.json'), JSON.stringify(await page.evaluate(() => window.sfxEvents())));
   // a few stills for previewing / thumbnails
-  for (const [name, t] of [['thumb', 1.6], ['mid', tl.duration * 0.55]]) {
-    await page.evaluate(t => window.frame(t), t);
+  const last = tl.lines[tl.lines.length - 1];   // the closing scene shows the host full-frame: used for channel art
+  for (const [name, t] of [['thumb', 1.6], ['mid', tl.duration * 0.55], ['host', Math.min(tl.duration - 0.6, last.start + 1.2)]]) {
+    await page.evaluate(([t, clean]) => { window.noCaptions = clean; return window.frame(t); }, [t, name === 'host']);
     await page.locator('canvas').screenshot({ path: path.join(dir, name + '.png') });
   }
   await browser.close();

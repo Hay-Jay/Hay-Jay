@@ -353,7 +353,7 @@ function renderAt(t) {
 // captions and the closing fade are drawn once per output frame, after motion blur, so text stays crisp
 function finishFrame(t, y) {
   capY = y;
-  drawCaptions(t);
+  if (!window.noCaptions) drawCaptions(t);   // channel-art stills are captured without captions
   const fo = clamp((t - (TL.duration - 0.5)) / 0.5);
   if (fo > 0) { ctx.fillStyle = `rgba(0,0,0,${fo})`; ctx.fillRect(0, 0, W, H); }
 }

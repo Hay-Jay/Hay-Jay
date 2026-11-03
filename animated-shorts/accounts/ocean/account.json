@@ -17,5 +17,7 @@
     "Sun"
   ],
   "rule": "One surprising fact per video, checked against a reliable source.",
-  "avatar_focus_y": 1000
+  "avatar_focus_y": 1000,
+  "host_focus_y": 980,
+  "host_episode": "octopus-hearts"
 }

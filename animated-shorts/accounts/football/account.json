@@ -19,5 +19,8 @@
     "Sat"
   ],
   "rule": "Use settled numbers (trophies, records). Re-check any stat from the current season the day you post.",
-  "avatar_focus_y": 960
+  "avatar_focus_y": 960,
+  "host_focus_y": 1000,
+  "host_episode": "goat-trophies",
+  "host_image": "thumb.png"
 }

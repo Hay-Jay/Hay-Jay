@@ -13,9 +13,13 @@ OUT = os.path.join(HERE, "build", "hub")
 LIMIT = 15_000_000  # per-file limit for the published page
 
 
+def seconds(path):
+    return float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
+                                capture_output=True, text=True, check=True).stdout)
+
+
 def duration(path):
-    s = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", path],
-                             capture_output=True, text=True, check=True).stdout)
+    s = seconds(path)
     return f"{int(s // 60)}:{int(round(s % 60)):02d}"
 
 
@@ -44,16 +48,20 @@ def main():
                 shutil.copy(mp4, os.path.join(OUT, video_rel))
             Image.open(os.path.join(src_dir, "thumb.png")).convert("RGB").resize((360, 640), Image.LANCZOS) \
                 .save(os.path.join(OUT, poster_rel), quality=82)
-            if not acc.get("avatar") :
-                fy = acc.get("avatar_focus_y", 1050); half = 330
-                av_rel = f"posters/{acc['id']}/avatar.jpg"
-                Image.open(os.path.join(src_dir, "thumb.png")).convert("RGB").crop((540 - half, fy - half, 540 + half, fy + half)) \
-                    .resize((192, 192), Image.LANCZOS).save(os.path.join(OUT, av_rel), quality=85)
-                acc["avatar"] = av_rel; files[av_rel] = os.path.join(OUT, av_rel)
+            if not acc.get("avatar") and (name == acc.get("host_episode") or not acc.get("host_episode")):
+                # channel art from the closing scene, where the host fills the frame
+                prefs = ([acc["host_image"]] if acc.get("host_image") else []) + ["host.png", "host.jpg", "thumb.png"]
+                host = next((os.path.join(src_dir, f) for f in prefs if os.path.exists(os.path.join(src_dir, f))))
+                im = Image.open(host).convert("RGB"); fy = acc.get("host_focus_y", acc.get("avatar_focus_y", 1050))
+                av_rel, bn_rel = f"posters/{acc['id']}/avatar.jpg", f"posters/{acc['id']}/banner.jpg"
+                im.crop((540 - 340, fy - 340, 540 + 340, fy + 340)).resize((320, 320), Image.LANCZOS).save(os.path.join(OUT, av_rel), quality=86)
+                top = max(0, min(1920 - 620, fy - 360)); im.crop((0, top, 1080, top + 620)).resize((720, 413), Image.LANCZOS).save(os.path.join(OUT, bn_rel), quality=84)
+                acc["avatar"], acc["banner"] = av_rel, bn_rel
+                files[av_rel] = os.path.join(OUT, av_rel); files[bn_rel] = os.path.join(OUT, bn_rel)
             files[video_rel] = os.path.join(OUT, video_rel)
             files[poster_rel] = os.path.join(OUT, poster_rel)
             eps.append(dict(id=name, title=ep.get("title", name), video=video_rel, poster=poster_rel,
-                            file=(name if name.startswith(acc["id"]) else f"{acc['id']}-{name}") + ".mp4", duration=duration(mp4),
+                            file=(name if name.startswith(acc["id"]) else f"{acc['id']}-{name}") + ".mp4", duration=duration(mp4), seconds=round(seconds(mp4), 1),
                             tiktok=post.get("caption", ""), yt_title=post.get("youtube_title", ""),
                             yt_desc=post.get("youtube_description", "")))
         acc["episodes"] = eps

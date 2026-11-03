@@ -2,316 +2,436 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: one column. Account switcher on top; each account = header, profile kit, then its videos. Posting status is the at-a-glance signal. */
+/* Layout: a broadcast control room. Console header with tally light, then a rundown of today's posts, channel monitors with goal rings,
+   and a week grid. Each channel opens its own bay: links, road-to-monetization meters, a growth chart, and the video library.
+   Committed single dark theme: it is a control room. */
 :root {
-  --bg: #f2f3f6; --surface: #ffffff; --sunken: #e9ebf0; --ink: #15171d; --muted: #5a606e; --line: #d9dce4;
-  --ok: #12804a; --ok-soft: #dff3e7; --warn: #9a5b00; --focus: #2b46c9;
-  --acc: #2b46c9;
+  color-scheme: dark;
+  --bg: #0d0c10; --panel: #16151b; --panel-2: #1e1d25; --line: #2c2a35; --ink: #f3efe6; --muted: #a29eac; --faint: #6f6b79;
+  --tally: #ff3b30; --clear: #34d27b; --amber: #ffb547; --tape: #f3efe6;
   --display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
   --body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1116; --surface: #171a22; --sunken: #20242e; --ink: #edeff4; --muted: #9ba2b3; --line: #2b303c;
-    --ok: #2bb36b; --ok-soft: #173826; --warn: #f0b04a; --focus: #8ea0ff; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1116; --surface: #171a22; --sunken: #20242e; --ink: #edeff4; --muted: #9ba2b3; --line: #2b303c;
-  --ok: #2bb36b; --ok-soft: #173826; --warn: #f0b04a; --focus: #8ea0ff; color-scheme: dark;
+  --acc: #f3efe6;
 }
 * { box-sizing: border-box; }
 body {
   background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--body);
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 56px;
+  background-image: radial-gradient(1200px 600px at 80% -10%, rgba(255,59,48,.07), transparent 60%), radial-gradient(900px 500px at -10% 30%, rgba(120,110,255,.05), transparent 60%);
 }
-.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 18px; }
-h1, h2, h3, h4 { font-family: var(--display); margin: 0; text-wrap: balance; line-height: 1.1; }
-h1 { font-size: clamp(30px, 7vw, 44px); font-weight: 800; letter-spacing: -0.02em; }
-h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
-h4 { font-size: 18px; font-weight: 600; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 22px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.02; text-wrap: balance; }
 p { margin: 0; }
-.eyebrow, .label { font: 600 11.5px/1.2 var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; border-radius: 8px; }
+.label { font: 700 11px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
-button { font: inherit; color: inherit; }
-:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
 
-.top { display: grid; gap: 6px; }
-#sync { font-size: 13.5px; color: var(--muted); }
-#sync.warn { color: var(--warn); }
+/* console header */
+.console { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: linear-gradient(var(--bg) 70%, rgba(13,12,16,0)); padding-block: 14px 10px; display: grid; gap: 12px; }
+.console-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.tally { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 10px; border-radius: 6px; border: 1.5px solid currentColor; font: 700 12px var(--mono); letter-spacing: .14em; color: var(--tally); }
+.tally i { width: 10px; height: 10px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; }
+.tally.clear { color: var(--clear); }
+@media (prefers-reduced-motion: no-preference) { .tally:not(.clear) i { animation: blink 1.4s ease-in-out infinite; } @keyframes blink { 50% { opacity: .25; } } }
+.brand { font-size: clamp(34px, 7.5vw, 58px); font-weight: 800; letter-spacing: -.035em; }
+.brand span { color: var(--tally); }
+.clock { margin-left: auto; text-align: right; }
+.clock b { display: block; font: 700 20px var(--mono); letter-spacing: .02em; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--panel); cursor: pointer; font-weight: 600; font-size: 14px; }
+.tab .led { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 8px var(--acc); }
+.tab[aria-current="page"] { border-color: var(--acc); background: color-mix(in srgb, var(--acc) 16%, var(--panel)); }
 
-/* account switcher */
-.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-.tab {
-  --acc: inherit; display: inline-flex; align-items: center; gap: 8px; padding: 9px 13px; min-height: 44px;
-  border: 1.5px solid var(--line); border-radius: 999px; background: var(--surface); cursor: pointer; font-weight: 600;
-}
-.tab .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--acc); flex: none; }
-.tab .count { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
-.tab[aria-selected="true"] { border-color: var(--acc); box-shadow: inset 0 0 0 1.5px var(--acc); }
-.tab.done .count { color: var(--ok); }
-
-/* account panel */
-.panel { display: grid; gap: 16px; }
-.acct-head { display: flex; gap: 14px; align-items: center; padding-bottom: 14px; border-bottom: 3px solid var(--acc); }
-.avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; background: var(--acc); flex: none; border: 3px solid var(--acc); }
-.acct-head > div { min-width: 0; display: grid; gap: 4px; }
-
-.kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-.kit-item { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
-.kit-item.wide { grid-column: 1 / -1; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { padding: 4px 10px; border-radius: 999px; background: var(--sunken); font-weight: 600; font-size: 14px; }
-.hint { font-size: 13px; color: var(--muted); }
-.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.week span { text-align: center; font: 500 12px var(--mono); padding: 7px 0; border-radius: 8px; background: var(--sunken); color: var(--muted); }
-.week span.on { background: var(--acc); color: #fff; }
-.copyline { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
-.copyline p { min-width: 0; overflow-wrap: anywhere; }
-
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 6px 12px;
-  border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; font-size: 13.5px; flex: none;
-}
+/* shared panels */
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.panel-body { padding: 16px; display: grid; gap: 12px; }
+.clapper { height: 14px; background: repeating-linear-gradient(-45deg, var(--tape) 0 14px, #121116 14px 28px); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; padding: 7px 13px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel-2); cursor: pointer; font-weight: 600; font-size: 14px; text-decoration: none; color: var(--ink); white-space: nowrap; }
 .btn:hover { border-color: var(--acc); }
-.btn.solid { background: var(--acc); border-color: var(--acc); color: #fff; }
-.btn[disabled] { opacity: .55; cursor: default; }
+.btn.solid { background: var(--acc); border-color: var(--acc); color: #0d0c10; }
+.btn.ghost { background: transparent; }
+.btn[disabled] { opacity: .45; cursor: default; }
 
-.eps-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.eps { display: grid; gap: 12px; }
-.ep {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px;
-  display: grid; grid-template-columns: 124px minmax(0, 1fr); grid-template-areas: "player head" "copy copy"; gap: 12px 14px;
-}
-.player { grid-area: player; }
-.player video { width: 100%; aspect-ratio: 9 / 16; max-width: 100%; border-radius: 10px; background: #000; display: block; }
-.ep-head { grid-area: head; display: grid; gap: 8px; align-content: start; min-width: 0; }
-.ep-copy { grid-area: copy; display: grid; gap: 8px; min-width: 0; }
-.spec { font: 500 12px/1.4 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
-.status { display: flex; flex-wrap: wrap; gap: 6px; }
-.post {
-  display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 11px; border-radius: 999px;
-  border: 1.5px dashed var(--line); background: transparent; cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--muted);
-}
-.post svg { width: 15px; height: 15px; }
+/* stat strip */
+.strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 2px; }
+.stat b { font: 800 clamp(26px, 6vw, 38px)/1 var(--display); letter-spacing: -.02em; }
+@media (max-width: 640px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* rundown */
+.rundown { list-style: none; margin: 0; padding: 0; display: grid; }
+.rd { display: grid; grid-template-columns: 34px 56px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); }
+.rd:first-child { border-top: 0; }
+.rd .n { font: 700 13px var(--mono); color: var(--faint); }
+.rd img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; border: 2px solid var(--acc); }
+.rd .t { min-width: 0; display: grid; gap: 2px; }
+.rd .t b { font-weight: 700; overflow-wrap: anywhere; }
+.rd .acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 640px) { .rd { grid-template-columns: 26px 48px minmax(0, 1fr); } .rd img { width: 48px; height: 48px; } .rd .acts { grid-column: 1 / -1; justify-content: flex-start; } }
+.empty { padding: 18px 16px; color: var(--muted); }
+
+/* posted toggles */
+.post { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 11px; border-radius: 999px; border: 1.5px dashed var(--line); background: transparent; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--muted); }
+.post svg { width: 14px; height: 14px; }
 .post .tick { display: none; }
-.post[aria-pressed="true"] { border-style: solid; border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
+.post[aria-pressed="true"] { border-style: solid; border-color: var(--clear); background: rgba(52,210,123,.12); color: var(--clear); }
 .post[aria-pressed="true"] .tick { display: block; }
 .post[aria-pressed="true"] .ring { display: none; }
-.post[disabled] { cursor: default; opacity: .6; }
-.copyblock { background: var(--sunken); border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; min-width: 0; }
-.copyblock .copyline { align-items: center; }
-.copyblock .text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
-details.copyblock summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 36px; }
-details.copyblock summary::-webkit-details-marker { display: none; }
-details.copyblock summary .label::after { content: " ▸"; }
-details[open].copyblock summary .label::after { content: " ▾"; }
-.save-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-@media (min-width: 720px) {
-  .ep { grid-template-columns: 210px minmax(0, 1fr); grid-template-areas: "player head" "player copy"; padding: 14px; }
-}
+.post[disabled] { cursor: default; opacity: .55; }
 
-/* setup steps */
+/* channel monitors */
+.monitors { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.mon { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; cursor: pointer; text-align: left; padding: 0; transition: transform .15s ease, border-color .15s ease; }
+.mon:hover { border-color: var(--acc); transform: translateY(-2px); }
+.sprockets { height: 14px; background: #08080b; background-image: radial-gradient(circle at 9px 7px, #2a2833 3.2px, transparent 3.6px); background-size: 18px 14px; }
+.screen { position: relative; height: 172px; overflow: hidden; background: #000; }
+.screen img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; filter: saturate(1.1); }
+.screen::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 2px, transparent 2px 4px), linear-gradient(180deg, transparent 40%, rgba(13,12,16,.92)); }
+.screen .ch { position: absolute; left: 14px; bottom: 10px; z-index: 1; display: grid; gap: 2px; }
+.screen .ch h3 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.screen .rec { position: absolute; right: 12px; top: 10px; z-index: 1; font: 700 11px var(--mono); letter-spacing: .12em; display: flex; gap: 6px; align-items: center; color: var(--acc); }
+.screen .rec i { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); }
+.mon-body { padding: 14px; display: grid; gap: 12px; }
+.rings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ringbox { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.ringbox svg { width: 62px; height: 62px; flex: none; }
+.ringbox .v { display: grid; min-width: 0; }
+.ringbox .v b { font: 700 16px var(--mono); }
+.mon-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.meterline { height: 6px; border-radius: 6px; background: var(--panel-2); overflow: hidden; }
+.meterline i { display: block; height: 100%; background: var(--acc); border-radius: 6px; }
+
+/* week grid */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.day { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 6px; display: grid; gap: 6px; justify-items: center; min-height: 92px; align-content: start; }
+.day.today { border-color: var(--tally); box-shadow: inset 0 0 0 1px var(--tally); }
+.day .dn { font: 700 11px var(--mono); letter-spacing: .1em; color: var(--muted); }
+.day .dd { font: 800 18px var(--display); }
+.dots { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--acc); }
+
+/* channel bay */
+.banner { position: relative; border-radius: 22px; overflow: hidden; border: 1px solid var(--line); background: linear-gradient(120deg, color-mix(in srgb, var(--acc) 30%, #0d0c10), #121117 70%); }
+.banner-in { position: relative; z-index: 1; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center; padding: 20px; }
+.banner img { width: 96px; height: 96px; border-radius: 22px; object-fit: cover; border: 3px solid var(--acc); box-shadow: 0 0 40px color-mix(in srgb, var(--acc) 45%, transparent); }
+.banner h2 { font-size: clamp(30px, 6vw, 46px); font-weight: 800; letter-spacing: -.03em; }
+.banner .links { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.banner::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 2px, transparent 2px 4px); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: minmax(0, 1fr); } .banner-in { grid-template-columns: minmax(0, 1fr); } }
+.meter { display: grid; gap: 6px; }
+.meter-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.meter-top b { font: 700 15px var(--mono); }
+.bar { height: 12px; border-radius: 8px; background: var(--panel-2); overflow: hidden; position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 70%, #fff 0%), var(--acc)); border-radius: 8px; transition: width .6s ease; }
+.bar.done i { background: var(--clear); }
+.note { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: rgba(255,181,71,.1); border: 1px solid rgba(255,181,71,.35); color: #ffd79a; font-size: 13.5px; }
+.form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.field { display: grid; gap: 5px; min-width: 0; }
+.field input { width: 100%; min-height: 42px; padding: 8px 11px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); font: 500 15px var(--mono); }
+.field input:focus { border-color: var(--acc); outline: none; }
+.form .full { grid-column: 1 / -1; }
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+/* library */
+.lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.vid { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: grid; align-content: start; }
+.thumb { position: relative; aspect-ratio: 9 / 13; max-width: 100%; background: #000; overflow: hidden; }
+.thumb img, .thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb button.play { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.75)); border: 0; cursor: pointer; }
+.thumb .pb { width: 64px; height: 64px; border-radius: 50%; background: rgba(13,12,16,.7); border: 2px solid var(--acc); display: grid; place-items: center; }
+.thumb .tc { position: absolute; left: 10px; bottom: 10px; font: 700 12px var(--mono); background: rgba(0,0,0,.65); padding: 3px 7px; border-radius: 6px; z-index: 1; }
+.vid-body { padding: 12px; display: grid; gap: 10px; }
+.vid-body h4 { margin: 0; font: 700 17px/1.2 var(--display); }
+.copies { display: grid; gap: 6px; }
+.copy-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--panel-2); border-radius: 10px; padding: 6px 6px 6px 10px; }
+.copy-row span { font-size: 13px; color: var(--muted); }
+details.kit { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; }
+details.kit summary { cursor: pointer; padding: 14px 16px; list-style: none; display: flex; justify-content: space-between; font-weight: 700; }
+details.kit summary::-webkit-details-marker { display: none; }
+.kit-grid { padding: 0 16px 16px; display: grid; gap: 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 4px 10px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
 .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
-.steps li { counter-increment: s; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 14px 56px; position: relative; display: grid; gap: 4px; }
-.steps li::before { content: counter(s); position: absolute; left: 14px; top: 13px; width: 30px; height: 30px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font: 700 14px var(--mono); }
-.steps b { font-family: var(--display); font-size: 17px; font-weight: 600; }
-.map { display: grid; gap: 8px; }
-.map-row { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-.map-row .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--acc); }
-.map-row .email { font: 500 12.5px var(--mono); color: var(--muted); overflow-wrap: anywhere; }
-
-#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 600; font-size: 14px; max-width: calc(100% - 32px); }
-@media (prefers-reduced-motion: no-preference) { .panel { animation: in .18s ease-out; } @keyframes in { from { transform: translateY(4px); } to { transform: none; } } }
+.steps li { counter-increment: s; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 14px 58px; position: relative; display: grid; gap: 4px; }
+.steps li::before { content: counter(s, decimal-leading-zero); position: absolute; left: 14px; top: 14px; font: 700 15px var(--mono); color: var(--tally); }
+.steps b { font-family: var(--display); font-size: 18px; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
+#sync { font-size: 13px; color: var(--muted); }
+#sync.warn { color: var(--amber); }
 </style>
 
 <div class="wrap">
-  <header class="top">
-    <p class="eyebrow">Hay-Jay · content studio</p>
-    <h1>Your accounts</h1>
-    <p id="summary" class="muted"></p>
-    <p id="sync" aria-live="polite">Loading your posted list…</p>
+  <header class="console">
+    <div class="console-row">
+      <span class="tally" id="tally"><i></i><span id="tallyText">ON AIR</span></span>
+      <div class="clock"><b id="clockDay">—</b><span class="label" id="clockWeek"></span></div>
+    </div>
+    <h1 class="brand">Hay-Jay <span>Studio</span></h1>
+    <p id="sync" aria-live="polite">Connecting to your progress…</p>
+    <nav class="tabs" id="tabs" aria-label="Studio sections"></nav>
   </header>
-  <nav class="tabs" role="tablist" aria-label="Accounts" id="tabs"></nav>
-  <main id="panels"></main>
+  <main id="view"></main>
 </div>
 <div id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 const DATA = /*__DATA__*/null;
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const PLATFORMS = [['tiktok', 'TikTok'], ['youtube', 'YouTube Shorts']];
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-let posted = {};            // "<account>--<episode>" -> { tiktok, youtube }
-let db = null, canWrite = true;
+const BRIGHT = { naija: '#2fd38a', football: '#ff5c78', whatif: '#8f9bff', myth: '#f0c35a', ocean: '#b69cff' };
+const GOALS = { tf: ['TikTok followers', 10000], tv: ['TikTok views, last 30 days', 100000], ys: ['YouTube subscribers', 1000], yv: ['YouTube Shorts views, last 90 days', 10000000] };
+const DAY_KEYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+const fmt = n => n == null ? '—' : nf.format(n);
+const acc = id => DATA.accounts.find(a => a.id === id);
+const col = a => BRIGHT[a.id] || a.color;
+let posted = {}, links = {}, stats = {}, db = null, canWrite = true;
 
-const tick = '<svg class="tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const ring = '<svg class="ring" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+const TICK = '<svg class="tick" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const RING = '<svg class="ring" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+const PLAY = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>';
 
-function copyBlock(label, text, key, collapsible) {
-  const body = `<p class="text" id="t-${key}">${esc(text)}</p>`;
-  const btn = `<button class="btn copy" data-copy="t-${key}" type="button">Copy</button>`;
-  if (collapsible) return `<details class="copyblock"><summary><span class="label">${label}</span>${btn}</summary>${body}</details>`;
-  return `<div class="copyblock"><div class="copyline"><span class="label">${label}</span>${btn}</div>${body}</div>`;
+function today() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function isoDate(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+function isoWeek(d) { const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return Math.ceil(((t - y0) / 864e5 + 1) / 7); }
+function weekStart() { const d = today(); const k = (d.getDay() + 6) % 7; d.setDate(d.getDate() - k); return d; }
+const isDone = (a, e) => { const s = posted[`${a.id}--${e.id}`] || {}; return !!(s.tiktok && s.youtube); };
+const nextVideo = a => a.episodes.find(e => !isDone(a, e));
+function nextSlot(a) { const d = today(); for (let k = 0; k < 7; k++) { const x = new Date(d); x.setDate(d.getDate() + k); if (a.days.includes(DAY_KEYS[x.getDay()])) return k === 0 ? 'Today' : k === 1 ? 'Tomorrow' : DAY_KEYS[x.getDay()]; } return '—'; }
+const latest = id => { const h = (stats[id] && stats[id].history) || []; return h[h.length - 1] || null; };
+
+function postBtns(a, e) {
+  return [['tiktok', 'TikTok'], ['youtube', 'YouTube']].map(([p, n]) => `<button class="post" type="button" data-key="${a.id}--${e.id}" data-platform="${p}" aria-pressed="false">${RING}${TICK}<span>${n}</span></button>`).join('');
+}
+function ring(value, goal, color, label) {
+  const pct = value == null ? 0 : Math.min(1, value / goal), r = 26, C = 2 * Math.PI * r;
+  return `<div class="ringbox"><svg viewBox="0 0 62 62" role="img" aria-label="${esc(label)}: ${value == null ? 'not logged' : Math.round(pct * 100) + '%'}">
+    <circle cx="31" cy="31" r="${r}" fill="none" stroke="#2c2a35" stroke-width="7"/>
+    <circle cx="31" cy="31" r="${r}" fill="none" stroke="${pct >= 1 ? '#34d27b' : color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - pct)}" transform="rotate(-90 31 31)"/>
+    <text x="31" y="35" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="12" fill="#f3efe6">${value == null ? '—' : Math.round(pct * 100) + '%'}</text></svg>
+    <span class="v"><b>${fmt(value)}</b><span class="label">${esc(label)} / ${fmt(goal)}</span></span></div>`;
 }
 
+// ---------- views ----------
+function viewToday() {
+  const d = today(), key = DAY_KEYS[d.getDay()];
+  const due = DATA.accounts.filter(a => a.days.includes(key)).map(a => [a, nextVideo(a)]).filter(([, e]) => e);
+  const total = DATA.accounts.reduce((n, a) => n + a.episodes.length, 0);
+  const done = DATA.accounts.reduce((n, a) => n + a.episodes.filter(e => isDone(a, e)).length, 0);
+  const ws = weekStart().getTime();
+  const thisWeek = Object.values(posted).filter(p => p.updatedAt && Date.parse(p.updatedAt) >= ws && (p.tiktok || p.youtube)).length;
+  const audience = DATA.accounts.reduce((n, a) => { const l = latest(a.id); return n + (l ? (l.tf || 0) + (l.ys || 0) : 0); }, 0);
+  const rows = due.map(([a, e], i) => `<li class="rd" style="--acc:${col(a)}"><span class="n">${String(i + 1).padStart(2, '0')}</span><img src="${a.avatar}" alt=""><span class="t"><span class="label" style="color:${col(a)}">${esc(a.label)}</span><b>${esc(e.title)}</b></span><span class="acts">${postBtns(a, e)}<button class="btn ghost" type="button" data-go="${a.id}">Open</button></span></li>`).join('');
+  const nextUp = DATA.accounts.map(a => `${esc(a.short)}: ${nextSlot(a)}`).join(' · ');
+  const monitors = DATA.accounts.map(a => {
+    const l = latest(a.id), n = a.episodes.length, dn = a.episodes.filter(e => isDone(a, e)).length;
+    return `<button class="mon" type="button" data-go="${a.id}" style="--acc:${col(a)}">
+      <div class="sprockets"></div>
+      <div class="screen"><img src="${a.banner || a.avatar}" alt=""><span class="rec"><i></i>CH ${String(a.order || 0).padStart(2, '0')}</span><span class="ch"><span class="label">${esc(a.host)}</span><h3>${esc(a.label)}</h3></span></div>
+      <div class="mon-body">
+        <div class="rings">${ring(l ? l.tf : null, GOALS.tf[1], col(a), 'TikTok')}${ring(l ? l.ys : null, GOALS.ys[1], col(a), 'YouTube')}</div>
+        <div class="meterline" aria-hidden="true"><i style="width:${n ? dn / n * 100 : 0}%"></i></div>
+        <div class="mon-foot"><span class="mono">${dn}/${n} posted</span><span class="muted">Next slot: <b style="color:var(--ink)">${nextSlot(a)}</b></span></div>
+      </div></button>`;
+  }).join('');
+  const days = Array.from({ length: 7 }, (_, k) => { const x = new Date(weekStart()); x.setDate(x.getDate() + k); return x; });
+  const week = days.map(x => { const k = DAY_KEYS[x.getDay()], on = DATA.accounts.filter(a => a.days.includes(k)); return `<div class="day${x.getTime() === d.getTime() ? ' today' : ''}"><span class="dn">${k}</span><span class="dd">${x.getDate()}</span><span class="dots">${on.map(a => `<i style="--acc:${col(a)}" title="${esc(a.label)}"></i>`).join('')}</span></div>`; }).join('');
+  return `
+  <section class="strip" aria-label="Studio totals">
+    <div class="stat"><span class="label">Videos ready</span><b class="mono">${total}</b></div>
+    <div class="stat"><span class="label">Posted on both</span><b class="mono">${done}</b></div>
+    <div class="stat"><span class="label">Posts this week</span><b class="mono">${thisWeek}</b></div>
+    <div class="stat"><span class="label">Total audience</span><b class="mono">${audience ? fmt(audience) : '—'}</b></div>
+  </section>
+  <section class="panel" aria-labelledby="rdh">
+    <div class="clapper"></div>
+    <div class="panel-head"><h2 id="rdh" style="font-size:24px">Today's rundown</h2><span class="label">${key} · ${due.length} to post</span></div>
+    ${due.length ? `<ol class="rundown">${rows}</ol>` : `<p class="empty">Nothing due today. Next slots: ${nextUp}</p>`}
+  </section>
+  <section aria-labelledby="chh" style="display:grid;gap:12px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><h2 id="chh" style="font-size:24px">Channels</h2><span class="label">Goal rings: 10K TikTok · 1K YouTube</span></div>
+    <div class="monitors">${monitors}</div>
+  </section>
+  <section class="panel" aria-labelledby="wkh">
+    <div class="panel-head"><h2 id="wkh" style="font-size:22px">This week's slots</h2><span class="label">Week ${isoWeek(d)}</span></div>
+    <div class="panel-body"><div class="week">${week}</div></div>
+  </section>`;
+}
+
+function chartSvg(a) {
+  const h = ((stats[a.id] && stats[a.id].history) || []).slice(-30);
+  if (h.length < 2) return `<p class="muted">Log your numbers on two different days to see the growth line here.</p>`;
+  const Wd = 640, Hd = 220, pad = 34, max = Math.max(10, ...h.map(e => Math.max(e.tf || 0, e.ys || 0)));
+  const x = i => pad + i * (Wd - pad * 2) / (h.length - 1), y = v => Hd - pad - (v / max) * (Hd - pad * 2);
+  const line = (k, c) => { const pts = h.map((e, i) => e[k] == null ? null : `${x(i).toFixed(1)},${y(e[k]).toFixed(1)}`).filter(Boolean); return pts.length > 1 ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` + (() => { const L = h.length - 1, v = h[L][k]; return v == null ? '' : `<circle cx="${x(L)}" cy="${y(v)}" r="5" fill="${c}"/>`; })() : ''; };
+  const grid = [0, 0.5, 1].map(f => `<line x1="${pad}" x2="${Wd - pad}" y1="${y(max * f)}" y2="${y(max * f)}" stroke="#2c2a35"/><text x="${pad - 6}" y="${y(max * f) + 4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#a29eac">${fmt(Math.round(max * f))}</text>`).join('');
+  return `<svg viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Follower growth">${grid}${line('tf', col(a))}${line('ys', '#f3efe6')}
+    <text x="${pad}" y="${Hd - 8}" font-family="JetBrains Mono, monospace" font-size="11" fill="#a29eac">${esc(h[0].d)}</text>
+    <text x="${Wd - pad}" y="${Hd - 8}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#a29eac">${esc(h[h.length - 1].d)}</text></svg>
+    <div class="legend"><span><i style="background:${col(a)}"></i>TikTok followers</span><span><i style="background:#f3efe6"></i>YouTube subscribers</span></div>`;
+}
+
+function viewChannel(a) {
+  const l = latest(a.id) || {}, lk = links[a.id] || {};
+  const short = a.episodes.length && a.episodes.every(e => (e.seconds || 0) < 60);
+  const meters = Object.entries(GOALS).map(([k, [name, goal]]) => {
+    const v = l[k], pct = v == null ? 0 : Math.min(1, v / goal);
+    return `<div class="meter"><div class="meter-top"><span>${esc(name)}</span><b>${fmt(v)} <span class="muted">/ ${fmt(goal)}</span></b></div><div class="bar${pct >= 1 ? ' done' : ''}"><i style="width:${pct * 100}%"></i></div></div>`;
+  }).join('');
+  const vids = a.episodes.map(e => `<article class="vid">
+      <div class="thumb" data-thumb="${a.id}--${e.id}"><img src="${e.poster}" alt=""><span class="tc">${e.duration}</span><button class="play" type="button" data-play="${e.video}" aria-label="Play ${esc(e.title)}"><span class="pb">${PLAY}</span></button></div>
+      <div class="vid-body"><h4>${esc(e.title)}</h4>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${postBtns(a, e)}</div>
+        <div class="copies">
+          <div class="copy-row"><span>TikTok caption</span><button class="btn" type="button" data-copytext="${esc(e.tiktok)}">Copy</button></div>
+          <div class="copy-row"><span>YouTube title</span><button class="btn" type="button" data-copytext="${esc(e.yt_title)}">Copy</button></div>
+          <div class="copy-row"><span>YouTube description</span><button class="btn" type="button" data-copytext="${esc(e.yt_desc)}">Copy</button></div>
+        </div>
+        <button class="btn solid save" type="button" data-src="${e.video}" data-file="${esc(e.file)}" hidden>Save video</button>
+      </div></article>`).join('');
+  return `
+  <section class="banner" style="--acc:${col(a)}"><div class="banner-in">
+    <img src="${a.avatar}" alt="${esc(a.host)}">
+    <div style="min-width:0"><span class="label" style="color:${col(a)}">Channel ${String(a.order || 0).padStart(2, '0')} · ${esc(a.days.join(' · '))}</span><h2>${esc(a.label)}</h2><p class="muted">${esc(a.host)} · ${esc(a.voice)}</p>
+      <div class="links">${lk.tiktok ? `<a class="btn solid" href="${esc(lk.tiktok)}" target="_blank" rel="noopener">Open TikTok ↗</a>` : ''}${lk.youtube ? `<a class="btn solid" href="${esc(lk.youtube)}" target="_blank" rel="noopener">Open YouTube ↗</a>` : ''}${!lk.tiktok && !lk.youtube ? '<span class="muted" style="font-size:13px">Add your account links below to open them from here.</span>' : ''}</div></div>
+  </div></section>
+  <div class="grid2" style="--acc:${col(a)}">
+    <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Road to getting paid</h3><span class="label">${l.d ? 'Logged ' + esc(l.d) : 'Not logged yet'}</span></div>
+      <div class="panel-body">${meters}${short ? `<p class="note">TikTok's Creator Rewards only pays for videos over 1 minute. These videos are under a minute, so they count toward growth, not TikTok payouts. YouTube Shorts are fine.</p>` : ''}</div></section>
+    <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Log today's numbers</h3><span class="label">${isoDate(today())}</span></div>
+      <form class="panel-body" data-stats="${a.id}"><div class="form">
+        <label class="field"><span class="label">TikTok followers</span><input id="f-${a.id}-tf" name="tf" inputmode="numeric" placeholder="${l.tf ?? '0'}"></label>
+        <label class="field"><span class="label">TikTok views (30 days)</span><input id="f-${a.id}-tv" name="tv" inputmode="numeric" placeholder="${l.tv ?? '0'}"></label>
+        <label class="field"><span class="label">YouTube subscribers</span><input id="f-${a.id}-ys" name="ys" inputmode="numeric" placeholder="${l.ys ?? '0'}"></label>
+        <label class="field"><span class="label">Shorts views (90 days)</span><input id="f-${a.id}-yv" name="yv" inputmode="numeric" placeholder="${l.yv ?? '0'}"></label>
+        <div class="full" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn solid" type="submit">Save numbers</button><span class="muted" style="font-size:13px">Blank boxes keep your last number.</span></div>
+      </div></form></section>
+  </div>
+  <section class="panel chart" style="--acc:${col(a)}"><div class="panel-head"><h3 style="font-size:20px">Growth</h3><span class="label">Last 30 logs</span></div><div class="panel-body">${chartSvg(a)}</div></section>
+  <section style="display:grid;gap:12px;--acc:${col(a)}"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><h2 style="font-size:24px">Library</h2><span class="label">${a.episodes.length} videos · ${a.episodes.filter(e => isDone(a, e)).length} posted</span></div><div class="lib">${vids || '<p class="muted">No videos yet.</p>'}</div></section>
+  <details class="kit" style="--acc:${col(a)}"><summary><span>Profile kit and links</span><span class="label">Edit</span></summary><div class="kit-grid">
+    <form data-links="${a.id}" class="form">
+      <label class="field"><span class="label">TikTok link or @handle</span><input id="l-${a.id}-tt" name="tiktok" value="${esc(lk.tiktok || '')}" placeholder="@yourhandle"></label>
+      <label class="field"><span class="label">YouTube link or @handle</span><input id="l-${a.id}-yt" name="youtube" value="${esc(lk.youtube || '')}" placeholder="@yourchannel"></label>
+      <div class="full"><button class="btn solid" type="submit">Save links</button></div>
+    </form>
+    <div><span class="label">Name ideas</span><div class="chips" style="margin-top:6px">${a.name_ideas.map(n => `<span class="chip">${esc(n)}</span>`).join('')}</div></div>
+    <div class="copy-row"><span style="color:var(--ink)">${esc(a.bio)}</span><button class="btn" type="button" data-copytext="${esc(a.bio)}">Copy bio</button></div>
+    <div class="copy-row"><span style="color:var(--ink)">${esc(a.hashtags)}</span><button class="btn" type="button" data-copytext="${esc(a.hashtags)}">Copy</button></div>
+    <p><span class="label">House rule</span><br>${esc(a.rule)}</p>
+  </div></details>`;
+}
+
+function viewSetup() {
+  return `<section style="display:grid;gap:14px"><h2 style="font-size:30px">Keep each account separate</h2>
+  <ol class="steps">
+    <li><b>Make one email per account</b><span class="muted">A new Gmail for each brand, used for that brand's TikTok and YouTube and nothing else.</span></li>
+    <li><b>Use one name everywhere</b><span class="muted">The same name and @handle on TikTok and YouTube, so fans find you on both.</span></li>
+    <li><b>Add every account to the TikTok app</b><span class="muted">Profile, tap your username at the top, then Add account. The same menu switches between them.</span></li>
+    <li><b>Give each brand its own YouTube channel</b><span class="muted">Sign in with each brand's Gmail. Switch from your profile picture, then Switch account.</span></li>
+    <li><b>Save each account's links here</b><span class="muted">Open a channel, then Profile kit and links. Its Open TikTok and Open YouTube buttons then take you straight there.</span></li>
+    <li><b>Log your numbers once a week</b><span class="muted">Followers and views from each app's analytics. The rings, meters and growth chart update for every device you use.</span></li>
+  </ol></section>`;
+}
+
+// ---------- routing + paint ----------
+let route = '';
 function render() {
-  const tabs = DATA.accounts.map(a => `<button class="tab" role="tab" id="tab-${a.id}" aria-controls="p-${a.id}" data-go="${a.id}" style="--acc:${a.color}"><span class="dot"></span>${esc(a.short)}<span class="count" data-count="${a.id}"></span></button>`);
-  tabs.push(`<button class="tab" role="tab" id="tab-setup" aria-controls="p-setup" data-go="setup" style="--acc:var(--ink)"><span class="dot"></span>Account setup</button>`);
-  document.getElementById('tabs').innerHTML = tabs.join('');
-
-  const panels = DATA.accounts.map(a => {
-        const eps = a.episodes.map(e => {
-      const key = `${a.id}--${e.id}`;
-      return `<article class="ep">
-        <div class="player"><video controls playsinline preload="none" poster="${e.poster}" src="${e.video}" aria-label="${esc(e.title)}"></video></div>
-        <div class="ep-head">
-          <h4>${esc(e.title)}</h4>
-          <p class="spec">${e.duration} · 1080×1920 · 9:16 · −14 LUFS</p>
-          <div class="status">${PLATFORMS.map(([p, name]) => `<button class="post" type="button" data-key="${key}" data-platform="${p}" aria-pressed="false">${ring}${tick}<span>${name}</span></button>`).join('')}</div>
-          <div class="save-row"><button class="btn solid save" type="button" data-src="${e.video}" data-file="${esc(e.file)}" hidden>Save video</button><span class="hint">${esc(e.file)}</span></div>
-        </div>
-        <div class="ep-copy">
-          ${copyBlock('TikTok caption', e.tiktok, key + '-tt')}
-          ${copyBlock('YouTube title', e.yt_title, key + '-yt')}
-          ${copyBlock('YouTube description', e.yt_desc, key + '-yd', true)}
-        </div>
-      </article>`;
-    }).join('');
-    return `<section class="panel" id="p-${a.id}" role="tabpanel" aria-labelledby="tab-${a.id}" style="--acc:${a.color}" hidden>
-      <div class="acct-head">
-        ${a.avatar ? `<img class="avatar" src="${a.avatar}" alt="${esc(a.host)}">` : ''}
-        <div><h2>${esc(a.label)}</h2><p class="muted">Host: ${esc(a.host)} · Voice: ${esc(a.voice)}</p></div>
-      </div>
-      <div class="kit">
-        <div class="kit-item"><span class="label">Name ideas</span><div class="chips">${a.name_ideas.map(n => `<span class="chip">${esc(n)}</span>`).join('')}</div><p class="hint">Check the name is free on TikTok and YouTube, then use the same one on both.</p></div>
-        <div class="kit-item"><div class="copyline"><span class="label">Bio</span><button class="btn copy" data-copy="bio-${a.id}" type="button">Copy</button></div><p id="bio-${a.id}">${esc(a.bio)}</p></div>
-        <div class="kit-item"><div class="copyline"><span class="label">Hashtags</span><button class="btn copy" data-copy="tags-${a.id}" type="button">Copy</button></div><p id="tags-${a.id}">${esc(a.hashtags)}</p></div>
-        <div class="kit-item"><span class="label">Post on</span><div class="week">${DAYS.map(d => `<span class="${a.days.includes(d) ? 'on' : ''}">${d}</span>`).join('')}</div></div>
-        <div class="kit-item wide"><span class="label">House rule</span><p>${esc(a.rule)}</p></div>
-      </div>
-      <div class="eps-head"><h3 class="label">Videos · ${a.episodes.length}</h3></div>
-      <div class="eps">${eps || '<p class="muted">No videos yet for this account.</p>'}</div>
-    </section>`;
-  });
-  panels.push(`<section class="panel" id="p-setup" role="tabpanel" aria-labelledby="tab-setup" hidden>
-    <div class="acct-head" style="--acc:var(--ink)"><div><h2>Keep each account separate</h2><p class="muted">One login per brand, so you always post the right video to the right account.</p></div></div>
-    <ol class="steps">
-      <li><b>Make one email per account</b><span>Create a new Gmail for each brand. Use it for that brand's TikTok and YouTube and nothing else.</span></li>
-      <li><b>Use one name everywhere</b><span>Pick a name from each account's ideas and use the same name and @handle on TikTok and YouTube, so fans can find you on both.</span></li>
-      <li><b>Add every account to the TikTok app</b><span>Go to Profile, tap your username at the top, then Add account. After that, the same menu switches between accounts.</span></li>
-      <li><b>Give each brand its own YouTube channel</b><span>Sign in to the YouTube app with each brand's Gmail. Switch channels from your profile picture, then Switch account.</span></li>
-      <li><b>Save the passwords</b><span>Keep all the logins in a password manager, such as Google Password Manager on Android.</span></li>
-      <li><b>Check the account before you post</b><span>Open the account's tab here, save the video, then check the profile picture at the top of TikTok or YouTube matches before you upload. Mark it posted when you're done.</span></li>
-    </ol>
-    <h3 class="label">Which videos go where</h3>
-    <div class="map">${DATA.accounts.map(a => `<div class="map-row" style="--acc:${a.color}"><span class="dot"></span><span><b>${esc(a.label)}</b><br><span class="email">${a.episodes.map(e => esc(e.file)).join(', ') || 'no videos yet'}</span></span><button class="btn" type="button" data-go="${a.id}">Open</button></div>`).join('')}</div>
-  </section>`);
-  document.getElementById('panels').innerHTML = panels.join('');
+  const id = (location.hash || '').slice(1);
+  route = id === 'setup' || acc(id) ? id : 'today';
+  const a = acc(route);
+  document.documentElement.style.setProperty('--acc', a ? col(a) : '#f3efe6');
+  document.getElementById('tabs').innerHTML = [['today', 'Today', '#f3efe6'], ...DATA.accounts.map(x => [x.id, x.short, col(x)]), ['setup', 'Setup', '#a29eac']]
+    .map(([k, n, c]) => `<button class="tab" type="button" data-go="${k}" style="--acc:${c}" ${route === k ? 'aria-current="page"' : ''}><span class="led"></span>${esc(n)}</button>`).join('');
+  document.getElementById('view').innerHTML = `<div style="display:grid;gap:22px">${route === 'today' ? viewToday() : route === 'setup' ? viewSetup() : viewChannel(a)}</div>`;
+  paint();
 }
-
-function paintStatus() {
-  let total = 0, done = 0;
-  for (const a of DATA.accounts) {
-    let aDone = 0;
-    for (const e of a.episodes) {
-      const s = posted[`${a.id}--${e.id}`] || {};
-      if (PLATFORMS.every(([p]) => s[p])) aDone++;
-    }
-    total += a.episodes.length; done += aDone;
-    const c = document.querySelector(`[data-count="${a.id}"]`);
-    if (c) { c.textContent = `${aDone}/${a.episodes.length}`; c.closest('.tab').classList.toggle('done', a.episodes.length > 0 && aDone === a.episodes.length); }
-  }
-  document.querySelectorAll('.post').forEach(b => {
-    const on = !!(posted[b.dataset.key] || {})[b.dataset.platform];
-    b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    b.title = on ? 'Posted. Tap to mark as not posted.' : 'Tap after you post it here.';
-    b.disabled = !db || !canWrite;
-  });
-  document.getElementById('summary').textContent = `${DATA.accounts.length} accounts · ${total} videos ready · ${done} posted on both TikTok and YouTube`;
+function paint() {
+  document.querySelectorAll('.post').forEach(b => { const on = !!(posted[b.dataset.key] || {})[b.dataset.platform]; b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.disabled = !db || !canWrite; b.title = on ? 'Posted. Tap to undo.' : 'Tap after you post it'; });
+  const d = today(), key = DAY_KEYS[d.getDay()];
+  const due = DATA.accounts.filter(a => a.days.includes(key)).some(a => { const e = nextVideo(a); return !!e; });
+  const t = document.getElementById('tally'); t.classList.toggle('clear', !due); document.getElementById('tallyText').textContent = due ? 'ON AIR · POSTS DUE' : 'ALL CLEAR';
+  document.getElementById('clockDay').textContent = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  document.getElementById('clockWeek').textContent = `Week ${isoWeek(d)}`;
+  if (downloadsOn) document.querySelectorAll('.save').forEach(b => b.hidden = false);
 }
-
-function show(id) {
-  const known = id === 'setup' || DATA.accounts.some(a => a.id === id);
-  if (!known) id = DATA.accounts[0].id;
-  document.querySelectorAll('.panel').forEach(p => { p.hidden = p.id !== `p-${id}`; });
-  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.go === id ? 'true' : 'false'));
-  document.querySelectorAll('video').forEach(v => { if (!v.closest('.panel').hidden) return; v.pause(); });
-}
-
 let toastTimer;
-function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2200); }
+function toast(m) { const el = document.getElementById('toast'); el.textContent = m; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.hidden = true, 2200); }
+function normLink(v, site) {
+  v = (v || '').trim(); if (!v) return '';
+  if (/^@?[A-Za-z0-9._-]{2,40}$/.test(v)) return site === 'tiktok' ? `https://www.tiktok.com/@${v.replace(/^@/, '')}` : `https://www.youtube.com/@${v.replace(/^@/, '')}`;
+  if (/^https:\/\/([a-z0-9-]+\.)*(tiktok\.com|youtube\.com|youtu\.be)\//i.test(v)) return v;
+  return null;
+}
 
 document.addEventListener('click', async ev => {
   const go = ev.target.closest('[data-go]');
-  if (go) { location.hash = go.dataset.go; show(go.dataset.go); window.scrollTo({ top: 0 }); return; }
-
-  const cp = ev.target.closest('[data-copy]');
-  if (cp) {
-    ev.preventDefault();
-    const node = document.getElementById(cp.dataset.copy);
-    const text = node.textContent;
-    try { await navigator.clipboard.writeText(text); toast('Copied'); }
-    catch { const r = document.createRange(); r.selectNodeContents(node); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Selected. Press and hold to copy.'); }
-    return;
-  }
-
+  if (go) { ev.preventDefault(); location.hash = go.dataset.go; window.scrollTo({ top: 0 }); return; }
+  const cp = ev.target.closest('[data-copytext]');
+  if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copytext); toast('Copied'); } catch { toast("Couldn't copy here. Press and hold the text instead."); } return; }
+  const pl = ev.target.closest('[data-play]');
+  if (pl) { const box = pl.closest('.thumb'); box.innerHTML = `<video controls playsinline autoplay src="${pl.dataset.play}"></video>`; return; }
   const post = ev.target.closest('.post');
   if (post && db && canWrite) {
-    const key = post.dataset.key, p = post.dataset.platform;
-    const before = posted[key] || {};
+    const k = post.dataset.key, p = post.dataset.platform, before = posted[k] || {};
     const next = { tiktok: !!before.tiktok, youtube: !!before.youtube, [p]: !before[p], updatedAt: new Date().toISOString() };
-    posted = { ...posted, [key]: next }; paintStatus();
-    try { await db.collection('posted').doc(key).set(next); }
-    catch (e) { posted = { ...posted, [key]: before }; paintStatus(); toast(e && e.code === 'permission_denied' ? 'You can view this page but not change it.' : "Couldn't save. Check your connection and tap again."); }
+    posted = { ...posted, [k]: next }; render();
+    try { await db.collection('posted').doc(k).set(next); if (next[p]) toast(`Marked posted on ${p === 'tiktok' ? 'TikTok' : 'YouTube'}`); }
+    catch (e) { posted = { ...posted, [k]: before }; render(); toast("Couldn't save. Check your connection and tap again."); }
     return;
   }
-
   const save = ev.target.closest('.save');
   if (save) {
-    const dl = await claude.use('downloads');
-    if (!dl) { save.hidden = true; return; }
+    const dl = await claude.use('downloads'); if (!dl) { save.hidden = true; return; }
     const label = save.textContent; save.disabled = true; save.textContent = 'Preparing…';
-    try {
-      const blob = await (await fetch(save.dataset.src)).blob();
-      await dl.save({ filename: save.dataset.file, data: blob });
-      save.textContent = 'Saved'; setTimeout(() => { save.textContent = label; save.disabled = false; }, 2500);
-      return;
-    } catch (e) {
-      const code = e && e.code;
-      if (code === 'declined') toast('Not saved');
-      else if (code === 'rate_limited') toast('Another save is open. Try again in a moment.');
-      else if (code === 'unavailable' || code === 'not_granted') { toast('Saving isn’t available here.'); document.querySelectorAll('.save').forEach(b => b.hidden = true); }
-      else toast("Couldn't prepare the video. Try again.");
-    }
-    save.textContent = label; save.disabled = false;
+    try { const blob = await (await fetch(save.dataset.src)).blob(); await dl.save({ filename: save.dataset.file, data: blob }); save.textContent = 'Saved'; }
+    catch (e) { toast(e && e.code === 'declined' ? 'Not saved' : e && e.code === 'rate_limited' ? 'Another save is open. Try again in a moment.' : "Couldn't save the video here."); save.textContent = label; }
+    setTimeout(() => { save.textContent = label; save.disabled = false; }, 2000);
   }
 });
-window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+document.addEventListener('submit', async ev => {
+  const f = ev.target; ev.preventDefault();
+  if (!db || !canWrite) { toast('Sign in to claude.ai to save progress.'); return; }
+  if (f.dataset.stats) {
+    const id = f.dataset.stats, prev = latest(id) || {}, entry = { d: isoDate(today()) };
+    for (const k of ['tf', 'tv', 'ys', 'yv']) { const raw = (f.elements[k].value || '').replace(/[,\s]/g, ''); if (raw === '') entry[k] = prev[k] ?? null; else if (/^\d+$/.test(raw)) entry[k] = Number(raw); else { toast('Numbers only, please, like 1250.'); f.elements[k].focus(); return; } }
+    const hist = (((stats[id] && stats[id].history) || []).filter(e => e.d !== entry.d)).concat([entry]).slice(-400);
+    try { await db.collection('stats').doc(id).set({ history: hist }); stats = { ...stats, [id]: { history: hist } }; toast('Numbers saved'); render(); }
+    catch { toast("Couldn't save. Check your connection and try again."); }
+  }
+  if (f.dataset.links) {
+    const id = f.dataset.links, tt = normLink(f.elements.tiktok.value, 'tiktok'), yt = normLink(f.elements.youtube.value, 'youtube');
+    if (tt === null) { toast('Use a tiktok.com link or an @handle.'); return; }
+    if (yt === null) { toast('Use a youtube.com link or an @handle.'); return; }
+    try { await db.collection('links').doc(id).set({ tiktok: tt, youtube: yt }); links = { ...links, [id]: { tiktok: tt, youtube: yt } }; toast('Links saved'); render(); }
+    catch { toast("Couldn't save. Check your connection and try again."); }
+  }
+});
+window.addEventListener('hashchange', render);
 
+let downloadsOn = false;
 render();
-show(location.hash.slice(1));
-paintStatus();
-
 (async () => {
   const sync = document.getElementById('sync');
-  if (!window.claude || !window.claude.use) { sync.textContent = 'Open this page on claude.ai to track what you’ve posted.'; sync.classList.add('warn'); return; }
-  claude.use('downloads').then(dl => { if (dl) document.querySelectorAll('.save').forEach(b => b.hidden = false); });
+  if (!window.claude || !window.claude.use) { sync.textContent = 'Open this page on claude.ai to track posts and growth.'; sync.classList.add('warn'); return; }
+  claude.use('downloads').then(dl => { if (dl) { downloadsOn = true; paint(); } });
   db = await claude.use('db');
-  if (!db) { sync.textContent = 'Sign in to claude.ai to track what you’ve posted.'; sync.classList.add('warn'); paintStatus(); return; }
+  if (!db) { sync.textContent = 'Sign in to claude.ai to track posts and growth.'; sync.classList.add('warn'); paint(); return; }
   const user = await claude.use('user');
   if (user) { const w = await user.can('data.write'); if (w === false) canWrite = false; }
-  paintStatus();
-  const timer = setTimeout(() => { sync.textContent = 'Can’t reach your posted list yet. Ticks may not save until it loads.'; sync.classList.add('warn'); }, 10000);
-  db.collection('posted').onSnapshot(snap => {
-    const next = {};
-    snap.docs.forEach(d => { if (d.exists) next[d.id] = d.data(); });
-    posted = next; paintStatus();
-    if (!snap.metadata.fromCache) { clearTimeout(timer); sync.classList.remove('warn'); sync.textContent = canWrite ? 'Tap TikTok or YouTube Shorts under a video once you’ve posted it there.' : 'You can view posting status but not change it.'; }
-  }, () => { clearTimeout(timer); sync.textContent = 'Posted tracking stopped working. Reload the page to try again.'; sync.classList.add('warn'); });
+  let first = 3;
+  const timer = setTimeout(() => { sync.textContent = "Can't reach your progress yet. Changes may not save until it loads."; sync.classList.add('warn'); }, 10000);
+  const settle = snap => { if (!snap.metadata.fromCache && --first <= 0) { clearTimeout(timer); sync.classList.remove('warn'); sync.textContent = canWrite ? 'Progress syncs across your devices.' : 'View only: you can see progress but not change it.'; } };
+  const sub = (name, apply) => db.collection(name).onSnapshot(snap => { const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); }); apply(m); render(); settle(snap); }, () => { clearTimeout(timer); sync.textContent = 'Sync stopped. Reload the page to try again.'; sync.classList.add('warn'); });
+  sub('posted', m => posted = m); sub('links', m => links = m); sub('stats', m => stats = m);
 })();
 </script>
