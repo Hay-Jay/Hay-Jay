@@ -9,6 +9,7 @@ Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian
 | 3 | 2023 rewind | `videos/rewind-2023.mp4` | 68.5M registered voters stayed home; margin was 2.69M |
 | 4 | Know the candidates | `videos/know-the-candidates.mp4` | Tinubu, Atiku and Obi side by side, why we need change, choose for yourself |
 | 5 | How to make your vote count | `videos/protect-your-vote.mp4` | PVC → polling unit → stay for the count → IReV |
+| 6 | Promise vs reality | `videos/promise-vs-reality.mp4` | 2022 promises vs 2026 data, shown with real news clippings, highlighted, with verdict stamps; includes what improved |
 
 - `stills/<video>-NN.png`: one 1080×1920 PNG per scene. Post them as an Instagram carousel or as Stories.
 - `index.html`: stats page with every video, a copy-caption button for each, and the full source list.
@@ -21,6 +22,16 @@ Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian
 - Text stays out of the bottom ~380px and the right edge, so the app's caption, buttons and progress bar won't cover it.
 - Captions with hashtags are in `videos.js` (`caption:`), and the page has a **Copy caption** button for each.
 - Every video ends on a sources card. Keep it: fact-checked posts are harder to dismiss and less likely to be flagged.
+
+## News clippings ("receipts")
+
+`clip.mjs` opens each article listed in `clips.json` in a phone-sized browser, screenshots the headline (with the article photo) and the paragraph holding the key sentence at 3× resolution, and records where that sentence sits. In the video, `receipt('<id>', {...})` shows them as paper cutouts and draws an animated highlighter over the sentence.
+
+```bash
+node nigeria-2027/clip.mjs
+```
+
+Add a clipping: put `{ "id", "outlet", "date", "url", "find": ["phrase in the sentence"] }` in `clips.json` (or `"headline": true` to highlight the headline), run the command above, then use `receipt('<id>', { stamp: 'Verdict', note: 'one-line takeaway' })` in a scene. Use short excerpts and always show the outlet and date.
 
 ## Edit and re-render
 
