@@ -29,6 +29,13 @@ const run = (cmd, a) => new Promise((res, rej) => {
 });
 const probe = f => +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]).toString().trim();
 const nn = i => String(i + 1).padStart(2, '0');
+// Emotion -> delivery for the Edge voice: [rate offset %, pitch Hz, volume %].
+const MOODS = { calm: [-4, 0, 0], serious: [-2, -2, 0], grave: [-12, -6, 0], hopeful: [0, 3, 0], urgent: [6, 4, 5], fired: [8, 8, 10] };
+function moodProsody(mood, base) {
+  const [r, p, v] = MOODS[mood] || MOODS.serious;
+  const sign = n => (n >= 0 ? '+' : '') + n;
+  return [sign(parseInt(base, 10) + r) + '%', sign(p) + 'Hz', sign(v) + '%'];
+}
 
 const browser = await chromium.launch();
 const pageUrl = pathToFileURL(path.join(here, 'studio.html')).href + '?render=1';
@@ -53,13 +60,15 @@ for (const v of videos) {
   mkdirSync(dir, { recursive: true });
   v.clips = [];
   for (let i = 0; i < v.durs.length; i++) {
-    const text = v.lines[i];
+    const line = v.lines[i];
+    const [mood, text] = Array.isArray(line) ? line : ['serious', line];
+    const [rate, pitch, vol] = moodProsody(mood, voice.rate);
     if (silent || !text) { v.clips.push(null); continue; }
     const mp3 = path.join(dir, `${nn(i)}.mp3`), txt = path.join(dir, `${nn(i)}.txt`);
-    const key = `${voice.name}|${voice.rate}|${text}`;
+    const key = `${voice.name}|${rate}|${pitch}|${vol}|${text}`;
     if (!existsSync(mp3) || !existsSync(txt) || readFileSync(txt, 'utf8') !== key) {
       process.stdout.write(`voice ${v.id} ${nn(i)}\n`);
-      await run('python3', [path.join(here, 'voiceover.py'), voice.name, voice.rate, text, mp3]);
+      await run('python3', [path.join(here, 'voiceover.py'), voice.name, rate, text, mp3, pitch, vol]);
       writeFileSync(txt, key);
     }
     const len = probe(mp3);

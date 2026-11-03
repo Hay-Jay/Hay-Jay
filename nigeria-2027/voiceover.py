@@ -1,6 +1,6 @@
 """Generate one narration clip with Microsoft Edge neural TTS.
 
-    python3 voiceover.py <voice> <rate> <text> <out.mp3>
+    python3 voiceover.py <voice> <rate> <text> <out.mp3> [pitch] [volume]
 
 Called by render.mjs for each scene. Needs:  pip install edge-tts
 """
@@ -18,4 +18,6 @@ if bundle:
 import edge_tts  # noqa: E402
 
 voice, rate, text, out = sys.argv[1:5]
-asyncio.run(edge_tts.Communicate(text, voice, rate=rate).save(out))
+pitch = sys.argv[5] if len(sys.argv) > 5 else '+0Hz'
+volume = sys.argv[6] if len(sys.argv) > 6 else '+0%'
+asyncio.run(edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, volume=volume).save(out))
