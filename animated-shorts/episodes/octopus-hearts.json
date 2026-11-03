@@ -1,0 +1,20 @@
+{
+  "title": "Octopuses have 3 hearts",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+8%",
+  "pitch": "+0Hz",
+  "post": {
+    "caption": "Octopuses have 3 hearts... and one of them quits when they swim 🐙💔 #octopus #animalfacts #weirdfacts #ocean #learnontiktok #science",
+    "youtube_title": "Octopuses Have 3 Hearts (And One Quits When They Swim) #shorts",
+    "youtube_description": "Two hearts pump blood through the gills, one pumps it to the body, and that one stops while the octopus swims. Plus: why their blood is blue.\n\n#animalfacts #octopus #shorts"
+  },
+  "lines": [
+    {"scene": "hook",  "text": "Octopuses have three hearts. And one of them quits every time they swim."},
+    {"scene": "gills", "text": "Two of those hearts pump blood through the gills, where it picks up oxygen."},
+    {"scene": "main",  "text": "The third heart pumps it out to the rest of the body."},
+    {"scene": "stop",  "text": "But when an octopus swims, that main heart stops beating."},
+    {"scene": "tired", "text": "That's why swimming wears them out, and most octopuses would rather crawl."},
+    {"scene": "blood", "text": "Oh, and their blood is blue, because it uses copper instead of iron to carry oxygen."},
+    {"scene": "cta",   "text": "Follow for more weird animal facts!"}
+  ]
+}
