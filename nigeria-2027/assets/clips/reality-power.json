@@ -1,0 +1,43 @@
+{
+ "id": "reality-power",
+ "outlet": "Nairametrics",
+ "url": "https://nairametrics.com/2025/03/06/nigerias-power-generation-hits-record-5801-84mw-tcn",
+ "title": "Nigeria’s power generation hits record 5,801.84MW – TCN",
+ "date": "2025-03-06",
+ "sentence": "Nigeria’s electricity sector has recorded a new milestone, reaching a peak power generation of 5,801.84 megawatts (MW) and a maximum daily energy generation of 128,370.75 megawatt-hours (MWh)—the highest ever attained in the country’s history.",
+ "head": {
+  "w": 600,
+  "h": 624
+ },
+ "quote": {
+  "w": 600,
+  "h": 128
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.1328125,
+   "w": 0.943203125,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.3203125,
+   "w": 0.856171875,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.5078125,
+   "w": 0.9200260416666667,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.6953125,
+   "w": 0.8149479166666667,
+   "h": 0.1640625
+  }
+ ]
+}

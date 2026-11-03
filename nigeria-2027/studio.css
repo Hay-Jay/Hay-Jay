@@ -124,3 +124,23 @@ body.render #stage{transform:none!important}
 #controls input{flex:1;min-width:60px}
 #time{min-width:56px;color:#9fc2ad;font-variant-numeric:tabular-nums}
 .ringwrap .big{font-size:150px}
+.stamp.amber{border-color:var(--gold);color:var(--gold)}
+.stamp.green{border-color:var(--green-hi);color:var(--green-hi)}
+.vs{display:flex;flex-direction:column;gap:22px}
+.vs .card .small{text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+
+/* receipts: real article clippings */
+.rcpt{position:relative;margin-top:10px}
+.paper{position:relative;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 34px 90px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.08)}
+.paper img{display:block;width:100%}
+.paper.head{width:940px;max-height:720px;transform:rotate(-1.2deg)}
+.paper.head.tall{max-height:900px}
+.paper.quote{width:900px;margin:-70px 0 0 20px;transform:rotate(1deg)}
+.paper .hlw{position:absolute}
+.paper .hlw i{display:block;height:100%;width:0;background:rgba(255,212,0,.62);mix-blend-mode:multiply;border-radius:3px}
+.paper::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 70%,rgba(0,0,0,.04))}
+.srcpill{display:inline-flex;gap:14px;align-items:center;font:800 28px/1 Inter;letter-spacing:.08em;text-transform:uppercase;padding:14px 22px;border-radius:999px;background:var(--white);color:#05170d}
+.srcpill.prom{background:var(--green-hi)}.srcpill.real{background:var(--red);color:#fff}
+.srcpill span{opacity:.7;font-weight:600}
+.verdict{display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:56px}
+.verdict .h3{flex:1}

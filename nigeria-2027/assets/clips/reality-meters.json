@@ -1,0 +1,28 @@
+{
+ "id": "reality-meters",
+ "outlet": "Nairametrics",
+ "url": "https://nairametrics.com/2026/10/02/fg-installs-707765-meters-in-q2-4-8-million-electricity-customers-remain-unmetered/",
+ "title": "FG installs 707,765 meters in Q2, 4.8 million electricity customers remain unmetered",
+ "date": "2026-10-02",
+ "sentence": "FG installs 707,765 meters in Q2, 4.8 million electricity customers remain unmetered",
+ "head": {
+  "w": 600,
+  "h": 624
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.14583333333333334,
+   "w": 0.8835677083333333,
+   "h": 0.04807692307692308
+  },
+  {
+   "x": 0.02,
+   "y": 0.1971153846153846,
+   "w": 0.8149479166666667,
+   "h": 0.04807692307692308
+  }
+ ]
+}

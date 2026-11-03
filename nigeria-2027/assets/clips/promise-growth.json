@@ -1,0 +1,28 @@
+{
+ "id": "promise-growth",
+ "outlet": "BusinessDay",
+ "url": "https://businessday.ng/politics/article/tinubu-targets-12-gdp-growth-in-economic-agenda/",
+ "title": "Tinubu targets 12% GDP growth in economic agenda",
+ "date": "2022",
+ "sentence": "Tinubu targets 12% GDP growth in economic agenda",
+ "head": {
+  "w": 592,
+  "h": 316.78125
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02702702702702703,
+   "y": 0.14994574331656307,
+   "w": 0.894504856418919,
+   "h": 0.1262700996350005
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.2711354444115616,
+   "w": 0.573268581081081,
+   "h": 0.1262700996350005
+  }
+ ]
+}

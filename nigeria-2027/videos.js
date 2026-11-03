@@ -41,6 +41,26 @@ const profile = (initials, name, party, color, facts) => ({
     ${facts.map(([k, v, note], i) => `<div class="card a" data-a="left" data-t="${.4 + i * .3}" style="margin-bottom:22px"><div class="small">${k}</div><div class="h3">${v}</div>${note ? `<div class="sub" style="margin-top:6px">${note}</div>` : ''}</div>`).join('')}`,
 });
 
+/* A real article clipping (made by clip.mjs) shown as a paper cutout with an animated highlighter. */
+const fmtDate = d => { if (!d || d.length < 7) return d || ''; const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; const [y, mo, da] = d.split('-'); return (da ? +da + ' ' : '') + m[+mo - 1] + ' ' + y; };
+const marksHtml = (c, t) => c.marks.map((m, i) => `<div class="hlw" style="left:${m.x * 100}%;top:${(m.y * 100) - .4}%;width:${m.w * 100}%;height:${(m.h * 100) + .8}%"><i class="a" data-a="bar" data-t="${t + i * .28}" data-d=".45" data-w="100"></i></div>`).join('');
+const receipt = (id, { kind = 'real', label, t = .3, stamp, stampCls = '', tall, note } = {}) => {
+  const c = (window.CLIPS || {})[id];
+  if (!c) return `<div class="card"><div class="body">[missing clipping: ${id}. Run node clip.mjs]</div></div>`;
+  const onHead = c.marksOn === 'head';
+  return `
+    <div class="a" data-a="up" data-t="${t - .2}"><span class="srcpill ${kind === 'prom' ? 'prom' : 'real'}">${label || (kind === 'prom' ? 'Promised' : 'Reality')} <span>${c.outlet} · ${fmtDate(c.date)}</span></span></div>
+    <div class="rcpt">
+      <div class="paper head ${tall || onHead ? 'tall' : ''} a" data-a="up" data-t="${t}"><img src="assets/clips/${id}-head.png" alt="">${onHead ? marksHtml(c, t + .8) : ''}</div>
+      ${onHead ? '' : `<div class="paper quote a" data-a="right" data-t="${t + .5}"><img src="assets/clips/${id}-quote.png" alt="">${marksHtml(c, t + 1.1)}</div>`}
+    </div>
+    ${stamp ? `<div class="verdict"><div class="h3 a" data-a="up" data-t="${t + 2}">${note || ''}</div><div class="a" data-a="stamp" data-t="${t + 2.4}"><span class="stamp ${stampCls}">${stamp}</span></div></div>` : ''}`;
+};
+const promiseCard = (text, src) => `
+  <div class="a" data-a="up" data-t=".1"><span class="srcpill prom">Promised <span>${src}</span></span></div>
+  <div class="gap"></div>
+  <div class="h2 a" data-a="up" data-t=".3">“${text}”</div>`;
+
 const sources = (items) => ({
   dur: 3.2,
   html: `
@@ -316,6 +336,55 @@ window.VIDEOS = [
       ]),
     ],
   },
+  /* ------------------------------------------------------------------ */
+  {
+    id: 'promise-vs-reality',
+    title: '6 · Promise vs reality: 3 years in',
+    caption: 'In 2022 the promises were big: 12% growth, 15,000MW of power, meters for all, an end to extreme poverty. Here are the receipts 3 years later, including what did improve. Judge for yourself. 🇳🇬 #Nigeria2027 #PromiseVsReality #FactCheck #NigeriaDecides2027',
+    scenes: [
+      { dur: 4, html: `
+        <div class="kicker a" data-a="up">2022 promises → 2026 data</div>
+        <div class="h1 a" data-a="up" data-t=".1">Promise<br>vs<br><span class="mark">reality</span></div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t=".8">President Tinubu's campaign promises, checked against the receipts.</div>` },
+      { dur: 5, html: `<div class="kicker a" data-a="up">Promise 1 · The economy</div>${receipt('promise-growth', { kind: 'prom' })}` },
+      { dur: 6, html: `<div class="kicker a" data-a="up">Promise 1 · The economy</div>${receipt('reality-growth', { stamp: 'Far behind', stampCls: 'amber', note: '4.43% vs 12% promised' })}` },
+      { dur: 5, html: `<div class="kicker a" data-a="up">Promise 2 · Electricity</div>${receipt('promise-power', { kind: 'prom' })}` },
+      { dur: 6, mood: 'red', html: `<div class="kicker a" data-a="up">Promise 2 · Electricity</div>${receipt('reality-power', { stamp: 'Not delivered', note: '5,802 MW of 15,000 promised' })}` },
+      { dur: 4.5, html: `<div class="kicker a" data-a="up">Promise 3 · Electricity bills</div>${promiseCard('All electricity bills will be meter-based.', 'Renewed Hope Agenda, p.30')}` },
+      { dur: 6, html: `<div class="kicker a" data-a="up">Promise 3 · Electricity bills</div>${receipt('reality-meters', { stamp: 'Not yet', stampCls: 'amber', note: '4.8M homes still unmetered' })}` },
+      { dur: 4.5, html: `<div class="kicker a" data-a="up">Promise 4 · Poverty</div>${promiseCard('End extreme poverty.', 'Renewed Hope Agenda, 2022')}` },
+      { dur: 6, mood: 'red', html: `<div class="kicker a" data-a="up">Promise 4 · Poverty</div>${receipt('reality-poverty', { stamp: 'Worse', note: '56% → 63% in poverty' })}` },
+      { dur: 6, mood: 'red', html: `<div class="kicker a" data-a="up">Promise 5 · Refineries</div>${receipt('reality-refinery', { label: 'Reality', stamp: 'Failed so far', note: 'Shut down after a $1.5bn rehab' })}` },
+      { dur: 7, html: `
+        <div class="kicker a" data-a="up">To be fair: what improved</div>
+        <div class="vs">
+          <div class="card a" data-a="left" data-t=".2"><div class="small hl">Inflation</div><div class="h3">Down from 34.8% (Dec 2024) to 14.6%</div></div>
+          <div class="card a" data-a="left" data-t=".5"><div class="small hl">Foreign reserves</div><div class="h3">$35.1bn → $54.9bn</div></div>
+          <div class="card a" data-a="left" data-t=".8"><div class="small hl">Oil theft</div><div class="h3">Lowest since 2009</div></div>
+          <div class="card a" data-a="left" data-t="1.1"><div class="small hl">Non-oil exports</div><div class="h3">Record $6.1bn in 2025</div></div>
+        </div>
+        <div class="src a" data-a="fade" data-t="1.6">Rated TRUE by FactCheckHub, 2 Oct 2026 · CBN reserve data</div>` },
+      { dur: 5, html: `
+        <div class="kicker a" data-a="up">The scorecard</div>
+        <div class="row a" data-a="up" data-t=".1" style="gap:22px">
+          <div class="card" style="flex:1;text-align:center"><div class="big red" style="font-size:160px">0</div><div class="small">Fully kept</div></div>
+          <div class="card" style="flex:1;text-align:center"><div class="big gold" style="font-size:160px">2</div><div class="small">Behind / not yet</div></div>
+          <div class="card" style="flex:1;text-align:center"><div class="big red" style="font-size:160px">3</div><div class="small">Not delivered / worse / failed</div></div>
+        </div>
+        <div class="gap"></div>
+        <div class="h3 a" data-a="up" data-t=".9">Some numbers are up. The big promises are not met.</div>
+        <div class="gap-s"></div>
+        <div class="h2 a hl" data-a="pop" data-t="1.5">Judge the record.</div>` },
+      sources([
+        '<b>Promises:</b> BusinessDay, 9 Jun 2022 · Nairametrics, 10 Jun 2022 · Renewed Hope Agenda',
+        '<b>Growth:</b> NBS via Nairametrics, 31 Aug 2026',
+        '<b>Power:</b> TCN via Nairametrics, 6 Mar 2025 · <b>Meters:</b> Nairametrics, 2 Oct 2026',
+        '<b>Poverty:</b> World Bank via Nairametrics, 10 Apr 2026',
+        '<b>Refineries:</b> NNPC via Nairametrics, 5 Feb 2026 · <b>Fair check:</b> FactCheckHub, 2 Oct 2026',
+      ]),
+    ],
+  },
 ];
 /* Narration: one line per scene, in order, as [emotion, words].
    Emotions: 'calm' 'serious' 'grave' 'urgent' 'hopeful' 'fired'
@@ -364,5 +433,20 @@ window.NARRATION = {
     ['urgent',  'Five. Check your unit\'s result on INEC\'s I-Rev portal, and make sure it matches what was posted. And bring five people with you!'],
     ['fired',   'In twenty twenty-three, the winner got eight point seven nine million votes. Today, one hundred and ten million of us are registered. We are the majority!'],
     ['hopeful', 'Share this with everyone you know.'],
+  ],
+  'promise-vs-reality': [
+    ['serious', 'In twenty twenty-two, candidate Tinubu made big promises. Three years into his presidency... here are the receipts.'],
+    ['serious', 'Promise one: the economy. His agenda targeted twelve percent growth.'],
+    ['serious', 'Reality? The best quarter so far was four point four three percent. Far behind.'],
+    ['serious', 'Promise two: fifteen thousand megawatts of electricity.'],
+    ['grave',   'Reality: the highest the national grid has ever reached is about five thousand eight hundred megawatts. Not delivered.'],
+    ['serious', 'Promise three: every electricity bill based on a meter. No more estimated bills.'],
+    ['serious', 'Reality: four point eight million customers still have no meter. Not yet.'],
+    ['serious', 'Promise four: end extreme poverty.'],
+    ['grave',   'Reality: the World Bank says poverty rose to sixty-three percent in twenty twenty-five. That is worse.'],
+    ['grave',   'And the refineries? NNPC shut down the state-owned refineries, after the Port Harcourt rehab. Failed, so far.'],
+    ['calm',    'To be fair, some things improved. Inflation is down from its peak. Foreign reserves are up. Oil theft is the lowest since two thousand and nine. And non-oil exports hit a record. Fact-checkers rated these claims true.'],
+    ['fired',   'The scorecard. Five big promises. None fully kept. Some numbers are up, but the big promises are not met. Judge the record, and vote on January sixteenth!'],
+    ['calm',    'Every article is on screen. Look them up, then share this.'],
   ],
 };
