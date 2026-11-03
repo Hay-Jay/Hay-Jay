@@ -17,7 +17,7 @@ Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian
 ## Posting tips
 
 - Each video has a **narrator** (Microsoft Edge neural voice `en-NG-AbeoNeural`, a Nigerian-English male voice). For music, add a trending sound in the TikTok / IG editor and turn its volume down to about 15–20% so the voice stays clear.
-- To use the female voice, set `window.VOICE = { name: 'en-NG-EzinneNeural', rate: '+6%' }` in `videos.js` and re-render. To record your own voice instead, replace the clips in `vo/<video>/NN.mp3` (keep the `.txt` files) and re-render.
+- To use the female voice, set `window.VOICE = { name: 'en-NG-EzinneNeural', rate: '+18%' }` in `videos.js` and re-render. To record your own voice instead, replace the clips in `vo/<video>/NN.mp3` (keep the `.txt` files) and re-render.
 - Text stays out of the bottom ~380px and the right edge, so the app's caption, buttons and progress bar won't cover it.
 - Captions with hashtags are in `videos.js` (`caption:`), and the page has a **Copy caption** button for each.
 - Every video ends on a sources card. Keep it: fact-checked posts are harder to dismiss and less likely to be flagged.

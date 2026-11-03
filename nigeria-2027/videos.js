@@ -6,7 +6,7 @@ window.HANDLE = '#Nigeria2027';
 
 /* Narrator voice (Microsoft Edge neural TTS). Nigerian English options:
    'en-NG-AbeoNeural' (male) or 'en-NG-EzinneNeural' (female). */
-window.VOICE = { name: 'en-NG-AbeoNeural', rate: '+6%' };
+window.VOICE = { name: 'en-NG-AbeoNeural', rate: '+18%' };
 
 const IMG = {
   obi: 'assets/img/peter-obi.png',
