@@ -114,6 +114,7 @@ def main(out):
         if n > 0: mixd[i:i + n] += s[:n]
     style = json.load(open(os.path.join(out, "timeline.json"))).get("channel", "ocean")
     m, level = music(total, style)
+    m = np.pad(m, (0, max(0, len(mixd) - len(m))))[:len(mixd)]
     mixd += level * m / max(1e-6, np.abs(m).max())
     mixd *= 0.95 / np.abs(mixd).max()
     with wave.open(os.path.join(out, "mix.wav"), "wb") as w:
