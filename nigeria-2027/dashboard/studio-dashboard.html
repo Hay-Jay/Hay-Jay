@@ -1,0 +1,295 @@
+<title>Naija Decides Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800;900&display=swap">
+<style>
+/* Layout: a posting control room. Summary strip, then "up next", calendar, library. One dark visual world that matches the videos. */
+:root{
+  --bg:#03130b; --panel:#08241a; --panel2:#0b2f21; --line:rgba(225,245,232,.13);
+  --fg:#eef8f1; --muted:#9dbfab; --accent:#3dff9a; --accent-ink:#022313;
+  --done:#3dff9a; --plan:#ffc83d; --late:#ff6a5c;
+  --tt:#ff2d6f; --ig:#c56bff; --x:#e8e8e8;
+  --display:"Anton",Impact,"Arial Narrow",sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 60px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:22px}
+h1,h2{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.01em;margin:0;text-wrap:balance}
+h1{font-size:clamp(34px,6vw,56px);line-height:.95}
+h2{font-size:24px}
+.eyebrow{font:800 11px/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+header{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end;justify-content:space-between}
+.flag{display:inline-flex;height:14px;border-radius:3px;overflow:hidden;vertical-align:-2px;margin-right:8px}
+.flag i{width:8px;background:#008751}.flag i:nth-child(2){background:#fff}
+.count{display:flex;gap:10px;align-items:baseline}
+.count b{font:400 54px/1 var(--display);color:var(--accent)}
+
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:6px;align-content:start}
+.tile .k{font:800 11px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font:400 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:6px}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:14px;align-content:start;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+
+.post{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:center;padding:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.post img,.post .ph{width:54px;height:96px;object-fit:cover;border-radius:8px;background:#06301f;display:grid;place-items:center;font:400 22px var(--display);color:var(--accent)}
+.post .t{font-weight:800;line-height:1.25}
+.post .d{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.post .note{font-size:12px;color:var(--plan)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 10px 5px 8px;font:800 12px/1 var(--body);display:inline-flex;gap:6px;align-items:center}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip[data-s="posted"]{background:rgba(61,255,154,.14);border-color:rgba(61,255,154,.5)}
+.chip[data-s="posted"]::after{content:"✓";color:var(--done)}
+.chip[data-s="planned"].late{border-color:rgba(255,106,92,.6)}
+.chip[data-s="skip"]{opacity:.45;text-decoration:line-through}
+.tag{font:800 10px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:6px;background:rgba(255,200,61,.15);color:var(--plan)}
+.tag.ready{background:rgba(61,255,154,.14);color:var(--done)}
+.tag.today{background:var(--accent);color:var(--accent-ink)}
+
+.cal-nav{display:flex;gap:8px;align-items:center}
+.cal-nav button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:6px 12px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cal .dow{font:800 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.day{min-height:74px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);padding:6px;display:grid;align-content:start;gap:4px;text-align:left;min-width:0}
+.day.out{opacity:.3}
+.day.sun{border-color:rgba(255,200,61,.35)}
+.day.today{outline:2px solid var(--accent)}
+.day.elect{background:rgba(61,255,154,.18);border-color:var(--accent)}
+.day .n{font:800 12px var(--body);font-variant-numeric:tabular-nums}
+.day .p{font-size:11px;line-height:1.2;padding:3px 5px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day .p.done{background:rgba(61,255,154,.18)}
+.day .p.todo{background:rgba(255,200,61,.14)}
+@media (max-width:560px){.day{min-height:54px}.day .p{font-size:0;height:6px;padding:0}}
+
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.card img,.card .ph{width:72px;height:128px;border-radius:8px;object-fit:cover;background:#06301f;display:grid;place-items:center;text-align:center;font:400 18px/1 var(--display);color:var(--plan);padding:6px}
+.card .t{font-weight:800;line-height:1.25}
+.card .meta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card .row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font:800 12px var(--body)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+
+form.add{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+label{display:grid;gap:4px;font:800 11px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 10px;text-transform:none;letter-spacing:0;font-weight:400;min-width:0}
+.plats{display:flex;gap:10px;flex-wrap:wrap;text-transform:none;letter-spacing:0}
+.plats label{display:flex;gap:6px;align-items:center;color:var(--fg);font:600 13px var(--body);text-transform:none;letter-spacing:0}
+
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.tip{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.tip b{font:400 20px var(--display);text-transform:uppercase;letter-spacing:.02em}
+.tip ul{margin:0;padding-left:18px;color:var(--muted);font-size:13px}
+.notice{padding:12px 14px;border-radius:12px;border:1px dashed var(--line);color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.on{opacity:1}
+dialog{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:16px;max-width:min(560px,92vw);padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow"><span class="flag"><i></i><i></i><i></i></span>Posting control room</div>
+      <h1>Naija Decides Studio</h1>
+      <div class="muted">TikTok · Instagram Reels · X, every post tracked until 16 January 2027.</div>
+    </div>
+    <div class="count"><b id="days">–</b><span class="muted">days to the<br>presidential vote</span></div>
+  </header>
+
+  <section class="strip" id="strip" aria-label="Progress"></section>
+
+  <div id="dbnote" class="notice" hidden></div>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="h-next">
+      <div class="panel-head"><h2 id="h-next">Up next</h2><span class="muted" id="nextnote"></span></div>
+      <div id="next" style="display:grid;gap:10px"></div>
+      <div class="muted" style="font-size:12px">Tap a platform once you've posted on it. Tap again to mark it skipped, and again to reset.</div>
+    </section>
+
+    <section class="panel" aria-labelledby="h-cal">
+      <div class="panel-head">
+        <h2 id="h-cal">Calendar</h2>
+        <div class="cal-nav"><button id="prev" aria-label="Previous month">‹</button><b id="month"></b><button id="nextm" aria-label="Next month">›</button></div>
+      </div>
+      <div class="cal" id="cal"></div>
+      <div class="muted" style="font-size:12px">Gold border = Sunday weekly-news slot. Green = posted. Gold = still to post. Tap a day for details.</div>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="h-lib">
+    <div class="panel-head"><h2 id="h-lib">Video library</h2><span class="muted" id="libnote"></span></div>
+    <div class="lib" id="lib"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-add">
+    <h2 id="h-add">Schedule a post</h2>
+    <form class="add" id="addform">
+      <label>Video<select id="f-video" required></select></label>
+      <label>Date<input id="f-date" type="date" required></label>
+      <label>Time (WAT)<input id="f-time" type="time" value="19:00" required></label>
+      <div><div class="eyebrow" style="color:var(--muted);margin-bottom:6px">Platforms</div>
+        <div class="plats">
+          <label><input type="checkbox" id="f-tt" checked> TikTok</label>
+          <label><input type="checkbox" id="f-ig" checked> Instagram</label>
+          <label><input type="checkbox" id="f-x" checked> X</label>
+        </div></div>
+      <label>Note<input id="f-note" placeholder="Optional"></label>
+      <button class="btn pri" type="submit" style="padding:11px 14px">Add to calendar</button>
+    </form>
+  </section>
+
+  <section class="panel" aria-labelledby="h-tips">
+    <h2 id="h-tips">Platform playbook</h2>
+    <div class="tips">
+      <div class="tip"><b style="color:var(--tt)">TikTok</b><ul><li>Post 7–9pm WAT; Sunday news at 6pm.</li><li>Add a trending sound at 15–20% under the narrator.</li><li>Pin the Fact-check and Promise vs reality videos.</li><li>Reply to comments with video replies; it pushes reach.</li></ul></div>
+      <div class="tip"><b style="color:var(--ig)">Instagram Reels</b><ul><li>Reels up to 3 min, so every video fits.</li><li>Post the stills as a carousel 1–2 days later.</li><li>Use Stories polls for the weekly viewer poll.</li><li>Put the website link in your bio.</li></ul></div>
+      <div class="tip"><b style="color:var(--x)">X</b><ul><li>Yes, use it: X is where Nigerian political debate happens.</li><li>Upload the video natively; free accounts allow 2:20, so all fit.</li><li>Lead with the strongest number in the first line.</li><li>Quote-post news the day it breaks; link sources in a reply.</li></ul></div>
+      <div class="tip"><b>Rules that protect you</b><ul><li>Keep the sources card at the end of every video.</li><li>Say "alleged" until a court convicts.</li><li>Don't post unverified viral claims, even ones you like.</li><li>Check dates and numbers again on posting day.</li></ul></div>
+    </div>
+  </section>
+</div>
+
+<dialog id="dlg"><div id="dlgbody"></div><div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" id="dlgclose">Close</button></div></dialog>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+  const ELECTION = new Date('2027-01-16T08:00:00+01:00');
+  const PL = {tiktok:{n:'TikTok',c:'var(--tt)'}, instagram:{n:'Instagram',c:'var(--ig)'}, x:{n:'X',c:'var(--x)'}};
+  const state = {videos:{}, posts:[], loaded:false};
+  let db = null, month = null;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const today = () => { const d = new Date(); return new Date(d.getTime() + (60 + d.getTimezoneOffset()) * 60000).toISOString().slice(0,10); }; // WAT date
+  const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+  const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1600); };
+  const thumb = v => v && v.status === 'ready' ? `<img src="thumbs/${esc(v.id)}.jpg" alt="" loading="lazy">` : `<div class="ph">${v ? (v.short || 'NEW') : '?'}</div>`;
+
+  // ---- countdown
+  function countdown(){ const d = Math.ceil((ELECTION - new Date()) / 864e5); $('#days').textContent = d > 0 ? d : 0; }
+  countdown(); setInterval(countdown, 60000);
+
+  // ---- render
+  function postStatus(p){ const vals = Object.values(p.platforms || {}); const live = vals.filter(s => s !== 'skip'); return live.length && live.every(s => s === 'posted') ? 'done' : 'todo'; }
+  function render(){
+    const posts = [...state.posts].sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+    const vids = Object.values(state.videos).sort((a,b) => (a.order||99) - (b.order||99));
+    const t = today();
+    // strip
+    let slots = 0, done = 0; const per = {tiktok:[0,0], instagram:[0,0], x:[0,0]};
+    posts.forEach(p => Object.entries(p.platforms||{}).forEach(([k,s]) => { if (s === 'skip' || !per[k]) return; slots++; per[k][1]++; if (s === 'posted') { done++; per[k][0]++; } }));
+    const ready = vids.filter(v => v.status === 'ready').length;
+    const wk = posts.filter(p => p.date >= t && p.date <= new Date(Date.now()+7*864e5).toISOString().slice(0,10)).length;
+    const late = posts.filter(p => p.date < t && postStatus(p) === 'todo').length;
+    const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+    $('#strip').innerHTML = `
+      <div class="tile"><div class="k">Videos ready</div><div class="v">${ready}<span class="muted" style="font-size:18px"> / ${vids.length}</span></div><div class="bar"><i style="width:${pct(ready,vids.length)}%"></i></div></div>
+      <div class="tile"><div class="k">Posts done</div><div class="v">${done}<span class="muted" style="font-size:18px"> / ${slots}</span></div><div class="bar"><i style="width:${pct(done,slots)}%"></i></div></div>
+      ${Object.entries(per).map(([k,[a,b]]) => `<div class="tile"><div class="k" style="color:${PL[k].c}">${PL[k].n}</div><div class="v">${a}<span class="muted" style="font-size:18px"> / ${b}</span></div><div class="bar"><i style="width:${pct(a,b)}%;background:${PL[k].c}"></i></div></div>`).join('')}
+      <div class="tile"><div class="k">Next 7 days</div><div class="v">${wk}</div><div class="muted" style="font-size:12px">${late ? `<span style="color:var(--late)">${late} overdue</span>` : 'Nothing overdue'}</div></div>`;
+    // next
+    const upcoming = posts.filter(p => p.date >= t || postStatus(p) === 'todo').filter(p => postStatus(p) === 'todo').slice(0, 6);
+    $('#nextnote').textContent = upcoming.length ? '' : (state.loaded ? 'All caught up' : '');
+    $('#next').innerHTML = upcoming.length ? upcoming.map(postRow).join('') : `<div class="notice">${state.loaded ? 'Nothing left to post. Add the next one below.' : 'Your schedule appears here: each post with the video, the date, and a button per platform.'}</div>`;
+    // calendar
+    renderCal(posts, t);
+    // library
+    const count = id => posts.filter(p => p.videoId === id);
+    $('#libnote').textContent = vids.length ? `${ready} ready · ${vids.length - ready} to make` : '';
+    $('#lib').innerHTML = vids.length ? vids.map(v => {
+      const ps = count(v.id); const posted = ps.filter(p => postStatus(p) === 'done').length;
+      return `<article class="card">${thumb(v)}<div style="min-width:0;display:grid;gap:4px;align-content:start">
+        <div class="t">${esc(v.title)}</div>
+        <div class="meta"><span class="tag ${v.status === 'ready' ? 'ready' : ''}">${v.status === 'ready' ? 'Ready' : 'To make'}</span>${v.secs ? `<span>${Math.floor(v.secs/60)}:${String(v.secs%60).padStart(2,'0')}</span>` : ''}<span>${ps.length ? `${posted}/${ps.length} posted` : 'Not scheduled'}</span></div>
+        ${v.file ? `<div class="meta" style="word-break:break-all">${esc(v.file)}</div>` : ''}
+        <div class="row">${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Copy caption</button>` : ''}<button class="btn" data-sched="${esc(v.id)}">Schedule</button></div>
+      </div></article>`; }).join('') : `<div class="notice">Your videos appear here with their thumbnail, length, caption and how many times each has been posted.</div>`;
+    // form select
+    const sel = $('#f-video'); const cur = sel.value;
+    sel.innerHTML = vids.map(v => `<option value="${esc(v.id)}">${esc(v.title)}${v.status === 'ready' ? '' : ' (to make)'}</option>`).join('');
+    if (cur) sel.value = cur;
+  }
+  function postRow(p){
+    const v = state.videos[p.videoId]; const t = today();
+    return `<div class="post">${thumb(v)}<div style="min-width:0">
+      <div class="d">${p.date === t ? '<span class="tag today">Today</span> ' : ''}${fmtDate(p.date)} · ${esc(p.time)} WAT</div>
+      <div class="t">${esc(v ? v.title : p.videoId)}</div>
+      ${p.note ? `<div class="note">${esc(p.note)}</div>` : ''}
+      <div class="chips">${Object.keys(PL).filter(k => p.platforms && k in p.platforms).map(k => `<button class="chip ${p.date < t ? 'late' : ''}" style="--c:${PL[k].c}" data-s="${p.platforms[k]}" data-post="${esc(p.id)}" data-pl="${k}"><span class="dot"></span>${PL[k].n}</button>`).join('')}
+        <button class="btn" data-del="${esc(p.id)}" title="Remove this post" aria-label="Remove post">✕</button></div>
+    </div></div>`;
+  }
+  function renderCal(posts, t){
+    if (!month) { const d = new Date(t + 'T12:00:00'); month = new Date(d.getFullYear(), d.getMonth(), 1); }
+    $('#month').textContent = month.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+    const first = new Date(month); const start = new Date(first); start.setDate(1 - ((first.getDay() + 6) % 7));
+    let h = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => `<div class="dow">${d}</div>`).join('');
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const ps = posts.filter(p => p.date === iso);
+      const cls = ['day', d.getMonth() !== month.getMonth() && 'out', d.getDay() === 0 && 'sun', iso === t && 'today', iso === '2027-01-16' && 'elect'].filter(Boolean).join(' ');
+      h += `<button class="${cls}" data-day="${iso}"><span class="n">${d.getDate()}</span>${iso === '2027-01-16' ? '<span class="p done">ELECTION DAY</span>' : ''}${ps.map(p => `<span class="p ${postStatus(p) === 'done' ? 'done' : 'todo'}">${esc((state.videos[p.videoId] || {}).short || p.videoId)}</span>`).join('')}</button>`;
+      if (i === 34 && new Date(start.getTime() + 35*864e5).getMonth() !== month.getMonth()) break;
+    }
+    $('#cal').innerHTML = h;
+  }
+
+  // ---- actions
+  const order = ['planned','posted','skip'];
+  async function write(fn, ok){ if (!db) { toast('Open this page in Claude to save changes'); return; } try { await fn(); if (ok) toast(ok); } catch (e) { toast(e && e.code === 'invalid_argument' ? 'You can view this plan but not change it' : 'Could not save. Try again'); } }
+  document.addEventListener('click', e => {
+    const c = e.target.closest('[data-post]');
+    if (c) { const p = state.posts.find(x => x.id === c.dataset.post); if (!p) return; const cur = p.platforms[c.dataset.pl]; const nxt = order[(order.indexOf(cur) + 1) % 3];
+      write(() => db.doc('posts/' + p.id).update({platforms: {[c.dataset.pl]: nxt}}), nxt === 'posted' ? `Marked posted on ${PL[c.dataset.pl].n}` : nxt === 'skip' ? 'Marked skipped' : 'Reset to planned'); return; }
+    const del = e.target.closest('[data-del]');
+    if (del) { if (del.dataset.armed) { write(() => db.doc('posts/' + del.dataset.del).delete(), 'Post removed'); } else { del.dataset.armed = '1'; del.textContent = 'Remove?'; setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.textContent = '✕'; } }, 2500); } return; }
+    const cp = e.target.closest('[data-copy]');
+    if (cp) { const v = state.videos[cp.dataset.copy]; navigator.clipboard.writeText(v.caption).then(() => toast('Caption copied'), () => toast('Copy blocked: select the caption in the details view')); return; }
+    const sc = e.target.closest('[data-sched]');
+    if (sc) { $('#f-video').value = sc.dataset.sched; $('#f-date').focus(); document.getElementById('h-add').scrollIntoView({behavior:'smooth'}); return; }
+    const day = e.target.closest('[data-day]');
+    if (day) { const ps = state.posts.filter(p => p.date === day.dataset.day).sort((a,b) => a.time.localeCompare(b.time));
+      $('#dlgbody').innerHTML = `<h2>${fmtDate(day.dataset.day)}</h2>${day.dataset.day === '2027-01-16' ? '<p>Presidential and National Assembly elections.</p>' : ''}<div style="display:grid;gap:10px;margin-top:10px">${ps.length ? ps.map(postRow).join('') : '<div class="notice">Nothing scheduled. Use "Schedule a post" to add one.</div>'}</div>`;
+      $('#dlg').showModal(); return; }
+  });
+  $('#dlgclose').onclick = () => $('#dlg').close();
+  $('#prev').onclick = () => { month = new Date(month.getFullYear(), month.getMonth() - 1, 1); render(); };
+  $('#nextm').onclick = () => { month = new Date(month.getFullYear(), month.getMonth() + 1, 1); render(); };
+  $('#addform').addEventListener('submit', e => {
+    e.preventDefault();
+    const platforms = {}; if ($('#f-tt').checked) platforms.tiktok = 'planned'; if ($('#f-ig').checked) platforms.instagram = 'planned'; if ($('#f-x').checked) platforms.x = 'planned';
+    if (!Object.keys(platforms).length) { toast('Pick at least one platform'); return; }
+    const body = {videoId: $('#f-video').value, date: $('#f-date').value, time: $('#f-time').value, platforms, note: $('#f-note').value.trim()};
+    write(() => db.collection('posts').add(body), 'Added to calendar').then(() => { $('#f-note').value = ''; });
+  });
+  $('#f-date').value = today();
+
+  // ---- data
+  render();
+  (async () => {
+    db = window.claude && await window.claude.use('db');
+    if (!db) { const n = $('#dbnote'); n.hidden = false; n.textContent = 'Your saved plan loads when this page is open in Claude while you are signed in.'; return; }
+    let pending = 2; const timer = setTimeout(() => { const n = $('#dbnote'); n.hidden = false; n.textContent = 'Still loading your plan. Check your connection.'; }, 10000);
+    const settle = s => { if (!s.metadata.fromCache && --pending <= 0) { clearTimeout(timer); $('#dbnote').hidden = true; } state.loaded = true; render(); };
+    const fail = () => { clearTimeout(timer); const n = $('#dbnote'); n.hidden = false; n.textContent = 'Your plan could not be loaded right now. Reopen the page to try again.'; };
+    db.collection('videos').onSnapshot(s => { state.videos = {}; s.docs.forEach(d => state.videos[d.id] = {id: d.id, ...d.data()}); settle(s); }, fail);
+    db.collection('posts').onSnapshot(s => { state.posts = s.docs.map(d => ({id: d.id, ...d.data()})); settle(s); }, fail);
+  })();
+})();
+</script>
