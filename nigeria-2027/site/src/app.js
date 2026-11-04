@@ -76,35 +76,58 @@ const ALL = [
 ALL[0].id = 'tinubu'; ALL[1].id = 'atiku'; ALL[2].id = 'obi';
 ALL.forEach(a => { a.photo = PHOTOS[a.id] || ''; });
 const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported', straw:'73.6%'}, obi:{fav:'+58.3', straw:'22.3%'} };
-// Popularity: current measured signals only (no past results). Each category ranks on its own.
-const POPCATS = {
-  fav:{label:'Favourability', unit:'net score', desc:'SBM Intelligence voter sentiment tracker, May 2026: share favourable minus unfavourable (−100 to +100). The only national survey so far.', src:'sbm',
-    vals:{obi:58.3, tinubu:-58.5}, fmt:v => (v > 0 ? '+' : '') + v, pct:v => (v + 100) / 2, conf:'Survey of about 829 people across all six zones'},
-  straw:{label:'Online poll', unit:'% of votes', desc:'Tinubu Must Go movement online poll, 24–25 Sep 2026, 109,799 self-selected respondents. Run by an anti-Tinubu group, so Tinubu was not an option and it is not representative.', src:'tmg',
-    vals:{atiku:73.6, obi:22.3}, fmt:v => v + '%', pct:v => v, conf:'Self-selected and partisan: treat with caution'},
-  combined:{label:'Overall popularity', unit:'index 0–100', desc:'Weighted mix of the current signals: favourability 70%, online poll 30% (the survey counts more because it is more reliable). A missing signal counts as a neutral 50.', src:'sbm',
-    vals:null, fmt:v => v.toFixed(1), pct:v => v, conf:'Partial data: Atiku has no favourability score and Tinubu was not in the online poll'},
-  predict:{label:'Likely to win', unit:'% of predictions', desc:'Who viewers think WILL win (not who they want). From our weekly viewer poll, plus your own forecast below.', src:null,
-    vals:null, fmt:v => v + '%', pct:v => v, conf:'Unscientific: shows only who answered'}
-};
-POPCATS.combined.vals = (() => { const o = {}; ['tinubu','atiku','obi'].forEach(id => { const f = POPCATS.fav.vals[id], w = POPCATS.straw.vals[id]; o[id] = Math.round((0.7 * (f == null ? 50 : (f + 100) / 2) + 0.3 * (w == null ? 50 : w / 73.6 * 100)) * 10) / 10; }); return o; })();
-POPCATS.predict.vals = (POLLS.predict && POLLS.predict.shares) || null; // e.g. {tinubu:40, atiku:25, obi:35} from the "who will win" poll question
-const popCat = () => POPCATS[store.get('popcat', 'fav')] ? store.get('popcat', 'fav') : 'fav';
-function ranked(){ const v = POPCATS[popCat()].vals || {}; const top = ALL.filter(a => v[a.id] != null).sort((x, y) => v[y.id] - v[x.id]); return [...top, ...ALL.filter(a => v[a.id] == null).sort((x, y) => x.tier - y.tier)]; }
+/*RANKING*/
+Object.assign(S, {
+  harmattan:{t:'Harmattan Intelligence via Africa Confidential',u:'https://www.africa-confidential.com/article/id/16082/new-polls-show-rising-anger-with-tinubu-on-economy-and-security'},
+  oxford:{t:'Oxford-Metro poll via Tribune, Sep 2026',u:'https://tribuneonlineng.com/2027-tinubu-edges-peter-obi-by-1-55-in-oxford-metro-poll/'},
+  pig:{t:'Politico.ng PIG projection via P.M. News',u:'https://pmnewsnigeria.com/2026/09/01/2027-presidency-tinubu-projected-to-win-20-states-atiku-nine-obi-eight/'}
+});
+const CATCOL = {sbm:'#3dff9a', harmattan:'#4aa3ff', oxford:'#ffc83d', tmg:'#ff9d3a', pig:'#c792ff'};
+const PTS = rankPoints(RANK);
+const fmtRaw = (c, v) => c.fmt === 'net' ? (v > 0 ? '+' : '') + v : c.fmt === 'states' ? v + ' states' : v + '%';
+const when = iso => new Date(iso).toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Africa/Lagos'}) + ' WAT';
+function movement(id){
+  const h = RANK.history; if (h.length < 2) return {txt:'NEW', cls:'new', d:0, r:0};
+  const [prev, cur] = [h[h.length - 2], h[h.length - 1]];
+  const rk = snap => Object.keys(snap.points).sort((a, b) => snap.points[b] - snap.points[a]);
+  const pr = rk(prev).indexOf(id), cr = rk(cur).indexOf(id), d = Math.round(((cur.points[id] || 0) - (prev.points[id] || 0)) * 10) / 10;
+  if (pr < 0) return {txt:'NEW', cls:'new', d, r:0};
+  const r = pr - cr;
+  return {r, d, cls: r > 0 ? 'up' : r < 0 ? 'down' : d > 0 ? 'up' : d < 0 ? 'down' : 'same', txt: `${r > 0 ? '▲' + r : r < 0 ? '▼' + (-r) : d > 0 ? '▲' : d < 0 ? '▼' : '●'} ${d > 0 ? '+' : ''}${d} pts`};
+}
+const popCat = () => { const k = store.get('popcat', 'official'); return k === 'official' || RANK.categories.some(c => c.id === k) ? k : 'official'; };
+function catVal(k, id){ if (k === 'official') return PTS[id] ? PTS[id].total : null; const c = RANK.categories.find(x => x.id === k); return c.raw[id] != null ? c.raw[id] : null; }
+function ranked(){ const k = popCat(); const top = ALL.filter(a => catVal(k, a.id) != null).sort((x, y) => catVal(k, y.id) - catVal(k, x.id)); return [...top, ...ALL.filter(a => catVal(k, a.id) == null).sort((x, y) => x.tier - y.tier)]; }
+function stack(id){ const p = PTS[id]; return `<div class="stack" title="Points by category">${p.parts.map(x => `<i style="width:${x.pts / RANK_MAX() * 100}%;background:${CATCOL[x.cat]};${x.filled ? 'opacity:.35' : ''}"></i>`).join('')}</div>`; }
 function popPanel(){
-  const k = popCat(), cat = POPCATS[k], v = cat.vals || {}; const order = Object.keys(v).filter(id => cand(id)).sort((a, b) => v[b] - v[a]);
-  const fc = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0});
-  return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Popularity ranking · pick a category</div><h2>Who is ahead?</h2></div></div>
-    <div class="chips" id="popcats">${Object.entries(POPCATS).map(([id, c]) => `<button class="chip" data-cat="${id}" aria-pressed="${id === k}">${c.label}</button>`).join('')}</div>
-    <p class="muted">${esc(cat.desc)} ${cat.src ? src(cat.src) : ''}</p>
-    ${order.length ? `<div class="podium">${order.map((id, i) => { const c = cand(id); return `<div class="pod p${i + 1}">${face(c, i === 0 ? 120 : 96)}<div class="pos">#${i + 1}</div><b>${c.name}</b><span class="party" style="--c:${c.c}">${c.party}</span><div class="score">${cat.fmt(v[id])}</div><div class="muted small">${cat.unit}</div><div class="bar" style="--c:${c.c};width:100%"><div class="t"><i style="width:${Math.max(2, cat.pct(v[id]))}%"></i></div></div></div>`; }).join('')}</div>
-      ${['tinubu','atiku','obi'].filter(id => v[id] == null).map(id => `<div class="muted small">${cand(id).name}: not measured in this category.</div>`).join('')}`
-      : `<div class="card"><b>No viewer predictions yet.</b><span class="muted small">Results appear here every Sunday once the "Who do you think will win?" poll is running.${CONFIG.pollFormUrl ? '' : ' (Add the poll link to switch it on.)'}</span></div>`}
-    <div class="row"><span class="tag">${esc(cat.conf)}</span></div>
-    ${k === 'predict' ? `<div class="card" style="gap:12px"><div class="eyebrow">Make your forecast</div><h3>Your win odds</h3><p class="muted small">Split 100% between the candidates: how likely is each to win? Your odds stay on this device; copy them to share.</p>
-      ${[['tinubu','Bola Tinubu'],['atiku','Atiku Abubakar'],['obi','Peter Obi'],['other','Anyone else']].map(([id, n]) => { const t = Object.values(fc).reduce((a, b) => a + b, 0) || 1; const c = cand(id); return `<label class="slider"><span class="row" style="justify-content:space-between"><span class="row" style="gap:10px">${c ? face(c, 34) : ''}<b>${n}</b></span><span class="n" style="font:400 24px var(--display)">${Math.round(fc[id] / t * 100)}%</span></span><input type="range" min="0" max="100" step="1" value="${fc[id]}" data-fc="${id}" aria-label="Chance for ${n}"></label>`; }).join('')}
-      <button class="btn pri" id="fcshare" style="justify-self:start">Copy my forecast</button></div>` : ''}
-    <p class="muted small">These rank popularity and expectations so far, not a prediction of the result. Past election results are not used. New national polls will be added as categories when they are published.</p></div>`;
+  const k = popCat(); const order = ALL.filter(a => catVal(k, a.id) != null && cand(a.id)).map(a => a.id).sort((a, b) => catVal(k, b) - catVal(k, a));
+  const cat = RANK.categories.find(c => c.id === k);
+  const next = new Date(new Date(RANK.updated).getTime() + RANK.everyHours * 36e5);
+  const movers = RANK.history.length > 1 ? Object.keys(PTS).map(id => ({id, m: movement(id)})).sort((a, b) => Math.abs(b.m.d) - Math.abs(a.m.d))[0] : null;
+  return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Official rank · all categories added up</div><h2>The Naija Decides Rank</h2></div>
+      <div class="upd"><span class="live"></span>Updated ${when(RANK.updated)}<br><span class="muted small">Refreshed every ${RANK.everyHours} hours · next check about ${when(next.toISOString())}</span></div></div>
+    <div class="chips" id="popcats"><button class="chip" data-cat="official" aria-pressed="${k === 'official'}">Official rank</button>${RANK.categories.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${k === c.id}">${esc(c.label)}</button>`).join('')}</div>
+    ${k === 'official' ? `<p class="muted">Five measured categories added together. In each one the leader scores 100 and others score in proportion; surveys count in full, open polls and projections count half. Maximum ${RANK_MAX()} points.</p>`
+      : `<p class="muted"><b>${esc(cat.kind)} · ${esc(cat.date)} · ${esc(cat.n)}.</b> ${esc(cat.note)} ${src(cat.src)}</p>`}
+    <div class="podium">${order.map((id, i) => { const c = cand(id), m = movement(id); const v = catVal(k, id); return `<div class="pod p${i + 1}">${face(c, i === 0 ? 120 : 96)}<div class="pos">#${i + 1}</div><b>${c.name}</b><span class="party" style="--c:${c.c}">${c.party}</span>
+      <div class="score">${k === 'official' ? v.toFixed(1) : fmtRaw(cat, v)}</div><div class="muted small">${k === 'official' ? `points of ${RANK_MAX()}` : `${(v === Math.max(...Object.values(cat.raw)) ? 100 : Math.round((cat.scale === 'net' ? (v + 100) / 2 / ((Math.max(...Object.values(cat.raw)) + 100) / 2) : v / Math.max(...Object.values(cat.raw))) * 100))} category points`}</div>
+      ${k === 'official' ? `${stack(id)}<span class="mv ${m.cls}">${m.txt}</span>` : ''}</div>`; }).join('')}</div>
+    ${k === 'official' ? `<div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>` : ''}
+    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
+    <details class="method"><summary>How the rank works, and every source</summary>
+      <div class="tw"><table><thead><tr><th>Category</th><th>Type</th><th>Counts</th><th>Date</th><th>Sample</th><th>Tinubu</th><th>Atiku</th><th>Obi</th></tr></thead><tbody>
+      ${RANK.categories.map(c => `<tr><td>${src(c.src)}</td><td>${esc(c.kind)}</td><td class="n">${c.weight === 1 ? 'Full' : 'Half'}</td><td class="small">${esc(c.date)}</td><td class="small">${esc(c.n)}</td>${['tinubu','atiku','obi'].map(id => `<td class="n">${c.raw[id] != null ? fmtRaw(c, c.raw[id]) : '—'}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div>
+      <p class="muted small">A gap (Atiku in the SBM survey; Tinubu in the anti-Tinubu online poll) is filled with that candidate's average across the categories they do appear in. Harmattan's Obi figure is for the Obi–Kwankwaso ticket and its Tinubu figure is the share not strongly disapproving of his performance. Candidates not in any poll score 0 and are listed by standing. Past election results are not used. This ranks popularity and expectations so far; it is not a forecast of the result.</p></details>
+    <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
+    ${store.get('fcopen', false) ? forecastCard() : ''}
+  </div>`;
+}
+function forecastCard(){
+  const fc = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(fc).reduce((a, b) => a + b, 0) || 1;
+  return `<div class="card" style="gap:12px"><div class="eyebrow">Your forecast</div><h3>Your win odds</h3><p class="muted small">Split 100% between the candidates: how likely is each to win? Your odds stay on this device; copy them to share.</p>
+    ${[['tinubu','Bola Tinubu'],['atiku','Atiku Abubakar'],['obi','Peter Obi'],['other','Anyone else']].map(([id, n]) => { const c = cand(id); return `<label class="slider"><span class="row" style="justify-content:space-between"><span class="row" style="gap:10px">${c ? face(c, 34) : ''}<b>${n}</b></span><span style="font:400 24px var(--display)">${Math.round(fc[id] / t * 100)}%</span></span><input type="range" min="0" max="100" step="1" value="${fc[id]}" data-fc="${id}" aria-label="Chance for ${n}"></label>`; }).join('')}
+    <button class="btn pri" id="fcshare" style="justify-self:start">Copy my forecast</button></div>`;
 }
 const TIERS = {1:['Frontrunner','Measured in national polling in 2026'],2:['Contender','Sitting or former governor, a past presidential candidate, or the nominee of a major national party'],3:['Long shot','Not yet measured, little national profile']};
 
@@ -205,7 +228,8 @@ const VIEWS = {
           <div class="src">Polls open 8:00am WAT · ${src('inecTime')}</div></div>
       </div>
     </div>
-    ${(() => { const cat = POPCATS.combined, sc = cat.vals; const o = Object.keys(sc).sort((a, b) => sc[b] - sc[a]); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">Overall popularity · current signals</div><h3>Who is most popular right now?</h3></div><span class="btn">Rank by category</span></div><div class="row" style="gap:18px">${o.map((id, i) => `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1}</div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${cat.fmt(sc[id])}</span></div></div>`).join('')}</div></a>`; })()}
+    ${(() => { const o = Object.keys(PTS).sort((a, b) => PTS[b].total - PTS[a].total); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">The Naija Decides Rank · updated ${when(RANK.updated)}</div><h3>Who is ahead right now?</h3></div><span class="btn">Full rank</span></div><div class="row" style="gap:18px">${o.map((id, i) => { const m = movement(id); return `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1} <span class="mv ${m.cls}">${m.txt}</span></div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${PTS[id].total.toFixed(1)}</span></div></div>`; }).join('')}</div></a>`; })()}
+
     <div class="grid g4">
       <div class="card stat lift"><div class="k">Registered voters</div><div class="v">110M</div><div class="src">${src('voters')}</div></div>
       <div class="card stat lift"><div class="k">2023 turnout</div><div class="v" style="color:var(--false)">26.7%</div><div class="src">${src('wiki23')}</div></div>
@@ -228,15 +252,15 @@ const VIEWS = {
 
   candidates:{label:'Candidates', render(){
     const myRank = store.get('rank', null);
-    return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · ranked by popularity</div><h2>The scoreboard</h2>
-      <p class="muted">Ranked by popularity today, never by past results. Pick a category to rank by: favourability, the online poll, overall popularity, or who viewers think will win. No scientific vote-intention poll has been published yet (${src('noPolls')}). Candidates not yet measured are listed by standing. Tap anyone for their profile.</p></div>
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · the official rank</div><h2>The scoreboard</h2>
+      <p class="muted">Ranked by the Naija Decides Rank: every published 2026 survey, poll and projection added up, refreshed every 12 hours, with arrows showing who moved. Tap a category to see it on its own, or tap any candidate for their profile. Candidates not yet measured are listed by standing.</p></div>
       <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
       ${popPanel()}
-      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>${esc(POPCATS[popCat()].label)}</th><th>Standing</th><th>Favourability</th><th>Online poll</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
-      ${(() => { const cat = POPCATS[popCat()], sc = cat.vals || {}; return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
+      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>${popCat() === 'official' ? 'Points' : esc(RANK.categories.find(c => c.id === popCat()).label)}</th><th>Move</th><th>Standing</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
+      ${(() => { const k = popCat(), cat = RANK.categories.find(c => c.id === k); return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const v = catVal(k, a.id), m = PTS[a.id] ? movement(a.id) : null; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
         <td><div class="who">${face(a, 42)}<div><b>${esc(a.name)}</b><div class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span> with ${esc(a.mate)}</div></div></div></td>
-        <td class="n">${sc[a.id] != null ? `<b style="font:400 24px/1 var(--display)">${cat.fmt(sc[a.id])}</b>` : '<span class="muted small">Not measured</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td><td class="n small">${s.fav || '—'}</td><td class="n small">${s.straw || '—'}</td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
-        <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 7 : 6}">${profile(a)}</td></tr>`; }).join(''); })()}
+        <td class="n">${v != null ? `<b style="font:400 24px/1 var(--display)">${k === 'official' ? v.toFixed(1) : fmtRaw(cat, v)}</b>` : '<span class="muted small">Not measured</span>'}</td><td>${m ? `<span class="mv ${m.cls}">${m.txt}</span>` : '<span class="muted small">—</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
+        <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 5 : 4}">${profile(a)}</td></tr>`; }).join(''); })()}
       </tbody></table></div></div>
       <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}.</div>
       <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up in this table and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
@@ -244,6 +268,7 @@ const VIEWS = {
       const keep = () => { const y = scrollY; route(); scrollTo(0, y); };
       $('#app').onchange = e => { const r = e.target.closest('[data-fc]'); if (!r) return; const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); f[r.dataset.fc] = +r.value; store.set('forecast', f); keep(); };
       $('#app').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) { store.set('popcat', c.dataset.cat); keep(); return; }
+        if (e.target.id === 'fcopen') { store.set('fcopen', !store.get('fcopen', false)); keep(); return; }
         if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
 
   compare:{label:'Compare', render(){

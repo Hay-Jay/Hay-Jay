@@ -37,5 +37,13 @@ Topics live in `MOTIONS` (`src/app.js`), each with sourced context and the stron
 ## Scoreboard tiers
 Frontrunner: 5M+ votes in 2023 or measured in national polling. Contender: sitting/former governor, past national candidate, or nominee of a party with 1M+ votes in 2023. Long shot: everyone else. It ranks evidence, not a prediction.
 
-## Popularity ranking
-`POPCATS` in `src/app.js`: viewers pick one category to rank by: Favourability (SBM), Online poll, Overall popularity (favourability 70% + online poll 30%, missing = 50) or Likely to win (viewer predictions + a "make your forecast" tool). Past election results are not used. Add each new national poll as its own category.
+## The Naija Decides Rank (official rank)
+Data lives in `src/ranking.js`: one entry per published 2026 survey, poll or projection (`raw` numbers, date, sample, source, weight). In each category the leader scores 100 and others score in proportion; surveys count in full (weight 1), open polls and projections half (0.5); a candidate missing from a category gets their own average there (shown faded). Total = sum, maximum 350 with five categories. Past election results are not used.
+
+After changing or adding a poll, run:
+
+```bash
+node nigeria-2027/site/build.mjs --snapshot
+```
+
+It refreshes the "updated" time and, if any total changed, appends a snapshot to `history`. The ▲/▼ arrows and +/− points compare the last two snapshots. A scheduled task checks for new polls every 12 hours (11:43 and 23:43 WAT), runs this, republishes the site and pushes.
