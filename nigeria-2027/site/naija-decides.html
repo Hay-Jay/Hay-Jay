@@ -1,0 +1,520 @@
+<title>Naija Decides 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Independent, sourced facts on Nigeria's 16 January 2027 presidential election: compare candidates, fact-checks, promises vs reality, weekly news, polls and a candidate match quiz.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800;900&display=swap">
+<style>
+/* Layout: a civic newsroom in the videos' visual language. Sticky section nav, one view at a time, every number carries its source. */
+:root{
+  --bg:#03130b; --panel:#08241a; --panel2:#0c3022; --line:rgba(225,245,232,.14);
+  --fg:#eef8f1; --muted:#a3c4b0; --accent:#3dff9a; --accent-ink:#022313; --flag:#008751;
+  --true:#3dff9a; --mis:#ffc83d; --false:#ff6a5c;
+  --apc:#4aa3ff; --adc:#ff9d3a; --ndc:#3dff9a;
+  --display:"Anton",Impact,"Arial Narrow",sans-serif; --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1100px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;margin:0;letter-spacing:.005em;text-wrap:balance;line-height:1}
+h1{font-size:clamp(44px,9vw,92px)}
+h2{font-size:clamp(30px,5vw,46px)}
+h3{font-size:22px;letter-spacing:.01em}
+p{margin:0;max-width:68ch}
+a{color:var(--accent)}
+.eyebrow{font:800 12px/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mark{background:var(--accent);color:var(--accent-ink);padding:0 .12em;border-radius:.1em;display:inline-block;line-height:1.02}
+
+/* nav */
+nav.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(3,19,11,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;align-items:center;gap:14px;padding-block:10px}
+.brand{display:flex;gap:8px;align-items:center;font:400 20px/1 var(--display);text-transform:uppercase;white-space:nowrap;color:var(--fg);text-decoration:none}
+.flag{display:inline-flex;height:16px;border-radius:3px;overflow:hidden}
+.flag i{width:9px;background:var(--flag)}.flag i:nth-child(2){background:#fff}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0;flex:1}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{padding:8px 11px;border-radius:999px;color:var(--muted);text-decoration:none;font:800 13px/1 var(--body);white-space:nowrap}
+.tabs a[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+
+main{padding-block:28px 70px}
+section.view{display:grid;gap:26px}
+section.view[hidden]{display:none}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:10px;align-content:start;min-width:0}
+.stat .v{font:400 44px/1 var(--display);font-variant-numeric:tabular-nums}
+.stat .k{font:800 11px/1.2 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.src{font-size:12px;color:var(--muted)}
+.src a{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font:800 14px var(--body);color:var(--fg);text-decoration:none}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:end}
+@media (max-width:760px){.hero{grid-template-columns:1fr}}
+.clock{display:flex;gap:10px}
+.clock div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:74px;text-align:center}
+.clock b{display:block;font:400 46px/1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.clock span{font:800 10px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* candidates */
+.cand-h{display:flex;gap:12px;align-items:center}
+.av{width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;font:400 24px/1 var(--display);border:3px solid var(--c);background:var(--panel2)}
+.party{display:inline-block;font:900 11px/1 var(--body);letter-spacing:.08em;padding:5px 8px;border-radius:6px;background:var(--c);color:#021}
+dl.facts{margin:0;display:grid;gap:8px}
+dl.facts div{display:grid;gap:2px}
+dl.facts dt{font:800 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+dl.facts dd{margin:0}
+
+/* compare */
+.pickers{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.round{display:grid;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.round-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.vs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media (max-width:620px){.vs{grid-template-columns:1fr}}
+.side{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;gap:8px;align-content:start;border-top:4px solid var(--c)}
+.side .who{font:800 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--c)}
+.pick{display:flex;gap:8px;flex-wrap:wrap}
+.pick button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 12px;font:800 13px var(--body)}
+.pick button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.verdict{display:grid;gap:10px;background:linear-gradient(135deg,rgba(61,255,154,.12),rgba(255,255,255,.02));border:1px solid rgba(61,255,154,.35);border-radius:16px;padding:18px}
+
+/* fact checks */
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 12px;font:800 13px var(--body)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.vd{display:inline-block;font:900 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;padding:6px 9px;border-radius:6px;border:2px solid currentColor}
+.vd.true{color:var(--true)}.vd.mis{color:var(--mis)}.vd.false{color:var(--false)}
+.claim{font:600 18px/1.4 var(--body)}
+.claim::before{content:"“"}.claim::after{content:"”"}
+.meta{font-size:13px;color:var(--muted)}
+
+/* bars */
+.bars{display:grid;gap:10px}
+.bar{display:grid;gap:4px}
+.bar .l{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:14px}
+.bar .t{height:12px;border-radius:8px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar .t i{display:block;height:100%;border-radius:8px;background:var(--c,var(--accent))}
+.diverge{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;align-items:center}
+.diverge .axis{position:relative;height:26px;background:linear-gradient(90deg,transparent calc(50% - 1px),var(--line) calc(50% - 1px),var(--line) calc(50% + 1px),transparent calc(50% + 1px))}
+.diverge .axis i{position:absolute;top:4px;height:18px;border-radius:4px}
+
+/* news */
+.news{display:grid;gap:12px}
+.item{display:grid;grid-template-columns:86px minmax(0,1fr);gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.item .when{font:400 18px/1.05 var(--display);text-transform:uppercase;color:var(--accent)}
+.item h3{font:800 17px/1.3 var(--body);text-transform:none}
+@media (max-width:520px){.item{grid-template-columns:1fr}}
+
+/* match */
+.q{display:grid;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.opts{display:grid;gap:8px}
+.opts button{text-align:left;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:11px 12px;font:600 15px var(--body)}
+.opts button[aria-pressed="true"]{border-color:var(--accent);background:rgba(61,255,154,.12)}
+
+/* ask */
+.askbox{display:flex;gap:10px;flex-wrap:wrap}
+.askbox input{flex:1 1 260px;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:16px}
+.answer{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:8px;white-space:pre-wrap}
+.sugs{display:flex;gap:8px;flex-wrap:wrap}
+.sugs button{border:1px dashed var(--line);background:transparent;border-radius:999px;padding:7px 12px;font:600 13px var(--body);color:var(--muted)}
+
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:800 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+footer{border-top:1px solid var(--line);padding-block:24px 40px;color:var(--muted);font-size:13px}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<nav class="top gut" aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#home"><span class="flag"><i></i><i></i><i></i></span>Naija Decides</a>
+    <div class="tabs" id="tabs"></div>
+  </div>
+</nav>
+
+<main class="gut"><div class="wrap" id="app"></div></main>
+
+<footer class="gut"><div class="wrap" style="display:grid;gap:8px">
+  <div><b style="color:var(--fg)">Naija Decides</b> is independent civic information. It is not affiliated with any party or candidate.</div>
+  <div>Every figure links to its source. Allegations are not convictions. Facts as of 4 November 2026. Spotted an error? Tell us on TikTok, Instagram or X.</div>
+</div></footer>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+/* ======================= CONFIG ======================= */
+const CONFIG = {
+  handle: '#Nigeria2027',                 // your @handle
+  pollFormUrl: '',                        // paste your Google Form link to switch on the viewer poll
+  links: { tiktok: '', instagram: '', x: '' }
+};
+
+/* ======================= DATA ======================= */
+const S = { // sources
+  inecTime:{t:'INEC revised timetable (VON)',u:'https://von.gov.ng/inec-issues-revised-timetable-for-2027-general-election/'},
+  voters:{t:'Voter register (Nairametrics, Oct 2026)',u:'https://nairametrics.com/2026/10/06/lagos-kano-kaduna-top-nigerias-voter-register-ahead-of-2027/'},
+  wiki27:{t:'2027 Nigerian general election (Wikipedia)',u:'https://en.wikipedia.org/wiki/2027_Nigerian_general_election'},
+  wiki23:{t:'2023 presidential election (Wikipedia/INEC)',u:'https://en.wikipedia.org/wiki/2023_Nigerian_presidential_election'},
+  poverty:{t:'World Bank via Nairametrics, Apr 2026',u:'https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/'},
+  gdp:{t:'NBS via Nairametrics, Aug 2026',u:'https://nairametrics.com/2026/08/31/nigerias-gdp-grows-by-4-43-in-q2-2026/'},
+  power22:{t:'Nairametrics, Jun 2022',u:'https://nairametrics.com/2022/06/10/tinubu-says-his-administration-will-focus-on-building-15000mw-power-generation/'},
+  power25:{t:'TCN via Nairametrics, Mar 2025',u:'https://nairametrics.com/2025/03/06/nigerias-power-generation-hits-record-5801-84mw-tcn'},
+  growth22:{t:'BusinessDay, Jun 2022',u:'https://businessday.ng/politics/article/tinubu-targets-12-gdp-growth-in-economic-agenda/'},
+  meters:{t:'Nairametrics, Oct 2026',u:'https://nairametrics.com/2026/10/02/fg-installs-707765-meters-in-q2-4-8-million-electricity-customers-remain-unmetered/'},
+  refinery:{t:'NNPC via Nairametrics, Feb 2026',u:'https://nairametrics.com/2026/02/05/nnpc-shuts-state-owned-refineries-after-assessments-show-value-leakage-ojulari'},
+  fch24:{t:'FactCheckHub, Oct 2024',u:'https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/'},
+  fch26:{t:'FactCheckHub, 2 Oct 2026',u:'https://factcheckhub.com/nigeria-at-66-fact-checking-tinubus-independence-day-economics/'},
+  dubVideo:{t:'Dubawa, 10 Aug 2024',u:'https://dubawa.org/presidency-tinubus-x-pages-circulate-old-video-amid-endbadgovernance-protest/'},
+  dub5:{t:'Dubawa, 11 Aug 2024',u:'https://dubawa.org/fact-checking-five-economic-claims-in-viral-response-to-tinubus-speech/'},
+  dubOccrp:{t:'Dubawa',u:'https://dubawa.org/false-tinubu-not-third-most-corrupt-person-in-world/'},
+  fchFrance:{t:'FactCheckHub',u:'https://factcheckhub.com/no-evidence-tinubu-lives-in-france-governs-nigeria-remotely/'},
+  audit:{t:'Daily Trust, Jul 2026',u:'https://dailytrust.com/25-mdas-varsities-others-flagged-in-n1-34trn-audit-lapses/'},
+  cash:{t:'StatePress, Sep 2026',u:'https://www.statepress.ng/2026/09/auditor-general-queries-n3375bn-cash.html'},
+  edu:{t:'ICIR, Jan 2024',u:'https://www.icirnigeria.org/efcc-grills-betta-edu-over-n585m-scandal/'},
+  emefiele:{t:'Naija News, 20 Oct 2026',u:'https://www.naijanews.com/2026/10/20/6-23-million-fraud-emefiele-has-case-to-answer-efcc-tells-court/'},
+  bello:{t:'Nairametrics, Apr 2026',u:'https://nairametrics.com/2026/04/24/yahaya-bello-efcc-n80-billion-alleged-fraud-case-adjourned-to-may-6/'},
+  tinubu460:{t:'Vanguard, Apr 2023',u:'https://www.vanguardngr.com/2023/04/alleged-drug-case-why-tinubu-forfeited-460000-in-us-apc-tells-court/'},
+  atikuPSI:{t:'Vanguard (US Senate PSI report, 2010)',u:'https://www.vanguardngr.com/2017/12/u-s-senate-report-abubakar-atikus-albatross/'},
+  atikuReply:{t:'allAfrica, Sep 2026',u:'https://allafrica.com/stories/202609290489.html'},
+  obiPandora:{t:'ICIR / Premium Times, Oct 2021',u:'https://www.icirnigeria.org/pandora-papers-inside-peter-obis-secret-businesses-and-how-he-broke-the-law/'},
+  obiReply:{t:'ThisDay, Oct 2021',u:'https://thisdaylive.com/index.php/2021/10/07/pandora-papers-i-broke-no-law-says-peter-obi'},
+  atikuPitch:{t:'Arise TV, 2026',u:'https://www.arise.tv/atiku-outlines-economic-security-blueprint-as-adc-screening-panel-clears-him-for-2027-race/'},
+  obiPitch:{t:'Voice of Nigeria, Aug 2026',u:'https://von.gov.ng/peter-obi-launches-2027-presidential-campaign/'},
+  tinubuPitch:{t:'allAfrica, Oct 2026',u:'https://allafrica.com/stories/202610260027.html'},
+  sbm:{t:'SBM Intelligence via BusinessDay, 2026',u:'https://businessday.ng/news/article/2027-elections-peter-obi-kwankwaso-get-favourable-ratings-ahead-of-incumbent-tinubu-in-new-survey/'},
+  sbmWrong:{t:'SBM via Nairametrics, Jun 2026',u:'https://nairametrics.com/2026/06/14/2027-poll-nearly-80-of-nigerians-say-country-moving-in-wrong-direction/'},
+  sbmSubsidy:{t:'SBM via Legit.ng',u:'https://www.legit.ng/politics/1732298-ariku-claims-tinubus-fuel-policy-rejected-by-674-nigerians-survey/'},
+  tmg:{t:'Vanguard, Sep 2026',u:'https://www.vanguardngr.com/2026/09/tinubu-must-go-poll-puts-atiku-ahead-of-obi-others-for-2027/'},
+  noPolls:{t:'African Business, Sep 2026',u:'https://african.business/2026/09/politics/a-divided-nigerian-opposition-takes-on-tinubu'},
+  inec100:{t:'Premium Times',u:'https://www.premiumtimesng.com/news/top-news/914520-2027-inec-to-address-nigerians-as-election-countdown-hits-100-days.html'},
+  channelsWatch:{t:'Channels TV, 16 Oct 2026',u:'https://www.channelstv.com/2026/10/16/nigeria-2027-election-watch-inec-leadership-changes-and-apc-reveals-its-campaign-priorities/'},
+  deepfakes:{t:'The Sun',u:'https://thesun.ng/2027-elections-inec-raises-alarm-over-deepfakes-ai-generated-fake-news'},
+  register:{t:'The Sun',u:'https://thesun.ng/2027-inec-and-unanswered-questions/'},
+  tinubu27:{t:'allAfrica, 26 Oct 2026',u:'https://allafrica.com/stories/202610260027.html'},
+  inflation:{t:'NBS CPI (Trading Economics)',u:'https://tradingeconomics.com/nigeria/inflation-cpi'},
+  fuel:{t:'dailyfuels.com, Nov 2026',u:'https://dailyfuels.com/nigeria/'}
+};
+const C = [
+  {id:'tinubu',name:'Bola Tinubu',ini:'BT',party:'APC',c:'var(--apc)',mate:'Kashim Shettima',home:'Lagos',
+    exp:'Governor of Lagos 1999–2007 · President since May 2023',
+    r23:'1st in 2023: 8.79M votes (36.6%), 12 states',
+    pitch:'Continue the reforms, toward a $1 trillion economy by 2030',pitchSrc:'tinubuPitch',
+    record:'Forfeited $460,000 in a 1993 US civil case.',reply:'His side: a settlement, not a conviction. A 2023 tribunal agreed.',recSrc:'tinubu460',
+    question:'Your 2022 targets (12% growth, 15,000 MW) were missed. Why trust the 2030 ones?'},
+  {id:'atiku',name:'Atiku Abubakar',ini:'AA',party:'ADC',c:'var(--adc)',mate:'Rotimi Amaechi',home:'Adamawa',
+    exp:'Vice President 1999–2007 · businessman',
+    r23:'2nd in 2023 (PDP): 6.98M votes (29.1%), 12 states',
+    pitch:'Restore a form of fuel subsidy, restructure the federation, job-led growth',pitchSrc:'atikuPitch',
+    record:'A 2010 US Senate report said $40M in "suspect funds" entered the US via his then-wife.',reply:'He says no court has ever found him guilty.',recSrc:'atikuPSI',
+    question:'How will you pay for a fuel subsidy, and stop the leakages this time?'},
+  {id:'obi',name:'Peter Obi',ini:'PO',party:'NDC',c:'var(--ndc)',mate:'Rabiu Kwankwaso',home:'Anambra',
+    exp:'Governor of Anambra 2006–2014 · businessman',
+    r23:'3rd in 2023 (LP): 6.10M votes (25.4%), 11 states + FCT',
+    pitch:'Move Nigeria from consumption to production',pitchSrc:'obiPitch',
+    record:'Pandora Papers (2021): offshore companies not declared while governor.',reply:'He says he broke no law.',recSrc:'obiPandora',
+    question:'How, how fast, and with what money will production replace imports?'}
+];
+const ROUNDS = [['exp','Experience'],['r23','2023 result'],['pitch','The 2027 pitch'],['record','On the record'],['question','The question they must answer']];
+const FACTS = [
+  {claim:'Nigeria attracted foreign direct investments worth more than $30 billion in the last year.',who:'President Tinubu, Independence Day broadcast',when:'1 Oct 2024',v:'false',label:'False',why:'NBS data shows about $363M in FDI over the nine months to March 2024.',src:'fch24'},
+  {claim:'We have cleared the Ways and Means debt of over ₦30 trillion.',who:'President Tinubu, same broadcast',when:'1 Oct 2024',v:'mis',label:'Misleading',why:'The debt was securitised into a 40-year loan, not paid off.',src:'fch24'},
+  {claim:'Nigeria inherited a reserve of over $33 billion.',who:'President Tinubu, same broadcast',when:'1 Oct 2024',v:'mis',label:'Mostly false',why:'Reserves handed over in May 2023 were about $35 billion.',src:'fch24'},
+  {claim:'A video of the President asking Nigerians to look beyond temporary pains (posted as new during the protests).',who:'@NGRPresident and @officialABAT on X',when:'7 Aug 2024',v:'mis',label:'Misleading',why:'It was a July 2023 broadcast reposted without saying it was old.',src:'dubVideo'},
+  {claim:'We have paid back the inherited forex backlog of $7 billion.',who:'President Tinubu',when:'1 Oct 2024',v:'true',label:'True',why:'The CBN said legitimate outstanding FX obligations were settled by March 2024.',src:'fch24'},
+  {claim:'Our economy has grown by over 4 per cent this year.',who:'President Tinubu, Independence Day',when:'1 Oct 2026',v:'true',label:'True',why:'NBS: 4.43% year-on-year in Q2 2026 (a single quarter, not the full year).',src:'fch26'},
+  {claim:'Inflation has fallen substantially from its peak.',who:'President Tinubu',when:'1 Oct 2026',v:'true',label:'True',why:'Headline inflation fell to 15.39% in Aug 2026 from 23.14% a year earlier. Food inflation is still near 20%.',src:'fch26'},
+  {claim:'Oil theft is down.',who:'President Tinubu',when:'1 Oct 2026',v:'true',label:'True',why:'NUPRC: losses averaged 9,600 barrels a day in 2025, the lowest since 2009.',src:'fch26'},
+  {claim:'The current administration awarded ₦70 billion to procure SUVs for members of the National Assembly.',who:'Viral post',when:'Aug 2024',v:'true',label:'True',why:'₦70bn was allocated for Toyota Prados for 469 lawmakers in the amended supplementary budget.',src:'dub5'},
+  {claim:'Tinubu was named the world\'s third most corrupt person.',who:'Viral post',when:'2024',v:'mis',label:'Misleading',why:'He got the third-most nominations in an OCCRP reader poll. It is not a ranking.',src:'dubOccrp'},
+  {claim:'Tinubu lives in France and governs Nigeria remotely.',who:'Viral post',when:'2026',v:'mis',label:'Unproven',why:'No evidence. A travel tracker shows two trips to France in 2026.',src:'fchFrance'}
+];
+const PROMISES = [
+  {topic:'Economy',promised:'12% GDP growth a year',reality:'Best quarter so far: 4.43% (Q2 2026)',v:'mis',label:'Far behind',ps:'growth22',rs:'gdp'},
+  {topic:'Electricity',promised:'15,000 MW of power',reality:'Record peak 5,802 MW (Mar 2025)',v:'false',label:'Not delivered',ps:'power22',rs:'power25'},
+  {topic:'Electricity bills',promised:'All bills meter-based',reality:'4.8M customers still unmetered (Q2 2026)',v:'mis',label:'Not yet',ps:'meters',rs:'meters'},
+  {topic:'Poverty',promised:'End extreme poverty',reality:'Poverty rose from 56% (2023) to 63% (2025)',v:'false',label:'Worse',ps:'poverty',rs:'poverty'},
+  {topic:'Refineries',promised:'Working state refineries',reality:'NNPC shut them after rehab, citing losses',v:'false',label:'Failed so far',ps:'refinery',rs:'refinery'}
+];
+const MONEY = [
+  {t:'₦1.34 trillion in audit lapses',d:'The Auditor-General flagged irregularities, weak controls and other lapses across ministries and agencies (report sent to NASS, July 2026).',tag:'Official audit',src:'audit'},
+  {t:'₦33.75bn in cash transfers unverified',d:'Auditors could not confirm 2023 transfers to 3.29M households reached real beneficiaries. The cash transfer office disputes part of this.',tag:'Official audit',src:'cash'},
+  {t:'₦585M memo to a private account',d:'The humanitarian minister was suspended in Jan 2024 after a memo asked for ₦585M to be paid into a private account. The EFCC investigated.',tag:'Reported',src:'edu'},
+  {t:'Emefiele on trial',d:'The former CBN governor faces an amended 20-count charge, including a $6.23M withdrawal. He denies the charges.',tag:'In court',src:'emefiele'},
+  {t:'Yahaya Bello on trial',d:'The former Kogi governor is on trial over ₦80bn. He denies it and won the APC Senate primary for Kogi Central.',tag:'In court',src:'bello'},
+  {t:'₦70bn for lawmakers\' SUVs',d:'Approved in the amended 2022 supplementary budget in 2023, during a cost-of-living crisis. Rated TRUE by Dubawa.',tag:'Verified',src:'dub5'}
+];
+const NEWS = {edition:'Week of 2–8 November 2026', note:'The full weekly roundup video drops every Sunday at 6pm WAT.', items:[
+  {when:'Countdown',h:'73 days to the presidential vote',d:'The presidential and National Assembly elections hold on Saturday 16 January 2027. Governorship and state assembly polls follow on 6 February.',src:'inecTime'},
+  {when:'INEC',h:'18 parties are on the presidential ballot',d:'INEC has published the final list of presidential candidates. The three leading tickets are APC (Tinubu/Shettima), ADC (Atiku/Amaechi) and NDC (Obi/Kwankwaso).',src:'inec100'},
+  {when:'Warning',h:'INEC chairman warns about AI deepfakes',d:'Joash Amupitan says AI-driven disinformation and deepfakes threaten the credibility of the 2027 elections. Check before you share.',src:'deepfakes'},
+  {when:'Register',h:'Calls to clean the voter register before December display',d:'Commentators urge INEC to verify the national register before its final public display in December. Check your name when it goes up.',src:'register'},
+  {when:'Campaign',h:'APC campaign runs to a Lagos finale on 9 January',d:'The APC opened its presidential campaign in Kaduna on 24 October and lists 12 states for Tinubu to visit personally.',src:'channelsWatch'},
+  {when:'Pledges',h:'Tinubu: "Poverty will go"',d:'The President set out his 2027 promises at the Kaduna campaign launch. We will check them against the record.',src:'tinubu27'}
+]};
+const POLLS = {
+  sbm:[{n:'Peter Obi',v:58.3,c:'var(--ndc)'},{n:'Bola Tinubu',v:-58.5,c:'var(--apc)'}],
+  tmg:[{n:'Atiku / Amaechi (ADC)',v:73.6,c:'var(--adc)'},{n:'Obi / Kwankwaso (NDC)',v:22.3,c:'var(--ndc)'},{n:'Others',v:4.1,c:'var(--muted)'}],
+  r23:[{n:'Tinubu (APC)',v:36.6,c:'var(--apc)'},{n:'Atiku (PDP)',v:29.1,c:'var(--adc)'},{n:'Obi (LP)',v:25.4,c:'var(--ndc)'},{n:'Kwankwaso (NNPP)',v:6.2,c:'#c792ff'}],
+  viewer: null // {updated:'', total:0, ages:{'18-24':{tinubu:0,atiku:0,obi:0,other:0}, ...}} — filled in from your Google Form results
+};
+const MATCH = [
+  {q:'Should the current economic reforms (subsidy removal, floating naira) continue?',o:[['Yes, keep going',{tinubu:2}],['Change course',{atiku:1,obi:1}],['Not sure',{}]]},
+  {q:'Should the government bring back some form of fuel subsidy?',o:[['Yes',{atiku:2}],['No',{tinubu:1}],['Not sure',{}]]},
+  {q:'What should the next president focus on first?',o:[['Making things here: farms, factories',{obi:2}],['Investment and a bigger economy',{tinubu:2}],['Jobs, stimulus and lower costs of governance',{atiku:2}]]},
+  {q:'Should power be restructured between the federal government and the states?',o:[['Yes, a big change',{atiku:2}],['Small changes are enough',{tinubu:1,obi:1}],['Not sure',{}]]},
+  {q:'Which experience matters most to you?',o:[['Running the country now',{tinubu:2}],['Vice president for 8 years',{atiku:2}],['Running a state frugally',{obi:2}]]},
+  {q:'Continuity or change in 2027?',o:[['Continuity',{tinubu:2}],['Change',{atiku:1,obi:1}],['Depends on the plan',{}]]}
+];
+const KB = [
+  ['When is the presidential election?','Saturday 16 January 2027. Governorship and state assembly elections follow on 6 February 2027.','inecTime'],
+  ['How many people are registered to vote?','About 110 million. Lagos (7.49M), Kano (6.57M) and Kaduna (4.66M) have the most.','voters'],
+  ['Who are the main candidates?','Bola Tinubu (APC, running mate Kashim Shettima), Atiku Abubakar (ADC, running mate Rotimi Amaechi) and Peter Obi (NDC, running mate Rabiu Kwankwaso). 18 parties field candidates.','wiki27'],
+  ['What happened in 2023?','Tinubu won with 8.79M votes (36.6%). Atiku had 6.98M (29.1%), Obi 6.10M (25.4%), Kwankwaso 1.50M (6.2%). Only 26.7% of registered voters voted.','wiki23'],
+  ['How many people did not vote in 2023?','About 68.5 million registered voters stayed home. The winning margin was 1.81 million.','wiki23'],
+  ['What is the poverty rate?','The World Bank estimates 63% of Nigerians (about 140 million) lived in poverty in 2025, up from 56% in 2023.','poverty'],
+  ['How much is petrol now?','Around ₦1,335 a litre in November 2026, compared with about ₦185 before May 2023.','fuel'],
+  ['What is inflation now?','Headline inflation was 14.63% in September 2026 (rebased index). Food inflation was 19.59%.','inflation'],
+  ['How fast is the economy growing?','Real GDP grew 4.43% year on year in Q2 2026, the best quarter in years. The 2022 campaign target was 12% a year.','gdp'],
+  ['Did Tinubu deliver 15,000 megawatts of electricity?','No. The grid\'s record peak is 5,802 MW (March 2025), against a promise of 15,000 MW.','power25'],
+  ['What did Tinubu promise in 2022?','Among others: 12% growth a year, 15,000 MW of electricity, meter-based billing for all, and an end to extreme poverty.','growth22'],
+  ['Was the $30 billion foreign investment claim true?','No. FactCheckHub rated it FALSE: NBS data shows about $363 million over nine months.','fch24'],
+  ['Was the Ways and Means debt cleared?','FactCheckHub rated the claim MISLEADING: the debt was converted into a 40-year loan, not paid off.','fch24'],
+  ['What is the $460,000 forfeiture?','In 1993 Tinubu forfeited $460,000 in a US civil case. His side calls it a settlement, not a conviction, and a 2023 tribunal agreed it was not a conviction.','tinubu460'],
+  ['What is the Atiku US Senate report?','A 2010 US Senate subcommittee report said $40M in "suspect funds" entered the US through accounts of his then-wife. Atiku says no court has found him guilty.','atikuPSI'],
+  ['What are the Pandora Papers about Peter Obi?','In 2021 the Pandora Papers reported offshore companies Obi did not declare while governor. He says he broke no law.','obiPandora'],
+  ['What is Atiku promising?','Restoring a form of fuel subsidy, restructuring the federation, job-led growth and lower costs of governance.','atikuPitch'],
+  ['What is Peter Obi promising?','Moving Nigeria from consumption to production: growing food, making goods and creating jobs at home.','obiPitch'],
+  ['What is Tinubu promising for 2027?','Continuing his reforms toward a $1 trillion economy by 2030, and he says poverty "will go".','tinubuPitch'],
+  ['Who is likely to win?','No scientific vote-intention poll has been published. SBM Intelligence\'s favourability tracker rated Obi +58.3 and Tinubu −58.5 (a sentiment snapshot, not a forecast). A self-selected online poll by an anti-Tinubu group put Atiku ahead. Turnout will decide.','noPolls'],
+  ['How do I make my vote count?','Collect your PVC, know your polling unit, go early, stay until results are counted and posted, then check your unit\'s result on INEC\'s IReV portal.','inecTime'],
+  ['How much did the Auditor-General flag?','Over ₦1.34 trillion in irregularities and lapses across ministries and agencies, in the report sent to the National Assembly in July 2026.','audit'],
+  ['Is Emefiele in court?','Yes. The former CBN governor faces an amended 20-count charge. He denies the charges. He has not been convicted.','emefiele'],
+  ['What about the cash transfers to the poor?','Auditors could not confirm that ₦33.75bn sent to 3.29M households in 2023 reached real beneficiaries. The office disputes part of this.','cash'],
+  ['Did lawmakers get SUVs?','Yes. ₦70bn was allocated for Toyota Prado SUVs for 469 lawmakers in the amended 2022 supplementary budget, approved in 2023.','dub5']
+];
+
+/* ======================= HELPERS ======================= */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const src = k => S[k] ? `<a href="${S[k].u}" target="_blank" rel="noopener">${esc(S[k].t)}</a>` : '';
+const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1800); };
+const store = { get(k, d){ try { return JSON.parse(localStorage.getItem('nd.' + k)) ?? d; } catch { return d; } }, set(k, v){ try { localStorage.setItem('nd.' + k, JSON.stringify(v)); } catch {} } };
+const ELECTION = new Date('2027-01-16T08:00:00+01:00');
+const cand = id => C.find(c => c.id === id);
+const avatar = c => `<div class="av" style="--c:${c.c}">${c.ini}</div>`;
+const copy = (text, ok) => navigator.clipboard.writeText(text).then(() => toast(ok || 'Copied'), () => toast('Copy blocked on this device'));
+
+/* ======================= VIEWS ======================= */
+const VIEWS = {
+  home:{label:'Home', render(){
+    const fc = FACTS.slice(0, 3);
+    return `
+    <div class="hero">
+      <div style="display:grid;gap:16px">
+        <div class="eyebrow">Nigeria decides · 16 January 2027</div>
+        <h1>Know before<br>you <span class="mark">vote</span></h1>
+        <p class="muted">Independent, sourced facts on the presidential race: compare the candidates, check the claims, follow the money, and see what the polls really say.</p>
+        <div class="row"><a class="btn pri" href="#compare">Compare candidates</a><a class="btn" href="#match">Find your match</a><a class="btn" href="#ask">Ask a question</a></div>
+      </div>
+      <div class="card" style="gap:12px">
+        <div class="eyebrow">Countdown to polling day</div>
+        <div class="clock" id="clock"><div><b>–</b><span>Days</span></div><div><b>–</b><span>Hours</span></div><div><b>–</b><span>Mins</span></div></div>
+        <div class="src">Polls open 8:00am WAT · ${src('inecTime')}</div>
+      </div>
+    </div>
+    <div class="grid g4">
+      <div class="card stat"><div class="k">Registered voters</div><div class="v">110M</div><div class="src">${src('voters')}</div></div>
+      <div class="card stat"><div class="k">2023 turnout</div><div class="v" style="color:var(--false)">26.7%</div><div class="src">${src('wiki23')}</div></div>
+      <div class="card stat"><div class="k">In poverty (2025)</div><div class="v" style="color:var(--false)">63%</div><div class="src">${src('poverty')}</div></div>
+      <div class="card stat"><div class="k">Petrol per litre</div><div class="v">₦1,335</div><div class="src">Was ₦185 in May 2023 · ${src('fuel')}</div></div>
+    </div>
+    <div class="grid g3">${C.map(c => `<a class="card" href="#compare" style="text-decoration:none;color:inherit;border-top:4px solid ${c.c}"><div class="cand-h">${avatar(c)}<div><span class="party" style="--c:${c.c}">${c.party}</span><h3 style="margin-top:6px">${c.name}</h3></div></div><div class="muted small">Running mate: ${c.mate}</div><div>${esc(c.pitch)}</div></a>`).join('')}</div>
+    <div style="display:grid;gap:12px"><div class="row" style="justify-content:space-between"><h2>Latest fact-checks</h2><a href="#factchecks">See all</a></div>
+      <div class="grid g3">${fc.map(factCard).join('')}</div></div>
+    <div class="card" style="gap:12px"><div class="row" style="justify-content:space-between"><h2>This week</h2><a href="#news">Full weekly news</a></div><div class="muted">${esc(NEWS.edition)}</div>
+      <div class="news">${NEWS.items.slice(0, 3).map(newsItem).join('')}</div></div>`; }},
+
+  compare:{label:'Compare', render(){
+    const [a, b] = store.get('pair', ['tinubu', 'obi']);
+    const opt = sel => C.map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${c.name} (${c.party})</option>`).join('');
+    return `
+    <div style="display:grid;gap:10px"><div class="eyebrow">Head to head · you are the judge</div><h2>Compare &amp; debate</h2>
+      <p class="muted">Pick two candidates. Read each round, then choose who won it. Everything shown is sourced, and each allegation comes with the candidate's own reply.</p></div>
+    <div class="pickers"><select id="ca" aria-label="First candidate">${opt(a)}</select><b class="muted">vs</b><select id="cb" aria-label="Second candidate">${opt(b)}</select></div>
+    <div id="rounds" style="display:grid;gap:14px"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="card"><h3>All three at a glance</h3><div class="tw"><table><thead><tr><th></th>${C.map(c => `<th style="color:${c.c}">${c.name}</th>`).join('')}</tr></thead><tbody>
+      <tr><td class="muted">Party</td>${C.map(c => `<td>${c.party}</td>`).join('')}</tr>
+      <tr><td class="muted">Running mate</td>${C.map(c => `<td>${c.mate}</td>`).join('')}</tr>
+      <tr><td class="muted">Home state</td>${C.map(c => `<td>${c.home}</td>`).join('')}</tr>
+      ${ROUNDS.map(([k, l]) => `<tr><td class="muted">${l}</td>${C.map(c => `<td>${esc(c[k])}${k === 'record' ? `<div class="muted small">${esc(c.reply)}</div>` : ''}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div><div class="src">Sources: ${C.map(c => src(c.recSrc) + ' · ' + src(c.pitchSrc)).join(' · ')} · ${src('wiki23')}</div></div>`; },
+    after(){ const go = () => { store.set('pair', [$('#ca').value, $('#cb').value]); drawRounds(); }; $('#ca').onchange = go; $('#cb').onchange = go; drawRounds(); }},
+
+  factchecks:{label:'Fact-checks', render(){
+    const f = store.get('fcf', 'all');
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Claims vs evidence</div><h2>Fact-checks</h2>
+      <p class="muted">Claims by the presidency and viral posts about the race, with verdicts from independent fact-checkers. We include claims rated TRUE and fakes against every side.</p></div>
+      <div class="chips" id="fcf">${[['all','All'],['false','False'],['mis','Misleading / unproven'],['true','True']].map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${k === f}">${l}</button>`).join('')}</div>
+      <div class="grid g2">${FACTS.filter(x => f === 'all' || x.v === f).map(factCard).join('')}</div>`; },
+    after(){ $('#fcf').onclick = e => { const b = e.target.closest('[data-f]'); if (b) { store.set('fcf', b.dataset.f); route(); } }; }},
+
+  promises:{label:'Promises', render(){
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">2022 campaign → 2026 data</div><h2>Promise vs reality</h2>
+      <p class="muted">The incumbent's big campaign promises checked against official data. Some things did improve: inflation is down from its peak, reserves rose from $35.1bn to $54.9bn, oil theft is the lowest since 2009 and non-oil exports hit a record. ${src('fch26')}</p></div>
+      <div class="grid g2">${PROMISES.map(p => `<div class="card"><div class="row" style="justify-content:space-between"><div class="eyebrow">${p.topic}</div><span class="vd ${p.v}">${p.label}</span></div>
+        <div><div class="muted small">Promised</div><div class="claim" style="font-size:17px">${esc(p.promised)}</div></div>
+        <div><div class="muted small">Reality</div><div style="font-weight:800">${esc(p.reality)}</div></div>
+        <div class="src">${src(p.ps)}${p.ps !== p.rs ? ' · ' + src(p.rs) : ''}</div></div>`).join('')}</div>
+      <div class="card"><b>Scorecard: 0 of 5 big promises fully kept.</b><span class="muted small">Behind or not yet: 2 · Not delivered, worse or failed: 3.</span></div>`; }},
+
+  money:{label:'Money', render(){
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Audits · court cases · spending</div><h2>Where did the money go?</h2>
+      <p class="muted">Only official reports, court records and verified facts. Everyone named is presumed innocent unless convicted by a court.</p></div>
+      <div class="grid g2">${MONEY.map(m => `<div class="card"><span class="vd ${m.tag === 'Verified' ? 'true' : m.tag === 'In court' ? 'mis' : 'false'}" style="justify-self:start">${m.tag}</span><h3>${esc(m.t)}</h3><p class="muted">${esc(m.d)}</p><div class="src">${src(m.src)}</div></div>`).join('')}</div>
+      <div class="card"><h3>What to demand</h3><p>Finish the trials. Make agencies answer the audit before the Public Accounts Committees. Sign the Federal Audit Service Bill so the Auditor-General is independent.</p></div>`; }},
+
+  news:{label:'Weekly news', render(){
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Sunday edition</div><h2>${esc(NEWS.edition)}</h2><p class="muted">${esc(NEWS.note)}</p></div>
+      <div class="news">${NEWS.items.map(newsItem).join('')}</div>`; }},
+
+  polls:{label:'Polls', render(){
+    const v = POLLS.viewer;
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Who is ahead?</div><h2>What the polls really say</h2>
+      <p class="muted">No scientific vote-intention poll for 2027 has been published (${src('noPolls')}). Here is what does exist, with its limits stated plainly.</p></div>
+      <div class="grid g2">
+        <div class="card"><h3>Favourability (SBM Intelligence)</h3><p class="muted small">Net favourability, May 2026, about 829 respondents. A sentiment snapshot, not a forecast. Atiku's score was not reported.</p>
+          ${POLLS.sbm.map(r => `<div class="diverge"><div class="small"><b>${r.n}</b><div style="font-variant-numeric:tabular-nums;color:${r.c}">${r.v > 0 ? '+' : ''}${r.v}</div></div><div class="axis"><i style="background:${r.c};${r.v >= 0 ? `left:50%;width:${r.v / 2}%` : `right:50%;width:${-r.v / 2}%`}"></i></div></div>`).join('')}
+          <div class="diverge"><span></span><div class="row small muted" style="justify-content:space-between"><span>−100</span><span>0</span><span>+100</span></div></div>
+          <div class="src">${src('sbm')}</div></div>
+        <div class="card"><h3>Mood of the country</h3><div class="grid" style="gap:12px">
+          <div class="stat"><div class="v" style="color:var(--false)">~80%</div><div class="muted small">say Nigeria is heading in the wrong direction (SBM)</div><div class="src">${src('sbmWrong')}</div></div>
+          <div class="stat"><div class="v">67.4%</div><div class="muted small">back restoring the petrol subsidy (SBM)</div><div class="src">${src('sbmSubsidy')}</div></div></div></div>
+        <div class="card"><h3>Online straw poll</h3><p class="muted small">"Tinubu Must Go" movement, 24–25 Sep 2026, 109,799 self-selected respondents. Run by an anti-Tinubu group and not representative.</p>
+          <div class="bars">${POLLS.tmg.map(barRow).join('')}</div><div class="src">${src('tmg')}</div></div>
+        <div class="card"><h3>The last real result: 2023</h3><p class="muted small">Share of votes cast. Turnout was 26.7%.</p><div class="bars">${POLLS.r23.map(barRow).join('')}</div><div class="src">${src('wiki23')}</div></div>
+      </div>
+      <div class="card" style="gap:12px"><h3>Viewer poll by age</h3>
+        <p class="muted">Our own weekly poll of viewers. It is unscientific: anyone can take part, and the results show only who answered.</p>
+        ${CONFIG.pollFormUrl ? `<a class="btn pri" style="justify-self:start" href="${esc(CONFIG.pollFormUrl)}" target="_blank" rel="noopener">Vote in this week's poll</a>` : `<div class="muted small">Voting opens soon. Results are published every Sunday.</div>`}
+        ${v ? viewerTable(v) : `<div class="muted small">No results yet. The first results by age group (18–24, 25–34, 35–44, 45–54, 55+) appear here after the first Sunday.</div>`}
+      </div>`; }},
+
+  match:{label:'Match me', render(){
+    const ans = store.get('match', {});
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Candidate match</div><h2>Who matches your views?</h2>
+      <p class="muted">Six questions based on each candidate's stated 2027 pitch. Where a candidate has not taken a clear public position, the answer counts for nobody. This is a guide, not advice.</p></div>
+      <div style="display:grid;gap:12px">${MATCH.map((m, i) => `<div class="q"><b>${i + 1}. ${esc(m.q)}</b><div class="opts">${m.o.map(([l], j) => `<button data-q="${i}" data-o="${j}" aria-pressed="${ans[i] === j}">${esc(l)}</button>`).join('')}</div></div>`).join('')}</div>
+      <div class="verdict" id="mres"></div>`; },
+    after(){ drawMatch(); $('#app').onclick = e => { const b = e.target.closest('[data-q]'); if (!b) return; const a = store.get('match', {}); a[b.dataset.q] = +b.dataset.o; store.set('match', a); b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); drawMatch(); }; }},
+
+  ask:{label:'Ask', render(){
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Ask anything about the race</div><h2>Ask a question</h2>
+      <p class="muted">Answers come from the verified facts on this site, with the source. If we don't have it, we say so.</p></div>
+      <form class="askbox" id="askf"><label class="muted small" for="q" style="flex-basis:100%">Your question</label><input id="q" placeholder="e.g. Who won in 2023?" autocomplete="off"><button class="btn pri" type="submit">Ask</button></form>
+      <div class="sugs">${['When is the election?','Who is likely to win?','Did Tinubu deliver 15,000 MW?','What is Peter Obi promising?','Was the $30 billion claim true?','How do I make my vote count?'].map(s => `<button data-s="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+      <div id="answers" style="display:grid;gap:12px"></div>`; },
+    after(){ $('#askf').onsubmit = e => { e.preventDefault(); ask($('#q').value); }; $('.sugs').onclick = e => { const b = e.target.closest('[data-s]'); if (b) { $('#q').value = b.dataset.s; ask(b.dataset.s); } }; }}
+};
+
+/* ======================= PIECES ======================= */
+function factCard(x){ return `<div class="card"><div class="row" style="justify-content:space-between"><span class="meta">${esc(x.who)} · ${esc(x.when)}</span><span class="vd ${x.v}">${x.label}</span></div><div class="claim">${esc(x.claim)}</div><p class="muted">${esc(x.why)}</p><div class="src">${src(x.src)}</div></div>`; }
+function newsItem(n){ return `<article class="item"><div class="when">${esc(n.when)}</div><div style="display:grid;gap:6px;min-width:0"><h3>${esc(n.h)}</h3><p class="muted">${esc(n.d)}</p><div class="src">${src(n.src)}</div></div></article>`; }
+function barRow(r){ return `<div class="bar" style="--c:${r.c}"><div class="l"><span>${esc(r.n)}</span><span style="font-variant-numeric:tabular-nums">${r.v}%</span></div><div class="t"><i style="width:${r.v}%"></i></div></div>`; }
+function viewerTable(v){ const cols = ['tinubu','atiku','obi','other']; return `<div class="tw"><table><thead><tr><th>Age</th>${cols.map(c => `<th>${c === 'other' ? 'Other' : cand(c).name}</th>`).join('')}<th>Votes</th></tr></thead><tbody>${Object.entries(v.ages).map(([age, r]) => { const t = cols.reduce((a, c) => a + (r[c] || 0), 0) || 1; return `<tr><td>${age}</td>${cols.map(c => `<td class="n">${Math.round((r[c] || 0) / t * 100)}%</td>`).join('')}<td class="n">${t}</td></tr>`; }).join('')}</tbody></table></div><div class="src">Updated ${esc(v.updated)} · ${v.total} responses · unscientific</div>`; }
+
+function drawRounds(){
+  const a = cand($('#ca').value), b = cand($('#cb').value);
+  const picks = store.get('picks', {});
+  const key = [a.id, b.id].sort().join('-');
+  const mine = picks[key] || {};
+  $('#rounds').innerHTML = a.id === b.id ? `<div class="card muted">Pick two different candidates.</div>` : ROUNDS.map(([k, l], i) => `
+    <div class="round"><div class="round-h"><h3>Round ${i + 1} · ${l}</h3>
+      <div class="pick" data-r="${k}">${[a, b].map(c => `<button data-w="${c.id}" aria-pressed="${mine[k] === c.id}">${c.name.split(' ')[1]} wins</button>`).join('')}<button data-w="tie" aria-pressed="${mine[k] === 'tie'}">Tie</button></div></div>
+      <div class="vs">${[a, b].map(c => `<div class="side" style="--c:${c.c}"><div class="who">${c.name} · ${c.party}</div><div>${esc(c[k])}</div>${k === 'record' ? `<div class="muted small">${esc(c.reply)}</div><div class="src">${src(c.recSrc)}</div>` : k === 'pitch' ? `<div class="src">${src(c.pitchSrc)}</div>` : ''}</div>`).join('')}</div></div>`).join('');
+  $('#rounds').onclick = e => { const btn = e.target.closest('[data-w]'); if (!btn) return; const r = btn.parentElement.dataset.r; const p = store.get('picks', {}); p[key] = p[key] || {}; p[key][r] = p[key][r] === btn.dataset.w ? undefined : btn.dataset.w; store.set('picks', p); drawRounds(); };
+  const score = {[a.id]:0, [b.id]:0}; let n = 0; Object.values(mine).forEach(w => { if (!w) return; n++; if (score[w] !== undefined) score[w]++; });
+  const lead = score[a.id] === score[b.id] ? null : (score[a.id] > score[b.id] ? a : b);
+  const text = `My Naija Decides debate: ${a.name} ${score[a.id]} – ${score[b.id]} ${b.name}${lead ? `. ${lead.name} wins it for me.` : '.'} Judge for yourself: ${CONFIG.handle}`;
+  $('#verdict').innerHTML = a.id === b.id ? '' : `<div class="eyebrow">Your verdict · ${n} of ${ROUNDS.length} rounds judged</div>
+    <h2>${a.name.split(' ')[1]} ${score[a.id]} – ${score[b.id]} ${b.name.split(' ')[1]}</h2>
+    <p class="muted">${n === 0 ? 'Judge the rounds above to see your result.' : lead ? `${lead.name} won more of your rounds. Your picks stay on this device.` : 'Level so far. Your picks stay on this device.'}</p>
+    ${n ? `<button class="btn" id="sharev" style="justify-self:start">Copy my verdict</button>` : ''}`;
+  const s = $('#sharev'); if (s) s.onclick = () => copy(text, 'Verdict copied. Paste it in your comments');
+}
+
+function drawMatch(){
+  const ans = store.get('match', {}); const tot = {tinubu:0, atiku:0, obi:0}; let max = 0, n = 0;
+  MATCH.forEach((m, i) => { const best = Math.max(...m.o.map(([, w]) => Math.max(0, ...Object.values(w)))); if (ans[i] === undefined) return; n++; max += best; Object.entries(m.o[ans[i]][1]).forEach(([c, w]) => tot[c] += w); });
+  const rows = C.map(c => ({n:`${c.name} (${c.party})`, v: max ? Math.round(tot[c.id] / max * 100) : 0, c:c.c})).sort((x, y) => y.v - x.v);
+  $('#mres').innerHTML = n ? `<div class="eyebrow">Your match · ${n} of ${MATCH.length} answered</div><div class="bars">${rows.map(barRow).join('')}</div>
+    <p class="muted small">Based on stated pitches: ${C.map(c => src(c.pitchSrc)).join(' · ')}. Read the full records on Compare before you decide.</p>
+    <div class="row"><button class="btn" id="mshare">Copy my result</button><button class="btn" id="mreset">Start again</button></div>`
+    : `<div class="eyebrow">Your match</div><p class="muted">Answer the questions above to see how closely each candidate's pitch matches your views.</p>`;
+  const sh = $('#mshare'); if (sh) sh.onclick = () => copy(`My Naija Decides match: ${rows.map(r => `${r.n.split(' (')[0]} ${r.v}%`).join(', ')}. Find yours: ${CONFIG.handle}`, 'Result copied');
+  const rs = $('#mreset'); if (rs) rs.onclick = () => { store.set('match', {}); route(); };
+}
+
+/* ---------- Ask: verified-facts engine, upgraded to AI answers where available ---------- */
+const STOP = new Set('the a an is are was were of to in on for and or what who how when did does do i me my about with be this that it at by from will can much many there'.split(' '));
+const toks = s => s.toLowerCase().replace(/[^a-z0-9₦$%. ]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w)).map(w => w.replace(/s$/, ''));
+function search(q){ const qt = toks(q); return KB.map(([qq, a, s]) => { const kt = new Set(toks(qq + ' ' + a)); const hit = qt.filter(t => kt.has(t)).length; const qhit = qt.filter(t => toks(qq).includes(t)).length; return {qq, a, s, score: hit + qhit * 1.5}; }).filter(r => r.score > 0).sort((x, y) => y.score - x.score); }
+let sampleP = null;
+async function ask(q){
+  q = (q || '').trim(); if (!q) return;
+  const box = document.createElement('div'); box.className = 'answer';
+  $('#answers').prepend(box);
+  const hits = search(q);
+  const head = `<b>${esc(q)}</b>`;
+  sampleP = sampleP || (window.claude ? window.claude.use('sample').catch(() => null) : Promise.resolve(null));
+  const sample = await sampleP;
+  if (sample) {
+    box.innerHTML = head + '<div class="muted">Thinking…</div>';
+    const facts = KB.map(([qq, a, s]) => `- ${qq} ${a} (Source: ${S[s].t}, ${S[s].u})`).join('\n');
+    const prompt = `You answer questions for "Naija Decides", a neutral civic site about Nigeria's 16 January 2027 presidential election. Use ONLY the verified facts below. Be even-handed between candidates, never tell people who to vote for, say "alleged" for anything not decided by a court, and if the facts don't cover the question, say you don't have verified information on that yet. Answer in 2-4 short sentences in plain English, then a line "Source:" with the source name and link.\n\nVERIFIED FACTS (as of 4 Nov 2026):\n${facts}\n\nQUESTION: ${q}`;
+    try {
+      const out = await sample(prompt, { modelTier: 'quick', onText: ({text}) => { box.innerHTML = head + `<div>${esc(text)}</div>`; } });
+      box.innerHTML = head + `<div>${esc(out.text)}</div><div class="src">AI answer from this site's verified facts.</div>`;
+      return;
+    } catch (e) { /* fall back to the facts engine */ }
+  }
+  if (!hits.length) { box.innerHTML = head + `<div>We don't have verified information on that yet. Try one of the suggested questions, or ask us on TikTok, Instagram or X and we may cover it in a video.</div>`; return; }
+  const [top, ...more] = hits;
+  box.innerHTML = head + `<div>${esc(top.a)}</div><div class="src">Source: ${src(top.s)}</div>` +
+    (more.length ? `<div class="muted small" style="white-space:normal">Related: ${more.slice(0, 3).map(r => `<a href="#ask" data-rel="${esc(r.qq)}">${esc(r.qq)}</a>`).join(' · ')}</div>` : '');
+  box.onclick = e => { const r = e.target.closest('[data-rel]'); if (r) { e.preventDefault(); $('#q').value = r.dataset.rel; ask(r.dataset.rel); } };
+}
+
+/* ======================= ROUTER ======================= */
+const ORDER = ['home','compare','factchecks','promises','money','news','polls','match','ask'];
+$('#tabs').innerHTML = ORDER.map(k => `<a href="#${k}" data-k="${k}">${VIEWS[k].label}</a>`).join('');
+function route(){
+  const k = VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'home';
+  document.querySelectorAll('#tabs a').forEach(a => a.setAttribute('aria-current', a.dataset.k === k ? 'page' : 'false'));
+  $('#app').onclick = null;
+  $('#app').innerHTML = `<section class="view">${VIEWS[k].render()}</section>`;
+  VIEWS[k].after && VIEWS[k].after();
+  const t = document.querySelector(`#tabs a[data-k="${k}"]`); t && t.scrollIntoView({block:'nearest', inline:'center'});
+  tick();
+}
+function tick(){ const el = $('#clock'); if (!el) return; let s = Math.max(0, (ELECTION - new Date()) / 1000); const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60); const b = el.querySelectorAll('b'); b[0].textContent = d; b[1].textContent = h; b[2].textContent = m; }
+setInterval(tick, 30000);
+addEventListener('hashchange', () => { route(); window.scrollTo(0, 0); });
+route();
+})();
+</script>
