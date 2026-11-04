@@ -23,6 +23,8 @@ import { sanitizeErrands } from './errands.js';
 import { sanitizeTodo } from './todo.js';
 import { sanitizeCrafts } from './stall.js';
 import { sanitizeLodger } from './lodger.js';
+import { sanitizeProfile, sanitizeGender } from './profile.js';
+import { sanitizeBackground } from './background.js';
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const arr = (v) => (Array.isArray(v) ? v : []);
@@ -106,6 +108,10 @@ export function sanitize(s, now = Date.now()) {
   s.todo = sanitizeTodo(s.todo);
   s.crafts = sanitizeCrafts(s.crafts);
   s.lodger = sanitizeLodger(s.lodger);
+  // M8: who you are (the creator's You tab) and the family you were born into
+  s.profile = sanitizeProfile(s.profile);
+  s.background = sanitizeBackground(s.background);
+  if (s.player && typeof s.player === 'object') s.player.gender = sanitizeGender(s.player.gender);
   s.festivals = isObj(s.festivals) ? { ...(isObj(s.festivals.pumpkinHunt) ? { pumpkinHunt: s.festivals.pumpkinHunt } : {}), ...(Array.isArray(s.festivals.told) ? { told: s.festivals.told.filter((x) => typeof x === 'string').slice(-20) } : {}) } : {};
   s.diary = arr(s.diary).filter((d) => isObj(d) && Number.isFinite(d.t) && typeof d.text === 'string').map((d) => ({ t: d.t, icon: str(d.icon).slice(0, 4), text: d.text.slice(0, 140) })).slice(0, 200);
   return s;

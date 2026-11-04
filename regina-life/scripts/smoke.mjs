@@ -72,10 +72,23 @@ await step('home map: landscape phone keeps every pin visible and tappable', asy
   await page.setViewportSize(vp); await wait(500); await settleHub();
 });
 await step('new life → creator', async () => { await page.click('#btn-new'); await page.waitForSelector('.panel.char', { timeout: 5000 }); await wait(1200); await shot('02-creator'); });
+await step('creator: who you are', async () => {
+  const tabs = await page.$$eval('.panel.char [data-tab]', (b) => b.map((x) => x.dataset.tab)); if (tabs[0] !== 'you') throw new Error('the creator should open on the You tab: ' + tabs);
+  await page.click('.panel.char [data-gender="woman"]'); for (const i of ['music', 'art', 'books', 'cooking']) await page.click(`.panel.char [data-interest="${i}"]`);
+  await page.click('.panel.char [data-personality="creative"]'); await page.click('.panel.char [data-dream="artist"]'); await wait(300); await shot('02b-creator-you');
+  const p = await page.evaluate(() => ({ g: __regina.store.state.player.gender, ...__regina.store.state.profile })); if (p.g !== 'woman' || p.interests.join() !== 'music,art,books' || p.personality !== 'creative' || p.dream !== 'artist') throw new Error('profile not saved: ' + JSON.stringify(p));
+});
 await step('creator customisation', async () => {
   await page.click('.panel.char [data-tab="hair"]'); await page.click('.panel.char [data-k="hair"][data-v="afro"]'); await wait(300);
   await page.click('.panel.char [data-tab="face"]'); await page.click('.panel.char [data-k="facialHair"][data-v="full"]'); await page.click('.panel.char [data-k="skin"][data-v="5"]'); await wait(500); await shot('03-creator-face');
-  await page.click('.panel.char [data-tab="outfit"]'); await wait(200); await page.fill('[data-name]', 'Riley'); await page.click('.panel.char [data-rand]'); await wait(300); await page.click('.panel.char [data-done]');
+  await page.click('.panel.char [data-tab="outfit"]'); await wait(200); await page.fill('[data-name]', 'Riley'); await page.click('.panel.char [data-rand]'); await wait(300);
+  await page.evaluate(() => __regina.setNextBackground('getting')); await page.click('.panel.char [data-done]');   // a fixed draw keeps the run repeatable (the money checks below assume P$400)
+});
+await step('family background reveal', async () => {
+  await page.waitForSelector('.bg-panel [data-go]', { timeout: 20000 }); await wait(400); await shot('02c-family');
+  const t = await page.$eval('.bg-card', (e) => e.innerText); if (!/Getting by/.test(t) || !/45% of people/.test(t)) throw new Error('reveal text: ' + t);
+  await page.click('.bg-panel [data-go]');
+  const s = await page.evaluate(() => ({ tier: __regina.store.state.background?.tier, bal: __regina.store.state.bank.balance, cha: __regina.store.state.skills.charisma })); if (s.tier !== 'getting' || s.bal !== 40000 || !(s.cha >= 50)) throw new Error('background not applied: ' + JSON.stringify(s));
 });
 await step('gameplay starts', async () => { await page.waitForFunction(() => window.__regina?.mode === 'play'); await page.evaluate(() => { __regina.store.state.flags = { daniCall: true, offerCall: true, disableEvents: true }; }); await wait(1500); await shot('04-play'); });
 await step('daylight + movement + camera', async () => {
@@ -203,7 +216,9 @@ await step('book a billboard and see it update', async () => {
   await page.evaluate(() => { __regina.tp(-30, -574); __regina.rig.yaw = 0; __regina.rig.pitch = 0.1; });
   await page.waitForFunction(() => /Billboard/.test(__regina.getTarget()?.label || ''), null, { timeout: 20000 }).catch(() => {});
   const t = await page.evaluate(() => __regina.getTarget()?.label); if (!/Billboard/.test(t || '')) throw new Error('no billboard prompt: ' + t);
-  await shot('21-billboard'); await page.keyboard.press('e'); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
+  await shot('21-billboard'); await page.keyboard.press('e'); await page.waitForSelector('.panel.menu', { timeout: 10000 }); await wait(300); await shot('22-board-menu');
+  const opts = await page.$$eval('.panel.menu button', (b) => b.map((x) => x.textContent)); if (!opts.some((o) => /real business/.test(o)) || !opts.some((o) => /Prairie Dollars/.test(o))) throw new Error('board menu: ' + opts);
+  await page.evaluate(() => [...document.querySelectorAll('.panel.menu button')].find((x) => /Prairie Dollars/.test(x.textContent)).click()); await wait(900); await shot('22-ads-from-board'); await page.evaluate(() => __regina.phone.close());
 });
 await step('gym: treadmill trains fitness', async () => {
   await page.evaluate(() => __regina.enterInterior('gym')); await page.waitForFunction(() => __regina.inInterior === 'gym'); await wait(1300); await shot('23-gym');

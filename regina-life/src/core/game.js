@@ -6,6 +6,7 @@ import { fmtMoney } from './ledger.js';
 import { policyMult, MAX_CAMPAIGN_POINTS, CANVASS_COOLDOWN_MS } from './policy.js';
 import { own } from './util.js';
 import { homeBonuses } from './home.js';
+import { activityMods, skillMult, moodDecayMult, jobXpMult } from './profile.js';
 
 const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
 let _id = 0;
@@ -166,7 +167,7 @@ export function finishShift(store) {
   const lvl = currentLevel(j), wage = wageFor(store, lvl);
   const pay = store.ledger.credit(wage, `Payroll: ${JOBS[j.id].employer}`, { category: 'income', ref: `shift:${sh.startedAt}` });
   if (!pay.ok) return pay;
-  j.xp += XP_PER_TASK * sh.tasksTotal; j.shifts++; tally(s, 'shifts');
+  j.xp += Math.round(XP_PER_TASK * sh.tasksTotal * jobXpMult(s)); j.shifts++; tally(s, 'shifts');   // ambitious people get promoted a little sooner
   s.job.shift = null;
   let promoted = null;
   const next = JOBS[j.id].levels[j.level + 1];
@@ -188,7 +189,7 @@ export const skillLevel = (xp) => Math.min(10, Math.floor((Math.sqrt(1 + (8 * xp
 export function addSkill(store, name, xp) {
   const s = store.state; if (!SKILLS[name] || !(xp > 0)) return null;
   s.skills ||= {}; const before = skillLevel(s.skills[name] || 0);
-  s.skills[name] = Math.min(10000, (s.skills[name] || 0) + xp);
+  s.skills[name] = Math.min(10000, (s.skills[name] || 0) + xp * skillMult(s, name));   // an outgoing or active personality learns its skill a little faster
   const after = skillLevel(s.skills[name]);
   if (after > before) notify(store, { app: 'life', title: `${SKILLS[name].icon} ${SKILLS[name].name} level ${after}!`, body: SKILLS[name].blurb });
   store.commit('skills'); return after > before ? after : null;
@@ -207,7 +208,7 @@ export function tickNeeds(store, dtSec, opts = {}) {
   n.hygiene = clamp(n.hygiene - dtSec * 0.03);
   n.fun = clamp(n.fun - dtSec * 0.035 * (1 - (hb?.fun ?? 0)));
   const low = [n.hunger, n.energy, n.hygiene, n.fun].filter((v) => v < 15).length;
-  if (low) n.mood = clamp(n.mood - dtSec * 0.05 * low);
+  if (low) n.mood = clamp(n.mood - dtSec * 0.05 * low * moodDecayMult(store.state));
   else n.mood = clamp(n.mood + dtSec * (0.005 + (hb?.mood ?? 0) * 0.004), 0, 100);
   const p = store.state.phone;
   p.battery = clamp(p.battery - dtSec * (p.flashlight ? 0.02 : 0.004), 1, 100);
@@ -271,9 +272,10 @@ export function doActivity(store, id, opts = {}) {
   const a = own(ACTIVITIES, id) ? ACTIVITIES[id] : null, n = store.state.needs; if (!a) return { ok: false, error: 'Unknown activity' };
   const bad = activityBlocked(store, id); if (bad) return { ok: false, error: bad };
   // at home, your furniture makes the same activity pay a little more (fun from TV/games/stereo, comfort for resting, skill XP from gear)
-  const hb = opts.home ? homeBonuses(store.state, a.skill?.[0] ?? null) : null, funBoost = hb ? 1 + hb.fun + (id === 'read' || id === 'tv' ? hb.comfort : 0) : 1;
+  const hb = opts.home ? homeBonuses(store.state, a.skill?.[0] ?? null) : null, pm = activityMods(store.state, id, { home: !!opts.home });   // your interests and personality (core/profile.js)
+  const funBoost = (hb ? 1 + hb.fun + (id === 'read' || id === 'tv' ? hb.comfort : 0) : 1) * pm.fun;
   for (const [k, v] of Object.entries(a.needs)) n[k] = clamp((n[k] ?? 50) + (k === 'fun' && v > 0 ? Math.round(v * funBoost) : v) + (k === 'mood' && v > 0 && hb ? Math.round(hb.mood) : 0));
-  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (a.skill[0] === 'fitness' ? policyMult(store.state, 'fitness') : 1) * (hb ? 1 + hb.skill : 1));
+  if (a.skill) addSkill(store, a.skill[0], a.skill[1] * (a.skill[0] === 'fitness' ? policyMult(store.state, 'fitness') : 1) * (hb ? 1 + hb.skill : 1) * pm.skill);
   tally(store.state, 'activities');
   store.commit('needs'); return { ok: true, activity: a };
 }

@@ -7,11 +7,11 @@ import { mulberry32 } from '../core/rng.js';
 /** Weather-responsive outfit for NPCs (and a shared helper for tests). */
 export function outfitForTemp(temp, rnd = Math.random) {
   const pick = (a) => a[Math.floor(rnd() * a.length)];
-  if (temp <= -15) return { top: 'jacket_black', bottom: 'jeans_black', shoes: 'boots_brown', head: pick(['toque_red', 'toque_grey']), neck: 'scarf_plaid' };
-  if (temp <= -3) return { top: pick(['jacket_black', 'jacket_green']), bottom: pick(['jeans_blue', 'jeans_black']), shoes: 'boots_brown', head: pick(['toque_grey', 'none_head']), neck: 'none_neck' };
-  if (temp <= 8) return { top: pick(['hoodie_grey', 'hoodie_red', 'sweater_cream', 'jacket_green']), bottom: pick(['jeans_blue', 'chino_tan', 'jogger_grey']), shoes: pick(['sneaker_black', 'boots_brown']), head: 'none_head', neck: 'none_neck' };
-  if (temp <= 18) return { top: pick(['hoodie_grey', 'tee_navy', 'sweater_cream']), bottom: pick(['jeans_blue', 'chino_tan']), shoes: 'sneaker_black', head: 'none_head', neck: 'none_neck' };
-  return { top: pick(['tee_white', 'tee_black', 'tee_navy']), bottom: pick(['shorts_khaki', 'chino_tan', 'jeans_blue']), shoes: 'sneaker_white', head: pick(['none_head', 'cap_navy']), face_acc: pick(['none_face', 'shades']) };
+  if (temp <= -15) return { top: pick(['jacket_black', 'puffer_red', 'puffer_navy']), bottom: 'jeans_black', shoes: pick(['boots_brown', 'pacs_charcoal']), head: pick(['toque_red', 'toque_grey', 'trapper_brown']), neck: pick(['scarf_plaid', 'scarf_gold']) };
+  if (temp <= -3) return { top: pick(['jacket_black', 'jacket_green', 'puffer_navy']), bottom: pick(['jeans_blue', 'jeans_black']), shoes: pick(['boots_brown', 'pacs_charcoal']), head: pick(['toque_grey', 'beanie_spruce', 'none_head']), neck: 'none_neck' };
+  if (temp <= 8) return { top: pick(['hoodie_grey', 'hoodie_red', 'sweater_cream', 'sweater_green', 'jacket_green', 'flannel_red']), bottom: pick(['jeans_blue', 'chino_tan', 'jogger_grey', 'overalls_denim']), shoes: pick(['sneaker_black', 'boots_brown']), head: 'none_head', neck: 'none_neck' };
+  if (temp <= 18) return { top: pick(['hoodie_grey', 'tee_navy', 'sweater_cream', 'flannel_spruce']), bottom: pick(['jeans_blue', 'chino_tan', 'skirt_denim']), shoes: 'sneaker_black', head: 'none_head', neck: 'none_neck' };
+  return { top: pick(['tee_white', 'tee_black', 'tee_navy']), bottom: pick(['shorts_khaki', 'chino_tan', 'jeans_blue', 'skirt_plum']), shoes: 'sneaker_white', head: pick(['none_head', 'cap_navy', 'bucket_wheat']), face_acc: pick(['none_face', 'shades']) };
 }
 
 const LINES = [
@@ -23,6 +23,7 @@ const LINES = [
   () => 'Careful on the crosswalks — Regina drivers are friendly, mostly.',
 ];
 
+const JOGGER = { top: 'tee_white', bottom: 'jogger_grey', shoes: 'sneaker_white', head: 'none_head', neck: 'none_neck' };
 export class Pedestrians {
   constructor(scene, { count = 14, temp = 15 } = {}) {
     this.scene = scene; this.list = [];
@@ -35,10 +36,12 @@ export class Pedestrians {
       const t = rnd();
       const look = { ...DEFAULT_LOOK, skin: Math.floor(rnd() * SKIN_TONES.length), hair: HAIR_STYLES[Math.floor(rnd() * HAIR_STYLES.length)], hairColor: Math.floor(rnd() * HAIR_COLORS.length), face: FACE_SHAPES[Math.floor(rnd() * 4)], body: BODY_TYPES[Math.floor(rnd() * 4)], facialHair: rnd() < 0.2 ? 'stubble' : 'none', expression: rnd() < 0.6 ? 'smile' : 'neutral', height: 0.94 + rnd() * 0.12, ...outfitForTemp(temp, rnd), face_acc: 'none_face' };
       Object.assign(look, outfitForTemp(temp, rnd));
+      const jog = n % 6 === 3; if (jog) Object.assign(look, JOGGER);   // a couple of joggers doing laps of the block
       const ch = buildCharacter(look, { detail: 0.45 });
       ch.root.position.set(a[0] + (b[0] - a[0]) * t, 0, a[1] + (b[1] - a[1]) * t);
       scene.add(ch.root);
-      this.list.push({ ch, baseLook: look, loop, idx: (start + dir + 4) % 4, dir, speed: 1.2 + rnd() * 0.7, wait: 0, rnd, x: ch.root.position.x, z: ch.root.position.z, yaw: 0, lookSeed: n });
+      const speed = 1.2 + rnd() * 0.7;
+      this.list.push({ ch, baseLook: look, loop, idx: (start + dir + 4) % 4, dir, speed: jog ? 3.3 : speed, jog, wait: 0, rnd, x: ch.root.position.x, z: ch.root.position.z, yaw: 0, lookSeed: n });
     }
   }
   /** Re-dress everyone when the weather changes. */
@@ -46,9 +49,15 @@ export class Pedestrians {
     for (const n of this.list) {
       const pos = n.ch.root.position.clone(), yaw = n.ch.root.rotation.y;
       this.scene.remove(n.ch.root); n.ch.dispose();
-      const base = { ...n.baseLook, face_acc: 'none_face', neck: 'none_neck', head: 'none_head', ...outfitForTemp(temp, n.rnd) }; n.baseLook = base;
+      const base = { ...n.baseLook, face_acc: 'none_face', neck: 'none_neck', head: 'none_head', ...outfitForTemp(temp, n.rnd), ...(n.jog ? JOGGER : {}) }; n.baseLook = base;
       n.ch = buildCharacter({ ...base }, { detail: 0.45 }); n.ch.root.position.copy(pos); n.ch.root.rotation.y = yaw; this.scene.add(n.ch.root);
     }
+    this.setRain(this.rain, true);
+  }
+  /** Umbrellas up when it rains (joggers just get wet). */
+  setRain(on, force = false) {
+    if (!!on === !!this.rain && !force) return; this.rain = !!on;
+    for (const n of this.list) n.ch.motion({ hold: this.rain && !n.jog ? 'umbrella' : null, holdAge: 0 });
   }
   setVisible(v) { this.hidden = !v; for (const n of this.list) n.ch.root.visible = v; }
   update(dt, playerPos) {
@@ -59,7 +68,7 @@ export class Pedestrians {
       if (d > 320) return; // out of range: freeze
       if (n.wait > 0) { n.wait -= dt; n.ch.motion({ speed: 0 }); n.ch.update(dt); return; }
       const tgt = n.loop[n.idx], dx = tgt[0] - n.x, dz = tgt[1] - n.z, l = Math.hypot(dx, dz);
-      if (l < 0.6) { n.idx = (n.idx + n.dir + 4) % 4; if (n.rnd() < 0.25) n.wait = 2 + n.rnd() * 5; return; }
+      if (l < 0.6) { n.idx = (n.idx + n.dir + 4) % 4; if (n.rnd() < 0.25 && !n.jog) n.wait = 2 + n.rnd() * 5; return; }
       const want = Math.atan2(dx, dz); n.yaw += Math.atan2(Math.sin(want - n.yaw), Math.cos(want - n.yaw)) * Math.min(1, dt * 6);
       n.x += (dx / l) * n.speed * dt; n.z += (dz / l) * n.speed * dt;
       n.ch.root.position.set(n.x, 0, n.z); n.ch.root.rotation.y = n.yaw; n.ch.motion({ speed: n.speed }); n.ch.update(dt);

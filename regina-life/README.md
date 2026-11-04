@@ -126,6 +126,52 @@ Regina dates) and push to `main`: it goes live on the next deploy and comes off 
 go in `SUPPORTERS`. Set `CONTACT_URL` (how advertisers reach you) and `SUPPORT_URL` (your support page) to turn on those buttons; until then the
 pages say "opens soon". Rows are validated (`core/sponsors.js`, tested): a bad row is skipped, never shown.
 
+## What's new in Milestone 7: "more amazing"
+
+* **Your body does the thing** — reading on a Victoria Park bench (they face the fountain now), running on the treadmill deck, cycling, a balance
+  pose on the yoga mat, washing your hair in the shower, strumming on Scarth Street, shovelling, raking, painting at the easel, handing out flyers,
+  eating and stirring the pot, with small props. You hold your phone while it is open, walk the dog on a leash, open an umbrella in the rain and
+  dance when the radio is on at home. Paydays and big moments get a cheer ([`src/player/poses.js`](src/player/poses.js), tested).
+* **Home lots on the map** — the One-bedroom is **Cathedral Court**, a walk-up with its own front door at the west edge of downtown. Homes you could
+  move up to get **For Sale** signs (press E to see one in the Homes app). The map's home pin follows wherever you live, the Map tab has a
+  **Homes** view with prices, and the phone map shows every home ([`src/core/homeLots.js`](src/core/homeLots.js), tested).
+* **Wardrobe** — puffer parkas with fur hoods, flannel overshirts, a green sweater, skirts, overalls, pac boots, a beanie, a trapper hat, a bucket
+  hat, a gold scarf, and four new hairstyles (bob, waves, ponytail, space buns). Bundle up and the pedestrians use the new winter gear.
+* **A creator studio** — the character creator opens on a bright photo set at any hour, not a dark street.
+* **A city that lives** — residents doing things where you can see them, by the real hour, season and weather: a busker on Scarth Street, a reader
+  and a painter in Victoria Park, a neighbour shovelling after a snowfall or raking in the fall, someone on the phone by the Market (labelled NPCs:
+  say hi). Pedestrians open umbrellas in the rain and a couple of joggers do laps ([`src/core/vignettes.js`](src/core/vignettes.js), tested).
+* **Photo-mode poses** — wave, cheer, dance, read, play guitar, check your phone or hold an umbrella for the shot.
+
+## What's new in Milestone 8: "who you are"
+
+* **The You tab** — the creator starts with who you are: Woman, Man or Non-binary (with pronouns, and a starting look to match; every hairstyle
+  and outfit stays open to everyone), up to three interests, a personality and a dream ([`src/core/profile.js`](src/core/profile.js), tested).
+  Interests make their activities more fun and quicker to learn, give a small skill head start, mark the jobs that fit you and become "Ideas for
+  you" in the Life app. A dream has a progress bar and pays P$250 when it comes true.
+* **The family you are born into** — drawn at random when you start, like real life ([`src/core/background.js`](src/core/background.js),
+  tested): money's tight 22%, getting by 45%, comfortable 24%, well-off 7%, rich parents 2%. More money and things at the start comes with less of
+  a skill head start. Well-off and rich starts get a short daily allowance; rich parents buy you the one-bedroom. A dice roll reveals it.
+* **Book a billboard for real** — tapping a free billboard in the game offers "Put your real business here", which opens the Advertise page
+  with that board picked. The page is a booking form with a live preview, and you pay right on the page with **PayPal or a debit or credit card**
+  (PayPal Checkout buttons). The Support section sells three supporter tiers the same way ([`src/core/checkout.js`](src/core/checkout.js), tested).
+  Founding prices: billboards CA$10 / 20 / 40 for 7 days; support CA$3 (coffee), CA$10 (name on the mural), CA$25 (founding supporter).
+
+### Owner: turning on payments
+
+The game itself never handles money; payments go to your PayPal Business account through PayPal's own buttons on the Advertise page.
+
+1. Open a free **PayPal Business** account (paypal.com/ca/business) if you don't have one.
+2. At **developer.paypal.com**, log in, open **Apps & Credentials**, switch to **Live**, create an app, and copy its **Client ID** (it is public
+   by design; never share the Secret).
+3. Paste it into `PAYPAL.clientId` in [`src/data/sponsors.js`](src/data/sponsors.js) and push to `main`. The payment buttons appear on the next deploy.
+4. Each payment carries the ad in PayPal: the item name (board), the item description (the line and the business), the custom field (the
+   website), the note (run dates, colours, reply-to email). Check that the amount matches the tier, review the ad, then add a row to `SPONSORED`
+   (or a name to `SUPPORTERS`) and push. If the ad can't run, refund it in PayPal.
+
+Until a Client ID is set, "Book and pay" sends the booking by email when `CONTACT_URL` is a `mailto:` address, and otherwise says booking
+opens soon.
+
 ## Economy & anti-exploit (important)
 
 Money only moves through `src/core/ledger.js`: integer cents, positive/limited amounts, no overdrafts, idempotency keys,

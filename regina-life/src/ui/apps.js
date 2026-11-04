@@ -8,6 +8,8 @@ import { fmtMoney } from '../core/ledger.js';
 import { sunTimes, hoursLabel, reginaParts, TZ } from '../core/time.js';
 import { WALLPAPERS } from './wallpapers.js';
 import { SKILLS, skillLevel, moodWord } from '../core/game.js';
+import { GENDERS, INTERESTS, PERSONALITIES, sanitizeProfile, dreamStatus, jobFits } from '../core/profile.js';
+import { BACKGROUND_BY_ID, sanitizeBackground } from '../core/background.js';
 import { BILLBOARDS, BOARD_BY_ID, THEMES, AD_TIERS, AD_TIER_ORDER, rotationFor } from '../data/billboards.js';
 import { adPrice, adReach, adQuote, buyAd, activeAd, moderate, validImage, MAX_AD_CHARS, MAX_IMAGE_CHARS } from '../core/ads.js';
 import { drawBillboard } from '../world/textures.js';
@@ -228,7 +230,7 @@ const jobsApp = app('jobs', 'Jobs', (body, ctx, phone) => {
         <div class="mc-btns"><button class="btn primary" data-act="nav">Navigate to work</button><button class="btn danger" data-act="quit">Quit job</button></div>`;
     } else {
       inner = (ap ? `<div class="card ${ap.status === 'offered' ? 'offer' : ''}"><small>Application</small><h3>${esc(JOBS[ap.id].title)}</h3><p>${ap.status === 'pending' ? 'Under review… the employer will contact you shortly.' : `Offer: ${fmtMoney(G.wageFor(store, JOBS[ap.id].levels[0]))} per shift`}</p>${ap.status === 'offered' ? '<div class="mc-btns"><button class="btn primary" data-act="accept">Accept offer</button><button class="btn" data-act="decline">Decline</button></div>' : ''}</div>` : '')
-        + Object.values(JOBS).map((d) => `<div class="card job"><div class="jt"><div class="avatar" style="background:${CONTACTS[d.contact].color}">${d.employer[0]}</div><div><h3>${esc(d.title)}</h3><small>${esc(d.employer)}</small></div></div><p>${esc(d.blurb)}</p>
+        + Object.values(JOBS).map((d) => `<div class="card job"><div class="jt"><div class="avatar" style="background:${CONTACTS[d.contact].color}">${d.employer[0]}</div><div><h3>${esc(d.title)}</h3><small>${esc(d.employer)}</small>${jobFits(s, d.id) ? '<span class="fit-tag">⭐ Fits your interests</span>' : ''}</div></div><p>${esc(d.blurb)}</p>
           <div class="chips">${d.levels.map((l) => `<span>${esc(l.name)} ${fmtMoney(G.wageFor(store, l))}</span>`).join('')}</div>
           <button class="btn primary wide" data-apply="${d.id}" ${j || ap ? 'disabled' : ''}>${j ? 'Already employed' : ap ? 'Application in progress' : 'Apply'}</button></div>`).join('')
         + '<p class="fine pad">More careers (delivery, rideshare, office, trades…) arrive in later milestones.</p>';
@@ -388,6 +390,18 @@ const MILESTONES = [
   ['📢', 'Run a billboard ad', (s) => s.bank.history.some((h) => h.category === 'advertising')],
   ['💰', 'Save $5,000', (s) => s.bank.balance >= 500000],
 ];
+/** Your story (core/profile.js, core/background.js): who you are, the family you came from, your dream's progress, and ideas that fit you. */
+function storyCard(s) {
+  const pr = sanitizeProfile(s.profile), bg = sanitizeBackground(s.background), b = bg && BACKGROUND_BY_ID[bg.tier], g = GENDERS[s.player?.gender], d = dreamStatus(s);
+  if (!b && !pr.interests.length && !d && !g) return '';
+  const tips = pr.interests.map((id) => `<li>${INTERESTS[id].icon} ${esc(INTERESTS[id].tip)}</li>`).join('');
+  return `<div class="card story"><h4>Your story</h4>
+    <p>${g ? `${esc(g.name)} · ${esc(g.pronouns)}` : 'They/them'}${pr.personality ? ` · ${PERSONALITIES[pr.personality].icon} ${esc(PERSONALITIES[pr.personality].name)}` : ''}${b ? ` · ${b.icon} ${esc(b.name)} family` : ''}</p>
+    ${pr.interests.length ? `<div class="chips">${pr.interests.map((id) => `<span>${INTERESTS[id].icon} ${esc(INTERESTS[id].name)}</span>`).join('')}</div>` : ''}
+    ${bg?.allowanceLeft ? `<p class="fine">💌 Allowance from home: ${fmtMoney(bg.allowancePer)} a day, ${bg.allowanceLeft} more day${bg.allowanceLeft > 1 ? 's' : ''}.</p>` : ''}
+    ${d ? `<div class="dream"><b>${d.icon} ${esc(d.name)}</b><small>${esc(d.goal)}${d.done ? ' · come true! 🎉' : ''}</small><div class="bar"><i style="width:${Math.round(d.progress * 100)}%"></i></div></div>` : ''}
+    ${tips ? `<h4>Ideas for you</h4><ul class="story-tips">${tips}</ul>` : ''}</div>`;
+}
 const lifeApp = app('life', 'Life', (body, ctx) => {
   const { store } = ctx;
   const render = () => {
@@ -395,6 +409,7 @@ const lifeApp = app('life', 'Life', (body, ctx) => {
     const bar = (icon, label, v) => `<div class="need"><span>${icon}</span><div class="grow"><small>${label}</small><div class="bar ${v < 20 ? 'low' : ''}"><i style="width:${Math.round(v)}%"></i></div></div><b>${Math.round(v)}</b></div>`;
     const done = MILESTONES.filter(([, , f]) => f(s)).length;
     body.innerHTML = `${nav('Life')}<div class="scroll"><div class="card lifehead"><div class="face">${face}</div><div><h3>${esc(s.player.name)}</h3><p>${word} · ${esc(ctx.jobTitle() || 'Between jobs')}</p></div></div>
+      ${storyCard(s)}
       <div class="card">${bar('⚡', 'Energy', n.energy)}${bar('🍽️', 'Hunger', n.hunger)}${bar('🚿', 'Hygiene', n.hygiene ?? 0)}${bar('🎉', 'Fun', n.fun ?? 0)}${bar('🙂', 'Mood', n.mood)}</div>
       <h4 class="sec">Skills</h4><div class="list">${Object.entries(SKILLS).map(([k, d]) => { const xp = s.skills?.[k] || 0, lv = skillLevel(xp), lo = 10 * lv * (lv + 1), hi = 10 * (lv + 1) * (lv + 2); return `<div class="row"><div class="avatar sm emoji">${d.icon}</div><div class="grow"><b>${d.name} · Lv ${lv}</b><p>${d.blurb}</p><div class="progress thin"><i style="width:${lv >= 10 ? 100 : ((xp - lo) / (hi - lo)) * 100}%"></i></div></div></div>`; }).join('')}</div>
       <h4 class="sec">Milestones · ${done}/${MILESTONES.length}</h4><div class="list">${MILESTONES.map(([ic, t, f]) => { const ok = f(s); return `<div class="row ${ok ? '' : 'dim'}"><div class="avatar sm emoji">${ok ? '✅' : ic}</div><div class="grow"><b>${t}</b></div></div>`; }).join('')}</div>

@@ -48,7 +48,8 @@ describe('City data', () => {
 describe('Weather-responsive clothing', () => {
   it('dresses warmly in deep cold and lightly in summer', () => {
     const cold = outfitForTemp(-25, mulberry32(1)), hot = outfitForTemp(28, mulberry32(1));
-    expect(cold.neck).toBe('scarf_plaid'); expect(CLOTHES[cold.top].style).toBe('jacket'); expect(CLOTHES[cold.shoes].style).toBe('boots');
+    expect(CLOTHES[cold.neck].style).toBe('scarf'); expect(['jacket', 'puffer']).toContain(CLOTHES[cold.top].style); expect(['boots', 'winter']).toContain(CLOTHES[cold.shoes].style);
+    for (let k = 1; k < 40; k++) { const o = outfitForTemp(-25, mulberry32(k)); expect(['toque', 'trapper']).toContain(CLOTHES[o.head].style); expect(['jacket', 'puffer']).toContain(CLOTHES[o.top].style); }   // every deep-cold walker is bundled up
     expect(CLOTHES[hot.top].style).toBe('tee');
   });
   it('only references catalog items', () => { for (const t of [-30, -10, 3, 12, 25]) for (const id of Object.values(outfitForTemp(t, mulberry32(t + 50)))) expect(CLOTHES[id]).toBeTruthy(); });
