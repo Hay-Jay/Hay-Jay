@@ -37,5 +37,10 @@
       "scene": "cta",
       "text": "Lagos or Abuja? Tell me in the comments, and follow for more Naija history!"
     }
-  ]
+  ],
+  "tags": {
+    "topic": "places",
+    "hook": "question",
+    "ask": true
+  }
 }

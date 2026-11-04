@@ -37,5 +37,10 @@
       "scene": "cta",
       "text": "Remember the past. Follow for more Naija history."
     }
-  ]
+  ],
+  "tags": {
+    "topic": "conflict",
+    "hook": "statement",
+    "ask": false
+  }
 }

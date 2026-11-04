@@ -9,12 +9,38 @@
     "youtube_description": "In 1897 Flora Shaw suggested the name 'Nigeria' in The Times, after the River Niger. In 1914 Lugard amalgamated the North and South, and the name stayed through independence in 1960.\n\n#nigeria #naijahistory #shorts"
   },
   "lines": [
-    {"scene": "hook",   "text": "Nigeria got its name from a newspaper article, written by a journalist who wasn't even Nigerian."},
-    {"scene": "flora",  "text": "In 1897, a British journalist named Flora Shaw wrote in The Times of London."},
-    {"scene": "river",  "text": "She suggested the name Nigeria, after the mighty River Niger that flows through the land."},
-    {"scene": "lugard", "text": "Flora later married Frederick Lugard, the colonial official who ruled the territory."},
-    {"scene": "amalg",  "text": "In 1914, Lugard joined the Northern and Southern Protectorates into one country, and the name stuck."},
-    {"scene": "indep",  "text": "On October first, 1960, Nigeria became independent, and kept the name."},
-    {"scene": "cta",    "text": "Would you rename Nigeria? Tell me in the comments, and follow for more Naija history!"}
-  ]
+    {
+      "scene": "hook",
+      "text": "Nigeria got its name from a newspaper article, written by a journalist who wasn't even Nigerian."
+    },
+    {
+      "scene": "flora",
+      "text": "In 1897, a British journalist named Flora Shaw wrote in The Times of London."
+    },
+    {
+      "scene": "river",
+      "text": "She suggested the name Nigeria, after the mighty River Niger that flows through the land."
+    },
+    {
+      "scene": "lugard",
+      "text": "Flora later married Frederick Lugard, the colonial official who ruled the territory."
+    },
+    {
+      "scene": "amalg",
+      "text": "In 1914, Lugard joined the Northern and Southern Protectorates into one country, and the name stuck."
+    },
+    {
+      "scene": "indep",
+      "text": "On October first, 1960, Nigeria became independent, and kept the name."
+    },
+    {
+      "scene": "cta",
+      "text": "Would you rename Nigeria? Tell me in the comments, and follow for more Naija history!"
+    }
+  ],
+  "tags": {
+    "topic": "origins",
+    "hook": "surprise",
+    "ask": true
+  }
 }

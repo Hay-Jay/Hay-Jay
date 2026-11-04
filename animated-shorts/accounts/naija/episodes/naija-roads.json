@@ -37,5 +37,10 @@
       "scene": "cta",
       "text": "Did your parents remember the switch? Tell me in the comments, and follow for more Naija history!"
     }
-  ]
+  ],
+  "tags": {
+    "topic": "everyday life",
+    "hook": "surprise",
+    "ask": true
+  }
 }

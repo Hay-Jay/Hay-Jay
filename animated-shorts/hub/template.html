@@ -183,6 +183,34 @@ details.kit summary::-webkit-details-marker { display: none; }
 .step[aria-pressed="true"] i::after { content: ""; width: 9px; height: 5px; border: solid #0d0c10; border-width: 0 0 3px 3px; transform: rotate(-45deg) translate(1px, -1px); }
 .step[disabled] { cursor: default; opacity: .6; }
 .step .auto { margin-left: auto; font: 700 10px var(--mono); letter-spacing: .1em; color: var(--faint); }
+.sel { min-height: 38px; padding: 6px 10px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); font: 500 13.5px var(--body); max-width: 100%; }
+.badge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font: 700 11px var(--mono); letter-spacing: .06em; vertical-align: middle; }
+.badge.top { background: rgba(52,210,123,.15); color: var(--clear); }
+.badge.under { background: rgba(255,181,71,.15); color: var(--amber); }
+.ins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.ins { background: var(--panel-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 4px; font-size: 14px; }
+.ins b { font-family: var(--display); font-size: 16px; line-height: 1.25; }
+.ins.good b { color: var(--clear); } .ins.weak b { color: var(--amber); } .ins.idea b { color: var(--ink); }
+.ins span { color: var(--muted); }
+.ask { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 8px; }
+.claude-read { white-space: pre-wrap; font-size: 14.5px; line-height: 1.55; color: var(--ink); background: var(--panel-2); border-radius: 12px; padding: 12px 14px; min-height: 48px; }
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { text-align: left; font: 700 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl td.num, .tbl th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
+.tbl.plan th, .tbl.plan td { text-align: left; }
+.tbl.plan td:last-child { display: flex; gap: 6px; flex-wrap: wrap; }
+.fc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.fc-grid > div { background: var(--panel-2); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; }
+.fc-grid b { font-size: 20px; }
+.mini-steps { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; display: grid; gap: 4px; }
+details.manual summary { cursor: pointer; font-weight: 600; color: var(--muted); }
+.chart g.hit:hover path, .chart g.hit:focus path { filter: brightness(1.18); }
+.chart g.hit:focus { outline: none; }
+.note { align-items: center; flex-wrap: wrap; }
+#tip { position: fixed; z-index: 30; pointer-events: none; background: #f3efe6; color: #0d0c10; border-radius: 10px; padding: 7px 10px; display: grid; gap: 1px; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.4); max-width: 280px; }
+#tip b { font: 700 15px var(--mono); }
 #toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-weight: 700; font-size: 14px; max-width: calc(100% - 32px); z-index: 20; }
 #sync { font-size: 13px; color: var(--muted); }
 #sync.warn { color: var(--amber); }
@@ -201,6 +229,8 @@ details.kit summary::-webkit-details-marker { display: none; }
   <main id="view"></main>
 </div>
 <div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="tip" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <script>
 const DATA = /*__DATA__*/null;
@@ -297,10 +327,10 @@ function chartSvg(a) {
   const Wd = 640, Hd = 220, pad = 34, max = Math.max(10, ...h.map(e => Math.max(e.tf || 0, e.ys || 0)));
   const x = i => pad + i * (Wd - pad * 2) / (h.length - 1), y = v => Hd - pad - (v / max) * (Hd - pad * 2);
   const line = (k, c) => { const pts = h.map((e, i) => e[k] == null ? null : `${x(i).toFixed(1)},${y(e[k]).toFixed(1)}`).filter(Boolean); return pts.length > 1 ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>` + (() => { const L = h.length - 1, v = h[L][k]; return v == null ? '' : `<circle cx="${x(L)}" cy="${y(v)}" r="5" fill="${c}"/>`; })() : ''; };
-  const grid = [0, 0.5, 1].map(f => `<line x1="${pad}" x2="${Wd - pad}" y1="${y(max * f)}" y2="${y(max * f)}" stroke="#2c2a35"/><text x="${pad - 6}" y="${y(max * f) + 4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#a29eac">${fmt(Math.round(max * f))}</text>`).join('');
+  const grid = [0, 0.5, 1].map(f => `<line x1="${pad}" x2="${Wd - pad}" y1="${y(max * f)}" y2="${y(max * f)}" stroke="#2c2a35"/><text x="${pad - 6}" y="${y(max * f) + 4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="17" fill="#a29eac">${fmt(Math.round(max * f))}</text>`).join('');
   return `<svg viewBox="0 0 ${Wd} ${Hd}" role="img" aria-label="Follower growth">${grid}${line('tf', col(a))}${line('ys', '#f3efe6')}
-    <text x="${pad}" y="${Hd - 8}" font-family="JetBrains Mono, monospace" font-size="11" fill="#a29eac">${esc(h[0].d)}</text>
-    <text x="${Wd - pad}" y="${Hd - 8}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#a29eac">${esc(h[h.length - 1].d)}</text></svg>
+    <text x="${pad}" y="${Hd - 8}" font-family="JetBrains Mono, monospace" font-size="17" fill="#a29eac">${esc(h[0].d)}</text>
+    <text x="${Wd - pad}" y="${Hd - 8}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="17" fill="#a29eac">${esc(h[h.length - 1].d)}</text></svg>
     <div class="legend"><span><i style="background:${col(a)}"></i>TikTok followers</span><span><i style="background:#f3efe6"></i>YouTube subscribers</span></div>`;
 }
 
@@ -392,17 +422,309 @@ function viewSetup() {
     </ol></section>`;
 }
 
+// ---------- analytics: YouTube performance, insights and forecast ----------
+let vstats = {}, examplesOff = false, claudeRead = { text: '', busy: false, err: '' };
+const CHART_GREEN = '#1fa86a';   // validated against the dark panel surface
+const SURFACE = '#16151b';
+// next-video ideas by topic (all checkable facts)
+const IDEAS = {
+  origins: ['Why Lagos is also called Eko', 'How Port Harcourt got its name (1913)'],
+  symbols: ['What every part of the coat of arms means', 'Who wrote "Arise, O Compatriots" (1978)'],
+  people: ['Funmilayo Ransome-Kuti, the Lioness of Lisabi', 'Nnamdi Azikiwe, "Zik of Africa"', 'Moremi of Ile-Ife: history or legend?'],
+  places: ['Zuma Rock, the face on the ₦100 note', 'Olumo Rock, Abeokuta\'s hiding place'],
+  conflict: ['The Aba Women\'s War of 1929'],
+  'everyday life': ['Africa\'s first TV station opened in Ibadan, 1959', 'How the naira got its name'],
+};
+const vkey = (a, e) => `${a.id}--${e.id}`;
+const vlatest = (a, e) => { const h = (vstats[vkey(a, e)] || {}).history || []; return h[h.length - 1] || null; };
+const vinfo = (a, e) => vstats[vkey(a, e)] || {};
+const hasReal = a => a.episodes.some(e => vlatest(a, e));
+
+// Example numbers, shown only until real numbers exist, and always labelled as examples.
+function exampleStats(a) {
+  const base = [5200, 2100, 3900, 1500, 2600, 1100], d0 = today();
+  const out = {};
+  orderOf(a).forEach((e, i) => {
+    const v = base[i % base.length], hist = [];
+    for (let k = 0; k < 4; k++) { const d = new Date(d0); d.setDate(d.getDate() - (9 - k * 3)); const f = [0.35, 0.65, 0.85, 1][k]; hist.push({ d: isoDate(d), views: Math.round(v * f), likes: Math.round(v * f * 0.05), comments: Math.round(v * f * 0.006 * (i % 3 ? 1 : 2.5)), subs: Math.round(v * f * 0.004), stayed: [72, 58, 69, 51, 63, 47][i % 6], avgpct: [88, 71, 84, 62, 76, 55][i % 6] }); }
+    const when = new Date(d0); when.setDate(when.getDate() - 10 + i);
+    out[vkey(a, e)] = { status: 'published', when: isoDate(when), history: hist };
+  });
+  return out;
+}
+function orderOf(a) { const o = a.launch_order || []; return [...a.episodes].sort((x, y) => (o.indexOf(x.id) + 1 || 99) - (o.indexOf(y.id) + 1 || 99)); }
+function slotsFrom(a, n) {
+  const out = [], d = today(); d.setDate(d.getDate() + 1);
+  while (out.length < n) { if (a.days.includes(DAY_KEYS[d.getDay()])) out.push(new Date(d)); d.setDate(d.getDate() + 1); }
+  return out;
+}
+const fmtDate = s => { if (!s) return '—'; const d = new Date(s + 'T12:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); };
+const daysSince = s => s ? Math.max(1, Math.round((today() - new Date(s + 'T00:00:00')) / 864e5)) : null;
+const median = arr => { const s = [...arr].sort((x, y) => x - y); return s.length ? (s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2) : 0; };
+const avg = arr => arr.length ? arr.reduce((x, y) => x + y, 0) / arr.length : 0;
+const pct = v => v == null || isNaN(v) ? '—' : Math.round(v) + '%';
+
+function analyticsModel(a) {
+  const ex = !hasReal(a) && !examplesOff;
+  const src = ex ? exampleStats(a) : vstats;
+  const rows = orderOf(a).map((e, i) => {
+    const info = src[vkey(a, e)] || {}, h = info.history || [], l = h[h.length - 1] || null;
+    const age = daysSince(info.when);
+    return { e, i, info, l, h, views: l ? l.views || 0 : null, perDay: l && age ? (l.views || 0) / age : null };
+  });
+  const live = rows.filter(r => r.l && r.views != null);
+  const med = median(live.map(r => r.perDay ?? r.views));
+  live.forEach(r => { const v = r.perDay ?? r.views; r.flag = live.length >= 3 ? (v >= 1.5 * med ? 'top' : v <= 0.6 * med ? 'under' : null) : null; });
+  // channel series: total views per logged date, each video carrying its latest known count forward
+  const dates = [...new Set(rows.flatMap(r => r.h.map(x => x.d)))].sort();
+  const series = dates.map(d => ({ d, v: rows.reduce((n, r) => { const k = r.h.filter(x => x.d <= d).pop(); return n + (k ? k.views || 0 : 0); }, 0), s: rows.reduce((n, r) => { const k = r.h.filter(x => x.d <= d).pop(); return n + (k ? k.subs || 0 : 0); }, 0) }));
+  const chan = (stats[a.id] && stats[a.id].history) || [];
+  const subsNow = !ex && chan.length && chan[chan.length - 1].ys != null ? chan[chan.length - 1].ys : (series.length ? series[series.length - 1].s : null);
+  return { ex, rows, live, med, series, subsNow };
+}
+function forecast(series, key) {
+  if (series.length < 2) return null;
+  const last = series[series.length - 1], lastD = new Date(last.d + 'T00:00:00');
+  const win = series.filter(p => (lastD - new Date(p.d + 'T00:00:00')) / 864e5 <= 14), first = win[0];
+  const span = (lastD - new Date(first.d + 'T00:00:00')) / 864e5;
+  if (span < 3) return null;
+  const rate = Math.max(0, (last[key] - first[key]) / span);
+  const end = (m) => { const d = new Date(lastD); if (m === 'month') { d.setMonth(d.getMonth() + 1, 0); } else { d.setMonth(11, 31); if (d < lastD) d.setFullYear(d.getFullYear() + 1); } return d; };
+  const at = d => { const n = Math.max(0, (d - lastD) / 864e5); return { low: last[key] + rate * 0.5 * n, likely: last[key] + rate * n, high: last[key] + rate * 1.6 * n, days: n }; };
+  return { rate, last: last[key], lastD, month: { d: end('month'), ...at(end('month')) }, year: { d: end('year'), ...at(end('year')) } };
+}
+function insights(a, m) {
+  const out = [];
+  if (m.live.length < 2) return out;
+  const by = r => r.perDay ?? r.views;
+  const sorted = [...m.live].sort((x, y) => by(y) - by(x)), best = sorted[0], worst = sorted[sorted.length - 1];
+  out.push({ kind: 'good', title: `"${best.e.title}" is your strongest video`, body: `${fmt(best.views)} views${best.perDay ? `, about ${fmt(Math.round(best.perDay))} a day` : ''}. ${m.med ? `That's ${(by(best) / m.med).toFixed(1)}× your typical video.` : ''} Its topic: ${(best.e.tags || {}).topic || 'n/a'}.` });
+  if (worst !== best) out.push({ kind: 'weak', title: `"${worst.e.title}" is behind`, body: `${fmt(worst.views)} views. ${worst.l.stayed != null && worst.l.stayed < 60 ? `Only ${pct(worst.l.stayed)} stayed to watch, so the first two seconds are losing people: open on the most surprising line or image.` : 'Try a sharper title, or re-cut the first two seconds.'}` });
+  const st = m.live.filter(r => r.l.stayed != null);
+  if (st.length >= 2) { const s = avg(st.map(r => r.l.stayed)); out.push({ kind: s >= 65 ? 'good' : 'weak', title: `${pct(s)} stay to watch on average`, body: s >= 65 ? 'Your openings are working. Keep starting with a surprising claim or question.' : 'Many viewers swipe away early. Open with the most surprising fact, and show it on screen in the first second.' }); }
+  const ap = m.live.filter(r => r.l.avgpct != null);
+  if (ap.length >= 2) { const s = avg(ap.map(r => r.l.avgpct)); out.push({ kind: s >= 75 ? 'good' : 'weak', title: `${pct(s)} of each video is watched on average`, body: s >= 75 ? 'People watch to the end. Over 100% would mean re-watches, which the algorithm loves.' : 'People leave in the middle. Cut faster: one idea per shot, and drop any line that doesn\'t add a fact.' }); }
+  const askY = m.live.filter(r => (r.e.tags || {}).ask), askN = m.live.filter(r => !(r.e.tags || {}).ask);
+  const cpk = rs => avg(rs.filter(r => r.views).map(r => (r.l.comments || 0) / r.views * 1000));
+  if (askY.length && askN.length) { const y = cpk(askY), n = cpk(askN); out.push({ kind: y >= n ? 'good' : 'weak', title: `Ending on a question: ${y.toFixed(1)} vs ${n.toFixed(1)} comments per 1K views`, body: y >= n ? 'Videos that end with a question get more comments. Keep ending with one, and pin it as a comment.' : 'The question endings aren\'t pulling comments yet. Make the question easier to answer in one word.' }); }
+  const subsRate = avg(m.live.filter(r => r.views).map(r => (r.l.subs || 0) / r.views * 1000));
+  if (subsRate) out.push({ kind: subsRate >= 3 ? 'good' : 'weak', title: `${subsRate.toFixed(1)} new subscribers per 1K views`, body: subsRate >= 3 ? 'Viewers like the series enough to follow. A clear series name in every title helps even more.' : 'Viewers enjoy the videos but don\'t follow. Say why to follow at the end: "a new Naija story every Monday, Wednesday and Friday".' });
+  return out;
+}
+function nextIdeas(a, m) {
+  const done = new Set(a.episodes.map(e => e.title.toLowerCase()));
+  const order = m.live.length ? [...m.live].sort((x, y) => (y.perDay ?? y.views) - (x.perDay ?? x.views)).map(r => (r.e.tags || {}).topic).filter(Boolean) : [];
+  const topics = [...new Set([...order, ...Object.keys(IDEAS)])];
+  const out = [];
+  for (const tp of topics) for (const idea of IDEAS[tp] || []) if (!done.has(idea.toLowerCase()) && out.length < 4) out.push({ topic: tp, idea, why: order[0] === tp ? 'Same topic as your best video' : 'A topic you haven\'t covered yet' });
+  return out;
+}
+
+// --- charts (single-series; hover tooltips; the table below is the table view)
+function barsSvg(m) {
+  const rows = m.live; if (!rows.length) return '';
+  const max = Math.max(...rows.map(r => r.views)), W = 640, row = 62, padL = 0, top = 6, H = top + rows.length * row + 6;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Views by video">${rows.map((r, i) => {
+    const y = top + i * row, w = Math.max(6, (r.views / max) * (W - 110)), v = fmt(r.views);
+    return `<g class="hit" tabindex="0" data-tip="${esc(r.e.title)}|${r.views.toLocaleString('en')} views${r.perDay ? ' · ' + Math.round(r.perDay).toLocaleString('en') + '/day' : ''}">
+      <rect x="0" y="${y}" width="${W}" height="${row}" fill="transparent"/>
+      <text x="${padL}" y="${y + 18}" font-family="Figtree, sans-serif" font-size="19" fill="#a29eac">${esc(r.e.title.length > 44 ? r.e.title.slice(0, 42) + '…' : r.e.title)}</text>
+      <path d="M0 ${y + 28} h${w - 4} a4 4 0 0 1 4 4 v16 a4 4 0 0 1 -4 4 h-${w - 4} z" fill="${CHART_GREEN}"/>
+      <text x="${w + 10}" y="${y + 47}" font-family="JetBrains Mono, monospace" font-size="20" font-weight="700" fill="#f3efe6">${v}</text></g>`;
+  }).join('')}</svg>`;
+}
+function lineSvg(m, fc) {
+  const s = m.series; if (s.length < 2) return '';
+  const W = 640, H = 300, pl = 70, pr = 16, pt = 16, pb = 40;
+  const t0 = new Date(s[0].d + 'T00:00:00').getTime(), t1 = fc ? fc.month.d.getTime() : new Date(s[s.length - 1].d + 'T00:00:00').getTime();
+  const ymax = Math.max(10, ...s.map(p => p.v), fc ? fc.month.high : 0) * 1.08;
+  const x = d => pl + ((d - t0) / Math.max(1, t1 - t0)) * (W - pl - pr), y = v => H - pb - (v / ymax) * (H - pt - pb);
+  const pts = s.map(p => [x(new Date(p.d + 'T00:00:00').getTime()), y(p.v)]);
+  const ticks = [0, 0.5, 1].map(f => { const v = Math.round(ymax / 1.08 * f); return `<line x1="${pl}" x2="${W - pr}" y1="${y(v)}" y2="${y(v)}" stroke="#2c2a35" stroke-width="1"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="17" fill="#a29eac">${fmt(v)}</text>`; }).join('');
+  let band = '';
+  if (fc) { const [lx, ly] = pts[pts.length - 1], ex = x(fc.month.d.getTime()); band = `<path d="M${lx} ${ly} L${ex} ${y(fc.month.high)} L${ex} ${y(fc.month.low)} Z" fill="${CHART_GREEN}" opacity=".12"/><line x1="${lx}" y1="${ly}" x2="${ex}" y2="${y(fc.month.likely)}" stroke="${CHART_GREEN}" stroke-width="2" opacity=".55" stroke-linecap="round"/><circle cx="${ex}" cy="${y(fc.month.likely)}" r="4" fill="${CHART_GREEN}" stroke="${SURFACE}" stroke-width="2" opacity=".75"/>`; }
+  const path = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const [ax, ay] = pts[pts.length - 1];
+  const data = s.map((p, i) => `${pts[i][0].toFixed(1)},${p.d},${p.v}`).join(';');
+  return `<svg class="line-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Total channel views over time" data-pts="${data}" data-h="${H - pb}" data-top="${pt}">${ticks}${band}
+    <path d="${path}" fill="none" stroke="${CHART_GREEN}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${ax}" cy="${ay}" r="5" fill="${CHART_GREEN}" stroke="${SURFACE}" stroke-width="2"/>
+    <text x="${pl}" y="${H - 8}" font-family="JetBrains Mono, monospace" font-size="17" fill="#a29eac">${fmtDate(s[0].d)}</text>
+    ${fc ? `<text x="${W - pr}" y="${H - 8}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="17" fill="#a29eac">${fc.month.d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} (forecast)</text>` : ''}
+    <line class="xhair" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="#a29eac" stroke-width="1" opacity="0"/>
+    <rect class="xhair-hit" x="${pl}" y="0" width="${W - pl - pr}" height="${H}" fill="transparent"/></svg>`;
+}
+
+function viewAnalytics(a) {
+  const m = analyticsModel(a), fcV = forecast(m.series, 'v'), fcS = forecast(m.series, 's');
+  const totalViews = m.live.reduce((n, r) => n + r.views, 0);
+  const stayedAvg = avg(m.live.filter(r => r.l.stayed != null).map(r => r.l.stayed));
+  const pubCount = a.episodes.filter(e => vinfo(a, e).status === 'published').length, schedCount = a.episodes.filter(e => vinfo(a, e).status === 'scheduled').length;
+  const slots = slotsFrom(a, m.rows.length);
+  const lk = links[a.id] || {}, chanUrl = lk.youtube || (a.handle ? `https://www.youtube.com/@${a.handle}` : '');
+  const ins = insights(a, m), ideas = nextIdeas(a, m);
+  const subsGoalEta = fcS && fcS.rate > 0 && m.subsNow != null && m.subsNow < 1000 ? Math.ceil((1000 - m.subsNow) / fcS.rate) : null;
+  const plan = m.rows.map((r, i) => {
+    const real = vinfo(a, r.e), st = real.status || 'uploaded', when = real.when || '';
+    return `<tr><td class="mono muted">${String(i + 1).padStart(2, '0')}</td><td><b>${esc(r.e.title)}</b><br><span class="muted" style="font-size:12.5px">${esc((r.e.tags || {}).topic || '')} · ${r.e.duration}</span></td>
+      <td class="mono">${when ? fmtDate(when) : `<span class="muted">${fmtDate(isoDate(slots[i]))}, 7:00 PM</span>`}</td>
+      <td><select class="sel" data-vstatus="${vkey(a, r.e)}" aria-label="Status of ${esc(r.e.title)}">${['uploaded', 'scheduled', 'published'].map(o => `<option value="${o}" ${st === o ? 'selected' : ''}>${o[0].toUpperCase() + o.slice(1)}</option>`).join('')}</select>
+      <input class="sel" type="date" data-vwhen="${vkey(a, r.e)}" value="${esc(when)}" aria-label="Date for ${esc(r.e.title)}"></td></tr>`;
+  }).join('');
+  const perf = m.rows.map(r => {
+    const l = r.l || {}, f = r.flag;
+    return `<tr><td><b>${esc(r.e.title)}</b>${f ? `<span class="badge ${f}">${f === 'top' ? '▲ Top' : '▼ Behind'}</span>` : ''}</td><td class="num">${r.views == null ? '—' : r.views.toLocaleString('en')}</td><td class="num">${r.perDay == null ? '—' : Math.round(r.perDay).toLocaleString('en')}</td><td class="num">${pct(l.stayed)}</td><td class="num">${pct(l.avgpct)}</td><td class="num">${l.likes == null ? '—' : l.likes.toLocaleString('en')}</td><td class="num">${l.comments == null ? '—' : l.comments.toLocaleString('en')}</td><td class="num">${l.subs == null ? '—' : '+' + l.subs.toLocaleString('en')}</td></tr>`;
+  }).join('');
+  return `
+  ${m.ex ? `<p class="note"><b>Example numbers.</b>&nbsp;Your videos aren't published yet, so these figures are made up to show how the dashboard works. Your real numbers replace them as soon as you import or type them in. <button class="btn" type="button" data-examples="off" style="margin-left:auto">Hide examples</button></p>` : (!hasReal(a) ? `<p class="note">No numbers yet. Publish your first video, then import your YouTube Studio export below. <button class="btn" type="button" data-examples="on" style="margin-left:auto">Show examples</button></p>` : '')}
+  <section class="banner" style="--acc:${col(a)}"><div class="banner-in">
+    <img src="${a.brand_profile || a.avatar}" alt="">
+    <div style="min-width:0"><span class="label" style="color:${col(a)}">YouTube analytics</span><h2>${esc(a.brand_name || a.label)}</h2>
+      <p class="muted mono">@${esc(a.handle || '')} · ${m.rows.length} uploaded · ${schedCount} scheduled · ${pubCount} published</p>
+      <div class="links">${chanUrl ? `<a class="btn solid" href="${esc(chanUrl)}" target="_blank" rel="noopener">Open channel ↗</a>` : ''}<a class="btn" href="https://studio.youtube.com" target="_blank" rel="noopener">YouTube Studio ↗</a></div></div>
+  </div></section>
+  <section class="strip" aria-label="Channel totals">
+    <div class="stat"><span class="label">Total views</span><b>${m.live.length ? fmt(totalViews) : '—'}</b></div>
+    <div class="stat"><span class="label">Subscribers</span><b>${m.subsNow == null ? '—' : fmt(m.subsNow)}</b></div>
+    <div class="stat"><span class="label">Stayed to watch</span><b>${stayedAvg ? pct(stayedAvg) : '—'}</b></div>
+    <div class="stat"><span class="label">Typical video</span><b>${m.live.length ? fmt(Math.round(median(m.live.map(r => r.views)))) : '—'}</b></div>
+  </section>
+  <div class="grid2">
+    <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Views by video</h3><span class="label">Latest numbers</span></div><div class="panel-body chart">${barsSvg(m) || '<p class="muted">Bars appear once a video has views.</p>'}</div></section>
+    <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Growth and forecast</h3><span class="label">Total views</span></div><div class="panel-body chart">
+      ${lineSvg(m, fcV) || '<p class="muted">The trend line appears after two imports at least three days apart.</p>'}
+      ${fcV ? `<div class="legend"><span><i style="background:${CHART_GREEN}"></i>Actual</span><span><i style="background:${CHART_GREEN};opacity:.35;height:10px"></i>Forecast range</span></div>` : ''}
+      <div class="fc-grid">
+        <div><span class="label">Views by ${fcV ? fcV.month.d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'month end'}</span><b class="mono">${fcV ? fmt(fcV.month.likely) : '—'}</b><span class="muted mono" style="font-size:12px">${fcV ? fmt(fcV.month.low) + ' – ' + fmt(fcV.month.high) : 'needs more data'}</span></div>
+        <div><span class="label">Views by 31 Dec</span><b class="mono">${fcV ? fmt(fcV.year.likely) : '—'}</b><span class="muted mono" style="font-size:12px">${fcV ? fmt(fcV.year.low) + ' – ' + fmt(fcV.year.high) : 'needs more data'}</span></div>
+        <div><span class="label">1,000 subscribers</span><b class="mono">${subsGoalEta != null ? (subsGoalEta > 365 ? '1 yr+' : 'in ~' + subsGoalEta + ' days') : m.subsNow >= 1000 ? 'Reached' : '—'}</b><span class="muted" style="font-size:12px">at the current pace</span></div>
+        <div><span class="label">If monetised</span><b class="mono">${m.live.length ? '$' + (totalViews / 1000 * 0.01).toFixed(2) + ' – $' + (totalViews / 1000 * 0.06).toFixed(2) : '—'}</b><span class="muted" style="font-size:12px">Shorts pay roughly $0.01–$0.06 per 1K views</span></div>
+      </div>
+      <p class="muted" style="font-size:12.5px">The forecast extends your last 14 days. Low is half that pace, high is 1.6×. Posting on schedule keeps you near the high end.</p>
+    </div></section>
+  </div>
+  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">What's working, what isn't</h3><span class="label">${m.ex ? 'From the example numbers' : 'From your numbers'}</span></div>
+    <div class="panel-body">${ins.length ? `<div class="ins-grid">${ins.map(x => `<div class="ins ${x.kind}"><b>${x.kind === 'good' ? '▲ ' : '▼ '}${esc(x.title)}</b><span>${esc(x.body)}</span></div>`).join('')}</div>` : '<p class="muted">Insights appear once two videos have numbers.</p>'}
+      <div class="ask"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="label">A written review from Claude</span><button class="btn solid" type="button" data-ask="${a.id}" ${m.ex || claudeRead.busy ? 'disabled' : ''}>${claudeRead.busy ? 'Reading your numbers…' : 'Ask Claude for a review'}</button></div>
+        <p class="claude-read" id="claude-read">${claudeRead.err ? esc(claudeRead.err) : claudeRead.text ? esc(claudeRead.text) : m.ex ? 'Available once your real numbers are in.' : 'Claude reads your latest numbers and writes what worked, what didn\'t, and what to make next.'}</p></div>
+    </div></section>
+  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Make next</h3><span class="label">Ideas</span></div><div class="panel-body"><div class="ins-grid">${ideas.map(x => `<div class="ins idea"><b>${esc(x.idea)}</b><span>${esc(x.why)} · ${esc(x.topic)}</span></div>`).join('')}</div></div></section>
+  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Every video</h3><span class="label">Table view</span></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Video</th><th>Views</th><th>Per day</th><th>Stayed</th><th>Watched</th><th>Likes</th><th>Comments</th><th>Subs</th></tr></thead><tbody>${perf}</tbody></table></div></section>
+  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Release plan</h3><span class="label">${a.days.join(' · ')} · 7 PM Nigeria time</span></div>
+    <div class="panel-body"><p class="muted" style="font-size:13.5px">Your ${m.rows.length} videos are uploaded but private. In YouTube Studio, open each one, set Visibility to Schedule, and use the dates below. The order leads with your broadest stories and saves the Biafra episode until the channel has an audience and you can keep an eye on its comments.</p>
+    <div class="tbl-wrap"><table class="tbl plan"><thead><tr><th>#</th><th>Video</th><th>Date</th><th>Status</th></tr></thead><tbody>${plan}</tbody></table></div></div></section>
+  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Add your numbers</h3><span class="label">Import or type</span></div>
+    <div class="panel-body">
+      <ol class="mini-steps"><li>On a computer, open YouTube Studio, then Analytics, then <b>Advanced mode</b>.</li><li>Pick the Content tab, set the dates to Lifetime, and choose <b>Export current view → Comma-separated values (.csv)</b>.</li><li>Upload the ZIP it downloads (or the "Table data.csv" inside it) here.</li></ol>
+      <label class="btn solid" style="width:max-content"><input type="file" id="csv-${a.id}" data-import="${a.id}" accept=".csv,.zip,text/csv,application/zip" hidden>Import YouTube Studio export</label>
+      <details class="manual"><summary>Or type one video's numbers (phone)</summary>
+        <form class="form" data-vmanual="${a.id}" style="margin-top:10px">
+          <label class="field full"><span class="label">Video</span><select class="sel" name="ep" id="vm-${a.id}-ep">${orderOf(a).map(e => `<option value="${e.id}">${esc(e.title)}</option>`).join('')}</select></label>
+          ${[['views', 'Views'], ['stayed', 'Stayed to watch %'], ['avgpct', 'Average % viewed'], ['likes', 'Likes'], ['comments', 'Comments'], ['subs', 'Subscribers gained']].map(([k, n]) => `<label class="field"><span class="label">${n}</span><input id="vm-${a.id}-${k}" name="${k}" inputmode="decimal" placeholder="0"></label>`).join('')}
+          <div class="full"><button class="btn solid" type="submit">Save numbers</button></div>
+        </form></details>
+    </div></section>`;
+}
+
+// ---- CSV / ZIP import of a YouTube Studio export
+function parseCSV(text) {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += c; }
+    else if (c === '"') q = true; else if (c === ',') { row.push(cell); cell = ''; } else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cell); rows.push(row); row = []; cell = ''; } else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+const normTitle = s => String(s || '').toLowerCase().replace(/#\w+/g, ' ').replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+function matchEpisode(a, title) {
+  const t = new Set(normTitle(title)); let best = null, bs = 0;
+  for (const e of a.episodes) { const c = new Set([...normTitle(e.yt_title), ...normTitle(e.title)]); const inter = [...t].filter(w => c.has(w)).length, sc = inter / Math.max(1, Math.min(t.size, c.size)); if (sc > bs) { bs = sc; best = e; } }
+  return bs >= 0.5 ? best : null;
+}
+async function importExport(a, file) {
+  let text;
+  if (/\.zip$/i.test(file.name) || file.type.includes('zip')) {
+    if (!window.JSZip) throw new Error('The ZIP reader didn\'t load. Upload the "Table data.csv" file instead.');
+    const zip = await JSZip.loadAsync(file); const f = Object.values(zip.files).find(z => /table data\.csv$/i.test(z.name)) || Object.values(zip.files).find(z => /\.csv$/i.test(z.name));
+    if (!f) throw new Error('No CSV inside that ZIP. Export again as "Comma-separated values".');
+    text = await f.async('string');
+  } else text = await file.text();
+  const rows = parseCSV(text.replace(/^﻿/, '')); if (rows.length < 2) throw new Error('That file has no rows.');
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = (...res) => head.findIndex(h => res.some(r => r.test(h)));
+  const C = { title: col(/^video title$/, /title/), views: col(/^views$/), likes: col(/^likes$/, /^likes /), comments: col(/comments/), subs: col(/^subscribers$/, /subscribers gained/), stayed: col(/stayed to watch/, /swiped/), avgpct: col(/average percentage viewed/), when: col(/publish time/, /published/) };
+  if (C.title < 0 || C.views < 0) throw new Error('Couldn\'t find "Video title" and "Views" columns. Export the Content tab from Advanced mode.');
+  const num = v => { const n = parseFloat(String(v || '').replace(/[,%\s]/g, '')); return isNaN(n) ? null : n; };
+  const d = isoDate(today()); let ok = 0; const missed = [];
+  for (const r of rows.slice(1)) {
+    const title = r[C.title]; if (!title || /^total$/i.test(title.trim())) continue;
+    const e = matchEpisode(a, title); if (!e) { missed.push(title); continue; }
+    const k = vkey(a, e), cur = vstats[k] || {};
+    const entry = { d, views: num(r[C.views]) || 0 };
+    for (const f of ['likes', 'comments', 'subs', 'stayed', 'avgpct']) if (C[f] >= 0) { const v = num(r[C[f]]); if (v != null) entry[f] = v; }
+    const hist = (cur.history || []).filter(x => x.d !== d).concat([entry]).slice(-200);
+    let when = cur.when || ''; if (C.when >= 0 && r[C.when]) { const pd = new Date(r[C.when]); if (!isNaN(pd)) when = isoDate(pd); }
+    const next = { ...cur, status: 'published', when, history: hist };
+    await db.collection('vstats').doc(k).set(next); vstats = { ...vstats, [k]: next }; ok++;
+    const p = posted[k] || {}; if (!p.youtube) { const np = { tiktok: !!p.tiktok, youtube: true, updatedAt: new Date().toISOString() }; await db.collection('posted').doc(k).set(np); posted = { ...posted, [k]: np }; }
+  }
+  return { ok, missed };
+}
+async function askClaude(a) {
+  const m = analyticsModel(a);
+  const sample = await claude.use('sample');
+  if (!sample) { claudeRead = { text: '', busy: false, err: 'Asking Claude isn\'t available in this view.' }; render(); return; }
+  claudeRead = { text: '', busy: true, err: '' }; render();
+  const data = m.rows.map(r => ({ title: r.e.title, topic: (r.e.tags || {}).topic, hook: (r.e.tags || {}).hook, endsWithQuestion: !!(r.e.tags || {}).ask, seconds: r.e.seconds, published: r.info.when || null, status: r.info.status || 'uploaded', latest: r.l || null }));
+  const prompt = `You are a YouTube Shorts coach. The channel "${a.brand_name || a.label}" posts 30-40 second animated Nigerian history Shorts in an Ankara pop-art style, hosted by Ijapa the tortoise, on ${a.days.join(', ')}.
+Here is each video with its latest YouTube numbers (views; stayed = % who stayed to watch instead of swiping away; avgpct = average % of the video viewed; subs = subscribers gained):
+${JSON.stringify(data)}
+Subscribers now: ${m.subsNow ?? 'unknown'}.
+Write a short, plain-English review for the creator, under 220 words, with these four headings on their own lines: What worked, What didn't, Make next (3 specific Nigerian history video ideas that fit what worked), This week (2 concrete actions). Only use the numbers given; if there is too little data, say so. No markdown symbols other than "- " for list items.`;
+  try {
+    const res = await sample(prompt, { onText: ({ text }) => { claudeRead.text = text; const el = document.getElementById('claude-read'); if (el) el.textContent = text; }, cache: false });
+    claudeRead = { text: res.text, busy: false, err: '' };
+  } catch (e) { claudeRead = { text: '', busy: false, err: e && e.code === 'rate_limited' ? 'Too many requests just now. Try again in a minute.' : e && e.code === 'not_granted' ? 'Claude wasn\'t allowed to read the numbers. Allow it in the page permissions to use this.' : 'Claude couldn\'t write the review. Try again.' }; }
+  render();
+}
+// hover tooltips for both charts
+function wireCharts() {
+  const tip = document.getElementById('tip');
+  const show = (txt, x, y) => { const [h, v] = txt.split('|'); tip.innerHTML = ''; const b = document.createElement('b'); b.textContent = v || h; const s = document.createElement('span'); s.textContent = v ? h : ''; tip.append(b, s); tip.hidden = false; tip.style.left = Math.min(window.innerWidth - tip.offsetWidth - 8, x + 14) + 'px'; tip.style.top = (y + 14) + 'px'; };
+  document.querySelectorAll('[data-tip]').forEach(g => {
+    g.addEventListener('pointermove', ev => show(g.dataset.tip, ev.clientX, ev.clientY));
+    g.addEventListener('pointerleave', () => tip.hidden = true);
+    g.addEventListener('focus', () => { const r = g.getBoundingClientRect(); show(g.dataset.tip, r.left, r.top); });
+    g.addEventListener('blur', () => tip.hidden = true);
+  });
+  document.querySelectorAll('svg.line-chart').forEach(svg => {
+    const pts = svg.dataset.pts.split(';').map(p => { const [x, d, v] = p.split(','); return { x: +x, d, v: +v }; });
+    const hair = svg.querySelector('.xhair'), hit = svg.querySelector('.xhair-hit');
+    hit.addEventListener('pointermove', ev => {
+      const r = svg.getBoundingClientRect(), vx = (ev.clientX - r.left) / r.width * 640;
+      const p = pts.reduce((b, q) => Math.abs(q.x - vx) < Math.abs(b.x - vx) ? q : b);
+      hair.setAttribute('x1', p.x); hair.setAttribute('x2', p.x); hair.setAttribute('opacity', '1');
+      show(`${fmtDate(p.d)}|${p.v.toLocaleString('en')} views`, ev.clientX, ev.clientY);
+    });
+    hit.addEventListener('pointerleave', () => { hair.setAttribute('opacity', '0'); tip.hidden = true; });
+  });
+}
+
 // ---------- routing + paint ----------
 let route = '';
 function render() {
   const id = (location.hash || '').slice(1);
-  route = id === 'setup' || acc(id) ? id : 'today';
-  const a = acc(route);
+  const an = id === 'analytics' || id.startsWith('analytics-') ? (acc(id.slice(10)) || acc('naija') || DATA.accounts[0]) : null;
+  route = an ? 'analytics' : id === 'setup' || acc(id) ? id : 'today';
+  const a = an || acc(route);
   document.documentElement.style.setProperty('--acc', a ? col(a) : '#f3efe6');
-  document.getElementById('tabs').innerHTML = [['today', 'Today', '#f3efe6'], ...DATA.accounts.map(x => [x.id, x.short, col(x)]), ['setup', 'Setup', '#a29eac']]
+  document.getElementById('tabs').innerHTML = [['today', 'Today', '#f3efe6'], ['analytics', 'Analytics', '#1fa86a'], ...DATA.accounts.map(x => [x.id, x.short, col(x)]), ['setup', 'Setup', '#a29eac']]
     .map(([k, n, c]) => `<button class="tab" type="button" data-go="${k}" style="--acc:${c}" ${route === k ? 'aria-current="page"' : ''}><span class="led"></span>${esc(n)}</button>`).join('');
-  document.getElementById('view').innerHTML = `<div style="display:grid;gap:22px">${route === 'today' ? viewToday() : route === 'setup' ? viewSetup() : viewChannel(a)}</div>`;
-  paint();
+  document.getElementById('view').innerHTML = `<div style="display:grid;gap:22px;--acc:${a ? col(a) : '#f3efe6'}">${route === 'today' ? viewToday() : route === 'setup' ? viewSetup() : route === 'analytics' ? viewAnalytics(a) : viewChannel(a)}</div>`;
+  paint(); wireCharts();
 }
 function paint() {
   document.querySelectorAll('.step').forEach(b => { b.disabled = !db || !canWrite; });
@@ -430,6 +752,10 @@ document.addEventListener('click', async ev => {
   if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copytext); toast('Copied'); } catch { toast("Couldn't copy here. Press and hold the text instead."); } return; }
   const pl = ev.target.closest('[data-play]');
   if (pl) { const box = pl.closest('.thumb'); box.innerHTML = `<video controls playsinline autoplay src="${pl.dataset.play}"></video>`; return; }
+  const exb = ev.target.closest('[data-examples]');
+  if (exb) { examplesOff = exb.dataset.examples === 'off'; render(); return; }
+  const askb = ev.target.closest('[data-ask]');
+  if (askb) { askClaude(acc(askb.dataset.ask)); return; }
   const step = ev.target.closest('[data-step]');
   if (step) {
     if (!db || !canWrite) { toast('Sign in to claude.ai to save progress.'); return; }
@@ -458,9 +784,36 @@ document.addEventListener('click', async ev => {
     setTimeout(() => { save.textContent = label; save.disabled = false; }, 2000);
   }
 });
+document.addEventListener('change', async ev => {
+  const el = ev.target;
+  if (!el.dataset.vstatus && !el.dataset.vwhen && !el.dataset.import) return;
+  if (!db || !canWrite) { toast('Sign in to claude.ai to save progress.'); return; }
+  if (el.dataset.import) {
+    const a = acc(el.dataset.import), file = el.files && el.files[0]; if (!file) return;
+    toast('Importing…');
+    try { const r = await importExport(a, file); toast(`Imported ${r.ok} video${r.ok === 1 ? '' : 's'}${r.missed.length ? `. ${r.missed.length} didn't match an episode` : ''}`); render(); }
+    catch (e) { toast(e.message || "Couldn't read that file."); }
+    el.value = ''; return;
+  }
+  const k = el.dataset.vstatus || el.dataset.vwhen, cur = vstats[k] || {};
+  const next = el.dataset.vstatus ? { ...cur, status: el.value } : { ...cur, when: el.value };
+  if (el.dataset.vstatus && el.value !== 'uploaded' && !next.when) { const a = acc(k.split('--')[0]), i = orderOf(a).findIndex(e => vkey(a, e) === k); next.when = isoDate(slotsFrom(a, i + 1)[i]); }
+  vstats = { ...vstats, [k]: next }; render();
+  try { await db.collection('vstats').doc(k).set(next); if (next.status === 'published') { const p = posted[k] || {}; if (!p.youtube) { const np = { tiktok: !!p.tiktok, youtube: true, updatedAt: new Date().toISOString() }; await db.collection('posted').doc(k).set(np); } } }
+  catch { vstats = { ...vstats, [k]: cur }; render(); toast("Couldn't save. Check your connection and try again."); }
+});
 document.addEventListener('submit', async ev => {
   const f = ev.target; ev.preventDefault();
   if (!db || !canWrite) { toast('Sign in to claude.ai to save progress.'); return; }
+  if (f.dataset.vmanual) {
+    const a = acc(f.dataset.vmanual), e = a.episodes.find(x => x.id === f.elements.ep.value), k = vkey(a, e), cur = vstats[k] || {}, d = isoDate(today());
+    const prev = (cur.history || []).slice(-1)[0] || {}, entry = { d };
+    for (const fld of ['views', 'stayed', 'avgpct', 'likes', 'comments', 'subs']) { const raw = (f.elements[fld].value || '').replace(/[,%\s]/g, ''); if (raw === '') { if (prev[fld] != null) entry[fld] = prev[fld]; } else if (/^\d+(\.\d+)?$/.test(raw)) entry[fld] = Number(raw); else { toast('Numbers only, please.'); f.elements[fld].focus(); return; } }
+    if (entry.views == null) { toast('Add the views at least.'); return; }
+    const next = { ...cur, status: 'published', when: cur.when || d, history: (cur.history || []).filter(x => x.d !== d).concat([entry]).slice(-200) };
+    try { await db.collection('vstats').doc(k).set(next); vstats = { ...vstats, [k]: next }; toast('Numbers saved'); render(); } catch { toast("Couldn't save. Check your connection and try again."); }
+    return;
+  }
   if (f.dataset.stats) {
     const id = f.dataset.stats, prev = latest(id) || {}, entry = { d: isoDate(today()) };
     for (const k of ['tf', 'tv', 'ys', 'yv']) { const raw = (f.elements[k].value || '').replace(/[,\s]/g, ''); if (raw === '') entry[k] = prev[k] ?? null; else if (/^\d+$/.test(raw)) entry[k] = Number(raw); else { toast('Numbers only, please, like 1250.'); f.elements[k].focus(); return; } }
@@ -488,10 +841,10 @@ render();
   if (!db) { sync.textContent = 'Sign in to claude.ai to track posts and growth.'; sync.classList.add('warn'); paint(); return; }
   const user = await claude.use('user');
   if (user) { const w = await user.can('data.write'); if (w === false) canWrite = false; }
-  let first = 4;
+  let first = 5;
   const timer = setTimeout(() => { sync.textContent = "Can't reach your progress yet. Changes may not save until it loads."; sync.classList.add('warn'); }, 10000);
   const settle = snap => { if (!snap.metadata.fromCache && --first <= 0) { clearTimeout(timer); sync.classList.remove('warn'); sync.textContent = canWrite ? 'Progress syncs across your devices.' : 'View only: you can see progress but not change it.'; } };
   const sub = (name, apply) => db.collection(name).onSnapshot(snap => { const m = {}; snap.docs.forEach(d => { if (d.exists) m[d.id] = d.data(); }); apply(m); render(); settle(snap); }, () => { clearTimeout(timer); sync.textContent = 'Sync stopped. Reload the page to try again.'; sync.classList.add('warn'); });
-  sub('posted', m => posted = m); sub('links', m => links = m); sub('stats', m => stats = m); sub('setup', m => setup = m);
+  sub('posted', m => posted = m); sub('links', m => links = m); sub('stats', m => stats = m); sub('setup', m => setup = m); sub('vstats', m => vstats = m);
 })();
 </script>

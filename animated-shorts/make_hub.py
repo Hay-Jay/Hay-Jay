@@ -63,7 +63,7 @@ def main():
             eps.append(dict(id=name, title=ep.get("title", name), video=video_rel, poster=poster_rel,
                             file=(name if name.startswith(acc["id"]) else f"{acc['id']}-{name}") + ".mp4", duration=duration(mp4), seconds=round(seconds(mp4), 1),
                             tiktok=post.get("caption", ""), yt_title=post.get("youtube_title", ""),
-                            yt_desc=post.get("youtube_description", "")))
+                            yt_desc=post.get("youtube_description", ""), tags=ep.get("tags", {})))
         acc["episodes"] = eps
         # brand kit (from make_brand.py): web-friendly JPEGs the page can show and save
         bdir = os.path.join(HERE, "build", "brand", acc["id"])

@@ -37,5 +37,10 @@
       "scene": "cta",
       "text": "Next time you see the green white green, remember him. Follow for more Naija history!"
     }
-  ]
+  ],
+  "tags": {
+    "topic": "symbols",
+    "hook": "surprise",
+    "ask": false
+  }
 }

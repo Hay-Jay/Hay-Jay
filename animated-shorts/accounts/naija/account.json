@@ -26,5 +26,13 @@
   "brand_name": "Ìjàpá Tells",
   "handle": "ijapatells",
   "tagline": "Nigerian history told by Ìjàpá",
-  "handles_checked": "3 Nov 2026"
+  "handles_checked": "3 Nov 2026",
+  "launch_order": [
+    "naija-name",
+    "naija-flag",
+    "naija-roads",
+    "naija-abuja",
+    "naija-amina",
+    "naija-biafra"
+  ]
 }
