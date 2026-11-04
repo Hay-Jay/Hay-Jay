@@ -2,7 +2,7 @@
    Edit the words/numbers here, then re-render with:  node render.mjs
    Every number has a source listed on the video's last scene and in README.md.
    Put your TikTok / IG handle here so it shows on every frame: */
-window.HANDLE = '#Nigeria2027';
+window.HANDLE = 'Naija Decides · #Nigeria2027';
 
 /* Narrator voice (Microsoft Edge neural TTS). Nigerian English options:
    'en-NG-AbeoNeural' (male) or 'en-NG-EzinneNeural' (female). */
@@ -621,3 +621,18 @@ window.NARRATION = {
     ['calm',    'All sources are on screen. None of the three has been convicted of a crime.'],
   ],
 };
+
+/* Closing promo for the Naija Decides website, added to every video. */
+(function(){
+  const faces = [['site/photos/atiku.jpg','var(--adc)'],['site/photos/tinubu.jpg','var(--apc)'],['site/photos/obi.jpg','var(--ndc)']];
+  const PROMO = { dur: 6, html: `
+    <div class="promo">
+      <div class="kicker a" data-a="up">Get the full picture</div>
+      <div class="trio-v a" data-a="pop" data-t=".15">${faces.map(([f, c]) => `<i style="background-image:url('${f}');--c:${c}"></i>`).join('')}</div>
+      <div class="brand-v a" data-a="pop" data-t=".45"><span class="flag-v"><i></i><i></i><i></i></span>NAIJA<br>DECIDES</div>
+      <div class="feat a" data-a="up" data-t=".9">${['Compare the candidates','Fact-checks with receipts','Weekly news every Sunday','The live Naija Decides Rank'].map(x => `<span>${x}</span>`).join('')}</div>
+      <div class="a" data-a="stamp" data-t="1.6"><span class="linkbio">Link in bio</span></div>
+    </div>` };
+  window.VIDEOS.forEach(v => v.scenes.push(PROMO));
+  Object.keys(window.NARRATION).forEach(id => window.NARRATION[id].push(['fired', 'Want the full facts? Compare the candidates, check the claims, and follow the live rank on Naija Decides. The link is in our bio!']));
+})();
