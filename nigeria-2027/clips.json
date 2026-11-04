@@ -188,5 +188,61 @@
   "find": [
    "did not in any respect whatsoever violate any law"
   ]
+ },
+ {
+  "id": "n-youth",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/inec-explains-drop-youth-voter-registration-ahead-2027-elections/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-statepolice",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/national-assembly-to-transmit-state-police-bill-to-president-tinubu/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-sokoto",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/atiku-disrupt-adc-campaign-rally-in-sokoto/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-elrufai",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/el-rufai-issues-directives-on-2027-elections/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-melaye",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/inec-apc-2027-elections-dino-melaye-alarm/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-deepfakes",
+  "outlet": "The Sun",
+  "date": "2026-11",
+  "url": "https://thesun.ng/2027-elections-inec-raises-alarm-over-deepfakes-ai-generated-fake-news",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-list",
+  "outlet": "Naija News",
+  "date": "2026-09-12",
+  "url": "https://www.naijanews.com/2026/09/12/inec-releases-presidential-candidates/",
+  "headline": true,
+  "below": 520
  }
 ]
