@@ -2,7 +2,7 @@
    Updated by the twice-daily update task. To add a new poll: add a category,
    then run `node nigeria-2027/site/build.mjs --snapshot` to record movement. */
 const RANK = {
-  updated: '2026-11-04T12:00:00+01:00',     // last time the data was checked (WAT)
+  updated: '2026-11-04T22:44:10.547Z',     // last time the data was checked (WAT)
   changed: '2026-11-04T12:00:00+01:00',     // last time any number changed
   everyHours: 12,
   categories: [
@@ -10,7 +10,7 @@ const RANK = {
       note:'Net favourability (favourable minus unfavourable), −100 to +100.', raw:{obi:58.3, tinubu:-58.5}, fmt:'net', scale:'net'},
     {id:'harmattan', label:'Harmattan Intelligence', kind:'Survey', weight:1, date:'30 Jun 2026', n:'1,000 registered voters', src:'harmattan',
       note:'Share favourable. Obi figure is for the Obi–Kwankwaso ticket; Atiku 40% "somewhat favourable" (very-favourable share not reported); Tinubu: 75% strongly disapprove of his performance, so at most 25% approve.', raw:{obi:80, atiku:40, tinubu:25}, fmt:'pct'},
-    {id:'oxford', label:'Oxford-Metro National Trust Poll', kind:'Open poll', weight:0.5, date:'closed 7 Sep 2026', n:'about 69,100 open responses', src:'oxford',
+    {id:'oxford', label:'Oxford-Metro National Trust Poll', kind:'Open poll', weight:0.5, date:'closed 7 Sep 2026', n:'69,110 approved open responses', src:'oxford',
       note:'Share of responses. Open to anyone, not a random sample.', raw:{tinubu:35.41, obi:33.86, atiku:26.67}, fmt:'pct'},
     {id:'tmg', label:'"Tinubu Must Go" online poll', kind:'Partisan poll', weight:0.5, date:'24–25 Sep 2026', n:'109,799 self-selected', src:'tmg',
       note:'Run by an anti-Tinubu group; Tinubu was not an option.', raw:{atiku:73.6, obi:22.3}, fmt:'pct'},
