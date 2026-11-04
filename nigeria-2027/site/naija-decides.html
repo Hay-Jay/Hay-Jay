@@ -233,6 +233,17 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
 .gloss div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .gloss dt{font:400 22px/1 var(--display);color:var(--accent);margin-bottom:6px}
 .gloss dd{margin:0;font-size:14px;color:var(--muted)}
+
+/* popularity */
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:end}
+@media (max-width:620px){.podium{grid-template-columns:1fr}}
+.pod{display:grid;justify-items:center;gap:8px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.pod.p1{border-color:var(--accent);background:linear-gradient(180deg,rgba(61,255,154,.14),var(--panel));padding-block:24px}
+.pod .pos{font:400 22px/1 var(--display);color:var(--muted)}
+.pod.p1 .pos{color:var(--accent)}
+.pod .score{font:400 46px/1 var(--display);font-variant-numeric:tabular-nums}
+.slider{display:grid;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.slider input{width:100%;accent-color:var(--accent)}
 footer{border-top:1px solid var(--line);padding-block:26px 44px;color:var(--muted);font-size:13px}
 #toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:11px 18px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
 #toast.on{opacity:1}
@@ -420,15 +431,16 @@ Object.assign(S, {
   duke:{t:'Donald Duke (Wikipedia)',u:'https://en.wikipedia.org/wiki/Donald_Duke'},
   makinde:{t:'Seyi Makinde (Wikipedia)',u:'https://en.wikipedia.org/wiki/Seyi_Makinde'},
   adebayo:{t:'Adewole Adebayo (Wikipedia)',u:'https://en.wikipedia.org/wiki/Adewole_Adebayo'},
+  abbas:{t:'Wikimedia Commons (Aliyu Bin Abbas)',u:'https://commons.wikimedia.org/wiki/File:Aliyu_Bin_Abbas_certificate_of_return.jpg'},
   reserves:{t:'CBN data via FactCheckHub / Africa Check',u:'https://factcheckhub.com/nigeria-at-66-fact-checking-tinubus-independence-day-economics/'}
 });
 
 // Freely licensed portraits only (Wikimedia Commons), cropped square around the face. Candidates without a free photo keep initials.
-const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg' };
+const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg', 'aliyu-abbas-bin':'photos/abbas.jpg' };
 const CREDITS = [
   'Photos via Wikimedia Commons, cropped (and for Makinde, upscaled) by Naija Decides; adaptations of CC BY-SA photos are shared under the same licence.',
-  'Tinubu: Nosa Asemota, CC BY-SA 4.0.', 'Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0.', 'Obi: Voice of America, public domain.',
-  'Makinde: Oduola Matthew, CC BY-SA 4.0.', 'Sowore: Mohamed Nanabhay, CC BY 2.0.', 'Adebayo: Benbaahi, CC BY-SA 4.0.'
+  'Tinubu: Nosa Asemota, CC BY-SA 4.0.', 'Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0.', 'Obi: photo supplied (source to be credited).',
+  'Makinde: Oduola Matthew, CC BY-SA 4.0.', 'Sowore: Mohamed Nanabhay, CC BY 2.0.', 'Adebayo: Benbaahi, CC BY-SA 4.0.', 'Abbas-Bin: Ultimatemastery, CC BY-SA 4.0.'
 ];
 C.forEach(c => c.photo = PHOTOS[c.id] || '');
 C.find(c => c.id === 'tinubu').img = 'img/s-tinubu.jpg';
@@ -463,7 +475,7 @@ const ALL = [
   ['AAC','Omoyele Sowore','Haruna Garba Magashi',2,'Founder of Sahara Reporters (2006) and the AAC (2018). Led the 2019 #RevolutionNow protests and was detained by the DSS. Ran in 2019 (33,953 votes) and 2023.','About 14,608 votes','sowore'],
   ['SDP','Adewole Adebayo','Usman Muhammed Bugaje',2,'Lawyer and founder of KAFTAN TV. SDP presidential candidate in 2023, running again.','Ran (SDP)','adebayo'],
   ['AA','Rufai Adekunle Omo-Aje','Shehu Hussaini',3,'','Did not run','n_list'],
-  ['ADP','Aliyu Abbas-Bin','Chinazam Ike',3,'','Did not run','n_list'],
+  ['ADP','Aliyu Abbas-Bin','Chinazam Ike',3,'Also written Aliyu Bin Abbas. Founder of the National Youth Alliance youth group; declared ADP presidential candidate in June 2026.','Did not run','abbas'],
   ['APP','Kabiru Yusuf','Peace Egobia Ofordile',3,'','Did not run','n_list'],
   ['BP','Sunday Adenuga','Usman Turaki Mustapha',3,'Boot Party candidate in 2023 too','Ran (BP)','n_list'],
   ['DLA','Moses Olusoji Adebisi','Nafisat Usaku Abubakar',3,'','Did not run','n_list'],
@@ -476,6 +488,27 @@ const ALL = [
 ALL[0].id = 'tinubu'; ALL[1].id = 'atiku'; ALL[2].id = 'obi';
 ALL.forEach(a => { a.photo = PHOTOS[a.id] || ''; });
 const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported', straw:'73.6%'}, obi:{fav:'+58.3', straw:'22.3%'} };
+// Popularity index: the only measured signals that exist. Missing values count as neutral (50).
+const POP = { tinubu:{fav:-58.5, share:36.6, straw:null}, atiku:{fav:null, share:29.1, straw:73.6}, obi:{fav:58.3, share:25.4, straw:22.3} };
+const POPSIG = [
+  ['fav','2026 favourability','SBM Intelligence net favourability, May 2026 (−100 to +100)', v => (v + 100) / 2, 'sbm'],
+  ['share','2023 vote share','Share of votes cast in 2023, scaled to the winner', v => v / 36.6 * 100, 'wiki23'],
+  ['straw','Online straw poll','Self-selected online poll, Sep 2026, run by an anti-Tinubu group', v => v / 73.6 * 100, 'tmg']
+];
+const POPW_DEFAULT = {fav:50, share:35, straw:15};
+function popScores(){
+  const w = store.get('popw', POPW_DEFAULT); const tot = POPSIG.reduce((a, [k]) => a + (+w[k] || 0), 0) || 1; const out = {};
+  Object.entries(POP).forEach(([id, d]) => { out[id] = Math.round(POPSIG.reduce((a, [k, , , f]) => a + (+w[k] || 0) * (d[k] == null ? 50 : f(d[k])), 0) / tot * 10) / 10; });
+  return out;
+}
+function ranked(){ const sc = popScores(); const top = ALL.filter(a => sc[a.id] != null).sort((x, y) => sc[y.id] - sc[x.id]); return [...top, ...ALL.filter(a => sc[a.id] == null).sort((x, y) => x.tier - y.tier)]; }
+function popPanel(){
+  const w = store.get('popw', POPW_DEFAULT); const sc = popScores(); const order = Object.keys(sc).sort((a, b) => sc[b] - sc[a]);
+  return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Popularity index · you set the weights</div><h2>Who is most popular?</h2></div><button class="btn" id="popreset">Reset weights</button></div>
+    <div class="podium">${order.map((id, i) => { const c = cand(id); return `<div class="pod p${i + 1}">${face(c, i === 0 ? 120 : 96)}<div class="pos">#${i + 1}</div><b>${c.name}</b><span class="party" style="--c:${c.c}">${c.party}</span><div class="score">${sc[id]}</div><div class="bar" style="--c:${c.c};width:100%"><div class="t"><i style="width:${sc[id]}%"></i></div></div></div>`; }).join('')}</div>
+    <div class="grid g3">${POPSIG.map(([k, l, d, , sk]) => `<label class="slider"><span class="row" style="justify-content:space-between"><b>${l}</b><span class="n" id="w-${k}">${w[k]}%</span></span><input type="range" min="0" max="100" step="5" value="${w[k]}" data-w="${k}" aria-label="Weight for ${l}"><span class="muted small">${d} · ${src(sk)}</span></label>`).join('')}</div>
+    <p class="muted small">Index = weighted average of each signal scaled to 0–100. Atiku has no published favourability score and Tinubu was not in the straw poll, so those gaps count as a neutral 50. When a scientific poll or our viewer poll by age is published, it gets added here. This measures popularity so far, not who will win.</p></div>`;
+}
 const TIERS = {1:['Frontrunner','5M+ votes in 2023, or measured in national polling'],2:['Contender','Sitting or former governor, a past national candidate, or the nominee of a party that won 1M+ votes in 2023'],3:['Long shot','No national track record yet']};
 
 const STATS = [
@@ -575,6 +608,7 @@ const VIEWS = {
           <div class="src">Polls open 8:00am WAT · ${src('inecTime')}</div></div>
       </div>
     </div>
+    ${(() => { const sc = popScores(); const o = Object.keys(sc).sort((a, b) => sc[b] - sc[a]); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">Popularity index</div><h3>Who is most popular right now?</h3></div><span class="btn">Full ranking</span></div><div class="row" style="gap:18px">${o.map((id, i) => `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1}</div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${sc[id]}</span></div></div>`).join('')}</div></a>`; })()}
     <div class="grid g4">
       <div class="card stat lift"><div class="k">Registered voters</div><div class="v">110M</div><div class="src">${src('voters')}</div></div>
       <div class="card stat lift"><div class="k">2023 turnout</div><div class="v" style="color:var(--false)">26.7%</div><div class="src">${src('wiki23')}</div></div>
@@ -597,18 +631,22 @@ const VIEWS = {
 
   candidates:{label:'Candidates', render(){
     const myRank = store.get('rank', null);
-    return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · ranked by the evidence</div><h2>The scoreboard</h2>
-      <p class="muted">Nobody can honestly say who will win: no scientific vote-intention poll has been published (${src('noPolls')}). So we rank on what can be checked: past results, national polling and track record. Tap a candidate for more.</p></div>
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · ranked by popularity</div><h2>The scoreboard</h2>
+      <p class="muted">Ranked by popularity: favourability, 2023 votes and polling. No scientific vote-intention poll has been published yet (${src('noPolls')}), so you decide how much each signal counts. Candidates with no popularity data are listed by standing. Tap anyone for their profile.</p></div>
       <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
-      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>Standing</th><th>2023 result</th><th>Favourability</th><th>Straw poll</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
-      ${ALL.map((a, i) => { const s = SIGNALS[a.id] || {}; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
+      ${popPanel()}
+      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>Popularity</th><th>Standing</th><th>2023 result</th><th>Favourability</th><th>Straw poll</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
+      ${(() => { const sc = popScores(); return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
         <td><div class="who">${face(a, 42)}<div><b>${esc(a.name)}</b><div class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span> with ${esc(a.mate)}</div></div></div></td>
-        <td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td><td class="small">${esc(a.r23)}</td><td class="n small">${s.fav || '—'}</td><td class="n small">${s.straw || '—'}</td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
-        <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 6 : 5}">${profile(a)}</td></tr>`; }).join('')}
+        <td class="n">${sc[a.id] != null ? `<b style="font:400 24px/1 var(--display)">${sc[a.id]}</b>` : '<span class="muted small">No data yet</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td><td class="small">${esc(a.r23)}</td><td class="n small">${s.fav || '—'}</td><td class="n small">${s.straw || '—'}</td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
+        <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 7 : 6}">${profile(a)}</td></tr>`; }).join(''); })()}
       </tbody></table></div></div>
       <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}.</div>
       <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up in this table and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
-    after(){ $('#app').onclick = e => { const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
+    after(){
+      $('#app').oninput = e => { const r = e.target.closest('[data-w]'); if (r) $('#w-' + r.dataset.w).textContent = r.value + '%'; };
+      $('#app').onchange = e => { const r = e.target.closest('[data-w]'); if (!r) return; const w = store.get('popw', POPW_DEFAULT); w[r.dataset.w] = +r.value; store.set('popw', w); const y = scrollY; route(); scrollTo(0, y); };
+      $('#app').onclick = e => { if (e.target.id === 'popreset') { store.set('popw', POPW_DEFAULT); const y = scrollY; route(); scrollTo(0, y); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
 
   compare:{label:'Compare', render(){
     const [a, b] = store.get('pair', ['tinubu', 'obi']);
@@ -872,7 +910,7 @@ document.addEventListener('click', e => { const g = e.target.closest('a[data-gam
 function route(){
   const k = VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : 'home';
   document.querySelectorAll('#tabs a').forEach(a => a.setAttribute('aria-current', a.dataset.k === k ? 'page' : 'false'));
-  $('#app').onclick = null; $('#app').onkeydown = null;
+  $('#app').onclick = null; $('#app').onkeydown = null; $('#app').oninput = null; $('#app').onchange = null;
   $('#app').innerHTML = `<section class="view">${VIEWS[k].render()}</section>`;
   VIEWS[k].after && VIEWS[k].after();
   const t = document.querySelector(`#tabs a[data-k="${k}"]`); t && t.scrollIntoView({block:'nearest', inline:'center'});

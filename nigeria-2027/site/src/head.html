@@ -233,6 +233,17 @@ select{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
 .gloss div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .gloss dt{font:400 22px/1 var(--display);color:var(--accent);margin-bottom:6px}
 .gloss dd{margin:0;font-size:14px;color:var(--muted)}
+
+/* popularity */
+.podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:end}
+@media (max-width:620px){.podium{grid-template-columns:1fr}}
+.pod{display:grid;justify-items:center;gap:8px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.pod.p1{border-color:var(--accent);background:linear-gradient(180deg,rgba(61,255,154,.14),var(--panel));padding-block:24px}
+.pod .pos{font:400 22px/1 var(--display);color:var(--muted)}
+.pod.p1 .pos{color:var(--accent)}
+.pod .score{font:400 46px/1 var(--display);font-variant-numeric:tabular-nums}
+.slider{display:grid;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.slider input{width:100%;accent-color:var(--accent)}
 footer{border-top:1px solid var(--line);padding-block:26px 44px;color:var(--muted);font-size:13px}
 #toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);font-weight:800;padding:11px 18px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
 #toast.on{opacity:1}

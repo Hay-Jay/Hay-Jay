@@ -26,7 +26,7 @@ Fill in `CONFIG.handle` and `CONFIG.links`.
 
 ## Candidate photos
 Freely licensed portraits from Wikimedia Commons, cropped square around the face (credits in `CREDITS`, `src/app.js`):
-- Tinubu: Nosa Asemota, CC BY-SA 4.0 · Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0 · Obi: Voice of America, public domain
+- Tinubu: Nosa Asemota, CC BY-SA 4.0 · Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0 · Obi: photo supplied by the site owner (credit its source in `CREDITS`) · Abbas-Bin: Ultimatemastery, CC BY-SA 4.0
 - Makinde: Oduola Matthew, CC BY-SA 4.0 (upscaled 4x with EDSR) · Sowore: Mohamed Nanabhay, CC BY 2.0 · Adebayo: Benbaahi, CC BY-SA 4.0
 No free photo exists yet for Duke or the other 11 candidates, so they show initials. To add one, crop it square as `photos/<id>.jpg`, add it to `PHOTOS` and `CREDITS`.
 
@@ -35,3 +35,6 @@ Topics live in `MOTIONS` (`src/app.js`), each with sourced context and the stron
 
 ## Scoreboard tiers
 Frontrunner: 5M+ votes in 2023 or measured in national polling. Contender: sitting/former governor, past national candidate, or nominee of a party with 1M+ votes in 2023. Long shot: everyone else. It ranks evidence, not a prediction.
+
+## Popularity index
+`POP` in `src/app.js` holds the measured signals (SBM favourability, 2023 vote share, online straw poll). Viewers set the weights with sliders; missing values count as a neutral 50. Add new polls (or the viewer poll results) as extra signals in `POPSIG`.
