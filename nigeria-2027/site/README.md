@@ -25,10 +25,13 @@ The page labels these results as unscientific.
 Fill in `CONFIG.handle` and `CONFIG.links`.
 
 ## Candidate photos
-Only freely licensed photos, credited in the footer (`CREDITS` in `src/app.js`):
-- Bola Tinubu: Nosa Asemota, CC BY-SA 4.0 (Wikimedia Commons)
-- Peter Obi: Plus TV Africa, CC BY 3.0 (Wikimedia Commons)
-- Atiku Abubakar: still needed. Download https://commons.wikimedia.org/wiki/File:Atiku_Abubakar-2010_(cropped).jpg (CC BY 2.0), crop to a square as `photos/atiku.jpg`, set `PHOTOS.atiku` and add the credit.
+Freely licensed portraits from Wikimedia Commons, cropped square around the face (credits in `CREDITS`, `src/app.js`):
+- Tinubu: Nosa Asemota, CC BY-SA 4.0 · Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0 · Obi: Voice of America, public domain
+- Makinde: Oduola Matthew, CC BY-SA 4.0 (upscaled 4x with EDSR) · Sowore: Mohamed Nanabhay, CC BY 2.0 · Adebayo: Benbaahi, CC BY-SA 4.0
+No free photo exists yet for Duke or the other 11 candidates, so they show initials. To add one, crop it square as `photos/<id>.jpg`, add it to `PHOTOS` and `CREDITS`.
+
+## Community (debate hall)
+Topics live in `MOTIONS` (`src/app.js`), each with sourced context and the strongest argument on both sides. Set `CONFIG.community.debatePost`, `argumentForm` and `topicForm` to switch on the buttons. Each Sunday, add the best viewer arguments (both sides) to `COMMUNITY_PICKS`.
 
 ## Scoreboard tiers
 Frontrunner: 5M+ votes in 2023 or measured in national polling. Contender: sitting/former governor, past national candidate, or nominee of a party with 1M+ votes in 2023. Long shot: everyone else. It ranks evidence, not a prediction.

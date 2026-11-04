@@ -22,10 +22,12 @@ Object.assign(S, {
   reserves:{t:'CBN data via FactCheckHub / Africa Check',u:'https://factcheckhub.com/nigeria-at-66-fact-checking-tinubus-independence-day-economics/'}
 });
 
-const PHOTOS = { tinubu: 'photos/tinubu.jpg', obi: 'photos/obi.jpg', atiku: '' }; // add 'photos/atiku.jpg' when available
+// Freely licensed portraits only (Wikimedia Commons), cropped square around the face. Candidates without a free photo keep initials.
+const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg' };
 const CREDITS = [
-  'Bola Tinubu photo: Nosa Asemota, CC BY-SA 4.0, via Wikimedia Commons.',
-  'Peter Obi photo: Plus TV Africa, CC BY 3.0, via Wikimedia Commons.'
+  'Photos via Wikimedia Commons, cropped (and for Makinde, upscaled) by Naija Decides; adaptations of CC BY-SA photos are shared under the same licence.',
+  'Tinubu: Nosa Asemota, CC BY-SA 4.0.', 'Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0.', 'Obi: Voice of America, public domain.',
+  'Makinde: Oduola Matthew, CC BY-SA 4.0.', 'Sowore: Mohamed Nanabhay, CC BY 2.0.', 'Adebayo: Benbaahi, CC BY-SA 4.0.'
 ];
 C.forEach(c => c.photo = PHOTOS[c.id] || '');
 C.find(c => c.id === 'tinubu').img = 'img/s-tinubu.jpg';
@@ -53,12 +55,12 @@ const ALL = [
   ['APC','Bola Tinubu','Kashim Shettima',1,'President since May 2023 · Lagos governor 1999–2007','8.79M votes, 1st (36.6%)','tinubu'],
   ['ADC','Atiku Abubakar','Rotimi Amaechi',1,'Vice President 1999–2007','6.98M votes, 2nd (29.1%, PDP)','atiku'],
   ['NDC','Peter Obi','Rabiu Kwankwaso',1,'Anambra governor 2006–2014','6.10M votes, 3rd (25.4%, LP)','obi'],
-  ['APM','Seyi Makinde','Musa Lawal Daura',2,'Governor of Oyo State since 2019','Did not run','makinde'],
-  ['PRP','Donald Duke','Kabiru Rabiu',2,'Cross River governor 1999–2007 · ran in 2019','Did not run','duke'],
+  ['APM','Seyi Makinde','Musa Lawal Daura',2,'Governor of Oyo State since 2019, re-elected in 2023. Engineer and businessman before politics. Running for president for the first time.','Did not run','makinde'],
+  ['PRP','Donald Duke','Kabiru Rabiu',2,'Governor of Cross River 1999–2007, known for the Obudu Ranch and Tinapa projects. Ran for president in 2019 (SDP).','Did not run','duke'],
   ['PDP','Sandy Ojang Onor','Umaru Babangida',2,'Candidate of the 2023 runner-up party','Did not run','n_list'],
   ['LP','Sunday Chibuzo Okereke','Hajja Bintu Konto',2,'Candidate of Obi\'s 2023 party (6.1M votes)','Did not run','n_list'],
-  ['AAC','Omoyele Sowore','Haruna Garba Magashi',2,'Sahara Reporters founder · ran in 2019 and 2023','About 14,608 votes','sowore'],
-  ['SDP','Adewole Adebayo','Usman Muhammed Bugaje',2,'Lawyer, KAFTAN TV founder · SDP candidate in 2023','Ran (SDP)','adebayo'],
+  ['AAC','Omoyele Sowore','Haruna Garba Magashi',2,'Founder of Sahara Reporters (2006) and the AAC (2018). Led the 2019 #RevolutionNow protests and was detained by the DSS. Ran in 2019 (33,953 votes) and 2023.','About 14,608 votes','sowore'],
+  ['SDP','Adewole Adebayo','Usman Muhammed Bugaje',2,'Lawyer and founder of KAFTAN TV. SDP presidential candidate in 2023, running again.','Ran (SDP)','adebayo'],
   ['AA','Rufai Adekunle Omo-Aje','Shehu Hussaini',3,'','Did not run','n_list'],
   ['ADP','Aliyu Abbas-Bin','Chinazam Ike',3,'','Did not run','n_list'],
   ['APP','Kabiru Yusuf','Peace Egobia Ofordile',3,'','Did not run','n_list'],
@@ -88,6 +90,58 @@ const STATS = [
   {id:'turnout',label:'Turnout',a:['2019','34.8%',34.75],b:['2023','26.7%',26.71],bad:'down',unit:'of registered voters',src:'wiki23'}
 ];
 
+/* ======================= COMMUNITY & GUIDE DATA ======================= */
+Object.assign(S, {
+  etrans:{t:'AFP via Yahoo News',u:'https://www.yahoo.com/news/articles/nigeria-launches-election-race-poll-122017720.html'},
+  timetable:{t:'INEC revised timetable (Inquirer, Feb 2026)',u:'https://inquirer.ng/2026/02/27/nigeria-sets-new-2027-election-dates-as-inec-revises-timetable/'}
+});
+CONFIG.community = {
+  // Paste links here to switch the buttons on: the TikTok/IG/X post where each week's debate happens,
+  // a Google Form for arguments, and one for topic ideas.
+  debatePost: '', argumentForm: '', topicForm: ''
+};
+const MOTIONS = [
+  {id:'subsidy', tag:'Economy', title:'Bring back the fuel subsidy', ctx:'Atiku promises to restore a form of fuel subsidy. An SBM survey found 67.4% of respondents back restoring it. Petrol is about ₦1,335 a litre, up from ₦185 in May 2023.', srcs:['sbmSubsidy','atikuPitch','fuel'],
+    yes:['Transport and food costs follow petrol prices; relief would reach almost every household.','Wages have not kept up: poverty rose from 56% to 63% after removal.'],
+    no:['Past subsidies cost trillions and were plagued by fraud and smuggling.','The money saved can fund roads, health and education instead, if it is accounted for.']},
+  {id:'police', tag:'Security', title:'Should the President sign the state police bill?', ctx:'28 state assemblies have approved the constitutional amendment, and the National Assembly says it will send the bill for assent.', srcs:['n_police'],
+    yes:['Local police know their communities and can respond faster to kidnapping and banditry.','One federal force for 200+ million people is stretched too thin.'],
+    no:['Governors could use their police against opponents and journalists.','Many states struggle to pay salaries; underfunded police can do more harm than good.']},
+  {id:'economy', tag:'Economy', title:'Is the economy getting better?', ctx:'Growth hit 4.43% in Q2 2026 and inflation fell from 34.8% to 14.6%. Poverty is at 63% and food inflation is near 20%.', srcs:['gdp','inflation','poverty'],
+    yes:['Growth is the strongest in years, reserves are up and oil theft is down.','Inflation has more than halved from its peak.'],
+    no:['Slower price rises are not lower prices: food still costs far more than in 2023.','More Nigerians are poor now than before the reforms.']},
+  {id:'restructure', tag:'Governance', title:'Should Nigeria restructure (more power to the states)?', ctx:'Atiku has made restructuring part of his pitch. Supporters want states to control more resources and decisions.', srcs:['atikuPitch'],
+    yes:['States closest to people can plan for local needs better than Abuja.','Competition between states can spread what works.'],
+    no:['Weaker states could be left behind without federal transfers.','Restructuring needs constitutional changes that take years.']},
+  {id:'etrans', tag:'Elections', title:'Should electronic results upload be compulsory?', ctx:'Lawmakers amended the election law to require electronic transmission of results, with paper records allowed during network failures.', srcs:['etrans'],
+    yes:['Uploading polling-unit results straight away makes tampering during collation harder.','Anyone can check their unit\'s result on IReV.'],
+    no:['Network coverage is patchy; a paper fallback is needed so votes are not lost.','Technology can fail or be blamed for failures, as some argued in 2023.']},
+  {id:'youth', tag:'Elections', title:'Experience or a new generation?', ctx:'Young people are now 29.8% of the register, down from 39.7% in 2023. The three frontrunners all held top offices before 2015.', srcs:['n_youth'],
+    yes:['Running a country takes experience; there is no time to learn on the job.','Proven records let voters judge what candidates actually did.'],
+    no:['The same generation has led for decades with mixed results.','New leaders bring new ideas and owe fewer old political debts.']}
+];
+const COMMUNITY_PICKS = []; // weekly best arguments from viewers: {motion:'subsidy', side:'yes'|'no', text:'…', by:'@handle'}
+const TIMELINE = [
+  ['23 Apr – 30 May 2026','Party primaries','Parties pick candidates under the Electoral Act 2026.','timetable'],
+  ['19 Aug 2026','Presidential campaigns open','National Assembly campaigns open the same day. Governorship campaigns follow on 9 Sep.','timetable'],
+  ['12 Sep 2026','Final list of candidates','INEC publishes 18 presidential tickets.','n_list'],
+  ['December 2026','Voter register on display','Check that your name and polling unit are correct.','register'],
+  ['10 Dec 2026','Party agents named','Parties submit the agents who will watch every polling unit.','inecTime'],
+  ['14 Jan 2027','Campaigns end','Campaigning stops 24 hours before polls open.','timetable'],
+  ['16 Jan 2027','Presidential & National Assembly elections','Polls open 8:00am. Bring your PVC.','inecTime'],
+  ['6 Feb 2027','Governorship & State Assembly elections','Your second trip to the polling unit.','inecTime']
+];
+const GLOSSARY = [
+  ['PVC','Permanent Voter Card. You cannot vote without it. Collect it from INEC before election day.'],
+  ['Polling unit','The exact place you are registered to vote. Find it on INEC\'s voter portal and visit before the day.'],
+  ['BVAS','Bimodal Voter Accreditation System: the device that checks your fingerprint or face before you vote.'],
+  ['IReV','INEC Result Viewing portal. Polling-unit result sheets are uploaded here for anyone to check.'],
+  ['Form EC8A','The result sheet filled in at each polling unit. Its photo is what appears on IReV.'],
+  ['Collation','Adding up polling-unit results at ward, local government and state centres before the national total.'],
+  ['Running mate','The vice-presidential candidate on the same ticket.'],
+  ['Spread rule','To win outright, a candidate needs the most votes plus at least 25% in two-thirds of the states and the FCT.']
+];
+
 /* ======================= HELPERS ======================= */
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -96,7 +150,7 @@ const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('
 const store = { get(k, d){ try { return JSON.parse(localStorage.getItem('nd.' + k)) ?? d; } catch { return d; } }, set(k, v){ try { localStorage.setItem('nd.' + k, JSON.stringify(v)); } catch {} } };
 const ELECTION = new Date('2027-01-16T08:00:00+01:00');
 const cand = id => C.find(c => c.id === id);
-const face = (c, s) => `<div class="face" style="--c:${c.c};${s ? `--s:${s}px;` : ''}${c.photo ? `background-image:url('${c.photo}')` : ''}" role="img" aria-label="${esc(c.name)}">${c.photo ? '' : c.ini}</div>`;
+const face = (c, s) => `<div class="face" style="--c:${c.c};${s ? `--s:${s}px;` : ''}${c.photo ? `background-image:url('${c.photo}');color:transparent` : ''}" role="img" aria-label="${esc(c.name)}">${c.photo ? '' : c.ini}</div>`;
 const copy = (text, ok) => navigator.clipboard.writeText(text).then(() => toast(ok || 'Copied'), () => toast('Copy blocked on this device'));
 const clip = (img, outlet, alt) => img ? `<div class="clip"><img src="${img}" alt="${esc(alt || 'Article screenshot')}" loading="lazy"><span class="outlet">${esc(outlet || '')}</span></div>` : '';
 const daysLeft = () => Math.max(0, Math.ceil((ELECTION - new Date()) / 864e5));
@@ -129,6 +183,7 @@ const VIEWS = {
     <div style="display:grid;gap:16px"><div class="sec-h"><div><div class="eyebrow">${esc(NEWS.edition)}</div><h2>This week</h2></div><a class="btn" href="#news">All the news</a></div>
       <div class="news-grid">${NEWS.items.slice(0, 6).map((n, i) => story(n, i === 0 ? 'lead' : '')).join('')}</div></div>
     <div style="display:grid;gap:16px"><div class="sec-h"><div><div class="eyebrow">Interactive</div><h2>Play &amp; compare</h2></div><a class="btn" href="#play">All games</a></div>${gameTiles()}</div>
+    <div class="verdict"><div class="sec-h"><div><div class="eyebrow">The debate hall</div><h2>Pick a side</h2></div><a class="btn pri" href="#community">Join the debate</a></div><div class="grid g3">${MOTIONS.slice(0, 3).map(m => `<a class="card lift" href="#community" style="text-decoration:none;color:inherit"><span class="tag">${esc(m.tag)}</span><h3>${esc(m.title)}</h3><span class="muted small">See both sides →</span></a>`).join('')}</div></div>
     <div style="display:grid;gap:16px"><div class="sec-h"><div><div class="eyebrow">Claims vs evidence</div><h2>Latest fact-checks</h2></div><a class="btn" href="#facts">See all</a></div>
       <div class="grid g3">${FACTS.slice(0, 3).map(factCard).join('')}</div></div>`; }},
 
@@ -165,6 +220,32 @@ const VIEWS = {
       <div class="verdict" id="verdict"></div>`; },
     after(){ const go = () => { store.set('pair', [$('#ca').value, $('#cb').value]); drawRounds(); }; $('#ca').onchange = go; $('#cb').onchange = go; drawRounds(); }},
 
+  community:{label:'Community', render(){
+    const side = store.get('sides', {}); const cm = CONFIG.community;
+    const picks = COMMUNITY_PICKS;
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">The debate hall</div><h2>Pick a side. Make your case.</h2>
+      <p class="muted">Big questions in the race, the facts behind them and the strongest argument on each side. Choose where you stand, then take it to the comments. The best arguments from viewers are featured here every Sunday.</p>
+      <div class="row">${cm.debatePost ? `<a class="btn pri" href="${esc(cm.debatePost)}" target="_blank" rel="noopener">Join this week's debate</a>` : ''}${cm.argumentForm ? `<a class="btn" href="${esc(cm.argumentForm)}" target="_blank" rel="noopener">Submit an argument</a>` : ''}${cm.topicForm ? `<a class="btn" href="${esc(cm.topicForm)}" target="_blank" rel="noopener">Suggest a topic</a>` : ''}</div></div>
+      <div class="chips" id="mf">${['All', ...new Set(MOTIONS.map(m => m.tag))].map(t => `<button class="chip" data-mt="${t}" aria-pressed="${store.get('mf', 'All') === t}">${t}</button>`).join('')}</div>
+      <div class="grid g2">${MOTIONS.filter(m => store.get('mf', 'All') === 'All' || m.tag === store.get('mf', 'All')).map(m => motionCard(m, side[m.id])).join('')}</div>
+      <div class="verdict"><div class="eyebrow">Your stance card</div>${Object.keys(side).length ? `<div class="grid g2" style="gap:8px">${MOTIONS.filter(m => side[m.id]).map(m => `<div class="row" style="justify-content:space-between"><span>${esc(m.title)}</span><span class="vd ${side[m.id] === 'yes' ? 'true' : side[m.id] === 'no' ? 'false' : 'mis'}">${side[m.id] === 'yes' ? 'For' : side[m.id] === 'no' ? 'Against' : 'Unsure'}</span></div>`).join('')}</div><button class="btn pri" id="sshare" style="justify-self:start">Copy my stances</button>` : '<p class="muted">Pick a side on any topic above and your stances collect here, ready to share.</p>'}</div>
+      <div class="card"><div class="eyebrow">Featured from the community</div>${picks.length ? picks.map(p => `<div class="why"><b>${esc(MOTIONS.find(m => m.id === p.motion)?.title || '')} · ${p.side === 'yes' ? 'For' : 'Against'}:</b> ${esc(p.text)} <span class="muted small">${esc(p.by || '')}</span></div>`).join('') : '<p class="muted">The best arguments from your comments will appear here, with both sides represented, starting this Sunday.</p>'}</div>
+      <div class="card"><h3>House rules</h3><p class="muted">Argue the issue, not the person. No tribal or religious insults. Back claims with a source. Posts that share fakes or threats are removed.</p></div>`; },
+    after(){ $('#app').onclick = e => {
+      const t = e.target.closest('[data-mt]'); if (t) { store.set('mf', t.dataset.mt); route(); return; }
+      const b = e.target.closest('[data-side]'); if (b) { const sd = store.get('sides', {}); sd[b.dataset.m] = sd[b.dataset.m] === b.dataset.side ? undefined : b.dataset.side; store.set('sides', sd); route(); return; }
+      if (e.target.id === 'sshare') { const sd = store.get('sides', {}); copy(MOTIONS.filter(m => sd[m.id]).map(m => `${m.title}: ${sd[m.id] === 'yes' ? 'FOR' : sd[m.id] === 'no' ? 'AGAINST' : 'UNSURE'}`).join('\n') + `\nWhere do you stand? ${CONFIG.handle}`, 'Stances copied'); }
+    }; }},
+
+  guide:{label:'Guide', render(){
+    const next = TIMELINE.find(t => !/2026/.test(t[0]) || t[0].startsWith('December') || t[0].startsWith('10 Dec')) ;
+    return `<div style="display:grid;gap:10px"><div class="eyebrow">Everything you need for 16 January</div><h2>The election guide</h2><p class="muted">Key dates, how voting works, and the words you will hear on election day.</p></div>
+      <div class="card"><h3>Key dates</h3><ol class="timeline">${TIMELINE.map(([d, h, x, s]) => `<li class="${/2027/.test(d) ? 'up' : ''}"><div class="d">${esc(d)}</div><div><b>${esc(h)}</b><div class="muted small">${esc(x)} <span class="src">${src(s)}</span></div></div></li>`).join('')}</ol></div>
+      <div class="grid g2">
+        <div class="card"><h3>How to vote, step by step</h3><ol class="steps">${['Collect your PVC from INEC before election day.','Check your name and polling unit when the register is displayed in December.','Go early on 16 January. Polls open at 8:00am.','Get accredited: BVAS checks your fingerprint or face.','Vote in secret, fold your ballot and drop it in the box.','Stay calm and watch the count at your polling unit.','Check that your unit\'s result on IReV matches the sheet posted at the unit.'].map(x => `<li>${x}</li>`).join('')}</ol><div class="src">${src('inecTime')}</div></div>
+        <div class="card"><h3>Where the votes are</h3><div class="bars">${[['Lagos',7.49],['Kano',6.57],['Kaduna',4.66]].map(([n, v]) => barRow({n:`${n} · ${v}M`, v: Math.round(v / 7.49 * 100), c:'var(--accent)'})).join('')}</div><p class="muted small">The three biggest of 110M registered voters. Young people are 29.8% of the register.</p><div class="src">${src('voters')} · ${src('n_youth')}</div></div>
+      </div>
+      <div class="card"><h3>Election words, explained</h3><dl class="gloss">${GLOSSARY.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></div>`; }},
   play:{label:'Play', render(){
     const g = store.get('game', 'fact');
     return `<div style="display:grid;gap:10px"><div class="eyebrow">Learn by playing</div><h2>Play</h2><p class="muted">Three quick games built on verified facts. Share your score in the comments.</p></div>
@@ -223,6 +304,9 @@ const VIEWS = {
 };
 
 /* ======================= PIECES ======================= */
+function motionCard(m, mine){ return `<article class="card motion lift"><div class="row" style="justify-content:space-between"><span class="tag">${esc(m.tag)}</span>${mine ? `<span class="vd ${mine === 'yes' ? 'true' : mine === 'no' ? 'false' : 'mis'}">You: ${mine === 'yes' ? 'For' : mine === 'no' ? 'Against' : 'Unsure'}</span>` : ''}</div><h3>${esc(m.title)}</h3><p class="muted">${esc(m.ctx)}</p><div class="src">${m.srcs.map(src).join(' · ')}</div>
+  <div class="sides"><div class="for"><div class="eyebrow">For</div>${m.yes.map(x => `<p>${esc(x)}</p>`).join('')}</div><div class="against"><div class="eyebrow">Against</div>${m.no.map(x => `<p>${esc(x)}</p>`).join('')}</div></div>
+  <div class="pick">${[['yes','I\'m for it'],['no','I\'m against'],['unsure','Not sure']].map(([k, l]) => `<button data-m="${m.id}" data-side="${k}" aria-pressed="${mine === k}">${l}</button>`).join('')}</div></article>`; }
 function story(n, cls){ return `<article class="story lift ${cls}">${clip(n.img, n.outlet, n.h)}<div class="row"><span class="tag ${n.tag === 'Allegation' ? 'alleg' : ''}">${esc(n.tag)}</span></div><h3>${esc(n.h)}</h3><p class="muted">${esc(n.d)}</p>${n.why ? `<div class="why"><b>Why it matters:</b> ${esc(n.why)}</div>` : ''}<div class="row" style="justify-content:space-between"><span class="src">${src(n.src)}</span>${n.cta ? `<a class="btn" href="${n.cta[0]}" ${n.cta[0] === '#play' ? 'data-game="fact"' : ''}>${esc(n.cta[1])}</a>` : ''}</div></article>`; }
 function factCard(x){ return `<div class="card lift">${x.img ? clip(x.img, S[x.src].t.split(',')[0]) : ''}<div class="row" style="justify-content:space-between"><span class="meta">${esc(x.who)} · ${esc(x.when)}</span><span class="vd ${x.v}">${x.label}</span></div><div class="claim">${esc(x.claim)}</div><p class="muted">${esc(x.why)}</p><div class="src">${src(x.src)}</div></div>`; }
 function barRow(r){ return `<div class="bar" style="--c:${r.c}"><div class="l"><span>${esc(r.n)}</span><span style="font-variant-numeric:tabular-nums">${r.v}%</span></div><div class="t"><i style="width:${r.v}%"></i></div></div>`; }
@@ -233,7 +317,7 @@ function gameTiles(active){ return `<div class="games">${[
   ['rank','Rank them','Drag all 18 candidates into your order and share it.', '18 tickets']].map(([k, t, d, n]) => `<a class="game-tile lift" href="#play" data-game="${k}" ${active === k ? 'style="border-color:var(--accent)"' : ''}><span class="eyebrow">${n}</span><h3 style="font-size:30px">${t}</h3><p class="muted">${d}</p><span class="btn ${active === k ? 'pri' : ''}" style="justify-self:start">${active === k ? 'Playing' : 'Play'}</span></a>`).join('')}</div>`; }
 function profile(a){
   const c = C.find(x => x.id === a.id);
-  if (!c) return `<div style="display:grid;gap:6px;padding:6px 0"><div>${a.note ? esc(a.note) : 'Little public record yet. Ask the campaign for its plan.'}</div><div class="src">${src(a.src)}</div></div>`;
+  if (!c) return `<div class="row" style="padding:6px 0;align-items:flex-start;flex-wrap:nowrap">${a.photo ? face(a, 96) : ''}<div style="display:grid;gap:6px;min-width:0"><div class="muted small">Running mate: ${esc(a.mate)}</div><div>${a.note ? esc(a.note) : 'Little public record yet. Ask the campaign for its plan, its team and how it would pay for it.'}</div><div class="src">${src(a.src)}</div></div></div>`;
   return `<div class="grid g2" style="padding:6px 0"><div style="display:grid;gap:10px"><div><div class="muted small">Experience</div>${esc(c.exp)}</div><div><div class="muted small">2027 pitch</div>${esc(c.pitch)} <span class="src">${src(c.pitchSrc)}</span></div><div><div class="muted small">On the record</div>${esc(c.record)}<div class="muted small">${esc(c.reply)}</div></div><div><div class="muted small">The question to ask</div><b>${esc(c.question)}</b></div><a class="btn" href="#compare" style="justify-self:start">Compare ${esc(c.name.split(' ')[1])}</a></div>${clip(c.img, S[c.recSrc].t.split(' (')[0].split(',')[0])}</div>`;
 }
 
@@ -378,7 +462,7 @@ async function ask(q){
 }
 
 /* ======================= ROUTER ======================= */
-const ORDER = ['home','news','candidates','compare','play','facts','polls','match','ask'];
+const ORDER = ['home','news','candidates','compare','community','play','facts','guide','polls','match','ask'];
 $('#tabs').innerHTML = ORDER.map(k => `<a href="#${k}" data-k="${k}">${VIEWS[k].label}</a>`).join('');
 const tick = [`${daysLeft()} days to the vote`, ...NEWS.items.map(n => n.h), 'Petrol: ₦185 → ₦1,335', 'Poverty: 56% → 63%', '18 tickets on the ballot', 'Play Fact or Cap'];
 $('#ticker').innerHTML = [...tick, ...tick].map(t => `<span>${esc(t)}</span>`).join('');
