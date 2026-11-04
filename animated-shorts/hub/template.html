@@ -350,7 +350,8 @@ function viewChannel(a) {
           <div class="copy-row"><span>YouTube title</span><button class="btn" type="button" data-copytext="${esc(e.yt_title)}">Copy</button></div>
           <div class="copy-row"><span>YouTube description</span><button class="btn" type="button" data-copytext="${esc(e.yt_desc)}">Copy</button></div>
         </div>
-        <button class="btn solid save" type="button" data-src="${e.video}" data-file="${esc(e.file)}" hidden>Save video</button>
+        <button class="btn solid save" type="button" data-src="${e.video}" data-file="${esc(e.file)}" hidden>${e.webcopy ? 'Save preview copy' : 'Save video'}</button>
+        ${e.webcopy ? '<p class="muted" style="font-size:12.5px">This is a lighter preview copy. For YouTube and TikTok, upload the full-quality file from the chat.</p>' : ''}
       </div></article>`).join('');
   return `
   <section class="banner" style="--acc:${col(a)}"><div class="banner-in">
@@ -454,7 +455,7 @@ function exampleStats(a) {
 }
 function orderOf(a) { const o = a.launch_order || []; return [...a.episodes].sort((x, y) => (o.indexOf(x.id) + 1 || 99) - (o.indexOf(y.id) + 1 || 99)); }
 function slotsFrom(a, n) {
-  const out = [], d = today(); d.setDate(d.getDate() + 1);
+  const out = [], d = today();   // today counts: post now, then the next slots
   while (out.length < n) { if (a.days.includes(DAY_KEYS[d.getDay()])) out.push(new Date(d)); d.setDate(d.getDate() + 1); }
   return out;
 }
@@ -611,7 +612,7 @@ function viewAnalytics(a) {
   <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Make next</h3><span class="label">Ideas</span></div><div class="panel-body"><div class="ins-grid">${ideas.map(x => `<div class="ins idea"><b>${esc(x.idea)}</b><span>${esc(x.why)} · ${esc(x.topic)}</span></div>`).join('')}</div></div></section>
   <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Every video</h3><span class="label">Table view</span></div>
     <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Video</th><th>Views</th><th>Per day</th><th>Stayed</th><th>Watched</th><th>Likes</th><th>Comments</th><th>Subs</th></tr></thead><tbody>${perf}</tbody></table></div></section>
-  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Release plan</h3><span class="label">${a.days.join(' · ')} · 7 PM Nigeria time</span></div>
+  <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Release plan</h3><span class="label">${a.days.length === 7 ? 'Every day' : a.days.join(' · ')} · 7 PM Nigeria time</span></div>
     <div class="panel-body"><p class="muted" style="font-size:13.5px">Your ${m.rows.length} videos are uploaded but private. In YouTube Studio, open each one, set Visibility to Schedule, and use the dates below. The order leads with your broadest stories and saves the Biafra episode until the channel has an audience and you can keep an eye on its comments.</p>
     <div class="tbl-wrap"><table class="tbl plan"><thead><tr><th>#</th><th>Video</th><th>Date</th><th>Status</th></tr></thead><tbody>${plan}</tbody></table></div></div></section>
   <section class="panel"><div class="panel-head"><h3 style="font-size:20px">Add your numbers</h3><span class="label">Import or type</span></div>

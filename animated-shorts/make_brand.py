@@ -73,7 +73,7 @@ def main():
         outlined(d, (tx, 800), acc.get("tagline", ""), tf, acc_col, sw=8)
         if acc.get("days"):
             sf = ImageFont.truetype(DEFAULT_FONT, 44)
-            outlined(d, (tx, 880), "New videos " + " · ".join(acc["days"]), sf, (230, 226, 240), sw=6)
+            outlined(d, (tx, 880), "New videos every day" if len(acc["days"]) == 7 else "New videos " + " · ".join(acc["days"]), sf, (230, 226, 240), sw=6)
         bg.save(os.path.join(out, "banner.png"))
         print(f"  {acc['id']}: profile.png, banner.png -> {out}")
 

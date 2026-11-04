@@ -40,7 +40,8 @@ def main():
             video_rel, poster_rel = f"videos/{acc['id']}/{name}.mp4", f"posters/{acc['id']}/{name}.jpg"
             os.makedirs(os.path.join(OUT, os.path.dirname(video_rel)), exist_ok=True)
             os.makedirs(os.path.join(OUT, os.path.dirname(poster_rel)), exist_ok=True)
-            if os.path.getsize(mp4) > LIMIT:   # smaller web copy so the page can host it
+            webcopy = os.path.getsize(mp4) > LIMIT
+            if webcopy:   # smaller web copy so the page can host it
                 subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", mp4, "-c:v", "libx264", "-preset", "slow", "-crf", "23",
                                 "-maxrate", "3200k", "-bufsize", "6400k", "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart",
                                 os.path.join(OUT, video_rel)], check=True)
@@ -63,7 +64,7 @@ def main():
             eps.append(dict(id=name, title=ep.get("title", name), video=video_rel, poster=poster_rel,
                             file=(name if name.startswith(acc["id"]) else f"{acc['id']}-{name}") + ".mp4", duration=duration(mp4), seconds=round(seconds(mp4), 1),
                             tiktok=post.get("caption", ""), yt_title=post.get("youtube_title", ""),
-                            yt_desc=post.get("youtube_description", ""), tags=ep.get("tags", {})))
+                            yt_desc=post.get("youtube_description", ""), tags=ep.get("tags", {}), webcopy=webcopy))
         acc["episodes"] = eps
         # brand kit (from make_brand.py): web-friendly JPEGs the page can show and save
         bdir = os.path.join(HERE, "build", "brand", acc["id"])
