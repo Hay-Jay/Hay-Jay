@@ -1,0 +1,55 @@
+{
+ "id": "s-atiku",
+ "outlet": "Vanguard",
+ "url": "https://www.vanguardngr.com/2017/12/u-s-senate-report-abubakar-atikus-albatross/",
+ "title": "The U.S. Senate report that is Abubakar Atiku’s albatross",
+ "date": "2017-12",
+ "sentence": "From 2000 to 2008, Jennifer Douglas, a U.S. citizen and the fourth wife of Atiku Abubakar, former Vice President and former candidate for President of Nigeria, helped her husband bring over $40 million in suspect funds into the United States through wire transfers sent by offshore corporations to U.S. bank accounts.",
+ "head": {
+  "w": 580,
+  "h": 620.03125
+ },
+ "quote": {
+  "w": 562,
+  "h": 185
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.028469750889679714,
+   "y": 0.0918918918918919,
+   "w": 0.9078347419928826,
+   "h": 0.12432432432432433
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.22972972972972974,
+   "w": 0.9336354537366548,
+   "h": 0.12432432432432433
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.3675675675675676,
+   "w": 0.9215135676156584,
+   "h": 0.12432432432432433
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.5054054054054054,
+   "w": 0.9172597864768683,
+   "h": 0.12432432432432433
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.6432432432432432,
+   "w": 0.6454904359430605,
+   "h": 0.12432432432432433
+  },
+  {
+   "x": 0.04092526690391459,
+   "y": 0.7810810810810811,
+   "w": 0.03558718861209965,
+   "h": 0.11891891891891893
+  }
+ ]
+}

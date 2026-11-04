@@ -11,6 +11,8 @@ Five ready-to-post **narrated** vertical videos (1080×1920, 30fps MP4, Nigerian
 | 5 | How to make your vote count | `videos/protect-your-vote.mp4` | PVC → polling unit → stay for the count → IReV |
 | 6 | Promise vs reality | `videos/promise-vs-reality.mp4` | 2022 promises vs 2026 data, shown with real news clippings, highlighted, with verdict stamps; includes what improved |
 | 7 | Fact-check: what the presidency said | `videos/fact-check.mp4` | Presidency claims rated FALSE / MISLEADING by FactCheckHub and Dubawa, claims rated TRUE, and fakes about the President not to share |
+| 8 | Where did the money go? | `videos/where-the-money-went.mp4` | Auditor-General ₦1.34tn flags, ₦33.75bn unverified cash transfers, ₦585M memo, Emefiele and Yahaya Bello trials, ₦70bn SUVs. Allegations labelled, replies included |
+| 9 | Candidate scorecard | `videos/candidate-scorecard.mp4` | Tinubu, Atiku and Obi under the same rules: experience, 2027 pitch, what's on the record (with their replies), the question each must answer |
 
 - `stills/<video>-NN.png`: one 1080×1920 PNG per scene. Post them as an Instagram carousel or as Stories.
 - `index.html`: stats page with every video, a copy-caption button for each, and the full source list.

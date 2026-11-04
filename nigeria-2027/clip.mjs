@@ -42,7 +42,11 @@ for (const c of clips) {
         if (cs.position === 'fixed' || cs.position === 'sticky') e.remove();
       }
       document.documentElement.style.scrollBehavior = 'auto';
-      const h1 = document.querySelector('article h1, h1.entry-title, h1');
+      // headline: a real <h1>, or else the smallest visible element whose text starts like the page title
+      const key = document.title.split(/ [-–|] /)[0].trim().slice(0, 40).toLowerCase();
+      const h1 = document.querySelector('article h1, h1.entry-title, h1') || [...document.querySelectorAll('h2, h3, div, p, span')]
+        .filter(e => e.getBoundingClientRect().height > 20 && e.textContent.trim().toLowerCase().startsWith(key) && e.textContent.trim().length < 220)
+        .sort((x, y) => x.textContent.length - y.textContent.length)[0];
       if (!h1) return { error: 'no headline' };
       const norm = s => s.replace(/\s+/g, ' ').toLowerCase();
       const paras = [...document.querySelectorAll('article p, .entry-content p, .post-content p, main p, p')];
@@ -62,8 +66,10 @@ for (const c of clips) {
       const lower = full.toLowerCase().replace(/\s/g, ' ');
       const f = find.map(x => x.toLowerCase()).find(x => lower.includes(x));
       let start = lower.indexOf(f), end = start + f.length;
-      while (start > 0 && !/[.!?]\s/.test(full.slice(start - 2, start))) start--;
-      const stop = full.slice(end).search(/[.!?](\s|$)/);
+      // sentence edges; "U.S." / "Mr." style abbreviations are not sentence ends
+      const isEnd = i => /[.!?]\s/.test(full.slice(i - 2, i)) && !/(^|[\s.])[A-Z]$|\b(Mr|Mrs|Ms|Dr|Gen|Sen|Hon|No|St)$/.test(full.slice(Math.max(0, i - 6), i - 2));
+      while (start > 0 && !isEnd(start)) start--;
+      const stop = full.slice(end).search(/(?<![\s.][A-Z]|\b(?:Mr|Mrs|Ms|Dr|Gen|Sen|Hon|No|St))[.!?](\s|$|(?=[A-Z][a-z]))/);
       end = stop < 0 ? full.length : end + stop + 1;
       const at = off => { for (let i = nodes.length - 1; i >= 0; i--) if (nodes[i][1] <= off) return [nodes[i][0], Math.min(off - nodes[i][1], nodes[i][0].textContent.length)]; };
       const r = document.createRange(); r.setStart(...at(start)); r.setEnd(...at(end));

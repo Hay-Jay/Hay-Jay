@@ -66,6 +66,18 @@ const claimCard = (text, who, label = 'Claim') => `
   <div class="gap"></div>
   <div class="h2 a" data-a="up" data-t=".3" style="font-size:88px">“${text}”</div>`;
 
+const trio = (kicker, rows) => ({
+  dur: 6.5,
+  html: `
+    <div class="kicker a" data-a="up">${kicker}</div>
+    <div class="cands">${rows.map(([name, party, color, text], i) => `
+      <div class="cand a" data-a="left" data-t="${.3 + i * .45}" style="--c:${color}">
+        <div class="ph" style="width:130px;height:130px;font-size:56px">${name.split(' ').map(w => w[0]).join('')}</div>
+        <div><div class="meta" style="margin:0 0 6px"><span class="party">${party}</span>${name}</div><div class="h3" style="font-size:58px">${text}</div></div>
+      </div>`).join('')}
+    </div>`,
+});
+
 const sources = (items) => ({
   dur: 3.2,
   html: `
@@ -430,6 +442,84 @@ window.VIDEOS = [
       ]),
     ],
   },
+  /* ------------------------------------------------------------------ */
+  {
+    id: 'where-the-money-went',
+    title: '8 · Where did the money go?',
+    caption: 'The Auditor-General flagged ₦1.34 trillion in lapses. ₦33.75bn in cash transfers could not be verified. Big trials are still dragging. Here are the receipts, with the agencies\' replies. Allegations are not convictions, so demand the trials finish. 🇳🇬 #Nigeria2027 #Accountability #AuditorGeneral #EFCC',
+    scenes: [
+      { dur: 4.5, html: `
+        <div class="kicker a" data-a="up">Audits · court cases · spending</div>
+        <div class="h1 a" data-a="up" data-t=".1">Where did<br>the <span class="mark">money</span><br>go?</div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t=".8">Only official reports, court records and verified facts. An allegation is not a conviction.</div>` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">1 · The Auditor-General's report</div>${receipt('m-audit', { label: 'Official audit', stamp: '₦1.34tn', note: 'Irregularities and lapses across ministries and agencies' })}` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">2 · Cash transfers to the poor</div>${receipt('m-cashtransfer', { label: 'Official audit', stamp: 'Unverified', stampCls: 'amber', note: '₦33.75bn. The office disputes part of the finding' })}` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">3 · Humanitarian ministry</div>${receipt('m-bettaedu', { label: 'Reported', stamp: 'Suspended', stampCls: 'amber', note: '₦585M memo to a private account. EFCC probe' })}` },
+      { dur: 6.5, html: `<div class="kicker a" data-a="up">4 · Ex-CBN governor</div>${receipt('m-emefiele', { label: 'In court', stamp: 'On trial', stampCls: 'amber', note: 'Emefiele: 20 counts. Denies the charges' })}` },
+      { dur: 6.5, html: `<div class="kicker a" data-a="up">5 · Ex-Kogi governor</div>${receipt('m-bello', { label: 'In court', stamp: 'On trial', stampCls: 'amber', note: 'Yahaya Bello: ₦80bn. Denies it, and is an APC Senate candidate' })}` },
+      { dur: 6.5, mood: 'red', html: `<div class="kicker a" data-a="up">6 · Spending choices</div>${receipt('m-suvs', { label: 'Verified', stamp: 'True', stampCls: 'green', note: '₦70bn for SUVs for 469 lawmakers, during a cost-of-living crisis' })}` },
+      { dur: 5.5, html: `
+        <div class="kicker a" data-a="up">What we should demand</div>
+        <div class="check a" data-a="left" data-t=".1"><div class="n">1</div><div class="t">Finish the trials<span>Courts, not TikTok, decide guilt. Years of delay help nobody.</span></div></div>
+        <div class="check a" data-a="left" data-t=".5"><div class="n">2</div><div class="t">Answer the audit<span>Agencies must appear before the Public Accounts Committees.</span></div></div>
+        <div class="check a" data-a="left" data-t=".9"><div class="n">3</div><div class="t">Sign the Audit Service Bill<span>Give the Auditor-General real independence.</span></div></div>` },
+      { dur: 4, html: `
+        <div class="h1 a" data-a="up">It's our<br>money.</div>
+        <div class="h1 a hl" data-a="pop" data-t=".7">Ask where it went.</div>` },
+      sources([
+        '<b>Audit:</b> Auditor-General report to NASS, Jul 2026, via Daily Trust · StatePress',
+        '<b>Edu:</b> ICIR, Jan 2024 · <b>Emefiele:</b> Naija News, 20 Oct 2026',
+        '<b>Bello:</b> Nairametrics, 24 Apr 2026 · allAfrica, May 2026',
+        '<b>SUVs:</b> Dubawa, 11 Aug 2024 (rated TRUE)',
+        'Everyone named is presumed innocent unless convicted by a court.',
+      ]),
+    ],
+  },
+
+  /* ------------------------------------------------------------------ */
+  {
+    id: 'candidate-scorecard',
+    title: '9 · Candidate scorecard',
+    caption: 'Tinubu, Atiku, Obi: same questions, same rules. Experience, 2027 pitch, what is on the record (with their own replies), and the question each one must answer. Score them yourself. 🇳🇬 #Nigeria2027 #Tinubu #Atiku #PeterObi #KnowYourCandidates',
+    scenes: [
+      { dur: 4, html: `
+        <div class="kicker a" data-a="up">Same questions · same rules</div>
+        <div class="h1 a" data-a="up" data-t=".1">Candidate<br><span class="mark">scorecard</span></div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t=".8">Tinubu. Atiku. Obi. Every claim has a source. Every allegation comes with their reply.</div>` },
+      trio('Round 1 · Experience', [
+        ['Bola Tinubu', 'APC', 'var(--apc)', 'Lagos governor 8 yrs · President since 2023'],
+        ['Atiku Abubakar', 'ADC', 'var(--adc)', 'Vice President 8 yrs (1999–2007) · businessman'],
+        ['Peter Obi', 'NDC', 'var(--ndc)', 'Anambra governor ~8 yrs (2006–2014) · businessman'],
+      ]),
+      trio('Round 2 · The 2027 pitch', [
+        ['Bola Tinubu', 'APC', 'var(--apc)', 'Continue reforms: a $1 trillion economy by 2030'],
+        ['Atiku Abubakar', 'ADC', 'var(--adc)', 'Restore a form of fuel subsidy · restructure the federation'],
+        ['Peter Obi', 'NDC', 'var(--ndc)', 'Move Nigeria from consumption to production'],
+      ]),
+      { dur: 7, html: `<div class="kicker a" data-a="up">Round 3 · On the record · Tinubu</div>${receipt('s-tinubu', { label: 'On record', stamp: '$460,000', stampCls: 'amber', note: '1993 US case. Tribunal (2023): not a conviction' })}` },
+      { dur: 7, html: `<div class="kicker a" data-a="up">Round 3 · On the record · Atiku</div>${receipt('s-atiku', { label: 'On record', stamp: '$40M', stampCls: 'amber', note: '2010 US Senate report. He denies wrongdoing' })}` },
+      { dur: 7, html: `<div class="kicker a" data-a="up">Round 3 · On the record · Obi</div>${receipt('s-obi', { label: 'On record', stamp: 'Undeclared', stampCls: 'amber', note: 'Pandora Papers, 2021. Says he broke no law' })}` },
+      trio('Round 4 · The question each must answer', [
+        ['Bola Tinubu', 'APC', 'var(--apc)', 'Your 2022 targets were missed. Why trust the 2030 ones?'],
+        ['Atiku Abubakar', 'ADC', 'var(--adc)', 'How will you pay for a fuel subsidy, and stop the leakages this time?'],
+        ['Peter Obi', 'NDC', 'var(--ndc)', 'How, how fast, and with what money will production replace imports?'],
+      ]),
+      { dur: 4.5, html: `
+        <div class="h1 a" data-a="up">No perfect<br>candidate.</div>
+        <div class="h1 a hl" data-a="pop" data-t=".7">Score them yourself.</div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t="1.3">Then vote on January 16.</div>` },
+      sources([
+        '<b>Offices and tickets:</b> INEC 2026 · Wikipedia',
+        '<b>Pitches:</b> Renewed Hope plan 2026–2030 · Atiku/ADC screening speech, Arise TV · Obi manifesto launch, VON',
+        '<b>Tinubu:</b> Vanguard, 11 Apr 2023 · <b>Atiku:</b> US Senate PSI report 2010, via Vanguard',
+        '<b>Obi:</b> ICIR/Premium Times Pandora Papers, Oct 2021 · ThisDay, 7 Oct 2021',
+        'Allegations are not convictions. None of the three has been convicted.',
+      ]),
+    ],
+  },
 ];
 /* Narration: one line per scene, in order, as [emotion, words].
    Emotions: 'calm' 'serious' 'grave' 'urgent' 'hopeful' 'fired'
@@ -506,5 +596,28 @@ window.NARRATION = {
     ['urgent',  'And fakes about the President? Don\'t share them. He was never named the world\'s third most corrupt person. And there is no evidence he lives in France. Fakes make the real facts easier to dismiss.'],
     ['fired',   'So check every claim. From every side. Then vote on January sixteenth!'],
     ['calm',    'Every fact-check is on screen. Look them up, then share this.'],
+  ],
+  'where-the-money-went': [
+    ['serious', 'Where did the money go? Only official reports, court records and verified facts here. And remember: an allegation is not a conviction.'],
+    ['grave',   'One. The Auditor-General\'s latest report flagged irregularities and lapses worth over one point three four trillion naira, across ministries and agencies.'],
+    ['grave',   'Two. Thirty-three point seven five billion naira in cash transfers to poor households. The auditors could not confirm it reached real beneficiaries. The office disputes part of this.'],
+    ['serious', 'Three. In January twenty twenty-four, the humanitarian minister was suspended after a memo asked for five hundred and eighty-five million naira to be paid into a private account. The EFCC investigated.'],
+    ['serious', 'Four. The former Central Bank governor, Godwin Emefiele, is on trial on twenty counts. He denies the charges.'],
+    ['serious', 'Five. Former Kogi governor Yahaya Bello is on trial over eighty billion naira. He denies it... and he is now an APC Senate candidate.'],
+    ['grave',   'Six. Seventy billion naira for SUVs for four hundred and sixty-nine lawmakers. Verified true. During a cost-of-living crisis.'],
+    ['urgent',  'So what should we demand? Finish the trials. Make the agencies answer the audit. And sign the Audit Service Bill, so the Auditor-General is truly independent.'],
+    ['fired',   'It is our money. Ask where it went!'],
+    ['calm',    'Every source is on screen. Everyone named is presumed innocent unless convicted by a court.'],
+  ],
+  'candidate-scorecard': [
+    ['calm',    'Tinubu. Atiku. Obi. Same questions, same rules. Every claim has a source, and every allegation comes with their reply.'],
+    ['serious', 'Round one: experience. Tinubu governed Lagos for eight years and has been President since twenty twenty-three. Atiku was Vice President for eight years. Obi governed Anambra for about eight years.'],
+    ['serious', 'Round two: the pitch. Tinubu wants to continue his reforms, toward a one trillion dollar economy by twenty thirty. Atiku promises to restore a form of fuel subsidy and restructure the federation. Obi wants to move Nigeria from consumption to production.'],
+    ['serious', 'Round three: what is on the record. Tinubu forfeited four hundred and sixty thousand dollars in a US case in nineteen ninety-three. His side says it was a civil settlement, not a conviction, and a tribunal agreed in twenty twenty-three.'],
+    ['serious', 'Atiku: a twenty ten US Senate report said over forty million dollars in suspect funds entered the US through his wife\'s accounts. He says no court has ever found him guilty.'],
+    ['serious', 'Obi: the Pandora Papers said he did not declare offshore companies while governor. He says he broke no law.'],
+    ['urgent',  'Round four: the question each must answer. Tinubu: your targets were missed... why trust the next ones? Atiku: how will you pay for a fuel subsidy? Obi: how, how fast, and with what money?'],
+    ['fired',   'There is no perfect candidate. Score them yourself. Then vote on January sixteenth!'],
+    ['calm',    'All sources are on screen. None of the three has been convicted of a crime.'],
   ],
 };

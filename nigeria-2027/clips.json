@@ -98,5 +98,95 @@
    "recycled from a July 2023 broadcast",
    "old and, therefore, misleading"
   ]
+ },
+ {
+  "id": "m-audit",
+  "outlet": "Daily Trust",
+  "date": "2026-07",
+  "url": "https://dailytrust.com/25-mdas-varsities-others-flagged-in-n1-34trn-audit-lapses/",
+  "find": [
+   "estimated at over N1.34 trillion"
+  ]
+ },
+ {
+  "id": "m-cashtransfer",
+  "outlet": "StatePress",
+  "date": "2026-09",
+  "url": "https://www.statepress.ng/2026/09/auditor-general-queries-n3375bn-cash.html",
+  "find": [
+   "records were insufficient to establish"
+  ]
+ },
+ {
+  "id": "m-bettaedu",
+  "outlet": "ICIR",
+  "date": "2024-01",
+  "url": "https://www.icirnigeria.org/efcc-grills-betta-edu-over-n585m-scandal/",
+  "find": [
+   "to pay N585 million into a private account"
+  ]
+ },
+ {
+  "id": "m-emefiele",
+  "outlet": "Naija News",
+  "date": "2026-10-20",
+  "url": "https://www.naijanews.com/2026/10/20/6-23-million-fraud-emefiele-has-case-to-answer-efcc-tells-court/",
+  "find": [
+   "amended 20-count charge"
+  ]
+ },
+ {
+  "id": "m-bello",
+  "outlet": "Nairametrics",
+  "date": "2026-04-24",
+  "url": "https://nairametrics.com/2026/04/24/yahaya-bello-efcc-n80-billion-alleged-fraud-case-adjourned-to-may-6/",
+  "find": [
+   "alleged N80 billion money laundering case"
+  ]
+ },
+ {
+  "id": "m-suvs",
+  "outlet": "Dubawa",
+  "date": "2024-08-11",
+  "url": "https://dubawa.org/fact-checking-five-economic-claims-in-viral-response-to-tinubus-speech/",
+  "find": [
+   "N70 billion was allocated"
+  ]
+ },
+ {
+  "id": "s-tinubu",
+  "outlet": "Vanguard",
+  "date": "2023-04",
+  "url": "https://www.vanguardngr.com/2023/04/alleged-drug-case-why-tinubu-forfeited-460000-in-us-apc-tells-court/",
+  "find": [
+   "not a fine but a decree of forfeiture"
+  ]
+ },
+ {
+  "id": "s-atiku",
+  "outlet": "Vanguard",
+  "date": "2017-12",
+  "url": "https://www.vanguardngr.com/2017/12/u-s-senate-report-abubakar-atikus-albatross/",
+  "find": [
+   "over $40 million in suspect funds"
+  ]
+ },
+ {
+  "id": "s-obi",
+  "outlet": "ICIR",
+  "date": "2021-10",
+  "url": "https://www.icirnigeria.org/pandora-papers-inside-peter-obis-secret-businesses-and-how-he-broke-the-law/",
+  "find": [
+   "did not declare these companies"
+  ]
+ },
+ {
+  "id": "s-obi-reply",
+  "outlet": "ThisDay",
+  "date": "2021-10-07",
+  "url": "https://thisdaylive.com/index.php/2021/10/07/pandora-papers-i-broke-no-law-says-peter-obi",
+  "find": [
+   "did not in any respect whatsoever violate any law"
+  ]
  }
 ]
