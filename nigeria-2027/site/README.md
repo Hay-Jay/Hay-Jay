@@ -26,7 +26,7 @@ Fill in `CONFIG.handle` and `CONFIG.links`.
 
 ## Candidate photos
 Freely licensed portraits from Wikimedia Commons, cropped square around the face (credits in `CREDITS`, `src/app.js`):
-- Tinubu: Nosa Asemota, CC BY-SA 4.0 · Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0 · Obi: photo supplied by the site owner (credit its source in `CREDITS`) · Abbas-Bin: Ultimatemastery, CC BY-SA 4.0
+- Tinubu: Nosa Asemota, CC BY-SA 4.0 · Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0 · Obi: official portrait as published by Premium Times, Nov 2022 (no photographer credited; not a free licence; replace with a photo from Obi's own media channels if possible) · Abbas-Bin: Ultimatemastery, CC BY-SA 4.0
 - Makinde: Oduola Matthew, CC BY-SA 4.0 (upscaled 4x with EDSR) · Sowore: Mohamed Nanabhay, CC BY 2.0 · Adebayo: Benbaahi, CC BY-SA 4.0
 No free photo exists yet for Duke or the other 11 candidates, so they show initials. To add one, crop it square as `photos/<id>.jpg`, add it to `PHOTOS` and `CREDITS`.
 
