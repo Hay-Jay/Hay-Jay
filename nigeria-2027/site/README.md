@@ -16,6 +16,7 @@ Clip the week's articles (`clips.json` entries with `"headline": true`, then `no
 1. Create a Google Form with two required questions:
    - "Who would you vote for on 16 January 2027?" → Tinubu (APC) / Atiku (ADC) / Obi (NDC) / Other / Undecided
    - "Your age group" → 18–24 / 25–34 / 35–44 / 45–54 / 55+
+   - "Who do you think WILL win, whatever your own choice?" → Tinubu / Atiku / Obi / Other (feeds the "Likely to win" ranking: put the percentages in `POLLS.predict.shares`)
 2. Paste the form link into `CONFIG.pollFormUrl`. The "Vote" button appears.
 3. Each Sunday, copy the counts from the form's Responses sheet into `POLLS.viewer`:
    `{updated:'15 Nov 2026', total:1234, ages:{'18-24':{tinubu:0,atiku:0,obi:0,other:0}, ...}}`
@@ -36,5 +37,5 @@ Topics live in `MOTIONS` (`src/app.js`), each with sourced context and the stron
 ## Scoreboard tiers
 Frontrunner: 5M+ votes in 2023 or measured in national polling. Contender: sitting/former governor, past national candidate, or nominee of a party with 1M+ votes in 2023. Long shot: everyone else. It ranks evidence, not a prediction.
 
-## Popularity index
-`POP` in `src/app.js` holds the measured signals (SBM favourability, 2023 vote share, online straw poll). Viewers set the weights with sliders; missing values count as a neutral 50. Add new polls (or the viewer poll results) as extra signals in `POPSIG`.
+## Popularity ranking
+`POPCATS` in `src/app.js`: viewers pick one category to rank by: Favourability (SBM), Online poll, Overall popularity (favourability 70% + online poll 30%, missing = 50) or Likely to win (viewer predictions + a "make your forecast" tool). Past election results are not used. Add each new national poll as its own category.

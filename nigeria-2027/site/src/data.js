@@ -97,6 +97,7 @@ const POLLS = {
   sbm:[{n:'Peter Obi',v:58.3,c:'var(--ndc)'},{n:'Bola Tinubu',v:-58.5,c:'var(--apc)'}],
   tmg:[{n:'Atiku / Amaechi (ADC)',v:73.6,c:'var(--adc)'},{n:'Obi / Kwankwaso (NDC)',v:22.3,c:'var(--ndc)'},{n:'Others',v:4.1,c:'var(--muted)'}],
   r23:[{n:'Tinubu (APC)',v:36.6,c:'var(--apc)'},{n:'Atiku (PDP)',v:29.1,c:'var(--adc)'},{n:'Obi (LP)',v:25.4,c:'var(--ndc)'},{n:'Kwankwaso (NNPP)',v:6.2,c:'#c792ff'}],
+  predict: null, // {updated:'', total:0, shares:{tinubu:0, atiku:0, obi:0}} from the poll question "Who do you think WILL win?" (percentages)
   viewer: null // {updated:'', total:0, ages:{'18-24':{tinubu:0,atiku:0,obi:0,other:0}, ...}} — filled in from your Google Form results
 };
 const MATCH = [

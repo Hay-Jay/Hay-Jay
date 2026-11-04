@@ -76,28 +76,37 @@ const ALL = [
 ALL[0].id = 'tinubu'; ALL[1].id = 'atiku'; ALL[2].id = 'obi';
 ALL.forEach(a => { a.photo = PHOTOS[a.id] || ''; });
 const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported', straw:'73.6%'}, obi:{fav:'+58.3', straw:'22.3%'} };
-// Popularity index: the only measured signals that exist. Missing values count as neutral (50).
-const POP = { tinubu:{fav:-58.5, share:36.6, straw:null}, atiku:{fav:null, share:29.1, straw:73.6}, obi:{fav:58.3, share:25.4, straw:22.3} };
-const POPSIG = [
-  ['fav','2026 favourability','SBM Intelligence net favourability, May 2026 (−100 to +100)', v => (v + 100) / 2, 'sbm'],
-  ['share','2023 vote share','Share of votes cast in 2023, scaled to the winner', v => v / 36.6 * 100, 'wiki23'],
-  ['straw','Online straw poll','Self-selected online poll, Sep 2026, run by an anti-Tinubu group', v => v / 73.6 * 100, 'tmg']
-];
-const POPW_DEFAULT = {fav:50, share:35, straw:15};
-function popScores(){
-  const w = store.get('popw', POPW_DEFAULT); const tot = POPSIG.reduce((a, [k]) => a + (+w[k] || 0), 0) || 1; const out = {};
-  Object.entries(POP).forEach(([id, d]) => { out[id] = Math.round(POPSIG.reduce((a, [k, , , f]) => a + (+w[k] || 0) * (d[k] == null ? 50 : f(d[k])), 0) / tot * 10) / 10; });
-  return out;
-}
-function ranked(){ const sc = popScores(); const top = ALL.filter(a => sc[a.id] != null).sort((x, y) => sc[y.id] - sc[x.id]); return [...top, ...ALL.filter(a => sc[a.id] == null).sort((x, y) => x.tier - y.tier)]; }
+// Popularity: current measured signals only (no past results). Each category ranks on its own.
+const POPCATS = {
+  fav:{label:'Favourability', unit:'net score', desc:'SBM Intelligence voter sentiment tracker, May 2026: share favourable minus unfavourable (−100 to +100). The only national survey so far.', src:'sbm',
+    vals:{obi:58.3, tinubu:-58.5}, fmt:v => (v > 0 ? '+' : '') + v, pct:v => (v + 100) / 2, conf:'Survey of about 829 people across all six zones'},
+  straw:{label:'Online poll', unit:'% of votes', desc:'Tinubu Must Go movement online poll, 24–25 Sep 2026, 109,799 self-selected respondents. Run by an anti-Tinubu group, so Tinubu was not an option and it is not representative.', src:'tmg',
+    vals:{atiku:73.6, obi:22.3}, fmt:v => v + '%', pct:v => v, conf:'Self-selected and partisan: treat with caution'},
+  combined:{label:'Overall popularity', unit:'index 0–100', desc:'Weighted mix of the current signals: favourability 70%, online poll 30% (the survey counts more because it is more reliable). A missing signal counts as a neutral 50.', src:'sbm',
+    vals:null, fmt:v => v.toFixed(1), pct:v => v, conf:'Partial data: Atiku has no favourability score and Tinubu was not in the online poll'},
+  predict:{label:'Likely to win', unit:'% of predictions', desc:'Who viewers think WILL win (not who they want). From our weekly viewer poll, plus your own forecast below.', src:null,
+    vals:null, fmt:v => v + '%', pct:v => v, conf:'Unscientific: shows only who answered'}
+};
+POPCATS.combined.vals = (() => { const o = {}; ['tinubu','atiku','obi'].forEach(id => { const f = POPCATS.fav.vals[id], w = POPCATS.straw.vals[id]; o[id] = Math.round((0.7 * (f == null ? 50 : (f + 100) / 2) + 0.3 * (w == null ? 50 : w / 73.6 * 100)) * 10) / 10; }); return o; })();
+POPCATS.predict.vals = (POLLS.predict && POLLS.predict.shares) || null; // e.g. {tinubu:40, atiku:25, obi:35} from the "who will win" poll question
+const popCat = () => POPCATS[store.get('popcat', 'fav')] ? store.get('popcat', 'fav') : 'fav';
+function ranked(){ const v = POPCATS[popCat()].vals || {}; const top = ALL.filter(a => v[a.id] != null).sort((x, y) => v[y.id] - v[x.id]); return [...top, ...ALL.filter(a => v[a.id] == null).sort((x, y) => x.tier - y.tier)]; }
 function popPanel(){
-  const w = store.get('popw', POPW_DEFAULT); const sc = popScores(); const order = Object.keys(sc).sort((a, b) => sc[b] - sc[a]);
-  return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Popularity index · you set the weights</div><h2>Who is most popular?</h2></div><button class="btn" id="popreset">Reset weights</button></div>
-    <div class="podium">${order.map((id, i) => { const c = cand(id); return `<div class="pod p${i + 1}">${face(c, i === 0 ? 120 : 96)}<div class="pos">#${i + 1}</div><b>${c.name}</b><span class="party" style="--c:${c.c}">${c.party}</span><div class="score">${sc[id]}</div><div class="bar" style="--c:${c.c};width:100%"><div class="t"><i style="width:${sc[id]}%"></i></div></div></div>`; }).join('')}</div>
-    <div class="grid g3">${POPSIG.map(([k, l, d, , sk]) => `<label class="slider"><span class="row" style="justify-content:space-between"><b>${l}</b><span class="n" id="w-${k}">${w[k]}%</span></span><input type="range" min="0" max="100" step="5" value="${w[k]}" data-w="${k}" aria-label="Weight for ${l}"><span class="muted small">${d} · ${src(sk)}</span></label>`).join('')}</div>
-    <p class="muted small">Index = weighted average of each signal scaled to 0–100. Atiku has no published favourability score and Tinubu was not in the straw poll, so those gaps count as a neutral 50. When a scientific poll or our viewer poll by age is published, it gets added here. This measures popularity so far, not who will win.</p></div>`;
+  const k = popCat(), cat = POPCATS[k], v = cat.vals || {}; const order = Object.keys(v).filter(id => cand(id)).sort((a, b) => v[b] - v[a]);
+  const fc = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0});
+  return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Popularity ranking · pick a category</div><h2>Who is ahead?</h2></div></div>
+    <div class="chips" id="popcats">${Object.entries(POPCATS).map(([id, c]) => `<button class="chip" data-cat="${id}" aria-pressed="${id === k}">${c.label}</button>`).join('')}</div>
+    <p class="muted">${esc(cat.desc)} ${cat.src ? src(cat.src) : ''}</p>
+    ${order.length ? `<div class="podium">${order.map((id, i) => { const c = cand(id); return `<div class="pod p${i + 1}">${face(c, i === 0 ? 120 : 96)}<div class="pos">#${i + 1}</div><b>${c.name}</b><span class="party" style="--c:${c.c}">${c.party}</span><div class="score">${cat.fmt(v[id])}</div><div class="muted small">${cat.unit}</div><div class="bar" style="--c:${c.c};width:100%"><div class="t"><i style="width:${Math.max(2, cat.pct(v[id]))}%"></i></div></div></div>`; }).join('')}</div>
+      ${['tinubu','atiku','obi'].filter(id => v[id] == null).map(id => `<div class="muted small">${cand(id).name}: not measured in this category.</div>`).join('')}`
+      : `<div class="card"><b>No viewer predictions yet.</b><span class="muted small">Results appear here every Sunday once the "Who do you think will win?" poll is running.${CONFIG.pollFormUrl ? '' : ' (Add the poll link to switch it on.)'}</span></div>`}
+    <div class="row"><span class="tag">${esc(cat.conf)}</span></div>
+    ${k === 'predict' ? `<div class="card" style="gap:12px"><div class="eyebrow">Make your forecast</div><h3>Your win odds</h3><p class="muted small">Split 100% between the candidates: how likely is each to win? Your odds stay on this device; copy them to share.</p>
+      ${[['tinubu','Bola Tinubu'],['atiku','Atiku Abubakar'],['obi','Peter Obi'],['other','Anyone else']].map(([id, n]) => { const t = Object.values(fc).reduce((a, b) => a + b, 0) || 1; const c = cand(id); return `<label class="slider"><span class="row" style="justify-content:space-between"><span class="row" style="gap:10px">${c ? face(c, 34) : ''}<b>${n}</b></span><span class="n" style="font:400 24px var(--display)">${Math.round(fc[id] / t * 100)}%</span></span><input type="range" min="0" max="100" step="1" value="${fc[id]}" data-fc="${id}" aria-label="Chance for ${n}"></label>`; }).join('')}
+      <button class="btn pri" id="fcshare" style="justify-self:start">Copy my forecast</button></div>` : ''}
+    <p class="muted small">These rank popularity and expectations so far, not a prediction of the result. Past election results are not used. New national polls will be added as categories when they are published.</p></div>`;
 }
-const TIERS = {1:['Frontrunner','5M+ votes in 2023, or measured in national polling'],2:['Contender','Sitting or former governor, a past national candidate, or the nominee of a party that won 1M+ votes in 2023'],3:['Long shot','No national track record yet']};
+const TIERS = {1:['Frontrunner','Measured in national polling in 2026'],2:['Contender','Sitting or former governor, a past presidential candidate, or the nominee of a major national party'],3:['Long shot','Not yet measured, little national profile']};
 
 const STATS = [
   {id:'petrol',label:'Petrol price',a:['May 2023','₦185',185],b:['Nov 2026','₦1,335',1335],bad:'up',unit:'per litre',src:'fuel'},
@@ -196,7 +205,7 @@ const VIEWS = {
           <div class="src">Polls open 8:00am WAT · ${src('inecTime')}</div></div>
       </div>
     </div>
-    ${(() => { const sc = popScores(); const o = Object.keys(sc).sort((a, b) => sc[b] - sc[a]); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">Popularity index</div><h3>Who is most popular right now?</h3></div><span class="btn">Full ranking</span></div><div class="row" style="gap:18px">${o.map((id, i) => `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1}</div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${sc[id]}</span></div></div>`).join('')}</div></a>`; })()}
+    ${(() => { const cat = POPCATS.combined, sc = cat.vals; const o = Object.keys(sc).sort((a, b) => sc[b] - sc[a]); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">Overall popularity · current signals</div><h3>Who is most popular right now?</h3></div><span class="btn">Rank by category</span></div><div class="row" style="gap:18px">${o.map((id, i) => `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1}</div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${cat.fmt(sc[id])}</span></div></div>`).join('')}</div></a>`; })()}
     <div class="grid g4">
       <div class="card stat lift"><div class="k">Registered voters</div><div class="v">110M</div><div class="src">${src('voters')}</div></div>
       <div class="card stat lift"><div class="k">2023 turnout</div><div class="v" style="color:var(--false)">26.7%</div><div class="src">${src('wiki23')}</div></div>
@@ -220,21 +229,22 @@ const VIEWS = {
   candidates:{label:'Candidates', render(){
     const myRank = store.get('rank', null);
     return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · ranked by popularity</div><h2>The scoreboard</h2>
-      <p class="muted">Ranked by popularity: favourability, 2023 votes and polling. No scientific vote-intention poll has been published yet (${src('noPolls')}), so you decide how much each signal counts. Candidates with no popularity data are listed by standing. Tap anyone for their profile.</p></div>
+      <p class="muted">Ranked by popularity today, never by past results. Pick a category to rank by: favourability, the online poll, overall popularity, or who viewers think will win. No scientific vote-intention poll has been published yet (${src('noPolls')}). Candidates not yet measured are listed by standing. Tap anyone for their profile.</p></div>
       <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
       ${popPanel()}
-      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>Popularity</th><th>Standing</th><th>2023 result</th><th>Favourability</th><th>Straw poll</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
-      ${(() => { const sc = popScores(); return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
+      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>${esc(POPCATS[popCat()].label)}</th><th>Standing</th><th>Favourability</th><th>Online poll</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
+      ${(() => { const cat = POPCATS[popCat()], sc = cat.vals || {}; return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
         <td><div class="who">${face(a, 42)}<div><b>${esc(a.name)}</b><div class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span> with ${esc(a.mate)}</div></div></div></td>
-        <td class="n">${sc[a.id] != null ? `<b style="font:400 24px/1 var(--display)">${sc[a.id]}</b>` : '<span class="muted small">No data yet</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td><td class="small">${esc(a.r23)}</td><td class="n small">${s.fav || '—'}</td><td class="n small">${s.straw || '—'}</td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
+        <td class="n">${sc[a.id] != null ? `<b style="font:400 24px/1 var(--display)">${cat.fmt(sc[a.id])}</b>` : '<span class="muted small">Not measured</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td><td class="n small">${s.fav || '—'}</td><td class="n small">${s.straw || '—'}</td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
         <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 7 : 6}">${profile(a)}</td></tr>`; }).join(''); })()}
       </tbody></table></div></div>
       <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}.</div>
       <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up in this table and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
     after(){
-      $('#app').oninput = e => { const r = e.target.closest('[data-w]'); if (r) $('#w-' + r.dataset.w).textContent = r.value + '%'; };
-      $('#app').onchange = e => { const r = e.target.closest('[data-w]'); if (!r) return; const w = store.get('popw', POPW_DEFAULT); w[r.dataset.w] = +r.value; store.set('popw', w); const y = scrollY; route(); scrollTo(0, y); };
-      $('#app').onclick = e => { if (e.target.id === 'popreset') { store.set('popw', POPW_DEFAULT); const y = scrollY; route(); scrollTo(0, y); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
+      const keep = () => { const y = scrollY; route(); scrollTo(0, y); };
+      $('#app').onchange = e => { const r = e.target.closest('[data-fc]'); if (!r) return; const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); f[r.dataset.fc] = +r.value; store.set('forecast', f); keep(); };
+      $('#app').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) { store.set('popcat', c.dataset.cat); keep(); return; }
+        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
 
   compare:{label:'Compare', render(){
     const [a, b] = store.get('pair', ['tinubu', 'obi']);
