@@ -1,7 +1,7 @@
 (function(){
 /* ======================= CONFIG ======================= */
 const CONFIG = {
-  handle: '#Nigeria2027',                 // your @handle
+  handle: 'naijadecides.deji.digital #Nigeria2027', // shown in every share/copy text
   pollFormUrl: '',                        // paste your Google Form link to switch on the viewer poll
 };
 
