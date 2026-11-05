@@ -298,6 +298,44 @@ section.view > *:nth-child(2){animation-delay:.05s}section.view > *:nth-child(3)
 .ff-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 16px}
 .ff-kv i{display:block;font-style:normal;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .ff-tl{margin:6px 0 0;padding-left:18px;display:grid;gap:4px}
+.chart{display:grid;gap:14px}
+.ch-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap}
+.ch-title{font:400 clamp(48px,9vw,96px)/.86 var(--display);text-transform:uppercase;letter-spacing:-.01em;margin:6px 0 8px;background:linear-gradient(90deg,var(--fg),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ch-hero{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--c);background:linear-gradient(120deg,color-mix(in srgb,var(--c) 30%,#04140b),#04140b 70%)}
+.ch-hero-bg{position:absolute;inset:0;background:center 25%/cover no-repeat;opacity:.22;filter:blur(18px) saturate(1.3);transform:scale(1.2)}
+.ch-hero-in{position:relative;display:grid;grid-template-columns:auto auto 1fr;gap:clamp(12px,3vw,28px);align-items:center;padding:clamp(16px,3vw,28px)}
+.ch-one{font:400 clamp(110px,18vw,200px)/.8 var(--display);color:var(--accent);text-shadow:0 8px 40px rgba(61,255,154,.35)}
+.ch-hero-art{width:clamp(120px,20vw,220px);aspect-ratio:1;border-radius:16px;background:var(--panel2) center 20%/cover no-repeat;box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 0 3px var(--c);display:grid;place-items:center;font:400 60px var(--display)}
+.ch-hero-txt{display:grid;gap:8px;min-width:0}
+.ch-hero-txt h3{font:400 clamp(34px,5vw,58px)/.95 var(--display);margin:0}
+.ch-hero-stats{display:flex;flex-wrap:wrap;gap:8px 22px}
+.ch-hero-stats span,.ch-stats span{display:grid;gap:2px;font:400 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.ch-hero-stats small{font:700 13px var(--body);color:var(--muted)}
+.ch-hero-stats i,.ch-stats i{font:800 10px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-style:normal}
+.ch-list{display:grid;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--panel)}
+.ch-row{display:grid;grid-template-columns:62px 64px minmax(0,1fr) auto;gap:14px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s}
+.ch-list>.ch-row:first-child{border-top:0}
+.ch-row:hover,.ch-row:focus-visible,.ch-row[aria-expanded=true]{background:var(--panel2);outline:none}
+.ch-row.top3 .ch-pos b{color:var(--accent)}
+.ch-pos{display:grid;justify-items:center;gap:4px}
+.ch-pos b{font:400 40px/.9 var(--display);font-variant-numeric:tabular-nums}
+.ch-mv{font:900 11px/1 var(--body);padding:3px 6px;border-radius:6px;white-space:nowrap}
+.ch-mv.up{color:var(--true);background:rgba(61,255,154,.14)}
+.ch-mv.down{color:var(--false);background:rgba(255,106,92,.14)}
+.ch-mv.same{color:var(--muted)}
+.ch-mv.new{background:var(--mis);color:#231a00}
+.ch-art{width:64px;height:64px;border-radius:10px;background:var(--panel2) center 20%/cover no-repeat;box-shadow:0 0 0 2px var(--c);display:grid;place-items:center;font:400 26px var(--display)}
+.ch-who{display:grid;gap:4px;min-width:0}
+.ch-who b{font:400 24px/1 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-who .stack{max-width:260px;height:6px}
+.ch-stats{display:flex;gap:18px;align-items:center}
+.ch-stats span{font-size:22px;min-width:42px;text-align:right}
+.ch-caret{color:var(--muted);font:700 16px var(--body)!important;min-width:0!important;transition:transform .2s}
+.ch-row[aria-expanded=true] .ch-caret{transform:rotate(180deg)}
+.ch-prof{padding:6px 18px 18px;background:var(--panel2);border-top:1px dashed var(--line)}
+.ch-line{padding:10px 14px;border-top:2px solid var(--mis);font:700 12px var(--body);color:var(--muted);background:rgba(255,200,61,.06)}
+.ch-line span{color:var(--mis);text-transform:uppercase;letter-spacing:.1em;margin-right:8px}
+@media (max-width:640px){.ch-row{grid-template-columns:44px 52px minmax(0,1fr) auto;gap:10px;padding:10px}.ch-pos b{font-size:30px}.ch-who .hide-s{display:none}.chart .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding-inline:4px}.chart .chips .chip{flex:none}.ch-art{width:52px;height:52px}.ch-who b{font-size:19px}.ch-stats .hide-s{display:none}.ch-who .hide-s{display:none}.ch-hero-in{grid-template-columns:auto 1fr}.ch-hero-txt{grid-column:1/-1}.ch-one{font-size:96px}.ch-hero-art{width:140px}.ch-prof{padding:6px 10px 14px}}
 .ff-tl li::marker{color:var(--accent)}
 .prof .ff{max-width:calc(100vw - 96px);position:sticky;left:0}
 @media (max-width:560px){.prof td:first-child{display:none}.ff-top .face{--s:72px!important}}
@@ -832,11 +870,17 @@ const popCat = () => { const k = store.get('popcat', 'official'); return k === '
 function catVal(k, id){ if (k === 'official') return PTS[id] ? PTS[id].total : null; const c = RANK.categories.find(x => x.id === k); return c.raw[id] != null ? c.raw[id] : null; }
 function ranked(){ const k = popCat(); const top = ALL.filter(a => catVal(k, a.id) != null).sort((x, y) => catVal(k, y.id) - catVal(k, x.id)); return [...top, ...ALL.filter(a => catVal(k, a.id) == null).sort((x, y) => x.tier - y.tier)]; }
 function stack(id){ const p = PTS[id]; return `<div class="stack" title="Points by category">${p.parts.map(x => `<i style="width:${x.pts / RANK_MAX() * 100}%;background:${CATCOL[x.cat]};${x.filled ? 'opacity:.35' : ''}"></i>`).join('')}</div>`; }
-function popPanel(){
+function popPanel(extras){
   const k = popCat(); const order = ALL.filter(a => catVal(k, a.id) != null && cand(a.id)).map(a => a.id).sort((a, b) => catVal(k, b) - catVal(k, a));
   const cat = RANK.categories.find(c => c.id === k);
   const next = new Date(new Date(RANK.updated).getTime() + RANK.everyHours * 36e5);
   const movers = RANK.history.length > 1 ? Object.keys(PTS).map(id => ({id, m: movement(id)})).sort((a, b) => Math.abs(b.m.d) - Math.abs(a.m.d))[0] : null;
+  if (extras) return `<div class="verdict pop"><div class="eyebrow">Behind the chart</div><h3>How the rank is built</h3>
+    <div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>
+    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
+    ${METHOD()}
+    <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
+    ${store.get('fcopen', false) ? forecastCard() : ''}</div>`;
   return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Official rank · all categories added up</div><h2>The Naija Decides Rank</h2></div>
       <div class="upd"><span class="live"></span>Updated ${when(RANK.updated)}<br><span class="muted small">Refreshed every ${RANK.everyHours} hours · next check about ${when(next.toISOString())}</span></div></div>
     <div class="chips" id="popcats"><button class="chip" data-cat="official" aria-pressed="${k === 'official'}">Official rank</button>${RANK.categories.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${k === c.id}">${esc(c.label)}</button>`).join('')}</div>
@@ -847,14 +891,63 @@ function popPanel(){
       ${k === 'official' ? `${stack(id)}<span class="mv ${m.cls}">${m.txt}</span>` : ''}</div>`; }).join('')}</div>
     ${k === 'official' ? `<div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>` : ''}
     ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
-    <details class="method"><summary>How the rank works, and every source</summary>
-      <div class="tw"><table><thead><tr><th>Category</th><th>Type</th><th>Counts</th><th>Date</th><th>Sample</th><th>Tinubu</th><th>Atiku</th><th>Obi</th></tr></thead><tbody>
-      ${RANK.categories.map(c => `<tr><td>${src(c.src)}</td><td>${esc(c.kind)}</td><td class="n">${c.weight === 1 ? 'Full' : 'Half'}</td><td class="small">${esc(c.date)}</td><td class="small">${esc(c.n)}</td>${['tinubu','atiku','obi'].map(id => `<td class="n">${c.raw[id] != null ? fmtRaw(c, c.raw[id]) : '—'}</td>`).join('')}</tr>`).join('')}
-      </tbody></table></div>
-      <p class="muted small">A gap (Atiku in the SBM survey; Tinubu in the anti-Tinubu online poll) is filled with that candidate's average across the categories they do appear in. Harmattan's Obi figure is for the Obi–Kwankwaso ticket and its Tinubu figure is the share not strongly disapproving of his performance. Candidates not in any poll score 0 and are listed by standing. Past election results are not used. This ranks popularity and expectations so far; it is not a forecast of the result.</p></details>
+    ${METHOD()}
     <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
     ${store.get('fcopen', false) ? forecastCard() : ''}
   </div>`;
+}
+const METHOD = () => `<details class="method"><summary>How the rank works, and every source</summary>
+      <div class="tw"><table><thead><tr><th>Category</th><th>Type</th><th>Counts</th><th>Date</th><th>Sample</th><th>Tinubu</th><th>Atiku</th><th>Obi</th></tr></thead><tbody>
+      ${RANK.categories.map(c => `<tr><td>${src(c.src)}</td><td>${esc(c.kind)}</td><td class="n">${c.weight === 1 ? 'Full' : 'Half'}</td><td class="small">${esc(c.date)}</td><td class="small">${esc(c.n)}</td>${['tinubu','atiku','obi'].map(id => `<td class="n">${c.raw[id] != null ? fmtRaw(c, c.raw[id]) : '—'}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div>
+      <p class="muted small">A gap (Atiku in the SBM survey; Tinubu in the anti-Tinubu online poll) is filled with that candidate's average across the categories they do appear in. Harmattan's Obi figure is for the Obi–Kwankwaso ticket and its Tinubu figure is the share not strongly disapproving of his performance. Candidates not in any poll score 0 and are listed by standing. Past election results are not used. This ranks popularity and expectations so far; it is not a forecast of the result.</p></details>`;
+/* ---------- The chart: Billboard / Spotify-style countdown of all 18 ---------- */
+const snapRank = (snap, id) => { const o = Object.keys(snap.points).sort((a, b) => snap.points[b] - snap.points[a]); const i = o.indexOf(id); return i < 0 ? null : i + 1; };
+function chartStats(id){
+  const h = RANK.history; if (!PTS[id] || !h.length) return {last:null, peak:null, on:0};
+  const rs = h.map(s => snapRank(s, id)).filter(Boolean);
+  return {last: h.length > 1 ? snapRank(h[h.length - 2], id) : null, peak: rs.length ? Math.min(...rs) : null, on: rs.length};
+}
+function chMove(a, k){
+  if (k !== 'official' || !PTS[a.id]) return `<span class="ch-mv same" title="Not measured yet">–</span>`;
+  const m = movement(a.id);
+  if (m.cls === 'new') return `<span class="ch-mv new">NEW</span>`;
+  return `<span class="ch-mv ${m.r > 0 ? 'up' : m.r < 0 ? 'down' : 'same'}" title="${esc(m.txt)}">${m.r > 0 ? '▲' + m.r : m.r < 0 ? '▼' + (-m.r) : '='}</span>`;
+}
+const art = (a, cls) => `<div class="${cls}" style="--c:${a.c};${a.photo ? `background-image:url('${a.photo}')` : ''}" role="img" aria-label="${esc(a.name)}">${a.photo ? '' : `<span>${a.ini}</span>`}</div>`;
+function chart(myRank){
+  const k = popCat(), cat = RANK.categories.find(c => c.id === k), list = ranked();
+  const val = a => { const v = catVal(k, a.id); return v == null ? null : k === 'official' ? v.toFixed(1) : fmtRaw(cat, v); };
+  const unit = k === 'official' ? 'pts' : '';
+  const next = new Date(new Date(RANK.updated).getTime() + RANK.everyHours * 36e5);
+  const top = list[0], ts = chartStats(top.id), second = list[1];
+  const lead = k === 'official' && PTS[second.id] ? (PTS[top.id].total - PTS[second.id].total).toFixed(1) : null;
+  const firstUnmeasured = list.findIndex(a => catVal(k, a.id) == null);
+  const row = (a, i) => { const s = chartStats(a.id), v = val(a), yr = myRank ? myRank.indexOf(a.id) + 1 : 0;
+    return `${i === firstUnmeasured ? `<div class="ch-line"><span>Below the line</span> Not in any 2026 poll yet · listed by standing</div>` : ''}
+    <div class="ch-row${i < 3 ? ' top3' : ''}" data-id="${a.id}" tabindex="0" role="button" aria-expanded="false" style="--c:${a.c}">
+      <div class="ch-pos"><b>${i + 1}</b>${chMove(a, k)}</div>
+      ${art(a, 'ch-art')}
+      <div class="ch-who"><b>${esc(a.name)}</b><span><span class="party" style="--c:${a.c}">${a.party}</span> <span class="muted hide-s">with ${esc(a.mate)}</span>${a.bio ? `<span class="muted ch-age"> · ${a.bio.age}</span>` : ''}</span>${k === 'official' && PTS[a.id] ? stack(a.id) : ''}</div>
+      <div class="ch-stats">${v != null ? `<span class="pts"><i>${k === 'official' ? 'Points' : 'Score'}</i>${v}</span>` : `<span class="pts muted hide-s"><i>Points</i>—</span>`}
+        <span class="hide-s"><i>Last</i>${s.last || '—'}</span><span class="hide-s"><i>Peak</i>${s.peak || '—'}</span>${yr ? `<span class="hide-s"><i>You</i>${yr}</span>` : ''}<span class="ch-caret" aria-hidden="true">▾</span></div>
+    </div>
+    <div class="ch-prof" data-for="${a.id}" hidden>${profile(a)}</div>`; };
+  return `<section class="chart">
+    <div class="ch-head"><div><div class="eyebrow">Naija Decides · chart dated ${when(RANK.updated).split(',')[0]}</div><h2 class="ch-title">The Naija<br>Decides 18</h2>
+      <p class="muted">The race's official popularity chart. Every 2026 survey, poll and projection added up, refreshed every ${RANK.everyHours} hours. Tap anyone for their fact file.</p></div>
+      <div class="upd"><span class="live"></span>Updated ${when(RANK.updated)}<br><span class="muted small">Next check about ${when(next.toISOString())}</span></div></div>
+    <div class="chips" id="popcats"><button class="chip" data-cat="official" aria-pressed="${k === 'official'}">Official chart</button>${RANK.categories.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${k === c.id}">${esc(c.label)}</button>`).join('')}</div>
+    ${k !== 'official' ? `<p class="muted small"><b>${esc(cat.kind)} · ${esc(cat.date)} · ${esc(cat.n)}.</b> ${esc(cat.note)} ${src(cat.src)}</p>` : ''}
+    <div class="ch-hero" style="--c:${top.c}">${top.photo ? `<div class="ch-hero-bg" style="background-image:url('${top.photo}')"></div>` : ''}
+      <div class="ch-hero-in"><div class="ch-one">1</div>${art(top, 'ch-hero-art')}
+        <div class="ch-hero-txt"><div class="eyebrow">${k === 'official' ? 'No. 1 on the chart' : 'No. 1 in ' + esc(cat.label)}</div><h3>${esc(top.name)}</h3>
+          <div><span class="party" style="--c:${top.c}">${top.party}</span> <span class="muted">with ${esc(top.mate)}</span></div>
+          <div class="ch-hero-stats"><span><i>${k === 'official' ? 'Points' : 'Score'}</i>${val(top)}${unit ? `<small> / ${RANK_MAX()}</small>` : ''}</span>${lead ? `<span><i>Lead</i>+${lead}</span>` : ''}<span><i>Last</i>${ts.last || '—'}</span><span><i>Peak</i>${ts.peak || '—'}</span><span><i>Move</i>${chMove(top, k)}</span></div>
+          <button class="btn" data-open="${top.id}" style="justify-self:start">Open fact file</button></div></div></div>
+    <div class="ch-list">${list.map(row).join('')}</div>
+    <p class="muted small">Popularity and expectations so far, not a forecast of the result. Past election results are not used. Chart positions below the line are not a ranking: those candidates have not been measured by any published poll.</p>
+  </section>`;
 }
 function forecastCard(){
   const fc = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(fc).reduce((a, b) => a + b, 0) || 1;
@@ -1003,28 +1096,21 @@ const VIEWS = {
 
   candidates:{label:'Candidates', render(){
     const myRank = store.get('rank', null);
-    return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · the official rank</div><h2>The scoreboard</h2>
-      <p class="muted">Ranked by the Naija Decides Rank: every published 2026 survey, poll and projection added up, refreshed every 12 hours, with arrows showing who moved. Tap a category to see it on its own, or tap any candidate for their profile. Candidates not yet measured are listed by standing.</p></div>
-      <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
-      <div class="sec-h"><h3>Meet all ${ALL.length}</h3><span class="muted small">Tap a face for the full fact file</span></div>
+    return `${chart(myRank)}
+      <div class="sec-h" style="margin-top:8px"><div><div class="eyebrow">The fact files</div><h2>Meet all ${ALL.length}</h2></div><span class="muted small">Tap a face for age, record, controversies and pitch</span></div>
       <div class="meet">${ALL.map(a => `<button class="meet-c lift" data-open="${a.id}" style="--c:${a.c}">${face(a, 72)}<b>${esc(a.name)}</b><span class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span>${a.bio ? ` · ${a.bio.age}` : ''}</span><span class="small">${a.bio ? esc(a.bio.pitch.length > 70 ? a.bio.pitch.slice(0, 68) + '…' : a.bio.pitch) : ''}</span></button>`).join('')}
         <div class="meet-c pending">${face({photo:PENDING.photo, c:'#888', ini:'GO', name:PENDING.name}, 72)}<b>${esc(PENDING.name)}</b><span class="muted small">${PENDING.party} · ${PENDING.age} · <span class="tag">Court-cleared, not on INEC list</span></span><span class="small">${esc(PENDING.note)}</span><span class="src">${src('ptprof')}</span></div></div>
-      ${popPanel()}
-      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>${popCat() === 'official' ? 'Points' : esc(RANK.categories.find(c => c.id === popCat()).label)}</th><th>Move</th><th>Standing</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
-      ${(() => { const k = popCat(), cat = RANK.categories.find(c => c.id === k); return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const v = catVal(k, a.id), m = PTS[a.id] ? movement(a.id) : null; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
-        <td><div class="who">${face(a, 42)}<div><b>${esc(a.name)}</b><div class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span> with ${esc(a.mate)}</div></div></div></td>
-        <td class="n">${v != null ? `<b style="font:400 24px/1 var(--display)">${k === 'official' ? v.toFixed(1) : fmtRaw(cat, v)}</b>` : '<span class="muted small">Not measured</span>'}</td><td>${m ? `<span class="mv ${m.cls}">${m.txt}</span>` : '<span class="muted small">—</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
-        <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 5 : 4}">${profile(a)}</td></tr>`; }).join(''); })()}
-      </tbody></table></div></div>
-      <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}.</div>
-      <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up in this table and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
+      <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
+      ${popPanel(true)}
+      <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}. Profiles: ${src('ptprof')}.</div>
+      <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up on the chart and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
     after(){
       const keep = () => { const y = scrollY; route(); scrollTo(0, y); };
       $('#app').onchange = e => { const r = e.target.closest('[data-fc]'); if (!r) return; const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); f[r.dataset.fc] = +r.value; store.set('forecast', f); keep(); };
       $('#app').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) { store.set('popcat', c.dataset.cat); keep(); return; }
         if (e.target.id === 'fcopen') { store.set('fcopen', !store.get('fcopen', false)); keep(); return; }
-        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const o = e.target.closest('[data-open]'); if (o) { const p = document.querySelector(`tr.prof[data-for="${o.dataset.open}"]`); p.hidden = false; p.previousElementSibling.scrollIntoView({behavior:'smooth', block:'start'}); return; }
-        const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
+        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const o = e.target.closest('[data-open]'); if (o) { const p = document.querySelector(`.ch-prof[data-for="${o.dataset.open}"]`); p.hidden = false; p.previousElementSibling.setAttribute('aria-expanded', 'true'); p.previousElementSibling.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+        const r = e.target.closest('.ch-row'); if (!r || e.target.closest('a')) return; const p = document.querySelector(`.ch-prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; r.setAttribute('aria-expanded', String(!p.hidden)); }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('.ch-row')) e.target.click(); }; }},
 
   compare:{label:'Compare', render(){
     const [a, b] = store.get('pair', ['tinubu', 'obi']);
