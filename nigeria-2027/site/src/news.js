@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-05T02:04:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-05T06:14:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'atiku-sokoto-rigging', at:'2026-11-04T19:43:00+01:00', img:'news/n27.jpg', tag:'Campaign', pri:2, outlet:'Leadership', url:'https://leadership.ng/2027-i-wont-allow-tinubu-apc-to-rig-me-out-like-in-2023-atiku-vows-in-sokoto/', people:['atiku','tinubu'], claim:true,
+    h:'Atiku at Sokoto flag-off: "We will not allow Tinubu and APC to rig us out"',
+    d:'Flagging off the ADC campaign in Sokoto, Atiku told supporters to vote, protect their votes and make sure results are announced as cast. He repeated his claim that the 2023 election was rigged and pledged to tackle insecurity and the cost of living. The 2023 result was upheld by the courts.',
+    why:'Rigging accusations are a claim, not a finding. The best answer is the one Atiku gave: vote, stay for the count, check IReV.'},
   {id:'calabar-attack', at:'2026-11-05T00:19:00+01:00', img:'news/n0.jpg', tag:'Security', pri:3, outlet:'The Sun', url:'https://thesun.ng/obi-kwankwasos-convoy-attacked-in-calabar-police-arrest-suspect/', people:['obi'],
     h:'Obi–Kwankwaso convoy attacked in Calabar; police arrest a suspect',
     d:'Suspected thugs attacked the NDC candidates\' convoy near Watt Market as they headed to a town hall. Vehicles were damaged. Cross River police confirmed the attack and arrested a 27-year-old suspect, and also averted a clash between NDC and APC supporters near the venue.',
