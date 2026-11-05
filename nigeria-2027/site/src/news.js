@@ -3,8 +3,20 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-05T16:17:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-05T21:14:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'court-voids-atiku', at:'2026-11-05T16:11:00+01:00', img:'news/n30.jpg', tag:'Court', pri:3, outlet:'Reuters (via Yahoo News)', url:'https://yahoo.com/news/articles/nigerian-court-voids-candidacy-opposition-151148095.html', people:['atiku'],
+    h:'Court voids Atiku\'s nomination as ADC presidential candidate; party to appeal',
+    d:'Justice Peter Lifu of the Federal High Court, Abuja, set aside the processes that produced the ADC leadership under David Mark and Atiku\'s nomination, in a suit by former ADC deputy chairman Nafiu Bala Gombe, who argued officials were not elected at a national convention. The ADC called the ruling politically motivated and says it will go to the Court of Appeal.',
+    why:'This can change the ballot. Until the appeal is decided, Atiku\'s place on the ticket is uncertain. Follow the appeal, not the rumours.'},
+  {id:'makinde-turn-by-turn', at:'2026-11-05T17:09:00+01:00', img:'news/n31.jpg', tag:'Campaign', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-makinde-rejects-turn-by-turn-presidency-vows-apm-victory/', people:['seyi-makinde','tinubu'],
+    h:'Makinde rejects "turn-by-turn" presidency at South-West town hall',
+    d:'The APM candidate said the South-West should not back President Tinubu only because he is from the region, pointing to 1999 when the region offered two candidates, Obasanjo and Falae.',
+    why:'A direct pitch for South-West votes in Tinubu\'s home region.'},
+  {id:'apc-ekiti-800k', at:'2026-11-05T18:30:00+01:00', img:'news/n32.jpg', tag:'Campaign', pri:1, outlet:'Voice of Nigeria', url:'https://von.gov.ng/2027-apc-targets-800000-votes-for-president-tinubu/', people:['tinubu'],
+    h:'APC asks Ekiti for 800,000 votes for Tinubu',
+    d:'At the party\'s Ekiti rally, APC national chairman Nentawe Yilwatda asked for at least 800,000 votes, which he put at about 90% of the state\'s expected votes, citing tax reforms, roads and the NELFUND student loans.',
+    why:'A party target, not a forecast. Compare it with past Ekiti turnout when results come in.'},
   {id:'apc-enugu-nsukka', at:'2026-11-05T08:25:00+01:00', img:'news/n28.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-apc-flags-off-enugu-campaign-in-nsukka-vows-to-deliver-mbah-tinubu-other-candidates/', people:['tinubu'],
     h:'APC flags off Enugu campaign in Nsukka, pledges votes for Tinubu and Gov. Mbah',
     d:'Party leaders filled Nsukka Township Stadium to launch the APC campaign in Enugu State, pledging to mobilise across all three senatorial districts for President Tinubu and Governor Peter Mbah, who listed his administration\'s projects.',
