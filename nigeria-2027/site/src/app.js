@@ -101,11 +101,17 @@ const popCat = () => { const k = store.get('popcat', 'official'); return k === '
 function catVal(k, id){ if (k === 'official') return PTS[id] ? PTS[id].total : null; const c = RANK.categories.find(x => x.id === k); return c.raw[id] != null ? c.raw[id] : null; }
 function ranked(){ const k = popCat(); const top = ALL.filter(a => catVal(k, a.id) != null).sort((x, y) => catVal(k, y.id) - catVal(k, x.id)); return [...top, ...ALL.filter(a => catVal(k, a.id) == null).sort((x, y) => x.tier - y.tier)]; }
 function stack(id){ const p = PTS[id]; return `<div class="stack" title="Points by category">${p.parts.map(x => `<i style="width:${x.pts / RANK_MAX() * 100}%;background:${CATCOL[x.cat]};${x.filled ? 'opacity:.35' : ''}"></i>`).join('')}</div>`; }
-function popPanel(){
+function popPanel(extras){
   const k = popCat(); const order = ALL.filter(a => catVal(k, a.id) != null && cand(a.id)).map(a => a.id).sort((a, b) => catVal(k, b) - catVal(k, a));
   const cat = RANK.categories.find(c => c.id === k);
   const next = new Date(new Date(RANK.updated).getTime() + RANK.everyHours * 36e5);
   const movers = RANK.history.length > 1 ? Object.keys(PTS).map(id => ({id, m: movement(id)})).sort((a, b) => Math.abs(b.m.d) - Math.abs(a.m.d))[0] : null;
+  if (extras) return `<div class="verdict pop"><div class="eyebrow">Behind the rank</div><h3>How the rank is built</h3>
+    <div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>
+    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
+    ${METHOD()}
+    <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
+    ${store.get('fcopen', false) ? forecastCard() : ''}</div>`;
   return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Official rank · all categories added up</div><h2>The Naija Decides Rank</h2></div>
       <div class="upd"><span class="live"></span>Updated ${when(RANK.updated)}<br><span class="muted small">Refreshed every ${RANK.everyHours} hours · next check about ${when(next.toISOString())}</span></div></div>
     <div class="chips" id="popcats"><button class="chip" data-cat="official" aria-pressed="${k === 'official'}">Official rank</button>${RANK.categories.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${k === c.id}">${esc(c.label)}</button>`).join('')}</div>
@@ -116,14 +122,63 @@ function popPanel(){
       ${k === 'official' ? `${stack(id)}<span class="mv ${m.cls}">${m.txt}</span>` : ''}</div>`; }).join('')}</div>
     ${k === 'official' ? `<div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>` : ''}
     ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
-    <details class="method"><summary>How the rank works, and every source</summary>
-      <div class="tw"><table><thead><tr><th>Category</th><th>Type</th><th>Counts</th><th>Date</th><th>Sample</th><th>Tinubu</th><th>Atiku</th><th>Obi</th></tr></thead><tbody>
-      ${RANK.categories.map(c => `<tr><td>${src(c.src)}</td><td>${esc(c.kind)}</td><td class="n">${c.weight === 1 ? 'Full' : 'Half'}</td><td class="small">${esc(c.date)}</td><td class="small">${esc(c.n)}</td>${['tinubu','atiku','obi'].map(id => `<td class="n">${c.raw[id] != null ? fmtRaw(c, c.raw[id]) : '—'}</td>`).join('')}</tr>`).join('')}
-      </tbody></table></div>
-      <p class="muted small">A gap (Atiku in the SBM survey; Tinubu in the anti-Tinubu online poll) is filled with that candidate's average across the categories they do appear in. Harmattan's Obi figure is for the Obi–Kwankwaso ticket and its Tinubu figure is the share not strongly disapproving of his performance. Candidates not in any poll score 0 and are listed by standing. Past election results are not used. This ranks popularity and expectations so far; it is not a forecast of the result.</p></details>
+    ${METHOD()}
     <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
     ${store.get('fcopen', false) ? forecastCard() : ''}
   </div>`;
+}
+const METHOD = () => `<details class="method"><summary>How the rank works, and every source</summary>
+      <div class="tw"><table><thead><tr><th>Category</th><th>Type</th><th>Counts</th><th>Date</th><th>Sample</th><th>Tinubu</th><th>Atiku</th><th>Obi</th></tr></thead><tbody>
+      ${RANK.categories.map(c => `<tr><td>${src(c.src)}</td><td>${esc(c.kind)}</td><td class="n">${c.weight === 1 ? 'Full' : 'Half'}</td><td class="small">${esc(c.date)}</td><td class="small">${esc(c.n)}</td>${['tinubu','atiku','obi'].map(id => `<td class="n">${c.raw[id] != null ? fmtRaw(c, c.raw[id]) : '—'}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div>
+      <p class="muted small">A gap (Atiku in the SBM survey; Tinubu in the anti-Tinubu online poll) is filled with that candidate's average across the categories they do appear in. Harmattan's Obi figure is for the Obi–Kwankwaso ticket and its Tinubu figure is the share not strongly disapproving of his performance. Candidates not in any poll score 0 and are listed by standing. Past election results are not used. This ranks popularity and expectations so far; it is not a forecast of the result.</p></details>`;
+/* ---------- The rank: No. 1 spotlight, then all 18 in order ---------- */
+const snapRank = (snap, id) => { const o = Object.keys(snap.points).sort((a, b) => snap.points[b] - snap.points[a]); const i = o.indexOf(id); return i < 0 ? null : i + 1; };
+function chartStats(id){
+  const h = RANK.history; if (!PTS[id] || !h.length) return {last:null, peak:null, on:0};
+  const rs = h.map(s => snapRank(s, id)).filter(Boolean);
+  return {last: h.length > 1 ? snapRank(h[h.length - 2], id) : null, peak: rs.length ? Math.min(...rs) : null, on: rs.length};
+}
+function chMove(a, k){
+  if (k !== 'official' || !PTS[a.id]) return `<span class="ch-mv same" title="Not measured yet">–</span>`;
+  const m = movement(a.id);
+  if (m.cls === 'new') return `<span class="ch-mv new">NEW</span>`;
+  return `<span class="ch-mv ${m.r > 0 ? 'up' : m.r < 0 ? 'down' : 'same'}" title="${esc(m.txt)}">${m.r > 0 ? '▲' + m.r : m.r < 0 ? '▼' + (-m.r) : '='}</span>`;
+}
+const art = (a, cls) => `<div class="${cls}" style="--c:${a.c};${a.photo ? `background-image:url('${a.photo}')` : ''}" role="img" aria-label="${esc(a.name)}">${a.photo ? '' : `<span>${a.ini}</span>`}</div>`;
+function chart(myRank){
+  const k = popCat(), cat = RANK.categories.find(c => c.id === k), list = ranked();
+  const val = a => { const v = catVal(k, a.id); return v == null ? null : k === 'official' ? v.toFixed(1) : fmtRaw(cat, v); };
+  const unit = k === 'official' ? 'pts' : '';
+  const next = new Date(new Date(RANK.updated).getTime() + RANK.everyHours * 36e5);
+  const top = list[0], ts = chartStats(top.id), second = list[1];
+  const lead = k === 'official' && PTS[second.id] ? (PTS[top.id].total - PTS[second.id].total).toFixed(1) : null;
+  const firstUnmeasured = list.findIndex(a => catVal(k, a.id) == null);
+  const row = (a, i) => { const s = chartStats(a.id), v = val(a), yr = myRank ? myRank.indexOf(a.id) + 1 : 0;
+    return `${i === firstUnmeasured ? `<div class="ch-line"><span>Not yet measured</span> Not in any 2026 poll yet · listed by standing</div>` : ''}
+    <div class="ch-row${i < 3 ? ' top3' : ''}" data-id="${a.id}" tabindex="0" role="button" aria-expanded="false" style="--c:${a.c}">
+      <div class="ch-pos"><b>${i + 1}</b>${chMove(a, k)}</div>
+      ${art(a, 'ch-art')}
+      <div class="ch-who"><b>${esc(a.name)}</b><span><span class="party" style="--c:${a.c}">${a.party}</span> <span class="muted hide-s">with ${esc(a.mate)}</span>${a.bio ? `<span class="muted ch-age"> · ${a.bio.age}</span>` : ''}</span>${k === 'official' && PTS[a.id] ? stack(a.id) : ''}</div>
+      <div class="ch-stats">${v != null ? `<span class="pts"><i>${k === 'official' ? 'Points' : 'Score'}</i>${v}</span>` : `<span class="pts muted hide-s"><i>Points</i>—</span>`}
+        <span class="hide-s"><i>Prev</i>${s.last ? '#' + s.last : '—'}</span><span class="hide-s"><i>Best</i>${s.peak ? '#' + s.peak : '—'}</span>${yr ? `<span class="hide-s"><i>You</i>${yr}</span>` : ''}<span class="ch-caret" aria-hidden="true">▾</span></div>
+    </div>
+    <div class="ch-prof" data-for="${a.id}" hidden>${profile(a)}</div>`; };
+  return `<section class="chart">
+    <div class="ch-head"><div><div class="eyebrow">Official rank · all categories added up</div><h2 class="ch-title">The Naija<br>Decides 18</h2>
+      <p class="muted">Every published 2026 survey, poll and projection added up, refreshed every ${RANK.everyHours} hours, with arrows showing who moved. Tap anyone for their fact file.</p></div>
+      <div class="upd"><span class="live"></span>Updated ${when(RANK.updated)}<br><span class="muted small">Next check about ${when(next.toISOString())}</span></div></div>
+    <div class="chips" id="popcats"><button class="chip" data-cat="official" aria-pressed="${k === 'official'}">Official rank</button>${RANK.categories.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${k === c.id}">${esc(c.label)}</button>`).join('')}</div>
+    ${k !== 'official' ? `<p class="muted small"><b>${esc(cat.kind)} · ${esc(cat.date)} · ${esc(cat.n)}.</b> ${esc(cat.note)} ${src(cat.src)}</p>` : ''}
+    <div class="ch-hero" style="--c:${top.c}">${top.photo ? `<div class="ch-hero-bg" style="background-image:url('${top.photo}')"></div>` : ''}
+      <div class="ch-hero-in"><div class="ch-one">1</div>${art(top, 'ch-hero-art')}
+        <div class="ch-hero-txt"><div class="eyebrow">${k === 'official' ? 'Leading the Naija Decides Rank' : 'Leading in ' + esc(cat.label)}</div><h3>${esc(top.name)}</h3>
+          <div><span class="party" style="--c:${top.c}">${top.party}</span> <span class="muted">with ${esc(top.mate)}</span></div>
+          <div class="ch-hero-stats"><span><i>${k === 'official' ? 'Points' : 'Score'}</i>${val(top)}${unit ? `<small> / ${RANK_MAX()}</small>` : ''}</span>${lead ? `<span><i>Lead</i>+${lead}</span>` : ''}<span><i>Previous</i>${ts.last ? '#' + ts.last : '—'}</span><span><i>Best</i>${ts.peak ? '#' + ts.peak : '—'}</span><span><i>Move</i>${chMove(top, k)}</span></div>
+          <button class="btn" data-open="${top.id}" style="justify-self:start">Open fact file</button></div></div></div>
+    <div class="ch-list">${list.map(row).join('')}</div>
+    <p class="muted small">Popularity and expectations so far, not a forecast of the result. Past election results are not used. Places 4 to 18 are not a poll ranking: those candidates have not been measured by any published poll yet.</p>
+  </section>`;
 }
 function forecastCard(){
   const fc = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(fc).reduce((a, b) => a + b, 0) || 1;
@@ -272,28 +327,21 @@ const VIEWS = {
 
   candidates:{label:'Candidates', render(){
     const myRank = store.get('rank', null);
-    return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · the official rank</div><h2>The scoreboard</h2>
-      <p class="muted">Ranked by the Naija Decides Rank: every published 2026 survey, poll and projection added up, refreshed every 12 hours, with arrows showing who moved. Tap a category to see it on its own, or tap any candidate for their profile. Candidates not yet measured are listed by standing.</p></div>
-      ${popPanel()}
-      <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>${popCat() === 'official' ? 'Points' : esc(RANK.categories.find(c => c.id === popCat()).label)}</th><th>Move</th><th>Standing</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
-      ${(() => { const k = popCat(), cat = RANK.categories.find(c => c.id === k); return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const v = catVal(k, a.id), m = PTS[a.id] ? movement(a.id) : null; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
-        <td><div class="who">${face(a, 42)}<div><b>${esc(a.name)}</b><div class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span> with ${esc(a.mate)}</div></div></div></td>
-        <td class="n">${v != null ? `<b style="font:400 24px/1 var(--display)">${k === 'official' ? v.toFixed(1) : fmtRaw(cat, v)}</b>` : '<span class="muted small">Not measured</span>'}</td><td>${m ? `<span class="mv ${m.cls}">${m.txt}</span>${m.r ? `<div class="muted small">was #${i + 1 + m.r}</div>` : ''}` : '<span class="muted small">—</span>'}</td><td><span class="tier t${a.tier}">${TIERS[a.tier][0]}</span></td>${myRank ? `<td class="n">${yr ? '#' + yr : '—'}</td>` : ''}</tr>
-        <tr class="prof" data-for="${a.id}" hidden><td></td><td colspan="${myRank ? 5 : 4}">${profile(a)}</td></tr>`; }).join(''); })()}
-      </tbody></table></div></div>
-      <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}.</div>
-      <div class="sec-h"><h3>Meet all ${ALL.length}</h3><span class="muted small">Tap a face for the full fact file</span></div>
+    return `${chart(myRank)}
+      <div class="sec-h" style="margin-top:8px"><div><div class="eyebrow">The fact files</div><h2>Meet all ${ALL.length}</h2></div><span class="muted small">Tap a face for age, record, controversies and pitch</span></div>
       <div class="meet">${ALL.map(a => `<button class="meet-c lift" data-open="${a.id}" style="--c:${a.c}">${face(a, 72)}<b>${esc(a.name)}</b><span class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span>${a.bio ? ` · ${a.bio.age}` : ''}</span><span class="small">${a.bio ? esc(a.bio.pitch.length > 70 ? a.bio.pitch.slice(0, 68) + '…' : a.bio.pitch) : ''}</span></button>`).join('')}
         <div class="meet-c pending">${face({photo:PENDING.photo, c:'#888', ini:'GO', name:PENDING.name}, 72)}<b>${esc(PENDING.name)}</b><span class="muted small">${PENDING.party} · ${PENDING.age} · <span class="tag">Court-cleared, not on INEC list</span></span><span class="small">${esc(PENDING.note)}</span><span class="src">${src('ptprof')}</span></div></div>
       <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
-      <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up in this table and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
+      ${popPanel(true)}
+      <div class="src">Favourability: SBM Intelligence net score, May 2026 (${src('sbm')}). Straw poll: self-selected online poll by an anti-Tinubu group (${src('tmg')}). Ballot: ${src('n_list')}. Profiles: ${src('ptprof')}.</div>
+      <div class="verdict"><div class="eyebrow">Your turn</div><h3>Rank them yourself</h3><p class="muted">Drag the candidates into your own order. Your ranking shows up in the rank list and you can share it.</p><a class="btn pri" href="#play" data-game="rank" style="justify-self:start">Make my ranking</a></div>`; },
     after(){
       const keep = () => { const y = scrollY; route(); scrollTo(0, y); };
       $('#app').onchange = e => { const r = e.target.closest('[data-fc]'); if (!r) return; const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); f[r.dataset.fc] = +r.value; store.set('forecast', f); keep(); };
       $('#app').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) { store.set('popcat', c.dataset.cat); keep(); return; }
         if (e.target.id === 'fcopen') { store.set('fcopen', !store.get('fcopen', false)); keep(); return; }
-        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const o = e.target.closest('[data-open]'); if (o) { const p = document.querySelector(`tr.prof[data-for="${o.dataset.open}"]`); p.hidden = false; p.previousElementSibling.scrollIntoView({behavior:'smooth', block:'start'}); return; }
-        const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
+        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const o = e.target.closest('[data-open]'); if (o) { const p = document.querySelector(`.ch-prof[data-for="${o.dataset.open}"]`); p.hidden = false; p.previousElementSibling.setAttribute('aria-expanded', 'true'); p.previousElementSibling.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+        const r = e.target.closest('.ch-row'); if (!r || e.target.closest('a')) return; const p = document.querySelector(`.ch-prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; r.setAttribute('aria-expanded', String(!p.hidden)); }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('.ch-row')) e.target.click(); }; }},
 
   compare:{label:'Compare', render(){
     const [a, b] = store.get('pair', ['tinubu', 'obi']);
