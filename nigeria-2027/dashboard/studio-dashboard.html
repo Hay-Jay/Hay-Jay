@@ -131,6 +131,24 @@ dialog{background:var(--panel);color:var(--fg);border:1px solid var(--line);bord
 dialog::backdrop{background:rgba(0,0,0,.65)}
 .sgrid{display:grid;grid-template-columns:90px repeat(3,minmax(0,1fr));gap:8px;align-items:center}
 .sgrid .h{font:800 11px var(--body);text-transform:uppercase;letter-spacing:.08em}
+.kit{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(46%,180px),1fr));gap:12px;margin-top:10px}
+.kit figure{margin:0;display:grid;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px}
+.kit figure.wide{grid-column:span 2}
+.kit img{width:100%;border-radius:10px;display:block;background:#020f08}
+.kit figcaption{display:grid;gap:6px;justify-items:start}
+.kit.covers{grid-template-columns:repeat(auto-fill,minmax(min(46%,130px),1fr))}
+.kit.covers img{aspect-ratio:9/16;object-fit:cover}
+.kit.hls{grid-template-columns:repeat(auto-fill,minmax(min(30%,96px),1fr))}
+.kit.hls img{aspect-ratio:1;object-fit:cover;object-position:center;border-radius:50%}
+.kh{margin:22px 0 4px;font:400 20px/1.1 var(--display);text-transform:uppercase;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.bios{display:grid;gap:10px;margin-top:8px}
+.bio{display:grid;gap:4px;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--fg);font:600 15px/1.4 var(--body);cursor:pointer}
+.bio:hover{border-color:var(--accent)}
+.steps{margin:8px 0 0;padding-left:20px;display:grid;gap:8px}
+.times{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;margin-top:8px}
+.times div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:4px}
+.times b{font:400 26px/1 var(--display)}
+@media (max-width:560px){.kit figure.wide{grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
@@ -175,6 +193,36 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
     </div>
   </section>
 
+  <section class="panel" aria-labelledby="h-kit">
+    <div class="head"><h2 id="h-kit">Profile kit</h2><span class="muted small">Everything for a sharp TikTok &amp; Instagram page. Tap to save to your iPhone.</span></div>
+    <div class="kit">
+      <figure><img src="kit/profile/profile-photo-monogram.png" alt="Profile photo, ND monogram" loading="lazy"><figcaption><b>Profile photo</b><span class="muted small">Monogram, 1080×1080 · recommended</span><button class="btn pri" data-kit="profile/profile-photo-monogram.png">⬇ Save</button></figcaption></figure>
+      <figure><img src="kit/profile/profile-photo-wordmark.png" alt="Profile photo, wordmark" loading="lazy"><figcaption><b>Profile photo, alt</b><span class="muted small">Wordmark, 1080×1080</span><button class="btn" data-kit="profile/profile-photo-wordmark.png">⬇ Save</button></figcaption></figure>
+      <figure class="wide"><img src="kit/banner/banner-1500x500.png" alt="Profile banner" loading="lazy"><figcaption><b>Banner</b><span class="muted small">1500×500 · TikTok profile banner and X header</span><button class="btn pri" data-kit="banner/banner-1500x500.png">⬇ Save</button></figcaption></figure>
+    </div>
+    <h3 class="kh">Video covers <span class="muted small">1080×1920, text kept inside the profile-grid crop</span></h3>
+    <div class="kit covers" id="kcovers"></div>
+    <h3 class="kh">Instagram highlight covers</h3>
+    <div class="kit hls" id="khls"></div>
+    <h3 class="kh">Bio &amp; name <span class="muted small">Tap to copy</span></h3>
+    <div class="bios">
+      <button class="bio" data-bio="name"><span class="muted small">Name (both apps)</span><b>Naija Decides 🇳🇬 2027</b></button>
+      <button class="bio" data-bio="tt"><span class="muted small">TikTok bio · 80 characters max</span><b>Facts, fact-checks &amp; the live rank for Nigeria 2027 🇳🇬 Vote 16 Jan 👇</b></button>
+      <button class="bio" data-bio="ig"><span class="muted small">Instagram bio · 150 characters max</span><b>Nigeria 2027, explained 🇳🇬 Facts • fact-checks • all 18 candidates • live rank. Neutral, sourced, no party. Vote 16 Jan 2027 🗳️ Site 👇</b></button>
+    </div>
+    <h3 class="kh">Best quality from your iPhone</h3>
+    <ol class="steps">
+      <li><b>Save</b> the MP4 here (⬇ Download), then in the share sheet tap <b>Save Video</b>. It lands in Photos at full 1080×1920.</li>
+      <li><b>TikTok:</b> Profile → ☰ → Settings and privacy → <b>Data saver: off</b>. On the post screen, check <b>More options → Allow high-quality uploads</b> if your app shows it.</li>
+      <li><b>Instagram:</b> Settings → Media quality → <b>Upload at highest quality: on</b>, and Data saver off.</li>
+      <li>Upload on <b>Wi-Fi</b>. Don't add TikTok filters or re-trim: re-editing re-compresses the video.</li>
+      <li>Cover: on the post screen tap <b>Edit cover</b> → pick from your photos and choose the saved cover PNG.</li>
+      <li>Paste the caption from <b>Copy caption</b>. Add 3–5 hashtags, not 20.</li>
+    </ol>
+    <h3 class="kh">When to post <span class="muted small" id="tzline"></span></h3>
+    <div class="times" id="times"></div>
+  </section>
+
   <section class="panel" aria-labelledby="h-lib">
     <div class="head"><h2 id="h-lib">Video library</h2><div class="filter" id="libf"></div></div>
     <div class="lib" id="lib"></div>
@@ -206,6 +254,22 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const today = () => new Date(Date.now() + (60 + new Date().getTimezoneOffset()) * 60000).toISOString().slice(0, 10);
+
+  const COVERS = ['countdown','your-money','promise-vs-reality','fact-check','know-the-candidates','where-the-money-went','candidate-scorecard','rewind-2023','protect-your-vote'];
+  const BIOS = {name:'Naija Decides 🇳🇬 2027', tt:'Facts, fact-checks & the live rank for Nigeria 2027 🇳🇬 Vote 16 Jan 👇', ig:'Nigeria 2027, explained 🇳🇬 Facts • fact-checks • all 18 candidates • live rank. Neutral, sourced, no party. Vote 16 Jan 2027 🗳️ Site 👇'};
+  const LOCAL_TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Lagos'; } catch (e) { return 'Africa/Lagos'; } })();
+  const watToDate = (date, time) => new Date(`${date}T${time || '19:00'}:00+01:00`);
+  const youT = d => d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  const youAt = p => LOCAL_TZ === 'Africa/Lagos' ? '' : ` (${youT(watToDate(p.date, p.time))} your time)`;
+  function kitRender(){
+    const c = document.getElementById('kcovers'); if (!c) return;
+    c.innerHTML = COVERS.map(id => `<figure><img src="kit/covers/${id}.png" alt="${id} cover" loading="lazy"><figcaption><button class="btn" data-kit="covers/${id}.png">⬇ Save</button></figcaption></figure>`).join('');
+    document.getElementById('khls').innerHTML = ['news','facts','rank','candidates','vote'].map(id => `<figure><img src="kit/highlights/${id}.png" alt="${id} highlight cover" loading="lazy"><figcaption><button class="btn" data-kit="highlights/${id}.png">⬇ ${id[0].toUpperCase() + id.slice(1)}</button></figcaption></figure>`).join('');
+    const d = new Date().toISOString().slice(0, 10);
+    const slots = [['19:00','Main slot · weekdays','After work and school in Nigeria: the busiest TikTok hours.'],['18:00','Sundays','Weekly news recap, when people wind down.'],['12:30','Bonus slot','Lunch scroll. Use it for a second post on big news days.'],['07:00','Election day only','Before polls open on 16 Jan.']];
+    document.getElementById('tzline').textContent = LOCAL_TZ === 'Africa/Lagos' ? 'All times are Lagos time (WAT)' : `Lagos time (WAT) → your time (${LOCAL_TZ.split('/').pop().replace(/_/g, ' ')})`;
+    document.getElementById('times').innerHTML = slots.map(([t, h, n]) => `<div><span class="muted small">${h}</span><b>${t} WAT${LOCAL_TZ === 'Africa/Lagos' ? '' : ` → ${youT(watToDate(d, t))}`}</b><span class="small">${n}</span></div>`).join('');
+  }
   const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
   const num = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n || 0);
   const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1700); };
@@ -216,7 +280,7 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
   function tick(){
     const now = new Date(); const d = Math.max(0, Math.ceil((ELECTION - now) / 864e5)); $('#days').textContent = d;
     const frac = Math.min(1, (now - START) / (ELECTION - START)); $('#ringarc').style.strokeDashoffset = 326.7 * (1 - frac);
-    $('#clock').textContent = 'Lagos ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', timeZone:'Africa/Lagos'}) + ' WAT · ' + now.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', timeZone:'Africa/Lagos'});
+    $('#clock').textContent = (LOCAL_TZ !== 'Africa/Lagos' ? 'You ' + now.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) + ' · ' : '') + 'Lagos ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', timeZone:'Africa/Lagos'}) + ' WAT · ' + now.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', timeZone:'Africa/Lagos'});
   }
   tick(); setInterval(tick, 30000);
 
@@ -229,10 +293,10 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
     const nextUp = tp[0] || posts.find(p => p.date > t && postStatus(p) === 'todo');
     $('#todaynote').textContent = tp.length ? `${tp.length} post${tp.length > 1 ? 's' : ''} today` : nextUp ? 'Nothing today. Next one below.' : '';
     $('#today').innerHTML = nextUp ? (() => { const v = state.videos[nextUp.videoId] || {}; return `<div class="spot"><div class="phone">${thumb(v)}</div><div style="display:grid;gap:10px;min-width:0">
-      <div class="row">${nextUp.date === t ? '<span class="tag today">Today</span>' : `<span class="tag">${fmtDate(nextUp.date)}</span>`}<span class="muted small">${esc(nextUp.time)} WAT</span></div>
+      <div class="row">${nextUp.date === t ? '<span class="tag today">Today</span>' : `<span class="tag">${fmtDate(nextUp.date)}</span>`}<span class="muted small">${esc(nextUp.time)} WAT${youAt(nextUp)}</span></div>
       <h2>${esc(v.title || nextUp.videoId)}</h2>${nextUp.note ? `<div style="color:var(--plan)">${esc(nextUp.note)}</div>` : ''}
       ${v.caption ? `<div class="muted small" style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px">${esc(v.caption)}</div>` : '<div class="notice">This video still needs to be made.</div>'}
-      <div class="row">${v.status === 'ready' ? `<button class="btn pri" data-dl="${esc(v.id)}">⬇ Download MP4</button>` : ''}${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Copy caption</button>` : ''}${chips(nextUp)}</div></div></div>`; })() : `<div class="notice">${state.loaded ? 'Nothing scheduled. Add a post below.' : 'Today\'s post appears here with its video, caption and download button.'}</div>`;
+      <div class="row">${v.status === 'ready' ? `<button class="btn pri" data-dl="${esc(v.id)}">⬇ Download MP4</button>${COVERS.includes(v.id) ? `<button class="btn" data-kit="covers/${esc(v.id)}.png">⬇ Cover</button>` : ''}` : ''}${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Copy caption</button>` : ''}${chips(nextUp)}</div></div></div>`; })() : `<div class="notice">${state.loaded ? 'Nothing scheduled. Add a post below.' : 'Today\'s post appears here with its video, caption and download button.'}</div>`;
     // kpis
     let slots = 0, done = 0; const per = {tiktok:[0,0], instagram:[0,0], x:[0,0]};
     posts.forEach(p => Object.entries(p.platforms || {}).forEach(([k, s]) => { if (s === 'skip' || !per[k]) return; slots++; per[k][1]++; if (s === 'posted') { done++; per[k][0]++; } }));
@@ -254,7 +318,7 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
   function postRow(p){
     const v = state.videos[p.videoId]; const t = today(); const vw = views(p);
     return `<div class="post"><div class="th">${v && v.status === 'ready' ? `<img src="thumbs/${esc(v.id)}.jpg" alt="">` : esc(v ? v.short : '?')}</div><div style="min-width:0">
-      <div class="d">${p.date === t ? '<span class="tag today">Today</span> ' : ''}${fmtDate(p.date)} · ${esc(p.time)} WAT${vw ? ` · <b style="color:var(--fg)">${num(vw)} views</b>` : ''}</div>
+      <div class="d">${p.date === t ? '<span class="tag today">Today</span> ' : ''}${fmtDate(p.date)} · ${esc(p.time)} WAT${youAt(p)}${vw ? ` · <b style="color:var(--fg)">${num(vw)} views</b>` : ''}</div>
       <div class="t">${esc(v ? v.title : p.videoId)}</div>${p.note ? `<div class="small" style="color:var(--plan)">${esc(p.note)}</div>` : ''}
       <div class="chips">${chips(p)}<button class="btn" data-stats="${esc(p.id)}">Log stats</button>${v && v.status === 'ready' ? `<button class="btn" data-dl="${esc(v.id)}" aria-label="Download video">⬇</button>` : ''}<button class="btn" data-del="${esc(p.id)}" aria-label="Remove post">✕</button></div>
     </div></div>`;
@@ -297,12 +361,18 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
     $('#lib').innerHTML = list.length ? list.map(v => { const ps = posts.filter(p => p.videoId === v.id); const vw = ps.reduce((a, p) => a + views(p), 0);
       return `<article class="vcard"><div class="phone" data-vid="${esc(v.id)}">${thumb(v)}${v.status === 'ready' ? `<button class="play" data-play="${esc(v.id)}" aria-label="Preview ${esc(v.title)}">▶</button>` : ''}</div>
         <div class="t">${esc(v.title)}</div><div class="meta"><span class="tag ${v.status === 'ready' ? 'ready' : ''}">${v.status === 'ready' ? 'Ready' : 'To make'}</span>${v.secs ? `<span>${Math.floor(v.secs / 60)}:${String(v.secs % 60).padStart(2, '0')}</span>` : ''}<span>${ps.length ? `${ps.filter(p => postStatus(p) === 'done').length}/${ps.length} posted` : 'Not scheduled'}</span>${vw ? `<span>${num(vw)} views</span>` : ''}</div>
-        <div class="row">${v.status === 'ready' ? `<button class="btn pri" data-dl="${esc(v.id)}">⬇ Download</button>` : ''}${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Caption</button>` : ''}<button class="btn" data-sched="${esc(v.id)}">Schedule</button></div></article>`; }).join('') : '<div class="notice">Nothing here.</div>';
+        <div class="row">${v.status === 'ready' ? `<button class="btn pri" data-dl="${esc(v.id)}">⬇ Download</button>${COVERS.includes(v.id) ? `<button class="btn" data-kit="covers/${esc(v.id)}.png">⬇ Cover</button>` : ''}` : ''}${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Caption</button>` : ''}<button class="btn" data-sched="${esc(v.id)}">Schedule</button></div></article>`; }).join('') : '<div class="notice">Nothing here.</div>';
   }
 
   // ---- actions
   const order = ['planned','posted','skip'];
   async function write(fn, ok){ if (!db) { toast('Open this page in Claude to save changes'); return; } try { await fn(); if (ok) toast(ok); } catch (e) { toast(e && e.code === 'invalid_argument' ? 'You can view this plan but not change it' : 'Could not save. Try again'); } }
+  async function saveFile(url, filename){
+    dl = dl || (window.claude ? await window.claude.use('downloads') : null);
+    if (!dl) { toast('Downloads work when this page is open in Claude'); return; }
+    try { toast('Preparing…'); const r = await fetch(url); if (!r.ok) throw new Error('missing'); await dl.save({filename, data: await r.blob()}); toast('Saved'); }
+    catch (e) { toast(e && e.code === 'declined' ? 'Download cancelled' : e && e.code === 'rate_limited' ? 'One download at a time' : 'Not available yet'); }
+  }
   async function download(id){
     const v = state.videos[id]; if (!v) return;
     dl = dl || (window.claude ? await window.claude.use('downloads') : null);
@@ -337,6 +407,8 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
     if (del) { if (del.dataset.armed) write(() => db.doc('posts/' + del.dataset.del).delete(), 'Post removed'); else { del.dataset.armed = '1'; del.textContent = 'Remove?'; setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.textContent = '✕'; } }, 2500); } return; }
     const cp = e.target.closest('[data-copy]'); if (cp) { navigator.clipboard.writeText(state.videos[cp.dataset.copy].caption).then(() => toast('Caption copied'), () => toast('Copy blocked on this device')); return; }
     const d = e.target.closest('[data-dl]'); if (d) { download(d.dataset.dl); return; }
+    const kf = e.target.closest('[data-kit]'); if (kf) { saveFile('kit/' + kf.dataset.kit, 'NaijaDecides-' + kf.dataset.kit.split('/').pop()); return; }
+    const bc = e.target.closest('[data-bio]'); if (bc) { navigator.clipboard.writeText(BIOS[bc.dataset.bio]).then(() => toast('Copied'), () => toast('Copy failed')); return; }
     const st = e.target.closest('[data-stats]'); if (st) { const p = state.posts.find(x => x.id === st.dataset.stats); if (p) statsDialog(p); return; }
     const pl = e.target.closest('[data-play]'); if (pl) { const box = pl.closest('.phone'); box.innerHTML = `<video src="videos/${esc(pl.dataset.play)}.mp4" controls autoplay playsinline></video>`; return; }
     const lf = e.target.closest('[data-lf]'); if (lf) { libFilter = lf.dataset.lf; render(); return; }
@@ -355,7 +427,7 @@ dialog::backdrop{background:rgba(0,0,0,.65)}
     write(() => db.collection('posts').add({videoId: $('#f-video').value, date: $('#f-date').value, time: $('#f-time').value, platforms, note: $('#f-note').value.trim()}), 'Added to calendar').then(() => { $('#f-note').value = ''; }); });
   $('#f-date').value = today();
 
-  render();
+  render(); kitRender();
   (async () => {
     db = window.claude && await window.claude.use('db');
     if (!db) { const n = $('#dbnote'); n.hidden = false; n.textContent = 'Your saved plan loads when this page is open in Claude while you are signed in.'; return; }
