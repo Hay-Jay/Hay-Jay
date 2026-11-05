@@ -24,11 +24,12 @@ Object.assign(S, {
 });
 
 // Freely licensed portraits only (Wikimedia Commons), cropped square around the face. Candidates without a free photo keep initials.
-const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg', 'aliyu-abbas-bin':'photos/abbas.jpg' };
+const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg', 'aliyu-abbas-bin':'photos/abbas.jpg', 'donald-duke':'photos/duke.jpg', 'sunday-chibuzo-okereke':'photos/okereke.jpg', 'sunday-adenuga':'photos/adenuga.jpg', 'moses-olusoji-adebisi':'photos/adebisi.jpg', 'ada-elizabeth-fredrick-okwori':'photos/okwori.jpg', 'nkem-esther-okereke':'photos/nkem.jpg', 'peter-ada-agada':'photos/agada.jpg' };
 const CREDITS = [
   'Photos via Wikimedia Commons, cropped (and for Makinde, upscaled) by Naija Decides; adaptations of CC BY-SA photos are shared under the same licence.',
   'Tinubu: Nosa Asemota, CC BY-SA 4.0.', 'Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0.', 'Obi: official portrait as published by Premium Times (4 Nov 2022); photographer not credited.',
-  'Makinde: Oduola Matthew, CC BY-SA 4.0.', 'Sowore: Mohamed Nanabhay, CC BY 2.0.', 'Adebayo: Benbaahi, CC BY-SA 4.0.', 'Abbas-Bin: Ultimatemastery, CC BY-SA 4.0.'
+  'Makinde: Oduola Matthew, CC BY-SA 4.0.', 'Sowore: Mohamed Nanabhay, CC BY 2.0.', 'Adebayo: Benbaahi, CC BY-SA 4.0.', 'Abbas-Bin: Ultimatemastery, CC BY-SA 4.0.',
+  'News-agency photos (used for identification, with credit, as published in Premium Times\' Oct 2026 candidate profiles): Adenuga (OurNigeria), Adebisi (Punch), Sunday Okereke (Facebook), Agada (Channels TV), Okwori (Women News), Esther Okereke (TheCable), Olawepo-Hashim (The Sun). Duke: Ripples Nigeria. Rights stay with those outlets; we will remove any photo on request.'
 ];
 C.forEach(c => c.photo = PHOTOS[c.id] || '');
 C.find(c => c.id === 'tinubu').img = 'img/s-tinubu.jpg';
@@ -41,15 +42,14 @@ PROMISES.forEach((p, i) => p.img = PIMG[i]);
 const MIMG = ['img/m-audit.jpg','img/m-cashtransfer.jpg','img/m-bettaedu.jpg','img/m-emefiele.jpg','img/m-bello.jpg','img/m-suvs.jpg'];
 MONEY.forEach((m, i) => m.img = MIMG[i]);
 
-const NEWS = {edition:'Week of 2–8 November 2026', note:'The full roundup video drops every Sunday at 6pm WAT.', items:[
-  {img:'img/n-youth.jpg',tag:'INEC',h:'Young voters shrink to 29.8% of the register',d:'INEC says under-35s make up 29.79% of the register under review, down from 39.65% in 2023. The chairman says it is mostly 2023 voters ageing into older brackets.',why:'Young voters swung Lagos in 2023. A smaller youth share changes the maths.',src:'n_youth',outlet:'Naija News'},
-  {img:'img/n-statepolice.jpg',tag:'Security',h:'State police bill heads to Tinubu',d:'28 state assemblies approved the constitutional amendment. The National Assembly says it will now send the bill for the President\'s assent.',why:'If signed, states could run their own police forces for the first time.',src:'n_police',outlet:'Naija News'},
-  {img:'img/n-sokoto.jpg',tag:'Allegation',h:'Atiku alleges a plot to disrupt the ADC rally in Sokoto',d:'At an Abuja briefing, Atiku accused the DSS leadership of mobilising protesters so the state could impose a curfew. These are his claims; the report carries no DSS response.',why:'Watch for rally restrictions across states as campaigns heat up.',src:'n_sokoto',outlet:'Naija News'},
-  {img:'img/n-elrufai.jpg',tag:'Campaign',h:'El-Rufai tells supporters: vote ADC at every level',d:'The former Kaduna governor\'s directive covers presidential, governorship and legislative races across Kaduna\'s 23 local government areas.',why:'Kaduna has 4.66M registered voters, the third most in Nigeria.',src:'n_elrufai',outlet:'Naija News'},
-  {img:'img/n-deepfakes.jpg',tag:'INEC',h:'INEC warns: deepfakes and cloned voices are coming',d:'Chairman Joash Amupitan said manipulated videos, cloned voices and fabricated images could undermine trust in the 2027 vote.',why:'Check before you share. Practise with our Fact or Cap game.',src:'deepfakes',outlet:'The Sun',cta:['#play','Play Fact or Cap']},
-  {img:'img/n-melaye.jpg',tag:'Allegation',h:'Dino Melaye claims INEC is helping the APC rig',d:'The former senator made the claim on Arise TV. The report includes no supporting evidence and no response from INEC.',why:'Serious claims need evidence. We will follow up if any is published.',src:'n_melaye',outlet:'Naija News'},
-  {img:'img/n-list.jpg',tag:'Ballot',h:'18 candidates, 2 women: the full ballot',d:'INEC\'s final list has 18 presidential tickets, 16 led by men and 2 by women, with four female running mates.',why:'See all 18 ranked by the evidence on our scoreboard.',src:'n_list',outlet:'Naija News',cta:['#candidates','Open the scoreboard']}
-]};
+/*NEWS*/
+NEWS_ITEMS.push({id:'tinubu-pledges', at:'2026-10-24T12:00:00+01:00', img:'', tag:'Manifesto', pri:1, outlet:'allAfrica', url:'https://allafrica.com/stories/202610260027.html', people:['tinubu'],
+  h:'Tinubu: "Poverty will go", full list of 2027 promises at APC launch', d:'The President set out his second-term pledges as the APC flagged off its campaign in Kaduna.', why:'We will check them against his 2022 promises on our Promises page.'});
+const hoursAgo = iso => (Date.now() - new Date(iso)) / 36e5;
+const newsScore = n => -hoursAgo(n.at) + (n.pri - 1) * 18 + (n.pri === 3 && hoursAgo(n.at) < 36 ? 24 : 0);
+const NEWS = { items: [...NEWS_ITEMS].sort((a, b) => newsScore(b) - newsScore(a)), latest: [...NEWS_ITEMS].sort((a, b) => new Date(b.at) - new Date(a.at)) };
+const ago = iso => { const h = hoursAgo(iso); if (h < 1) return 'Just now'; if (h < 24) return Math.floor(h) + 'h ago'; if (h < 48) return 'Yesterday'; return new Date(iso).toLocaleDateString('en-GB', {day:'numeric', month:'short'}); };
+
 
 const PCOL = {APC:'var(--apc)',ADC:'var(--adc)',NDC:'var(--ndc)',PDP:'#e8443a',LP:'#d9e021',SDP:'#ff7ac8',APM:'#9fd3ff',PRP:'#ff5050',AAC:'#ff3b3b',AA:'#c6a7ff',ADP:'#ffd27a',APP:'#7affd7',BP:'#d4b483',DLA:'#a0ffa0',NDP:'#ffa4a4',NRM:'#7ab6ff',YPP:'#ffcf3d',ZLP:'#b0b0ff'};
 const ALL = [
@@ -75,6 +75,8 @@ const ALL = [
   ini: name.split(' ').filter((w, i, a) => i === 0 || i === a.length - 1).map(w => w[0]).join(''), c: PCOL[party] || '#888'}));
 ALL[0].id = 'tinubu'; ALL[1].id = 'atiku'; ALL[2].id = 'obi';
 ALL.forEach(a => { a.photo = PHOTOS[a.id] || ''; });
+/*BIOS*/
+ALL.forEach(a => { a.bio = BIO[a.id] || null; });
 const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported', straw:'73.6%'}, obi:{fav:'+58.3', straw:'22.3%'} };
 /*RANKING*/
 Object.assign(S, {
@@ -236,7 +238,7 @@ const VIEWS = {
       <div class="card stat lift"><div class="k">In poverty (2025)</div><div class="v" style="color:var(--false)">63%</div><div class="src">${src('poverty')}</div></div>
       <div class="card stat lift"><div class="k">On the ballot</div><div class="v">18</div><div class="src">${src('n_list')}</div></div>
     </div>
-    <div style="display:grid;gap:16px"><div class="sec-h"><div><div class="eyebrow">${esc(NEWS.edition)}</div><h2>This week</h2></div><a class="btn" href="#news">All the news</a></div>
+    <div style="display:grid;gap:16px"><div class="sec-h"><div><div class="eyebrow"><span class="live"></span>Live · updated every ${NEWS_META.everyHours} hours</div><h2>Top stories</h2></div><a class="btn" href="#news">All the news</a></div>
       <div class="news-grid">${NEWS.items.slice(0, 6).map((n, i) => story(n, i === 0 ? 'lead' : '')).join('')}</div></div>
     <div style="display:grid;gap:16px"><div class="sec-h"><div><div class="eyebrow">Interactive</div><h2>Play &amp; compare</h2></div><a class="btn" href="#play">All games</a></div>${gameTiles()}</div>
     <div class="verdict"><div class="sec-h"><div><div class="eyebrow">The debate hall</div><h2>Pick a side</h2></div><a class="btn pri" href="#community">Join the debate</a></div><div class="grid g3">${MOTIONS.slice(0, 3).map(m => `<a class="card lift" href="#community" style="text-decoration:none;color:inherit"><span class="tag">${esc(m.tag)}</span><h3>${esc(m.title)}</h3><span class="muted small">See both sides →</span></a>`).join('')}</div></div>
@@ -244,17 +246,38 @@ const VIEWS = {
       <div class="grid g3">${FACTS.slice(0, 3).map(factCard).join('')}</div></div>`; }},
 
   news:{label:'News', render(){
-    return `<div style="display:grid;gap:10px"><div class="eyebrow">Sunday edition · ${esc(NEWS.edition)}</div><h2>The week in the race</h2><p class="muted">${esc(NEWS.note)} Every story links to the original article. Claims made by politicians are labelled as claims.</p></div>
-      <div class="chips" id="nf">${['All', ...new Set(NEWS.items.map(n => n.tag))].map(t => `<button class="chip" data-t="${t}" aria-pressed="${store.get('nf', 'All') === t}">${t}</button>`).join('')}</div>
-      <div class="news-grid">${NEWS.items.filter(n => store.get('nf', 'All') === 'All' || n.tag === store.get('nf', 'All')).map((n, i) => story(n, i === 0 ? 'lead' : i < 3 ? '' : 'wide')).join('')}</div>
-      <div class="card"><div class="eyebrow">Also this week</div><h3>Tinubu: "Poverty will go"</h3><p class="muted">The President set out his 2027 promises at the APC campaign launch in Kaduna. We will check them against his 2022 promises in a coming video.</p><div class="src">${src('tinubu27')}</div></div>`; },
-    after(){ $('#nf').onclick = e => { const b = e.target.closest('[data-t]'); if (b) { store.set('nf', b.dataset.t); route(); } }; }},
+    const f = store.get('nf', 'All'), who = store.get('nwho', ''), q = (store.get('nq', '') || '').toLowerCase(), shown = store.get('nshow', 12);
+    const match = n => (f === 'All' || (f === 'Claims' ? n.claim : f === 'Pressing' ? n.pri >= 2 : n.tag === f)) && (!who || (n.people || []).includes(who)) && (!q || (n.h + ' ' + n.d).toLowerCase().includes(q));
+    const top = NEWS.items.filter(match).slice(0, 6), topIds = new Set(top.map(n => n.id));
+    const rest = NEWS.latest.filter(match).filter(n => !topIds.has(n.id));
+    const recent = rest.filter(n => hoursAgo(n.at) < 72), archive = rest.filter(n => hoursAgo(n.at) >= 72);
+    const days = {}; archive.forEach(n => { const d = new Date(n.at).toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'}); (days[d] = days[d] || []).push(n); });
+    const tags = ['All', 'Pressing', 'Claims', ...new Set(NEWS_ITEMS.map(n => n.tag))];
+    return `<div class="sec-h"><div style="display:grid;gap:10px"><div class="eyebrow"><span class="live"></span>Live news · refreshed every ${NEWS_META.everyHours} hours</div><h2>The race, as it happens</h2>
+      <p class="muted">Newest and most pressing stories first. Nothing is deleted: older stories move to the archive. Claims made by politicians are marked <span class="clm" style="position:static">Claim</span>. Every story links to the original article.</p></div>
+      <div class="upd">Updated ${when(NEWS_META.updated)}<br><span class="muted small">${NEWS_ITEMS.length} stories so far</span></div></div>
+      <div class="newsbar"><input id="nq" type="search" placeholder="Search the news…" value="${esc(store.get('nq', ''))}" aria-label="Search the news">
+        <div class="chips" id="nf">${tags.map(t => `<button class="chip" data-t="${t}" aria-pressed="${f === t}">${t}</button>`).join('')}</div>
+        <div class="row" id="nwho" style="gap:6px"><span class="muted small">Candidate:</span>${['tinubu','atiku','obi','seyi-makinde','omoyele-sowore'].map(id => { const a = ALL.find(x => x.id === id); return `<button class="facebtn" data-who="${id}" aria-pressed="${who === id}" title="${esc(a.name)}">${face(a, 34)}</button>`; }).join('')}${who ? '<button class="chip" data-who="">Clear</button>' : ''}</div></div>
+      ${top.length ? `<div><div class="eyebrow" style="margin-bottom:10px">Top stories</div><div class="news-grid">${top.map((n, i) => story(n, i === 0 ? 'lead' : '')).join('')}</div></div>` : '<div class="card muted">No stories match. Try another filter.</div>'}
+      ${recent.length ? `<div><div class="eyebrow" style="margin-bottom:10px">Latest</div><div class="news-grid">${recent.slice(0, shown).map(n => story(n, 'wide')).join('')}</div>${recent.length > shown ? `<button class="btn" id="nmore" style="margin-top:14px">Show more (${recent.length - shown})</button>` : ''}</div>` : ''}
+      ${archive.length ? `<div><div class="eyebrow" style="margin-bottom:10px">Archive</div>${Object.entries(days).map(([d, items], i) => `<details class="method" ${i === 0 ? 'open' : ''}><summary>${d} · ${items.length} ${items.length > 1 ? 'stories' : 'story'}</summary><div class="news-grid" style="margin-top:12px">${items.map(n => story(n, '')).join('')}</div></details>`).join('')}</div>` : ''}`; },
+    after(){
+      const keep = () => { const y = scrollY; route(); scrollTo(0, y); };
+      $('#app').onclick = e => { const b = e.target.closest('[data-t]'); if (b) { store.set('nf', b.dataset.t); store.set('nshow', 12); keep(); return; }
+        const w = e.target.closest('[data-who]'); if (w) { store.set('nwho', store.get('nwho', '') === w.dataset.who ? '' : w.dataset.who); keep(); return; }
+        if (e.target.id === 'nmore') { store.set('nshow', store.get('nshow', 12) + 12); keep(); } };
+      let tmr; $('#nq').oninput = e => { clearTimeout(tmr); tmr = setTimeout(() => { store.set('nq', e.target.value); keep(); setTimeout(() => { const i = $('#nq'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 0); }, 350); };
+    }},
 
   candidates:{label:'Candidates', render(){
     const myRank = store.get('rank', null);
     return `<div style="display:grid;gap:10px"><div class="eyebrow">All 18 tickets · the official rank</div><h2>The scoreboard</h2>
       <p class="muted">Ranked by the Naija Decides Rank: every published 2026 survey, poll and projection added up, refreshed every 12 hours, with arrows showing who moved. Tap a category to see it on its own, or tap any candidate for their profile. Candidates not yet measured are listed by standing.</p></div>
       <div class="grid g3">${Object.entries(TIERS).map(([k, [n, d]]) => `<div class="card"><span class="tier t${k}" style="justify-self:start">${n}</span><div class="muted small">${d}</div></div>`).join('')}</div>
+      <div class="sec-h"><h3>Meet all ${ALL.length}</h3><span class="muted small">Tap a face for the full fact file</span></div>
+      <div class="meet">${ALL.map(a => `<button class="meet-c lift" data-open="${a.id}" style="--c:${a.c}">${face(a, 72)}<b>${esc(a.name)}</b><span class="muted small"><span class="party" style="--c:${a.c}">${a.party}</span>${a.bio ? ` · ${a.bio.age}` : ''}</span><span class="small">${a.bio ? esc(a.bio.pitch.length > 70 ? a.bio.pitch.slice(0, 68) + '…' : a.bio.pitch) : ''}</span></button>`).join('')}
+        <div class="meet-c pending">${face({photo:PENDING.photo, c:'#888', ini:'GO', name:PENDING.name}, 72)}<b>${esc(PENDING.name)}</b><span class="muted small">${PENDING.party} · ${PENDING.age} · <span class="tag">Court-cleared, not on INEC list</span></span><span class="small">${esc(PENDING.note)}</span><span class="src">${src('ptprof')}</span></div></div>
       ${popPanel()}
       <div class="card" style="padding:8px 12px"><div class="tw"><table class="sb"><thead><tr><th>#</th><th>Candidate</th><th>${popCat() === 'official' ? 'Points' : esc(RANK.categories.find(c => c.id === popCat()).label)}</th><th>Move</th><th>Standing</th>${myRank ? '<th>Your rank</th>' : ''}</tr></thead><tbody>
       ${(() => { const k = popCat(), cat = RANK.categories.find(c => c.id === k); return ranked().map((a, i) => { const s = SIGNALS[a.id] || {}; const v = catVal(k, a.id), m = PTS[a.id] ? movement(a.id) : null; const yr = myRank ? myRank.indexOf(a.id) + 1 : 0; return `<tr class="cand" data-id="${a.id}" tabindex="0"><td class="rank">${i + 1}</td>
@@ -269,7 +292,8 @@ const VIEWS = {
       $('#app').onchange = e => { const r = e.target.closest('[data-fc]'); if (!r) return; const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); f[r.dataset.fc] = +r.value; store.set('forecast', f); keep(); };
       $('#app').onclick = e => { const c = e.target.closest('[data-cat]'); if (c) { store.set('popcat', c.dataset.cat); keep(); return; }
         if (e.target.id === 'fcopen') { store.set('fcopen', !store.get('fcopen', false)); keep(); return; }
-        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
+        if (e.target.id === 'fcshare') { const f = store.get('forecast', {tinubu:34, atiku:33, obi:33, other:0}); const t = Object.values(f).reduce((a, b) => a + b, 0) || 1; copy(`My Naija Decides forecast: Tinubu ${Math.round(f.tinubu / t * 100)}%, Atiku ${Math.round(f.atiku / t * 100)}%, Obi ${Math.round(f.obi / t * 100)}%, others ${Math.round(f.other / t * 100)}%. What's yours? ${CONFIG.handle}`, 'Forecast copied'); return; } const g = e.target.closest('[data-game]'); if (g) { store.set('game', g.dataset.game); return; } const o = e.target.closest('[data-open]'); if (o) { const p = document.querySelector(`tr.prof[data-for="${o.dataset.open}"]`); p.hidden = false; p.previousElementSibling.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+        const r = e.target.closest('tr.cand'); if (!r) return; const p = document.querySelector(`tr.prof[data-for="${r.dataset.id}"]`); p.hidden = !p.hidden; }; $('#app').onkeydown = e => { if (e.key === 'Enter' && e.target.matches('tr.cand')) e.target.click(); }; }},
 
   compare:{label:'Compare', render(){
     const [a, b] = store.get('pair', ['tinubu', 'obi']);
@@ -369,7 +393,17 @@ const VIEWS = {
 function motionCard(m, mine){ return `<article class="card motion lift"><div class="row" style="justify-content:space-between"><span class="tag">${esc(m.tag)}</span>${mine ? `<span class="vd ${mine === 'yes' ? 'true' : mine === 'no' ? 'false' : 'mis'}">You: ${mine === 'yes' ? 'For' : mine === 'no' ? 'Against' : 'Unsure'}</span>` : ''}</div><h3>${esc(m.title)}</h3><p class="muted">${esc(m.ctx)}</p><div class="src">${m.srcs.map(src).join(' · ')}</div>
   <div class="sides"><div class="for"><div class="eyebrow">For</div>${m.yes.map(x => `<p>${esc(x)}</p>`).join('')}</div><div class="against"><div class="eyebrow">Against</div>${m.no.map(x => `<p>${esc(x)}</p>`).join('')}</div></div>
   <div class="pick">${[['yes','I\'m for it'],['no','I\'m against'],['unsure','Not sure']].map(([k, l]) => `<button data-m="${m.id}" data-side="${k}" aria-pressed="${mine === k}">${l}</button>`).join('')}</div></article>`; }
-function story(n, cls){ return `<article class="story lift ${cls}">${clip(n.img, n.outlet, n.h)}<div class="row"><span class="tag ${n.tag === 'Allegation' ? 'alleg' : ''}">${esc(n.tag)}</span></div><h3>${esc(n.h)}</h3><p class="muted">${esc(n.d)}</p>${n.why ? `<div class="why"><b>Why it matters:</b> ${esc(n.why)}</div>` : ''}<div class="row" style="justify-content:space-between"><span class="src">${src(n.src)}</span>${n.cta ? `<a class="btn" href="${n.cta[0]}" ${n.cta[0] === '#play' ? 'data-game="fact"' : ''}>${esc(n.cta[1])}</a>` : ''}</div></article>`; }
+function story(n, cls){
+  const breaking = n.pri === 3 && hoursAgo(n.at) < 36;
+  const ppl = (n.people || []).map(id => ALL.find(a => a.id === id)).filter(Boolean);
+  return `<article class="story lift ${cls}">
+    <a class="photo" href="${esc(n.url)}" target="_blank" rel="noopener">${n.img ? `<img src="${n.img}" alt="" loading="lazy">` : `<div class="noimg">${esc(n.tag)}</div>`}
+      <span class="badges">${breaking ? '<span class="brk">Breaking</span>' : n.pri >= 2 ? '<span class="topb">Top story</span>' : ''}${n.claim ? '<span class="clm">Claim</span>' : ''}</span>
+      <span class="credit">Photo: ${esc(n.outlet)}</span></a>
+    <div class="row" style="justify-content:space-between"><span class="tag">${esc(n.tag)}</span><span class="muted small">${ago(n.at)}</span></div>
+    <h3>${esc(n.h)}</h3><p class="muted">${esc(n.d)}</p>${n.why ? `<div class="why"><b>Why it matters:</b> ${esc(n.why)}</div>` : ''}
+    <div class="row" style="justify-content:space-between"><span class="row" style="gap:6px">${ppl.map(a => face(a, 28)).join('')}</span><a class="readon" href="${esc(n.url)}" target="_blank" rel="noopener">Read on ${esc(n.outlet)} ↗</a></div></article>`;
+}
 function factCard(x){ return `<div class="card lift">${x.img ? clip(x.img, S[x.src].t.split(',')[0]) : ''}<div class="row" style="justify-content:space-between"><span class="meta">${esc(x.who)} · ${esc(x.when)}</span><span class="vd ${x.v}">${x.label}</span></div><div class="claim">${esc(x.claim)}</div><p class="muted">${esc(x.why)}</p><div class="src">${src(x.src)}</div></div>`; }
 function barRow(r){ return `<div class="bar" style="--c:${r.c}"><div class="l"><span>${esc(r.n)}</span><span style="font-variant-numeric:tabular-nums">${r.v}%</span></div><div class="t"><i style="width:${r.v}%"></i></div></div>`; }
 function viewerTable(v){ const cols = ['tinubu','atiku','obi','other']; return `<div class="tw"><table><thead><tr><th>Age</th>${cols.map(c => `<th>${c === 'other' ? 'Other' : cand(c).name}</th>`).join('')}<th>Votes</th></tr></thead><tbody>${Object.entries(v.ages).map(([age, r]) => { const t = cols.reduce((a, c) => a + (r[c] || 0), 0) || 1; return `<tr><td>${age}</td>${cols.map(c => `<td class="n">${Math.round((r[c] || 0) / t * 100)}%</td>`).join('')}<td class="n">${t}</td></tr>`; }).join('')}</tbody></table></div><div class="src">Updated ${esc(v.updated)} · ${v.total} responses · unscientific</div>`; }
@@ -377,8 +411,23 @@ function gameTiles(active){ return `<div class="games">${[
   ['fact','Fact or Cap?','Swipe real claims about the race. Can you spot the cap?', FACTS.length + ' claims'],
   ['lab','Stat Lab','Drag stats onto the board to compare then vs now.', STATS.length + ' stats'],
   ['rank','Rank them','Drag all 18 candidates into your order and share it.', '18 tickets']].map(([k, t, d, n]) => `<a class="game-tile lift" href="#play" data-game="${k}" ${active === k ? 'style="border-color:var(--accent)"' : ''}><span class="eyebrow">${n}</span><h3 style="font-size:30px">${t}</h3><p class="muted">${d}</p><span class="btn ${active === k ? 'pri' : ''}" style="justify-self:start">${active === k ? 'Playing' : 'Play'}</span></a>`).join('')}</div>`; }
+function factFile(a){
+  const b = a.bio; if (!b) return '';
+  const tag = b.oldest ? '<span class="tag">Oldest candidate</span>' : b.youngest ? '<span class="tag">Youngest candidate</span>' : '';
+  return `<div class="ff"><div class="ff-top">${face(a, 96)}<div style="display:grid;gap:6px;min-width:0"><div class="row" style="gap:8px"><b style="font:400 26px/1 var(--display)">${esc(a.name)}</b>${tag}</div>
+    <div class="ff-kv"><span><i>Age</i>${b.age}${b.born ? ` · born ${esc(b.born)}` : ''}</span><span><i>From</i>${esc(b.from)}</span><span><i>Party</i>${a.party}</span><span><i>Running mate</i>${esc(a.mate)}</span></div></div></div>
+    <div class="ff-kv"><span style="grid-column:1/-1"><i>Education</i>${esc(b.edu)}</span></div>
+    <div><div class="muted small">Career so far</div><ol class="ff-tl">${b.career.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
+    <div class="grid g2"><div><div class="muted small">What they have done</div>${esc(b.record)}</div><div><div class="muted small">Questions &amp; disputes <span class="tag">claims labelled</span></div>${esc(b.questions)}</div></div>
+    <div><div class="muted small">2027 pitch</div>${esc(b.pitch)}</div>
+    <div class="src">${src(b.src)}${b.more ? ' · ' + src(b.more) : ''}</div></div>`;
+}
 function profile(a){
   const c = C.find(x => x.id === a.id);
+  if (a.bio) return factFile(a) + (c ? `<details class="method" style="margin-top:10px"><summary>Head-to-head detail</summary>${profileCore(a, c)}</details>` : '');
+  return profileCore(a, c);
+}
+function profileCore(a, c){
   if (!c) return `<div class="row" style="padding:6px 0;align-items:flex-start;flex-wrap:nowrap">${a.photo ? face(a, 96) : ''}<div style="display:grid;gap:6px;min-width:0"><div class="muted small">Running mate: ${esc(a.mate)}</div><div>${a.note ? esc(a.note) : 'Little public record yet. Ask the campaign for its plan, its team and how it would pay for it.'}</div><div class="src">${src(a.src)}</div></div></div>`;
   return `<div class="grid g2" style="padding:6px 0"><div style="display:grid;gap:10px"><div><div class="muted small">Experience</div>${esc(c.exp)}</div><div><div class="muted small">2027 pitch</div>${esc(c.pitch)} <span class="src">${src(c.pitchSrc)}</span></div><div><div class="muted small">On the record</div>${esc(c.record)}<div class="muted small">${esc(c.reply)}</div></div><div><div class="muted small">The question to ask</div><b>${esc(c.question)}</b></div><a class="btn" href="#compare" style="justify-self:start">Compare ${esc(c.name.split(' ')[1])}</a></div>${clip(c.img, S[c.recSrc].t.split(' (')[0].split(',')[0])}</div>`;
 }
@@ -512,7 +561,7 @@ async function ask(q){
   const sample = await sampleP;
   if (sample) {
     box.innerHTML = head + '<div class="muted">Thinking…</div>';
-    const facts = KB.map(([qq, a, s]) => `- ${qq} ${a} (Source: ${S[s].t}, ${S[s].u})`).join('\n') + '\n' + NEWS.items.map(n => `- News (${NEWS.edition}): ${n.h}. ${n.d} (Source: ${S[n.src].t}, ${S[n.src].u})`).join('\n') + '\n- The 18 presidential tickets: ' + ALL.map(a => `${a.name}/${a.mate} (${a.party})`).join('; ');
+    const facts = KB.map(([qq, a, s]) => `- ${qq} ${a} (Source: ${S[s].t}, ${S[s].u})`).join('\n') + '\n' + NEWS.latest.slice(0, 25).map(n => `- News (${n.at.slice(0, 10)}): ${n.h}. ${n.d} (Source: ${n.outlet}, ${n.url})`).join('\n') + '\n- The 18 presidential tickets: ' + ALL.map(a => `${a.name}/${a.mate} (${a.party})`).join('; ');
     const prompt = `You answer questions for "Naija Decides", a neutral civic site about Nigeria's 16 January 2027 presidential election. Use ONLY the verified facts below. Be even-handed between candidates, never tell people who to vote for, say "alleged" for anything not decided by a court, and if the facts don't cover the question, say you don't have verified information on that yet. Answer in 2-4 short sentences in plain English, then a line "Source:" with the source name and link.\n\nVERIFIED FACTS (as of 4 Nov 2026):\n${facts}\n\nQUESTION: ${q}`;
     try { const out = await sample(prompt, { modelTier: 'quick', onText: ({text}) => { box.innerHTML = head + `<div>${esc(text)}</div>`; } }); box.innerHTML = head + `<div>${esc(out.text)}</div><div class="src">AI answer from this site's verified facts.</div>`; return; } catch (e) {}
   }
@@ -526,7 +575,7 @@ async function ask(q){
 /* ======================= ROUTER ======================= */
 const ORDER = ['home','news','candidates','compare','community','play','facts','guide','polls','match','ask'];
 $('#tabs').innerHTML = ORDER.map(k => `<a href="#${k}" data-k="${k}">${VIEWS[k].label}</a>`).join('');
-const tick = [`${daysLeft()} days to the vote`, ...NEWS.items.map(n => n.h), 'Petrol: ₦185 → ₦1,335', 'Poverty: 56% → 63%', '18 tickets on the ballot', 'Play Fact or Cap'];
+const tick = [`${daysLeft()} days to the vote`, ...NEWS.items.slice(0, 8).map(n => (n.pri === 3 && hoursAgo(n.at) < 36 ? 'BREAKING: ' : '') + n.h), 'Petrol: ₦185 → ₦1,335', 'Poverty: 56% → 63%', '18 tickets on the ballot', 'Play Fact or Cap'];
 $('#ticker').innerHTML = [...tick, ...tick].map(t => `<span>${esc(t)}</span>`).join('');
 $('#credits').textContent = CREDITS.join(' ');
 document.addEventListener('click', e => { const g = e.target.closest('a[data-game]'); if (g) store.set('game', g.dataset.game); });

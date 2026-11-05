@@ -47,3 +47,15 @@ node nigeria-2027/site/build.mjs --snapshot
 ```
 
 It refreshes the "updated" time and, if any total changed, appends a snapshot to `history`. The ▲/▼ arrows and +/− points compare the last two snapshots. A scheduled task checks for new polls every 12 hours (11:43 and 23:43 WAT), runs this, republishes the site and pushes.
+
+## News (every 5 hours, never deleted)
+- Stories live in `src/news.js` (`NEWS_ITEMS`). Add new ones and **never delete old ones**: anything older than 72 hours moves to the Archive, grouped by day.
+- Fields: `at` (publish time), `pri` (3 = pressing/breaking, 2 = notable, 1 = routine), `claim: true` when a story rests on someone's allegation, `people` (candidate ids), `why`.
+- Ranking = newest first, with pressing stories boosted (`newsScore` in `app.js`).
+- Images are the article's own lead photo (its `og:image`), saved to `news/nX.jpg` (max 960px) and credited to the outlet on the card. Fetch with `scratchpad/newsfetch.cjs`-style Playwright code.
+- Update `NEWS_META.updated`, run `node build.mjs`, republish with the new `news/` files.
+
+## Candidate fact files
+- `src/bios.js` holds age, home state, education, career, record, labelled questions/disputes and the 2027 pitch for all 18, mainly from Premium Times' Oct 2026 profiles.
+- Photos in `photos/` (640×640). Wikimedia photos keep their CC licences; news-agency photos (credited in `CREDITS`) are used for identification only and will be removed on request. Still no reliable photo: Onor, Omo-Aje, Kabiru Yusuf, Nwanyanwu (shown as initials).
+- Gbenga Olawepo-Hashim (Accord) is court-cleared but not on INEC's final list; shown as a "pending" card. If INEC adds him, move him into `ALL`.
