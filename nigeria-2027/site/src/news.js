@@ -3,8 +3,16 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-05T06:14:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-05T16:17:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'apc-enugu-nsukka', at:'2026-11-05T08:25:00+01:00', img:'news/n28.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-apc-flags-off-enugu-campaign-in-nsukka-vows-to-deliver-mbah-tinubu-other-candidates/', people:['tinubu'],
+    h:'APC flags off Enugu campaign in Nsukka, pledges votes for Tinubu and Gov. Mbah',
+    d:'Party leaders filled Nsukka Township Stadium to launch the APC campaign in Enugu State, pledging to mobilise across all three senatorial districts for President Tinubu and Governor Peter Mbah, who listed his administration\'s projects.',
+    why:'The South East voted heavily for Obi in 2023. Watch whether governors switching to Tinubu moves voters too.'},
+  {id:'tpa-footballs', at:'2026-11-05T08:43:00+01:00', img:'news/n29.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-tpa-launches-five-million-customised-footballs-for-tinubus-re-election-campaign/', people:['tinubu'],
+    h:'Pro-Tinubu group says it will hand out five million branded footballs',
+    d:'The Tinubu Progressive Advocate unveiled a plan to distribute five million customised footballs nationwide to mobilise grassroots support for the President\'s re-election, at an event in Lagos.',
+    why:'Campaign giveaways are legal, but ask: who pays, and what does a football say about policy?'},
   {id:'atiku-sokoto-rigging', at:'2026-11-04T19:43:00+01:00', img:'news/n27.jpg', tag:'Campaign', pri:2, outlet:'Leadership', url:'https://leadership.ng/2027-i-wont-allow-tinubu-apc-to-rig-me-out-like-in-2023-atiku-vows-in-sokoto/', people:['atiku','tinubu'], claim:true,
     h:'Atiku at Sokoto flag-off: "We will not allow Tinubu and APC to rig us out"',
     d:'Flagging off the ADC campaign in Sokoto, Atiku told supporters to vote, protect their votes and make sure results are announced as cast. He repeated his claim that the 2023 election was rigged and pledged to tackle insecurity and the cost of living. The 2023 result was upheld by the courts.',
