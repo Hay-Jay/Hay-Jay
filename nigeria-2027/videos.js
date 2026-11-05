@@ -685,7 +685,7 @@ window.VIDEOS.push(
         <div class="h2 a" data-a="up" data-t=".2">Security and growth, and…</div>
         <div class="gap"></div>
         <div class="a" data-a="stamp" data-t=".8"><span class="stamp amber">Petrol at ₦300</span></div>
-        <div class="gap"></div>
+        <div class="gap"></div><div class="gap"></div>
         <div class="body a" data-a="up" data-t="1.4">Today it is about ₦1,335 a litre. <span class="hl">Ask him to show how.</span></div>` },
       judge('Can he deliver it?'),
       sources(['<b>Premium Times</b> candidate profiles, Oct 2026', '<b>Ripples Nigeria</b> / <b>Arise TV</b> (PRP nomination and court case)', '<b>Wikipedia:</b> Donald Duke']),
