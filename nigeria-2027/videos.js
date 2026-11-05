@@ -622,6 +622,99 @@ window.NARRATION = {
   ],
 };
 
+/* ---------------- "Meet the 18": one candidate per video ----------------
+   Same structure for every candidate: who, path, record, questions, pitch, judge.
+   Facts from Premium Times' Oct 2026 candidate profiles unless stated. */
+const spotHero = (photo, name, party, color, part, hook) => ({ dur: 5, html: `
+  <div class="kicker a" data-a="up">Meet the 18 · part ${part}</div>
+  <div class="gap-s"></div>
+  <div class="a" data-a="pop" data-t=".15" style="width:560px;height:560px;border-radius:50%;background:#0d3a24 center 20%/cover no-repeat url('${photo}');box-shadow:0 0 0 14px ${color},0 0 0 28px rgba(2,15,8,.9),0 40px 90px rgba(0,0,0,.55)"></div>
+  <div class="gap"></div>
+  <div class="a" data-a="up" data-t=".5"><span class="pill" style="background:${color};color:#021;border-color:transparent">${party}</span></div>
+  <div class="h1 a" data-a="up" data-t=".7" style="margin-top:18px">${name}</div>
+  <div class="body a" data-a="up" data-t="1.1">${hook}</div>` });
+const factCards = (kicker, rows, extra = '') => ({ dur: 5.6, html: `
+  <div class="kicker a" data-a="up">${kicker}</div>
+  ${rows.map(([k, v, note], i) => `<div class="card a" data-a="left" data-t="${.3 + i * .35}" style="margin-bottom:22px"><div class="small">${k}</div><div class="h3">${v}</div>${note ? `<div class="sub" style="margin-top:6px">${note}</div>` : ''}</div>`).join('')}${extra}` });
+const judge = (q) => ({ dur: 4.6, html: `
+  <div class="kicker a" data-a="up">Your call</div>
+  <div class="h2 a" data-a="up" data-t=".2">${q}</div>
+  <div class="gap"></div>
+  <div class="h1 a hl" data-a="pop" data-t=".9">Judge for yourself.</div>
+  <div class="gap"></div>
+  <div class="body a" data-a="up" data-t="1.4">Then vote on <span class="mark">16 January 2027</span>.</div>` });
+
+window.VIDEOS.push(
+  {
+    id: 'spotlight-seyi-makinde',
+    title: 'Meet the 18: Seyi Makinde (APM)',
+    caption: 'Meet the 18, part 1: Seyi Makinde, APM. Engineer, two-term Oyo governor, first run for president. His record, the questions, his pitch. Judge for yourself. Full fact file on Naija Decides: link in bio. 🇳🇬 #Nigeria2027 #NigeriaDecides2027 #SeyiMakinde #MeetThe18',
+    scenes: [
+      spotHero('site/photos/makinde.jpg', 'Seyi Makinde', 'APM', '#9fd3ff', 1, 'Governor of Oyo State. Now he wants to be president.'),
+      factCards('Who is he?', [['Age', '58', 'Born 25 December 1967, Ibadan'], ['Studied', 'Electrical Engineering', 'University of Lagos'], ['Before politics', 'Engineer & businessman', 'Founded Makon Engineering']]),
+      factCards('The road here', [['2015', 'Lost the Oyo governorship'], ['2019', 'Elected Oyo governor'], ['2023', 'Re-elected'], ['May 2026', 'APM presidential nominee']]),
+      factCards('What he has done in Oyo', [['Schools', 'Scrapped the ₦3,000 school levy'], ['LAUTECH', 'Took sole ownership for Oyo State'], ['Roads', 'Large road-building programme']]),
+      { dur: 5.4, mood: 'red', html: `
+        <div class="kicker a red" data-a="up">The question</div>
+        <div class="h2 a" data-a="up" data-t=".2">His running mate:<br><span class="mark">Lawal Daura</span></div>
+        <div class="gap"></div>
+        <div class="card a" data-a="left" data-t=".7"><div class="small">August 2018</div><div class="h3">Sacked as DSS chief</div><div class="sub" style="margin-top:6px">After masked agents blocked the National Assembly</div></div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t="1.4">Ask why he chose him.</div>` },
+      factCards('His 2027 pitch', [['Security', 'Decentralised policing'], ['Government', 'A 4-year transitional Government of National Unity']]),
+      judge('Is this the plan Nigeria needs?'),
+      sources(['<b>Premium Times</b> candidate profiles, Oct 2026', '<b>Wikipedia:</b> Seyi Makinde', '<b>INEC</b> final list of candidates, 2026']),
+    ],
+  },
+  {
+    id: 'spotlight-donald-duke',
+    title: 'Meet the 18: Donald Duke (PRP)',
+    caption: 'Meet the 18, part 2: Donald Duke, PRP. Former Cross River governor behind Obudu Ranch, Carnival Calabar and Tinapa. His record, the questions, his ₦300 petrol promise. Judge for yourself. Full fact file on Naija Decides: link in bio. 🇳🇬 #Nigeria2027 #NigeriaDecides2027 #DonaldDuke #MeetThe18',
+    scenes: [
+      spotHero('site/photos/duke.jpg', 'Donald Duke', 'PRP', '#ff5050', 2, 'The man behind Obudu, Carnival Calabar and Tinapa wants to be president.'),
+      factCards('Who is he?', [['Age', '65', 'Born 30 September 1961, Calabar'], ['Studied', 'Law', 'Ahmadu Bello University; master\'s, University of Pennsylvania']]),
+      factCards('The road here', [['Before 1999', 'Cross River finance commissioner'], ['1999 – 2007', 'Governor of Cross River'], ['2019', 'SDP presidential candidate', '34,746 votes'], ['June 2026', 'Cleared as PRP candidate']]),
+      factCards('What he built', [['Obudu Ranch', 'Revived as a tourist resort'], ['Carnival Calabar', 'Launched the yearly festival'], ['Tinapa', 'Business & leisure resort']]),
+      { dur: 5.4, mood: 'red', html: `
+        <div class="kicker a red" data-a="up">The questions</div>
+        <div class="card a" data-a="left" data-t=".3"><div class="small">Tinapa</div><div class="h3">Valued at ₦58.7bn</div><div class="sub" style="margin-top:6px">In Cross River's 2024 accounts. His successor disputes the debts it left.</div></div>
+        <div class="gap-s"></div>
+        <div class="card a" data-a="left" data-t=".7"><div class="small">His nomination</div><div class="h3">Challenged in court</div><div class="sub" style="margin-top:6px">A PRP aspirant sued. The suit was dismissed.</div></div>` },
+      { dur: 5.2, html: `
+        <div class="kicker a" data-a="up">His 2027 pitch</div>
+        <div class="h2 a" data-a="up" data-t=".2">Security and growth, and…</div>
+        <div class="gap"></div>
+        <div class="a" data-a="stamp" data-t=".8"><span class="stamp amber">Petrol at ₦300</span></div>
+        <div class="gap"></div>
+        <div class="body a" data-a="up" data-t="1.4">Today it is about ₦1,335 a litre. <span class="hl">Ask him to show how.</span></div>` },
+      judge('Can he deliver it?'),
+      sources(['<b>Premium Times</b> candidate profiles, Oct 2026', '<b>Ripples Nigeria</b> / <b>Arise TV</b> (PRP nomination and court case)', '<b>Wikipedia:</b> Donald Duke']),
+    ],
+  },
+);
+Object.assign(window.NARRATION, {
+  'spotlight-seyi-makinde': [
+    ['urgent',  'Meet the eighteen, part one. Seyi Makinde, APM. Governor of Oyo State... and now he wants to be president.'],
+    ['calm',    'He is fifty-eight, born in Ibadan. He studied electrical engineering at the University of Lagos, and built his own company, Makon Engineering, before politics.'],
+    ['serious', 'He lost the Oyo governorship in twenty fifteen. Won it in twenty nineteen. Won again in twenty twenty-three. In May twenty twenty-six, the APM made him its presidential candidate.'],
+    ['hopeful', 'In Oyo, he scrapped the three thousand naira school levy, took full ownership of LAUTECH for the state, and ran a big road-building programme.'],
+    ['grave',   'Now the question. His running mate is Lawal Daura... who was sacked as head of the DSS in twenty eighteen, after masked agents blocked the National Assembly. Ask him why.'],
+    ['serious', 'His pitch for twenty twenty-seven: decentralised policing, and a four-year transitional government of national unity.'],
+    ['fired',   'Is this the plan Nigeria needs? Judge for yourself. Then vote on January sixteenth!'],
+    ['calm',    'The sources are on screen.'],
+  ],
+  'spotlight-donald-duke': [
+    ['urgent',  'Meet the eighteen, part two. Donald Duke, PRP. The man behind Obudu, Carnival Calabar and Tinapa... wants to be president.'],
+    ['calm',    'He is sixty-five, born in Calabar. He studied law at Ahmadu Bello University, then got a master\'s degree in the United States.'],
+    ['serious', 'He was Cross River\'s finance commissioner, then governor from nineteen ninety-nine to two thousand and seven. He ran for president in twenty nineteen, and got about thirty-five thousand votes. In twenty twenty-six, the PRP cleared him as its candidate.'],
+    ['hopeful', 'As governor, he revived Obudu Ranch, launched Carnival Calabar, and built Tinapa, a business and leisure resort.'],
+    ['grave',   'The questions. Tinapa is valued at fifty-eight point seven billion naira in the state\'s accounts, and his successor disputes the debts it left. A party member also challenged his nomination in court. That suit was dismissed.'],
+    ['serious', 'His pitch: security, growth... and petrol at about three hundred naira a litre. Today it is around one thousand, three hundred. So ask him to show exactly how.'],
+    ['fired',   'Can he deliver it? Judge for yourself. Then vote on January sixteenth!'],
+    ['calm',    'The sources are on screen.'],
+  ],
+});
+
 /* Closing promo for the Naija Decides website, added to every video. */
 (function(){
   const faces = [['site/photos/atiku.jpg','var(--adc)'],['site/photos/tinubu.jpg','var(--apc)'],['site/photos/obi.jpg','var(--ndc)']];
