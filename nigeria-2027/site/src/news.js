@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-06T06:14:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-06T11:15:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'melaye-kebbi', at:'2026-11-06T09:11:00+01:00', img:'news/n36.jpg', tag:'Campaign', pri:1, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/06/court-order-tinubu-melaye/', people:['tinubu','atiku'],
+    h:'ADC campaign carries on in Kebbi after ruling; Melaye: "no court order will save Tinubu"',
+    d:'Speaking at the ADC presidential rally in Kebbi on Thursday, hours after the Federal High Court voided Atiku\'s nomination, former senator Dino Melaye said no harassment or court order would keep Tinubu in power.',
+    why:'The ADC is campaigning as if the ruling will be overturned. The Court of Appeal decides that, not rallies.'},
   {id:'rig-and-die', at:'2026-11-05T12:00:00+01:00', img:'news/n35.jpg', tag:'Security', pri:2, outlet:'Arise News', url:'https://www.arise.tv/omo-agege-anyone-who-manipulates-2027-election-will-be-killed-its-rig-and-die/', people:[],
     h:'"Rig and die": Omo-Agege threatens to kill anyone who rigs; Keyamo mocks the slogan',
     d:'Former Deputy Senate President Ovie Omo-Agege, now an NDC Senate candidate in Delta Central, told a rally that anyone who rigs the 2027 election "will be killed". Delta State government and rival camps condemned it; his aide later called rigging "treason". Aviation minister Festus Keyamo (APC) responded on X that the opposition should then show how many people they killed to back up rigging claims.',
