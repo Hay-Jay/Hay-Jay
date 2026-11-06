@@ -548,8 +548,12 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-06T01:14:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-06T06:14:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'rig-and-die', at:'2026-11-05T12:00:00+01:00', img:'news/n35.jpg', tag:'Security', pri:2, outlet:'Arise News', url:'https://www.arise.tv/omo-agege-anyone-who-manipulates-2027-election-will-be-killed-its-rig-and-die/', people:[],
+    h:'"Rig and die": Omo-Agege threatens to kill anyone who rigs; Keyamo mocks the slogan',
+    d:'Former Deputy Senate President Ovie Omo-Agege, now an NDC Senate candidate in Delta Central, told a rally that anyone who rigs the 2027 election "will be killed". Delta State government and rival camps condemned it; his aide later called rigging "treason". Aviation minister Festus Keyamo (APC) responded on X that the opposition should then show how many people they killed to back up rigging claims.',
+    why:'Threats of violence have no place in an election, from any side. Report vote-buying or rigging to INEC and the police.'},
   {id:'adc-all-candidates', at:'2026-11-05T12:22:00+01:00', img:'news/n33.jpg', tag:'Court', pri:3, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/headlines/922934-updated-court-nullifies-atikus-candidacy-sacks-all-adc-candidates-party-leadership.html', people:['atiku'],
     h:'What the ruling means: every ADC candidate for 2027 is affected, not only Atiku',
     d:'Justice Lifu also sacked the party\'s national officers, including national secretary Rauf Aregbesola, and voided all candidates the ADC submitted to INEC. If higher courts uphold it, the ADC cannot field candidates in the 2027 elections. The ADC says the ruling conflicts with an earlier Federal High Court judgment that affirmed the Mark-led leadership.',
