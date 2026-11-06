@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-06T11:15:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-06T16:18:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'atiku-not-going-anywhere', at:'2026-11-06T15:59:00+01:00', img:'news/n37.jpg', tag:'Court', pri:2, outlet:'Tori.ng', url:'https://tori.ng/news/327274/atiku-insists-he-will-contest-in-2027-despite-cour.html', people:['atiku'], claim:true,
+    h:'"I am not going anywhere": Atiku and ADC say they will contest despite the ruling',
+    d:'Atiku said no court ruling or pressure would push him out, calling the judgment part of a wider effort to weaken the opposition, and alleged attempts to corrupt the voters\' register with AI-generated photos and fake identities. ADC campaign spokesperson Kola Ologbondiyan said the party will use "all available legal channels", citing an earlier, conflicting judgment by another judge.',
+    why:'Whether the ADC is on the ballot depends on the Court of Appeal. The voter-register claim is unproven; INEC has not responded yet.'},
   {id:'melaye-kebbi', at:'2026-11-06T09:11:00+01:00', img:'news/n36.jpg', tag:'Campaign', pri:1, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/06/court-order-tinubu-melaye/', people:['tinubu','atiku'],
     h:'ADC campaign carries on in Kebbi after ruling; Melaye: "no court order will save Tinubu"',
     d:'Speaking at the ADC presidential rally in Kebbi on Thursday, hours after the Federal High Court voided Atiku\'s nomination, former senator Dino Melaye said no harassment or court order would keep Tinubu in power.',
