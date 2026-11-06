@@ -548,8 +548,16 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-06T16:18:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-06T21:15:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-kidnap-plot', at:'2026-11-06T15:42:00+01:00', img:'news/n38.jpg', tag:'INEC', pri:3, outlet:'Tribune Online', url:'https://tribuneonlineng.com/2027-elections-inec-raises-alarm-over-plot-to-kidnap-electoral-workers/', people:[],
+    h:'INEC says it foiled a plot to kidnap election workers; suspects charged',
+    d:'INEC chairman Joash Amupitan said intelligence operations led to the arrest of suspected masterminds of a plot to intimidate, threaten and kidnap ad hoc electoral staff, and that the DSS has taken them to court. He warned that anyone who harms electoral personnel will face the full weight of the law.',
+    why:'Ad hoc staff, many of them NYSC members, run the polling units. Their safety is the election\'s safety.'},
+  {id:'inec-readiness-lokoja', at:'2026-11-06T16:14:00+01:00', img:'news/n39.jpg', tag:'INEC', pri:2, outlet:'TVC News', url:'https://www.tvcnews.tv/inec-suspends-staff-annual-leave-unveils-welfare-reforms-ahead-of-2027-elections/', people:[],
+    h:'INEC cancels staff leave, says the 16 January election will hold as scheduled',
+    d:'At a readiness review in Lokoja, INEC suspended further annual leave for its staff, announced welfare and logistics measures, and warned that negligence, partisanship or financial impropriety will be punished. Amupitan also opened a new BVAS storage facility and raised concerns about voter apathy and thuggery.',
+    why:'The date is not moving. Check your PVC and polling unit now.'},
   {id:'atiku-not-going-anywhere', at:'2026-11-06T15:59:00+01:00', img:'news/n37.jpg', tag:'Court', pri:2, outlet:'Tori.ng', url:'https://tori.ng/news/327274/atiku-insists-he-will-contest-in-2027-despite-cour.html', people:['atiku'], claim:true,
     h:'"I am not going anywhere": Atiku and ADC say they will contest despite the ruling',
     d:'Atiku said no court ruling or pressure would push him out, calling the judgment part of a wider effort to weaken the opposition, and alleged attempts to corrupt the voters\' register with AI-generated photos and fake identities. ADC campaign spokesperson Kola Ologbondiyan said the party will use "all available legal channels", citing an earlier, conflicting judgment by another judge.',
