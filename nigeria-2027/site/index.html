@@ -548,8 +548,16 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-05T21:14:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-06T01:14:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'adc-all-candidates', at:'2026-11-05T12:22:00+01:00', img:'news/n33.jpg', tag:'Court', pri:3, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/headlines/922934-updated-court-nullifies-atikus-candidacy-sacks-all-adc-candidates-party-leadership.html', people:['atiku'],
+    h:'What the ruling means: every ADC candidate for 2027 is affected, not only Atiku',
+    d:'Justice Lifu also sacked the party\'s national officers, including national secretary Rauf Aregbesola, and voided all candidates the ADC submitted to INEC. If higher courts uphold it, the ADC cannot field candidates in the 2027 elections. The ADC says the ruling conflicts with an earlier Federal High Court judgment that affirmed the Mark-led leadership.',
+    why:'Two High Court rulings now point different ways. The Court of Appeal will decide, so wait for it.'},
+  {id:'adc-ruling-reactions', at:'2026-11-05T19:15:00+01:00', img:'news/n34.jpg', tag:'Court', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/atiku-obi-sdp-cupp-adc-kick-as-court-sacks-mark-led-adc-exco/', people:['atiku','obi'], claim:true,
+    h:'Atiku blames APC for the ruling; Obi urges courts to let opposition parties thrive',
+    d:'Atiku accused the APC of using the judgment to frustrate his bid and weaken his support in the North, and said he will appeal. Obi, the SDP and the CUPP coalition also criticised the ruling. The APC has not been shown to have any role in the suit, which was filed by a former ADC official.',
+    why:'Blaming the APC is Atiku\'s claim; the suit came from inside the ADC. The appeal is what counts.'},
   {id:'court-voids-atiku', at:'2026-11-05T16:11:00+01:00', img:'news/n30.jpg', tag:'Court', pri:3, outlet:'Reuters (via Yahoo News)', url:'https://yahoo.com/news/articles/nigerian-court-voids-candidacy-opposition-151148095.html', people:['atiku'],
     h:'Court voids Atiku\'s nomination as ADC presidential candidate; party to appeal',
     d:'Justice Peter Lifu of the Federal High Court, Abuja, set aside the processes that produced the ADC leadership under David Mark and Atiku\'s nomination, in a suit by former ADC deputy chairman Nafiu Bala Gombe, who argued officials were not elected at a national convention. The ADC called the ruling politically motivated and says it will go to the Court of Appeal.',
