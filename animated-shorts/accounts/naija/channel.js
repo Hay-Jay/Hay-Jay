@@ -501,14 +501,29 @@ function sea(y, t) { ctx.fillStyle = pat('waves', 'indigo', 0.6, t * 30, 0); ctx
 
 // ======================= v2 motion toolkit =======================
 // Ankara wipe: at a cut, a wax-print curtain covers the frame and sweeps away to reveal the new shot.
-function ankaraWipe(st, o = {}) {
-  const dur = o.dur || 0.45, p = st / dur; if (p >= 1 || p < 0) return;
-  const x0 = lerp(-260, 1500, easeInOut(p)) * (o.dir === -1 ? -1 : 1) + (o.dir === -1 ? 1080 : 0), skew = 360, w = 1700;
+// Ankara whip transition. The band sweeps in over the last moment of the outgoing scene (afterScene),
+// covers the cut, then slides off to reveal the new scene (ankaraWipe, called at the start of each scene/shot).
+const WIPE_IN = 0.22, WIPE_OUT = 0.26, WIPE_W = 1900, WIPE_SKEW = 360, WIPE_MID = 1570, WIPE_END = 1080 + WIPE_W + WIPE_SKEW + 40;
+function wipeBand(x0) {
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const band = (off, wd, fill) => { ctx.beginPath(); ctx.moveTo(x0 - wd + off, 0); ctx.lineTo(x0 + off, 0); ctx.lineTo(x0 + off - skew, H); ctx.lineTo(x0 - wd + off - skew, H); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = 14; ctx.strokeStyle = K; ctx.stroke(); };
-  band(0, w, pat(o.pattern || 'diamonds', o.pal || 'sunset', 0.9));
-  band(90, 90, (PALS[o.pal || 'sunset'] || PALS.sunset)[1]);
+  const band = (off, wd, fill, lw = 14) => { ctx.beginPath(); ctx.moveTo(x0 - wd + off, -20); ctx.lineTo(x0 + off, -20); ctx.lineTo(x0 + off - WIPE_SKEW, H + 20); ctx.lineTo(x0 - wd + off - WIPE_SKEW, H + 20); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = K; ctx.stroke(); };
+  band(0, WIPE_W, pat('diamonds', 'magenta', 0.9));
+  band(0, WIPE_W, 'rgba(23,17,28,.18)', 0);
+  band(-WIPE_W + 70, 70, '#f2b705');            // trailing gold stripe
+  band(90, 90, '#f2b705'); band(150, 46, '#0aa3a3');   // leading gold + teal stripes
   ctx.restore();
+}
+function ankaraWipe(st) {
+  if (st < -0.1 || st >= WIPE_OUT) return;   // scenes switch 0.05 s before their start: hold the cover until then
+  const q = Math.max(0, st) / WIPE_OUT; wipeBand(lerp(WIPE_MID, WIPE_END, 1 - (1 - q) * (1 - q)));
+}
+const usesWipe = f => !!f && String(f).includes('ankaraWipe');
+function afterScene({ t, ln, li }) {
+  let left = Infinity;
+  const nx = TL.lines[li + 1];
+  if (nx && usesWipe(S[nx.scene] || S.cta)) left = nx.start - 0.05 - t;
+  if (SHOT_NEXT != null && String(S[ln.scene] || '').includes('ankaraWipe(st')) left = Math.min(left, SHOT_NEXT);
+  if (left > 0 && left <= WIPE_IN) { const p = 1 - left / WIPE_IN; wipeBand(lerp(-60, WIPE_MID, p * p)); }
 }
 // stylised leaves for the foreground, drawn soft and out of focus for depth
 function frond(x, y, s, rot, t, col = '#0f9d58') {
@@ -784,6 +799,7 @@ function ctaScene(top = 'FOLLOW FOR MORE', big = 'NAIJA HISTORY', o = {}) {
     popText(top, 540, 330, 88, lt + 0.1, { color: '#f2b705' });
     popText(big, 540, 450, 104, lt - 0.2, { color: '#fff4dc' });
     ctx.save(); ctx.translate(540, 600); const p = pulse(t, 70); ctx.scale(p, p); tag('FOLLOW +', 0, 0, easeOut(clamp((lt - 0.5) / 0.3)), { size: 58, bg: '#d6246e', ink: '#fff4dc' }); ctx.restore();
+    if (o.wipe !== false) ankaraWipe(lt);
   };
 }
 S.cta = ctaScene();

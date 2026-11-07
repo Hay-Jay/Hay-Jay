@@ -166,7 +166,8 @@ function noise1(x) { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f)
 function shake(t, amp, freq = 22) { if (amp <= 0) return; CAM.sx += (noise1(t * freq) - 0.5) * 2 * amp; CAM.sy += (noise1(t * freq + 91.3) - 0.5) * 2 * amp; }
 const easeInOut = t => { t = clamp(t); return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
 // which shot of a line we are in, given cut times (seconds into the line): [index, seconds into that shot]
-function shotOf(lt, cuts) { let i = 0; while (i < cuts.length && lt >= cuts[i]) i++; return [i, lt - (i ? cuts[i - 1] : 0)]; }
+let SHOT_NEXT = null;   // seconds until the scene's next shot cut (lets a channel start a transition before the cut)
+function shotOf(lt, cuts) { let i = 0; while (i < cuts.length && lt >= cuts[i]) i++; SHOT_NEXT = i < cuts.length ? cuts[i] - lt : null; return [i, lt - (i ? cuts[i - 1] : 0)]; }
 
 const OFF = document.createElement('canvas'); OFF.width = W; OFF.height = H; const OFFX = OFF.getContext('2d');
 // Draw fn in world space as seen by the camera. depth 0 = fixed to screen, 1 = main plane, >1 = foreground.
@@ -346,7 +347,9 @@ function renderAt(t) {
   const punch = (li === 0 || !FX.punch) ? 1 : 1 + 0.07 * (1 - easeOut(lt / 0.35));
   ctx.translate(W / 2, H / 2); ctx.scale(punch, punch); ctx.translate(-W / 2, -H / 2);
   drawBg(t);
+  SHOT_NEXT = null;
   (S[ln.scene] || S.cta)({ t, lt, d, ln, talk });
+  if (typeof afterScene === 'function') afterScene({ t, lt, d, ln, li });
   ctx.restore();
   overlay(t);
 }

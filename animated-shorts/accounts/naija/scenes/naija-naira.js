@@ -53,6 +53,7 @@ S.awo = ({ t, lt, ln }) => {
     popWorld(t, () => { person('chief', 540, 1290, 1.15, { t, pop: clamp((lt - 0.1) / 0.45), armR: [1.0, 2.0], armL: [0.2, 0.1] }); }, { pattern: 'waves', pal: 'indigo', cy: 820, disc: 320, fronds: true });
     tag('CHIEF OBAFEMI AWOLOWO', 540, 330, clamp((lt - ch) / 0.3), { size: 46 });
     tag('THE NAME IS CREDITED TO', 540, 220, clamp((st - 0.1) / 0.3), { size: 32, bg: '#f2b705' });
+    ankaraWipe(st);
   } else {
     camera(540, 900, lerp(1.06, 1.0, easeOut(st / 1)));
     popWorld(t, () => {}, { pattern: 'diamonds', pal: 'green', cy: 800, disc: 0 });

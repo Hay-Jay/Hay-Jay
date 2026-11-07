@@ -28,6 +28,7 @@ S.date = ({ t, lt, ln }) => {
     camera(540, 900, lerp(1.1, 1.0, easeOut(st / 1.5)));
     popWorld(t, () => { ijapa(540, 1200, 0.85, { t, armR: 0.7 }); }, { pattern: 'suns', pal: 'sunset', cy: 1060, disc: 260, fronds: true });
     calendarCard('31', 'OCT', '1959', 540, 600, clamp((lt - oc + 0.1) / 0.3), { top: '#d6246e' });
+    ankaraWipe(st);
   } else {
     camera(lerp(520, 560, st / 3), 900, lerp(1.0, 1.08, st / 3));
     const on = lt > air - 0.35;

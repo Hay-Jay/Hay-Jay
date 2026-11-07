@@ -30,6 +30,7 @@ S.portuguese = ({ t, lt, ln }) => {
     }, { pattern: 'waves', pal: 'teal', burst: false, ground: false, cx: 540 });
     burstBadge('1400s', 820, 430, 140, clamp(st / 0.3), { size: 70, color: '#f2b705' });
     tag('PORTUGUESE SAILORS', 450, 330, clamp((lt - port + 0.1) / 0.3), { size: 48 });
+    ankaraWipe(st);
   } else {
     camera(560, 860, lerp(1.0, 1.15, easeInOut(st / 3)));
     popWorld(t, () => { lagoonMap(t, 1); cityPin('lagos', null, 1, { x: 560, y: 860, s: 1 }); }, { pattern: 'waves', pal: 'indigo', burst: false, ground: false, floaters: false });
@@ -65,6 +66,7 @@ S.benin = ({ t, lt, ln }) => {
       if (u > 0) { ctx.save(); ctx.setLineDash([18, 12]); ctx.lineWidth = 10; ctx.strokeStyle = '#fff4dc'; ctx.beginPath(); ctx.moveTo(x0, y0 - 40); ctx.quadraticCurveTo((x0 + x1) / 2, y0 - 160, lerp(x0, x1, u), lerp(y0, y1, u) - 40); ctx.stroke(); ctx.restore(); }
     }, { pattern: 'diamonds', pal: 'magenta', burst: false, ground: false });
     tag('THE BENIN KINGDOM', 540, 330, clamp((lt - bk + 0.2) / 0.3), { size: 52 });
+    ankaraWipe(st);
   } else if (shot === 1) {
     camera(lerp(500, 580, easeInOut(st / 2.5)), 940, lerp(1.05, 1.12, easeInOut(st / 2.5)));
     popWorld(t, () => {
@@ -103,6 +105,7 @@ S.today = ({ t, lt, ln }) => {
     }, { pattern: 'diamonds', pal: 'sunset', burst: false, ground: false });
     numberPlate(540, 600, 1.15, clamp((lt - cen + 0.1) / 0.3));
     popText('TODAY', 540, 320, 110, st, { color: '#fff4dc' });
+    ankaraWipe(st);
   } else {
     camera(540, 940, lerp(1.12, 1.0, easeOut(st / 1.5)));
     popWorld(t, () => {
