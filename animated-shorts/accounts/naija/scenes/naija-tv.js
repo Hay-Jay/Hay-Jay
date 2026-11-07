@@ -49,7 +49,7 @@ S.who = ({ t, lt, ln }) => {
   camera(540, 940, lerp(1.05, 1.12, lt / 4));
   popWorld(t, () => {
     mast(900, 1290, 0.75, t, 0.8);
-    person('chief', 470, 1290, 1.12, { t, pop: clamp((lt - ch + 0.4) / 0.45), armR: [1.1, 2.2], armL: [0.2, 0.1] });
+    person('chief', 470, 1290, 1.12, { t, pop: clamp((lt - 0.1) / 0.45), armR: [1.1, 2.2], armL: [0.2, 0.1] });
   }, { pattern: 'waves', pal: 'indigo', cx: 470, cy: 820, disc: 300, fronds: true });
   tag('WESTERN REGION GOVERNMENT', 540, 330, clamp((lt - reg + 0.3) / 0.3), { size: 42, bg: '#2fd38a' });
   tag('CHIEF OBAFEMI AWOLOWO', 540, 450, clamp((lt - ch) / 0.3), { size: 46 });
@@ -73,19 +73,25 @@ EV.slogan = ln => [{ t: wl(ln, 'first', 0.6), type: 'ding' }];
 
 S.before = ({ t, lt, ln }) => {
   const yr = wl(ln, 'year', 0.5), ind = wlLast(ln, 'independence', 0.95);
-  camera(540, 900, 1.0);
+  camera(540, 940, lerp(1.0, 1.06, lt / 4));
+  const up = easeOut(clamp((lt - ind + 0.6) / 0.8));
+  impact(t, lt - ind + 0.2, 0.7);
   popWorld(t, () => {
-    const u = clamp((lt - 0.6) / 1.2);
-    ctx.save(); ctx.lineWidth = 16; ctx.strokeStyle = K; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(280, 1000); ctx.lineTo(lerp(280, 800, u), 1000); ctx.stroke(); ctx.lineWidth = 8; ctx.strokeStyle = '#f2b705'; ctx.stroke(); ctx.restore();
-    if (u >= 1) { ctx.save(); ctx.fillStyle = '#f2b705'; ctx.strokeStyle = K; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(830, 1000); ctx.lineTo(790, 976); ctx.lineTo(790, 1024); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
-    tvSet(280, 1180, 0.38, t, { on: true });
-    ngFlag(820, 1180, 170, 100, t, clamp((lt - ind + 0.3) / 0.3));
+    tvSet(300, 1080, 0.62, t, { on: true, text: 'WNTV' });
+    ctx.save(); ctx.strokeStyle = K; ctx.lineCap = 'round'; ctx.lineWidth = 18; ctx.beginPath(); ctx.moveTo(690, 1290); ctx.lineTo(690, 820); ctx.stroke(); ctx.lineWidth = 9; ctx.strokeStyle = '#d8d0c4'; ctx.stroke(); ctx.restore();
+    circle(690, 812, 16, '#f2b705'); ctx.beginPath(); ctx.arc(690, 812, 16, 0, Math.PI * 2); ctx.lineWidth = 6; ctx.strokeStyle = K; ctx.stroke();
+    if (up > 0) { ngFlag(690 + 150, lerp(1200, 900, up), 290, 175, t, 1); if (up > 0.6) glow(840, 900, 260, 'rgba(255,240,180,.35)', (up - 0.6) / 0.4); }
   }, { pattern: 'leaves', pal: 'green', cy: 900, disc: 0 });
-  calendarCard('31', 'OCT', '1959', 280, 680, clamp(lt / 0.3), { top: '#d6246e', rot: -0.05 });
-  calendarCard('1', 'OCT', '1960', 800, 680, clamp((lt - ind + 0.3) / 0.3), { top: NG, rot: 0.05 });
+  calendarCard('31', 'OCT', '1959', 280, 640, clamp(lt / 0.3), { top: '#d6246e', rot: -0.05 });
+  const u = clamp((lt - 0.5) / 0.9);
+  ctx.save(); ctx.lineWidth = 16; ctx.strokeStyle = K; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(445, 650); ctx.lineTo(lerp(445, 615, u), 650); ctx.stroke(); ctx.lineWidth = 8; ctx.strokeStyle = '#f2b705'; ctx.stroke();
+  if (u >= 1) { ctx.fillStyle = '#f2b705'; ctx.strokeStyle = K; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(648, 650); ctx.lineTo(610, 626); ctx.lineTo(610, 674); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  ctx.restore();
+  tag('11 MONTHS', 545, 735, clamp((lt - yr + 0.2) / 0.3), { size: 34, bg: '#f2b705' });
+  calendarCard('1', 'OCT', '1960', 800, 640, clamp((lt - ind + 0.5) / 0.3), { top: NG, rot: 0.05 });
   popText('ALMOST A YEAR EARLY', 540, 320, 84, lt - yr + 0.3, { color: '#fff4dc', step: 0.02 });
   ankaraWipe(lt, { pal: 'green', pattern: 'leaves' });
 };
-EV.before = ln => [{ t: 0.6, type: 'whoosh' }, { t: wlLast(ln, 'independence', 0.95) - 0.3, type: 'pop' }];
+EV.before = ln => [{ t: 0.5, type: 'whoosh' }, { t: wl(ln, 'year', 0.5) - 0.2, type: 'pop' }, { t: wlLast(ln, 'independence', 0.95) - 0.5, type: 'ding' }];
 
 S.cta = ctaScene('FOLLOW FOR MORE', 'NAIJA FIRSTS', { pal: 'teal' });

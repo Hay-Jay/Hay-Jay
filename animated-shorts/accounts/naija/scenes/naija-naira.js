@@ -35,7 +35,7 @@ S.swap = ({ t, lt, ln }) => {
   impact(t, lt - na + 0.2, 1);
   popWorld(t, () => {
     const out = clamp((lt - na + 0.6) / 0.5);
-    money(lerp(540, -300, easeIn2(out)), 980, 1.2, '£', '£1', 'NIGERIAN POUND', '#b8c9a2', clamp((lt - pd + 0.5) / 0.3), -0.06 - out * 0.4);
+    money(lerp(540, -300, easeIn2(out)), 980, 1.2, '£', '£1', 'NIGERIAN POUND', '#b8c9a2', clamp((lt - 0.15) / 0.35), -0.06 - out * 0.4 + Math.sin(t * 2) * 0.02 * (1 - out));
     money(lerp(1400, 560, easeOut(clamp((lt - na + 0.2) / 0.45))), 980, 1.25, '₦', '₦1', 'NAIRA', '#2fd38a', 1, 0.05);
   }, { pattern: 'rings', pal: 'green', cy: 980, disc: 320, fronds: true });
   calendarCard('1', 'JAN', '1973', 800, 520, clamp((lt - jan + 0.1) / 0.3), { top: NG });
@@ -43,14 +43,14 @@ S.swap = ({ t, lt, ln }) => {
   ankaraWipe(lt, { pal: 'green', pattern: 'rings' });
 };
 const easeIn2 = u => u * u;
-EV.swap = ln => [{ t: wl(ln, 'january', 0.2) - 0.1, type: 'pop' }, { t: wlLast(ln, 'naira', 0.95) - 0.2, type: 'ding' }];
+EV.swap = ln => [{ t: 0.15, type: 'pop' }, { t: wl(ln, 'january', 0.2) - 0.1, type: 'pop' }, { t: wlLast(ln, 'naira', 0.95) - 0.2, type: 'ding' }];
 
 S.awo = ({ t, lt, ln }) => {
   const ch = wl(ln, 'chief', 0.4), he = wl(ln, 'he', 0.55), nai = wl(ln, 'nai', 0.85), ra = wlLast(ln, 'ra', 0.95);
   const [shot, st] = shotOf(lt, [he - 0.1]);
   if (shot === 0) {
     camera(520, 940, lerp(1.05, 1.12, st / 3));
-    popWorld(t, () => { person('chief', 540, 1290, 1.15, { t, pop: clamp((lt - ch + 0.4) / 0.45), armR: [1.0, 2.0], armL: [0.2, 0.1] }); }, { pattern: 'waves', pal: 'indigo', cy: 820, disc: 320, fronds: true });
+    popWorld(t, () => { person('chief', 540, 1290, 1.15, { t, pop: clamp((lt - 0.1) / 0.45), armR: [1.0, 2.0], armL: [0.2, 0.1] }); }, { pattern: 'waves', pal: 'indigo', cy: 820, disc: 320, fronds: true });
     tag('CHIEF OBAFEMI AWOLOWO', 540, 330, clamp((lt - ch) / 0.3), { size: 46 });
     tag('THE NAME IS CREDITED TO', 540, 220, clamp((st - 0.1) / 0.3), { size: 32, bg: '#f2b705' });
   } else {

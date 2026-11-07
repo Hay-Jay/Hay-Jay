@@ -83,7 +83,7 @@ S.king = ({ t, lt, ln }) => {
   const lift = easeInOut(clamp((lt - step + 0.1) / 0.8));
   popWorld(t, () => {
     ctx.save(); ctx.beginPath(); ctx.rect(-400, -400, 2000, 1690); ctx.clip();
-    person('alake', 540, 1290, 1.15, { t, style: { head: lift > 0.1 ? 'fila' : 'crown' }, mood: lift > 0.4 ? 'sad' : 'flat', armL: [0.2, 0.1], armR: [0.2, 0.1], pop: clamp((lt - al + 0.4) / 0.45) });
+    person('alake', 540, 1290, 1.15, { t, style: { head: lift > 0.1 ? 'fila' : 'crown' }, mood: lift > 0.4 ? 'sad' : 'flat', armL: [0.2, 0.1], armR: [0.2, 0.1], pop: clamp((lt - 0.1) / 0.45) });
     ctx.restore();
     if (lift > 0.1) beadedCrown(540 + lift * 250, lerp(1290 - 1.15 * 560, 560, lift), 0.65, t, { rot: lift * 0.6 });
   }, { pattern: 'suns', pal: 'teal', cy: 800, disc: 300, fronds: true });
