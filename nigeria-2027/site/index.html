@@ -548,8 +548,24 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-07T06:15:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-07T11:15:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'adc-appeal-filed', at:'2026-11-07T10:44:00+01:00', img:'news/n42.jpg', tag:'Court', pri:3, outlet:'National Update', url:'https://nationalupdate.ng/2026/11/07/adc-races-to-save-atikus-ticket-tells-inec-to-wait/', people:['atiku'],
+    h:'ADC files appeal and asks for a stay; tells INEC to wait for the Court of Appeal',
+    d:'The ADC says it has filed a notice of appeal against the ruling that voided the Mark-led leadership and Atiku\'s nomination, and has applied for a stay of execution. Until the court rules on the stay, the judgment stands, and the party is asking INEC to hold back voluntarily.',
+    why:'The stay decides what happens next. If it is granted, Atiku stays on the ticket while the appeal runs.'},
+  {id:'tinubu-uyo', at:'2026-11-07T06:20:00+01:00', img:'news/n43.jpg', tag:'Campaign', pri:2, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/07/im-a-comfortable-man-i-dont-know-pain-of-the-market-tinubu/', people:['tinubu'],
+    h:'Tinubu in Uyo: "I don\'t know the pain of the market, but I share your pain"',
+    d:'At the APC rally in Akwa Ibom, the President acknowledged that his reforms have been hard on households and asked for re-election. Campaign DG Abdulaziz Yari told the crowd the APC "will not rig" and will rely on the President\'s record.',
+    why:'A rare admission of hardship from the President. Weigh it against the numbers on our Facts page.'},
+  {id:'apga-adopts-tinubu', at:'2026-11-07T06:58:00+01:00', img:'news/n44.jpg', tag:'Campaign', pri:2, outlet:'The Fellow Press', url:'https://www.fellowpress.com/apga-formally-adopts-tinubu-for-2027-as-soludo-sets-50-target-in-anambra/', people:['tinubu','obi'],
+    h:'APGA adopts Tinubu for 2027; Soludo targets 50% of Anambra\'s vote',
+    d:'APGA, which has no presidential candidate, formally adopted Tinubu at its campaign launch in Awka. Anambra governor Charles Soludo set a target of half the state\'s vote for the President, who got 5,111 votes there in 2023.',
+    why:'Anambra is Obi\'s home state and voted overwhelmingly for him in 2023. A real test of governors versus voters.'},
+  {id:'keyamo-heaven', at:'2026-11-07T09:25:00+01:00', img:'news/n45.jpg', tag:'Court', pri:1, outlet:'Business Insider', url:'https://www.bizinsider.org/2027-heaven-wont-fall-if-atiku-isnt-on-the-ballot-keyamo/', people:['atiku'],
+    h:'Keyamo: "heaven won\'t fall" if Atiku is not on the ballot',
+    d:'The aviation minister said on X that Nigeria would suffer no catastrophe if Atiku is excluded, and accused the opposition of praising courts only when rulings go its way. An ADC chieftain separately said there should be "no election" without Atiku.',
+    why:'Both sides are talking past the courts. The Court of Appeal will settle it.'},
   {id:'pig-november-map', at:'2026-11-06T05:19:00+01:00', img:'', tag:'Polls', pri:2, outlet:'allAfrica', url:'https://allafrica.com/stories/202611060098.html', people:['tinubu','obi','atiku'],
     h:'Politico.ng November map: APC 13 states, NDC 13, ADC 11, with Tinubu narrowly ahead',
     d:'Lai Omotola of Politico.ng\'s Political Intelligence Group projected a tight race, with Tinubu slightly ahead of Obi and Atiku third, and APC, NDC and ADC winning 13, 13 and 11 states. He projected turnout of about 40% (29% last time), and said the map assumes a free and fair vote and may change with court cases.',
