@@ -1,0 +1,42 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "The rock on the 100 naira note",
+  "tags": {
+    "topic": "places",
+    "hook": "surprise",
+    "ask": true
+  },
+  "post": {
+    "caption": "There's a giant rock on the ₦100 note, and some people see a face in it 🪨👀 #zumarock #nigeria #abuja #naija #nigerianhistory",
+    "youtube_title": "The Giant Rock On The ₦100 Note (Zuma Rock) #shorts",
+    "youtube_description": "Zuma Rock in Niger State rises about 300 metres above the land around it, by the road into Abuja. It's called the Gateway to Abuja, and its streaks look like a face.\n\n#zumarock #nigeria #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "There's a giant rock on the hundred naira note. And some people see a face in it."
+    },
+    {
+      "scene": "where",
+      "text": "It's Zuma Rock, in Niger State, by the road into Abuja."
+    },
+    {
+      "scene": "size",
+      "text": "It towers about three hundred metres above the land around it."
+    },
+    {
+      "scene": "gateway",
+      "text": "That's why it's called the Gateway to Abuja."
+    },
+    {
+      "scene": "face",
+      "text": "And look closely: its dark streaks seem to form a human face."
+    },
+    {
+      "scene": "cta",
+      "text": "Have you seen it in person? Tell me below, and follow Ijapa Tells!"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "What Nigeria's coat of arms means",
+  "tags": {
+    "topic": "symbols",
+    "hook": "statement",
+    "ask": true
+  },
+  "post": {
+    "caption": "Every part of Nigeria's coat of arms means something 🦅🐎 #nigeria #coatofarms #naija #nigerianhistory #history #learnontiktok",
+    "youtube_title": "What Nigeria's Coat Of Arms Really Means #shorts",
+    "youtube_description": "The black shield is fertile soil, the white Y is the Niger and Benue rivers, the red eagle is strength, the white horses are dignity, and the motto: Unity and Faith, Peace and Progress.\n\n#nigeria #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Every part of Nigeria's coat of arms means something."
+    },
+    {
+      "scene": "shield",
+      "text": "The black shield stands for Nigeria's fertile soil."
+    },
+    {
+      "scene": "y",
+      "text": "The white Y shape is the Niger and Benue rivers, meeting."
+    },
+    {
+      "scene": "eagle",
+      "text": "The red eagle on top stands for strength."
+    },
+    {
+      "scene": "horses",
+      "text": "The two white horses stand for dignity."
+    },
+    {
+      "scene": "motto",
+      "text": "And at the bottom, the motto: Unity and Faith, Peace and Progress."
+    },
+    {
+      "scene": "cta",
+      "text": "Did you know all of that? Tell me below, and follow Ijapa Tells!"
+    }
+  ]
+}

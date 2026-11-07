@@ -1,0 +1,42 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "Nigeria launched sub-Saharan Africa's first TV station",
+  "tags": {
+    "topic": "everyday life",
+    "hook": "surprise",
+    "ask": false
+  },
+  "post": {
+    "caption": "The first TV station in sub-Saharan Africa wasn't in Lagos. It was in Ibadan 📺 #nigeria #ibadan #wntv #naija #nigerianhistory #history",
+    "youtube_title": "Sub-Saharan Africa's First TV Station Was In Ibadan (1959) #shorts",
+    "youtube_description": "Western Nigeria Television (WNTV) went on air on 31 October 1959, launched by the Western Region government led by Obafemi Awolowo. Its slogan: 'First in Africa'.\n\n#nigeria #ibadan #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "The first TV station in sub-Saharan Africa wasn't in Lagos. It was in Ibadan."
+    },
+    {
+      "scene": "date",
+      "text": "On October thirty first, 1959, Western Nigeria Television, WNTV, went on air."
+    },
+    {
+      "scene": "who",
+      "text": "It was launched by the Western Region government, led by Chief Obafemi Awolowo."
+    },
+    {
+      "scene": "slogan",
+      "text": "Its proud slogan was: First in Africa."
+    },
+    {
+      "scene": "before",
+      "text": "And it came almost a full year before Nigeria's independence."
+    },
+    {
+      "scene": "cta",
+      "text": "Follow Ijapa Tells for more Naija firsts!"
+    }
+  ]
+}

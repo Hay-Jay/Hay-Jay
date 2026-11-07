@@ -1,0 +1,42 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "Why Lagos is also called Eko",
+  "tags": {
+    "topic": "origins",
+    "hook": "surprise",
+    "ask": true
+  },
+  "post": {
+    "caption": "Lagos has two names, and both stories start somewhere else 🌊⛵ Eko o ni baje! #lagos #eko #nigeria #naija #nigerianhistory #history",
+    "youtube_title": "Why Is Lagos Also Called Eko? #shorts",
+    "youtube_description": "Portuguese sailors named it Lagos ('lakes') in the 1400s. Eko is older, and many historians link it to a Benin Kingdom war camp. Eko o ni baje!\n\n#lagos #eko #nigeria #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "Lagos has two names. And both stories start somewhere else."
+    },
+    {
+      "scene": "portuguese",
+      "text": "In the fourteen hundreds, Portuguese sailors reached the coast and named it Lagos, which means lakes, after its lagoons."
+    },
+    {
+      "scene": "older",
+      "text": "But the city already had an older name: Eko."
+    },
+    {
+      "scene": "benin",
+      "text": "Many historians link Eko to the Benin Kingdom, whose soldiers kept a war camp there. In the Benin language, Eko is said to mean war camp."
+    },
+    {
+      "scene": "today",
+      "text": "Today, Lagos calls itself the Centre of Excellence. But locals still say: Eko o ni baje. Lagos will not spoil!"
+    },
+    {
+      "scene": "cta",
+      "text": "Do you say Lagos or Eko? Tell me below, and follow Ijapa Tells!"
+    }
+  ]
+}

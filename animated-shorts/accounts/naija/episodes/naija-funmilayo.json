@@ -1,0 +1,42 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "Funmilayo Ransome-Kuti",
+  "tags": {
+    "topic": "people",
+    "hook": "surprise",
+    "ask": true
+  },
+  "post": {
+    "caption": "She was called the Lioness of Lisabi, and she made a king step down 🦁👑 #funmilayoransomekuti #nigeria #naija #nigerianhistory #womeninhistory",
+    "youtube_title": "Funmilayo Ransome-Kuti: The Woman Who Made A King Step Down #shorts",
+    "youtube_description": "Often called the first woman in Nigeria to drive a car, she led the Abeokuta Women's Union against unfair taxes, and in 1949 the Alake of Egbaland stepped down for a time. She was Fela Kuti's mother.\n\n#nigeria #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "She was called the Lioness of Lisabi. And she made a king step down."
+    },
+    {
+      "scene": "drive",
+      "text": "Funmilayo Ransome-Kuti is often called the first woman in Nigeria to drive a car."
+    },
+    {
+      "scene": "union",
+      "text": "In the 1940s, she led the Abeokuta Women's Union against unfair taxes on market women."
+    },
+    {
+      "scene": "king",
+      "text": "Their protests pushed the Alake of Egbaland to step down, for a time, in 1949."
+    },
+    {
+      "scene": "son",
+      "text": "She was also the mother of Afrobeat legend Fela Kuti."
+    },
+    {
+      "scene": "cta",
+      "text": "Who should Ijapa talk about next? Tell me below, and follow Ijapa Tells!"
+    }
+  ]
+}

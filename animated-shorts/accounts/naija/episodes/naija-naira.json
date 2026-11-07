@@ -1,0 +1,42 @@
+{
+  "channel": "naija",
+  "voice": "en-NG-AbeoNeural",
+  "rate": "+6%",
+  "title": "How the naira got its name",
+  "tags": {
+    "topic": "symbols",
+    "hook": "surprise",
+    "ask": true
+  },
+  "post": {
+    "caption": "The naira's name is hiding inside the word Nigeria 💸🇳🇬 #naira #nigeria #naija #nigerianhistory #money #history",
+    "youtube_title": "How The Naira Got Its Name #shorts",
+    "youtube_description": "On 1 January 1973 the naira replaced the Nigerian pound at two naira to the pound. The name is credited to Obafemi Awolowo, from 'Nigeria'; kobo comes from 'copper'.\n\n#naira #nigeria #shorts"
+  },
+  "lines": [
+    {
+      "scene": "hook",
+      "text": "The naira's name is hiding inside the word Nigeria."
+    },
+    {
+      "scene": "swap",
+      "text": "On January first, 1973, Nigeria swapped the pound for brand new money: the naira."
+    },
+    {
+      "scene": "awo",
+      "text": "The name is credited to Chief Obafemi Awolowo. He took it straight from Nigeria: Nai, ra."
+    },
+    {
+      "scene": "kobo",
+      "text": "And the kobo? Its name comes from the English word copper."
+    },
+    {
+      "scene": "rate",
+      "text": "At the start, one pound was worth two naira."
+    },
+    {
+      "scene": "cta",
+      "text": "What's the oldest naira note you remember? Follow Ijapa Tells for more!"
+    }
+  ]
+}
