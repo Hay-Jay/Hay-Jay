@@ -886,8 +886,8 @@ const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported'
    Updated by the twice-daily update task. To add a new poll: add a category,
    then run `node nigeria-2027/site/build.mjs --snapshot` to record movement. */
 const RANK = {
-  updated: '2026-11-06T22:44:52.887Z',     // last time the data was checked (WAT)
-  changed: '2026-11-04T12:00:00+01:00',     // last time any number changed
+  updated: '2026-11-07T10:45:19.775Z',     // last time the data was checked (WAT)
+  changed: '2026-11-07T10:45:19.775Z',     // last time any number changed
   everyHours: 12,
   categories: [
     {id:'sbm', label:'SBM favourability', kind:'Survey', weight:1, date:'May 2026', n:'about 829 people, all six zones', src:'sbm',
@@ -898,12 +898,13 @@ const RANK = {
       note:'Share of responses. Open to anyone, not a random sample.', raw:{tinubu:35.41, obi:33.86, atiku:26.67}, fmt:'pct'},
     {id:'tmg', label:'"Tinubu Must Go" online poll', kind:'Partisan poll', weight:0.5, date:'24–25 Sep 2026', n:'109,799 self-selected', src:'tmg',
       note:'Run by an anti-Tinubu group; Tinubu was not an option.', raw:{atiku:73.6, obi:22.3}, fmt:'pct'},
-    {id:'pig', label:'Politico.ng projection', kind:'Analyst projection', weight:0.5, date:'1 Sep 2026', n:'states projected to win (of 37)', src:'pig',
-      note:'Political Intelligence Group forecast of states won "under current conditions". Not a poll.', raw:{tinubu:20, atiku:9, obi:8}, fmt:'states'}
+    {id:'pig', label:'Politico.ng projection', kind:'Analyst projection', weight:0.5, date:'5 Nov 2026 (November map)', n:'states projected to win (of 37)', src:'pig',
+      note:'Political Intelligence Group November map of states won if the vote is free and fair (Sept map: Tinubu 20, Atiku 9, Obi 8). Not a poll. Made before the court ruling on Atiku\'s nomination.', raw:{tinubu:13, atiku:11, obi:13}, fmt:'states'}
   ],
   // Snapshots of total points, oldest first. Movement arrows compare the last two.
   history: [
-    {at:'2026-11-04T12:00:00+01:00', points:{obi:282.9, atiku:227.8, tinubu:189.7}, note:'Launch of the official rank'}
+    {at:'2026-11-04T12:00:00+01:00', points:{obi:282.9, atiku:227.8, tinubu:189.7}, note:'Launch of the official rank'},
+    {at:'2026-11-07T10:45:19.775Z', points:{obi:312.9,tinubu:189.7,atiku:257.5}}
   ]
 };
 /* Points: in each category the leader scores 100 and others score in proportion
@@ -931,7 +932,7 @@ const RANK_MAX = () => RANK.categories.reduce((a, c) => a + 100 * c.weight, 0);
 Object.assign(S, {
   harmattan:{t:'Harmattan Intelligence via Africa Confidential',u:'https://www.africa-confidential.com/article/id/16082/new-polls-show-rising-anger-with-tinubu-on-economy-and-security'},
   oxford:{t:'Oxford-Metro poll via Tribune, Sep 2026',u:'https://tribuneonlineng.com/2027-tinubu-edges-peter-obi-by-1-55-in-oxford-metro-poll/'},
-  pig:{t:'Politico.ng PIG projection via P.M. News',u:'https://pmnewsnigeria.com/2026/09/01/2027-presidency-tinubu-projected-to-win-20-states-atiku-nine-obi-eight/'}
+  pig:{t:'Politico.ng PIG November map via Vanguard',u:'https://www.vanguardngr.com/2026/11/2027-youth-voters-to-reshape-polls-lai-omotola-predicts/'}
 });
 const CATCOL = {sbm:'#3dff9a', harmattan:'#4aa3ff', oxford:'#ffc83d', tmg:'#ff9d3a', pig:'#c792ff'};
 const PTS = rankPoints(RANK);

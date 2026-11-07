@@ -82,7 +82,7 @@ const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported'
 Object.assign(S, {
   harmattan:{t:'Harmattan Intelligence via Africa Confidential',u:'https://www.africa-confidential.com/article/id/16082/new-polls-show-rising-anger-with-tinubu-on-economy-and-security'},
   oxford:{t:'Oxford-Metro poll via Tribune, Sep 2026',u:'https://tribuneonlineng.com/2027-tinubu-edges-peter-obi-by-1-55-in-oxford-metro-poll/'},
-  pig:{t:'Politico.ng PIG projection via P.M. News',u:'https://pmnewsnigeria.com/2026/09/01/2027-presidency-tinubu-projected-to-win-20-states-atiku-nine-obi-eight/'}
+  pig:{t:'Politico.ng PIG November map via Vanguard',u:'https://www.vanguardngr.com/2026/11/2027-youth-voters-to-reshape-polls-lai-omotola-predicts/'}
 });
 const CATCOL = {sbm:'#3dff9a', harmattan:'#4aa3ff', oxford:'#ffc83d', tmg:'#ff9d3a', pig:'#c792ff'};
 const PTS = rankPoints(RANK);
