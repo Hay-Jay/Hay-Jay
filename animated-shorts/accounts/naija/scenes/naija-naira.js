@@ -36,10 +36,10 @@ S.swap = ({ t, lt, ln }) => {
   popWorld(t, () => {
     const out = clamp((lt - na + 0.6) / 0.5);
     money(lerp(540, -300, easeIn2(out)), 980, 1.2, '£', '£1', 'NIGERIAN POUND', '#b8c9a2', clamp((lt - 0.15) / 0.35), -0.06 - out * 0.4 + Math.sin(t * 2) * 0.02 * (1 - out));
-    money(lerp(1400, 560, easeOut(clamp((lt - na + 0.2) / 0.45))), 980, 1.25, '₦', '₦1', 'NAIRA', '#2fd38a', 1, 0.05);
+    money(lerp(1400, 560, easeOut(clamp((lt - na + 0.5) / 0.5))), 980, 1.25, '₦', '₦1', 'NAIRA', '#2fd38a', 1, 0.05);
   }, { pattern: 'rings', pal: 'green', cy: 980, disc: 320, fronds: true });
   calendarCard('1', 'JAN', '1973', 800, 520, clamp((lt - jan + 0.1) / 0.3), { top: NG });
-  popText('NEW MONEY!', 360, 330, 96, lt - na + 0.2, { color: '#f2b705' });
+  popText('NEW MONEY!', 360, 330, 96, lt - na + 0.65, { color: '#f2b705' });
   ankaraWipe(lt, { pal: 'green', pattern: 'rings' });
 };
 const easeIn2 = u => u * u;
