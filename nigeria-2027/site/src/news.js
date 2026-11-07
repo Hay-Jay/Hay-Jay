@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-07T11:15:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-07T16:14:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'gombe-faction-inec', at:'2026-11-06T18:00:00+01:00', img:'', tag:'Court', pri:2, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/07/top-nigerian-newspaper-headlines-for-7th-november-2026/', people:['atiku'],
+    h:'Rival ADC camp asks INEC to enforce the ruling now and reopen its portal for fresh primaries',
+    d:'The ADC NEC Chairmen Forum, backing Nafiu Bala Gombe, threatened nationwide protests unless INEC removes David Mark\'s leadership from its portal, recognises Gombe\'s officials and lets the party hold new primaries. It said the judgment means Atiku and running mate Amaechi are not the party\'s authentic candidates. The Mark camp has asked INEC to wait for the appeal.',
+    why:'INEC is now caught between two ADC camps. Its next move, and the stay decision, will show who is on the ballot.'},
   {id:'adc-appeal-filed', at:'2026-11-07T10:44:00+01:00', img:'news/n42.jpg', tag:'Court', pri:3, outlet:'National Update', url:'https://nationalupdate.ng/2026/11/07/adc-races-to-save-atikus-ticket-tells-inec-to-wait/', people:['atiku'],
     h:'ADC files appeal and asks for a stay; tells INEC to wait for the Court of Appeal',
     d:'The ADC says it has filed a notice of appeal against the ruling that voided the Mark-led leadership and Atiku\'s nomination, and has applied for a stay of execution. Until the court rules on the stay, the judgment stands, and the party is asking INEC to hold back voluntarily.',
