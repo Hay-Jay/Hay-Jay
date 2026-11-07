@@ -12,7 +12,7 @@ const NEWS_ITEMS = [
   {id:'ojudu-violence', at:'2026-11-06T18:00:00+01:00', img:'news/n40.jpg', tag:'Security', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/ojudu-warns-of-threat-to-democracy-urges-action-against-violence', people:['obi','omoyele-sowore','atiku'],
     h:'Ojudu warns rising political violence threatens 2027, urges cross-party action',
     d:'Former senator and presidential adviser Babafemi Ojudu cited reported attacks on Sowore\'s campaign team in Ado-Ekiti, Obi\'s in Calabar, and an alleged attack on the ADC convoy in Kebbi that destroyed media equipment, and called on leaders, unions and civil society to demand a peaceful vote.',
-    why:'Attacks on any campaign hurt every voter. The Kebbi incident is an allegation; police have not reported on it yet.'},
+    why:'Attacks on any campaign hurt every voter. The Kebbi incident is so far an allegation.'},
   {id:'opposition-space', at:'2026-11-07T06:00:00+01:00', img:'news/n41.jpg', tag:'Campaign', pri:1, outlet:'Daily Trust', url:'https://dailytrust.com/2027-oppositions-battle-for-space', people:[],
     h:'Weekend Trust: a week of convoy attacks, rally rows and torn billboards for the opposition',
     d:'The paper notes that 31 states are APC-governed and lists the past week\'s incidents: the attack on the NDC convoy in Cross River, resistance to the ADC rally in Sokoto, and opposition billboards pulled down in Edo and Plateau.',
