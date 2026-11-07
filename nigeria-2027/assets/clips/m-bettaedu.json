@@ -1,0 +1,43 @@
+{
+ "id": "m-bettaedu",
+ "outlet": "ICIR",
+ "url": "https://www.icirnigeria.org/efcc-grills-betta-edu-over-n585m-scandal/",
+ "title": "EFCC grills Betta Edu over N585m scandal",
+ "date": "2024-01",
+ "sentence": "The suspension followed criticisms that trailed her leaked letter instructing the Accountant-General of the Federation, Oluwatoyin Madein, to pay N585 million into a private account managed by United Bank of Africa (UBA) and owned by Oniyelu Bridget Mojisola.",
+ "head": {
+  "w": 592,
+  "h": 588.59375
+ },
+ "quote": {
+  "w": 592,
+  "h": 140.75
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02702702702702703,
+   "y": 0.12788632326820604,
+   "w": 0.814426731418919,
+   "h": 0.15630550621669628
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.3210479573712256,
+   "w": 0.8394742398648649,
+   "h": 0.15630550621669628
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.5142095914742452,
+   "w": 0.8988334037162162,
+   "h": 0.15630550621669628
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.7073712255772646,
+   "w": 0.7801414695945946,
+   "h": 0.15630550621669628
+  }
+ ]
+}

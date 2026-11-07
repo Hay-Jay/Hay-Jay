@@ -1,0 +1,28 @@
+{
+ "id": "n-melaye",
+ "outlet": "Naija News",
+ "url": "https://www.naijanews.com/2026/11/03/inec-apc-2027-elections-dino-melaye-alarm/",
+ "title": "INEC Helping APC To Rig 2027 Elections – Dino Melaye Raises Alarm",
+ "date": "2026-11-03",
+ "sentence": "INEC Helping APC To Rig 2027 Elections – Dino Melaye Raises Alarm",
+ "head": {
+  "w": 600,
+  "h": 661.96875
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.13444743426332437,
+   "w": 0.884453125,
+   "h": 0.04229806920643912
+  },
+  {
+   "x": 0.02,
+   "y": 0.17370060897889816,
+   "w": 0.2084375,
+   "h": 0.04229806920643912
+  }
+ ]
+}
