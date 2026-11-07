@@ -548,8 +548,20 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-06T21:15:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-07T06:15:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'pig-november-map', at:'2026-11-06T05:19:00+01:00', img:'', tag:'Polls', pri:2, outlet:'allAfrica', url:'https://allafrica.com/stories/202611060098.html', people:['tinubu','obi','atiku'],
+    h:'Politico.ng November map: APC 13 states, NDC 13, ADC 11, with Tinubu narrowly ahead',
+    d:'Lai Omotola of Politico.ng\'s Political Intelligence Group projected a tight race, with Tinubu slightly ahead of Obi and Atiku third, and APC, NDC and ADC winning 13, 13 and 11 states. He projected turnout of about 40% (29% last time), and said the map assumes a free and fair vote and may change with court cases.',
+    why:'This is an analyst\'s projection, not a poll. In September the same group had the APC on 20 states; our rank will reflect it once a second outlet confirms the numbers.'},
+  {id:'ojudu-violence', at:'2026-11-06T18:00:00+01:00', img:'news/n40.jpg', tag:'Security', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/ojudu-warns-of-threat-to-democracy-urges-action-against-violence', people:['obi','omoyele-sowore','atiku'],
+    h:'Ojudu warns rising political violence threatens 2027, urges cross-party action',
+    d:'Former senator and presidential adviser Babafemi Ojudu cited reported attacks on Sowore\'s campaign team in Ado-Ekiti, Obi\'s in Calabar, and an alleged attack on the ADC convoy in Kebbi that destroyed media equipment, and called on leaders, unions and civil society to demand a peaceful vote.',
+    why:'Attacks on any campaign hurt every voter. The Kebbi incident is an allegation; police have not reported on it yet.'},
+  {id:'opposition-space', at:'2026-11-07T06:00:00+01:00', img:'news/n41.jpg', tag:'Campaign', pri:1, outlet:'Daily Trust', url:'https://dailytrust.com/2027-oppositions-battle-for-space', people:[],
+    h:'Weekend Trust: a week of convoy attacks, rally rows and torn billboards for the opposition',
+    d:'The paper notes that 31 states are APC-governed and lists the past week\'s incidents: the attack on the NDC convoy in Cross River, resistance to the ADC rally in Sokoto, and opposition billboards pulled down in Edo and Plateau.',
+    why:'Equal access to campaign space is part of a fair election, whoever is in power.'},
   {id:'inec-kidnap-plot', at:'2026-11-06T15:42:00+01:00', img:'news/n38.jpg', tag:'INEC', pri:3, outlet:'Tribune Online', url:'https://tribuneonlineng.com/2027-elections-inec-raises-alarm-over-plot-to-kidnap-electoral-workers/', people:[],
     h:'INEC says it foiled a plot to kidnap election workers; suspects charged',
     d:'INEC chairman Joash Amupitan said intelligence operations led to the arrest of suspected masterminds of a plot to intimidate, threaten and kidnap ad hoc electoral staff, and that the DSS has taken them to court. He warned that anyone who harms electoral personnel will face the full weight of the law.',
