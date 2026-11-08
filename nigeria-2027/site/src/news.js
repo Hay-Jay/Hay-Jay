@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-07T16:14:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-08T01:15:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'govt-credible-pledge', at:'2026-11-07T09:20:00+01:00', img:'news/n46.jpg', tag:'INEC', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-tinubu-assures-nigerians-international-community-of-commitment-to-free-fair-credible-elections/', people:['tinubu'],
+    h:'Government tells world audience it is committed to a free and fair 2027 vote',
+    d:'Information minister Mohammed Idris told Türkiye\'s TRT World, at a forum in Istanbul, that the Tinubu administration supports INEC and respects its independence, and warned against fake news ahead of the election.',
+    why:'A promise worth holding them to. Credible elections are judged on polling day, not in interviews.'},
   {id:'gombe-faction-inec', at:'2026-11-06T18:00:00+01:00', img:'', tag:'Court', pri:2, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/07/top-nigerian-newspaper-headlines-for-7th-november-2026/', people:['atiku'],
     h:'Rival ADC camp asks INEC to enforce the ruling now and reopen its portal for fresh primaries',
     d:'The ADC NEC Chairmen Forum, backing Nafiu Bala Gombe, threatened nationwide protests unless INEC removes David Mark\'s leadership from its portal, recognises Gombe\'s officials and lets the party hold new primaries. It said the judgment means Atiku and running mate Amaechi are not the party\'s authentic candidates. The Mark camp has asked INEC to wait for the appeal.',
