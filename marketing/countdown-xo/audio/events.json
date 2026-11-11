@@ -1,0 +1,298 @@
+{
+ "film": "countdown-xo: 790 frames at 30 fps; 155 BPM grid, bar = 1.548387 s; the drop (clock 24:00:00) at 3.0968 s",
+ "bpm": 155,
+ "bar": 1.5483870967741935,
+ "drop": 3.096774193548387,
+ "events": [
+  {
+   "t": 0.1,
+   "kind": "typing",
+   "note": "Priority transmission"
+  },
+  {
+   "t": 0.233,
+   "kind": "scan",
+   "note": "signal wave"
+  },
+  {
+   "t": 0.7,
+   "kind": "typing",
+   "note": "Incoming"
+  },
+  {
+   "t": 1.567,
+   "kind": "slam",
+   "note": "T-MINUS"
+  },
+  {
+   "t": 1.967,
+   "kind": "slam",
+   "note": "24"
+  },
+  {
+   "t": 2.333,
+   "kind": "slam",
+   "note": "HOURS"
+  },
+  {
+   "t": 3.1,
+   "kind": "clock",
+   "note": "the clock slams in at 24:00:00"
+  },
+  {
+   "t": 3.233,
+   "kind": "typing",
+   "note": "The Vision Issue"
+  },
+  {
+   "t": 3.467,
+   "kind": "typing",
+   "note": "Declassified in"
+  },
+  {
+   "t": 3.9,
+   "kind": "slam",
+   "note": "Sunday 18 October"
+  },
+  {
+   "t": 4.1,
+   "kind": "tick",
+   "note": "86399 s left"
+  },
+  {
+   "t": 5.1,
+   "kind": "tick",
+   "note": "86398 s left"
+  },
+  {
+   "t": 6.1,
+   "kind": "tick",
+   "note": "86397 s left"
+  },
+  {
+   "t": 7.1,
+   "kind": "tick",
+   "note": "86396 s left"
+  },
+  {
+   "t": 7.167,
+   "kind": "whoosh",
+   "note": "the clock flies to the top"
+  },
+  {
+   "t": 8.1,
+   "kind": "tick",
+   "note": "86395 s left"
+  },
+  {
+   "t": 8.1,
+   "kind": "card",
+   "note": "evidence bag lands"
+  },
+  {
+   "t": 8.4,
+   "kind": "scan",
+   "note": "laser scan"
+  },
+  {
+   "t": 8.433,
+   "kind": "swish",
+   "note": "redaction bar"
+  },
+  {
+   "t": 8.567,
+   "kind": "swish",
+   "note": "redaction bar"
+  },
+  {
+   "t": 8.733,
+   "kind": "swish",
+   "note": "redaction bar"
+  },
+  {
+   "t": 9.1,
+   "kind": "tick",
+   "note": "86394 s left"
+  },
+  {
+   "t": 9.3,
+   "kind": "stamp",
+   "note": "CLASSIFIED"
+  },
+  {
+   "t": 10.1,
+   "kind": "tick",
+   "note": "86393 s left"
+  },
+  {
+   "t": 10.433,
+   "kind": "beep",
+   "note": "peek lens opens"
+  },
+  {
+   "t": 10.467,
+   "kind": "card",
+   "note": "tag lands: sealed until 18.10"
+  },
+  {
+   "t": 11.1,
+   "kind": "tick",
+   "note": "86392 s left"
+  },
+  {
+   "t": 11.233,
+   "kind": "stamp",
+   "note": "DENIED"
+  },
+  {
+   "t": 12.1,
+   "kind": "tick",
+   "note": "86391 s left"
+  },
+  {
+   "t": 12.6,
+   "kind": "slam",
+   "note": "Regina Sun"
+  },
+  {
+   "t": 13.1,
+   "kind": "tick",
+   "note": "86390 s left"
+  },
+  {
+   "t": 13.767,
+   "kind": "slam",
+   "note": "Lagos Sun"
+  },
+  {
+   "t": 14.1,
+   "kind": "tick",
+   "note": "86389 s left"
+  },
+  {
+   "t": 14.9,
+   "kind": "slam",
+   "note": "Toronto Sun"
+  },
+  {
+   "t": 15.1,
+   "kind": "tick",
+   "note": "86388 s left"
+  },
+  {
+   "t": 16.067,
+   "kind": "slam",
+   "note": "London Sun"
+  },
+  {
+   "t": 16.1,
+   "kind": "tick",
+   "note": "86387 s left"
+  },
+  {
+   "t": 17.1,
+   "kind": "tick",
+   "note": "86386 s left"
+  },
+  {
+   "t": 17.5,
+   "kind": "card",
+   "note": "phone lands"
+  },
+  {
+   "t": 17.833,
+   "kind": "stamp",
+   "note": "LIVE NOW"
+  },
+  {
+   "t": 18.033,
+   "kind": "swipe",
+   "note": "scroll"
+  },
+  {
+   "t": 18.1,
+   "kind": "tick",
+   "note": "86385 s left"
+  },
+  {
+   "t": 19.1,
+   "kind": "tick",
+   "note": "86384 s left"
+  },
+  {
+   "t": 19.367,
+   "kind": "tap",
+   "note": "tap: pre-order a copy"
+  },
+  {
+   "t": 19.967,
+   "kind": "swipe",
+   "note": "scroll"
+  },
+  {
+   "t": 20.1,
+   "kind": "tick",
+   "note": "86383 s left"
+  },
+  {
+   "t": 20.933,
+   "kind": "stamp",
+   "note": "PRE-ORDERS OPEN"
+  },
+  {
+   "t": 21.1,
+   "kind": "tick",
+   "note": "86382 s left"
+  },
+  {
+   "t": 21.7,
+   "kind": "boom",
+   "note": "end card: 24 HOURS."
+  },
+  {
+   "t": 22.033,
+   "kind": "typing",
+   "note": "Watch it hit zero"
+  },
+  {
+   "t": 22.1,
+   "kind": "tick",
+   "note": "86381 s left"
+  },
+  {
+   "t": 22.467,
+   "kind": "slam",
+   "note": "monochrome.com.ng"
+  },
+  {
+   "t": 23.1,
+   "kind": "tick",
+   "note": "86380 s left"
+  },
+  {
+   "t": 23.233,
+   "kind": "click",
+   "note": "Pre-orders open"
+  },
+  {
+   "t": 24.1,
+   "kind": "tick",
+   "note": "86379 s left"
+  },
+  {
+   "t": 24.467,
+   "kind": "shimmer",
+   "note": "light across 24 HOURS."
+  },
+  {
+   "t": 25.1,
+   "kind": "tick",
+   "note": "86378 s left"
+  },
+  {
+   "t": 26.1,
+   "kind": "tick",
+   "note": "86377 s left"
+  }
+ ]
+}

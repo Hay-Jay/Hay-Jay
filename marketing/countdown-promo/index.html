@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MONOCHROME — The Vision Issue, 24-hour countdown (9:16)</title>
+<!--
+  A 24-second vertical promo for Reels / TikTok / Stories, posted Friday 16 October 12:00 Regina, exactly 24 hours before
+  The Vision Issue launches (Saturday 17 October 12:00 Regina). The split-flap clock is real time: it reads 24:00:00 at 2.0 s
+  and loses one second per second of film, so the end card reads 23:59:39. Every frame is a pure function of time: render(t)
+  sets the whole stage for second t; render.mjs steps t at 30 fps. Open this file in a browser and press space to preview it.
+-->
+<style>
+  @font-face { font-family: 'Big Shoulders Display'; font-weight: 100 900; src: url(assets/mc-font-big-shoulders-display.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 400; src: url(assets/mc-font-courier-prime-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Courier Prime'; font-weight: 700; src: url(assets/mc-font-courier-prime-700.woff2) format('woff2'); }
+  @font-face { font-family: 'Special Elite'; font-weight: 400; src: url(assets/mc-font-special-elite-400.woff2) format('woff2'); }
+  @font-face { font-family: 'Stardos Stencil'; font-weight: 700; src: url(assets/mc-font-stardos-stencil-700.woff2) format('woff2'); }
+  :root {
+    --ink: #0a0a0a; --paper: #e6e6e6; --fg: #ececec; --dim: #a8a8a8; --red: #ff3b30;
+    --head: 'Big Shoulders Display', Impact, sans-serif; --mono: 'Courier Prime', 'Courier New', monospace;
+    --type: 'Special Elite', 'Courier Prime', monospace; --stamp: 'Stardos Stencil', Impact, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; background: #000; overflow: hidden; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #070707; color: var(--fg); font-family: var(--mono); }
+  .scene { position: absolute; inset: 0; display: none; overflow: hidden; }
+  .dark { background: #070707; color: var(--fg); }
+  .paper { background: var(--paper); color: var(--ink); }
+  .abs { position: absolute; }
+  .mono { font-family: var(--mono); font-weight: 700; text-transform: uppercase; letter-spacing: .18em; }
+  .head { font-family: var(--head); font-weight: 900; text-transform: uppercase; line-height: .86; letter-spacing: .005em; }
+  .chrome { color: transparent; -webkit-background-clip: text; background-clip: text;
+            background-image: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.95) 50%, transparent 58%),
+                              linear-gradient(180deg, #ffffff 0%, #e4e4e4 24%, #8d8d8d 47%, #3a3a3a 50%, #b9b9b9 55%, #ffffff 74%, #a0a0a0 100%);
+            background-size: 260% 100%, 100% 100%; background-repeat: no-repeat; background-position: 130% 0, 0 0; }
+  .stamp { font-family: var(--stamp); text-transform: uppercase; letter-spacing: .08em; border: 8px solid currentColor; padding: .1em .34em .02em; line-height: 1; white-space: nowrap;
+           -webkit-mask-image: url(assets/distress.png); mask-image: url(assets/distress.png); -webkit-mask-size: 420px; mask-size: 420px; }
+  .rec { display: inline-block; width: 26px; height: 26px; border-radius: 50%; background: var(--red); box-shadow: 0 0 18px 4px rgba(255,59,48,.55); vertical-align: -2px; }
+  .kick { font: 700 32px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+  .kick::before { content: ""; display: inline-block; width: 52px; height: 14px; background: currentColor; margin-right: 20px; vertical-align: 4px; }
+  .tape { position: absolute; left: -20px; right: -20px; height: 92px; overflow: hidden; display: flex; align-items: center;
+          background: repeating-linear-gradient(-45deg, #0a0a0a 0 34px, #ececec 34px 68px); }
+  .tape .band { position: absolute; left: 0; right: 0; top: 16px; bottom: 16px; background: #0a0a0a; }
+  .tape .run { position: absolute; top: 50%; white-space: nowrap; transform: translateY(-50%); color: #ececec; font: 700 32px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; }
+  #grain { position: absolute; inset: 0; pointer-events: none; background-size: 512px 512px; opacity: .55; }
+  #scan { position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 2px, transparent 2px 5px); }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  #vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.45) 100%); }
+
+  /* ---- the split-flap clock (built by buildClock; sizes come from --w, --h, --fs, --gap, --cw) ---- */
+  .clock { display: flex; align-items: flex-start; }
+  .clock .grp { position: relative; display: flex; gap: var(--gap); }
+  .clock .ul { position: absolute; left: 0; right: 0; top: calc(var(--h) + 22px); text-align: center; font: 700 30px/1 var(--mono); letter-spacing: .26em; text-transform: uppercase; color: var(--dim); padding-left: .26em; }
+  .clock .colon { width: var(--cw); height: var(--h); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--h) * .2); }
+  .clock .colon i { display: block; width: calc(var(--h) * .07); height: calc(var(--h) * .07); border-radius: 2px; background: #d8d8d8; }
+  .fl { position: relative; width: var(--w); height: var(--h); perspective: calc(var(--h) * 3.2); border-radius: calc(var(--h) * .06);
+        box-shadow: 0 calc(var(--h) * .05) calc(var(--h) * .1) rgba(0,0,0,.7), 0 0 0 2px #050505; }
+  .fl .h { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; }
+  .fl .t { top: 0; border-radius: calc(var(--h) * .06) calc(var(--h) * .06) 0 0; background: linear-gradient(180deg, #2c2c2c, #1d1d1d); }
+  .fl .b { top: 50%; border-radius: 0 0 calc(var(--h) * .06) calc(var(--h) * .06); background: linear-gradient(180deg, #171717, #121212); }
+  .fl .h span { position: absolute; left: 0; right: 0; height: 200%; display: flex; align-items: center; justify-content: center;
+                font: 900 var(--fs)/1 var(--head); color: #f2f2f2; padding-top: calc(var(--h) * .02); }
+  .fl .t span { top: 0; } .fl .b span { top: -100%; }
+  .fl .lf { transform-origin: 50% 100%; display: none; } .fl .lb { transform-origin: 50% 0; display: none; }
+  .fl .shade { position: absolute; left: 0; right: 0; top: 50%; height: 50%; background: #000; opacity: 0; border-radius: 0 0 calc(var(--h) * .06) calc(var(--h) * .06); }
+  .fl .seam { position: absolute; left: 0; right: 0; top: calc(50% - 2px); height: 4px; background: #030303; box-shadow: 0 1px 0 rgba(255,255,255,.08); z-index: 2; }
+  .fl .hinge { position: absolute; top: calc(50% - var(--h) * .07); width: calc(var(--w) * .05); height: calc(var(--h) * .14); background: #0b0b0b; z-index: 3; border-radius: 2px; }
+  .fl .hinge.l { left: calc(var(--w) * -.02); } .fl .hinge.r { right: calc(var(--w) * -.02); }
+
+  /* HUD: the small clock that keeps running across the scenes */
+  #hud { position: absolute; left: 60px; right: 60px; top: 228px; height: 96px; display: none; align-items: center; justify-content: center; gap: 22px; z-index: 30; }
+  #hud .lbl { font: 700 32px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--fg); white-space: nowrap; }
+  #hud.light .lbl { color: var(--ink); }
+
+  /* S1 cold open */
+  #s1 .head1 { left: 60px; top: 250px; display: flex; align-items: center; gap: 22px; font: 700 40px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; }
+  #s1 .sub { left: 60px; top: 318px; font: 700 30px/1 var(--mono); letter-spacing: .2em; color: var(--dim); text-transform: uppercase; white-space: nowrap; }
+  #s1 .corner { position: absolute; width: 70px; height: 70px; border: 6px solid rgba(236,236,236,.75); }
+  #s1 .c1 { left: 60px; top: 390px; border-right: 0; border-bottom: 0; } #s1 .c2 { right: 60px; top: 390px; border-left: 0; border-bottom: 0; }
+  #s1 .c3 { left: 60px; top: 1460px; border-right: 0; border-top: 0; } #s1 .c4 { right: 60px; top: 1460px; border-left: 0; border-top: 0; }
+  #s1 .tm { left: 0; right: 0; top: 470px; text-align: center; font-size: 210px; white-space: nowrap; }
+  #s1 .n24 { left: 0; right: 0; top: 650px; text-align: center; font-size: 560px; line-height: .8; white-space: nowrap; filter: drop-shadow(0 10px 0 rgba(0,0,0,.6)); }
+  #s1 .hrs { left: 0; right: 0; top: 1110px; text-align: center; font-size: 210px; white-space: nowrap; }
+  #s1 .wave { left: 60px; top: 1350px; width: 960px; height: 90px; }
+  #s1 .wave polyline { fill: none; stroke: #e6e6e6; stroke-width: 3; stroke-linejoin: round; filter: drop-shadow(0 0 6px rgba(255,255,255,.6)); }
+  #s1 .foot { left: 0; right: 0; top: 1480px; text-align: center; font: 700 30px/1 var(--mono); letter-spacing: .24em; color: var(--dim); text-transform: uppercase; }
+
+  /* S2 the clock */
+  #s2 .kick { left: 60px; top: 262px; }
+  #s2 .sub { left: 60px; top: 320px; font: 700 40px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  #s2 .housing { left: 40px; width: 1000px; top: 560px; height: 420px; border: 3px solid rgba(255,255,255,.2); background: linear-gradient(180deg, #111, #0b0b0b); box-shadow: inset 0 0 60px rgba(0,0,0,.8); }
+  #s2 .housing .live { position: absolute; left: 28px; top: 24px; display: flex; align-items: center; gap: 14px; font: 700 30px/1 var(--mono); letter-spacing: .24em; }
+  #s2 .housing .live .rec { width: 22px; height: 22px; }
+  #s2 .housing .rt { position: absolute; right: 28px; top: 24px; font: 700 30px/1 var(--mono); letter-spacing: .2em; color: var(--dim); }
+  #bigclock { left: 70px; top: 650px; }
+  #s2 .until { left: 0; right: 0; top: 1050px; text-align: center; font-size: 120px; white-space: nowrap; }
+  #s2 .when { left: 0; right: 0; top: 1170px; text-align: center; font: 700 42px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+  #s2 .tape { top: 1300px; }
+
+  /* S3 the sealed cover */
+  #s3 { background: radial-gradient(ellipse 80% 55% at 50% 40%, #222 0%, #111 55%, #080808 100%); }
+  #s3 .kick { left: 60px; top: 352px; color: var(--fg); }
+  #bag { left: 210px; top: 410px; width: 660px; height: 920px; transform-origin: 50% 50%; }
+  #bag .pouch { position: absolute; inset: 0; border-radius: 10px; background: rgba(255,255,255,.06); box-shadow: 0 40px 70px rgba(0,0,0,.75), inset 0 0 0 2px rgba(255,255,255,.28); overflow: hidden; }
+  #bag .zip { position: absolute; left: 0; right: 0; top: 0; height: 48px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 3px, rgba(255,255,255,.12) 3px 9px); border-bottom: 3px solid rgba(255,255,255,.45); }
+  #bag .seal { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 2px, transparent 2px 7px); }
+  #bag .cover { position: absolute; left: 30px; top: 64px; width: 600px; height: 776px; overflow: hidden; background: #111; }
+  #bag .cover > img { position: absolute; left: -24px; top: -24px; width: 648px; height: 824px; filter: grayscale(1) blur(16px) brightness(.72) contrast(1.15); }
+  #bag .red { position: absolute; height: 58px; background: #050505; transform-origin: 0 50%; box-shadow: 0 2px 0 rgba(255,255,255,.06); }
+  #bag .lens { position: absolute; width: 300px; height: 300px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 8px #d9d9d9, 0 0 0 12px #3a3a3a, 0 16px 40px rgba(0,0,0,.7); display: none; }
+  #bag .lens img { position: absolute; width: 600px; height: 776px; }
+  #bag .lens i { position: absolute; background: rgba(255,255,255,.8); }
+  #bag .laser { position: absolute; left: 0; right: 0; height: 5px; background: #ff5a4f; box-shadow: 0 0 22px 7px rgba(255,59,48,.7); display: none; }
+  #bag .laserband { position: absolute; left: 0; right: 0; height: 160px; background: linear-gradient(180deg, transparent, rgba(255,59,48,.18)); display: none; }
+  #bag .plastic { position: absolute; inset: 0; pointer-events: none;
+                  background: linear-gradient(118deg, transparent 18%, rgba(255,255,255,.16) 24%, transparent 31%, transparent 58%, rgba(255,255,255,.1) 64%, transparent 70%),
+                              linear-gradient(180deg, rgba(255,255,255,.08), transparent 30%, transparent 80%, rgba(255,255,255,.06)); }
+  #bag .stamp { position: absolute; left: 70px; top: 330px; color: #ececec; font-size: 118px; background: rgba(0,0,0,.35); }
+  #bag .denied { position: absolute; color: var(--red); font-size: 66px; border-width: 6px; display: none; }
+  #lenslbl { font: 700 30px/1 var(--mono); letter-spacing: .2em; color: #fff; background: #0a0a0a; padding: 10px 14px 8px; display: none; white-space: nowrap; }
+  #tag { left: 350px; top: 1238px; width: 640px; height: 250px; transform-origin: 40px 125px; }
+  #tag .card { position: absolute; inset: 0; background: #e8e8e8; color: #0a0a0a; clip-path: polygon(70px 0, 100% 0, 100% 100%, 70px 100%, 0 70%, 0 30%); box-shadow: 0 18px 30px rgba(0,0,0,.6); }
+  #tag .card::after { content: ""; position: absolute; inset: 0; background: url(assets/grain-d.png); opacity: .5; }
+  #tag .hole { position: absolute; left: 26px; top: 107px; width: 36px; height: 36px; border-radius: 50%; background: #151515; box-shadow: 0 0 0 7px #bdbdbd; }
+  #tag .txt { position: absolute; left: 96px; top: 30px; right: 24px; }
+  #tag .t1 { font: 900 60px/1 var(--head); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; }
+  #tag .t2 { margin-top: 18px; font: 700 30px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: #333; }
+  #tag .t3 { margin-top: 12px; font: 700 36px/1 var(--mono); letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; }
+  #string { left: 0; top: 0; width: 1080px; height: 1920px; pointer-events: none; }
+  #string path { fill: none; stroke: #d0d0d0; stroke-width: 4; stroke-linecap: round; }
+
+  /* S4 the four cities */
+  #s4 .kick { left: 60px; top: 352px; }
+  #orbit { left: 0; top: 420px; width: 1080px; height: 700px; }
+  #orbit ellipse { fill: none; stroke: rgba(255,255,255,.22); stroke-width: 3; }
+  #orbit .o2 { stroke-dasharray: 6 14; stroke: rgba(255,255,255,.3); }
+  #s4 .city { left: 0; right: 0; top: 520px; text-align: center; font-size: 270px; white-space: nowrap; filter: drop-shadow(0 8px 0 rgba(0,0,0,.65)); }
+  #s4 .time { left: 0; right: 0; top: 790px; text-align: center; font-size: 190px; white-space: nowrap; }
+  #s4 .geo { left: 0; right: 0; top: 1000px; text-align: center; font: 700 34px/1 var(--mono); letter-spacing: .2em; color: var(--dim); white-space: nowrap; }
+  #s4 .list { left: 60px; right: 60px; top: 1170px; }
+  #s4 .row { display: flex; align-items: baseline; height: 84px; padding: 22px 22px 0; font: 700 42px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; border-top: 2px solid rgba(255,255,255,.18); }
+  #s4 .row .dots { flex: 1; border-bottom: 4px dotted rgba(255,255,255,.35); margin: 0 18px; transform: translateY(-8px); }
+  #s4 .row.on { background: #ececec; color: #0a0a0a; border-top-color: #ececec; }
+  #s4 .row.on .dots { border-bottom-color: rgba(0,0,0,.45); }
+
+  /* S5 the countdown page on a phone */
+  #s5 .kick { left: 60px; top: 246px; }
+  #s5 .title { left: 56px; top: 292px; font-size: 140px; white-space: nowrap; }
+  #phone { left: 274px; top: 428px; width: 532px; height: 1112px; border-radius: 70px; background: #0a0a0a; padding: 18px; box-shadow: 0 40px 80px rgba(0,0,0,.45), inset 0 0 0 3px #3a3a3a; }
+  #phone .screen { position: relative; width: 496px; height: 1076px; border-radius: 54px; overflow: hidden; background: #000; }
+  #phone .island { position: absolute; left: 50%; top: 12px; width: 132px; height: 34px; margin-left: -66px; border-radius: 17px; background: #000; z-index: 5; box-shadow: 0 0 0 2px #1a1a1a; }
+  #scr { position: absolute; left: 0; top: 48px; width: 496px; }
+  #scr img { position: absolute; left: 0; top: 0; width: 496px; display: block; }
+  #scr .clk { display: none; }
+  #press { position: absolute; left: 20px; width: 456px; background: rgba(0,0,0,.4); display: none; }
+  #tapring { position: absolute; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; border: 7px solid #fff; box-shadow: 0 0 0 4px rgba(0,0,0,.6); z-index: 6; display: none; }
+  #s5 .stamp { color: var(--ink); background: rgba(230,230,230,.9); }
+  #s5stamp1 { right: 60px; top: 470px; font-size: 52px; }
+  #s5stamp2 { left: 60px; top: 1300px; font-size: 52px; }
+
+  /* S6 the inside pages */
+  #s6 { background: #0b0b0b; }
+  #s6 .pg { left: 220px; top: 392px; width: 640px; height: 828px; transform-origin: 50% 50%; display: none; box-shadow: 0 30px 60px rgba(0,0,0,.7); }
+  #s6 .pg .im { position: absolute; inset: 0; overflow: hidden; background: #111; }
+  #s6 .pg .im img { position: absolute; left: -20px; top: -20px; width: 680px; height: 868px; filter: grayscale(1) blur(9px) brightness(.85) contrast(1.15); }
+  #s6 .pg .bar { position: absolute; background: #050505; }
+  #s6 .pg .no { position: absolute; left: -14px; top: -26px; font: 700 32px/1 var(--mono); letter-spacing: .18em; background: #ececec; color: #0a0a0a; padding: 12px 18px 10px; white-space: nowrap; }
+  #s6 .pg .stamp { position: absolute; left: 90px; top: 340px; color: #ececec; font-size: 100px; background: rgba(0,0,0,.4); }
+  #s6 .word { left: 0; right: 0; top: 1262px; text-align: center; font-size: 250px; white-space: nowrap; filter: drop-shadow(0 8px 0 rgba(0,0,0,.6)); }
+  #s6 .seal { left: 0; right: 0; margin: 0 auto; top: 690px; width: max-content; color: #ececec; font-size: 120px; background: rgba(0,0,0,.55); }
+
+  /* S7 end card */
+  #s7 .word { left: 230px; top: 250px; width: 620px; mix-blend-mode: screen; }
+  #s7 .h24 { left: 0; right: 0; top: 352px; text-align: center; font-size: 270px; white-space: nowrap; filter: drop-shadow(0 10px 0 rgba(0,0,0,.6)); }
+  #endclock { left: 108px; top: 622px; }
+  #s7 .zero { left: 0; right: 0; top: 918px; text-align: center; font: 400 62px/1 var(--type); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  #s7 .url { left: 0; right: 0; top: 1018px; text-align: center; font-size: 150px; white-space: nowrap; }
+  #s7 .url span { display: inline-block; }
+  #s7 .buy { left: 110px; right: 110px; top: 1196px; font: 800 58px/1 var(--head); text-transform: uppercase; background: #ececec; color: #070707; padding: 30px 36px 24px; display: flex; justify-content: space-between; }
+  #s7 .info { left: 0; right: 0; top: 1350px; text-align: center; font: 700 32px/1.6 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: #cfcfcf; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- S1 0.0–2.0  cold open: priority transmission, T-MINUS 24 HOURS -->
+  <section class="scene dark" id="s1">
+    <div class="abs head1"><i class="rec" id="s1rec"></i><span id="s1t1"></span></div>
+    <p class="abs sub" id="s1t2"></p>
+    <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+    <p class="abs head tm" id="s1tm">T-minus</p>
+    <p class="abs head n24 chrome" id="s1n24">24</p>
+    <p class="abs head hrs" id="s1hrs">Hours</p>
+    <svg class="abs wave" viewBox="0 0 960 90" preserveAspectRatio="none" aria-hidden="true"><polyline id="s1wave" points=""/></svg>
+    <p class="abs foot" id="s1foot">The Vision Issue // Vol. 001</p>
+  </section>
+
+  <!-- S2 2.0–6.0  the split-flap clock slams in at 24:00:00 and starts to run -->
+  <section class="scene dark" id="s2">
+    <p class="abs kick" id="s2kick">The Vision Issue</p>
+    <p class="abs sub" id="s2sub">Declassified in</p>
+    <div class="abs housing" id="s2house"><span class="live"><i class="rec" id="s2rec"></i>Live</span><span class="rt">Hrs : Min : Sec</span></div>
+    <div class="abs" id="bigclock"></div>
+    <p class="abs head until chrome" id="s2until">Saturday 17 October</p>
+    <p class="abs when" id="s2when">12:00 Regina time</p>
+    <div class="tape" id="s2tape"><i class="band"></i><span class="run" id="s2run"></span></div>
+  </section>
+
+  <!-- S3 6.0–10.0  the sealed cover: evidence bag, laser scan, redactions, CLASSIFIED, the tag, a peek -->
+  <section class="scene" id="s3">
+    <p class="abs kick" id="s3kick">Exhibit A — Vol. 001</p>
+    <div class="abs" id="bag">
+      <div class="pouch">
+        <div class="cover"><img src="assets/mag-01.jpg" alt=""></div>
+        <i class="red" id="red1" style="left:70px;top:206px;width:420px"></i>
+        <i class="red" id="red2" style="left:150px;top:560px;width:430px"></i>
+        <i class="red" id="red3" style="left:60px;top:690px;width:330px"></i>
+        <div class="lens" id="lens"><img src="assets/mag-01.jpg" alt="" id="lensimg"><i style="left:146px;top:10px;width:8px;height:34px"></i><i style="left:146px;bottom:10px;width:8px;height:34px"></i><i style="top:146px;left:10px;height:8px;width:34px"></i><i style="top:146px;right:10px;height:8px;width:34px"></i></div>
+        <i class="laserband" id="laserband"></i><i class="laser" id="laser"></i>
+        <i class="zip"></i><i class="seal"></i>
+        <div class="plastic"></div>
+      </div>
+      <span class="stamp" id="s3stamp">Classified</span>
+      <span class="stamp denied" id="denied">Denied</span>
+    </div>
+    <span class="abs" id="lenslbl">Peek: 0.6 s</span>
+    <svg class="abs" id="string" viewBox="0 0 1080 1920" aria-hidden="true"><path id="strp" d=""/></svg>
+    <div class="abs" id="tag"><div class="card"><i class="hole"></i>
+      <div class="txt"><p class="t1">Evidence MC-016</p><p class="t2">Sealed until</p><p class="t3">17.10 — 12:00 Regina</p></div></div></div>
+  </section>
+
+  <!-- S4 10.0–14.0  the launch in four cities -->
+  <section class="scene dark" id="s4">
+    <p class="abs kick">The drop — Saturday 17.10</p>
+    <svg class="abs" id="orbit" viewBox="0 0 1080 700" aria-hidden="true">
+      <ellipse class="o1" cx="540" cy="330" rx="480" ry="150" transform="rotate(-9 540 330)"/>
+      <ellipse class="o2" cx="540" cy="330" rx="420" ry="105" transform="rotate(7 540 330)"/>
+      <circle id="ping" cx="0" cy="0" r="30" fill="none" stroke="#ececec" stroke-width="4"/>
+      <defs><radialGradient id="ball" cx="35%" cy="35%"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#9a9a9a"/><stop offset="1" stop-color="#2a2a2a"/></radialGradient></defs>
+      <circle id="sat" cx="0" cy="0" r="24" fill="url(#ball)"/>
+    </svg>
+    <p class="abs head city chrome" id="city"></p>
+    <p class="abs head time" id="ctime"></p>
+    <p class="abs geo" id="geo"></p>
+    <div class="abs list" id="clist"></div>
+  </section>
+
+  <!-- S5 14.0–18.0  the countdown page on a phone -->
+  <section class="scene paper" id="s5">
+    <p class="abs kick">Now live on the site</p>
+    <h2 class="abs head title" id="s5title">The countdown</h2>
+    <div class="abs" id="phone"><div class="screen"><i class="island"></i>
+      <div id="scr"><img src="assets/site-cd.jpg" alt="" id="scrimg">
+        <img class="clk" id="clk48" src="assets/site-cd-clock-48.png" alt=""><img class="clk" id="clk47" src="assets/site-cd-clock-47.png" alt="">
+        <img class="clk" id="clk46" src="assets/site-cd-clock-46.png" alt=""><img class="clk" id="clk45" src="assets/site-cd-clock-45.png" alt="">
+        <i id="press"></i></div>
+      <i id="tapring"></i></div></div>
+    <span class="abs stamp" id="s5stamp1">Live now</span>
+    <span class="abs stamp" id="s5stamp2">Pre-orders open</span>
+  </section>
+
+  <!-- S6 18.0–20.0  inside pages: style, play, culture — redacted -->
+  <section class="scene" id="s6">
+    <div id="pages"></div>
+    <p class="abs head word chrome" id="s6word"></p>
+    <span class="abs stamp seal" id="s6seal">20 pages sealed</span>
+  </section>
+
+  <!-- S7 20.0–24.0  end card, the clock still running -->
+  <section class="scene dark" id="s7">
+    <img class="abs word" id="s7word" src="assets/wordmark-white.webp" alt="MONOCHROME">
+    <p class="abs head h24 chrome" id="s7h24">24 hours.</p>
+    <div class="abs" id="endclock"></div>
+    <p class="abs zero" id="s7zero"></p>
+    <p class="abs head url"><span id="s7url">monochrome.com.ng</span></p>
+    <div class="abs buy" id="s7buy"><span>Pre-orders open — $10 CAD</span><span>↗</span></div>
+    <p class="abs info" id="s7info">Sat 17 Oct — 12:00 Regina time<br>Ships to 29 countries</p>
+  </section>
+
+  <div id="hud"><i class="rec" id="hudrec"></i><span class="lbl">T-minus</span><div id="hudclock"></div></div>
+  <div id="vignette"></div>
+  <div id="scan"></div>
+  <div id="grain"></div>
+  <div id="flash"></div>
+</div>
+
+<script>
+// ---------------------------------------------------------------- the film's facts
+const LAUNCH = 'Saturday 17 October 2026, 12:00 Regina (UTC-6)';
+const T_CLOCK = 2.0;          // the clock appears reading 24:00:00 here, and loses one second per second of film
+const CITIES = [               // the launch moment in each city (Regina is UTC-6 all year; Lagos UTC+1; Toronto UTC-4 in October; London UTC+1 in October)
+  { name: 'Regina', time: 'Sat 12:00', geo: '50.45° N   104.62° W', ang: 200 },
+  { name: 'Lagos', time: 'Sat 19:00', geo: '6.52° N   3.38° E', ang: 330 },
+  { name: 'Toronto', time: 'Sat 14:00', geo: '43.65° N   79.38° W', ang: 250 },
+  { name: 'London', time: 'Sat 19:00', geo: '51.51° N   0.13° W', ang: 20 },
+];
+// inside pages (the client's own pages, blurred and redacted; bars in % of the page)
+const PAGES = [
+  { img: 'assets/mag-13.jpg', no: 'P.13 / 20', word: 'Style', rot: -3,
+    bars: [[6, 4.5, 74, 8], [10, 30, 80, 6], [6, 60, 44, 15], [50, 79, 44, 4.5], [8, 88, 60, 3.5]] },
+  { img: 'assets/mag-09.jpg', no: 'P.09 / 20', word: 'Play', rot: 2.6,
+    bars: [[6, 4, 66, 10], [6, 27, 40, 4], [56, 27, 38, 4], [6, 45, 40, 4], [56, 50, 38, 4], [6, 66, 40, 4], [56, 72, 38, 4], [8, 89, 70, 3]] },
+  { img: 'assets/mag-06.jpg', no: 'P.06 / 20', word: 'Culture', rot: -2.2,
+    bars: [[4, 4, 70, 9], [4, 15, 52, 8], [8, 24, 86, 6], [56, 62, 36, 5], [4, 80, 44, 4], [52, 84, 44, 4]] },
+];
+const DUR = 24;
+const SCENES = [['s1', 0, 2], ['s2', 2, 6], ['s3', 6, 10], ['s4', 10, 14], ['s5', 14, 18], ['s6', 18, 20], ['s7', 20, DUR + 1]];
+const CUTS = SCENES.slice(1).map(s => s[1]);
+
+// ---------------------------------------------------------------- helpers
+const $ = id => document.getElementById(id);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeOut = k => 1 - Math.pow(1 - k, 3);
+const easeIn = k => k * k * k;
+const easeIO = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const back = k => { const c = 1.7; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const type = (el, text, k) => { const n = Math.round(text.length * clamp(k)); const s = text.slice(0, n); if (el.textContent !== s) el.textContent = s; };
+const rnd = n => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+const pad = n => String(n).padStart(2, '0');
+// 'block', not '': several of these are display:none in the stylesheet, and '' would leave them hidden
+const show = (el, on) => { el.style.display = on ? (el.dataset.d || 'block') : 'none'; };
+// a stamp thump: big and faint, then slammed down with a small shake
+const thump = (el, t, at, rot, base = '') => {
+  const k = seg(t, at, at + 0.14), s = lerp(1.9, 1, easeIn(k)), o = clamp(k * 1.6);
+  const shake = t > at + 0.14 && t < at + 0.3 ? (rnd(t * 97) - .5) * 12 : 0;
+  el.style.opacity = t < at ? 0 : o;
+  el.style.transform = `${base} translate(${shake}px, ${shake * .6}px) rotate(${rot}deg) scale(${s})`;
+};
+// a slam: type drops onto the frame from slightly larger, with a short shake
+const slam = (el, t, at, from = 1.4, dur = .1) => {
+  const k = seg(t, at, at + dur), sh = t > at + dur && t < at + dur + .14 ? (rnd(t * 61) - .5) * 16 : 0;
+  el.style.opacity = t < at ? 0 : 1;
+  el.style.transform = `translate(${sh}px, ${sh * .4}px) scale(${lerp(from, 1, easeIn(k))})`;
+};
+const ticker = (el, text, t, speed) => { if (!el.textContent) el.textContent = (text + '   //   ').repeat(8); el.style.transform = `translate(${-(t * speed) % 1600}px, -50%)`; };
+const sheen = (el, t, a, b) => { el.style.backgroundPosition = `${lerp(130, -30, easeIO(seg(t, a, b)))}% 0, 0 0`; };
+
+// ---------------------------------------------------------------- the clock: real seconds, HH:MM:SS
+const remain = t => 86400 - (t < T_CLOCK ? 0 : Math.floor(t - T_CLOCK + 1e-6));
+const hms = r => pad(Math.floor(r / 3600)) + pad(Math.floor(r / 60) % 60) + pad(r % 60);
+const LEAD = 0.05, FLIP = 0.2;   // a flip starts 50 ms before the second and lasts 200 ms; the clack lands on the second
+function buildClock(el, o) {
+  el.classList.add('clock');
+  for (const [k, v] of Object.entries({ w: o.w, h: o.h, fs: o.fs, gap: o.gap, cw: o.cw })) el.style.setProperty('--' + k, v + 'px');
+  const flap = () => `<div class="fl"><div class="h t"><span></span></div><div class="h b"><span></span></div><i class="shade"></i><div class="h t lf"><span></span></div><div class="h b lb"><span></span></div><i class="seam"></i><i class="hinge l"></i><i class="hinge r"></i></div>`;
+  let html = '';
+  ['Hours', 'Minutes', 'Seconds'].forEach((u, g) => {
+    html += `<div class="grp">${flap()}${flap()}${o.labels ? `<span class="ul">${u}</span>` : ''}</div>`;
+    if (g < 2) html += '<span class="colon"><i></i><i></i></span>';
+  });
+  el.innerHTML = html;
+  el._f = [...el.querySelectorAll('.fl')].map(f => { const [T, B, S, LF, LB] = f.children; return { T, B, S, LF, LB, tx: [T, B, LF, LB].map(x => x.firstChild) }; });
+}
+const txt = (node, v) => { if (node.textContent !== v) node.textContent = v; };
+function setClock(el, t) {
+  const ts = t + LEAD;
+  const cur = hms(remain(ts));
+  const n = Math.floor(ts - T_CLOCK + 1e-6), tc = T_CLOCK + n;
+  const prev = n >= 1 ? hms(remain(tc - 0.001)) : cur;
+  const k = (ts - tc) / FLIP;
+  el._f.forEach((f, i) => {
+    const nw = cur[i], old = prev[i];
+    if (n < 1 || old === nw || k >= 1.4) {
+      f.tx.forEach(x => txt(x, nw)); f.LF.style.display = f.LB.style.display = 'none'; f.S.style.opacity = 0; return;
+    }
+    txt(f.tx[0], nw);
+    if (k < .5) {             // the top leaf (old digit) falls towards us; the new top half shows behind it
+      txt(f.tx[1], old); txt(f.tx[2], old);
+      f.LF.style.display = 'block'; f.LB.style.display = 'none';
+      f.LF.style.transform = `rotateX(${-180 * k}deg)`; f.LF.style.filter = `brightness(${1 - 1.1 * k})`;
+      f.S.style.opacity = .5 * (k / .5);
+    } else if (k < 1) {       // the bottom leaf (new digit) comes down over the old bottom half
+      txt(f.tx[1], old); txt(f.tx[3], nw);
+      f.LF.style.display = 'none'; f.LB.style.display = 'block';
+      f.LB.style.transform = `rotateX(${90 - 180 * (k - .5)}deg)`; f.LB.style.filter = `brightness(${.45 + 1.1 * (k - .5)})`;
+      f.S.style.opacity = .5 * (1 - (k - .5) / .5);
+    } else {                  // a small bounce as it lands
+      txt(f.tx[1], nw); txt(f.tx[3], nw);
+      f.LF.style.display = 'none'; f.LB.style.display = 'block'; f.LB.style.filter = 'none';
+      f.LB.style.transform = `rotateX(${14 * Math.sin(Math.PI * (k - 1) / .4)}deg)`;
+      f.S.style.opacity = 0;
+    }
+  });
+}
+
+// ---------------------------------------------------------------- build the dynamic bits once
+(function build() {
+  buildClock($('bigclock'), { w: 136, h: 220, fs: 214, gap: 12, cw: 44, labels: true });
+  buildClock($('hudclock'), { w: 50, h: 78, fs: 76, gap: 5, cw: 20, labels: false });
+  buildClock($('endclock'), { w: 122, h: 192, fs: 186, gap: 10, cw: 40, labels: true });
+  $('clist').innerHTML = CITIES.map((c, i) => `<div class="row" id="row${i}"><span>${c.name}</span><i class="dots"></i><span>${c.time}</span></div>`).join('');
+  $('pages').innerHTML = PAGES.map((p, i) => `
+    <div class="abs pg" id="pg${i}"><div class="im"><img src="${p.img}" alt="">${p.bars.map(([x, y, w, h]) => `<i class="bar" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%"></i>`).join('')}</div>
+      <span class="no">${p.no} — redacted</span><span class="stamp" id="pgs${i}">Classified</span></div>`).join('');
+  // the oscilloscope line of the cold open: a fixed jagged signal
+  const pts = []; for (let x = 0; x <= 960; x += 12) pts.push([x, 45 + (rnd(x * .37) - .5) * 30 + Math.sin(x / 60) * 14]);
+  $('s1wave')._pts = pts;
+})();
+
+// ---------------------------------------------------------------- the timeline
+function render(t) {
+  for (const [id, a, b] of SCENES) $(id).style.display = t >= a && t < b ? 'block' : 'none';
+  const f = Math.round(t * 30);
+  const onPaper = t >= 14 && t < 18;
+  const gr = $('grain'); gr.style.backgroundImage = `url(assets/${onPaper ? 'grain-d' : 'grain-l'}.png)`;
+  gr.style.backgroundPosition = `${Math.floor(rnd(f) * 512)}px ${Math.floor(rnd(f + 7) * 512)}px`;
+  let fl = 0; for (const c of CUTS) { const d = t - c; if (d >= 0 && d < 0.1) fl = Math.max(fl, .75 * (1 - d / .1)); }
+  $('flash').style.opacity = fl;
+
+  // the HUD clock runs over the cover, the cities and the inside pages
+  const hudOn = (t >= 6 && t < 14) || (t >= 18 && t < 20);
+  $('hud').style.display = hudOn ? 'flex' : 'none';
+  if (hudOn) { setClock($('hudclock'), t); $('hudrec').style.opacity = Math.floor(t * 2) % 2 === 0 ? 1 : .2; }
+
+  // S1 cold open ------------------------------------------------------------------
+  if (t < 2) {
+    $('s1rec').style.opacity = Math.floor(t * 4) % 2 === 0 ? 1 : .15;
+    type($('s1t1'), 'Priority transmission', seg(t, .05, .55));
+    type($('s1t2'), 'Incoming — Monochrome Bureau', seg(t, .45, .85));
+    slam($('s1tm'), t, 1.0, 1.5);
+    slam($('s1n24'), t, 1.25, 1.6, .09); sheen($('s1n24'), t, 1.4, 1.9);
+    slam($('s1hrs'), t, 1.5, 1.5);
+    // glitch just before the drop: the big 24 jitters
+    if (t > 1.82) { const g = (rnd(f * 3.1) - .5) * 30; $('s1n24').style.transform = `translate(${g}px, 0) skewX(${g * .3}deg)`; }
+    const amp = .25 + 1.6 * seg(t, .2, 1.9), ph = t * 900;
+    $('s1wave').setAttribute('points', $('s1wave')._pts.map(([x, y]) => `${x},${(45 + (y - 45) * amp * (0.6 + 0.4 * Math.sin((x + ph) / 40))).toFixed(1)}`).join(' '));
+    $('s1foot').style.opacity = seg(t, .6, .9);
+    document.querySelectorAll('#s1 .corner').forEach((c, i) => { const k = easeOut(seg(t, .0 + i * .04, .3 + i * .04)); c.style.opacity = k; c.style.transform = `scale(${lerp(1.6, 1, k)})`; });
+  }
+
+  // S2 the clock ------------------------------------------------------------------
+  if (t >= 2 && t < 6) {
+    const l = t - 2;
+    // slams in at 2.0 reading 24:00:00
+    const k = seg(l, 0, .1), sh = l > .1 && l < .32 ? (rnd(l * 77) - .5) * 22 * (1 - (l - .1) / .22) : 0;
+    let tr = `translate(${sh}px, ${sh * .5}px) scale(${lerp(1.35, 1, easeIn(k))})`;
+    // 5.55-6.0: it flies up into the HUD position
+    const fk = easeIn(seg(l, 3.55, 3.98));
+    if (fk > 0) { const F = window.FLY || { dx: 0, dy: 0, s: 1 }; tr = `translate(${F.dx * fk}px, ${F.dy * fk}px) scale(${lerp(1, F.s, fk)})`; }
+    $('bigclock').style.transform = tr; $('bigclock').style.transformOrigin = '0 0';
+    $('s2house').style.opacity = (l < .02 ? 0 : 1) * (1 - seg(l, 3.5, 3.75));
+    $('s2house').style.transform = `scale(${lerp(1.08, 1, easeOut(seg(l, 0, .12)))})`;
+    setClock($('bigclock'), t);
+    $('s2rec').style.opacity = Math.floor(l * 2) % 2 === 0 ? 1 : .2;
+    type($('s2kick'), 'The Vision Issue', seg(l, .1, .4));
+    type($('s2sub'), 'Declassified in', seg(l, .3, .6));
+    slam($('s2until'), t, 2.5, 1.4); sheen($('s2until'), t, 2.7, 3.4);
+    $('s2when').style.opacity = seg(l, .75, 1.0);
+    ticker($('s2run'), 'T-minus 24 hours // The Vision Issue // Pre-orders open // monochrome.com.ng', l, 260);
+    const out = 1 - seg(l, 3.5, 3.75);
+    for (const id of ['s2kick', 's2sub', 's2when', 's2tape']) $(id).style.opacity = (id === 's2when' ? seg(l, .75, 1.0) : 1) * out;
+    $('s2until').style.opacity = (l < .5 ? 0 : 1) * out;
+    $('s2tape').style.transform = `translateX(${lerp(-1200, 0, easeOut(seg(l, .05, .4)))}px)`;
+  }
+
+  // S3 the sealed cover -------------------------------------------------------------
+  if (t >= 6 && t < 10) {
+    const l = t - 6;
+    // the bag drops onto the desk
+    const bk = seg(l, 0, .3), land = l > .3 && l < .5 ? Math.sin((l - .3) / .2 * Math.PI) * 6 : 0;
+    $('bag').style.transform = `translateY(${lerp(-1300, 0, easeIn(bk)) - land}px) rotate(${lerp(-9, -2.2, easeOut(bk))}deg)`;
+    $('s3kick').style.opacity = seg(l, .2, .45);
+    // the redaction bars are drawn across, one after another
+    [['red1', .45], ['red2', .58], ['red3', .71]].forEach(([id, a]) => { $(id).style.transform = `scaleX(${easeOut(seg(l, a, a + .12))})`; });
+    // the laser scan: down, up, down
+    const sk = seg(l, .55, 2.35), on = l >= .55 && l < 2.4;
+    show($('laser'), on); show($('laserband'), on);
+    if (on) {
+      const pos = (1 - Math.cos(sk * Math.PI * 3)) / 2, y = lerp(60, 860, pos), down = Math.sin(sk * Math.PI * 3) >= 0;
+      $('laser').style.top = `${y}px`; $('laserband').style.top = `${down ? y - 160 : y}px`;
+      $('laserband').style.transform = down ? 'none' : 'scaleY(-1)';
+    }
+    thump($('s3stamp'), l, 1.5, -10);
+    // the tag slides in and settles, tied to the corner of the bag
+    const tk = seg(l, 2.0, 2.3), tr = lerp(16, 3, easeOut(tk)) + (l > 2.3 ? Math.sin((l - 2.3) * 14) * Math.exp(-(l - 2.3) * 5) * 3 : 0);
+    $('tag').style.opacity = l < 2.0 ? 0 : 1;
+    $('tag').style.transform = `translate(${lerp(500, 0, easeOut(tk))}px, ${lerp(260, 0, easeOut(tk))}px) rotate(${tr}deg)`;
+    // the string from the tag's hole to the grommet at the bag's corner
+    if (l >= 2.0) {
+      const a = (tr * Math.PI) / 180, hx = 440 + 40 + lerp(500, 0, easeOut(tk)), hy = 1238 + 125 + lerp(260, 0, easeOut(tk));
+      const gx = 846, gy = 1300;
+      $('strp').setAttribute('d', `M${gx} ${gy} C ${gx - 60} ${gy + 40}, ${hx + 30} ${hy - 70}, ${hx} ${hy}`);
+    } else $('strp').setAttribute('d', '');
+    // the peek: a lens opens over the cover for 0.6 s, then access is denied
+    const pk = seg(l, 2.45, 2.57), pc = seg(l, 3.07, 3.15), lensOn = l >= 2.45 && l < 3.15;
+    show($('lens'), lensOn); show($('lenslbl'), lensOn);
+    if (lensOn) {
+      const m = easeIO(seg(l, 2.45, 3.1));
+      const cx = lerp(210, 400, m), cy = lerp(470, 600, m), r = 150 * easeOut(pk) * (1 - pc);
+      const L = $('lens'); L.style.left = `${30 + cx - 150}px`; L.style.top = `${64 + cy - 150}px`; L.style.transform = `scale(${Math.max(.001, r / 150)})`;
+      $('lensimg').style.left = `${150 - cx}px`; $('lensimg').style.top = `${150 - cy}px`;
+      const lb = $('lenslbl'); lb.style.left = `${210 + 30 + cx - 150}px`; lb.style.top = `${410 + 64 + cy + 168}px`; lb.style.opacity = r > 100 ? 1 : 0;
+    }
+    const dn = l >= 3.15 && l < 3.75; show($('denied'), dn);
+    if (dn) { const d = $('denied'); d.style.left = '250px'; d.style.top = '560px'; thump(d, l, 3.15, 8); d.style.opacity = Math.floor((l - 3.15) * 10) % 2 === 0 ? 1 : .35; }
+  }
+
+  // S4 the four cities ---------------------------------------------------------------
+  if (t >= 10 && t < 14) {
+    const l = t - 10, i = Math.min(3, Math.floor(l + 1e-6)), c = CITIES[i], li = l - i;
+    // each city lands on its second: in from the right with a smear, out to the left
+    const k = easeOut(seg(li, 0, .16)), smear = (1 - k) * 18;
+    for (const [id, dx] of [['city', 0], ['ctime', 60], ['geo', 120]]) {
+      const el = $(id); el.style.transform = `translateX(${lerp(900 + dx, 0, k)}px)`; el.style.filter = `blur(${smear}px)` + (id === 'city' ? ' drop-shadow(0 8px 0 rgba(0,0,0,.65))' : '');
+    }
+    txt($('city'), c.name); txt($('ctime'), c.time); txt($('geo'), c.geo);
+    sheen($('city'), li, .15, .7);
+    if (li > .78 && i < 3) { const ok = easeIn(seg(li, .78, 1)); $('city').style.transform = `translateX(${-1100 * ok}px)`; $('ctime').style.transform = `translateX(${-1000 * ok}px)`; $('geo').style.transform = `translateX(${-900 * ok}px)`; }
+    CITIES.forEach((_, j) => { const r = $('row' + j); const rk = easeOut(seg(l, j + .05, j + .25)); r.style.opacity = l >= j ? rk : 0; r.style.transform = `translateX(${lerp(60, 0, rk)}px)`; r.classList.toggle('on', j === i); });
+    // the satellite moves round the orbit to each city's position, with a ping when it lands
+    const prevA = i > 0 ? CITIES[i - 1].ang : CITIES[0].ang - 70, ang = lerp(prevA, c.ang + (c.ang < prevA - 180 ? 360 : 0), easeIO(seg(li, 0, .22)));
+    const rad = ang * Math.PI / 180, ex = 480 * Math.cos(rad), ey = 150 * Math.sin(rad), rr = -9 * Math.PI / 180;
+    const sx = 540 + ex * Math.cos(rr) - ey * Math.sin(rr), sy = 330 + ex * Math.sin(rr) + ey * Math.cos(rr);
+    $('sat').setAttribute('cx', sx.toFixed(1)); $('sat').setAttribute('cy', sy.toFixed(1));
+    const pg = seg(li, .2, .75); $('ping').setAttribute('cx', sx.toFixed(1)); $('ping').setAttribute('cy', sy.toFixed(1));
+    $('ping').setAttribute('r', (24 + 90 * easeOut(pg)).toFixed(1)); $('ping').style.opacity = pg > 0 && pg < 1 ? 1 - pg : 0;
+    $('orbit').style.transform = `rotate(${l * 2}deg)`;
+  }
+
+  // S5 the countdown page on a phone ------------------------------------------------
+  if (t >= 14 && t < 18) {
+    const l = t - 14, S = 496 / 390;               // CSS px of the page -> px on the phone screen
+    const pk = easeOut(seg(l, 0, .4)); $('phone').style.transform = `translateY(${lerp(1300, 0, pk)}px) rotate(${lerp(7, 0, pk)}deg)`;
+    $('s5title').style.opacity = seg(l, .05, .3);
+    // scroll: top -> the clock, cities and the pre-order button -> the evidence bag and the spec sheet
+    const y = 300 * easeIO(seg(l, .85, 1.45)) + 860 * easeIO(seg(l, 2.5, 3.2));
+    $('scr').style.transform = `translateY(${-y * S}px)`;
+    // the page's own clock ticks with the film: 23:59:48 at 14 s ... 23:59:45 at 17 s
+    const sec = 86400 - Math.floor(t - T_CLOCK + 1e-6) - 86340;
+    for (const s of [48, 47, 46, 45]) { const im = $('clk' + s); im.style.display = s === sec ? 'block' : 'none'; im.style.top = `${415 * S}px`; }
+    // a tap on PRE-ORDER A COPY (the button: CSS y 747-825)
+    const tapAt = 1.95, tk = seg(l, tapAt, tapAt + .4), tp = $('tapring');
+    show(tp, l >= tapAt && l < tapAt + .42);
+    tp.style.left = '248px'; tp.style.top = `${48 + (786 - y) * S}px`; tp.style.transform = `scale(${lerp(.4, 1.5, easeOut(tk))})`; tp.style.opacity = 1 - tk;
+    const pr = $('press'); show(pr, l >= tapAt && l < tapAt + .2); pr.style.top = `${747 * S}px`; pr.style.height = `${78 * S}px`;
+    thump($('s5stamp1'), l, .5, 8);
+    thump($('s5stamp2'), l, 3.3, -6);
+  }
+
+  // S6 the inside pages: style, play, culture --------------------------------------
+  if (t >= 18 && t < 20) {
+    const l = t - 18, i = Math.min(2, Math.floor(l / .5)), fan = l >= 1.5;
+    PAGES.forEach((p, j) => {
+      const el = $('pg' + j);
+      if (!fan) {
+        show(el, j === i);
+        if (j === i) { const li = l - j * .5, k = easeOut(seg(li, 0, .08)); el.style.transform = `rotate(${p.rot}deg) scale(${lerp(1.18, 1, k)})`; el.style.filter = `blur(${(1 - k) * 10}px)`; thump($('pgs' + j), li, .1, -9); }
+      } else {               // all three, fanned out and sealed
+        show(el, true); const k = easeOut(seg(l, 1.5, 1.68));
+        el.style.transform = `translate(${(j - 1) * 210 * k}px, ${Math.abs(j - 1) * 40 * k}px) rotate(${lerp(p.rot, (j - 1) * 11, k)}deg) scale(${lerp(1, .72, k)})`; el.style.filter = 'none';
+        el.style.zIndex = j === 1 ? 3 : 1; $('pgs' + j).style.opacity = 0;
+      }
+    });
+    const w = $('s6word');
+    if (!fan) { txt(w, PAGES[i].word); slam(w, l, i * .5 + .02, 1.5, .08); sheen(w, l, i * .5 + .1, i * .5 + .45); }
+    else { txt(w, 'Style + Play + Culture'); w.style.fontSize = (window.FIT_TRIO || 110) + 'px'; slam(w, l, 1.5, 1.3, .08); }
+    if (!fan) w.style.fontSize = '';
+    thump($('s6seal'), l, 1.62, -7);
+  }
+
+  // S7 end card --------------------------------------------------------------------
+  if (t >= 20) {
+    const l = t - 20;
+    $('s7word').style.clipPath = `inset(0 ${100 - easeIO(seg(l, .05, .45)) * 100}% 0 0)`;
+    slam($('s7h24'), t, 20, 1.5, .09); sheen($('s7h24'), t, 20.15, 20.8); sheen($('s7h24'), t, 22.4, 23.1);
+    const ck = easeOut(seg(l, 0, .14)); $('endclock').style.opacity = ck; $('endclock').style.transform = `scale(${lerp(1.2, 1, ck)})`;
+    setClock($('endclock'), t);
+    type($('s7zero'), 'Watch it hit zero', seg(l, .3, .75));
+    const uk = seg(l, .8, .9); $('s7url').parentNode.style.opacity = uk > 0 ? 1 : 0; $('s7url').parentNode.style.transform = `scale(${lerp(1.3, 1, easeIn(uk))})`;
+    const bk = easeOut(seg(l, 1.15, 1.45)); $('s7buy').style.opacity = bk; $('s7buy').style.transform = `translateY(${lerp(40, 0, bk)}px)`;
+    $('s7info').style.opacity = easeOut(seg(l, 1.4, 1.8));
+  }
+}
+
+// big type shrinks until it fits the frame; the clock's fly-to-HUD move is measured here too
+function fitAll() {
+  // measure the words, not the block: full-width centred lines are always wider than max
+  const fit = (el, max) => {
+    const keep = [el.style.width, el.style.right];
+    el.style.width = 'max-content'; el.style.right = 'auto';
+    let fs = parseFloat(getComputedStyle(el).fontSize); el.style.fontSize = fs + 'px';
+    while (el.getBoundingClientRect().width > max && fs > 40) { fs -= 2; el.style.fontSize = fs + 'px'; }
+    [el.style.width, el.style.right] = keep; return fs;
+  };
+  const withScene = (id, fn) => { const s = $(id), was = s.style.display; s.style.display = 'block'; const r = fn(); s.style.display = was; return r; };
+  withScene('s1', () => { fit($('s1n24'), 960); fit($('s1tm'), 960); fit($('s1hrs'), 960); });
+  withScene('s2', () => { fit($('s2until'), 960); fit($('s2sub'), 960); });
+  withScene('s3', () => fit($('s3kick'), 960));
+  withScene('s4', () => { let m = 400; for (const c of CITIES) { $('city').textContent = c.name; $('city').style.fontSize = '270px'; m = Math.min(m, fit($('city'), 960)); } $('city').style.fontSize = m + 'px'; });
+  withScene('s5', () => fit($('s5title'), 960));
+  withScene('s6', () => { const w = $('s6word'); let m = 300; for (const p of PAGES) { w.textContent = p.word; w.style.fontSize = '250px'; m = Math.min(m, fit(w, 960)); } w.style.fontSize = ''; document.styleSheets[0].insertRule(`#s6 .word { font-size: ${m}px; }`, document.styleSheets[0].cssRules.length); w.textContent = 'Style + Play + Culture'; w.style.fontSize = '160px'; window.FIT_TRIO = fit(w, 960); w.style.fontSize = ''; });
+  withScene('s7', () => { fit($('s7h24'), 960); fit($('s7url'), 940); fit($('s7zero'), 960); });
+  // where the big clock has to go to become the HUD clock
+  const hud = $('hud'), hw = hud.style.display; hud.style.display = 'flex';
+  const big = withScene('s2', () => { const b = $('bigclock'), tr = b.style.transform; b.style.transform = 'none'; const r = b.getBoundingClientRect(); b.style.transform = tr; return r; });
+  const sm = $('hudclock').getBoundingClientRect(); hud.style.display = hw;
+  // only the flap row scales (labels sit below it); match widths and the top-left corner
+  const flapW = big.width, s = sm.width / flapW;
+  window.FLY = { dx: sm.left - big.left, dy: sm.top - big.top, s };
+}
+window.fitAll = fitAll;
+window.render = render; window.DUR = DUR;
+document.fonts.ready.then(() => { fitAll(); render(0); });
+render(0);
+// live preview: space plays it in real time
+let playing = false, t0 = 0;
+addEventListener('keydown', e => { if (e.code !== 'Space') return; playing = !playing; t0 = performance.now(); const loop = now => { if (!playing) return; const t = ((now - t0) / 1000) % DUR; render(t); requestAnimationFrame(loop); }; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>

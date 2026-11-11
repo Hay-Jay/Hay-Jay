@@ -1,0 +1,48 @@
+  <!-- 07 COLOPHON ------------------------------------------------------------------------------ -->
+  <section class="spread paper colophon" data-tone="paper" aria-labelledby="colH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">07</div>
+    <div class="folio-v mono" aria-hidden="true">Monochrome® — Colophon — Contact</div>
+    <p class="mono kicker rv">Colophon — p.07</p>
+    <h1 class="display rv-lines" id="colH"><span class="ln"><span>Colo-</span></span><span class="ln"><span class="ital">phon<i class="stop">.</i></span></span></h1>
+    <p class="co-deck rv">Who made this issue, how it is set, and how to reach us.</p>
+    <div class="co-grid">
+      <dl class="co-list">
+        <div><dt class="mono">Title</dt><dd>MONOCHROME®</dd></div>
+        <div><dt class="mono">Issue</dt><dd>01, <em>The Unknown</em></dd></div>
+        <div><dt class="mono">Finishes</dt><dd>Black, white and chrome</dd></div>
+        <div><dt class="mono">Pieces</dt><dd>{{pieces}}, in small runs</dd></div>
+        <div><dt class="mono">Photographs</dt><dd>The Monochrome archive</dd></div>
+        <div><dt class="mono">Set in</dt><dd>Bodoni Moda &amp; DM Mono</dd></div>
+        <div><dt class="mono">Store address</dt><dd>{{store_city}}</dd></div>
+        <div><dt class="mono">Delivers to</dt><dd>{{countries}} countries</dd></div>
+        <div><dt class="mono">Prices</dt><dd>Canadian dollars (CAD)</dd></div>
+      </dl>
+      <ul class="cn-links">
+        <li><a href="mailto:info.mccanada@gmail.com"><span class="mono">Email</span><b>info.mccanada<wbr>@gmail.com</b><i class="arr" aria-hidden="true"></i></a></li>
+        <li><a href="https://www.instagram.com/monochrome.ca/" target="_blank" rel="noopener"><span class="mono">Instagram</span><b>@monochrome.ca</b><i class="arr" aria-hidden="true"></i></a></li>
+        <li><a data-store="/" href="{{store_url}}/" target="_blank" rel="noopener"><span class="mono">The store</span><b>monochrome.com.ng</b><i class="arr" aria-hidden="true"></i></a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="spread ink coupon-spread" id="subscribe" data-tone="ink" aria-labelledby="subH">
+    <div class="bleed-num" aria-hidden="true" data-drift="-.1">06</div>
+    <p class="mono kicker rv">Subscribe — coupon</p>
+    <div class="coupon paper rv">
+      <span class="cut mono" aria-hidden="true"><i>&#9986;</i> Cut along the line</span>
+      <div class="coupon-in">
+        <h2 id="subH" class="coupon-h"><span>Next</span> <em>issue<i class="stop">.</i></em></h2>
+        <form class="news" id="news" method="post" action="{{news_action}}" target="_blank" rel="noopener">
+          <input type="hidden" name="form_type" value="customer">
+          <input type="hidden" name="utf8" value="✓">
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <label for="email" class="mono">Drop alerts, first. One email, your address.</label>
+          <div class="news-row">
+            <input id="email" name="contact[email]" type="email" required placeholder="you@email.com" autocomplete="email">
+            <button class="send" type="submit">Notify me<span class="arr" aria-hidden="true"></span></button>
+          </div>
+          <small class="mono news-note" id="newsNote">Signs you up through the Monochrome store. A new tab opens so you can see it go through.</small>
+        </form>
+      </div>
+    </div>
+  </section>

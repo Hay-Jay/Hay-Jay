@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>Requisition {{ order_name }} confirmed</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  a { text-decoration: none; }
+  @media only screen and (max-width: 620px) {
+    .outer { padding: 0 !important; }
+    .wrap { width: 100% !important; border-left: 0 !important; border-right: 0 !important; }
+    .px { padding-left: 18px !important; padding-right: 18px !important; }
+    .pp { padding-left: 8px !important; padding-right: 8px !important; }
+    .spr { width: 16px !important; min-width: 16px !important; }
+    .ppx { padding-left: 12px !important; padding-right: 12px !important; }
+    .ppl { padding-left: 12px !important; }
+    .ppr { padding-right: 12px !important; }
+    .thumb { width: 44px !important; height: 44px !important; }
+    .hide-s { display: none !important; }
+    .tg { font-size: 15px !important; line-height: 25px !important; }
+    .tot { font-size: 23px !important; }
+    .col { display: block !important; width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .colgap { padding-top: 16px !important; }
+    .wheel { width: 88px !important; height: 88px !important; }
+    .wheelcell { width: 88px !important; padding-right: 14px !important; }
+    .eot { font-size: 30px !important; line-height: 32px !important; }
+    .code { font-size: 40px !important; letter-spacing: 4px !important; }
+    .btn a { font-size: 21px !important; }
+  }
+</style>
+</head>
+{%- comment -%}
+  MONOCHROME order confirmation, "THE SECURE TRANSMISSION". Settings → Notifications → Order confirmation → Edit code:
+  replace everything with this file (after build.py has swapped __NIMG__/ for the uploaded images' CDN URLs).
+  "Revert to default" in the same screen brings Shopify's own back.
+  The Bureau files your order as an encrypted dispatch: it decrypts (GIF), a routing slip and a telegram give the facts, a
+  tractor-feed printout lists the exhibits and totals, and the message signs off on punched teleprinter tape.
+  All order data is live text. Images are props; the email reads in full with them blocked.
+  The VISION10 one-time pad shows only when the order contains The Vision Issue (product 15418664059134).
+  The AUTH CODE is decorative: a fixed scramble of the order number, not a security feature.
+{%- endcomment -%}
+{%- assign mono = "'Courier Prime', 'Courier New', Courier, monospace" -%}
+{%- assign type = "'Special Elite', 'Courier New', Courier, monospace" -%}
+{%- assign head = "'Big Shoulders Display', Impact, 'Arial Narrow Bold', 'Arial Black', Arial, sans-serif" -%}
+{%- assign lbl = "font-weight:bold;font-size:10px;line-height:14px;letter-spacing:2.5px;text-transform:uppercase;" -%}
+{%- assign got_issue = false -%}
+{%- assign n_items = 0 -%}
+{%- for line in line_items -%}
+  {%- if line.product_id == 15418664059134 -%}{%- assign got_issue = true -%}{%- endif -%}
+  {%- assign n_items = n_items | plus: line.quantity -%}
+{%- endfor -%}
+{%- assign agent = 'Agent' -%}
+{%- if customer.first_name != blank -%}{%- assign agent = 'Agent ' | append: customer.first_name -%}{%- endif -%}
+{%- comment -%} decorative auth code: a fixed scramble of the order number (letters without I and O) {%- endcomment -%}
+{%- assign ab = 'ABCDEFGHJKLMNPQRSTUVWXYZ' -%}
+{%- assign onum = order_number | plus: 0 -%}
+{%- assign k1 = onum | times: 31 | plus: 7 | modulo: 24 -%}
+{%- assign k2 = onum | times: 17 | plus: 3 | modulo: 24 -%}
+{%- assign k3 = onum | times: 13 | plus: 11 | modulo: 24 -%}
+{%- assign g1 = onum | times: 7919 | modulo: 9000 | plus: 1000 -%}
+{%- assign g2 = onum | times: 104729 | plus: 3571 | modulo: 900 | plus: 100 -%}
+{%- capture auth_code -%}{{ ab | slice: k1 }}{{ ab | slice: k2 }}-{{ g1 }}-{{ ab | slice: k3 }}{{ g2 }}{%- endcapture -%}
+{%- capture stop -%}<span style="color:#7d7d7d;">&nbsp;STOP.</span>{%- endcapture -%}
+<body style="margin:0;padding:0;background:#050505;" bgcolor="#050505">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Requisition {{ order_name }} received and confirmed. Total {{ total_price | money_with_currency }}. Thank you, {{ agent | escape }}.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#050505" style="background:#050505;">
+<tr><td class="outer" align="center" style="padding:24px 8px;">
+<table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#0d0d0d" style="width:600px;max-width:600px;background:#0d0d0d;border:1px solid #262626;">
+
+  <!-- classification banner -->
+  <tr><td bgcolor="#000000" style="background:#000000;padding:9px 20px 8px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font-family:{{ mono }};{{ lbl }}color:#f0f0f0;white-space:nowrap;"><span style="color:#ff3b30;">&#9679;</span>&nbsp; Incoming transmission</td>
+      <td class="hide-s" align="right" style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;white-space:nowrap;">Eyes only // Monochrome Bureau</td>
+    </tr></table>
+  </td></tr>
+
+  <!-- wordmark -->
+  <tr><td align="center" style="padding:26px 20px 22px;">
+    <a href="{{ shop.url }}" target="_blank" style="text-decoration:none;"><img src="__NIMG__/transmission-wordmark.png" width="220" height="20" alt="MONOCHROME" style="display:block;width:220px;height:20px;border:0;outline:none;color:#ececec;font:bold 20px/20px {{ head }};letter-spacing:4px;"></a>
+  </td></tr>
+
+  <!-- the decrypt: Outlook for Windows gets the still last frame -->
+  <tr><td bgcolor="#0a0a0a" style="background:#0a0a0a;padding:0;font-size:0;line-height:0;">
+    <!--[if mso]><img src="__NIMG__/transmission-decrypt.png" width="600" height="330" alt="REQUISITION RECEIVED. Confirmed." style="display:block;border:0;"><![endif]-->
+    <!--[if !mso]><!--><img src="__NIMG__/transmission-decrypt.gif" width="600" height="330" alt="REQUISITION RECEIVED. Confirmed." style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;background:#0a0a0a;color:#f2f2f2;font:900 36px/40px {{ head }};letter-spacing:1px;text-transform:uppercase;"><!--<![endif]-->
+  </td></tr>
+
+  <!-- routing slip -->
+  <tr><td class="px" style="padding:28px 30px 0;">
+    <div aria-hidden="true" style="font-family:{{ mono }};{{ lbl }}color:#6a6a6a;padding:0 0 8px;">ZCZC MC7 {{ order_number }} &nbsp;&middot;&nbsp; decrypted copy</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px solid #e6e6e6;">
+      <tr><td colspan="2" bgcolor="#e6e6e6" style="background:#e6e6e6;padding:6px 12px 5px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="font-family:{{ mono }};{{ lbl }}color:#0d0d0d;">Routing slip</td>
+          <td align="right" style="font-family:{{ mono }};{{ lbl }}color:#0d0d0d;">Msg 01 of 01</td>
+        </tr></table>
+      </td></tr>
+      <tr>
+        <td width="50%" valign="top" style="padding:11px 12px 10px;border-right:1px solid #444444;border-bottom:1px solid #444444;">
+          <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">From</div>
+          <div style="font:bold 14px/20px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#f0f0f0;padding-top:3px;">Requisitions Desk</div>
+        </td>
+        <td width="50%" valign="top" style="padding:11px 12px 10px;border-bottom:1px solid #444444;">
+          <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">To</div>
+          <div style="font:bold 14px/20px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#f0f0f0;padding-top:3px;word-break:break-word;">{{ agent | escape }}</div>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" style="padding:11px 12px 10px;border-right:1px solid #444444;border-bottom:1px solid #444444;">
+          <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">Re: requisition</div>
+          <div style="padding-top:5px;"><span style="background:#f0f0f0;color:#0a0a0a;font:bold 16px/22px {{ mono }};letter-spacing:1px;padding:1px 6px;">{{ order_name }}</span></div>
+        </td>
+        <td valign="top" style="padding:11px 12px 10px;border-bottom:1px solid #444444;">
+          <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">Filed</div>
+          <div style="font:bold 14px/20px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#f0f0f0;padding-top:3px;">{{ created_at | date: "%d %b %Y" }}</div>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top" style="padding:11px 12px 11px;border-right:1px solid #444444;">
+          <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">Priority</div>
+          <div style="font:bold 14px/20px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#f0f0f0;padding-top:3px;">Flash</div>
+        </td>
+        <td valign="top" style="padding:11px 12px 11px;">
+          <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">Clearance</div>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;"><tr>
+            <td valign="bottom" style="padding:0 8px 0 0;"><img src="__NIMG__/transmission-ladder.png" width="38" height="14" alt="Level 5 of 5" style="display:block;width:38px;height:14px;border:0;color:#8a8a8a;font:bold 8px/14px {{ mono }};"></td>
+            <td valign="bottom" style="font:bold 14px/14px {{ mono }};letter-spacing:1px;color:#f0f0f0;">L5</td>
+          </tr></table>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  <!-- the telegram -->
+  <tr><td class="px" style="padding:28px 30px 0;">
+    <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;padding:0 0 10px;">BT &nbsp;&middot;&nbsp; Message follows</div>
+    <div class="tg" style="font:17px/29px {{ type }};letter-spacing:.5px;text-transform:uppercase;color:#f0f0f0;">
+      {{ agent | escape }}.<br>
+      Requisition {{ order_name }} received and confirmed.{{ stop }}<br>
+      {{ n_items }} {% if n_items == 1 %}exhibit{% else %}exhibits{% endif %}. Total {{ total_price | money_with_currency }}.{{ stop }}<br>
+      {%- if shipping_address %}
+      Destination {{ shipping_address.city }}, {{ shipping_address.country }}.{{ stop }}<br>
+      {%- elsif shipping_method %}
+      Collection: {{ shipping_method.title }}.{{ stop }}<br>
+      {%- endif %}
+      Thank you.{% if shipping_address %} We will signal again when it ships.{% elsif requires_shipping %} We will signal again when it is ready.{% endif %}{{ stop }}
+    </div>
+  </td></tr>
+  <tr><td class="px" style="padding:20px 30px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="border-left:3px solid #f0f0f0;padding:1px 0 2px 14px;font:15px/24px {{ mono }};color:#cfcfcf;">
+        <div style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;padding-bottom:3px;">In plain English</div>
+        Thanks for your order{% if customer.first_name != blank %}, {{ customer.first_name | escape }}{% endif %}. It's confirmed and we're getting it ready.{% if shipping_address %} We'll email you as soon as it ships.{% elsif requires_shipping %} We'll email you when it's ready.{% endif %}
+      </td>
+    </tr></table>
+  </td></tr>
+
+  <!-- button -->
+  <tr><td class="px" style="padding:28px 30px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td class="btn" align="center" bgcolor="#f0f0f0" style="background:#f0f0f0;">
+        <a href="{{ order_status_url }}" target="_blank" style="display:block;padding:18px 20px 17px;font:800 24px/26px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#0a0a0a;text-decoration:none;">View your order&nbsp;&nbsp;&#8599;</a>
+      </td>
+    </tr></table>
+  </td></tr>
+  <tr><td class="px" align="center" style="padding:11px 30px 0;font-family:{{ mono }};{{ lbl }}letter-spacing:2px;color:#8a8a8a;">
+    Live status of {{ order_name }} &nbsp;//&nbsp; <a href="{{ shop.url }}" target="_blank" style="color:#e6e6e6;text-decoration:underline;">Back to the store</a>
+  </td></tr>
+
+  <!-- the manifest: a tractor-feed printout -->
+  <tr><td class="pp" style="padding:36px 24px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#e8e8e8" style="background:#e8e8e8;">
+      <tr><td colspan="3" style="padding:0;font-size:0;line-height:0;"><img src="__NIMG__/transmission-tear-top.png" width="552" height="10" alt="- - - tear along perforation - - -" style="display:block;width:100%;height:auto;border:0;color:#8a8a8a;font:8px/10px {{ mono }};letter-spacing:2px;text-align:center;"></td></tr>
+      <tr>
+        <td class="spr" width="22" style="width:22px;min-width:22px;border-right:1px dashed #9a9a9a;background-image:url('__NIMG__/transmission-sprocket.png');background-repeat:repeat-y;background-size:22px 30px;background-position:0 4px;">&nbsp;</td>
+        <td valign="top" style="padding:0;">
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td class="ppx" style="padding:16px 20px 0;">
+              <img src="__NIMG__/transmission-dmx.png" width="384" height="25" alt="REQUISITION MANIFEST" style="display:block;width:384px;max-width:100%;height:auto;border:0;color:#0a0a0a;font:bold 18px/25px {{ mono }};letter-spacing:3px;">
+              <div style="font-family:{{ mono }};{{ lbl }}letter-spacing:2px;color:#4a4a4a;padding:9px 0 0;">Monochrome Bureau &middot; Requisitions system MC-7</div>
+            </td></tr>
+            <tr><td class="ppx" style="padding:12px 20px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid #0a0a0a;border-bottom:1px solid #0a0a0a;">
+                <tr>
+                  <td valign="top" style="padding:7px 8px 7px 0;font:bold 12px/17px {{ mono }};color:#0a0a0a;"><span style="font-size:9px;letter-spacing:2px;color:#555555;">FILE</span><br>{{ order_name }}</td>
+                  <td valign="top" style="padding:7px 8px;font:bold 12px/17px {{ mono }};color:#0a0a0a;text-transform:uppercase;"><span style="font-size:9px;letter-spacing:2px;color:#555555;">DATE</span><br>{{ created_at | date: "%d %b %Y" }}</td>
+                  <td valign="top" align="right" style="padding:7px 0 7px 8px;font:bold 12px/17px {{ mono }};color:#0a0a0a;"><span style="font-size:9px;letter-spacing:2px;color:#555555;">PAGE</span><br>01/01</td>
+                </tr>
+              </table>
+            </td></tr>
+            <tr><td class="ppx" style="padding:12px 20px 6px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+                <td style="font-family:{{ mono }};{{ lbl }}font-size:9px;letter-spacing:2px;color:#555555;">Exhibit</td>
+                <td align="right" style="font-family:{{ mono }};{{ lbl }}font-size:9px;letter-spacing:2px;color:#555555;">Amount</td>
+              </tr></table>
+            </td></tr>
+          </table>
+
+          <!-- one greybar band per exhibit -->
+          {%- for line in subtotal_line_items %}
+          {%- capture band -%}{%- cycle 'bands': '#dadada', '#e8e8e8' -%}{%- endcapture %}
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="{{ band }}" style="background:{{ band }};"><tr>
+            <td class="ppl" width="54" valign="top" style="width:54px;padding:12px 0 12px 20px;">
+              {%- if line.image %}<img class="thumb" src="{{ line | img_url: 'compact_cropped' }}" width="52" height="52" alt="{{ line.product.title | default: line.title | escape }}" style="display:block;width:52px;height:52px;border:1px solid #0a0a0a;background:#c3c3c3;filter:grayscale(100%);color:#555555;font:8px/10px {{ mono }};">
+              {%- else %}<table role="presentation" class="thumb" width="52" height="52" cellpadding="0" cellspacing="0" border="0" style="width:52px;height:52px;border:1px dashed #555555;"><tr><td align="center" valign="middle" style="font:bold 8px/10px {{ mono }};letter-spacing:1px;color:#555555;">NO<br>PHOTO</td></tr></table>{% endif -%}
+            </td>
+            <td valign="top" style="padding:11px 10px 12px 12px;">
+              <div style="font:bold 9px/12px {{ mono }};letter-spacing:2px;color:#555555;">EXH-{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</div>
+              <div style="font:bold 14px/19px {{ mono }};text-transform:uppercase;color:#0a0a0a;padding-top:2px;">{{ line.product.title | default: line.title }}</div>
+              <div style="font:12px/17px {{ mono }};text-transform:uppercase;color:#333333;padding-top:2px;">
+                {%- if line.variant.title != 'Default Title' and line.variant.title != blank %}{{ line.variant.title }} &middot; {% endif -%}
+                Qty {{ line.quantity }}{% if line.sku != blank %}<span class="hide-s"> &middot; Ref {{ line.sku }}</span>{% endif -%}
+              </div>
+              {%- for p in line.properties -%}{%- assign c0 = p.first | slice: 0 -%}{%- unless p.last == blank or c0 == '_' -%}
+              <div style="font:12px/17px {{ mono }};color:#333333;">{{ p.first }}: <b style="color:#0a0a0a;">{{ p.last }}</b></div>
+              {%- endunless -%}{%- endfor -%}
+              {%- for allocation in line.discount_allocations -%}{%- if allocation.discount_application.target_selection != 'all' -%}
+              <div style="font:bold 11px/16px {{ mono }};text-transform:uppercase;color:#d42a20;padding-top:2px;">&#8627; {{ allocation.discount_application.title }} (&minus;{{ allocation.amount | money }})</div>
+              {%- endif -%}{%- endfor -%}
+            </td>
+            <td class="ppr" align="right" valign="top" style="padding:22px 20px 12px 0;font:bold 15px/19px {{ mono }};color:#0a0a0a;white-space:nowrap;">
+              {%- if line.original_line_price != line.final_line_price %}<span style="font-weight:normal;font-size:12px;color:#555555;text-decoration:line-through;">{{ line.original_line_price | money }}</span><br>{% endif -%}
+              {%- if line.final_line_price > 0 %}{{ line.final_line_price | money }}{% else %}FREE{% endif -%}
+            </td>
+          </tr></table>
+          {%- endfor %}
+
+          <!-- totals -->
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td class="ppx" style="padding:10px 20px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px dashed #0a0a0a;font:bold 12px/16px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#1a1a1a;">
+                <tr><td style="padding:10px 8px 5px 0;white-space:nowrap;">Subtotal</td><td width="100%" valign="bottom" style="padding:0 0 9px;"><div style="border-bottom:2px dotted #9a9a9a;height:1px;line-height:1px;font-size:1px;">&nbsp;</div></td><td align="right" style="padding:10px 0 5px 8px;white-space:nowrap;">{{ subtotal_price | money }}</td></tr>
+                {%- for discount_application in discount_applications -%}{%- if discount_application.target_selection == 'all' and discount_application.target_type == 'line_item' %}
+                <tr><td style="padding:5px 8px 5px 0;white-space:nowrap;color:#d42a20;">Discount{% if discount_application.title != blank %} <span style="font-weight:normal;">({{ discount_application.title }})</span>{% endif %}</td><td valign="bottom" style="padding:0 0 9px;"><div style="border-bottom:2px dotted #9a9a9a;height:1px;line-height:1px;font-size:1px;">&nbsp;</div></td><td align="right" style="padding:5px 0 5px 8px;white-space:nowrap;color:#d42a20;">&minus;{{ discount_application.total_allocated_amount | money }}</td></tr>
+                {%- endif -%}{%- endfor %}
+                {%- if requires_shipping %}
+                <tr><td style="padding:5px 8px 5px 0;white-space:nowrap;">Shipping</td><td valign="bottom" style="padding:0 0 9px;"><div style="border-bottom:2px dotted #9a9a9a;height:1px;line-height:1px;font-size:1px;">&nbsp;</div></td><td align="right" style="padding:5px 0 5px 8px;white-space:nowrap;">{% if shipping_price > 0 %}{{ shipping_price | money }}{% else %}Free{% endif %}</td></tr>
+                {%- endif %}
+                {%- if tax_price > 0 %}
+                <tr><td style="padding:5px 8px 5px 0;white-space:nowrap;">Taxes</td><td valign="bottom" style="padding:0 0 9px;"><div style="border-bottom:2px dotted #9a9a9a;height:1px;line-height:1px;font-size:1px;">&nbsp;</div></td><td align="right" style="padding:5px 0 5px 8px;white-space:nowrap;">{{ tax_price | money }}</td></tr>
+                {%- endif %}
+              </table>
+            </td></tr>
+            <tr><td class="ppx" style="padding:10px 20px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:4px double #0a0a0a;border-bottom:4px double #0a0a0a;"><tr>
+                <td class="tot" style="padding:12px 0 9px;font:800 26px/28px {{ head }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;">Total</td>
+                <td class="tot" align="right" style="padding:12px 0 9px 8px;font:800 26px/28px {{ head }};letter-spacing:1px;color:#0a0a0a;white-space:nowrap;">{{ total_price | money_with_currency }}</td>
+              </tr></table>
+            </td></tr>
+
+            <!-- where it goes -->
+            <tr><td class="ppx" style="padding:20px 20px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+                <td class="col" width="55%" valign="top" style="padding:0 14px 0 0;font:13px/20px {{ mono }};color:#1a1a1a;">
+                  {%- if shipping_address %}
+                  <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;letter-spacing:2px;color:#555555;padding-bottom:4px;">&#9656; Extraction point</div>
+                  <b style="text-transform:uppercase;">{{ shipping_address.name }}</b><br>{{ shipping_address.address1 }}{% if shipping_address.address2 != blank %}<br>{{ shipping_address.address2 }}{% endif %}<br>{{ shipping_address.city }}{% if shipping_address.province_code != blank %} {{ shipping_address.province_code }}{% endif %} {{ shipping_address.zip }}<br>{{ shipping_address.country }}
+                  {%- elsif shipping_method %}
+                  <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;letter-spacing:2px;color:#555555;padding-bottom:4px;">&#9656; Collection point</div>
+                  <b style="text-transform:uppercase;">{{ shipping_method.title }}</b>
+                  {%- endif %}
+                </td>
+                <td class="col colgap" width="45%" valign="top" style="padding:0;font:13px/20px {{ mono }};color:#1a1a1a;">
+                  {%- if shipping_method and shipping_address %}
+                  <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;letter-spacing:2px;color:#555555;padding-bottom:4px;">&#9656; Route</div>
+                  {{ shipping_method.title }}<br><br>
+                  {%- endif %}
+                  {%- if billing_address %}
+                  <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;letter-spacing:2px;color:#555555;padding-bottom:4px;">&#9656; Billing</div>
+                  {% if billing_address.name != blank %}{{ billing_address.name }}<br>{% endif %}{{ billing_address.city }}{% if billing_address.province_code != blank %} {{ billing_address.province_code }}{% endif %}, {{ billing_address.country }}
+                  {%- endif %}
+                </td>
+              </tr></table>
+            </td></tr>
+            <tr><td class="ppx" align="center" style="padding:22px 20px 18px;font:bold 10px/14px {{ mono }};letter-spacing:2px;color:#555555;">*** END OF MANIFEST *** {{ n_items }} {% if n_items == 1 %}EXHIBIT{% else %}EXHIBITS{% endif %} ***</td></tr>
+          </table>
+
+        </td>
+        <td class="spr" width="22" style="width:22px;min-width:22px;border-left:1px dashed #9a9a9a;background-image:url('__NIMG__/transmission-sprocket.png');background-repeat:repeat-y;background-size:22px 30px;background-position:0 4px;">&nbsp;</td>
+      </tr>
+      <tr><td colspan="3" style="padding:0;font-size:0;line-height:0;"><img src="__NIMG__/transmission-tear-bot.png" width="552" height="10" alt="- - - tear along perforation - - -" style="display:block;width:100%;height:auto;border:0;color:#8a8a8a;font:8px/10px {{ mono }};letter-spacing:2px;text-align:center;"></td></tr>
+    </table>
+  </td></tr>
+
+  {%- if got_issue %}
+  <!-- the one-time pad: VISION10, only for orders with The Vision Issue -->
+  {%- assign pad = onum | modulo: 99991 -%}
+  <tr><td class="px" style="padding:34px 30px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px dashed #e6e6e6;">
+      <tr><td style="padding:14px 16px 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="font-family:{{ mono }};{{ lbl }}color:#f0f0f0;">One-time pad</td>
+          <td align="right" style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;">Use once</td>
+        </tr></table>
+      </td></tr>
+      <tr><td aria-hidden="true" align="center" style="padding:12px 16px 0;font:13px/21px {{ mono }};letter-spacing:3px;color:#5e5e5e;">
+        {%- for i in (1..10) -%}{%- assign pad = pad | times: 7 | plus: 3301 | modulo: 99991 -%}{%- assign grp = pad | plus: 100000 | append: '' -%}{{ grp | slice: 1, 5 }} {% endfor -%}
+      </td></tr>
+      <tr><td class="code" align="center" style="padding:10px 16px 2px;font:800 50px/52px {{ head }};letter-spacing:6px;color:#f6f6f6;">VISION10</td></tr>
+      <tr><td align="center" style="padding:2px 16px 4px;font:14px/21px {{ mono }};color:#cfcfcf;">10% off your next order &middot; one use</td></tr>
+      <tr><td align="center" style="padding:2px 16px 16px;font-family:{{ mono }};{{ lbl }}letter-spacing:2px;color:#8a8a8a;">Thank you for reading The Vision Issue</td></tr>
+    </table>
+  </td></tr>
+  {%- endif %}
+
+  <!-- authentication -->
+  <tr><td class="px" style="padding:36px 30px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font-family:{{ mono }};{{ lbl }}color:#8a8a8a;padding:0 0 12px;border-bottom:1px solid #333333;">Authentication</td>
+    </tr></table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;"><tr>
+      <td class="wheelcell" width="124" valign="middle" style="width:124px;padding:0 20px 0 0;"><img class="wheel" src="__NIMG__/transmission-wheel.png" width="124" height="124" alt="Bureau cipher wheel" style="display:block;width:124px;height:124px;border:0;color:#6a6a6a;font:9px/12px {{ mono }};"></td>
+      <td valign="middle" style="font:13px/18px {{ mono }};color:#cfcfcf;">
+        <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;color:#8a8a8a;">Auth code</div>
+        <div style="font:bold 19px/24px {{ mono }};letter-spacing:3px;color:#f6f6f6;padding:1px 0 9px;">{{ auth_code }}</div>
+        <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;color:#8a8a8a;">Cipher</div>
+        <div style="padding:1px 0 9px;text-transform:uppercase;letter-spacing:1px;">MC-7 &middot; rotor shift 07</div>
+        <div style="font-family:{{ mono }};{{ lbl }}font-size:9px;color:#8a8a8a;">Signature</div>
+        <div style="padding:1px 0 0;text-transform:uppercase;letter-spacing:1px;color:#f6f6f6;"><b>&#10003; Verified</b> &middot; Requisitions Desk</div>
+      </td>
+    </tr></table>
+    <div style="font:12px/18px {{ mono }};color:#7a7a7a;padding:14px 0 0;">The cipher is ceremonial. Your order is real.</div>
+  </td></tr>
+
+  <!-- end of transmission -->
+  <tr><td style="padding:38px 0 0;font-size:0;line-height:0;"><img src="__NIMG__/transmission-tape.png" width="600" height="46" alt="Punched teleprinter tape" style="display:block;width:100%;max-width:600px;height:auto;border:0;color:#6a6a6a;font:9px/12px {{ mono }};text-align:center;"></td></tr>
+  <tr><td class="px" align="center" style="padding:24px 30px 34px;">
+    <div style="font:bold 11px/14px {{ mono }};letter-spacing:8px;color:#6a6a6a;">NNNN</div>
+    <div class="eot" style="font:800 38px/40px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#f6f6f6;padding:10px 0 12px;">End of transmission</div>
+    <div style="font:14px/22px {{ mono }};color:#bdbdbd;">This message will not self-destruct.<br>Keep it for your records.</div>
+  </td></tr>
+
+  <!-- footer -->
+  <tr><td class="px" bgcolor="#080808" style="background:#080808;padding:28px 30px 32px;border-top:1px solid #262626;" align="center">
+    <div style="font:14px/22px {{ mono }};color:#cfcfcf;padding-bottom:16px;">Questions? Reply to this email or write to <a href="mailto:{{ shop.email }}" style="color:#f0f0f0;text-decoration:underline;word-break:break-all;">{{ shop.email }}</a></div>
+    <div style="font:bold 12px/20px {{ mono }};letter-spacing:3px;text-transform:uppercase;padding-bottom:16px;">
+      <a href="https://www.instagram.com/monochrome.ca/" target="_blank" style="color:#f0f0f0;text-decoration:none;">Instagram</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="https://www.tiktok.com/@monochrome.ca" target="_blank" style="color:#f0f0f0;text-decoration:none;">TikTok</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="{{ shop.url }}" target="_blank" style="color:#f0f0f0;text-decoration:none;">monochrome.com.ng</a>
+    </div>
+    <div style="font:12px/19px {{ mono }};color:#8a8a8a;">MONOCHROME&reg; &middot; Regina, Canada<br>The Monochrome Bureau is a work of fiction. MONOCHROME&reg; is a clothing brand.</div>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

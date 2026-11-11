@@ -1,0 +1,14 @@
+<section class="spread paper ct-open" aria-labelledby="artH">
+  <div class="wrap">
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-110</span><span>{{ article.published_at | date: '%b %d, %Y' }}</span>{% if article.author != blank %}<span>{{ article.author | escape }}</span>{% endif %}</p>
+      <h1 class="h1 pg-h" id="artH">{{ article.title | escape }}</h1>
+    </header>
+    {%- if article.image -%}<figure class="art-fig">{% render 'mc-img', image: article.image, alt: article.image.alt, class: 'art-img', sizes: '(min-width:1000px) 960px, 100vw', widths: '480,720,960,1400' %}</figure>{%- endif -%}
+    <div class="pg-body rte">{{ article.content }}</div>
+    <p><a class="link-line mono" href="{{ blog.url }}">All dispatches</a></p>
+  </div>
+</section>
+{% schema %}
+{ "name": "Dispatch (article)", "settings": [] }
+{% endschema %}

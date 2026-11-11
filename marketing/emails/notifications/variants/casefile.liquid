@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>Requisition {{ order_name }} approved</title>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+  a { text-decoration: none; }
+  @media only screen and (max-width: 620px) {
+    .wrap { width: 100% !important; }
+    .desk { padding-left: 6px !important; padding-right: 6px !important; }
+    .fold { padding-left: 5px !important; padding-right: 5px !important; padding-bottom: 5px !important; }
+    .sheet { padding: 20px 16px 26px !important; }
+    .hide-m { display: none !important; }
+    .col { display: block !important; width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .stampcell { padding: 14px 0 0 !important; text-align: left !important; }
+    .h1 { font-size: 46px !important; line-height: 42px !important; }
+    .kick { font-size: 16px !important; }
+    .fh { padding: 7px 8px !important; letter-spacing: 1px !important; }
+    .pic { width: 64px !important; }
+    .pic img.ph { width: 56px !important; height: 56px !important; }
+    .t-name { font-size: 18px !important; line-height: 19px !important; }
+    .tot { font-size: 26px !important; }
+    .code { font-size: 38px !important; letter-spacing: 5px !important; }
+    .step { font-size: 10px !important; letter-spacing: 0 !important; }
+    .tab { font-size: 14px !important; padding: 9px 12px 7px !important; }
+    .seal img { width: 84px !important; height: 84px !important; }
+    .links { letter-spacing: 1px !important; font-size: 11px !important; }
+    .foot { padding-left: 16px !important; padding-right: 16px !important; }
+    .price { font-size: 17px !important; }
+  }
+  @media only screen and (max-width: 360px) {
+    .sheet { padding: 18px 12px 24px !important; }
+    .h1 { font-size: 39px !important; line-height: 36px !important; }
+    .kick { font-size: 14px !important; }
+    .chip { letter-spacing: 1px !important; }
+    .pic { width: 54px !important; padding-right: 10px !important; }
+    .pic img.ph { width: 44px !important; height: 44px !important; }
+    .t-name { font-size: 15px !important; line-height: 17px !important; letter-spacing: 0 !important; }
+    .price { font-size: 15px !important; padding-left: 6px !important; letter-spacing: 0 !important; }
+    .btn-a { font-size: 18px !important; padding: 15px 12px 16px !important; letter-spacing: 1px !important; }
+    .sh { letter-spacing: 1px !important; }
+    .tot { font-size: 22px !important; }
+    .memo-l { width: 64px !important; }
+  }
+</style>
+</head>
+{%- comment -%}
+  MONOCHROME order confirmation: THE CASE FILE. The order arrives as Form MB-7, a requisition pulled from a Monochrome Bureau
+  folder and stamped APPROVED. Settings → Notifications → Order confirmation → Edit code: replace everything with this file
+  ("Revert to default" brings Shopify's own back). Images: notifications/img/casefile-*.png|gif, rendered by casefile-images.mjs.
+  Every piece of order data is live text; the images are props. The VISION10 enclosure shows only when the order contains
+  The Vision Issue (product 15418664059134).
+{%- endcomment -%}
+{%- assign mono = "'Courier Prime','Courier New',Courier,monospace" -%}
+{%- assign type = "'Special Elite','Courier New',Courier,monospace" -%}
+{%- assign head = "'Big Shoulders Display',Impact,'HelveticaNeue-CondensedBlack','Arial Narrow Bold',sans-serif-condensed,'Arial Black',Arial,sans-serif" -%}
+{%- assign got_issue = false -%}
+{%- assign n_items = 0 -%}
+{%- for line in line_items -%}{%- if line.product_id == 15418664059134 -%}{%- assign got_issue = true -%}{%- endif -%}{%- endfor -%}
+{%- for line in subtotal_line_items -%}{%- assign n_items = n_items | plus: line.quantity -%}{%- endfor -%}
+{%- if customer.first_name != blank -%}{%- assign agent = 'Agent ' | append: customer.first_name -%}{%- else -%}{%- assign agent = 'Agent' -%}{%- endif -%}
+{%- assign filed = created_at | date: "%d %b %Y" -%}
+{%- assign filed_at = created_at | date: "%H:%M" -%}
+<body style="margin:0;padding:0;background:#070707;">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Requisition {{ order_name }} approved: your order is confirmed. Total {{ total_price | money_with_currency }}.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#070707" style="background:#070707;">
+<tr><td align="center" style="padding:0;">
+<table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
+
+  <!-- classification banner -->
+  <tr><td class="desk" style="padding:12px 14px 11px;border-bottom:1px solid #222222;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td style="font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#bdbdbd;"><span style="color:#ff3b30;">&#9679;</span>&nbsp; Eyes only // Monochrome Bureau</td>
+      <td class="hide-m" align="right" style="font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#7a7a7a;">Personal &amp; confidential</td>
+    </tr></table>
+  </td></tr>
+
+  <!-- wordmark -->
+  <tr><td align="center" style="padding:22px 20px 20px;">
+    <a href="{{ shop.url }}" target="_blank"><img src="__NIMG__/casefile-wordmark.png" width="220" height="28" alt="MONOCHROME" style="display:block;width:220px;height:auto;border:0;outline:none;color:#ececec;font:bold 20px {{ head }};letter-spacing:4px;"></a>
+  </td></tr>
+
+  <!-- the folder: tab with the file number -->
+  <tr><td class="desk" style="padding:0 14px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>
+      <td class="tab" bgcolor="#c3c3c3" style="background:#c3c3c3;border-radius:7px 7px 0 0;padding:10px 18px 7px;font:bold 16px/18px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#0a0a0a;white-space:nowrap;">File {{ order_name }}</td>
+      <td width="100%" valign="bottom" align="right" style="padding:0 2px 7px 12px;font:bold 10px/13px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#6f6f6f;">Form MB-7</td>
+    </tr></table>
+  </td></tr>
+  <tr><td class="desk" style="padding:0 14px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#c3c3c3" style="background:#c3c3c3;">
+      <!-- folder lip: a paper clip holds the sheet; a typed label names the agent -->
+      <tr><td class="fold" style="padding:0 9px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td valign="bottom" style="padding:0 0 0 30px;line-height:0;font-size:0;"><img src="__NIMG__/casefile-clip.png" width="28" height="50" alt="" style="display:block;width:28px;height:50px;border:0;"></td>
+          <td width="100%" align="right" valign="middle" style="padding:6px 0 6px 10px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#f2f2f0" style="background:#f2f2f0;border:1px solid #9a9a9a;padding:4px 10px 3px;font:13px/16px {{ type }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;">{{ agent }}</td></tr></table>
+          </td>
+        </tr></table>
+      </td></tr>
+      <tr><td class="fold" style="padding:0 9px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="22" style="font-size:0;line-height:0;">&nbsp;</td><td height="5" bgcolor="#d4d4d2" style="height:5px;background:#d4d4d2;border-radius:3px 3px 0 0;font-size:0;line-height:0;">&nbsp;</td><td width="6" style="font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
+      <tr><td class="fold" style="padding:0 9px 9px;">
+
+  <!-- ======================= THE SHEET ======================= -->
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#e8e8e8" style="background-color:#e8e8e8;background-image:url(__NIMG__/casefile-grain.png);box-shadow:0 2px 3px rgba(0,0,0,.28);">
+  <tr><td class="sheet" style="padding:26px 28px 30px;">
+
+    <!-- file header, as on the site -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#dddddd" style="background:#dddddd;border:2px solid #0a0a0a;">
+      <tr>
+        <td class="fh" valign="top" style="padding:8px 12px 8px 10px;border-right:1px solid #0a0a0a;font:bold 12px/15px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;white-space:nowrap;"><span style="font-size:9px;letter-spacing:2px;color:#4a4a4a;">File no.</span><br>{{ order_name }}</td>
+        <td class="fh" valign="top" style="padding:8px 12px 8px 10px;border-right:1px solid #0a0a0a;font:bold 12px/15px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;white-space:nowrap;"><span style="font-size:9px;letter-spacing:2px;color:#4a4a4a;">Document</span><br>Requisition</td>
+        <td class="fh hide-m" valign="top" style="padding:8px 12px 8px 10px;border-right:1px solid #0a0a0a;font:bold 12px/15px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;white-space:nowrap;"><span style="font-size:9px;letter-spacing:2px;color:#4a4a4a;">Page</span><br>1 of 1</td>
+        <td class="fh" valign="top" style="padding:8px 12px 8px 10px;font:bold 12px/15px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;white-space:nowrap;"><span style="font-size:9px;letter-spacing:2px;color:#4a4a4a;">Clearance</span><br><img src="__NIMG__/casefile-ladder.png" width="38" height="14" alt="" style="display:inline-block;width:38px;height:14px;border:0;vertical-align:-1px;">&nbsp;L5</td>
+        <td class="hide-m" width="100%" align="right" valign="middle" style="padding:2px 6px 0 4px;line-height:0;font-size:0;"><img src="__NIMG__/casefile-barcode.png" width="118" height="42" alt="" style="display:inline-block;width:118px;height:42px;border:0;"></td>
+      </tr>
+    </table>
+
+    <!-- memo lines + the stamp -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td class="col" width="270" valign="middle" style="padding:22px 0 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font:15px/22px {{ type }};color:#0a0a0a;text-transform:uppercase;">
+          <tr><td class="memo-l" width="78" valign="top" style="padding:2px 0;font:bold 11px/22px {{ mono }};letter-spacing:2px;color:#4a4a4a;">To:</td><td style="padding:2px 0;">{{ agent }} <span style="color:#4a4a4a;">(that is you)</span></td></tr>
+          <tr><td valign="top" style="padding:2px 0;font:bold 11px/22px {{ mono }};letter-spacing:2px;color:#4a4a4a;">From:</td><td style="padding:2px 0;">Requisitions desk</td></tr>
+          <tr><td valign="top" style="padding:2px 0;font:bold 11px/22px {{ mono }};letter-spacing:2px;color:#4a4a4a;">Filed:</td><td style="padding:2px 0;">{{ filed }}, {{ filed_at }}</td></tr>
+          <tr><td valign="top" style="padding:2px 0;font:bold 11px/22px {{ mono }};letter-spacing:2px;color:#4a4a4a;">Status:</td><td style="padding:2px 0;"><span style="color:#6a6a6a;text-decoration:line-through;">Pending</span> Approved</td></tr>
+          <tr><td valign="top" style="padding:2px 0;font:bold 11px/22px {{ mono }};letter-spacing:2px;color:#4a4a4a;">Motive:</td><td style="padding:2px 0;"><span style="background:#0a0a0a;color:#0a0a0a;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><br><span style="font:bold 11px/16px {{ mono }};letter-spacing:1px;color:#4a4a4a;">&#8627; Declassified:<br>&nbsp;&nbsp;excellent taste.</span></td></tr>
+        </table>
+      </td>
+      <td class="col stampcell" valign="middle" align="right" style="padding:16px 0 0 8px;">
+        <!--[if mso]><img src="__NIMG__/casefile-stamp.png" width="240" height="140" alt="APPROVED" style="display:block;border:0;"><![endif]-->
+        <!--[if !mso]><!--><img src="__NIMG__/casefile-stamp.gif" width="240" height="140" alt="APPROVED" style="display:inline-block;width:240px;max-width:100%;height:auto;border:0;outline:none;color:#e0281c;font:bold 28px/140px {{ mono }};letter-spacing:6px;text-align:center;"><!--<![endif]-->
+      </td>
+    </tr></table>
+
+    <!-- headline -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td class="kick" style="padding:20px 0 4px;font:19px/24px {{ type }};text-transform:uppercase;color:#0a0a0a;">Requisition {{ order_name }}:</td></tr>
+      <tr><td class="h1" style="padding:0;font:900 66px/60px {{ head }};letter-spacing:0;text-transform:uppercase;color:#0a0a0a;">Order<br>confirmed.</td></tr>
+      <tr><td style="padding:18px 0 0;font:15px/24px {{ mono }};color:#1a1a1a;">
+        Thank you for your order. It's in, it's approved, and the Requisitions Desk is getting your exhibits ready. {% if shipping_address %}We'll email you the moment it ships.{% else %}We'll email you when it's ready to collect.{% endif %}
+      </td></tr>
+    </table>
+
+    <!-- the button: black, with the site's hazard edge -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;">
+      <tr><td height="7" bgcolor="#0a0a0a" style="height:7px;line-height:7px;font-size:0;background-color:#0a0a0a;background-image:repeating-linear-gradient(-45deg,#0a0a0a 0 5px,#e8e8e8 5px 10px);">&nbsp;</td></tr>
+      <tr><td align="center" bgcolor="#0a0a0a" style="background:#0a0a0a;">
+        <a class="btn-a" href="{{ order_status_url }}" target="_blank" style="display:block;padding:17px 20px 18px;font:900 22px/26px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#f6f6f6;text-decoration:none;">View your order&nbsp;&nbsp;&#8599;</a>
+      </td></tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td align="center" style="padding:9px 0 0;font:bold 11px/16px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#4a4a4a;">Your order status page, kept up to date as it moves</td></tr>
+    </table>
+
+    <!-- chain of custody -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;">
+      <tr>
+        <td class="sh" style="padding:0 0 10px;font:bold 11px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#0a0a0a;"><span style="display:inline-block;width:18px;height:7px;background:#0a0a0a;vertical-align:1px;"></span>&nbsp; Chain of custody</td>
+        <td class="sh" align="right" style="padding:0 0 10px;font:bold 11px/14px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;">Step 1 of 4</td>
+      </tr>
+    </table>
+    {%- if shipping_address -%}{%- assign s2 = 'Packed' -%}{%- assign s3 = 'In transit' -%}{%- assign s4 = 'Delivered' -%}{%- else -%}{%- assign s2 = 'Packed' -%}{%- assign s3 = 'Ready' -%}{%- assign s4 = 'Collected' -%}{%- endif %}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid #0a0a0a;border-bottom:2px solid #0a0a0a;">
+      <tr>
+        <td width="25%" valign="top" style="padding:12px 4px 12px 0;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="18" height="18" bgcolor="#f6f6f6" style="width:18px;height:18px;background:#f6f6f6;border:2px solid #0a0a0a;line-height:0;font-size:0;"><img src="__NIMG__/casefile-tick.png" width="22" height="22" alt="&#10003;" style="display:block;width:22px;height:22px;margin:-6px 0 0 1px;border:0;color:#e0281c;font:bold 16px/18px Arial,sans-serif;"></td></tr></table>
+          <div class="step" style="padding:8px 0 0;font:bold 11px/14px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;">Received</div>
+          <div class="step" style="font:10px/14px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#4a4a4a;">{{ filed }}</div>
+        </td>
+        {%- assign steps = s2 | append: '|' | append: s3 | append: '|' | append: s4 | split: '|' -%}
+        {%- for s in steps %}
+        <td width="25%" valign="top" style="padding:12px 4px 12px 8px;border-left:1px dashed #8a8a8a;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="18" height="18" style="width:18px;height:18px;border:2px solid #6a6a6a;line-height:0;font-size:0;">&nbsp;</td></tr></table>
+          <div class="step" style="padding:8px 0 0;font:bold 11px/14px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#6a6a6a;">{{ s }}</div>
+        </td>
+        {%- endfor %}
+      </tr>
+    </table>
+
+
+    <!-- §1 exhibits -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:32px;">
+      <tr>
+        <td class="sh" style="padding:0 0 9px;font:bold 11px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#0a0a0a;"><span style="display:inline-block;width:18px;height:7px;background:#0a0a0a;vertical-align:1px;"></span>&nbsp; &sect;1 &mdash; Exhibits</td>
+        <td class="sh" align="right" style="padding:0 0 9px;font:bold 11px/14px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;">{{ n_items }} item{% if n_items != 1 %}s{% endif %}</td>
+      </tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid #0a0a0a;">
+    {%- for line in subtotal_line_items %}
+      <tr>
+        <td class="pic" width="86" valign="top" style="padding:12px 14px 16px 0;{% unless forloop.last %}border-bottom:1px dashed #8a8a8a;{% endunless %}">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:0 0 0 8px;line-height:0;font-size:0;"><img src="__NIMG__/casefile-clip.png" width="20" height="36" alt="" style="display:block;width:20px;height:36px;border:0;"></td></tr>
+            <tr><td bgcolor="#f6f6f6" style="background:#f6f6f6;border:1px solid #9a9a9a;padding:4px;line-height:0;font-size:0;">
+              {%- if line.image -%}
+              <img class="ph" src="{{ line | img_url: 'compact_cropped' }}" width="70" height="70" alt="{{ line.product.title | default: line.title | escape }}" style="display:block;width:70px;height:70px;border:0;background:#d6d6d6;filter:grayscale(100%) contrast(1.08);color:#4a4a4a;font:10px/14px {{ mono }};">
+              {%- else -%}
+              <table role="presentation" class="ph" width="70" height="70" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" valign="middle" bgcolor="#dcdcdc" style="width:70px;height:70px;background:#dcdcdc;font:bold 9px/12px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#4a4a4a;">No photo<br>on file</td></tr></table>
+              {%- endif -%}
+            </td></tr>
+          </table>
+        </td>
+        <td valign="top" style="padding:16px 0 16px;{% unless forloop.last %}border-bottom:1px dashed #8a8a8a;{% endunless %}">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td class="chip" bgcolor="#0a0a0a" style="background:#0a0a0a;padding:3px 8px 2px 6px;font:bold 10px/13px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#f6f6f6;white-space:nowrap;"><span style="color:#e8e8e8;">&#9679;</span> Exhibit {% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</td></tr></table>
+          <div class="t-name" style="padding:8px 0 4px;overflow-wrap:anywhere;word-break:break-word;font:800 21px/21px {{ head }};letter-spacing:.5px;text-transform:uppercase;color:#0a0a0a;">{{ line.product.title | default: line.title }}</div>
+          <div style="font:bold 11px/17px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#4a4a4a;">
+            {%- if line.variant.title != 'Default Title' and line.variant.title != blank %}{{ line.variant.title }} &middot; {% endif -%}
+            Qty {{ line.quantity }}
+            {%- if line.sku != blank %} &middot; Ref {{ line.sku }}{% endif -%}
+          </div>
+          {%- for p in line.properties -%}{%- assign c0 = p.first | slice: 0 -%}{%- unless p.last == blank or c0 == '_' -%}
+          <div style="font:12px/17px {{ type }};text-transform:uppercase;color:#1a1a1a;">{{ p.first }}: {{ p.last }}</div>
+          {%- endunless -%}{%- endfor -%}
+          {%- for allocation in line.discount_allocations -%}{%- if allocation.discount_application.target_selection != 'all' -%}
+          <div style="padding-top:3px;font:bold 11px/16px {{ mono }};letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;">&#8627; {{ allocation.discount_application.title }} <span style="white-space:nowrap;">(&minus;{{ allocation.amount | money }})</span></div>
+          {%- endif -%}{%- endfor %}
+        </td>
+        <td class="price" align="right" valign="top" style="padding:36px 0 16px 10px;{% unless forloop.last %}border-bottom:1px dashed #8a8a8a;{% endunless %}font:800 19px/22px {{ head }};letter-spacing:1px;color:#0a0a0a;white-space:nowrap;">
+          {%- if line.original_line_price != line.final_line_price %}<span style="font:12px/16px {{ mono }};color:#6a6a6a;text-decoration:line-through;">{{ line.original_line_price | money }}</span><br>{% endif -%}
+          {%- if line.final_line_price > 0 %}{{ line.final_line_price | money }}{% else %}FREE{% endif -%}
+        </td>
+      </tr>
+    {%- endfor %}
+    </table>
+
+    <!-- §2 totals -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;">
+      <tr><td class="sh" style="padding:0 0 9px;font:bold 11px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#0a0a0a;"><span style="display:inline-block;width:18px;height:7px;background:#0a0a0a;vertical-align:1px;"></span>&nbsp; &sect;2 &mdash; Valuation</td></tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid #0a0a0a;font:bold 13px/18px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#1a1a1a;">
+      <tr><td style="padding:12px 0 5px;white-space:nowrap;">Subtotal</td><td width="100%" valign="bottom" style="padding:0 8px 9px;"><div style="border-bottom:2px dotted #9a9a9a;line-height:0;font-size:0;">&nbsp;</div></td><td align="right" style="padding:12px 0 5px;white-space:nowrap;">{{ subtotal_price | money }}</td></tr>
+      {%- for discount_application in discount_applications -%}{%- if discount_application.target_selection == 'all' and discount_application.target_type == 'line_item' %}
+      <tr><td style="padding:5px 0;white-space:nowrap;">Discount</td><td width="100%" valign="bottom" style="padding:0 8px 9px;"><div style="border-bottom:2px dotted #9a9a9a;line-height:0;font-size:0;">&nbsp;</div></td><td align="right" style="padding:5px 0;white-space:nowrap;">&minus;{{ discount_application.total_allocated_amount | money }}</td></tr>
+      {%- if discount_application.title != blank %}<tr><td colspan="3" style="padding:0 0 4px;font:11px/15px {{ mono }};letter-spacing:1px;color:#4a4a4a;">&#8627; {{ discount_application.title }}</td></tr>{% endif %}
+      {%- endif -%}{%- endfor %}
+      {%- if requires_shipping %}
+      <tr><td style="padding:5px 0;white-space:nowrap;">{% if shipping_address %}Shipping{% else %}Pickup{% endif %}</td><td width="100%" valign="bottom" style="padding:0 8px 9px;"><div style="border-bottom:2px dotted #9a9a9a;line-height:0;font-size:0;">&nbsp;</div></td><td align="right" style="padding:5px 0;white-space:nowrap;">{% if shipping_price > 0 %}{{ shipping_price | money }}{% else %}Free{% endif %}</td></tr>
+      {%- endif %}
+      {%- if tax_price > 0 %}
+      <tr><td style="padding:5px 0;white-space:nowrap;">Taxes</td><td width="100%" valign="bottom" style="padding:0 8px 9px;"><div style="border-bottom:2px dotted #9a9a9a;line-height:0;font-size:0;">&nbsp;</div></td><td align="right" style="padding:5px 0;white-space:nowrap;">{{ tax_price | money }}</td></tr>
+      {%- endif %}
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;border-top:4px solid #0a0a0a;border-bottom:1px solid #0a0a0a;">
+      <tr>
+        <td valign="bottom" style="padding:12px 0 12px;font:900 24px/26px {{ head }};letter-spacing:2px;text-transform:uppercase;color:#0a0a0a;">Total</td>
+        <td class="tot" align="right" valign="bottom" style="padding:12px 0 12px;font:900 32px/32px {{ head }};letter-spacing:1px;color:#0a0a0a;white-space:nowrap;">{{ total_price | money_with_currency }}</td>
+      </tr>
+    </table>
+
+    <!-- §3 where it goes -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:30px;">
+      <tr><td class="sh" style="padding:0 0 9px;font:bold 11px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#0a0a0a;"><span style="display:inline-block;width:18px;height:7px;background:#0a0a0a;vertical-align:1px;"></span>&nbsp; &sect;3 &mdash; {% if shipping_address %}Extraction point{% else %}Rendezvous{% endif %}</td></tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td class="col" width="56%" valign="top" style="padding:0 14px 0 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f2f2f0" style="background:#f2f2f0;border:2px solid #0a0a0a;">
+          <tr><td bgcolor="#0a0a0a" style="background:#0a0a0a;padding:6px 12px 5px;font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#f6f6f6;">{% if shipping_address %}Shipping to{% else %}Collecting from{% endif %}</td></tr>
+          <tr><td style="padding:12px 12px 14px;font:15px/22px {{ type }};text-transform:uppercase;color:#0a0a0a;">
+            {%- if shipping_address -%}
+            {{ shipping_address.name }}<br>{{ shipping_address.address1 }}{% if shipping_address.address2 != blank %}<br>{{ shipping_address.address2 }}{% endif %}<br>{{ shipping_address.city }}{% if shipping_address.province_code != blank %} {{ shipping_address.province_code }}{% endif %} {{ shipping_address.zip }}<br>{{ shipping_address.country }}
+            {%- else -%}
+            {{ shipping_method.title | default: 'Local pickup' }}<br><span style="font:12px/18px {{ mono }};text-transform:none;color:#4a4a4a;">We'll email you when it's ready to collect.</span>
+            {%- endif -%}
+          </td></tr>
+          <tr><td align="right" style="padding:0 6px 6px;line-height:0;font-size:0;"><img src="__NIMG__/casefile-barcode.png" width="100" height="36" alt="" style="display:inline-block;width:100px;height:36px;border:0;"></td></tr>
+        </table>
+      </td>
+      <td class="col" valign="top" style="padding:0;font:13px/19px {{ mono }};color:#1a1a1a;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          {%- if shipping_method and shipping_address %}
+          <tr><td style="padding:12px 0 2px;font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#4a4a4a;">Route</td></tr>
+          <tr><td style="padding:0 0 8px;font:13px/19px {{ mono }};color:#0a0a0a;">{{ shipping_method.title }}</td></tr>
+          {%- endif %}
+          {%- if billing_address %}
+          <tr><td style="padding:12px 0 2px;font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#4a4a4a;">Billing</td></tr>
+          <tr><td style="padding:0 0 8px;font:13px/19px {{ mono }};color:#0a0a0a;">{% if billing_address.name != blank %}{{ billing_address.name }}<br>{% endif %}{{ billing_address.city }}{% if billing_address.province_code != blank %} {{ billing_address.province_code }}{% endif %}, {{ billing_address.country }}</td></tr>
+          {%- endif %}
+          {%- if email != blank %}
+          <tr><td style="padding:12px 0 2px;font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#4a4a4a;">Dispatches to</td></tr>
+          <tr><td style="padding:0 0 8px;font:13px/19px {{ mono }};color:#0a0a0a;word-break:break-all;">{{ email }}</td></tr>
+          {%- endif %}
+        </table>
+      </td>
+    </tr></table>
+
+    {%- if got_issue %}
+    <!-- enclosure: the thank-you code, only with The Vision Issue -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:34px;">
+      <tr><td style="padding:0 0 8px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td width="50%" style="border-bottom:2px dashed #8a8a8a;font-size:0;line-height:0;">&nbsp;</td><td style="padding:0 10px;font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#4a4a4a;white-space:nowrap;">Cut here</td><td width="50%" style="border-bottom:2px dashed #8a8a8a;font-size:0;line-height:0;">&nbsp;</td></tr></table></td></tr>
+      <tr><td bgcolor="#0a0a0a" style="background:#0a0a0a;padding:8px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td align="center" style="border:1px dashed #8a8a8a;padding:16px 14px 16px;">
+            <div style="font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#a9a9a9;">Enclosure A &middot; clearance code</div>
+            <div class="code" style="padding:8px 0 6px;font:900 46px/48px {{ head }};letter-spacing:8px;color:#f6f6f6;">VISION10</div>
+            <div style="font:14px/20px {{ mono }};color:#dcdcdc;">10% off your next order <span style="white-space:nowrap;">&middot; one use</span></div>
+            <div style="padding-top:4px;font:12px/18px {{ type }};text-transform:uppercase;color:#a9a9a9;">Thank you for reading The Vision Issue</div>
+          </td>
+        </tr></table>
+      </td></tr>
+    </table>
+    {%- endif %}
+
+    <!-- signature block -->
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:34px;border-top:1px dashed #8a8a8a;">
+      <tr>
+        <td valign="bottom" style="padding:20px 0 0;">
+          <div style="font:15px/22px {{ type }};text-transform:uppercase;color:#0a0a0a;">Filed and approved,</div>
+          <img src="__NIMG__/casefile-sign.png" width="160" height="54" alt="" style="display:block;width:160px;max-width:100%;height:auto;border:0;margin:2px 0 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-top:1px solid #0a0a0a;padding-top:7px;font:bold 12px/18px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#0a0a0a;">Officer <span style="background:#0a0a0a;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td></tr></table>
+          <div style="font:11px/17px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;">Requisitions desk &middot; Monochrome Bureau</div>
+        </td>
+        <td class="seal" width="112" align="right" valign="bottom" style="padding:12px 0 0 8px;line-height:0;font-size:0;"><img src="__NIMG__/casefile-seal.png" width="104" height="104" alt="" style="display:inline-block;width:104px;height:104px;border:0;"></td>
+      </tr>
+      <tr><td colspan="2" style="padding:16px 0 0;font:bold 10px/15px {{ mono }};letter-spacing:2px;text-transform:uppercase;color:#4a4a4a;">cc: {{ agent }} &middot; Archives &middot; Not the shredder</td></tr>
+      <tr><td colspan="2" style="padding:16px 0 0;font:13px/20px {{ mono }};color:#1a1a1a;">P.S. Questions about your order? Reply to this email, or write to <a href="mailto:{{ shop.email }}" style="color:#0a0a0a;text-decoration:underline;">{{ shop.email }}</a>.</td></tr>
+    </table>
+
+  </td></tr>
+  </table>
+  <!-- ======================= /THE SHEET ======================= -->
+
+      </td></tr>
+    </table>
+  </td></tr>
+
+  <!-- DO NOT CROSS -->
+  <tr><td style="padding:22px 0 6px;line-height:0;font-size:0;"><img src="__NIMG__/casefile-tape.png" width="600" height="60" alt="Do not cross // Requisition approved // Eyes only" style="display:block;width:100%;max-width:600px;height:auto;border:0;color:#8a8a8a;font:bold 11px/16px {{ mono }};letter-spacing:3px;text-transform:uppercase;text-align:center;"></td></tr>
+
+  <!-- footer -->
+  <tr><td class="foot" align="center" style="padding:22px 24px 30px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td align="center" style="padding:0 0 18px;"><a href="{{ shop.url }}" target="_blank"><img src="__NIMG__/casefile-wordmark.png" width="150" height="19" alt="MONOCHROME" style="display:block;width:150px;height:auto;border:0;color:#ececec;font:bold 16px {{ head }};letter-spacing:3px;"></a></td></tr>
+      <tr><td align="center" style="padding:0 0 14px;font:13px/21px {{ mono }};color:#cfcfcf;">Questions? Write to <a href="mailto:{{ shop.email }}" style="color:#ececec;text-decoration:underline;">{{ shop.email }}</a></td></tr>
+      <tr><td class="links" align="center" style="padding:0 0 16px;font:bold 12px/20px {{ mono }};letter-spacing:3px;text-transform:uppercase;">
+        <a href="https://www.instagram.com/monochrome.ca/" target="_blank" style="color:#ececec;text-decoration:none;">Instagram</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="https://www.tiktok.com/@monochrome.ca" target="_blank" style="color:#ececec;text-decoration:none;">TikTok</a> &nbsp;<span style="color:#555555;">//</span>&nbsp; <a href="{{ shop.url }}" target="_blank" style="color:#ececec;text-decoration:none;">monochrome.com.ng</a>
+      </td></tr>
+      <tr><td align="center" style="font:12px/19px {{ mono }};color:#8a8a8a;">MONOCHROME&reg; &middot; Regina, Canada<br>The Monochrome Bureau is a work of fiction. MONOCHROME&reg; is a clothing brand.</td></tr>
+    </table>
+  </td></tr>
+  <tr><td align="center" style="padding:10px 14px 12px;border-top:1px solid #222222;font:bold 10px/14px {{ mono }};letter-spacing:3px;text-transform:uppercase;color:#6f6f6f;">End of file {{ order_name }}</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{%- comment -%}
+  Size line of a card/row. Params: product, cls (output of mc-class), range (true = short form for cards: "S–XXL", "6–12").
+  Output e.g. S M L XL (default) or S–XL (range; empty when the product has no size option).
+{%- endcomment -%}
+{%- liquid
+  assign out = ''
+  for opt in product.options_with_values
+    assign nm = opt.name | downcase
+    if nm contains 'size' and out == ''
+      if range and opt.values.size > 1
+        assign first = opt.values | first | upcase
+        assign last = opt.values | last | upcase
+        assign out = first | append: '–' | append: last
+      else
+        assign out = opt.values | slice: 0, 7 | join: ' ' | upcase
+      endif
+    endif
+  endfor
+  if out == '' and range
+    # cards: no size line when there is nothing to choose
+  elsif out == ''
+    if cls == 'gift'
+      assign out = 'Choose amount'
+    elsif cls == 'print'
+      assign out = 'Single issue'
+    else
+      assign out = 'One size'
+    endif
+  endif
+-%}
+{{- out -}}

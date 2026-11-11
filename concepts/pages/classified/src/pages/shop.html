@@ -1,0 +1,53 @@
+  <!-- ASSET REGISTER ----------------------------------------------------------- -->
+  <section class="spread paper reg" id="index" aria-labelledby="indexH">
+    <div class="wrap">
+      {{filehead}}
+      <header class="reg-head">
+        <div class="reg-title">
+          <p class="kick mono">Division of Wearables — Field equipment</p>
+          <h1 class="h1" id="indexH"><span class="tw caret" style="--n:14">Asset register</span></h1>
+          <p class="reg-sub">Every item of field equipment cleared for issue, indexed by file number. <span class="hint-fine">Hover a line for the surveillance photo, click to open the dossier.</span><span class="hint-touch">Tap a line for the photo, then open the dossier.</span> All prices are in Canadian dollars (CAD).</p>
+        </div>
+        <div class="reg-side mono" aria-hidden="true">
+          <p><b>Authorised by</b><span class="redact">Director of Wearables</span></p>
+          <p><b>Assets on file</b>{{total}}</p>
+          <span class="stamp ts" style="--r:-7deg">Top secret</span>
+        </div>
+      </header>
+
+      <div class="toolbar" role="group" aria-label="Filter and sort the register">
+        <div class="filters" id="filters">
+        {{filters}}
+        </div>
+        <div class="tb-r">
+          <label class="findwrap mono"><span class="sr-only">Search the register</span><input id="q" type="search" placeholder="Search the register" data-hints="{{search_hints}}" autocomplete="off" spellcheck="false" aria-controls="toc sheet"></label>
+          <label class="sortwrap mono"><span>Sort</span>
+            <select id="sort"><option value="featured">Featured</option><option value="new">Newest</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option></select>
+          </label>
+          <div class="views" role="group" aria-label="View as">
+            <button class="view" data-view="index" type="button" aria-pressed="false">Register</button>
+            <button class="view" data-view="sheet" type="button" aria-pressed="false">Photo<span class="v-x"> sheet</span></button>
+          </div>
+        </div>
+      </div>
+      <p class="count mono" id="count" role="status" aria-live="polite">{{total}} assets on file — {{in_stock}} in stock</p>
+      <div class="empty-state" id="empty" hidden>
+        <p class="mono">File not found.</p>
+        <p>No asset in this section matches. <button class="link-line mono" type="button" id="emptyReset">Show the whole register</button>.</p>
+      </div>
+
+      <ol class="toc" id="toc">
+{{shop_rows}}
+      </ol>
+      <div class="board sheet-wrap" id="sheetWrap">
+        <div class="sheet" id="sheet">
+{{shop_cards}}
+        </div>
+      </div>
+
+      <p class="reg-end"><a class="mono link-line" data-store="/collections/all" href="{{store_url}}/collections/all">View the complete store<span class="arr" aria-hidden="true"></span></a></p>
+    </div>
+  </section>
+
+  <!-- floating photo that follows the pointer over register lines (desktop) -->
+  <div class="plate" id="plate" aria-hidden="true"><div class="plate-in"><img alt="" id="plateImg" width="560" height="700" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><i class="plate-x"></i></div><span class="plate-cap mono" id="plateCap"></span></div>

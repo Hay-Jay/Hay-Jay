@@ -1,0 +1,11 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-portfolio",
+      "settings": {}
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

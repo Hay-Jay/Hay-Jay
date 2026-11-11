@@ -1,0 +1,81 @@
+{%- comment -%}
+  Lookbook strip: a roll of film, one frame per "Frame" block (a product and its photo number), each frame a link to its product.
+  mc-home.js lets the roll drift slowly (it stops for hover, focus, touch and the Pause button, and never runs with reduced motion)
+  and drag sideways with a mouse; on touch it is a normal swipe. Without JavaScript it is a plain sideways-scrolling row.
+  Over the frames sits a surveillance camera read-out (corner brackets, scan lines, a REC dot, the camera label and a timecode); the
+  timecode runs while the film drifts and holds, with the REC dot, while it is paused.
+{%- endcomment -%}
+{%- liquid
+  assign letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  assign link = section.settings.link_url | default: '/pages/lookbook'
+-%}
+<section class="spread paper hlb" id="evidence" aria-labelledby="lbH">
+  <div class="wrap">
+    <header class="hsec-h">
+      <div>
+        {% render 'mc-home-kick', text: section.settings.kicker, level: 3 %}
+        <h2 class="h2 hx" id="lbH">{{ section.settings.heading | escape }}</h2>
+      </div>
+      <p class="hl-tools">
+        <button class="hl-pause" type="button" data-film-toggle aria-pressed="false" aria-label="{{ section.settings.pause_label | escape }}" hidden><i aria-hidden="true"></i></button>
+        {%- if section.settings.link_text != blank %}<a class="btn-line mono" href="{{ link }}">{{ section.settings.link_text | escape }}<span class="arr" aria-hidden="true"></span></a>{% endif -%}
+      </p>
+    </header>
+  </div>
+  <div class="hl-film" data-film>
+    <ul class="hl-row" data-film-row role="list" aria-label="{{ section.settings.heading | escape }}">
+      {%- assign k = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- assign p = block.settings.product -%}
+        {%- if p != blank -%}
+          {%- liquid
+            assign pn = block.settings.photo | minus: 1
+            assign pic = p.images[pn] | default: p.featured_image
+            assign ltr = letters | slice: k, 1
+          -%}
+          <li class="hl-fr" style="--ar:{{ block.settings.ratio }}" {{ block.shopify_attributes }}>
+            <a class="hl-a" href="{{ p.url }}" draggable="false" aria-label="{{ p.title | strip | escape }}">
+              {%- if pic != blank %}{% render 'mc-img', image: pic, alt: '', widths: '300,450,600,900', sizes: '(min-width:900px) 420px, 62vw' %}{% endif -%}
+              <span class="hl-no mono" data-l="{{ ltr }}" aria-hidden="true"></span>
+            </a>
+          </li>
+          {%- assign k = k | plus: 1 -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+    {%- if section.settings.osd != blank -%}
+      <span class="hl-osd" aria-hidden="true"><span class="hl-osd-l"><b class="rec"></b>{{ section.settings.osd | escape }}</span><span class="hl-osd-r" data-tc>00:00:00:00</span></span>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Lookbook strip",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small heading", "info": "Text before \" / \" becomes the file number.", "default": "File 03 / Surveillance" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Lookbook" },
+    { "type": "text", "id": "link_text", "label": "Link text", "default": "See it all" },
+    { "type": "url", "id": "link_url", "label": "Link", "info": "Empty: /pages/lookbook." },
+    { "type": "text", "id": "pause_label", "label": "Pause button (read out by screen readers)", "default": "Pause the film" },
+    { "type": "text", "id": "osd", "label": "Camera label over the film", "info": "Empty: no camera read-out.", "default": "Field footage // Cam 03" }
+  ],
+  "blocks": [
+    {
+      "type": "frame",
+      "name": "Frame",
+      "limit": 16,
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "range", "id": "photo", "label": "Photo number", "min": 1, "max": 20, "step": 1, "default": 1 },
+        { "type": "select", "id": "ratio", "label": "Frame shape", "options": [
+          { "value": "4/5", "label": "Portrait 4:5" },
+          { "value": "1/1", "label": "Square" },
+          { "value": "3/2", "label": "Landscape 3:2" }
+        ], "default": "4/5" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Lookbook strip", "blocks": [{ "type": "frame" }, { "type": "frame" }, { "type": "frame" }, { "type": "frame" }] }]
+}
+{% endschema %}

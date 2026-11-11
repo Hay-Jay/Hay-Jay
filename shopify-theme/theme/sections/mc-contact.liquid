@@ -1,0 +1,72 @@
+{%- liquid
+  assign title = section.settings.heading
+  assign is_contact = true
+  if page != blank and page.handle != 'contact'
+    assign title = page.title
+    assign is_contact = false
+  endif
+  assign tw = title | split: ' '
+-%}
+<!-- CONTACT: the lines, then the message form -->
+<section class="spread dark ct-open" aria-labelledby="colH">
+  <div class="wrap ct-grid">
+    <div class="ct-term">
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">MC-107</span><span>{{ section.settings.kicker | escape }}</span><span class="ct-live"><b class="rec" aria-hidden="true"></b>Line open</span></p>
+        {%- comment -%} one typing span per word, so long page titles ("Model signup form") wrap {%- endcomment -%}
+        <h1 class="h1 pg-h" id="colH">{% for w in tw %}<span class="tw{% if forloop.last %} caret{% endif %}" style="--n:{{ w | size }};--dl:{{ forloop.index0 | times: 0.4 | plus: 0.1 }}s">{{ w | escape }}</span>{% unless forloop.last %} {% endunless %}{% endfor %}</h1>
+        {%- if page != blank and page.content != blank -%}
+          <div class="pg-sub rte">{{ page.content }}</div>
+        {%- elsif section.settings.deck != blank -%}
+          <p class="pg-sub">{{ section.settings.deck | escape }}</p>
+        {%- endif -%}
+      </header>
+      <a class="btn ct-jump" href="#message">{% if is_contact %}{{ section.settings.form_heading | escape }}{% else %}Fill in the form{% endif %}<i class="arr" aria-hidden="true"></i></a>
+    </div>
+    <ul class="cn-links ct-lines">
+      <li><a href="mailto:{{ settings.contact_email }}"><span class="mono">Email</span><b>{{ settings.contact_email | replace: '@', '<wbr>@' }}</b><i class="arr" aria-hidden="true"></i></a></li>
+      {%- if settings.social_instagram != blank -%}<li><a href="{{ settings.social_instagram }}" target="_blank" rel="noopener"><span class="mono">Instagram</span><b>@monochrome.ca</b><i class="arr" aria-hidden="true"></i></a></li>{%- endif -%}
+      {%- if settings.social_tiktok != blank -%}<li><a href="{{ settings.social_tiktok }}" target="_blank" rel="noopener"><span class="mono">TikTok</span><b>@monochrome.ca</b><i class="arr" aria-hidden="true"></i></a></li>{%- endif -%}
+      {%- if settings.social_snapchat != blank -%}<li><a href="{{ settings.social_snapchat }}" target="_blank" rel="noopener"><span class="mono">Snapchat</span><b>monochrome.ca</b><i class="arr" aria-hidden="true"></i></a></li>{%- endif -%}
+    </ul>
+  </div>
+</section>
+
+<section class="spread paper ct-form-sec" id="message" aria-labelledby="msgH">
+  <div class="wrap">
+    <div class="enlist ct-msg">
+      <span class="tape tape-l" aria-hidden="true"></span><span class="tape tape-r" aria-hidden="true"></span>
+      <h2 class="h2" id="msgH">{% if is_contact %}{{ section.settings.form_heading | escape }}{% else %}{{ page.title | escape }}{% endif %}</h2>
+      {%- form 'contact', id: 'contactForm', class: 'news ct-form' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="ct-ok" role="status"><span class="stamp" style="--r:-6deg">Received</span> We'll reply soon.</p>
+        {%- else -%}
+          {%- if form.errors -%}<p class="mono news-note" role="alert">{{ form.errors | default_errors }}</p>{%- endif -%}
+          <div class="ct-fields">
+            <label class="ct-f"><span class="mono">Name</span><input type="text" name="contact[name]" autocomplete="name" value="{{ form.name }}"></label>
+            <label class="ct-f"><span class="mono">Email</span><input type="email" name="contact[email]" required autocomplete="email" placeholder="you@email.com" value="{{ form.email }}"></label>
+            {%- unless is_contact -%}
+              <label class="ct-f"><span class="mono">Phone</span><input type="tel" name="contact[phone]" autocomplete="tel" value="{{ form.phone }}"></label>
+            {%- endunless -%}
+            <label class="ct-f ct-f-wide"><span class="mono">Message</span><textarea name="contact[body]" rows="5" required>{{ form.body }}</textarea></label>
+          </div>
+          <button class="send" type="submit">Send<span class="arr" aria-hidden="true"></span></button>
+        {%- endif -%}
+      {%- endform -%}
+      <span class="stamp pend ct-stamp" style="--r:-6deg" aria-hidden="true">Eyes only</span>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Contact",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "Secure channel" },
+    { "type": "text", "id": "heading", "label": "Heading", "info": "Other pages that use this template (for example the model signup form) show their own page title instead.", "default": "Contact" },
+    { "type": "text", "id": "deck", "label": "One line", "default": "Sizes, orders, collabs. Pick a line." },
+    { "type": "text", "id": "form_heading", "label": "Message form heading", "default": "Send a message" }
+  ],
+  "presets": [{ "name": "Contact" }]
+}
+{% endschema %}

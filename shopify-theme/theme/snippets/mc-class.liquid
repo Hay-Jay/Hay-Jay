@@ -1,0 +1,29 @@
+{%- comment -%}
+  Asset class of a product: top | bottom | accessory | gift | print. Same rules as the prototype (sync-products.mjs category()).
+  Override on any product with a tag: class-top, class-bottom, class-accessory, class-gift, class-print.
+  Params: product. Output: the class word only.
+{%- endcomment -%}
+{%- liquid
+  assign cls = 'top'
+  assign s = ' ' | append: product.title | append: ' ' | append: product.type | append: ' ' | downcase
+  if product.tags contains 'class-top'
+    assign cls = 'top'
+  elsif product.tags contains 'class-bottom'
+    assign cls = 'bottom'
+  elsif product.tags contains 'class-accessory'
+    assign cls = 'accessory'
+  elsif product.tags contains 'class-gift'
+    assign cls = 'gift'
+  elsif product.tags contains 'class-print'
+    assign cls = 'print'
+  elsif product.gift_card? or s contains 'gift'
+    assign cls = 'gift'
+  elsif s contains 'magazine' or s contains 'publication' or s contains ' zine '
+    assign cls = 'print'
+  elsif s contains 'ring' or s contains 'chain' or s contains 'necklace' or s contains 'jewel' or s contains 'accessor'
+    assign cls = 'accessory'
+  elsif s contains 'short' or s contains 'skirt' or s contains 'pant' or s contains 'trouser' or s contains 'jean'
+    assign cls = 'bottom'
+  endif
+-%}
+{{- cls -}}

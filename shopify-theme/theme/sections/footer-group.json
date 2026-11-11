@@ -1,0 +1,93 @@
+{
+  "name": "Footer",
+  "type": "footer",
+  "sections": {
+    "footer": {
+      "type": "mc-footer",
+      "blocks": {
+        "link-1": {
+          "type": "link",
+          "settings": {
+            "label": "Shop all",
+            "url": "/collections/all"
+          }
+        },
+        "link-2": {
+          "type": "link",
+          "settings": {
+            "label": "New in",
+            "url": "/collections/new-arrivals"
+          }
+        },
+        "link-3": {
+          "type": "link",
+          "settings": {
+            "label": "Lookbook",
+            "url": "/pages/lookbook"
+          }
+        },
+        "link-4": {
+          "type": "link",
+          "settings": {
+            "label": "Vision Issue",
+            "url": "/pages/vision-issue"
+          }
+        },
+        "link-5": {
+          "type": "link",
+          "settings": {
+            "label": "About",
+            "url": "/pages/about"
+          }
+        },
+        "help-1": {
+          "type": "help",
+          "settings": {
+            "label": "Shipping",
+            "url": "/pages/shipping"
+          }
+        },
+        "help-2": {
+          "type": "help",
+          "settings": {
+            "label": "Returns",
+            "url": "/pages/shipping#returns"
+          }
+        },
+        "help-3": {
+          "type": "help",
+          "settings": {
+            "label": "FAQ",
+            "url": "/pages/faq"
+          }
+        },
+        "help-4": {
+          "type": "help",
+          "settings": {
+            "label": "Contact",
+            "url": "/pages/contact"
+          }
+        }
+      },
+      "block_order": [
+        "link-1",
+        "link-2",
+        "link-3",
+        "link-4",
+        "link-5",
+        "help-1",
+        "help-2",
+        "help-3",
+        "help-4"
+      ],
+      "settings": {
+        "tagline": "Wear the unknown.",
+        "news": "not_home",
+        "news_label": "Drop alerts by email"
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

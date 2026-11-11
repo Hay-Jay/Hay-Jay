@@ -1,0 +1,165 @@
+/* MONOCHROME® — Shopify additions loaded on every page: sticky header wrapper, the bag count, the slide-in bag (cart drawer), shared
+   cart-line styles, the free-magazine nudge, and the Add to bag sequence (stamp, count bump). */
+
+/* the header lives in a section-group wrapper, so the wrapper is the sticky element (the prototype made .hdr itself sticky) */
+.shopify-section-group-header-group { position: sticky; top: -24px; z-index: 60; view-transition-name: bar; }
+.shopify-section-group-header-group .hdr { position: static; top: auto; view-transition-name: none; }
+.hdr { --fg: #efefef; }
+
+/* bag count in the header */
+.bar-bag { position: relative; }
+.bag-n { display: inline-grid; place-items: center; min-width: 1.5em; height: 1.5em; margin-left: .55em; padding: 0 .3em; background: #efefef; color: #0a0a0a; font: 800 11px/1 var(--mono); letter-spacing: 0; border-radius: 99px; }
+.bag-n[hidden] { display: none; }
+.bar-bag:hover .bag-n { background: #0a0a0a; color: #efefef; }
+.shopify-section-mc-cart-drawer, #shopify-section-mc-cart-drawer { display: contents; }
+.mc-add-pending { opacity: .6; pointer-events: none; }
+
+/* ---- Add to bag: a stamp lands on the button, the button thunks, the bag count jumps -------------------------------------- */
+.add-stamp { position: fixed; z-index: 145; left: 0; top: 0; transform: translate(-50%, -50%); pointer-events: none; transition: opacity .4s; }
+.add-stamp .stamp { margin: 0; font-size: 1em; }
+.add-stamp .stamp.white { background: rgba(0, 0, 0, .25); }
+.add-stamp.out { opacity: 0; }
+.is-thunk { animation: btn-thunk .62s both; }
+@keyframes btn-thunk { 0%, 42% { transform: none; } 52% { transform: translateY(3px) scale(.985); } 72% { transform: translateY(-1px); } 100% { transform: none; } }
+[data-cart-count].bag-bump, [data-cart-count-text].bag-bump { animation: count-bump .6s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes count-bump { 0% { transform: none; } 35% { transform: scale(1.75) rotate(-10deg); } 70% { transform: scale(.92); } 100% { transform: none; } }
+a.bag-bump, button.bag-bump { animation: bag-ring .7s ease-out; }
+@keyframes bag-ring { from { outline: 2px solid currentColor; outline-offset: 0; } to { outline: 2px solid transparent; outline-offset: 10px; } }
+@media (prefers-reduced-motion: reduce) { .is-thunk, .bag-bump, .add-stamp { animation: none !important; } }
+
+/* ---- the bag: a manifest that slides in from the right (a bottom sheet on phones) -------------------------------------- */
+.drawer { position: fixed; inset: 0; z-index: 130; visibility: hidden; pointer-events: none; transition: visibility 0s .45s; }
+.drawer.open { visibility: visible; pointer-events: auto; transition: visibility 0s; }
+.drawer[hidden] { display: none; }
+.dr-back { position: absolute; inset: 0; background: rgba(0, 0, 0, .66); opacity: 0; transition: opacity .35s; }
+.drawer.open .dr-back { opacity: 1; }
+.dr-panel {
+  position: absolute; right: 0; top: 0; bottom: 0; width: min(100%, 460px); display: flex; flex-direction: column; outline: none; overscroll-behavior: contain;
+  color: #0a0a0a; --bg: var(--paper); --fg: #0a0a0a; --dim: #454545; --rule: rgba(0, 0, 0, .3); --soft: rgba(0, 0, 0, .07);
+  background-color: var(--paper); background-image: var(--grain-d), repeating-linear-gradient(90deg, rgba(0, 0, 0, .014) 0 1px, transparent 1px 9px);
+  border-left: 3px solid #000; box-shadow: -14px 0 0 rgba(0, 0, 0, .45);
+  transform: translateX(100%); transition: transform .45s var(--ease);
+}
+.drawer.open .dr-panel { transform: none; }
+.dr-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 12px 12px 20px; background: #0d0d0d var(--grain-l); color: #efefef; }
+.dr-t { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin: 0; font: 900 2rem/.9 var(--head); text-transform: uppercase; letter-spacing: .01em; }
+.dr-k { flex: 0 0 100%; display: flex; align-items: center; gap: 8px; color: #b9b9b9; font-size: 11px; }
+.dr-n { display: inline-grid; place-items: center; min-width: 1.7em; height: 1.7em; padding: 0 .35em; background: #efefef; color: #0a0a0a; font: 800 13px/1 var(--mono); letter-spacing: 0; }
+.dr-x { flex: none; display: grid; place-items: center; width: 48px; height: 48px; background: #efefef; color: #0a0a0a; transition: background .2s, color .2s; }
+.dr-x:hover { background: #0a0a0a; color: #efefef; box-shadow: inset 0 0 0 2px #efefef; }
+.dr-x i { position: relative; width: 20px; height: 20px; }
+.dr-x i::before, .dr-x i::after { content: ""; position: absolute; left: -2px; right: -2px; top: 9px; height: 2.5px; background: currentColor; transform: rotate(45deg); }
+.dr-x i::after { transform: rotate(-45deg); }
+.dr-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 0 20px 16px; }
+.dr-lines { margin: 0; }
+.dr-foot { flex: none; display: grid; gap: 8px; padding: 14px 20px calc(16px + env(safe-area-inset-bottom, 0px)); background: #f1f1f1; border-top: 3px solid #0a0a0a; }
+.dr-sub { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0; }
+.dr-sub span { font: 700 13px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+.dr-sub b { font: 900 2.3rem/1 var(--head); letter-spacing: .02em; }
+.dr-sub small { margin-left: .4em; font: 700 11px/1 var(--mono); letter-spacing: .1em; color: var(--dim); }
+.dr-note, .dr-save { margin: 0; color: var(--dim); font: 400 12.5px/1.4 var(--mono); }
+.dr-save { color: #0a0a0a; font-weight: 700; }
+.dr-form { margin: 2px 0 0; }
+.dr-go, .cs-go { width: 100%; justify-content: space-between; min-height: 60px; font-size: 1.55rem; letter-spacing: .08em; }
+.dr-go .arr, .cs-go .arr { margin-left: auto; }
+.dr-lock { flex: none; width: 15px; height: 17px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 17'%3E%3Cpath d='M3.5 7V5a4 4 0 0 1 8 0v2' fill='none' stroke='black' stroke-width='2'/%3E%3Crect x='1' y='7' width='13' height='10' fill='black'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 17'%3E%3Cpath d='M3.5 7V5a4 4 0 0 1 8 0v2' fill='none' stroke='black' stroke-width='2'/%3E%3Crect x='1' y='7' width='13' height='10' fill='black'/%3E%3C/svg%3E") center / contain no-repeat; }
+.dr-full { justify-self: center; display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px; font: 700 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; }
+.dr-empty { flex: 1; display: grid; align-content: center; justify-items: start; gap: 14px; padding: 28px 24px; }
+.dr-empty .stamp { margin-bottom: 6px; }
+.dr-empty-t { font: 900 2.4rem/.95 var(--head); text-transform: uppercase; margin: 0; }
+
+/* ---- cart lines: the same markup in the drawer and on the cart page ---------------------------------------------------- */
+.ln { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.ln-img { position: relative; display: block; align-self: start; aspect-ratio: 4 / 5; border: 1.5px solid #0a0a0a; background: #111; overflow: hidden; box-shadow: 3px 3px 0 rgba(0, 0, 0, .3); }
+.ln-img img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.12); }
+.ln-no { position: absolute; left: 0; bottom: 0; padding: 3px 5px 2px; background: #ececec; color: #0a0a0a; font: 700 9.5px/1 var(--mono); letter-spacing: .08em; }
+.ln-body { display: grid; gap: 5px; align-content: start; min-width: 0; }
+.ln-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.ln-t { font: 800 1.3rem/1 var(--head); text-transform: uppercase; letter-spacing: .015em; text-decoration: none; overflow-wrap: anywhere; }
+.ln-t:hover { text-decoration: underline; text-underline-offset: 4px; }
+.ln-price { flex: none; display: grid; justify-items: end; font: 900 1.35rem/1 var(--head); letter-spacing: .02em; font-variant-numeric: lining-nums; }
+.ln-was { color: var(--dim); font-size: .78em; text-decoration-thickness: 2px; }
+.ln-opt { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; color: var(--dim); font: 400 12.5px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.ln-opt b { color: #0a0a0a; font-weight: 700; }
+.ln-each { text-transform: none; }
+/* line-item properties (Easify personalisation): a typed label stuck to the line */
+.ln-prop { justify-self: start; display: inline-flex; flex-wrap: wrap; gap: 0 8px; margin: 2px 0 0; padding: 4px 8px; border: 1.5px solid #0a0a0a; border-left-width: 5px; background: #f3f3f3; font: 400 12.5px/1.35 var(--mono); max-width: 100%; overflow-wrap: anywhere; }
+.ln-prop span { color: var(--dim); }
+.ln-prop b { font-weight: 700; }
+.ln-prop a { text-decoration: underline; text-underline-offset: 3px; }
+.ln-disc { margin: 0; font: 400 12.5px/1.3 var(--mono); color: var(--dim); }
+.ln-disc b { color: #0a0a0a; }
+.ln-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px; margin-top: 6px; }
+.ln-rm { display: inline-flex; align-items: center; min-height: 44px; padding: 0 2px; color: var(--dim); font: 400 12.5px/1 var(--mono); letter-spacing: .06em; text-decoration: underline; text-underline-offset: 4px; }
+.ln-rm:hover { color: #0a0a0a; }
+.ln.is-busy { opacity: .5; pointer-events: none; }
+.ln.is-new { animation: ln-new 1.6s ease-out; }
+@keyframes ln-new { 0%, 30% { background-color: rgba(0, 0, 0, .1); box-shadow: inset 5px 0 0 #0a0a0a; } 100% { background-color: transparent; box-shadow: inset 0 0 0 transparent; } }
+.qty { display: inline-grid; grid-template-columns: 44px 48px 44px; border: 2px solid #0a0a0a; background: #f4f4f4; }
+.qty button { min-height: 44px; font: 800 1.35rem/1 var(--head); color: #0a0a0a; }
+.qty button:hover { background: #0a0a0a; color: #f4f4f4; }
+.qty input { width: 100%; min-width: 0; border: 0; border-inline: 2px solid #0a0a0a; border-radius: 0; text-align: center; background: transparent; color: #0a0a0a; font: 700 16px/1 var(--mono); padding: 0; -moz-appearance: textfield; appearance: textfield; }
+.qty input::-webkit-outer-spin-button, .qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.cart-err { margin: 10px 0 0; padding: 10px 12px; border: 2px dashed #0a0a0a; background: #f4f4f4; color: #0a0a0a; }
+/* the lines settle in one by one as the drawer opens */
+@media (prefers-reduced-motion: no-preference) {
+  .drawer.opening .ln, .drawer.opening .offer { animation: ln-in .5s var(--ease) both; animation-delay: calc(.12s + var(--d, 0) * 70ms); }
+}
+@keyframes ln-in { from { opacity: 0; transform: translateX(24px); } }
+
+/* ---- free-magazine nudge (snippets/mc-bag-offer) ----------------------------------------------------------------------- */
+.offer { position: relative; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; margin: 20px 0 4px; padding: 12px 12px 12px 14px;
+  border: 2px dashed #0a0a0a; background: #f6f6f6; color: #0a0a0a; }
+.offer::before { content: "Offer"; position: absolute; left: 10px; top: -9px; padding: 1px 6px; background: #0a0a0a; color: #f4f4f4; font: 700 9.5px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+.offer-ph { display: block; width: 44px; height: 57px; background: #111; border: 1px solid #0a0a0a; overflow: hidden; transform: rotate(-3deg); box-shadow: 2px 2px 0 rgba(0, 0, 0, .3); }
+.offer-ph img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.15); }
+.offer-t { display: grid; gap: 3px; min-width: 0; }
+.offer-k { margin: 0; font: 700 11.5px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.offer-n { margin: 0; font: 800 1.3rem/1 var(--head); text-transform: uppercase; letter-spacing: .02em; }
+.offer-s { margin: 0; color: var(--dim); font: 400 12px/1.3 var(--mono); }
+.offer-go { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 3px 14px 0; background: #0a0a0a; color: #f4f4f4; border: 2px solid #0a0a0a; font: 900 1.2rem/1 var(--head); letter-spacing: .08em; text-transform: uppercase; transition: background .2s, color .2s; }
+.offer-go i { font: 900 1.4rem/1 var(--head); font-style: normal; margin-top: -3px; }
+.offer-go:hover { background: transparent; color: #0a0a0a; }
+.offer-ok { display: flex; align-items: flex-start; gap: 10px; margin: 14px 0 4px; padding: 10px 12px; border: 1.5px solid #0a0a0a; border-left-width: 5px; background: #f3f3f3; font: 400 12.5px/1.4 var(--mono); }
+.offer-ok i { flex: none; font-style: normal; font-weight: 700; }
+
+@media (max-width: 699px) {
+  .dr-panel { top: auto; width: 100%; max-height: min(92svh, 780px); border-left: 0; border-top: 3px solid #000; box-shadow: 0 -10px 0 rgba(0, 0, 0, .45); transform: translateY(100%); }
+  .drawer.open .dr-panel { transform: none; }
+  .dr-head { padding-left: 16px; }
+  .dr-t { font-size: 1.8rem; }
+  .dr-body { padding-inline: 16px; }
+  .dr-foot { padding-inline: 16px; }
+  .ln { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding-block: 14px; }
+  .ln-t { font-size: 1.18rem; }
+  .ln-price { font-size: 1.25rem; }
+}
+@media (max-width: 359px) { .offer { grid-template-columns: minmax(0, 1fr) auto; } .offer-ph { display: none; } }
+@media (prefers-reduced-motion: reduce) { .drawer, .dr-back, .dr-panel { transition: none; } .ln.is-new { animation: none; } }
+@media (max-width: 899px) and (max-height: 520px) and (orientation: landscape) { .dr-panel { max-height: 100svh; } }
+
+/* ---- the bag locks the page behind it -------------------------------------------------------------------- */
+html.drawer-lock { overflow: hidden; }
+
+/* ---- the store's apps next to the theme's overlays -------------------------------------------------------- */
+/* The Inbox chat launcher floats bottom-right above everything; it steps aside while the bag, the menu or
+   the photo zoom is open, and on phones while the sticky Add to bag bar is showing (it is back as soon as those close). */
+/* display, not visibility: the widget's own button sets visibility: visible inside its shadow root and would show through */
+html.drawer-lock shopify-chat, html.menu-up shopify-chat, html.lb-lock shopify-chat { display: none !important; }
+@media (max-width: 899px) { html.buy-pin shopify-chat { display: none !important; } }
+
+/* ---- app blocks section (Klarna messaging and the like) ---------------------------------------------------- */
+.spread.mc-apps-sec { padding-block: 4px 18px; }
+.mc-apps { padding-block: 10px; }
+.mc-apps:empty { display: none; }
+
+/* ---- Shopify's policy pages: long links (https://www.shopify.com/legal/...) wrap instead of widening the page on phones -- */
+.shopify-policy__container, .rte { overflow-wrap: anywhere; }
+
+/* ---- without JavaScript: the typed quantity and "Update quantities" do the work, so the +/- buttons and the
+   wallet placeholders (they need scripts) are not shown --------------------------------------------------------- */
+html:not(.js) .qty [data-q], html:not(.js) .cs-pay { display: none; }
+html:not(.js) .qty:has([data-q]) { grid-template-columns: 72px; }
+html:not(.js) .qty:has([data-q]) input { border-inline: 0; min-height: 44px; }

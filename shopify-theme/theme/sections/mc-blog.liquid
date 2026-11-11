@@ -1,0 +1,21 @@
+<section class="spread paper ct-open" aria-labelledby="blogH">
+  <div class="wrap">
+    <header class="pg-head">
+      <p class="pg-file mono"><span class="pg-no">MC-110</span><span>Dispatches</span></p>
+      <h1 class="h1 pg-h" id="blogH">{{ blog.title | escape }}</h1>
+    </header>
+    {%- paginate blog.articles by 12 -%}
+      <ol class="blog-list">
+        {%- for article in blog.articles -%}
+          <li><a href="{{ article.url }}"><span class="mono">{{ article.published_at | date: '%b %d' }}</span><b>{{ article.title | escape }}</b><span class="mono">Read</span></a></li>
+        {%- endfor -%}
+      </ol>
+      {%- if paginate.pages > 1 -%}
+        <nav class="mono pg-pager" aria-label="Pages">{%- if paginate.previous -%}<a class="link-line" href="{{ paginate.previous.url }}">Previous</a>{% endif -%}<span>{{ paginate.current_page }} / {{ paginate.pages }}</span>{%- if paginate.next %}<a class="link-line" href="{{ paginate.next.url }}">Next</a>{% endif -%}</nav>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</section>
+{% schema %}
+{ "name": "Dispatches (blog)", "settings": [] }
+{% endschema %}

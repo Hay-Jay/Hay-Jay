@@ -1,0 +1,84 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-shipping",
+      "blocks": {
+        "rn1": {
+          "type": "return_note",
+          "settings": {
+            "text": "<p>Doesn't fit? We'll exchange it.</p>"
+          }
+        },
+        "rn2": {
+          "type": "return_note",
+          "settings": {
+            "text": "<p>Email us within 14 days of delivery with your order number. Unworn, with tags.</p>"
+          }
+        },
+        "rn3": {
+          "type": "return_note",
+          "settings": {
+            "text": "<p>Final terms: <a href=\"{refund}\">refund policy</a> and <a href=\"{shipping}\">shipping policy</a>.</p>"
+          }
+        },
+        "sz1": {
+          "type": "size",
+          "settings": {
+            "label": "Tops & jerseys",
+            "text": "Relaxed, true to size. Between sizes? Go up."
+          }
+        },
+        "sz2": {
+          "type": "size",
+          "settings": {
+            "label": "Bottoms",
+            "text": "Sizes on each product. Unsure? Ask first."
+          }
+        },
+        "sz3": {
+          "type": "size",
+          "settings": {
+            "label": "Rings",
+            "text": "Ring sizes. Between two? Go up."
+          }
+        },
+        "sz4": {
+          "type": "size",
+          "settings": {
+            "label": "Chains",
+            "text": "One size."
+          }
+        },
+        "sz5": {
+          "type": "size",
+          "settings": {
+            "label": "Custom jersey",
+            "text": "Up to 10 characters."
+          }
+        }
+      },
+      "block_order": [
+        "rn1",
+        "rn2",
+        "rn3",
+        "sz1",
+        "sz2",
+        "sz3",
+        "sz4",
+        "sz5"
+      ],
+      "settings": {
+        "kicker": "Extraction routes",
+        "heading": "Shipping",
+        "deck": "{countries} countries. Rates at checkout.",
+        "nigeria": "Delivered. Rate shown at checkout.",
+        "canada": "Free standard shipping over $200.",
+        "us": "Free standard shipping over $100.",
+        "rates_note": "Your rate shows at checkout, before you pay."
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

@@ -1,0 +1,38 @@
+{%- assign tk_countries = '{countries}' -%}
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+-%}
+<!-- OBJECTIVES --------------------------------------------------------------------------------- -->
+<section class="spread dark ab-obj" aria-labelledby="objH">
+  <div class="wrap">
+    <header class="sec-h">
+      <p class="kick mono">§2 — Mission objectives</p>
+      <h2 class="h2 rv" id="objH">{{ section.settings.heading | escape }}</h2>
+    </header>
+    <ol class="objs">
+      {%- for block in section.blocks -%}
+        <li class="rv" {{ block.shopify_attributes }}><span class="ob-n">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span><div><b>{{ block.settings.title | escape }}</b><p>{{ block.settings.text | replace: tk_countries, countries.size | escape }}</p></div><i class="tick" aria-hidden="true"></i></li>
+      {%- endfor -%}
+    </ol>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "About: objectives",
+  "settings": [{ "type": "text", "id": "heading", "label": "Heading", "default": "Objectives" }],
+  "blocks": [
+    {
+      "type": "objective", "name": "Objective", "limit": 8,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Wear black, white and chrome." },
+        { "type": "textarea", "id": "text", "label": "Text ({countries} = live count)", "default": "One line." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "About: objectives" }]
+}
+{% endschema %}

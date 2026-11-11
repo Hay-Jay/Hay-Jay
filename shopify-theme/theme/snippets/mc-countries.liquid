@@ -1,0 +1,17 @@
+{%- comment -%}
+  The delivery list from settings.ship_countries ("Name|CODE|Region" per line). No params.
+  Output: the lines normalised and joined by ";" : Nigeria|NG|Africa;Canada|CA|North America;...
+  Callers: {% capture raw %}{% render 'mc-countries' %}{% endcapture %}{% assign list = raw | split: ';' %}
+{%- endcomment -%}
+{%- liquid
+  assign out = ''
+  assign lines = settings.ship_countries | newline_to_br | strip_newlines | split: '<br />'
+  for line in lines
+    assign t = line | strip
+    if t contains '|'
+      assign out = out | append: t | append: ';'
+    endif
+  endfor
+  assign out = out | remove_last: ';'
+-%}
+{{- out -}}

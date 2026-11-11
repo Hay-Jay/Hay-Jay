@@ -1,0 +1,94 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-faq",
+      "blocks": {
+        "q1": {
+          "type": "qa",
+          "settings": {
+            "question": "Do you ship to Nigeria?",
+            "answer": "<p>Yes. Nigeria is one of {countries} countries we ship to. Your rate shows at checkout, before you pay. <a href=\"/pages/shipping\">All countries</a></p>"
+          }
+        },
+        "q2": {
+          "type": "qa",
+          "settings": {
+            "question": "What does shipping cost?",
+            "answer": "<p>It depends on your address and shows at checkout. Standard shipping is free in Canada over $200 and in the US over $100. You get an email when your order ships.</p>"
+          }
+        },
+        "q3": {
+          "type": "qa",
+          "settings": {
+            "question": "How does sizing work?",
+            "answer": "<p>Tops run true to size with a relaxed cut. Between sizes? Go up. Rings come in ring sizes. <a href=\"/pages/shipping#sizing\">Size guide</a></p>"
+          }
+        },
+        "q4": {
+          "type": "qa",
+          "settings": {
+            "question": "Returns and exchanges?",
+            "answer": "<p>Doesn't fit? We'll exchange it. Email us within 14 days of delivery with your order number. Unworn, with tags. <a href=\"/pages/shipping#returns\">Details</a></p>"
+          }
+        },
+        "q5": {
+          "type": "qa",
+          "settings": {
+            "question": "Which currency?",
+            "answer": "<p>Prices are in Canadian dollars (CAD). Where possible you see your local currency and pay the amount shown.</p>"
+          }
+        },
+        "q6": {
+          "type": "qa",
+          "settings": {
+            "question": "Will a sold-out piece come back?",
+            "answer": "<p>Some do, some don't. Runs are small. Get <a href=\"#subscribe\">drop alerts</a> to hear first.</p>"
+          }
+        },
+        "q7": {
+          "type": "qa",
+          "settings": {
+            "question": "How do gift cards work?",
+            "answer": "<p>Choose {giftamounts} CAD on the <a href=\"/products/monochrome-gift-cards\">gift card page</a>. They pick the piece.</p>"
+          }
+        },
+        "q8": {
+          "type": "qa",
+          "settings": {
+            "question": "Custom jersey?",
+            "answer": "<p>Up to 10 characters. Message us with the details before you order.</p>"
+          }
+        },
+        "q9": {
+          "type": "qa",
+          "settings": {
+            "question": "Collabs and bulk orders?",
+            "answer": "<p>Email <a href=\"mailto:info.mccanada@gmail.com\">info.mccanada@gmail.com</a> with the details.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6",
+        "q7",
+        "q8",
+        "q9"
+      ],
+      "settings": {
+        "kicker": "Debrief",
+        "heading": "FAQ",
+        "deck": "",
+        "foot_label": "Not here?",
+        "foot_link": "Ask us",
+        "report_url": "/pages/contact"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

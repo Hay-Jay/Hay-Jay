@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-collection-list",
+      "settings": {
+        "heading": "Collections",
+        "kicker": "Asset sections"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

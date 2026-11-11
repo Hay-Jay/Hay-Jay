@@ -1,0 +1,7 @@
+{%- comment -%} The slide-in bag. The contents come from sections/mc-cart-drawer.liquid so the Section Rendering API can refresh them. {%- endcomment -%}
+<aside class="drawer" id="mcDrawer" role="dialog" aria-modal="true" aria-labelledby="mcDrawerT" hidden>
+  <div class="dr-back" data-close></div>
+  <div class="dr-panel" id="mcDrawerPanel" tabindex="-1">
+    {% section 'mc-cart-drawer' %}
+  </div>
+</aside>

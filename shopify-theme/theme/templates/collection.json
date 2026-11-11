@@ -1,0 +1,17 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-register",
+      "settings": {
+        "heading": "Shop all",
+        "kicker": "Asset register",
+        "stamp": "Cleared for issue",
+        "more_title": "More on file",
+        "more_count": 8
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

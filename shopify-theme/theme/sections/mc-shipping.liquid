@@ -1,0 +1,153 @@
+{%- comment -%} dropped from the returns notes while Settings > Policies > Shipping policy is empty {%- endcomment -%}
+{%- assign ship_clause = ' and <a href="{shipping}">shipping policy</a>' -%}
+{%- assign tk_refund = '{refund}' -%}
+{%- assign tk_shipping = '{shipping}' -%}
+{%- assign tk_countries = '{countries}' -%}
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  assign region_text = ''
+  for c in countries
+    assign rg = c | split: '|' | last
+    assign region_text = region_text | append: rg | append: ';'
+  endfor
+  assign regions = region_text | remove_last: ';' | split: ';' | uniq
+  assign pol_ship = shop.shipping_policy.url | default: '/policies/shipping-policy'
+  assign pol_refund = shop.refund_policy.url | default: '/policies/refund-policy'
+  assign n_c = countries.size
+-%}
+<!-- SHIPPING: where it goes, what it costs, what if it does not fit -->
+<section class="spread dark rt-open" aria-labelledby="distH">
+  <div class="wrap rt-grid">
+    <div class="rt-text">
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">MC-105</span><span>{{ section.settings.kicker | escape }}</span><span>{{ n_c }} zones</span></p>
+        <h1 class="h1 pg-h" id="distH"><span class="tw caret" style="--n:{{ section.settings.heading | size }}">{{ section.settings.heading | escape }}</span></h1>
+        {%- if section.settings.deck != blank %}<p class="pg-sub">{{ section.settings.deck | replace: tk_countries, n_c | escape }}</p>{% endif -%}
+      </header>
+      <div class="dst-hl">
+        <div class="hl hl-ng rv"><span class="mono">Field office</span><b>Nigeria</b><p>{{ section.settings.nigeria | escape }}</p></div>
+        <div class="hl hl-ca rv" style="--rv:1"><span class="mono">Home base</span><b>Canada</b><p>{{ section.settings.canada | escape }}</p></div>
+        {%- if section.settings.us != blank %}<div class="hl hl-us rv" style="--rv:2"><span class="mono">Next door</span><b>USA</b><p>{{ section.settings.us | escape }}</p></div>{% endif -%}
+      </div>
+    </div>
+    <div class="rt-radar" aria-hidden="true">{% render 'mc-radar' %}</div>
+  </div>
+</section>
+
+<section class="spread paper rt-zones" aria-labelledby="zonesH">
+  <div class="wrap dst-grid">
+    <div class="dst-main">
+      <h2 class="rt-h2" id="zonesH">{{ n_c }} countries</h2>
+      <p class="mono rt-note">{{ section.settings.rates_note | escape }}</p>
+      <div class="zones">
+        {%- for rg in regions -%}
+          <div class="zone rv" style="--rv:{{ forloop.index0 }}">
+            <h3 class="mono zone-h">{{ rg | escape }}</h3>
+            <ul class="zone-l">
+              {%- for c in countries -%}
+                {%- assign bits = c | split: '|' -%}
+                {%- if bits[2] == rg -%}<li{% if bits[1] == 'NG' or bits[1] == 'CA' %} class="hot"{% endif %}><span class="mono" aria-hidden="true">{{ bits[1] }}</span>{{ bits[0] | escape }}</li>{%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endfor -%}
+      </div>
+      <p class="mono rt-more">Not listed? <a class="link-line" href="/pages/contact">Ask us</a></p>
+    </div>
+
+    <aside class="dst-aside" aria-labelledby="retH" id="returns">
+      <span class="tape" aria-hidden="true"></span>
+      <p class="mono mg-k">Return to base</p>
+      <h2 id="retH">Returns</h2>
+      <ol class="mg-notes">
+        {%- assign rn = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'return_note' -%}
+            {%- assign rn = rn | plus: 1 -%}
+            {%- assign note = block.settings.text -%}
+            {%- if shop.shipping_policy.body == blank -%}{%- assign note = note | replace: ship_clause, '' -%}{%- endif -%}
+            <li {{ block.shopify_attributes }}><span class="mono">{{ rn }}</span>{{ note | replace: tk_refund, pol_refund | replace: tk_shipping, pol_ship }}</li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+      <p class="mono mg-links"><a class="link-line" href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}<span class="arr" aria-hidden="true"></span></a></p>
+    </aside>
+  </div>
+</section>
+
+{%- assign n_steps = 0 -%}
+{%- for block in section.blocks -%}{%- if block.type == 'step' -%}{%- assign n_steps = n_steps | plus: 1 -%}{%- endif -%}{%- endfor -%}
+{%- if n_steps > 0 -%}
+<section class="spread dark dst-steps" aria-labelledby="stepsH">
+  <div class="wrap">
+    <h2 class="kick mono" id="stepsH">How an order travels</h2>
+    <ol class="steps">
+      {%- assign sn = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'step' -%}
+          {%- assign sn = sn | plus: 1 -%}
+          <li class="rv" {{ block.shopify_attributes }}><span class="mono">{{ sn | prepend: '0' | slice: -2, 2 }}</span><b>{{ block.settings.title | escape }}</b>{% if block.settings.text != blank %}<p>{{ block.settings.text | escape }}</p>{% endif %}</li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+  </div>
+</section>
+{%- endif -%}
+
+<section class="spread dark dst-sizing" id="sizing" aria-labelledby="sizeH">
+  <div class="wrap">
+    <p class="pg-file mono"><span class="pg-no">Fit</span><span>Field-fit notes</span></p>
+    <h2 class="rt-h2 rv" id="sizeH">Size guide</h2>
+    <dl class="sz-list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'size' -%}
+          <div class="rv" style="--rv:{{ forloop.index0 | modulo: 6 }}" {{ block.shopify_attributes }}><dt>{{ block.settings.label | escape }}</dt><dd>{{ block.settings.text | escape }}</dd></div>
+        {%- endif -%}
+      {%- endfor -%}
+    </dl>
+    <p class="sz-foot mono">Unsure? <a class="ab-a" href="mailto:{{ settings.contact_email }}">{{ settings.contact_email }}</a></p>
+  </div>
+</section>
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "WebPage", "name": "Shipping, returns and sizing", "url": {{ shop.url | append: '/pages/shipping' | json }} }
+</script>
+
+{% schema %}
+{
+  "name": "Shipping",
+  "settings": [
+    { "type": "paragraph", "content": "The list of countries lives in Theme settings > Shipping. Shopify decides the real rates." },
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "Extraction routes" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shipping" },
+    { "type": "text", "id": "deck", "label": "One line", "info": "{countries} = how many countries.", "default": "{countries} countries. Rates at checkout." },
+    { "type": "text", "id": "nigeria", "label": "Nigeria box", "default": "Delivered. Rate shown at checkout." },
+    { "type": "text", "id": "canada", "label": "Canada box", "default": "Free standard shipping over $200." },
+    { "type": "text", "id": "us", "label": "United States line", "info": "Under the two boxes. Empty: hidden.", "default": "Free standard shipping over $100." },
+    { "type": "text", "id": "rates_note", "label": "Under the country list", "default": "Your rate shows at checkout, before you pay." }
+  ],
+  "blocks": [
+    {
+      "type": "return_note", "name": "Returns note", "limit": 8,
+      "settings": [{ "type": "richtext", "id": "text", "label": "Text ({refund}, {shipping} = policy links)", "default": "<p>Unworn, with tags.</p>" }]
+    },
+    {
+      "type": "step", "name": "Order step", "limit": 6,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Title", "default": "Choose" },
+        { "type": "textarea", "id": "text", "label": "Text", "info": "Optional." }
+      ]
+    },
+    {
+      "type": "size", "name": "Size note", "limit": 12,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Tops" },
+        { "type": "text", "id": "text", "label": "Text", "default": "True to size. Between sizes? Go up." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Shipping" }]
+}
+{% endschema %}

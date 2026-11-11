@@ -1,0 +1,29 @@
+{%- liquid
+  capture pk
+    render 'mc-pagekey'
+  endcapture
+  assign pkp = pk | split: '~'
+  assign folio = pkp[1] | plus: 0
+  assign docno = 100 | plus: folio | prepend: 'MC-'
+-%}
+<section class="spread paper ct-open" aria-labelledby="pageH">
+  <div class="wrap">
+    {%- if page != blank -%}
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">{{ docno }}</span><span>Document</span></p>
+        <h1 class="h1 pg-h" id="pageH">{{ page.title | escape }}</h1>
+      </header>
+      <div class="pg-body rte">{{ page.content }}</div>
+    {%- else -%}
+      <div class="pg-body rte shopify-policy__container">{{ content_for_layout | default: '' }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page",
+  "settings": [],
+  "presets": [{ "name": "Page" }]
+}
+{% endschema %}

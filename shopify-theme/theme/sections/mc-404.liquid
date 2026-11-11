@@ -1,0 +1,32 @@
+<section class="spread dark lost" aria-labelledby="lostH">
+  <div class="wrap lost-wrap">
+    <div class="lost-in">
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">MC-404</span><span>{{ section.settings.kicker | escape }}</span></p>
+        <h1 class="h1 pg-h" id="lostH"><span class="tw" style="--n:4;--dl:.1s">Page</span> <span class="tw" style="--n:3;--dl:.45s">not</span> <span class="tw caret" style="--n:6;--dl:.75s">found</span></h1>
+        {%- if section.settings.text != blank %}<p class="pg-sub">{{ section.settings.text | escape }}</p>{% endif -%}
+      </header>
+      <form class="lost-find" action="{{ routes.search_url }}" method="get" role="search">
+        <label class="sr-only" for="lostQ">Search the shop</label>
+        <input id="lostQ" name="q" type="search" placeholder="Search the shop" autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <nav class="lost-links" aria-label="Where to next">
+        <a href="{{ routes.all_products_collection_url }}"><span class="mono">01</span><b>Shop all</b><i class="arr" aria-hidden="true"></i></a>
+        <a href="{{ routes.collections_url }}/new-arrivals"><span class="mono">02</span><b>New in</b><i class="arr" aria-hidden="true"></i></a>
+        <a href="{{ routes.root_url }}"><span class="mono">03</span><b>Home</b><i class="arr" aria-hidden="true"></i></a>
+      </nav>
+    </div>
+    <div class="lost-stamp" aria-hidden="true"><span class="stamp white xl" style="--r:-9deg">Access denied</span></div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Page not found (404)",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "File shredded" },
+    { "type": "text", "id": "text", "label": "One line", "default": "This file was moved or never existed." }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,78 @@
+{%- liquid
+  assign letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  assign n = section.blocks.size
+  assign last_i = n | minus: 1
+  assign last = letters | slice: last_i, 1
+-%}
+<!-- LOOKBOOK: the evidence wall. Every photo opens its product -->
+<section class="spread dark lookbook" id="lookbook" aria-labelledby="lbH">
+  <div class="lb-pin" id="lbPin">
+    <div class="lb-run mono" aria-hidden="true"><span>MC-103 // Evidence wall</span><span><b class="rec"></b>Rec</span></div>
+    <div class="lb-track" id="lbTrack" role="region" aria-label="Lookbook photographs, scroll sideways" tabindex="0">
+      <div class="lb-intro">
+        <h1 id="lbH" aria-label="{{ section.settings.heading_a | append: section.settings.heading_b | escape }}"><span aria-hidden="true">{{ section.settings.heading_a | escape }}-</span><span aria-hidden="true">{{ section.settings.heading_b | escape }}</span></h1>
+        <p class="mono">{{ n }} looks. <span class="lb-how">Swipe.</span> {{ section.settings.line | escape }}</p>
+        <span class="stamp white" style="--r:-6deg" aria-hidden="true">Eyes only</span>
+      </div>
+      {%- for block in section.blocks -%}
+        {%- assign p = block.settings.product -%}
+        {%- if p != blank -%}
+          {%- liquid
+            assign li = forloop.index0
+            assign ltr = letters | slice: li, 1
+            assign pn = block.settings.photo | minus: 1
+            assign pic = p.images[pn] | default: p.featured_image
+            assign tilt = li | times: 5 | modulo: 7 | minus: 3 | times: 0.35 | round: 2
+            assign k = block.settings.scale | divided_by: 100.0
+            capture pt
+              render 'mc-price', product: p
+            endcapture
+          -%}
+          <a class="lb-fig" href="{{ p.url }}" aria-label="{{ p.title | strip | escape }}, {{ pt | strip | escape }}" style="--k:{{ k }};--ar:{{ block.settings.ratio }};--mt:{{ block.settings.offset }}vh;--tilt:{{ tilt }}deg" {{ block.shopify_attributes }}>
+            <span class="lb-pin-dot" aria-hidden="true"></span>
+            <span class="lb-no" aria-hidden="true">{{ ltr }}</span>
+            <div class="xp">{% render 'mc-img', image: pic, alt: p.title, sizes: '(min-width:900px) 50vh, 70vw', widths: '480,720,1000,1400', eager: forloop.first %}<i class="lb-vf" aria-hidden="true"></i><span class="lb-shop mono" aria-hidden="true">Shop<i class="arr"></i></span></div>
+            <span class="lb-cap mono"><b aria-hidden="true">{{ ltr }}</b><span>{{ p.title | strip | escape }}</span><span>{{ pt }}</span></span>
+          </a>
+        {%- endif -%}
+      {%- endfor -%}
+      <div class="lb-out"><span class="mono">End of file</span><a href="{{ routes.all_products_collection_url }}">Shop<br>all<span class="arr" aria-hidden="true"></span></a></div>
+    </div>
+    <div class="lb-meter mono">
+      <span id="lbNo" aria-hidden="true">A / {{ last }}</span>
+      <span class="lb-rail" aria-hidden="true"><i id="lbBar"></i></span>
+      <span class="lb-ctrl">
+        <button type="button" id="lbPrev" aria-label="Previous photo" hidden>&larr;</button>
+        <button type="button" id="lbNext" aria-label="Next photo" hidden>&rarr;</button>
+      </span>
+      <span id="lbHint" aria-hidden="true">Swipe</span>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "ImageGallery", "name": "MONOCHROME® Lookbook", "url": {{ shop.url | append: '/pages/lookbook' | json }} }
+</script>
+
+{% schema %}
+{
+  "name": "Lookbook (evidence wall)",
+  "settings": [
+    { "type": "text", "id": "heading_a", "label": "Heading, first half", "default": "Look" },
+    { "type": "text", "id": "heading_b", "label": "Heading, second half", "default": "book" },
+    { "type": "text", "id": "line", "label": "One line", "default": "Tap one to shop it." }
+  ],
+  "blocks": [
+    {
+      "type": "exhibit", "name": "Exhibit", "limit": 26,
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "range", "id": "photo", "label": "Photo number", "min": 1, "max": 12, "step": 1, "default": 1 },
+        { "type": "select", "id": "ratio", "label": "Frame shape", "options": [{ "value": "4/5", "label": "Portrait 4:5" }, { "value": "3/4", "label": "Portrait 3:4" }, { "value": "1/1", "label": "Square" }, { "value": "4/3", "label": "Landscape 4:3" }, { "value": "3/2", "label": "Landscape 3:2" }], "default": "4/5" },
+        { "type": "range", "id": "scale", "label": "Size (%)", "min": 50, "max": 100, "step": 2, "default": 100 },
+        { "type": "range", "id": "offset", "label": "Vertical offset", "min": -10, "max": 10, "step": 1, "default": 0, "unit": "vh" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Lookbook (evidence wall)" }]
+}
+{% endschema %}

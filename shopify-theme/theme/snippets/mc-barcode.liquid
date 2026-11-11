@@ -1,0 +1,25 @@
+{%- comment -%} Decorative barcode (deterministic from a numeric seed). Params: seed (number), w (default 160), h (default 28). {%- endcomment -%}
+{%- liquid
+  assign bw_total = w | default: 160
+  assign bh = h | default: 28
+  assign limit = bw_total | minus: 4
+  assign x = 0
+  assign d = ''
+  assign s = seed | default: 1 | times: 40503 | plus: 7 | modulo: 4294967296
+  for n in (1..120)
+    assign s = s | times: 1664525 | plus: 1013904223 | modulo: 4294967296
+    assign bw = s | times: 3.4 | divided_by: 4294967296.0 | floor | plus: 1
+    assign s = s | times: 1664525 | plus: 1013904223 | modulo: 4294967296
+    assign gap = s | times: 2.6 | divided_by: 4294967296.0 | floor | plus: 1
+    assign end_x = x | plus: bw
+    if end_x > bw_total
+      break
+    endif
+    assign d = d | append: 'M' | append: x | append: ' 0h' | append: bw | append: 'v' | append: bh | append: 'h-' | append: bw | append: 'z'
+    assign x = end_x | plus: gap
+    if x >= limit
+      break
+    endif
+  endfor
+-%}
+<svg class="bc" viewBox="0 0 {{ bw_total }} {{ bh }}" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="{{ d }}"/></svg>

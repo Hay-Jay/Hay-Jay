@@ -1,0 +1,2 @@
+{%- comment -%} Tape ticker. Params: words (pipe-separated), cls (e.g. hazard). {%- endcomment -%}
+<div class="ticker{% if cls != blank %} {{ cls }}{% endif %}" aria-hidden="true"><div class="ticker-t" data-ticker><div class="tk">{%- assign tw = words | split: '|' -%}{%- for w in tw -%}<span>{{ w | escape }}</span>{%- endfor -%}</div></div></div>

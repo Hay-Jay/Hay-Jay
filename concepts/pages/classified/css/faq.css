@@ -1,0 +1,42 @@
+/* FAQ — the debrief: a dark briefing-room panel with a tape recorder, and the transcript on paper (a real <details> accordion). */
+.faq-spread { overflow: clip; padding-top: clamp(28px, 4vw, 52px); }
+.fq-grid { display: grid; gap: clamp(32px, 5vw, 60px); align-items: start; }
+.fq-head .h1 { font-size: clamp(3.8rem, 12vw, 9.4rem); }
+.fq-deck { max-width: 24em; margin-top: 24px; font: 400 clamp(1.1rem, 1.8vw, 1.4rem)/1.4 var(--type); color: #d8d8d8; }
+.fq-meta { display: grid; gap: 4px; margin-top: 22px; color: var(--dim); }
+.fq-meta b { color: var(--fg); }
+.recorder { display: flex; align-items: center; gap: 14px; margin-top: 30px; padding: 16px 18px; border: 2px solid var(--fg); width: fit-content; background: var(--soft); }
+.reel { position: relative; width: 56px; height: 56px; border: 3px solid var(--fg); border-radius: 50%; animation: spin 5s linear infinite; }
+.reel::before { content: ""; position: absolute; inset: 14px; border: 3px solid var(--fg); border-radius: 50%; }
+.reel::after { content: ""; position: absolute; left: 50%; top: 3px; bottom: 3px; width: 3px; margin-left: -1.5px; background: var(--fg); box-shadow: 0 0 0 0 transparent; }
+.reel + .reel { animation-duration: 3.2s; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.recorder .mono { display: inline-flex; align-items: center; margin-left: 6px; }
+.transcript { position: relative; padding: clamp(22px, 3.4vw, 44px); background: var(--paper) var(--grain-d); border: 2px solid #0a0a0a; box-shadow: 0 16px 36px rgba(0, 0, 0, .5); }
+.transcript > .clip { right: clamp(18px, 4vw, 48px); top: -22px; }
+.tr-head { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; margin-bottom: 4px; border-bottom: 3px solid var(--fg); color: var(--dim); }
+.faq-list details { border-bottom: 1px solid var(--rule); }
+.faq-list summary { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr) 1.4rem; align-items: baseline; gap: 12px; padding: 20px 0; cursor: pointer; list-style: none; min-height: 44px; }
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary b { font: 800 clamp(1.5rem, 3.2vw, 2.2rem)/1.02 var(--head); text-transform: uppercase; letter-spacing: .01em; transition: transform .35s var(--ease); }
+.faq-list summary:hover b, .faq-list summary:focus-visible b { transform: translateX(8px); }
+.faq-list summary .mono { color: var(--dim); }
+.faq-list details[open] summary { background: var(--soft); margin-inline: -10px; padding-inline: 10px; }
+.pm { position: relative; width: 16px; height: 16px; align-self: center; }
+.pm::before, .pm::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px; background: currentColor; transition: transform .35s var(--ease); }
+.pm::after { transform: rotate(90deg); }
+details[open] .pm::after { transform: rotate(0); }
+.ans { display: grid; grid-template-columns: 3.6rem minmax(0, 1fr); gap: 12px; padding: 4px 0 28px; animation: fadein .45s var(--ease); }
+.ans .a-lbl { color: var(--dim); padding-top: .35em; }
+.ans p { max-width: 38em; font: 400 clamp(1.02rem, 1.4vw, 1.16rem)/1.6 var(--type); }
+.ans a { text-underline-offset: 4px; }
+@keyframes fadein { from { opacity: 0; transform: translateY(-6px); } }
+.fq-foot { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; margin-top: 30px; padding-top: 18px; border-top: 3px solid var(--fg); }
+.fq-foot .mono { color: var(--dim); }
+.fq-foot a { font: 900 clamp(2.4rem, 6vw, 4rem)/.95 var(--head); text-transform: uppercase; text-decoration: none; }
+.fq-foot a:hover, .fq-foot a:focus-visible { text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: .1em; }
+@media (min-width: 1000px) {
+  .fq-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(32px, 5vw, 84px); }
+  .fq-head { position: sticky; top: calc(var(--bar) + 24px); align-self: start; }
+}
+@media (max-width: 699px) { .faq-list summary { grid-template-columns: 3rem minmax(0, 1fr) 1.2rem; gap: 8px; } .ans { grid-template-columns: 3rem minmax(0, 1fr); gap: 8px; } }

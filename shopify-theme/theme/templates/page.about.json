@@ -1,0 +1,119 @@
+{
+  "sections": {
+    "open": {
+      "type": "mc-about-open",
+      "settings": {
+        "kicker": "About",
+        "word_1": "Black",
+        "word_2": "White",
+        "word_3": "Chrome",
+        "deck": "Three finishes. Small runs. Nothing else."
+      }
+    },
+    "situation": {
+      "type": "mc-about-situation",
+      "settings": {
+        "heading": "The idea",
+        "para_1": "Clothing and objects in three finishes. No colour of the month, so every piece works with every piece you own.",
+        "para_2": "**Black** the base. **White** the contrast. **Chrome** the edge.",
+        "address": "Regina, Canada",
+        "informant": "A very well dressed one",
+        "figure_a": "acid-washed-monochrome-hoodie",
+        "figure_a_photo": 6,
+        "figure_c": "black-monochrome-jersey",
+        "figure_c_photo": 4
+      }
+    },
+    "rules": {
+      "type": "mc-about-rules",
+      "blocks": {
+        "r1": {
+          "type": "rule",
+          "settings": {
+            "title": "No colour of the month."
+          }
+        },
+        "r2": {
+          "type": "rule",
+          "settings": {
+            "title": "Between sizes? Go up."
+          }
+        },
+        "r3": {
+          "type": "rule",
+          "settings": {
+            "title": "Sold out means sold out."
+          }
+        },
+        "r4": {
+          "type": "rule",
+          "settings": {
+            "title": "Nothing needs a matching partner."
+          }
+        },
+        "r5": {
+          "type": "rule",
+          "settings": {
+            "title": "Never explain the outfit."
+          }
+        }
+      },
+      "block_order": [
+        "r1",
+        "r2",
+        "r3",
+        "r4",
+        "r5"
+      ],
+      "settings": {
+        "heading": "The rules",
+        "figure_b": "royal-black",
+        "figure_b_photo": 1
+      }
+    },
+    "next": {
+      "type": "mc-next-pages",
+      "blocks": {
+        "n1": {
+          "type": "link",
+          "settings": {
+            "page": "01",
+            "label": "Shop all",
+            "url": "/collections/all"
+          }
+        },
+        "n2": {
+          "type": "link",
+          "settings": {
+            "page": "03",
+            "label": "Lookbook",
+            "url": "/pages/lookbook"
+          }
+        },
+        "n3": {
+          "type": "link",
+          "settings": {
+            "page": "04",
+            "label": "The Vision Issue",
+            "url": "/pages/vision-issue"
+          }
+        }
+      },
+      "block_order": [
+        "n1",
+        "n2",
+        "n3"
+      ],
+      "settings": {
+        "big_a": "Wear the",
+        "big_b": "unknown"
+      }
+    }
+  },
+  "order": [
+    "open",
+    "situation",
+    "rules",
+    "next"
+  ]
+}

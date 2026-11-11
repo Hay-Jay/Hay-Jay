@@ -1,0 +1,2 @@
+{%- comment -%} "From $9.99" or "$9.99" (Shopify money format). Params: product. {%- endcomment -%}
+{%- if product.price_varies %}From {% endif -%}{{- product.price | money -}}

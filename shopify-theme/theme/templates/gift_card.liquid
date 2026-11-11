@@ -1,0 +1,30 @@
+{%- layout none -%}
+<!doctype html>
+<html lang="{{ request.locale.iso_code | default: 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gift card — {{ shop.name }}</title>
+  <meta name="robots" content="noindex">
+  {% render 'mc-fonts' %}
+  {{ 'mc-base.css' | asset_url | stylesheet_tag }}
+  {{ 'mc-customer.css' | asset_url | stylesheet_tag }}
+  {{ content_for_header }}
+</head>
+<body class="pg-gift">
+  <main id="main">
+    <section class="spread paper cu gc">
+      <div class="wrap cu-wrap">
+        <img class="pw-word" src="{{ 'mc-wordmark.webp' | asset_url }}" alt="MONOCHROME" width="1170" height="114" style="filter:invert(1);width:240px;height:auto">
+        <p class="kick mono">Gift card — clearance granted</p>
+        <h1 class="h1">{{ gift_card.initial_value | money }}</h1>
+        {%- if gift_card.enabled == false or gift_card.expired -%}<span class="stamp oos" style="--r:-6deg">{% if gift_card.expired %}Expired{% else %}Disabled{% endif %}</span>{%- endif -%}
+        <p class="mono">Balance: {{ gift_card.balance | money }} {{ gift_card.currency }}</p>
+        <p class="gc-code" id="GiftCardDigits">{{ gift_card.code | format_code }}</p>
+        {%- if gift_card.pass_url -%}<p><a class="btn" href="{{ gift_card.pass_url }}">Add to Apple Wallet<i class="arr" aria-hidden="true"></i></a></p>{%- endif -%}
+        <p><a class="btn ghost" href="{{ shop.url }}">Use it in the store<i class="arr" aria-hidden="true"></i></a></p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

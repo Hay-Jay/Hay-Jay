@@ -1,0 +1,57 @@
+{%- comment -%} One cart line (cart page and drawer). Params: item, i (1-based line number), compact (true in the drawer). {%- endcomment -%}
+{%- liquid
+  capture fno
+    render 'mc-fileno', product: item.product
+  endcapture
+  assign ttl = item.product.title | strip | escape
+-%}
+<li class="ln{% if compact %} ln-c{% endif %}" style="--d:{{ i }}" data-line="{{ i }}" data-key="{{ item.key }}" data-vid="{{ item.variant_id }}">
+  <a class="ln-img" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- if item.image -%}
+      {% render 'mc-img', image: item.image, alt: '', class: 'ln-ph', widths: '160,240,360', sizes: '112px' %}
+    {%- endif -%}
+    <span class="ln-no">{{ fno }}</span>
+  </a>
+  <div class="ln-body">
+    <div class="ln-top">
+      <a class="ln-t" href="{{ item.url }}">{{ ttl }}</a>
+      <span class="ln-price">
+        {%- if item.original_line_price != item.final_line_price -%}<s class="ln-was">{{ item.original_line_price | money }}</s>{%- endif -%}
+        {{- item.final_line_price | money -}}
+      </span>
+    </div>
+    {%- unless item.product.has_only_default_variant -%}
+      <p class="ln-opt">
+        {%- for o in item.options_with_values -%}
+          <span>{{ o.name | escape }} <b>{{ o.value | escape }}</b></span>
+        {%- endfor -%}
+        {%- if item.quantity > 1 -%}<span class="ln-each">{{ item.final_price | money }} each</span>{%- endif -%}
+      </p>
+    {%- else -%}
+      {%- if item.quantity > 1 -%}<p class="ln-opt"><span class="ln-each">{{ item.final_price | money }} each</span></p>{%- endif -%}
+    {%- endunless -%}
+    {%- for p in item.properties -%}
+      {%- assign pk = p.first | slice: 0 -%}
+      {%- if pk != '_' and p.last != blank -%}
+        <p class="ln-prop"><span>{{ p.first | escape }}</span>
+          {%- if p.last contains '://' -%}
+            <a href="{{ p.last | escape }}" target="_blank" rel="noopener">{{ p.last | split: '/' | last | split: '?' | first | escape }}</a>
+          {%- else -%}
+            <b>{{ p.last | escape }}</b>
+          {%- endif -%}
+        </p>
+      {%- endif -%}
+    {%- endfor -%}
+    {%- for a in item.line_level_discount_allocations -%}
+      <p class="ln-disc">{{ a.discount_application.title | escape }} <b>−{{ a.amount | money }}</b></p>
+    {%- endfor -%}
+    <div class="ln-row">
+      <div class="qty" data-qty>
+        <button type="button" data-q="-1" aria-label="Fewer: {{ ttl }}">−</button>
+        <input type="number" name="updates[]" min="0" value="{{ item.quantity }}" inputmode="numeric" data-line-qty data-line="{{ i }}" aria-label="Quantity: {{ ttl }}">
+        <button type="button" data-q="1" aria-label="More: {{ ttl }}">+</button>
+      </div>
+      <a class="ln-rm" href="{{ routes.cart_change_url }}?line={{ i }}&amp;quantity=0" data-remove data-line="{{ i }}" aria-label="Remove {{ ttl }}">Remove</a>
+    </div>
+  </div>
+</li>

@@ -1,0 +1,76 @@
+{%- assign tk_countries = '{countries}' -%}
+{%- assign tk_giftamounts = '{giftamounts}' -%}
+{%- liquid
+  capture raw
+    render 'mc-countries'
+  endcapture
+  assign countries = raw | split: ';'
+  # gift card face values are the variant names ("$10.00", "$25.00" ...), set in CAD; the answer text adds " CAD"
+  assign amts = ''
+  for p in collections['all'].products
+    if p.gift_card?
+      for v in p.variants
+        if v.title == 'Default Title'
+          assign amt = v.price | money
+        else
+          assign amt = v.title
+        endif
+        assign amts = amts | append: amt | append: '|'
+      endfor
+    endif
+  endfor
+  assign gift_amounts = amts | split: '|' | join: ', ' | replace_last: ', ', ' and '
+-%}
+<!-- FAQ: the debrief -->
+<section class="spread dark faq-spread" aria-labelledby="faqH">
+  <div class="wrap fq-grid">
+    <div class="fq-head">
+      <header class="pg-head">
+        <p class="pg-file mono"><span class="pg-no">MC-106</span><span>{{ section.settings.kicker | escape }}</span></p>
+        <h1 class="h1 pg-h" id="faqH"><span class="tw caret" style="--n:{{ section.settings.heading | size }}">{{ section.settings.heading | escape }}</span></h1>
+        {%- if section.settings.deck != blank %}<p class="pg-sub">{{ section.settings.deck | escape }}</p>{% endif -%}
+      </header>
+      <nav class="fq-jump" aria-label="Help topics"><a href="/pages/shipping">Shipping</a><a href="/pages/shipping#returns">Returns</a><a href="/pages/shipping#sizing">Size guide</a></nav>
+    </div>
+    <div class="transcript paper">
+      <span class="clip" aria-hidden="true"></span>
+      <div class="faq-list">
+        {%- for block in section.blocks -%}
+          {%- assign qn = forloop.index | prepend: '0' | slice: -2, 2 -%}
+          <details{% if forloop.first %} open{% endif %} {{ block.shopify_attributes }}><summary><span class="mono q-no" aria-hidden="true">Q.{{ qn }}</span><b>{{ block.settings.question | escape }}</b><i class="pm" aria-hidden="true"></i></summary><div class="ans">{{ block.settings.answer | replace: tk_countries, countries.size | replace: tk_giftamounts, gift_amounts }}</div></details>
+        {%- endfor -%}
+      </div>
+      <div class="fq-foot">
+        <p class="mono">{{ section.settings.foot_label | escape }}</p>
+        <a href="{{ section.settings.report_url | default: '/pages/contact' }}">{{ section.settings.foot_link | escape }}<span class="arr" aria-hidden="true"></span></a>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">
+{ "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{% for block in section.blocks %}{ "@type": "Question", "name": {{ block.settings.question | json }}, "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | replace: tk_countries, countries.size | replace: tk_giftamounts, gift_amounts | strip_html | strip_newlines | json }} } }{% unless forloop.last %},{% endunless %}{% endfor %}] }
+</script>
+
+{% schema %}
+{
+  "name": "FAQ",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small label", "default": "Debrief" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "FAQ" },
+    { "type": "text", "id": "deck", "label": "One line", "info": "Optional." },
+    { "type": "text", "id": "foot_label", "label": "Bottom label", "default": "Not here?" },
+    { "type": "text", "id": "foot_link", "label": "Bottom link text", "default": "Ask us" },
+    { "type": "url", "id": "report_url", "label": "Bottom link" }
+  ],
+  "blocks": [
+    {
+      "type": "qa", "name": "Question", "limit": 30,
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Do you ship to Nigeria?" },
+        { "type": "richtext", "id": "answer", "label": "Answer ({countries} = live count, {giftamounts} = gift card amounts)", "default": "<p>Yes. The rate shows at checkout.</p>" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "FAQ" }]
+}
+{% endschema %}

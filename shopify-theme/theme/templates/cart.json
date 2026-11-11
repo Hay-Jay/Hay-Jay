@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "main": {
+      "type": "mc-cart",
+      "settings": {
+        "show_note": false,
+        "offer_on": true,
+        "offer_product": "monochrome-magazine-the-vision-issue-print",
+        "offer_title": "Free with your {item}",
+        "offer_name": "The Vision Issue",
+        "offer_note": "Discount applies at checkout."
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

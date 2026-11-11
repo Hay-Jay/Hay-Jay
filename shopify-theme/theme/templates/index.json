@@ -1,0 +1,76 @@
+{
+  "sections": {
+    "cover": {
+      "type": "mc-home-cover",
+      "blocks": {
+        "photo-1": { "type": "photo", "settings": { "product": "white-monochrome-jersey", "photo": 10 } },
+        "photo-2": { "type": "photo", "settings": { "product": "black-monochrome-jersey", "photo": 4 } },
+        "photo-3": { "type": "photo", "settings": { "product": "acid-washed-monochrome-hoodie", "photo": 4 } },
+        "photo-4": { "type": "photo", "settings": { "product": "monochrome-acid-washed-black", "photo": 11 } },
+        "photo-5": { "type": "photo", "settings": { "product": "monochrome-cargo-skirt", "photo": 5 } }
+      },
+      "block_order": ["photo-1", "photo-2", "photo-3", "photo-4", "photo-5"],
+      "settings": {}
+    },
+    "wanted": {
+      "type": "mc-home-wanted",
+      "settings": {
+        "products": ["custom-monochrome-jersey", "acid-washed-monochrome-hoodie", "monochrome-sleeveless-crop-top", "trinity-fidget-ring"]
+      }
+    },
+    "apps": {
+      "type": "mc-apps",
+      "blocks": {
+        "klarna": {
+          "type": "shopify://apps/klarna-on-site-messaging/blocks/app-block/b95936a9-74b6-4a95-8103-6a1b6459c25e",
+          "settings": {
+            "data_key": "top-strip-promotion-badge",
+            "theme": "default",
+            "topPadding": "0",
+            "bottomPadding": "0",
+            "messagePrefix": ""
+          }
+        }
+      },
+      "block_order": ["klarna"],
+      "settings": {}
+    },
+    "categories": {
+      "type": "mc-home-cats",
+      "blocks": {
+        "tile-1": { "type": "tile", "settings": { "label": "Tops", "filter": "top", "product": "monochrome-acid-washed-grey", "photo": 15 } },
+        "tile-2": { "type": "tile", "settings": { "label": "Bottoms", "filter": "bottom", "product": "monochrome-cargo-skirt", "photo": 9 } },
+        "tile-3": { "type": "tile", "settings": { "label": "Hardware", "filter": "accessory", "product": "monochrome-cross-necklace", "photo": 2 } },
+        "tile-4": { "type": "tile", "settings": { "label": "The Vision Issue", "filter": "print" } }
+      },
+      "block_order": ["tile-1", "tile-2", "tile-3", "tile-4"],
+      "settings": {}
+    },
+    "magazine": {
+      "type": "mc-home-magazine",
+      "settings": {
+        "countdown_link": false
+      }
+    },
+    "lookbook": {
+      "type": "mc-home-lookbook",
+      "blocks": {
+        "frame-1": { "type": "frame", "settings": { "product": "monochrome-acid-washed-black", "photo": 4, "ratio": "1/1" } },
+        "frame-2": { "type": "frame", "settings": { "product": "white-monochrome-jersey", "photo": 3, "ratio": "3/2" } },
+        "frame-3": { "type": "frame", "settings": { "product": "monochrome-sweatshirt", "photo": 2, "ratio": "4/5" } },
+        "frame-4": { "type": "frame", "settings": { "product": "monochrome-cargo-skirt", "photo": 2, "ratio": "3/2" } },
+        "frame-5": { "type": "frame", "settings": { "product": "black-monochrome-jersey", "photo": 6, "ratio": "4/5" } },
+        "frame-6": { "type": "frame", "settings": { "product": "monochrome-pants-chain", "photo": 2, "ratio": "1/1" } },
+        "frame-7": { "type": "frame", "settings": { "product": "monochrome-sleeveless-crop-top", "photo": 3, "ratio": "3/2" } },
+        "frame-8": { "type": "frame", "settings": { "product": "acid-washed-monochrome-hoodie", "photo": 1, "ratio": "4/5" } }
+      },
+      "block_order": ["frame-1", "frame-2", "frame-3", "frame-4", "frame-5", "frame-6", "frame-7", "frame-8"],
+      "settings": {}
+    },
+    "subscribe": {
+      "type": "mc-home-subscribe",
+      "settings": {}
+    }
+  },
+  "order": ["cover", "wanted", "apps", "categories", "magazine", "lookbook", "subscribe"]
+}

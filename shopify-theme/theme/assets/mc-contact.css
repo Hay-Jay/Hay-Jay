@@ -1,0 +1,76 @@
+/* CONTACT — a secure channel: the lines as big link rows, then the message form on a taped sheet.
+   Also styles the 404, the team page (personnel file), plain pages and Shopify's policy pages. */
+.ct-open { overflow: clip; padding-top: clamp(26px, 4vw, 52px); }
+.ct-grid { display: grid; gap: clamp(28px, 5vw, 64px); align-items: center; }
+.ct-term .pg-head { margin-bottom: 20px; }
+.ct-live { display: inline-flex; align-items: center; color: var(--fg); }
+.ct-live .rec { width: 8px; height: 8px; box-shadow: none; }
+.ct-jump { margin-top: 4px; }
+.ct-lines { align-self: end; }
+.ct-open .cn-links b { font-size: clamp(1.9rem, 6vw, 3.4rem); }
+@media (min-width: 960px) { .ct-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .ct-open .cn-links b { white-space: nowrap; font-size: clamp(1.9rem, 3vw, 3.1rem); } }
+
+/* the message form */
+.ct-form-sec { overflow: clip; padding-top: clamp(40px, 6vw, 72px); }
+.ct-msg { max-width: 860px; margin-inline: auto; }
+.ct-msg .h2 { font-size: clamp(2.3rem, 5vw, 3.8rem); }
+.ct-fields { display: grid; gap: 14px; margin-bottom: 18px; }
+@media (min-width: 700px) { .ct-fields { grid-template-columns: 1fr 1fr; } .ct-f-wide { grid-column: 1 / -1; } }
+.ct-f { display: grid; gap: 6px; color: var(--dim); }
+.ct-f input, .ct-f textarea { width: 100%; min-width: 0; background: #f5f5f5; border: 2px solid var(--fg); border-radius: 0; color: var(--fg); font: 400 16px/1.4 var(--type); padding: 12px 14px; box-shadow: inset 3px 3px 0 rgba(0, 0, 0, .14); outline-offset: 4px; }
+.ct-f textarea { resize: vertical; min-height: 140px; }
+.ct-ok { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin: 0; font: 400 1.2rem/1.4 var(--type); }
+.ct-ok .stamp { position: relative; }
+.ct-stamp { position: absolute; right: clamp(14px, 3vw, 40px); top: clamp(12px, 2vw, 24px); }
+@media (max-width: 599px) { .ct-stamp { display: none; } }
+
+/* ---- 404: a short apology, a search box and three ways back to the shop ------------------------------------------- */
+.lost { display: grid; align-items: start; overflow: clip; padding-top: clamp(26px, 4vw, 52px); }
+@media (min-width: 1000px) { .lost { min-height: calc(100svh - 80px); align-items: center; } }
+.lost-wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: center; }
+.lost-in { max-width: 56rem; width: 100%; }
+.lost-find { display: flex; max-width: 520px; margin-bottom: 26px; border: 2px solid var(--fg); }
+.lost-find input { flex: 1; min-width: 0; min-height: 52px; padding: 10px 14px; background: transparent; border: 0; border-radius: 0; color: var(--fg); font: 400 16px/1.2 var(--type); outline: none; }
+.lost-find input::placeholder { color: #8f8f8f; opacity: 1; }
+.lost-find:focus-within { box-shadow: 0 0 0 3px rgba(255, 255, 255, .25); }
+.lost-find button { flex: none; min-height: 52px; padding: 0 18px; background: var(--fg); color: #0a0a0a; font: 800 1.2rem/1 var(--head); letter-spacing: .06em; text-transform: uppercase; }
+.lost-find button:focus-visible { outline: 2px solid #0a0a0a; outline-offset: -5px; }
+.lost-links { border-top: 3px solid var(--fg); }
+.lost-links a { display: grid; grid-template-columns: 3rem 1fr auto; align-items: center; gap: 10px; padding: 12px 0; min-height: 44px; border-bottom: 1px solid var(--rule); text-decoration: none; transition: background .2s, color .2s, padding .2s; }
+.lost-links b { font: 900 clamp(1.7rem, 4.2vw, 2.8rem)/1 var(--head); text-transform: uppercase; letter-spacing: .01em; }
+.lost-links .mono { color: var(--dim); }
+.lost-links a:hover, .lost-links a:focus-visible { background: var(--fg); color: #0a0a0a; padding-inline: 10px; }
+.lost-links a:hover .mono, .lost-links a:focus-visible .mono { color: #0a0a0a; }
+.lost-links .arr { width: 22px; height: 22px; margin: 0; }
+.lost-stamp { justify-self: start; order: -1; }
+.lost-stamp .stamp { font-size: clamp(1.6rem, 8vw, 4.4rem); white-space: normal; text-align: center; max-width: 5.4em; line-height: 1.02; }
+@media (max-width: 999px) { .lost-stamp { order: 0; justify-self: end; margin-top: -8px; } }
+@media (min-width: 1000px) { .lost-wrap { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); } .lost-stamp { order: 0; justify-self: center; } .lost-stamp .stamp { font-size: clamp(3rem, 5.4vw, 5.6rem); } }
+
+/* ---- the team page: roles as file labels, names in big type -------------------------------------------------------- */
+.pf .pg-head { margin-bottom: clamp(18px, 3vw, 30px); }
+.pf-body { max-width: 52em; border-top: 3px solid var(--fg); padding-top: 8px; }
+.pf .pf-body p { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--rule); font: 900 clamp(1.7rem, 4.2vw, 3rem)/1 var(--head); text-transform: uppercase; letter-spacing: .01em; }
+.pf .pf-body p:has(> em, > strong) { padding: 26px 0 8px; border-bottom: 0; font: 700 12px/1.3 var(--mono); letter-spacing: .16em; color: var(--dim); }
+.pf .pf-body p:first-child:has(> em, > strong) { padding-top: 12px; }
+.pf-body em, .pf-body strong { font-style: normal; font-weight: 700; }
+
+/* ---- plain pages, articles and Shopify's policy pages ------------------------------------------------------------- */
+.rte p { margin: 0 0 1em; }
+.rte a { text-underline-offset: 4px; }
+.pg-body { max-width: 46em; font-size: clamp(1rem, 1.3vw, 1.1rem); }
+.pg-body h2, .pg-body h3 { font-family: var(--head); text-transform: uppercase; line-height: 1; margin: 1.4em 0 .5em; }
+.pg-body img { height: auto; }
+.shopify-policy__container { max-width: 52em; margin: 0 auto; padding: clamp(36px, 6vw, 72px) var(--gut) clamp(56px, 8vw, 96px); }
+.shopify-policy__title h1 { font: 900 clamp(2.6rem, 6vw, 4.6rem)/.95 var(--head); text-transform: uppercase; margin: 0 0 1em; }
+.shopify-policy__body { font-size: 1.05rem; }
+.art-fig { margin: 0 0 clamp(20px, 3vw, 32px); max-width: 960px; }
+.art-fig img { width: 100%; height: auto; }
+.blog-list { border-top: 3px solid var(--fg); max-width: 960px; }
+.blog-list li { border-bottom: 1px solid var(--rule); }
+.blog-list a { display: grid; grid-template-columns: 6.4rem minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 16px 0; min-height: 44px; text-decoration: none; }
+.blog-list b { font: 900 clamp(1.5rem, 3vw, 2.3rem)/1 var(--head); text-transform: uppercase; }
+.blog-list .mono { color: var(--dim); }
+.blog-list a:hover b { text-decoration: underline; text-underline-offset: 4px; }
+.pg-pager { display: flex; gap: 18px; align-items: center; margin-top: 20px; }
+@media (max-width: 599px) { .blog-list a { grid-template-columns: 1fr; gap: 4px; } }

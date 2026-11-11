@@ -1,0 +1,20 @@
+<!-- RUNNING HEAD: the classification banner scrolls away, the dossier tab bar stays (position:sticky with a negative top) -->
+<header class="hdr" id="bar">
+  <div class="banner top" aria-hidden="true">
+    <span class="bn-l mono">{{ladder_html}}<span>Clearance L{{level}}</span></span>
+    <span class="bn-c">{{mark}}</span>
+    <span class="bn-r mono">Page {{folio}} of {{pages_total}}</span>
+  </div>
+  <div class="bar">
+    <a class="bar-brand" href="{{href:}}"{{nav_home_current}} aria-label="MONOCHROME, mission briefing">
+      <img class="bar-emblem" src="{{asset:assets/emblem.webp}}" alt="" width="26" height="28">
+      <img class="bar-word" src="{{asset:assets/wordmark.webp}}" alt="MONOCHROME" width="1170" height="114"><span class="bar-div mono">Div. of Wearables</span>
+    </a>
+    <nav class="tabs" aria-label="Primary">{{nav_bar}}</nav>
+    <div class="bar-r">
+      <button class="bar-btn" id="declass" type="button" aria-pressed="false" title="Lift every redaction bar on every page"><span class="dc-ico" aria-hidden="true"></span><span class="bar-lbl">Declassify</span></button>
+      <a class="bar-btn" id="menuBtn" href="#contents" aria-controls="menu" aria-expanded="false"><span>Index</span></a>
+      <a class="bar-btn" data-store="/cart" href="{{store_cart}}">Bag<span class="arr" aria-hidden="true"></span></a>
+    </div>
+  </div>
+</header>

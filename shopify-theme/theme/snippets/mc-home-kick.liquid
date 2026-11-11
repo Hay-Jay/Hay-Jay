@@ -1,0 +1,19 @@
+{%- comment -%}
+  Home section file line, e.g. "File 01 / Top sellers": the part before " / " becomes an inverted file-number chip, then the label and a
+  decorative clearance ladder. Text without " / " is just the label. Params: text (empty: nothing), level (1-5 bars lit, default 3).
+{%- endcomment -%}
+{%- if text != blank -%}
+  {%- liquid
+    assign bits = text | split: ' / '
+    assign lv = level | default: 3 | plus: 0
+    assign label = text
+    if bits.size > 1
+      assign label = text | remove_first: bits[0] | remove_first: ' / '
+    endif
+  -%}
+  <p class="kick mono hk">
+    {%- if bits.size > 1 %}<b class="hk-no">{{ bits[0] | escape }}</b>{% endif -%}
+    <span class="hk-t">{{ label | escape }}</span>
+    <span class="ladder hk-lv" aria-hidden="true">{%- for i in (1..5) -%}<i{% if i <= lv %} class="on"{% endif %}></i>{%- endfor -%}</span>
+  </p>
+{%- endif -%}

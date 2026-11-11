@@ -1,0 +1,177 @@
+{%- comment -%}
+  Shop by category: big photo tiles, one per "Tile" block. A tile picks a shop filter (tops, bottoms, hardware, gift cards, print or
+  everything): it links to /collections/all?c=<filter> (print goes straight to the magazine when there is one) and shows the live
+  number of pieces. The photo is the block's image, else a product photo, else the first product of that filter.
+  Each tile is a RESTRICTED ACCESS file: mc-home.js arms the lock (redaction bars, a hazard frame and a plate) and it declassifies on
+  hover or keyboard focus, or on touch screens as the tile scrolls into view. Without JavaScript, or with reduced motion, the lock is
+  never shown: the tiles are plain photo links.
+{%- endcomment -%}
+{%- liquid
+  assign n_top = 0
+  assign n_bottom = 0
+  assign n_acc = 0
+  assign n_gift = 0
+  assign n_print = 0
+  assign first_top = nil
+  assign first_bottom = nil
+  assign first_acc = nil
+  assign first_gift = nil
+  assign first_print = nil
+  for p in collections['all'].products
+    capture cls
+      render 'mc-class', product: p
+    endcapture
+    case cls
+      when 'top'
+        assign n_top = n_top | plus: 1
+        if first_top == blank
+          assign first_top = p
+        endif
+      when 'bottom'
+        assign n_bottom = n_bottom | plus: 1
+        if first_bottom == blank
+          assign first_bottom = p
+        endif
+      when 'accessory'
+        assign n_acc = n_acc | plus: 1
+        if first_acc == blank
+          assign first_acc = p
+        endif
+      when 'gift'
+        assign n_gift = n_gift | plus: 1
+        if first_gift == blank
+          assign first_gift = p
+        endif
+      when 'print'
+        assign n_print = n_print | plus: 1
+        if first_print == blank
+          assign first_print = p
+        endif
+    endcase
+  endfor
+  capture mag_handle
+    render 'mc-magazine'
+  endcapture
+  if mag_handle != blank
+    assign mag = all_products[mag_handle]
+  endif
+-%}
+<section class="spread paper hcats" id="categories" aria-labelledby="catsH">
+  <div class="wrap">
+    <header class="hsec-h">
+      <div>
+        {% render 'mc-home-kick', text: section.settings.kicker, level: 2 %}
+        <h2 class="h2 hx" id="catsH">{{ section.settings.heading | escape }}</h2>
+      </div>
+    </header>
+    <ul class="hc-grid" role="list" data-hc>
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign f = block.settings.filter
+          assign n = collections['all'].products_count
+          assign src = nil
+          assign url = routes.all_products_collection_url | append: '?c=' | append: f
+          case f
+            when 'top'
+              assign n = n_top
+              assign src = first_top
+            when 'bottom'
+              assign n = n_bottom
+              assign src = first_bottom
+            when 'accessory'
+              assign n = n_acc
+              assign src = first_acc
+            when 'gift'
+              assign n = n_gift
+              assign src = first_gift
+            when 'print'
+              assign n = n_print
+              assign src = first_print
+              if mag != blank
+                assign src = mag
+                assign url = mag.url
+              endif
+            else
+              assign url = routes.all_products_collection_url
+              assign src = collections['all'].products.first
+          endcase
+          if block.settings.url != blank
+            assign url = block.settings.url
+          endif
+          if block.settings.product != blank
+            assign src = block.settings.product
+          endif
+          assign pn = block.settings.photo | minus: 1
+          assign pic = block.settings.image
+          if pic == blank and src != blank
+            assign pic = src.images[pn] | default: src.featured_image
+          endif
+          if f == 'print' and mag != blank and block.settings.product == blank
+            assign meta = mag.price | money
+          elsif n == 1
+            assign meta = section.settings.one_label
+          else
+            assign meta = section.settings.many_label | replace: '{n}', n
+          endif
+        -%}
+        <li class="hc-li" {{ block.shopify_attributes }}>
+          <a class="hc-tile" href="{{ url }}" style="--i:{{ forloop.index0 }}">
+            <span class="hc-ph">
+              {%- if pic != blank -%}{% render 'mc-img', image: pic, alt: '', widths: '300,450,600,800', sizes: '(min-width:700px) 23vw, 46vw' %}{%- endif -%}
+              <i class="hc-vf" aria-hidden="true"></i>
+            </span>
+            <span class="hc-no mono" aria-hidden="true">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+            <span class="hc-txt"><b class="hc-lbl"><span>{{ block.settings.label | escape }}</span></b><span class="hc-n mono">{{ meta | escape }}</span></span>
+            <i class="arr hc-arr" aria-hidden="true"></i>
+            {%- if section.settings.lock_label != blank -%}
+              <span class="hc-lock" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><b class="hc-plate"><small>{{ section.settings.lock_label | escape }} // {{ forloop.index | prepend: '0' | slice: -2, 2 }}</small> <span>{{ block.settings.label | escape }}</span></b></span>
+            {%- endif -%}
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shop by category",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Small heading", "info": "Text before \" / \" becomes the file number.", "default": "File 02 / Departments" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by category" },
+    { "type": "text", "id": "many_label", "label": "Count text ({n} = live number)", "default": "{n} pieces" },
+    { "type": "text", "id": "one_label", "label": "Count text for a single piece", "default": "1 piece" },
+    { "type": "header", "content": "Restricted access" },
+    { "type": "paragraph", "content": "Each tile starts under redaction bars, with its label on a plate; they lift on hover, or as the tile scrolls into view on phones." },
+    { "type": "text", "id": "lock_label", "label": "Plate marking (the tile number follows)", "info": "Empty: no bars, plain photo tiles.", "default": "Restricted" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "limit": 8,
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Tops" },
+        { "type": "select", "id": "filter", "label": "Shop filter", "options": [
+          { "value": "top", "label": "Tops" },
+          { "value": "bottom", "label": "Bottoms" },
+          { "value": "accessory", "label": "Hardware (rings, chains, necklaces)" },
+          { "value": "gift", "label": "Gift cards" },
+          { "value": "print", "label": "Print (the magazine)" },
+          { "value": "all", "label": "Everything" }
+        ], "default": "top" },
+        { "type": "url", "id": "url", "label": "Link", "info": "Empty: the shop with this filter (print: the magazine)." },
+        { "type": "image_picker", "id": "image", "label": "Photo" },
+        { "type": "product", "id": "product", "label": "Or a product's photo", "info": "Used when no photo is chosen. Empty: the first product of the filter." },
+        { "type": "range", "id": "photo", "label": "Photo number", "min": 1, "max": 20, "step": 1, "default": 1 }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Shop by category", "blocks": [
+    { "type": "tile", "settings": { "label": "Tops", "filter": "top" } },
+    { "type": "tile", "settings": { "label": "Bottoms", "filter": "bottom" } },
+    { "type": "tile", "settings": { "label": "Hardware", "filter": "accessory" } },
+    { "type": "tile", "settings": { "label": "The Vision Issue", "filter": "print" } }
+  ] }]
+}
+{% endschema %}
