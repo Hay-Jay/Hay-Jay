@@ -1,0 +1,28 @@
+{
+ "id": "n-youth",
+ "outlet": "Naija News",
+ "url": "https://www.naijanews.com/2026/11/03/inec-explains-drop-youth-voter-registration-ahead-2027-elections/",
+ "title": "INEC Explains Drop In Youth Voter Registration Ahead Of 2027 Elections",
+ "date": "2026-11-03",
+ "sentence": "INEC Explains Drop In Youth Voter Registration Ahead Of 2027 Elections",
+ "head": {
+  "w": 600,
+  "h": 661.96875
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.13444743426332437,
+   "w": 0.9169270833333333,
+   "h": 0.04229806920643912
+  },
+  {
+   "x": 0.02,
+   "y": 0.17370060897889816,
+   "w": 0.23640625,
+   "h": 0.04229806920643912
+  }
+ ]
+}

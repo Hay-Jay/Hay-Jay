@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Naija 2027 Studio</title>
+<link rel="stylesheet" href="studio.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <div class="bg">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+      <div class="grid"></div>
+    </div>
+    <div id="scenes"></div>
+    <div class="chrome">
+      <div id="bars"></div>
+      <div class="tag"><span class="flag"><i></i><i></i><i></i></span><span id="handle"></span></div>
+    </div>
+  </div>
+</div>
+<div id="controls">
+  <select id="pick"></select>
+  <button id="play">Play</button>
+  <button id="restart">Restart</button>
+  <input id="scrub" type="range" min="0" max="1000" value="0">
+  <span id="time">0.0s</span>
+</div>
+<script src="assets/clips/clips.js"></script>
+<script src="videos.js"></script>
+<script src="vo/timing.js"></script>
+<script src="studio.js"></script>
+</body>
+</html>

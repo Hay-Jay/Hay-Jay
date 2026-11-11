@@ -1,0 +1,28 @@
+{
+ "id": "n-list",
+ "outlet": "Naija News",
+ "url": "https://www.naijanews.com/2026/09/12/inec-releases-presidential-candidates/",
+ "title": "INEC Releases Final List Of 2027 Presidential Candidates (Full List)",
+ "date": "2026-09-12",
+ "sentence": "INEC Releases Final List Of 2027 Presidential Candidates (Full List)",
+ "head": {
+  "w": 600,
+  "h": 661.96875
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.13444743426332437,
+   "w": 0.9117447916666667,
+   "h": 0.04229806920643912
+  },
+  {
+   "x": 0.02,
+   "y": 0.17370060897889816,
+   "w": 0.14205729166666667,
+   "h": 0.04229806920643912
+  }
+ ]
+}

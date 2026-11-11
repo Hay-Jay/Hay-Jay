@@ -1,0 +1,43 @@
+{
+ "id": "fc-oldvideo",
+ "outlet": "Dubawa",
+ "url": "https://dubawa.org/presidency-tinubus-x-pages-circulate-old-video-amid-endbadgovernance-protest/",
+ "title": "Presidency, Tinubu’s X pages circulate old video amid #EndBadGovernance protest",
+ "date": "2024-08-10",
+ "sentence": "The video was recycled from a July 2023 broadcast by Mr Tinubu to address the outburst that greeted his administration’s decision to remove fuel subsidies.",
+ "head": {
+  "w": 600,
+  "h": 624.375
+ },
+ "quote": {
+  "w": 584,
+  "h": 191.5625
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.384230522260274,
+   "y": 0.21402936378466558,
+   "w": 0.4942744006849315,
+   "h": 0.10440456769983687
+  },
+  {
+   "x": 0.095703125,
+   "y": 0.3674551386623165,
+   "w": 0.7501070205479452,
+   "h": 0.10440456769983687
+  },
+  {
+   "x": 0.095703125,
+   "y": 0.5208809135399673,
+   "w": 0.7858786386986302,
+   "h": 0.10440456769983687
+  },
+  {
+   "x": 0.095703125,
+   "y": 0.6743066884176183,
+   "w": 0.1446917808219178,
+   "h": 0.10440456769983687
+  }
+ ]
+}

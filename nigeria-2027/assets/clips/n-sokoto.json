@@ -1,0 +1,28 @@
+{
+ "id": "n-sokoto",
+ "outlet": "Naija News",
+ "url": "https://www.naijanews.com/2026/11/03/atiku-disrupt-adc-campaign-rally-in-sokoto/",
+ "title": "Atiku Raises Alarm Over Alleged Plot To Disrupt ADC Campaign Rally In Sokoto",
+ "date": "2026-11-03",
+ "sentence": "Atiku Raises Alarm Over Alleged Plot To Disrupt ADC Campaign Rally In Sokoto",
+ "head": {
+  "w": 600,
+  "h": 661.96875
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.13444743426332437,
+   "w": 0.8523958333333334,
+   "h": 0.04229806920643912
+  },
+  {
+   "x": 0.02,
+   "y": 0.17370060897889816,
+   "w": 0.4119010416666667,
+   "h": 0.04229806920643912
+  }
+ ]
+}
