@@ -163,7 +163,7 @@ body.render #stage{transform:none!important}
 .dyk-big{font:400 300px/.85 Anton;color:#fff}
 .dyk-bg{position:absolute;inset:-40px;background:center/cover no-repeat;filter:saturate(1.1)}
 .dyk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,19,11,.55),rgba(3,19,11,.78) 40%,rgba(3,19,11,.95))}
-.scene .dyk-bg ~ *{position:relative}
+.scene .dyk-bg ~ *:not(.dyk-shade){position:relative}
 .dyk-vs{display:grid;gap:22px;margin-top:20px}
 .dyk-row{display:flex;align-items:baseline;gap:28px}
 .dyk-n{font:400 170px/.9 Anton;min-width:420px;font-variant-numeric:tabular-nums}
