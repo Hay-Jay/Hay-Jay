@@ -715,6 +715,56 @@ Object.assign(window.NARRATION, {
   ],
 });
 
+/* ---------------- "Did you know?" series: one jaw-drop fact, ~30s, creator's cloned voice ---------------- */
+const photoBg = (img, pos = 'center') => `<div class="dyk-bg a" data-a="zoom" style="background-image:url('${img}');background-position:${pos}"></div>`;
+window.VIDEOS.push({
+  id: 'dyk-turnout',
+  voice: 'clone',
+  title: 'Did you know? 68 million stayed home',
+  caption: 'Did you know? 68 million registered Nigerians did not vote in 2023. The winner got 8.8 million votes. 103 million of us are registered for 16 January 2027. Get your PVC. Sources: INEC. Full facts on Naija Decides: link in bio. 🇳🇬 #Nigeria2027 #NigeriaDecides2027 #PVC #DidYouKnow',
+  scenes: [
+    { dur: 4.2, html: `
+      <div class="dyk-tag a" data-a="pop">Did you know?</div>
+      <div class="gap"></div>
+      <div class="dyk-num a" data-a="count" data-to="103428715" data-t=".3"></div>
+      <div class="h2 a" data-a="up" data-t="1.1">Nigerians are registered to vote</div>
+      <div class="sub a" data-a="up" data-t="1.5">INEC, October 2026</div>` },
+    { dur: 5, mood: 'red', html: `
+      ${photoBg('site/news/n38.jpg')}
+      <div class="dyk-shade"></div>
+      <div class="kicker a red" data-a="up">The 2023 election</div>
+      <div class="dyk-big a" data-a="pop" data-t=".3"><span class="red">1</span> in <span class="red">4</span></div>
+      <div class="h2 a" data-a="up" data-t=".8">actually voted</div>
+      <div class="gap-s"></div>
+      ${people(27, 1.1)}
+      <div class="sub a" data-a="up" data-t="1.6">26.7% turnout · INEC</div>` },
+    { dur: 7, html: `
+      <div class="kicker a" data-a="up">Let that sink in</div>
+      <div class="dyk-vs">
+        <div class="dyk-row a" data-a="left" data-t=".3"><div class="dyk-n red" ><span class="a" data-a="count" data-to="68.5" data-dec="1" data-t=".4" data-suf="M"></span></div><div class="body">registered voters <b>stayed home</b></div></div>
+        <div class="dyk-bar"><i class="a red-bg" data-a="bar" data-w="100" data-t=".6"></i></div>
+        <div class="dyk-row a" data-a="left" data-t="1.4"><div class="dyk-n"><span class="a" data-a="count" data-to="8.79" data-dec="2" data-t="1.5" data-suf="M"></span></div><div class="body">votes <b>won the presidency</b></div></div>
+        <div class="dyk-bar"><i class="a" data-a="bar" data-w="12.8" data-t="1.7"></i></div>
+      </div>
+      <div class="gap"></div>
+      <div class="a" data-a="stamp" data-t="2.6"><span class="stamp amber">Nearly 8×</span></div>
+      <div class="sub a" data-a="up" data-t="3" style="margin-top:28px">INEC 2023: 93.5M registered, 26.7% turnout, winner 8,794,726 votes</div>` },
+    { dur: 4.6, html: `
+      ${photoBg('site/news/n39.jpg', 'center 30%')}
+      <div class="dyk-shade"></div>
+      <div class="kicker a" data-a="up">16 January 2027</div>
+      <div class="h1 a" data-a="up" data-t=".2">Your vote<br><span class="mark">is the majority.</span></div>
+      <div class="gap"></div>
+      <div class="body a" data-a="up" data-t=".9">Get your PVC. Find your polling unit. Show up.</div>` },
+  ],
+});
+window.NARRATION['dyk-turnout'] = [
+  ['urgent',  'Did you know? One hundred and three million Nigerians are now registered to vote.'],
+  ['grave',   'But in the last election, only about one in four people actually voted.'],
+  ['fired',   'Sixty-eight million registered voters stayed home. The winner got less than nine million votes. The people who stayed home could have decided it... nearly eight times over.'],
+  ['hopeful', 'January sixteenth is coming. Get your PVC, find your polling unit, and show up.'],
+];
+
 /* Closing promo for the Naija Decides website, added to every video. */
 (function(){
   const faces = [['site/photos/atiku.jpg','var(--adc)'],['site/photos/tinubu.jpg','var(--apc)'],['site/photos/obi.jpg','var(--ndc)']];

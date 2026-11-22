@@ -50,11 +50,29 @@ async function openPage() {
 const meta = await openPage();
 const { videos, voice } = await meta.evaluate(() => ({
   voice: window.VOICE,
-  videos: VIDEOS.map(v => ({ id: v.id, durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
+  videos: VIDEOS.map(v => ({ id: v.id, clone: v.voice === 'clone', durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
 }));
 await meta.close();
 
+// Cloned voice: mood -> [exaggeration, cfg_weight] (higher exaggeration = more emotion; lower cfg = slower, weightier)
+const CLONE = { calm: [0.45, 0.5], serious: [0.55, 0.45], grave: [0.6, 0.4], hopeful: [0.55, 0.5], urgent: [0.7, 0.45], fired: [0.8, 0.35] };
+const CLONE_PY = process.env.CLONE_PY || 'python3';  // set CLONE_PY to the Python that has chatterbox-tts
 const timing = {};
+for (const v of videos.filter(v => v.clone && !silent && (!only.length || only.includes(v.id)))) {
+  const dir = path.join(here, 'vo', v.id); mkdirSync(dir, { recursive: true });
+  const jobs = [];
+  v.lines.forEach((line, i) => {
+    const [mood, text] = Array.isArray(line) ? line : ['serious', line]; if (!text) return;
+    const [ex, cfg] = CLONE[mood] || CLONE.serious;
+    const out = path.join(dir, `${nn(i)}.wav`), txt = path.join(dir, `${nn(i)}.txt`), key = `clone|${ex}|${cfg}|${text}`;
+    if (!existsSync(out) || !existsSync(txt) || readFileSync(txt, 'utf8') !== key) jobs.push({ text, out, ex, cfg, txt, key });
+  });
+  if (jobs.length) {
+    const jf = path.join(dir, 'jobs.json'); writeFileSync(jf, JSON.stringify(jobs));
+    await run(CLONE_PY, [path.join(here, 'clonevoice.py'), jf]);
+    jobs.forEach(j => writeFileSync(j.txt, j.key));
+  }
+}
 for (const v of videos) {
   const dir = path.join(here, 'vo', v.id);
   mkdirSync(dir, { recursive: true });
@@ -64,6 +82,12 @@ for (const v of videos) {
     const [mood, text] = Array.isArray(line) ? line : ['serious', line];
     const [rate, pitch, vol] = moodProsody(mood, voice.rate);
     if (silent || !text) { v.clips.push(null); continue; }
+    if (v.clone) {
+      const wav = path.join(dir, `${nn(i)}.wav`);
+      if (!existsSync(wav)) { v.clips.push(null); continue; }
+      const len = probe(wav); v.clips.push({ mp3: wav, len });
+      v.durs[i] = Math.max(v.durs[i], +(VO_LEAD + len + VO_TAIL).toFixed(2)); continue;
+    }
     const mp3 = path.join(dir, `${nn(i)}.mp3`), txt = path.join(dir, `${nn(i)}.txt`);
     const key = `${voice.name}|${rate}|${pitch}|${vol}|${text}`;
     if (!existsSync(mp3) || !existsSync(txt) || readFileSync(txt, 'utf8') !== key) {
