@@ -548,8 +548,24 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-08T01:15:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-22T09:24:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'tinubu-ibadan-makinde', at:'2026-11-21T17:00:00+01:00', img:'news/n48.jpg', tag:'Campaign', pri:2, outlet:'The Sun', url:'https://thesun.ng/2027-tinubu-throws-jabs-at-makinde-on-home-turf/', people:['tinubu','seyi-makinde'],
+    h:'Tinubu takes veiled swipe at Makinde at Ibadan rally',
+    d:'At the APC rally at Mapo Hall, Ibadan, the President called an unnamed group the "pack up" faction with nowhere to go, widely read as a dig at Oyo governor Seyi Makinde and his APM presidential bid.',
+    why:'The South-West is split between its two sons in the race. Oyo is Makinde\'s home state.'},
+  {id:'adc-crossfire', at:'2026-11-21T12:19:00+01:00', img:'news/n47.jpg', tag:'Court', pri:2, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/21/atiku-caught-in-crossfire-is-adc-coalition-collapsing/', people:['atiku'],
+    h:'Explainer: Atiku caught in the ADC\'s fight to survive in court',
+    d:'Less than two months before the vote, the ADC is campaigning while appealing the 5 November judgment. A Federal High Court has since also ruled on a resignation letter allegedly written by Nafiu Bala Gombe, adding a new twist. INEC has kept Atiku\'s name on its list while the appeal and a stay application are pending.',
+    why:'Until the Court of Appeal rules, Atiku remains on INEC\'s list. That decision could come at any time.'},
+  {id:'bishop-atiku', at:'2026-11-22T01:40:00+01:00', img:'news/n49.jpg', tag:'Court', pri:1, outlet:'The Sun', url:'https://thesun.ng/catholic-bishop-slams-plot-to-disqualify-atiku/', people:['atiku'], claim:true,
+    h:'Awka Catholic bishop condemns "plots" to stop Atiku contesting',
+    d:'Bishop Paulinus Ezeokafor criticised efforts to keep the ADC candidate off the ballot. The ADC calls the 5 November ruling a "desperate attempt to cripple the opposition".',
+    why:'Calling it a "plot" is an opinion; the case is before the Court of Appeal.'},
+  {id:'politics-watch-1119', at:'2026-11-19T11:36:00+01:00', img:'news/n50.jpg', tag:'INEC', pri:2, outlet:'allAfrica', url:'https://allafrica.com/stories/202611190195.html', people:['tinubu','obi'],
+    h:'Week in brief: court voids APC Benue Senate swap; state police bill reaches Tinubu; ADC asks INEC to delay mock test',
+    d:'A Federal High Court invalidated the APC\'s substitution of ex-governor Gabriel Suswam as Benue North-East Senate candidate. The state police constitutional amendment bill was sent to the President. The ADC asked INEC to postpone its nationwide mock accreditation over the party-agent deadline, and Anambra police set security plans for Tinubu-supporter and Obi events.',
+    why:'INEC\'s mock accreditation tests the BVAS and result transmission before 16 January.'},
   {id:'govt-credible-pledge', at:'2026-11-07T09:20:00+01:00', img:'news/n46.jpg', tag:'INEC', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-tinubu-assures-nigerians-international-community-of-commitment-to-free-fair-credible-elections/', people:['tinubu'],
     h:'Government tells world audience it is committed to a free and fair 2027 vote',
     d:'Information minister Mohammed Idris told Türkiye\'s TRT World, at a forum in Istanbul, that the Tinubu administration supports INEC and respects its independence, and warned against fake news ahead of the election.',
@@ -894,7 +910,7 @@ const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported'
    Updated by the twice-daily update task. To add a new poll: add a category,
    then run `node nigeria-2027/site/build.mjs --snapshot` to record movement. */
 const RANK = {
-  updated: '2026-11-07T22:44:20.922Z',     // last time the data was checked (WAT)
+  updated: '2026-11-22T08:24:42.176Z',     // last time the data was checked (WAT)
   changed: '2026-11-07T10:45:19.775Z',     // last time any number changed
   everyHours: 12,
   categories: [
