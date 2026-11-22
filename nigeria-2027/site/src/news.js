@@ -3,8 +3,16 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-22T09:24:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-22T16:15:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'atiku-not-stepped-down', at:'2026-11-22T16:00:00+01:00', img:'news/n51.jpg', tag:'Campaign', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-any-party-saying-ive-stepped-down-is-working-for-tinubu-atiku/', people:['atiku','tinubu'], claim:true,
+    h:'Atiku: "I have not stepped down"; says withdrawal stories help Tinubu',
+    d:'In a Sunday statement, Atiku called reports that he had quit the race false and said no group had the authority to announce his withdrawal, accusing parties spreading the claim of "doing Tinubu\'s work". Opposition figures have been discussing uniting behind a single challenger.',
+    why:'Withdrawal rumours spread fast before elections. Trust statements from the candidate or INEC, not forwarded messages.'},
+  {id:'atiku-inec-audit', at:'2026-11-20T09:37:00+01:00', img:'news/n52.jpg', tag:'INEC', pri:2, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/headlines/926667-2027-politics-watch-from-atikus-inec-audit-demand-to-apgas-tinubu-endorsement.html', people:['atiku','tinubu','obi'],
+    h:'Atiku asks INEC to let outside experts audit result checks before 28 November mock test',
+    d:'Atiku asked INEC to allow independent experts to examine its proposed checks on polling-unit results ahead of the nationwide mock accreditation on 28 November. In Awka, Gov. Soludo handed the APGA flag to VP Shettima for Tinubu at a joint APGA–APC rally, a day before Obi\'s Onitsha town hall.',
+    why:'Independent checks on result technology build trust whoever wins. Watch INEC\'s answer before the mock test.'},
   {id:'tinubu-ibadan-makinde', at:'2026-11-21T17:00:00+01:00', img:'news/n48.jpg', tag:'Campaign', pri:2, outlet:'The Sun', url:'https://thesun.ng/2027-tinubu-throws-jabs-at-makinde-on-home-turf/', people:['tinubu','seyi-makinde'],
     h:'Tinubu takes veiled swipe at Makinde at Ibadan rally',
     d:'At the APC rally at Mapo Hall, Ibadan, the President called an unnamed group the "pack up" faction with nowhere to go, widely read as a dig at Oyo governor Seyi Makinde and his APM presidential bid.',
