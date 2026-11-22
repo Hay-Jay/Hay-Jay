@@ -82,15 +82,17 @@ const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported'
 Object.assign(S, {
   harmattan:{t:'Harmattan Intelligence via Africa Confidential',u:'https://www.africa-confidential.com/article/id/16082/new-polls-show-rising-anger-with-tinubu-on-economy-and-security'},
   oxford:{t:'Oxford-Metro poll via Tribune, Sep 2026',u:'https://tribuneonlineng.com/2027-tinubu-edges-peter-obi-by-1-55-in-oxford-metro-poll/'},
+  momentum:{t:'Google News (Nigeria edition), counted by Naija Decides',u:'https://news.google.com/?hl=en-NG&gl=NG&ceid=NG:en'},
   pig:{t:'Politico.ng PIG November map via Vanguard',u:'https://www.vanguardngr.com/2026/11/2027-youth-voters-to-reshape-polls-lai-omotola-predicts/'}
 });
-const CATCOL = {sbm:'#3dff9a', harmattan:'#4aa3ff', oxford:'#ffc83d', tmg:'#ff9d3a', pig:'#c792ff'};
+const CATCOL = {sbm:'#3dff9a', harmattan:'#4aa3ff', oxford:'#ffc83d', tmg:'#ff9d3a', pig:'#c792ff', momentum:'#ff6fae'};
 const PTS = rankPoints(RANK);
-const fmtRaw = (c, v) => c.fmt === 'net' ? (v > 0 ? '+' : '') + v : c.fmt === 'states' ? v + ' states' : v + '%';
+const fmtRaw = (c, v) => c.fmt === 'net' ? (v > 0 ? '+' : '') + v : c.fmt === 'states' ? v + ' states' : c.fmt === 'count' ? v + ' stories' : v + '%';
 const when = iso => new Date(iso).toLocaleString('en-GB', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Africa/Lagos'}) + ' WAT';
 function movement(id){
   const h = RANK.history; if (h.length < 2) return {txt:'NEW', cls:'new', d:0, r:0};
   const [prev, cur] = [h[h.length - 2], h[h.length - 1]];
+  if (cur.reset) return {txt:'NEW', cls:'new', d:0, r:0};
   const rk = snap => Object.keys(snap.points).sort((a, b) => snap.points[b] - snap.points[a]);
   const pr = rk(prev).indexOf(id), cr = rk(cur).indexOf(id), d = Math.round(((cur.points[id] || 0) - (prev.points[id] || 0)) * 10) / 10;
   if (pr < 0) return {txt:'NEW', cls:'new', d, r:0};
@@ -108,20 +110,20 @@ function popPanel(extras){
   const movers = RANK.history.length > 1 ? Object.keys(PTS).map(id => ({id, m: movement(id)})).sort((a, b) => Math.abs(b.m.d) - Math.abs(a.m.d))[0] : null;
   if (extras) return `<div class="verdict pop"><div class="eyebrow">Behind the rank</div><h3>How the rank is built</h3>
     <div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>
-    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
+    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${(ALL.find(a => a.id === movers.id) || {}).name} ${movers.m.txt}</div>` : ''}
     ${METHOD()}
     <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
     ${store.get('fcopen', false) ? forecastCard() : ''}</div>`;
   return `<div class="verdict pop"><div class="sec-h"><div><div class="eyebrow">Official rank · all categories added up</div><h2>The Naija Decides Rank</h2></div>
       <div class="upd"><span class="live"></span>Updated ${when(RANK.updated)}<br><span class="muted small">Refreshed every ${RANK.everyHours} hours · next check about ${when(next.toISOString())}</span></div></div>
     <div class="chips" id="popcats"><button class="chip" data-cat="official" aria-pressed="${k === 'official'}">Official rank</button>${RANK.categories.map(c => `<button class="chip" data-cat="${c.id}" aria-pressed="${k === c.id}">${esc(c.label)}</button>`).join('')}</div>
-    ${k === 'official' ? `<p class="muted">Five measured categories added together. In each one the leader scores 100 and others score in proportion; surveys count in full, open polls and projections count half. Maximum ${RANK_MAX()} points.</p>`
+    ${k === 'official' ? `<p class="muted">Six categories added together. In each one the leader scores 100 and others score in proportion; surveys count in full, open polls, projections and news momentum count half. Maximum ${RANK_MAX()} points.</p>`
       : `<p class="muted"><b>${esc(cat.kind)} · ${esc(cat.date)} · ${esc(cat.n)}.</b> ${esc(cat.note)} ${src(cat.src)}</p>`}
     <div class="podium">${order.map((id, i) => { const c = cand(id), m = movement(id); const v = catVal(k, id); return `<div class="pod p${i + 1}">${face(c, i === 0 ? 120 : 96)}<div class="pos">#${i + 1}</div><b>${c.name}</b><span class="party" style="--c:${c.c}">${c.party}</span>
       <div class="score">${k === 'official' ? v.toFixed(1) : fmtRaw(cat, v)}</div><div class="muted small">${k === 'official' ? `points of ${RANK_MAX()}` : `${(v === Math.max(...Object.values(cat.raw)) ? 100 : Math.round((cat.scale === 'net' ? (v + 100) / 2 / ((Math.max(...Object.values(cat.raw)) + 100) / 2) : v / Math.max(...Object.values(cat.raw))) * 100))} category points`}</div>
       ${k === 'official' ? `${stack(id)}<span class="mv ${m.cls}">${m.txt}</span>` : ''}</div>`; }).join('')}</div>
     ${k === 'official' ? `<div class="legend">${RANK.categories.map(c => `<span><i style="background:${CATCOL[c.id]}"></i>${esc(c.label)}${c.weight < 1 ? ' (×½)' : ''}</span>`).join('')}<span><i style="background:var(--muted);opacity:.35"></i>Filled gap (own average)</span></div>` : ''}
-    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${cand(movers.id).name} ${movers.m.txt}</div>` : ''}
+    ${movers && movers.m.d ? `<div class="card"><b>Biggest mover:</b> ${(ALL.find(a => a.id === movers.id) || {}).name} ${movers.m.txt}</div>` : ''}
     ${METHOD()}
     <div class="row"><button class="btn" id="fcopen">${store.get('fcopen', false) ? 'Hide' : 'Make'} your own win forecast</button></div>
     ${store.get('fcopen', false) ? forecastCard() : ''}
@@ -153,9 +155,10 @@ function chart(myRank){
   const next = new Date(new Date(RANK.updated).getTime() + RANK.everyHours * 36e5);
   const top = list[0], ts = chartStats(top.id), second = list[1];
   const lead = k === 'official' && PTS[second.id] ? (PTS[top.id].total - PTS[second.id].total).toFixed(1) : null;
-  const firstUnmeasured = list.findIndex(a => catVal(k, a.id) == null);
+  const inPoll = id => RANK.categories.some(c => !c.all && c.raw[id] != null);
+  const firstUnmeasured = k === 'official' ? list.findIndex(a => !inPoll(a.id)) : list.findIndex(a => catVal(k, a.id) == null);
   const row = (a, i) => { const s = chartStats(a.id), v = val(a), yr = myRank ? myRank.indexOf(a.id) + 1 : 0;
-    return `${i === firstUnmeasured ? `<div class="ch-line"><span>Not yet measured</span> Not in any 2026 poll yet · listed by standing</div>` : ''}
+    return `${i === firstUnmeasured ? `<div class="ch-line"><span>${k === 'official' ? 'No polls yet' : 'Not measured'}</span> ${k === 'official' ? 'Not in any 2026 poll yet · ranked by news momentum only' : 'Not in this category'}</div>` : ''}
     <div class="ch-row${i < 3 ? ' top3' : ''}" data-id="${a.id}" tabindex="0" role="button" aria-expanded="false" style="--c:${a.c}">
       <div class="ch-pos"><b>${i + 1}</b>${chMove(a, k)}</div>
       ${art(a, 'ch-art')}
@@ -177,7 +180,7 @@ function chart(myRank){
           <div class="ch-hero-stats"><span><i>${k === 'official' ? 'Points' : 'Score'}</i>${val(top)}${unit ? `<small> / ${RANK_MAX()}</small>` : ''}</span>${lead ? `<span><i>Lead</i>+${lead}</span>` : ''}<span><i>Previous</i>${ts.last ? '#' + ts.last : '—'}</span><span><i>Best</i>${ts.peak ? '#' + ts.peak : '—'}</span><span><i>Move</i>${chMove(top, k)}</span></div>
           <button class="btn" data-open="${top.id}" style="justify-self:start">Open fact file</button></div></div></div>
     <div class="ch-list">${list.map(row).join('')}</div>
-    <p class="muted small">Popularity and expectations so far, not a forecast of the result. Past election results are not used. Places 4 to 18 are not a poll ranking: those candidates have not been measured by any published poll yet.</p>
+    <p class="muted small">Popularity and expectations so far, not a forecast of the result. Past election results are not used. Candidates below the line are in no published poll yet; their place comes only from news momentum, which measures attention, not support.</p>
   </section>`;
 }
 function forecastCard(){
@@ -285,7 +288,7 @@ const VIEWS = {
           <div class="src">Polls open 8:00am WAT · ${src('inecTime')}</div></div>
       </div>
     </div>
-    ${(() => { const o = Object.keys(PTS).sort((a, b) => PTS[b].total - PTS[a].total); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">The Naija Decides Rank · updated ${when(RANK.updated)}</div><h3>Who is ahead right now?</h3></div><span class="btn">Full rank</span></div><div class="row" style="gap:18px">${o.map((id, i) => { const m = movement(id); return `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1} <span class="mv ${m.cls}">${m.txt}</span></div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${PTS[id].total.toFixed(1)}</span></div></div>`; }).join('')}</div></a>`; })()}
+    ${(() => { const o = Object.keys(PTS).sort((a, b) => PTS[b].total - PTS[a].total).slice(0, 3); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">The Naija Decides Rank · updated ${when(RANK.updated)}</div><h3>Who is ahead right now?</h3></div><span class="btn">Full rank</span></div><div class="row" style="gap:18px">${o.map((id, i) => { const m = movement(id); return `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1} <span class="mv ${m.cls}">${m.txt}</span></div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${PTS[id].total.toFixed(1)}</span></div></div>`; }).join('')}</div></a>`; })()}
 
     <div class="grid g4">
       <div class="card stat lift"><div class="k">Registered voters</div><div class="v">110M</div><div class="src">${src('voters')}</div></div>

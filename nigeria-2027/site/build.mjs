@@ -15,7 +15,7 @@ if (SNAP) { // append the current points to the ranking history (run after chang
   const last = RANK.RANK.history[RANK.RANK.history.length - 1];
   const same = last && Object.keys(points).length === Object.keys(last.points).length && Object.keys(points).every(k => last.points[k] === points[k]);
   if (!same) {
-    src = src.replace(/(  history: \[[\s\S]*?)(\n  \]\n\};)/, (m, a, b) => `${a},\n    {at:'${now}', points:${JSON.stringify(points).replace(/"/g, '')}}${b}`);
+    src = src.replace(/(  history: \[[\s\S]*?)(\n  \]\n\};)/, (m, a, b) => `${a},\n    {at:'${now}', points:${JSON.stringify(points).replace(/"([a-z]+)":/g, '$1:').replace(/"/g, "'")}}${b}`);
     src = src.replace(/changed: '[^']*'/, `changed: '${now}'`);
     console.log('snapshot added', points);
   } else console.log('no change in points');

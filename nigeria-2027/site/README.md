@@ -59,3 +59,6 @@ It refreshes the "updated" time and, if any total changed, appends a snapshot to
 - `src/bios.js` holds age, home state, education, career, record, labelled questions/disputes and the 2027 pitch for all 18, mainly from Premium Times' Oct 2026 profiles.
 - Photos in `photos/` (640×640). Wikimedia photos keep their CC licences; news-agency photos (credited in `CREDITS`) are used for identification only and will be removed on request. Still no reliable photo: Onor, Omo-Aje, Kabiru Yusuf, Nwanyanwu (shown as initials).
 - Gbenga Olawepo-Hashim (Accord) is court-cleared but not on INEC's final list; shown as a "pending" card. If INEC adds him, move him into `ALL`.
+
+## News momentum (all 18 candidates)
+`node site/momentum.mjs` counts Google News (Nigeria edition) stories that mention each candidate with election words, day by day over the last 7 full days (max 100 a day per candidate; common names also require the party name). It rewrites the `momentum` category (weight ½, `all:true`). It measures attention, not support. Candidates in no poll get 0 in poll categories (gaps are only filled for candidates in 2+ polls), so their place comes from momentum alone. The rank refresh task runs it every 12 hours.
