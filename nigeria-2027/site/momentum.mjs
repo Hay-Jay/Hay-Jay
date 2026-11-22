@@ -23,6 +23,10 @@ const PARTY = {'sunday-chibuzo-okereke':'(LP OR "Labour Party")', 'kabiru-yusuf'
 const day = d => d.toISOString().slice(0, 10);
 const sleep = ms => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 const end = new Date(); end.setUTCHours(0, 0, 0, 0);            // count the 7 full days before today
+const from0 = day(new Date(end - 7 * 864e5)), to0 = day(new Date(end - 864e5));
+if (!process.argv.includes('--force') && readFileSync(path.join(here, 'src', 'ranking.js'), 'utf8').includes(`date:'${from0} to ${to0}'`)) {
+  console.log(`momentum already counted for ${from0} to ${to0}; skipping (use --force to recount)`); process.exit(0);
+}
 const raw = {};
 for (const [id, q] of Object.entries(Q)) {
   const links = new Set();
