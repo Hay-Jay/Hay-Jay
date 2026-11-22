@@ -548,8 +548,28 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-22T16:15:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-22T21:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'serap-ai-register', at:'2026-11-22T09:36:00+01:00', img:'news/n53.jpg', tag:'Court', pri:3, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/more-news/927074-serap-sues-ndpc-inec-over-alleged-ai-manipulation-of-voters-register.html', people:[], claim:true,
+    h:'SERAP sues INEC and data regulator over AI-generated photos in voter register',
+    d:'Rights group SERAP has filed suit FHC/ABJ/CS/2863/2026 at the Federal High Court, Abuja, asking the court to compel the Nigeria Data Protection Commission to decide whether to investigate alleged AI-generated photos and altered records in INEC\'s preliminary register. INEC said on 1 November that its biometric system had flagged 268 records for review.',
+    why:'The voter register decides who can vote. A court case could force a closer look at how fake or altered entries are caught.'},
+  {id:'tinubu-lagos-pvc', at:'2026-11-22T19:48:00+01:00', img:'news/n54.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/2027-lagos-is-a-big-deal-to-me-tinubu/', people:['tinubu'],
+    h:'Tinubu in Lagos: "Knock your neighbour\'s door" and get PVCs collected',
+    d:'At a family prayer session at the Yoruba Tennis Club, Onikan, Tinubu called Lagos "a big deal" to him and urged residents to mobilise voters and collect their Permanent Voter Cards, saying turnout should match the state\'s large register.',
+    why:'Lagos has one of the biggest voter registers but has often had low turnout. Every campaign is now pushing PVC collection.'},
+  {id:'makinde-reset-abuja', at:'2026-11-22T17:27:00+01:00', img:'news/n55.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/2027-nigeria-not-working-for-most-citizens-makinde/', people:['seyi-makinde'], claim:true,
+    h:'Makinde: "Nigeria is not working for most citizens"; pitches four-pillar Reset Agenda',
+    d:'Speaking at Dunamis International Gospel Centre and NKST churches in Abuja, the APM candidate said the country had failed most citizens and set out his Reset Agenda: economic expansion, security, education and the socio-political environment.',
+    why:'The day after Tinubu\'s Ibadan rally, Makinde took his message to Abuja. Compare each candidate\'s plan on the same four issues.'},
+  {id:'akpabio-akwa-ibom', at:'2026-11-22T18:28:00+01:00', img:'news/n56.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-akwa-ibom-opposition-to-vote-tinubu-akpabio/', people:['tinubu'], claim:true,
+    h:'Akpabio claims Akwa Ibom opposition parties will back Tinubu',
+    d:'At the launch of the PBAT Door-to-Door Movement\'s Akwa Ibom chapter in Uyo, Senate President Godswill Akpabio said the APC and other parties in the state had formed a coalition to re-elect Tinubu. The movement donated 31 campaign vehicles.',
+    why:'Endorsement claims are not votes. Watch whether the named parties confirm it themselves.'},
+  {id:'dubawa-candidate-list', at:'2026-11-22T12:48:00+01:00', img:'news/n57.jpg', tag:'Fact-check', pri:2, outlet:'Dubawa', url:'https://dubawa.org/misleading-2027-presidential-candidates-list-shared-by-x-user-incomplete/', people:[],
+    h:'Fact-check: viral "INEC final list" of presidential candidates leaves out seven',
+    d:'Dubawa rated as misleading a list shared on X as INEC\'s final list of 2027 presidential candidates. It omitted seven candidates and does not match the list published on INEC\'s website.',
+    why:'There are 18 presidential candidates. Check INEC\'s own website, or our Meet the 18 section, before sharing a list.'},
   {id:'atiku-not-stepped-down', at:'2026-11-22T16:00:00+01:00', img:'news/n51.jpg', tag:'Campaign', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-any-party-saying-ive-stepped-down-is-working-for-tinubu-atiku/', people:['atiku','tinubu'], claim:true,
     h:'Atiku: "I have not stepped down"; says withdrawal stories help Tinubu',
     d:'In a Sunday statement, Atiku called reports that he had quit the race false and said no group had the authority to announce his withdrawal, accusing parties spreading the claim of "doing Tinubu\'s work". Opposition figures have been discussing uniting behind a single challenger.',
