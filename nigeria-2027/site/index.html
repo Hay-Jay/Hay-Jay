@@ -548,8 +548,28 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-22T21:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-23T01:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'factcheck-adc-obi', at:'2026-11-22T22:51:00+01:00', img:'news/n58.jpg', tag:'Fact-check', pri:2, outlet:'The Trumpet', url:'https://thetrumpet.ng/fact-check-did-the-adc-endorse-peter-obi-for-the-2027-presidential-election/', people:['obi','atiku'],
+    h:'Fact-check: the ADC did not endorse Obi; a coalition of ex-Atiku groups did',
+    d:'Viral clips claimed the ADC, or Atiku, had stepped down for Peter Obi. The Trumpet found the 21 November Abuja endorsement came from a coalition of groups that had backed Atiku, not from the ADC as a party. Atiku remains the ADC candidate and has denied withdrawing.',
+    why:'A support group is not a party. Check who actually made an announcement before sharing it.'},
+  {id:'tinubu-reconcile-apc', at:'2026-11-22T21:26:00+01:00', img:'news/n59.jpg', tag:'Party', pri:1, outlet:'Punch', url:'https://punchng.com/2027-tinubu-orders-masari-badaru-to-reconcile-apc-leaders/', people:['tinubu'],
+    h:'Tinubu tells Masari and Badaru to lead reconciliation with aggrieved APC leaders',
+    d:'At a family prayer session in Lagos, Tinubu urged APC leaders to forgive one another, and directed adviser Ibrahim Masari and former defence minister Abubakar Badaru to lead reconciliation, including a reported rift between Masari and Katsina governor Dikko Radda.',
+    why:'Internal party splits can cost votes in key states. Every major party is managing its own disputes.'},
+  {id:'obi-smartballot', at:'2026-11-22T23:23:00+01:00', img:'news/n60.jpg', tag:'Campaign', pri:1, outlet:'Arise News', url:'https://www.arise.tv/2027-peter-obi-endorses-smartballot-app-for-presidential-election-mobilisation/', people:['obi'],
+    h:'Obi backs SmartBallot app for mobilising voters and polling-unit agents',
+    d:'In a post on X, the NDC candidate urged supporters and party candidates to register on SmartBallot, a platform for organising communities, coordinating voters and polling-unit agents, and monitoring the election.',
+    why:'Campaigns are moving organising online. Any app that collects voter data should say clearly how it protects it.'},
+  {id:'makinde-nelfund', at:'2026-11-22T21:42:00+01:00', img:'news/n61.jpg', tag:'Manifesto', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/22/2027-makinde-names-only-policy-of-tinubu-govt-he-will-keep-as-president/', people:['seyi-makinde','tinubu'],
+    h:'Makinde: student loan fund is the one Tinubu policy he would keep',
+    d:'On The Roof Top podcast, the APM candidate named the Nigerian Education Loan Fund (NELFUND) as the Tinubu policy he would sustain, and said states should take full responsibility for local governments, which should stop relying on federal allocations.',
+    why:'Rare detail on what a challenger would keep, not just scrap. Students: compare each plan for NELFUND.'},
+  {id:'kwankwaso-power', at:'2026-11-22T22:38:00+01:00', img:'news/n62.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/22/2027-power-does-not-guarantee-public-support-kwankwaso/', people:['obi'], claim:true,
+    h:'Kwankwaso: "Power does not guarantee public support"',
+    d:'The NDC vice-presidential candidate pointed to Kano\'s 2019 race, saying his camp had no former governors or senators on its side against Ganduje yet still won votes, to argue that holding office does not guarantee voters\' backing.',
+    why:'Kano is one of the biggest voting states. Endorsements from office-holders may matter less than ground support.'},
   {id:'serap-ai-register', at:'2026-11-22T09:36:00+01:00', img:'news/n53.jpg', tag:'Court', pri:3, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/more-news/927074-serap-sues-ndpc-inec-over-alleged-ai-manipulation-of-voters-register.html', people:[], claim:true,
     h:'SERAP sues INEC and data regulator over AI-generated photos in voter register',
     d:'Rights group SERAP has filed suit FHC/ABJ/CS/2863/2026 at the Federal High Court, Abuja, asking the court to compel the Nigeria Data Protection Commission to decide whether to investigate alleged AI-generated photos and altered records in INEC\'s preliminary register. INEC said on 1 November that its biometric system had flagged 268 records for review.',
