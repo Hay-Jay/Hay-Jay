@@ -548,8 +548,32 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-23T11:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-23T16:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-mock-17676', at:'2026-11-23T09:55:00+01:00', img:'news/n74.jpg', tag:'INEC', pri:3, outlet:'Punch', url:'https://punchng.com/2027-inec-selects-17676-polling-units-for-bvas-mock-exercise/', people:[],
+    h:'INEC names 17,676 polling units for Saturday\'s BVAS test run',
+    d:'INEC has published the list of polling units for its nationwide mock accreditation and result-upload exercise on Saturday 28 November, 8:30am to 2:30pm. Two polling units in each of the 8,838 registration areas will take part. The list is on INEC\'s website.',
+    why:'If your polling unit is on the list, you can go and test the BVAS machine yourself. It is the last big rehearsal before 16 January.'},
+  {id:'inec-rig-and-die-warning', at:'2026-11-23T15:21:00+01:00', img:'news/n75.jpg', tag:'INEC', pri:3, outlet:'Punch', url:'https://punchng.com/2027-inec-warns-against-violent-election-slogans-fake-pvc-claims/', people:[],
+    h:'INEC warns "rig and die" slogan endangers voters and officials; no PVC, no vote',
+    d:'At a media forum in Abuja, INEC\'s voter education committee warned politicians and supporters against the "rig and die" slogan, saying such rhetoric threatens the lives of election officials and voters. It also dismissed social media claims that people can vote without a PVC.',
+    why:'You cannot vote without your PVC. Treat any message saying otherwise as false.'},
+  {id:'sowore-inec-protest', at:'2026-11-23T13:31:00+01:00', img:'news/n76.jpg', tag:'Campaign', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/2027-tinubu-must-go-as-sowore-leads-protest-to-inec-headquarters-video-2/', people:['omoyele-sowore','tinubu'],
+    h:'Sowore leads protest at INEC headquarters against electoral violence and rigging',
+    d:'AAC candidate Omoyele Sowore led demonstrators to INEC\'s Abuja headquarters demanding a transparent, credible election and rejecting electoral violence and manipulation. In videos he shared on X, protesters chanted "Tinubu must go".',
+    why:'Peaceful protest is a right. Watch how INEC and the police respond to it.'},
+  {id:'abure-lp-tinubu', at:'2026-11-23T13:51:00+01:00', img:'news/n77.jpg', tag:'Party', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/abure-led-labour-party-faction-backs-tinubu-for-2027/', people:['tinubu','obi'], claim:true,
+    h:'Abure-led Labour Party faction endorses Tinubu',
+    d:'After a National Executive Council meeting in Abuja, the Labour Party faction led by Julius Abure endorsed Tinubu and pledged to mobilise the roughly six million votes the party won in 2023 behind him. Obi, the LP\'s 2023 candidate, is now the NDC candidate.',
+    why:'Party endorsements do not move votes automatically. LP\'s 2023 votes were cast with Obi as its candidate, so watch whether LP voters follow the faction.'},
+  {id:'ndc-obi-funding', at:'2026-11-23T13:32:00+01:00', img:'news/n78.jpg', tag:'Party', pri:1, outlet:'Punch', url:'https://punchng.com/ndc-denies-rift-with-obi-over-2027-campaign-funding/', people:['obi'],
+    h:'NDC denies rift with Obi over campaign money',
+    d:'NDC campaign spokesperson Constance Ikokwu said reports that Obi had complained about campaign funding were false and aimed at dividing the opposition. The denial follows questions about how donations are managed after Aisha Yesufu launched a fundraiser for his bid.',
+    why:'How campaigns raise and spend money is a fair question for every party. Transparent accounts settle disputes.'},
+  {id:'obi-ipob-plot-claim', at:'2026-11-23T13:02:00+01:00', img:'news/n79.jpg', tag:'Campaign', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-obis-camp-alleges-plot-to-link-him-with-ipob/', people:['obi'], claim:true,
+    h:'Obi\'s media office alleges a plot to link him to IPOB to cut his Northern support',
+    d:'The Peter Obi Media Office alleged that people in the ruling party and some opposition figures are coordinating a campaign, through sponsored articles, radio interviews and social media, to portray Obi as sympathetic to Biafran separatism and put off young Northern voters.',
+    why:'Expect targeted claims against every candidate in the final weeks. Check where a story comes from before sharing it.'},
   {id:'peace-accord-breaches', at:'2026-11-23T07:04:00+01:00', img:'news/n68.jpg', tag:'Security', pri:3, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/109-peace-accord-breaches-campaign-attacks-raise-concerns-over-2027-elections/', people:[],
     h:'Attacks on campaign teams and Peace Accord breaches pile up across states',
     d:'Daily Post reports a rising number of attacks on campaign teams, destroyed campaign materials and intimidation of opponents, from Niger and Kano to the FCT and Anambra. In Minna, police said they arrested seven suspected political thugs after two incidents. Questions remain over who is behind the attacks and whether anyone will be prosecuted.',
