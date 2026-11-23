@@ -548,8 +548,32 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-23T06:30:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-23T11:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'peace-accord-breaches', at:'2026-11-23T07:04:00+01:00', img:'news/n68.jpg', tag:'Security', pri:3, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/109-peace-accord-breaches-campaign-attacks-raise-concerns-over-2027-elections/', people:[],
+    h:'Attacks on campaign teams and Peace Accord breaches pile up across states',
+    d:'Daily Post reports a rising number of attacks on campaign teams, destroyed campaign materials and intimidation of opponents, from Niger and Kano to the FCT and Anambra. In Minna, police said they arrested seven suspected political thugs after two incidents. Questions remain over who is behind the attacks and whether anyone will be prosecuted.',
+    why:'Violence keeps voters at home. If you see an attack, report it to the police and to INEC, and stay safe.'},
+  {id:'inec-adhoc-1-4m', at:'2026-11-23T10:51:00+01:00', img:'news/n69.jpg', tag:'INEC', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/we-need-1-4-million-ad-hoc-staff-for-2027-polls-inec-chairman-amupitan/', people:[],
+    h:'INEC chairman: the election needs 1.4 million temporary staff',
+    d:'Answering listeners\' questions on radio, INEC chairman Joash Amupitan said the 2027 polls will need 1.4 million ad-hoc staff to run more than 176,000 polling units, each needing presiding officers, assistants and other officials.',
+    why:'Most of the people running your polling unit will be temporary staff. Their training and safety shape how smoothly voting goes.'},
+  {id:'gombe-offers-atiku', at:'2026-11-23T06:15:00+01:00', img:'news/n70.jpg', tag:'Party', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/adc-crisis-bala-gombe-offers-atiku-abubakar-new-appointment-with-one-condition/', people:['atiku'],
+    h:'Rival ADC chairman offers Atiku campaign council job if he "registers" with the party',
+    d:'In Kaduna, Nafiu Bala Gombe, who leads the ADC faction favoured by the 5 November court ruling, said he would make Atiku chairman of the presidential campaign council if he formally registers as a member. The David Mark-led faction has appealed the ruling and says Atiku remains its candidate.',
+    why:'Who the ADC\'s candidate is now depends on the appeal court. Watch the ruling, not the statements.'},
+  {id:'tinubu-power-factories', at:'2026-11-23T08:00:00+01:00', img:'news/n71.jpg', tag:'Manifesto', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/headlines/927295-2027-tinubu-promises-reliable-electricity-for-factories-quarterly-reports.html', people:['tinubu'],
+    h:'APC manifesto: dedicated power for industrial zones and quarterly supply reports',
+    d:'Tinubu\'s 2027-2031 manifesto, "From Reforms to Prosperity", promises dedicated electricity for industrial clusters and export zones and quarterly public reports on power delivered to businesses: hours of supply, voltage quality and factory downtime.',
+    why:'A promise that comes with its own scorecard. Compare it with other candidates\' power plans.'},
+  {id:'obi-summit-posters', at:'2026-11-23T09:09:00+01:00', img:'news/n72.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/2027-tinubu-doesnt-care-about-anybody-but-himself-peter-obi/', people:['obi','tinubu'], claim:true,
+    h:'Obi: "Tinubu only cares about himself"; says opposition posters are being removed',
+    d:'At the Global Peter Obi Supporters Summit in Abuja, the NDC candidate accused the APC of focusing on its campaign while Nigerians face insecurity, and alleged that state governors target opposition members and that opposition posters and billboards are taken down.',
+    why:'Equal access to campaign space is a fairness test. Claims of removed posters can be checked locally.'},
+  {id:'okinbaloye-irev', at:'2026-11-23T06:32:00+01:00', img:'news/n73.jpg', tag:'INEC', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/2027-inec-you-must-explain-to-us-seun-okinbaloye-exposes-secret-cleanup-of-election-results-on-irev/', people:[], claim:true,
+    h:'Channels presenter asks INEC to explain new checks before results reach IReV',
+    d:'On Sunday Politics, Seun Okinbaloye said INEC chairman Joash Amupitan\'s statement that new checks will stop inaccurate results appearing on the IReV portal makes sense but raises questions about what happens to results before upload, and asked INEC to explain the process.',
+    why:'IReV is how the public sees polling-unit results. Clear rules on what gets checked, and by whom, build trust.'},
   {id:'atiku-defence-ministry', at:'2026-11-22T15:31:00+01:00', img:'news/n63.jpg', tag:'Campaign', pri:2, outlet:'Tribune', url:'https://tribuneonlineng.com/atiku-slams-defence-ministry-for-promoting-tinubus-apc-campaign-rally/', people:['atiku','tinubu'], claim:true,
     h:'Atiku camp asks why Defence Ministry accounts promoted an APC rally',
     d:'Atiku\'s media adviser Paul Ibe questioned why the Ministry of Defence\'s official Facebook and X accounts publicised an APC presidential rally for Tinubu, including Defence Minister Christopher Musa inspecting the venue, saying it raised questions about using a public institution for partisan ends.',
