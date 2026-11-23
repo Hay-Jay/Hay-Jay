@@ -1002,8 +1002,8 @@ const SIGNALS = { tinubu:{fav:'−58.5', straw:'—'}, atiku:{fav:'not reported'
    Updated by the twice-daily update task. To add a new poll: add a category,
    then run `node nigeria-2027/site/build.mjs --snapshot` to record movement. */
 const RANK = {
-  updated: '2026-11-22T22:44:08.579Z',     // last time the data was checked (WAT)
-  changed: '2026-11-22T08:54:21.498Z',     // last time any number changed
+  updated: '2026-11-23T10:46:50.566Z',     // last time the data was checked (WAT)
+  changed: '2026-11-23T10:46:50.566Z',     // last time any number changed
   everyHours: 12,
   categories: [
     {id:'sbm', label:'SBM favourability', kind:'Survey', weight:1, date:'May 2026', n:'about 829 people, all six zones', src:'sbm',
@@ -1016,14 +1016,15 @@ const RANK = {
       note:'Run by an anti-Tinubu group; Tinubu was not an option.', raw:{atiku:73.6, obi:22.3}, fmt:'pct'},
     {id:'pig', label:'Politico.ng projection', kind:'Analyst projection', weight:0.5, date:'5 Nov 2026 (November map)', n:'states projected to win (of 37)', src:'pig',
       note:'Political Intelligence Group November map of states won if the vote is free and fair (Sept map: Tinubu 20, Atiku 9, Obi 8). Not a poll. Made before the court ruling on Atiku\'s nomination.', raw:{tinubu:13, atiku:11, obi:13}, fmt:'states'},
-    {id:'momentum', label:'News momentum', kind:'Attention measure', weight:0.5, all:true, date:'2026-11-15 to 2026-11-21', n:'news stories in 7 days (Google News, Nigeria)', src:'momentum',
-      note:'How often each candidate was in the news with election words, counted day by day (max 100 a day). Measures attention, good or bad, not support. Refreshed with every rank update.', raw:{'tinubu':597,'atiku':362,'obi':438,'seyi-makinde':147,'donald-duke':36,'sandy-ojang-onor':17,'sunday-chibuzo-okereke':6,'omoyele-sowore':53,'adewole-adebayo':50,'rufai-adekunle-omo-aje':28,'aliyu-abbas-bin':2,'kabiru-yusuf':1,'sunday-adenuga':5,'moses-olusoji-adebisi':7,'ada-elizabeth-fredrick-okwori':1,'nkem-esther-okereke':2,'peter-ada-agada':20,'daniel-nwanyanwu':3}, fmt:'count'}
+    {id:'momentum', label:'News momentum', kind:'Attention measure', weight:0.5, all:true, date:'2026-11-16 to 2026-11-22', n:'news stories in 7 days (Google News, Nigeria)', src:'momentum',
+      note:'How often each candidate was in the news with election words, counted day by day (max 100 a day). Measures attention, good or bad, not support. Refreshed with every rank update.', raw:{'tinubu':700,'atiku':359,'obi':457,'seyi-makinde':147,'donald-duke':37,'sandy-ojang-onor':18,'sunday-chibuzo-okereke':4,'omoyele-sowore':52,'adewole-adebayo':55,'rufai-adekunle-omo-aje':25,'aliyu-abbas-bin':1,'kabiru-yusuf':0,'sunday-adenuga':7,'moses-olusoji-adebisi':6,'ada-elizabeth-fredrick-okwori':1,'nkem-esther-okereke':2,'peter-ada-agada':21,'daniel-nwanyanwu':1}, fmt:'count'}
   ],
   // Snapshots of total points, oldest first. Movement arrows compare the last two.
   history: [
     {at:'2026-11-04T12:00:00+01:00', points:{obi:282.9, atiku:227.8, tinubu:189.7}, note:'Launch of the official rank'},
     {at:'2026-11-07T10:45:19.775Z', points:{obi:312.9,tinubu:189.7,atiku:257.5}},
-    {at:'2026-11-22T08:54:21.498Z', reset:true, note:'News momentum added; new baseline', points:{obi:349.6,tinubu:239.7,atiku:287.8,'seyi-makinde':12.3,'donald-duke':3,'sandy-ojang-onor':1.4,'sunday-chibuzo-okereke':0.5,'omoyele-sowore':4.4,'adewole-adebayo':4.2,'rufai-adekunle-omo-aje':2.3,'aliyu-abbas-bin':0.2,'kabiru-yusuf':0.1,'sunday-adenuga':0.4,'moses-olusoji-adebisi':0.6,'ada-elizabeth-fredrick-okwori':0.1,'nkem-esther-okereke':0.2,'peter-ada-agada':1.7,'daniel-nwanyanwu':0.3}}
+    {at:'2026-11-22T08:54:21.498Z', reset:true, note:'News momentum added; new baseline', points:{obi:349.6,tinubu:239.7,atiku:287.8,'seyi-makinde':12.3,'donald-duke':3,'sandy-ojang-onor':1.4,'sunday-chibuzo-okereke':0.5,'omoyele-sowore':4.4,'adewole-adebayo':4.2,'rufai-adekunle-omo-aje':2.3,'aliyu-abbas-bin':0.2,'kabiru-yusuf':0.1,'sunday-adenuga':0.4,'moses-olusoji-adebisi':0.6,'ada-elizabeth-fredrick-okwori':0.1,'nkem-esther-okereke':0.2,'peter-ada-agada':1.7,'daniel-nwanyanwu':0.3}},
+    {at:'2026-11-23T10:46:50.566Z', points:{obi:345.5,tinubu:239.7,atiku:283.1,'seyi-makinde':10.5,'donald-duke':2.6,'sandy-ojang-onor':1.3,'sunday-chibuzo-okereke':0.3,'omoyele-sowore':3.7,'adewole-adebayo':3.9,'rufai-adekunle-omo-aje':1.8,'aliyu-abbas-bin':0.1,'kabiru-yusuf':0,'sunday-adenuga':0.5,'moses-olusoji-adebisi':0.4,'ada-elizabeth-fredrick-okwori':0.1,'nkem-esther-okereke':0.1,'peter-ada-agada':1.5,'daniel-nwanyanwu':0.1}}
   ]
 };
 /* Points: in each category the leader scores 100 and others score in proportion
