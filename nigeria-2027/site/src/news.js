@@ -3,8 +3,28 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-23T16:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-23T21:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'apc-fake-inec-letter', at:'2026-11-23T17:38:00+01:00', img:'news/n80.jpg', tag:'Fact-check', pri:2, outlet:'Punch', url:'https://punchng.com/apc-disowns-letter-asking-inec-to-ensure-tinubus-2027-victory/', people:['tinubu'],
+    h:'Viral "APC letter" asking INEC to ensure Tinubu wins is fake, party says',
+    d:'An unsigned letter dated 22 November, supposedly from APC national chairman Nentawe Yilwatda to INEC chairman Joash Amupitan, asked INEC to use its machinery to declare Tinubu winner. The APC called it fake and malicious. Daily Trust and TheCable also flagged it as unverified disinformation.',
+    why:'Unsigned "leaked letters" are a common fake. Check with the named sender and with fact-checkers before sharing.'},
+  {id:'apm-register-rigging', at:'2026-11-23T18:39:00+01:00', img:'news/n81.jpg', tag:'INEC', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-holding-election-with-disputed-voters-register-amounts-to-rigging-apm-2/', people:['seyi-makinde'], claim:true,
+    h:'APM: going into the election with a disputed register "is rigging"',
+    d:'Makinde\'s party, the APM, criticised INEC\'s decision to defer a fuller review of the voters\' register until after the polls. Spokesman Abubakar Yusuf said holding the election with a controversial register amounts to rigging and vowed the party would resist it.',
+    why:'The final register is due on 15 December. Check your name is on it once it is published.'},
+  {id:'obi-suleja', at:'2026-11-23T19:59:00+01:00', img:'news/n82.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/obi-urges-nigerians-to-protect-their-votes-in-2027-election-as-he-meets-niger-residents/', people:['obi','tinubu'], claim:true,
+    h:'Obi in Suleja: stay at your polling unit until votes are counted and sent',
+    d:'Campaigning in Niger State, the NDC candidate urged voters to turn out, stay at polling units until results are counted and transmitted, and guard against manipulation. He also questioned Tinubu\'s physical ability to govern and accused him of putting power first.',
+    why:'Voters may legally stay at a polling unit to watch the count, peacefully and at a distance.'},
+  {id:'tinubu-igbo-lagos', at:'2026-11-23T20:15:00+01:00', img:'news/n83.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/2027-tinubu-woos-igbo-recalls-2023-defeat-in-lagos/', people:['tinubu'],
+    h:'At Onikan rally, Tinubu courts Lagos Igbo voters and recalls 2023 loss in the state',
+    d:'At the Lagos Central campaign rally at Mobolaji Johnson Arena, Tinubu appealed to Igbo stakeholders in Lagos to back his re-election, recalling his 2023 defeat in the state, and campaigned for APC governorship candidate Obafemi Hamzat.',
+    why:'Lagos was one of the closest states in 2023. Every major campaign is chasing its large non-indigene vote.'},
+  {id:'adc-jigawa-rally', at:'2026-11-23T21:03:00+01:00', img:'news/n84.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/2027-adc-seeks-postponement-of-atikus-rally-in-jigawa/', people:['atiku'],
+    h:'Jigawa ADC asks Atiku to move his 27 November rally',
+    d:'ADC governorship candidate Sabo Mohammed Nakudu asked Atiku to reschedule his planned 27 November rally in Jigawa to give the state chapter more time for mobilisation and logistics, after Governor Umar Namadi challenged the opposition to match APC crowds.',
+    why:'Rally dates show where campaigns think the race is being fought.'},
   {id:'inec-mock-17676', at:'2026-11-23T09:55:00+01:00', img:'news/n74.jpg', tag:'INEC', pri:3, outlet:'Punch', url:'https://punchng.com/2027-inec-selects-17676-polling-units-for-bvas-mock-exercise/', people:[],
     h:'INEC names 17,676 polling units for Saturday\'s BVAS test run',
     d:'INEC has published the list of polling units for its nationwide mock accreditation and result-upload exercise on Saturday 28 November, 8:30am to 2:30pm. Two polling units in each of the 8,838 registration areas will take part. The list is on INEC\'s website.',
