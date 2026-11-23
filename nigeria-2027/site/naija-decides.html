@@ -548,8 +548,28 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-23T01:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-23T06:30:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'atiku-defence-ministry', at:'2026-11-22T15:31:00+01:00', img:'news/n63.jpg', tag:'Campaign', pri:2, outlet:'Tribune', url:'https://tribuneonlineng.com/atiku-slams-defence-ministry-for-promoting-tinubus-apc-campaign-rally/', people:['atiku','tinubu'], claim:true,
+    h:'Atiku camp asks why Defence Ministry accounts promoted an APC rally',
+    d:'Atiku\'s media adviser Paul Ibe questioned why the Ministry of Defence\'s official Facebook and X accounts publicised an APC presidential rally for Tinubu, including Defence Minister Christopher Musa inspecting the venue, saying it raised questions about using a public institution for partisan ends.',
+    why:'Rules on using government resources for campaigns apply to every party. Watch for a response from the ministry or INEC.'},
+  {id:'makinde-30-percent', at:'2026-11-23T05:54:00+01:00', img:'news/n64.jpg', tag:'Campaign', pri:1, outlet:'Naija News', url:'https://www.naijanews.com/2026/11/23/2027-tinubus-winning-probability-is-30-makinde/', people:['seyi-makinde','tinubu'], claim:true,
+    h:'Makinde puts Tinubu\'s "winning probability" at 30%',
+    d:'On The Roof Top podcast, the APM candidate said Tinubu does not stand a chance in 2027 and claimed APC members talk of using federal power to win "because they don\'t have the people". The 30% figure is his own estimate, not a poll.',
+    why:'Candidates often quote odds. Only published polls with a method and sample size count as evidence.'},
+  {id:'jega-kukah-trust', at:'2026-11-23T01:57:00+01:00', img:'news/n65.jpg', tag:'INEC', pri:2, outlet:'ThisDay', url:'https://www.thisdaylive.com/2026/11/23/jega-kukah-list-factors-thatll-determine-credibility-of-nigerias-democratic-process/', people:[],
+    h:'Ex-INEC chair Jega and Bishop Kukah: trust and accountability will decide 2027\'s credibility',
+    d:'At an EU-backed symposium in Abuja by The Kukah Centre and NILDS, former INEC chairman Attahiru Jega and Bishop Matthew Kukah named public trust, political accountability and responsible communication as what will determine whether the democratic process is credible.',
+    why:'Two widely respected voices outside party politics are setting the test every side will be judged by.'},
+  {id:'tinubu-hostels', at:'2026-11-23T01:34:00+01:00', img:'news/n66.jpg', tag:'Manifesto', pri:1, outlet:'Punch', url:'https://punchng.com/tinubu-pledges-50000-new-hostel-beds-by-2027/', people:['tinubu'],
+    h:'Tinubu pledges 50,000 new hostel beds by end of 2027',
+    d:'Represented by Education Minister Tunji Alausa at the University of Ibadan, Tinubu promised 50,000 new bed spaces across federal tertiary institutions by the end of 2027 under a N400bn Student Hostels Programme run through TETFund and private partners.',
+    why:'A dated, measurable promise. Students can check progress against it.'},
+  {id:'pdp-rejects-coalition', at:'2026-11-21T19:12:00+01:00', img:'news/n67.jpg', tag:'Party', pri:1, outlet:'The Source', url:'https://thesourceng.com/pdp-dissociates-self-from-opposition-coalition/', people:[],
+    h:'Wike-aligned PDP says it is not part of opposition "Coalition for Democracy"',
+    d:'PDP spokesman Jungudo Haruna Mohammed said the party will not attend the coalition\'s 30 November summit, has authorised no one to represent it, and recognises only the Wike-backed Rainbow Coalition. He called those presented as PDP representatives expelled members.',
+    why:'The PDP is split. Check which faction is speaking before assuming where "the PDP" stands.'},
   {id:'factcheck-adc-obi', at:'2026-11-22T22:51:00+01:00', img:'news/n58.jpg', tag:'Fact-check', pri:2, outlet:'The Trumpet', url:'https://thetrumpet.ng/fact-check-did-the-adc-endorse-peter-obi-for-the-2027-presidential-election/', people:['obi','atiku'],
     h:'Fact-check: the ADC did not endorse Obi; a coalition of ex-Atiku groups did',
     d:'Viral clips claimed the ADC, or Atiku, had stepped down for Peter Obi. The Trumpet found the 21 November Abuja endorsement came from a coalition of groups that had backed Atiku, not from the ADC as a party. Atiku remains the ADC candidate and has denied withdrawing.',
