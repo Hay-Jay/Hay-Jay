@@ -50,7 +50,7 @@ async function openPage() {
 const meta = await openPage();
 const { videos, voice, voices } = await meta.evaluate(() => ({
   voice: window.VOICE, voices: window.VOICES || {},
-  videos: VIDEOS.map(v => ({ id: v.id, clone: v.voice === 'clone', vkey: typeof v.voice === 'string' && v.voice !== 'clone' ? v.voice : null, durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
+  videos: VIDEOS.map(v => ({ id: v.id, clone: v.voice === 'clone', pre: v.voice === 'eleven', vkey: typeof v.voice === 'string' && !['clone', 'eleven'].includes(v.voice) ? v.voice : null, durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
 }));
 await meta.close();
 
@@ -83,6 +83,13 @@ for (const v of videos) {
     const vc = voices[lineVoice || v.vkey] || voice;
     const [rate, pitch, vol] = moodProsody(mood, vc.rate, vc.pitch || 0, vc.pitchScale ?? 1);
     if (silent || !text) { v.clips.push(null); continue; }
+    if (v.pre) {
+      // ElevenLabs narration is generated ahead of time (via the ElevenLabs connector) as vo/<id>/NN.mp3.
+      const mp3 = path.join(dir, `${nn(i)}.mp3`);
+      if (!existsSync(mp3)) { console.warn(`missing ${mp3}`); v.clips.push(null); continue; }
+      const len = probe(mp3); v.clips.push({ mp3, len });
+      v.durs[i] = Math.max(v.durs[i], +(VO_LEAD + len + VO_TAIL).toFixed(2)); continue;
+    }
     if (v.clone) {
       const wav = path.join(dir, `${nn(i)}.wav`);
       if (!existsSync(wav)) { v.clips.push(null); continue; }

@@ -7,6 +7,7 @@ window.HANDLE = 'Naija Decides · #Nigeria2027';
 /* Narrator voice (Microsoft Edge neural TTS). Nigerian English options:
    'en-NG-AbeoNeural' (male) or 'en-NG-EzinneNeural' (female). */
 window.VOICE = { name: 'en-NG-AbeoNeural', rate: '+10%' };
+// voice:'eleven' = ElevenLabs narration made beforehand (voice: Olakunle, id 8P18CIVcRlwP98FOjZDm, model eleven_v4) and saved as vo/<id>/NN.mp3.
 // Named voices a video (voice:'abeo') or a single narration line ([mood, text, 'andrew']) can pick.
 window.VOICES = {
   abeo:   { name: 'en-NG-AbeoNeural', rate: '-6%', pitch: -3 },
@@ -773,7 +774,7 @@ window.NARRATION['dyk-turnout'] = [
 /* Same "Did you know?" video in the two voices the creator picked, plus a two-voice version. */
 (function(){
   const base = window.VIDEOS.find(v => v.id === 'dyk-turnout'), lines = window.NARRATION['dyk-turnout'];
-  [['dyk-turnout-andrew', 'andrew', null], ['dyk-turnout-abeo', 'abeo', null], ['dyk-turnout-duo', 'abeo', ['andrew', 'abeo', 'andrew', 'abeo']]].forEach(([id, voice, who]) => {
+  [['dyk-turnout-andrew', 'andrew', null], ['dyk-turnout-abeo', 'abeo', null], ['dyk-turnout-duo', 'abeo', ['andrew', 'abeo', 'andrew', 'abeo']], ['dyk-turnout-el', 'eleven', null]].forEach(([id, voice, who]) => {
     window.VIDEOS.push({ ...base, id, voice, scenes: base.scenes.slice() });
     window.NARRATION[id] = lines.map(([m, t], i) => who ? [m, t, who[i]] : [m, t]);
   });
