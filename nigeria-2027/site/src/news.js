@@ -3,8 +3,32 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-24T11:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-24T16:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'court-voids-omo-agege', at:'2026-11-24T14:50:00+01:00', img:'news/n95.jpg', tag:'Court', pri:3, outlet:'Punch', url:'https://punchng.com/2027-court-voids-omo-ageges-ndc-ticket-orders-inec-to-delist-him/', people:[],
+    h:'Court voids Omo-Agege\'s NDC Senate ticket, orders INEC to delist him',
+    d:'A Federal High Court in Warri nullified former Deputy Senate President Ovie Omo-Agege\'s nomination as NDC candidate for Delta Central, citing non-compliance with the Electoral Act over his exit from the APC, NDC membership and eligibility for the primary. Justice Hyeladzira Nganjiwa ordered INEC to remove his name. The ruling came a day after gunmen attacked his campaign team.',
+    why:'Court rulings keep reshaping who is on the ballot. Candidates can appeal, so check INEC\'s final list.'},
+  {id:'sowore-quits-peace-accord', at:'2026-11-24T10:09:00+01:00', img:'news/n96.jpg', tag:'Security', pri:3, outlet:'Punch', url:'https://punchng.com/political-violence-sowore-rejects-peace-accord-questions-peace-committees-relevance/', people:['omoyele-sowore'], claim:true,
+    h:'Sowore pulls AAC out of the National Peace Accord over political violence',
+    d:'The AAC candidate announced his party\'s withdrawal from the National Peace Accord signing and accused the National Peace Committee and the Kukah Centre of "radio silence" on recurring campaign violence, saying lives have been lost and citizens intimidated.',
+    why:'The Peace Accord is a public promise by candidates to reject violence. Watch how the committee and other candidates respond.'},
+  {id:'ariwoola-2011-warning', at:'2026-11-24T13:11:00+01:00', img:'news/n97.jpg', tag:'Security', pri:2, outlet:'Punch', url:'https://punchng.com/2027-ex-cjn-warns-against-repeat-of-2011-post-election-killings/', people:[],
+    h:'Ex-Chief Justice Ariwoola warns against a repeat of 2011 post-election killings',
+    d:'Retired CJN Olukayode Ariwoola, who chairs the Savannah Centre\'s Council of the Wise, raised concern in Abuja over rising political violence, intimidation and destruction of property, and urged political actors to act now to protect the 2027 polls.',
+    why:'Hundreds died after the 2011 election. Leaders on all sides are being asked to calm supporters before, not after, the vote.'},
+  {id:'igp-police-neutral', at:'2026-11-24T11:52:00+01:00', img:'news/n98.jpg', tag:'Security', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-police-will-not-be-used-as-political-tool-igp/', people:[],
+    h:'IGP: partisan officers will be disciplined; police "will not be a political tool"',
+    d:'At a media conference in Abuja, Inspector-General Olatunji Dusu said the police will be guided by professionalism and neutrality in 2027, and that any officer found to have taken sides or aided a candidate or party will face disciplinary action.',
+    why:'A clear, public standard. If you see partisan conduct by officers, note the time, place and details.'},
+  {id:'atiku-kogi-rally', at:'2026-11-24T15:25:00+01:00', img:'news/n99.jpg', tag:'Campaign', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-atiku-storms-kogi-says-nigerians-deserve-to-live-with-dignity/', people:['atiku','tinubu'],
+    h:'Atiku takes campaign to Kogi: "Nigerians deserve to live with dignity"',
+    d:'At a rally in Kogi, Atiku criticised the cost of living for households, traders and workers and called for a change in economic direction. Supporters reportedly chanted "Tinubu must go", according to his campaign.',
+    why:'Atiku is campaigning while his party\'s court case continues. Crowd sizes are reported by campaigns, so treat them with care.'},
+  {id:'ibe-secret-meeting', at:'2026-11-24T15:23:00+01:00', img:'news/n100.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/24/2027-paul-ibe-addresses-claim-of-secret-meeting-between-atiku-obi/', people:['atiku','obi'],
+    h:'Atiku aide rejects claim he and Obi held "secret meeting" to stir violence',
+    d:'Atiku\'s media aide Paul Ibe called the allegation, made after the Abure-led LP faction endorsed Tinubu, "false, reckless and malicious", and challenged the person behind it to produce evidence or withdraw it.',
+    why:'Serious accusations need evidence. Until there is some, treat them as claims.'},
   {id:'nscia-mosque-violence', at:'2026-11-24T09:27:00+01:00', img:'news/n91.jpg', tag:'Security', pri:2, outlet:'Arise News', url:'https://www.arise.tv/sultan-condemns-mosque-attacks-warns-politicians-and-clerics-against-2027-election-violence/', people:[],
     h:'Sultan-led Islamic council condemns mosque attacks, warns against election violence',
     d:'The Nigerian Supreme Council for Islamic Affairs, led by the Sultan of Sokoto, condemned recent attacks in and around some mosques and urged politicians, religious leaders and the public to avoid inflammatory comments and actions that could raise tension before the elections.',
