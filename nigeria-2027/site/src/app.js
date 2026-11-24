@@ -24,12 +24,12 @@ Object.assign(S, {
 });
 
 // Freely licensed portraits only (Wikimedia Commons), cropped square around the face. Candidates without a free photo keep initials.
-const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg', 'aliyu-abbas-bin':'photos/abbas.jpg', 'donald-duke':'photos/duke.jpg', 'sunday-chibuzo-okereke':'photos/okereke.jpg', 'sunday-adenuga':'photos/adenuga.jpg', 'moses-olusoji-adebisi':'photos/adebisi.jpg', 'ada-elizabeth-fredrick-okwori':'photos/okwori.jpg', 'nkem-esther-okereke':'photos/nkem.jpg', 'peter-ada-agada':'photos/agada.jpg' };
+const PHOTOS = { tinubu:'photos/tinubu.jpg', atiku:'photos/atiku.jpg', obi:'photos/obi.jpg', 'seyi-makinde':'photos/makinde.jpg', 'omoyele-sowore':'photos/sowore.jpg', 'adewole-adebayo':'photos/adebayo.jpg', 'aliyu-abbas-bin':'photos/abbas.jpg', 'donald-duke':'photos/duke.jpg', 'sunday-chibuzo-okereke':'photos/okereke.jpg', 'sunday-adenuga':'photos/adenuga.jpg', 'moses-olusoji-adebisi':'photos/adebisi.jpg', 'ada-elizabeth-fredrick-okwori':'photos/okwori.jpg', 'nkem-esther-okereke':'photos/nkem.jpg', 'peter-ada-agada':'photos/agada.jpg', 'rufai-adekunle-omo-aje':'photos/omo-aje.jpg' };
 const CREDITS = [
   'Photos via Wikimedia Commons, cropped (and for Makinde, upscaled) by Naija Decides; adaptations of CC BY-SA photos are shared under the same licence.',
   'Tinubu: Nosa Asemota, CC BY-SA 4.0.', 'Atiku: Morten Fauerby / Atiku Abubakar (Flickr), CC BY 2.0.', 'Obi: official portrait as published by Premium Times (4 Nov 2022); photographer not credited.',
   'Makinde: Oduola Matthew, CC BY-SA 4.0.', 'Sowore: Mohamed Nanabhay, CC BY 2.0.', 'Adebayo: Benbaahi, CC BY-SA 4.0.', 'Abbas-Bin: Ultimatemastery, CC BY-SA 4.0.',
-  'News-agency photos (used for identification, with credit, as published in Premium Times\' Oct 2026 candidate profiles): Adenuga (OurNigeria), Adebisi (Punch), Sunday Okereke (Facebook), Agada (Channels TV), Okwori (Women News), Esther Okereke (TheCable), Olawepo-Hashim (The Sun). Duke: Ripples Nigeria. Rights stay with those outlets; we will remove any photo on request.'
+  'News-agency photos (used for identification, with credit, as published in Premium Times\' Oct 2026 candidate profiles): Adenuga (OurNigeria), Adebisi (Punch), Sunday Okereke (Facebook), Agada (Channels TV), Okwori (Women News), Esther Okereke (TheCable), Olawepo-Hashim (The Sun). Duke: Ripples Nigeria. Omo-Aje: The Sun (Nov 2026). Rights stay with those outlets; we will remove any photo on request.'
 ];
 C.forEach(c => c.photo = PHOTOS[c.id] || '');
 C.find(c => c.id === 'tinubu').img = 'img/s-tinubu.jpg';

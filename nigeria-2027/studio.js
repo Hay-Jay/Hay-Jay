@@ -89,6 +89,7 @@
       case 'stamp': { const s = lt < 0 ? 2.4 : 2.4 - 1.4 * eBack(k); n.style.opacity = clamp(k * 3) * vis; n.style.transform = `rotate(-6deg) scale(${s})`; break; }
       case 'zoom': { n.style.opacity = clamp(k * 2) * vis; n.style.transform = `scale(${1.12 - .12 * eInOut(clamp(lt / 6))})`; break; }
       case 'bar': n.style.width = (e * +n.dataset.w) + '%'; break;
+      case 'hl': n.style.backgroundSize = (e * 100).toFixed(1) + '% 100%'; break; // highlighter sweep (works across wrapped lines)
       case 'pillar': n.style.height = (e * +n.dataset.h) + '%'; break;
       case 'ring': { const p = +n.dataset.p, r = +n.getAttribute('r'), C = 2 * Math.PI * r; n.style.strokeDasharray = C; n.style.strokeDashoffset = C * (1 - e * p / 100); break; }
       case 'people': { const want = Math.round(eInOut(k) * +n.dataset.n); o.dots.forEach((dot, i) => dot.classList.toggle('on', i < want)); break; }
