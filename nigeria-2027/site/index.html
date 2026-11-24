@@ -548,8 +548,20 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-23T21:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-24T01:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'delta-omo-agege-attack', at:'2026-11-23T22:01:00+01:00', img:'news/n85.jpg', tag:'Security', pri:3, outlet:'Punch', url:'https://punchng.com/delta-attack-gunmen-wanted-to-kill-me-omo-agege/', people:[], claim:true,
+    h:'Four reported killed as gunmen attack Omo-Agege\'s campaign team in Delta',
+    d:'Gunmen attacked the campaign team of former Deputy Senate President Ovie Omo-Agege, the NDC\'s Delta Central Senate candidate, in Uduere, Ughelli North. Four members of his campaign were reported killed. Omo-Agege told Channels the attackers shouted his name and said they wanted to kill him, and that his DSS escorts saved him. Channels reported the state government condemned the killings and imposed a curfew on the area.',
+    why:'Campaign violence has turned deadly. Watch whether anyone is arrested and charged, whoever they are linked to.'},
+  {id:'inec-nuc-academics', at:'2026-11-23T22:20:00+01:00', img:'news/n86.jpg', tag:'INEC', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/23/2027-inec-secures-nuc-backing-on-hiring-credible-academic-for-elections-alignment-of-university-calendars/', people:[],
+    h:'Universities to supply lecturers as collation and returning officers and adjust calendars',
+    d:'After a visit by INEC chairman Joash Amupitan, the National Universities Commission committed to providing credible academic staff for the elections and adjusting university calendars around the 16 January presidential and 6 February governorship polls.',
+    why:'Lecturers collate and declare results. Who they are, and how they are picked, matters for trust in the count.'},
+  {id:'yobe-apc-flagoff', at:'2026-11-23T23:57:00+01:00', img:'news/n87.jpg', tag:'Campaign', pri:1, outlet:'Daily Trust', url:'https://dailytrust.com/2027-gov-buni-gaidam-rally-supporters-for-tinubu-warn-against-shadow-parties/', people:['tinubu','atiku','obi'], claim:true,
+    h:'Yobe APC flags off campaign; Buni calls ADC and NDC "shadow parties"',
+    d:'At the statewide APC campaign launch in Damaturu, Governor Mai Mala Buni and Senator Ibrahim Gaidam urged voters to re-elect Tinubu and not "waste" votes on what they called shadow parties like the ADC and NDC.',
+    why:'The North-East is contested by all three big campaigns. Rallies show who is investing where.'},
   {id:'apc-fake-inec-letter', at:'2026-11-23T17:38:00+01:00', img:'news/n80.jpg', tag:'Fact-check', pri:2, outlet:'Punch', url:'https://punchng.com/apc-disowns-letter-asking-inec-to-ensure-tinubus-2027-victory/', people:['tinubu'],
     h:'Viral "APC letter" asking INEC to ensure Tinubu wins is fake, party says',
     d:'An unsigned letter dated 22 November, supposedly from APC national chairman Nentawe Yilwatda to INEC chairman Joash Amupitan, asked INEC to use its machinery to declare Tinubu winner. The APC called it fake and malicious. Daily Trust and TheCable also flagged it as unverified disinformation.',
