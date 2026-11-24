@@ -754,7 +754,7 @@ window.VIDEOS.push({
       </div>
       <div class="gap"></div>
       <div class="a" data-a="stamp" data-t="2.6"><span class="stamp amber">Nearly 8×</span></div>
-      <div class="sub a" data-a="up" data-t="3" style="margin-top:28px">INEC 2023: 93.5M registered, 26.7% turnout, winner 8,794,726 votes</div>` },
+      <div class="sub a" data-a="up" data-t="3" style="margin-top:70px">INEC 2023: 93.5M registered, 26.7% turnout, winner 8,794,726 votes</div>` },
     { dur: 4.6, html: `
       ${photoBg('site/news/n39.jpg', 'center 30%')}
       <div class="dyk-shade"></div>

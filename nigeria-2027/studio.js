@@ -58,6 +58,9 @@
     el.appendChild(fit);
     el.style.visibility = '';
     const refit = () => {
+      // Measure with counters showing their final (widest) value.
+      const counters = [...fit.querySelectorAll('[data-a="count"]')].map(n => [n, n.textContent]);
+      counters.forEach(([n]) => { n.textContent = fmt(+n.dataset.to, +(n.dataset.dec || 0), n.dataset.pre || '', n.dataset.suf || ''); });
       const cs = getComputedStyle(el);
       const availH = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
       const availW = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
@@ -65,6 +68,7 @@
       const wide = fit.scrollWidth > availW + 2;
       fit.style.transformOrigin = `${wide ? '0' : '50%'} ${el.classList.contains('hero') ? '100%' : '50%'}`;
       fit.style.transform = k < 0.995 ? `scale(${k.toFixed(3)})` : '';
+      counters.forEach(([n, txt]) => { n.textContent = txt; });
     };
     refit();
     // Images change the height once they load, so fit again then (the renderer waits on __fitted).

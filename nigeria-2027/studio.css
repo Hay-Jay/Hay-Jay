@@ -166,7 +166,7 @@ body.render #stage{transform:none!important}
 
 /* ---- "Did you know?" series ---- */
 .dyk-tag{align-self:flex-start;font:900 44px/1 Inter;letter-spacing:.14em;text-transform:uppercase;color:#021;background:var(--green-hi,#3dff9a);padding:20px 30px;border-radius:14px;box-shadow:0 0 60px rgba(61,255,154,.45)}
-.dyk-num{font:400 210px/.9 Anton;letter-spacing:-.01em;color:#fff;text-shadow:0 10px 60px rgba(61,255,154,.35);font-variant-numeric:tabular-nums}
+.dyk-num{margin-bottom:26px;font:400 210px/.9 Anton;letter-spacing:-.01em;color:#fff;text-shadow:0 10px 60px rgba(61,255,154,.35);font-variant-numeric:tabular-nums}
 .dyk-big{font:400 300px/.85 Anton;color:#fff}
 .dyk-bg{position:absolute;inset:-40px;background:center/cover no-repeat;filter:saturate(1.1)}
 .dyk-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,19,11,.55),rgba(3,19,11,.78) 40%,rgba(3,19,11,.95))}
