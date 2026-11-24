@@ -37,6 +37,14 @@ function moodProsody(mood, base, basePitch = 0, pitchScale = 1) {
   return [sign(parseInt(base, 10) + r) + '%', sign(basePitch + Math.round(p * pitchScale)) + 'Hz', sign(v) + '%'];
 }
 
+// Sound effects, synthesised once (no third-party audio): a soft whoosh for cuts, a low hit for stamps.
+const SFX = { whoosh: path.join(here, 'assets', 'sfx', 'whoosh.wav'), hit: path.join(here, 'assets', 'sfx', 'hit.wav') };
+mkdirSync(path.dirname(SFX.whoosh), { recursive: true });
+if (!existsSync(SFX.whoosh)) await run('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'anoisesrc=d=0.5:c=pink:a=0.6:r=44100',
+  '-af', 'highpass=f=400,lowpass=f=5000,afade=t=in:d=0.3:curve=exp,afade=t=out:st=0.3:d=0.2:curve=exp,aformat=channel_layouts=stereo', SFX.whoosh]);
+if (!existsSync(SFX.hit)) await run('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', "aevalsrc='0.9*sin(2*PI*110*t*exp(-5*t))*exp(-9*t)':d=0.45:s=44100",
+  '-af', 'lowpass=f=1200,aformat=channel_layouts=stereo', SFX.hit]);
+
 const browser = await chromium.launch();
 const pageUrl = pathToFileURL(path.join(here, 'studio.html')).href + '?render=1';
 async function openPage() {
@@ -50,7 +58,7 @@ async function openPage() {
 const meta = await openPage();
 const { videos, voice, voices } = await meta.evaluate(() => ({
   voice: window.VOICE, voices: window.VOICES || {},
-  videos: VIDEOS.map(v => ({ id: v.id, clone: v.voice === 'clone', pre: v.voice === 'eleven', vkey: typeof v.voice === 'string' && !['clone', 'eleven'].includes(v.voice) ? v.voice : null, durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
+  videos: VIDEOS.map(v => ({ id: v.id, sfx: v.sfx, clone: v.voice === 'clone', pre: v.voice === 'eleven', vkey: typeof v.voice === 'string' && !['clone', 'eleven'].includes(v.voice) ? v.voice : null, durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
 }));
 await meta.close();
 
@@ -115,16 +123,21 @@ if (!silent) writeFileSync(path.join(here, 'vo', 'timing.js'),
 // ---- 2. render ----
 async function renderVideo(v) {
   const page = await openPage();
-  const duration = await page.evaluate(([id, durs]) => { window.__build(id, durs); return window.__duration; }, [v.id, v.durs]);
+  const duration = await page.evaluate(async ([id, durs]) => { window.__build(id, durs); await window.__fitted; return window.__duration; }, [v.id, v.durs]);
   await page.evaluate(() => Promise.all([...document.images].map(i => i.decode?.().catch(() => {}))));
 
   // narration track: each clip placed at its scene start + lead-in
   const tmp = mkdtempSync(path.join(os.tmpdir(), 'vo-'));
   const track = path.join(tmp, 'track.wav');
   const clips = v.clips.map((c, i) => c && { ...c, at: v.durs.slice(0, i).reduce((a, b) => a + b, 0) + VO_LEAD }).filter(Boolean);
+  if (clips.length && v.sfx !== false) {
+    const cues = await page.evaluate(() => window.__sfx());
+    cues.cuts.forEach(at => clips.push({ mp3: SFX.whoosh, at: Math.max(0, at - 0.18), gain: 0.35 }));
+    cues.hits.forEach(at => clips.push({ mp3: SFX.hit, at, gain: 0.5 }));
+  }
   if (clips.length) {
     const inputs = clips.flatMap(c => ['-i', c.mp3]);
-    const fx = clips.map((c, i) => `[${i}:a]aresample=44100,aformat=channel_layouts=stereo,adelay=${Math.round(c.at * 1000)}:all=1[a${i}]`).join(';')
+    const fx = clips.map((c, i) => `[${i}:a]aresample=44100,aformat=channel_layouts=stereo,volume=${c.gain || 1},adelay=${Math.round(c.at * 1000)}:all=1[a${i}]`).join(';')
       + ';' + clips.map((_, i) => `[a${i}]`).join('') + `amix=inputs=${clips.length}:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=11[out]`;
     await run('ffmpeg', ['-y', '-loglevel', 'error', ...inputs, '-filter_complex', fx, '-map', '[out]', '-ar', '44100', track]);
   }

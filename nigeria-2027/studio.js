@@ -7,6 +7,8 @@
   const scenesEl = document.getElementById('scenes');
   const barsEl = document.getElementById('bars');
   const blobs = [...document.querySelectorAll('.blob')];
+  const flash = Object.assign(document.createElement('div'), { className: 'flash' });
+  stage.appendChild(flash);
   const render = qs.has('render');
   if (render) document.body.classList.add('render');
   document.getElementById('handle').textContent = qs.get('handle') || window.HANDLE || '#Nigeria2027';
@@ -24,12 +26,14 @@
     durs = durs || (window.VO_TIMING || {})[video.id] || [];
     scenesEl.innerHTML = ''; barsEl.innerHTML = '';
     scenes = []; total = 0;
+    const waits = [];
     video.scenes.forEach((s, si) => {
       const dur = durs[si] || s.dur;
       const el = document.createElement('section');
       el.className = 'scene ' + (s.cls || '');
       el.innerHTML = s.html;
       scenesEl.appendChild(el);
+      waits.push(...fitScene(el));
       const anims = [...el.querySelectorAll('[data-a]')].map(n => ({
         n, a: n.dataset.a, t: +(n.dataset.t || 0),
         d: +(n.dataset.d || ({ count: 1.4, bar: 1.2, pillar: 1.3, ring: 1.6, people: 1.6, type: 1.0 }[n.dataset.a] || .6)),
@@ -41,7 +45,30 @@
       const b = document.createElement('div'); b.appendChild(document.createElement('i')); barsEl.appendChild(b);
     });
     window.__duration = total;
+    window.__fitted = Promise.all(waits);
     seek(0);
+  }
+
+  // Keep every scene inside the TikTok/Reels safe zone: wrap its content (not full-bleed
+  // backgrounds) and scale it down if it is taller or wider than the safe area.
+  function fitScene(el) {
+    const fit = document.createElement('div'); fit.className = 'fit';
+    el.style.visibility = 'visible';
+    [...el.children].forEach(c => { if (!/absolute|fixed/.test(getComputedStyle(c).position)) fit.appendChild(c); });
+    el.appendChild(fit);
+    el.style.visibility = '';
+    const refit = () => {
+      const cs = getComputedStyle(el);
+      const availH = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const availW = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const k = Math.min(1, availH / fit.scrollHeight, availW / fit.scrollWidth);
+      const wide = fit.scrollWidth > availW + 2;
+      fit.style.transformOrigin = `${wide ? '0' : '50%'} ${el.classList.contains('hero') ? '100%' : '50%'}`;
+      fit.style.transform = k < 0.995 ? `scale(${k.toFixed(3)})` : '';
+    };
+    refit();
+    // Images change the height once they load, so fit again then (the renderer waits on __fitted).
+    return [...fit.querySelectorAll('img')].filter(i => !i.complete).map(i => new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); }).then(refit));
   }
 
   function applyAnim(o, lt) {
@@ -80,11 +107,14 @@
       fill.style.width = (i < idx ? 100 : i > idx ? 0 : clamp((t - s.start) / s.dur) * 100) + '%';
       if (!on) return;
       const lt = t - s.start;
-      const kin = eOut(clamp(lt / .4));
+      // Short-form editing: punch-in on every cut, a slow push-in while the scene holds,
+      // and a quick flash between scenes, so the frame never sits still.
+      const kin = eOut(clamp(lt / .35));
       const last = i === scenes.length - 1;
-      const kout = last ? 0 : eInOut(clamp((lt - (s.dur - .3)) / .3));
-      s.el.style.opacity = kin * (1 - kout);
-      s.el.style.transform = `translateY(${(1 - kin) * 40}px) scale(${1 - kout * .04})`;
+      const kout = last ? 0 : eInOut(clamp((lt - (s.dur - .25)) / .25));
+      s.el.style.opacity = clamp(lt / .12) * (1 - kout);
+      s.el.style.transform = `scale(${((1 + .08 * (1 - kin)) * (1 + .02 * clamp(lt / s.dur)) * (1 - kout * .05)).toFixed(4)})`;
+      flash.style.opacity = i ? (.3 * (1 - clamp(lt / .22))).toFixed(3) : 0;
       s.anims.forEach(o => applyAnim(o, lt - o.t));
       stage.classList.toggle('mood-red', s.mood === 'red');
     });
@@ -98,6 +128,11 @@
   window.__seek = seek;
   window.__build = build;
   window.__scenes = () => scenes.map(s => ({ start: s.start, dur: s.dur }));
+  // Sound-effect cue points for the renderer: a whoosh on each cut, a hit when a stamp lands.
+  window.__sfx = () => ({
+    cuts: scenes.slice(1).map(s => s.start),
+    hits: scenes.flatMap(s => s.anims.filter(o => o.a === 'stamp').map(o => s.start + o.t)),
+  });
 
   // ----- preview UI -----
   const pick = document.getElementById('pick');
