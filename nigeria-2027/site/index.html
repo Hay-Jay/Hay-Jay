@@ -548,8 +548,20 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-24T01:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-24T06:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-queries-54', at:'2026-11-24T01:18:00+01:00', img:'news/n88.jpg', tag:'INEC', pri:3, outlet:'Punch', url:'https://punchng.com/inec-queries-54-officials-over-voter-registration-breaches/', people:[],
+    h:'INEC queries 54 of its own staff over voter registration irregularities in 10 states',
+    d:'INEC national commissioner Mohammed Haruna told Punch the commission has issued queries to 54 personnel allegedly involved in registration irregularities across 10 states. They must respond before further investigation, and INEC says it will follow due process before any discipline.',
+    why:'Problems in the register start with the people who enrol voters. Follow whether these cases end in sanctions.'},
+  {id:'sowore-trial-subpoena', at:'2026-11-24T02:39:00+01:00', img:'news/n89.jpg', tag:'Court', pri:2, outlet:'The Sun', url:'https://thesun.ng/inec-chairman-sowore-clash-over-subpoena-as-trial-stalls/', people:['omoyele-sowore','tinubu'],
+    h:'Sowore\'s cybercrime trial stalls over his subpoena of the INEC chairman',
+    d:'Sowore\'s trial at the Federal High Court, Abuja, stalled after his side did not file a response in time to INEC chairman Joash Amupitan\'s application to set aside a subpoena Sowore had issued on him. The DSS is prosecuting the AAC candidate over 2025 social media posts calling Tinubu a "criminal".',
+    why:'A presidential candidate is on trial during the campaign. Watch how the court handles the timetable.'},
+  {id:'code-uzabe-monitoring', at:'2026-11-24T05:55:00+01:00', img:'news/n90.jpg', tag:'INEC', pri:1, outlet:'NAN', url:'https://nannews.ng/code-to-deploy-specialised-portal-for-2027-election-monitoring/', people:[],
+    h:'Civic group CODE to run citizen election-monitoring platform in all 36 states',
+    d:'Connected Development (CODE) founder Hamzat Lawal said the group will deploy its Uzabe citizen observation platform across all 36 states and the FCT for the 16 January and 6 February polls.',
+    why:'Citizen observers add independent eyes on polling units. You can report what you see.'},
   {id:'delta-omo-agege-attack', at:'2026-11-23T22:01:00+01:00', img:'news/n85.jpg', tag:'Security', pri:3, outlet:'Punch', url:'https://punchng.com/delta-attack-gunmen-wanted-to-kill-me-omo-agege/', people:[], claim:true,
     h:'Four reported killed as gunmen attack Omo-Agege\'s campaign team in Delta',
     d:'Gunmen attacked the campaign team of former Deputy Senate President Ovie Omo-Agege, the NDC\'s Delta Central Senate candidate, in Uduere, Ughelli North. Four members of his campaign were reported killed. Omo-Agege told Channels the attackers shouted his name and said they wanted to kill him, and that his DSS escorts saved him. Channels reported the state government condemned the killings and imposed a curfew on the area.',
