@@ -3,8 +3,24 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-24T06:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-24T11:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'nscia-mosque-violence', at:'2026-11-24T09:27:00+01:00', img:'news/n91.jpg', tag:'Security', pri:2, outlet:'Arise News', url:'https://www.arise.tv/sultan-condemns-mosque-attacks-warns-politicians-and-clerics-against-2027-election-violence/', people:[],
+    h:'Sultan-led Islamic council condemns mosque attacks, warns against election violence',
+    d:'The Nigerian Supreme Council for Islamic Affairs, led by the Sultan of Sokoto, condemned recent attacks in and around some mosques and urged politicians, religious leaders and the public to avoid inflammatory comments and actions that could raise tension before the elections.',
+    why:'Religious leaders on all sides are calling for calm. Keep places of worship free of campaign fights.'},
+  {id:'falana-impunity', at:'2026-11-24T06:44:00+01:00', img:'news/n92.jpg', tag:'Security', pri:2, outlet:'Punch', url:'https://punchng.com/delta-killings-impunity-fuelling-political-violence-falana/', people:[],
+    h:'Falana: political killings will continue until attackers are prosecuted',
+    d:'Reacting on Channels to the deadly attack at a rally in Ughelli North, Delta State, human rights lawyer Femi Falana blamed rising political violence on the failure to prosecute electoral offenders, and urged the NBA, civil society and security agencies to make sure those responsible face justice.',
+    why:'Arrests are announced often; convictions are rare. Prosecutions are the test.'},
+  {id:'adeyemi-atiku-step-down', at:'2026-11-24T08:37:00+01:00', img:'news/n93.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/2027-northern-leaders-should-appeal-to-atiku-to-step-down-wait-for-norths-turn-smart-adeyemi/', people:['atiku','tinubu'], claim:true,
+    h:'Kogi APC campaign chief: Northern leaders should ask Atiku to step aside',
+    d:'On TVC\'s Politics Today, Senator Smart Adeyemi, who heads Tinubu\'s campaign in Kogi, said the South should complete eight years in the presidency and urged Northern leaders to persuade Atiku to withdraw. Atiku has repeatedly said he is staying in the race.',
+    why:'Zoning is an informal party convention, not a law. Any eligible candidate can run.'},
+  {id:'barau-kano-clerics', at:'2026-11-24T10:08:00+01:00', img:'news/n94.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/2027-barau-urges-kano-clerics-to-back-tinubu/', people:['tinubu'],
+    h:'Deputy Senate President Barau asks 2,000 Kano clerics to mobilise for Tinubu',
+    d:'At a meeting with Islamic clerics from Kano North\'s 13 local governments, Barau Jibrin urged them to back Tinubu and APC candidates, citing federal projects in Kano and the North-West.',
+    why:'Kano is one of the biggest prizes in the North. Every campaign is courting its religious and community leaders.'},
   {id:'inec-queries-54', at:'2026-11-24T01:18:00+01:00', img:'news/n88.jpg', tag:'INEC', pri:3, outlet:'Punch', url:'https://punchng.com/inec-queries-54-officials-over-voter-registration-breaches/', people:[],
     h:'INEC queries 54 of its own staff over voter registration irregularities in 10 states',
     d:'INEC national commissioner Mohammed Haruna told Punch the commission has issued queries to 54 personnel allegedly involved in registration irregularities across 10 states. They must respond before further investigation, and INEC says it will follow due process before any discipline.',
