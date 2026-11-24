@@ -7,6 +7,11 @@ window.HANDLE = 'Naija Decides · #Nigeria2027';
 /* Narrator voice (Microsoft Edge neural TTS). Nigerian English options:
    'en-NG-AbeoNeural' (male) or 'en-NG-EzinneNeural' (female). */
 window.VOICE = { name: 'en-NG-AbeoNeural', rate: '+10%' };
+// Named voices a video (voice:'abeo') or a single narration line ([mood, text, 'andrew']) can pick.
+window.VOICES = {
+  abeo:   { name: 'en-NG-AbeoNeural', rate: '-6%', pitch: -3 },
+  andrew: { name: 'en-US-AndrewMultilingualNeural', rate: '+0%', pitch: 0, pitchScale: 0.5 },
+};
 
 const IMG = {
   // Every candidate is shown the same way (initials, no photo) to keep the videos neutral.
@@ -764,6 +769,15 @@ window.NARRATION['dyk-turnout'] = [
   ['fired',   'Sixty-eight million registered voters stayed home. The winner got less than nine million votes. The people who stayed home could have decided it... nearly eight times over.'],
   ['hopeful', 'January sixteenth is coming. Get your PVC, find your polling unit, and show up.'],
 ];
+
+/* Same "Did you know?" video in the two voices the creator picked, plus a two-voice version. */
+(function(){
+  const base = window.VIDEOS.find(v => v.id === 'dyk-turnout'), lines = window.NARRATION['dyk-turnout'];
+  [['dyk-turnout-andrew', 'andrew', null], ['dyk-turnout-abeo', 'abeo', null], ['dyk-turnout-duo', 'abeo', ['andrew', 'abeo', 'andrew', 'abeo']]].forEach(([id, voice, who]) => {
+    window.VIDEOS.push({ ...base, id, voice, scenes: base.scenes.slice() });
+    window.NARRATION[id] = lines.map(([m, t], i) => who ? [m, t, who[i]] : [m, t]);
+  });
+})();
 
 /* Closing promo for the Naija Decides website, added to every video. */
 (function(){

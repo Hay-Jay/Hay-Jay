@@ -31,10 +31,10 @@ const probe = f => +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'fo
 const nn = i => String(i + 1).padStart(2, '0');
 // Emotion -> delivery for the Edge voice: [rate offset %, pitch Hz, volume %].
 const MOODS = { calm: [-4, 0, 0], serious: [-2, -2, 0], grave: [-10, -6, 0], hopeful: [0, 3, 0], urgent: [8, 4, 5], fired: [12, 8, 10] };
-function moodProsody(mood, base) {
+function moodProsody(mood, base, basePitch = 0, pitchScale = 1) {
   const [r, p, v] = MOODS[mood] || MOODS.serious;
   const sign = n => (n >= 0 ? '+' : '') + n;
-  return [sign(parseInt(base, 10) + r) + '%', sign(p) + 'Hz', sign(v) + '%'];
+  return [sign(parseInt(base, 10) + r) + '%', sign(basePitch + Math.round(p * pitchScale)) + 'Hz', sign(v) + '%'];
 }
 
 const browser = await chromium.launch();
@@ -48,9 +48,9 @@ async function openPage() {
 
 // ---- 1. narration clips (cached by text) and scene timing for every video ----
 const meta = await openPage();
-const { videos, voice } = await meta.evaluate(() => ({
-  voice: window.VOICE,
-  videos: VIDEOS.map(v => ({ id: v.id, clone: v.voice === 'clone', durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
+const { videos, voice, voices } = await meta.evaluate(() => ({
+  voice: window.VOICE, voices: window.VOICES || {},
+  videos: VIDEOS.map(v => ({ id: v.id, clone: v.voice === 'clone', vkey: typeof v.voice === 'string' && v.voice !== 'clone' ? v.voice : null, durs: v.scenes.map(s => s.dur), lines: (window.NARRATION || {})[v.id] || [] })),
 }));
 await meta.close();
 
@@ -79,8 +79,9 @@ for (const v of videos) {
   v.clips = [];
   for (let i = 0; i < v.durs.length; i++) {
     const line = v.lines[i];
-    const [mood, text] = Array.isArray(line) ? line : ['serious', line];
-    const [rate, pitch, vol] = moodProsody(mood, voice.rate);
+    const [mood, text, lineVoice] = Array.isArray(line) ? line : ['serious', line];
+    const vc = voices[lineVoice || v.vkey] || voice;
+    const [rate, pitch, vol] = moodProsody(mood, vc.rate, vc.pitch || 0, vc.pitchScale ?? 1);
     if (silent || !text) { v.clips.push(null); continue; }
     if (v.clone) {
       const wav = path.join(dir, `${nn(i)}.wav`);
@@ -89,10 +90,10 @@ for (const v of videos) {
       v.durs[i] = Math.max(v.durs[i], +(VO_LEAD + len + VO_TAIL).toFixed(2)); continue;
     }
     const mp3 = path.join(dir, `${nn(i)}.mp3`), txt = path.join(dir, `${nn(i)}.txt`);
-    const key = `${voice.name}|${rate}|${pitch}|${vol}|${text}`;
+    const key = `${vc.name}|${rate}|${pitch}|${vol}|${text}`;
     if (!existsSync(mp3) || !existsSync(txt) || readFileSync(txt, 'utf8') !== key) {
       process.stdout.write(`voice ${v.id} ${nn(i)}\n`);
-      await run('python3', [path.join(here, 'voiceover.py'), voice.name, rate, text, mp3, pitch, vol]);
+      await run('python3', [path.join(here, 'voiceover.py'), vc.name, rate, text, mp3, pitch, vol]);
       writeFileSync(txt, key);
     }
     const len = probe(mp3);
