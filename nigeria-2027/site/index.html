@@ -553,8 +553,24 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-24T16:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-24T21:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-no-battlefield', at:'2026-11-24T18:45:00+01:00', img:'news/n101.jpg', tag:'INEC', pri:2, outlet:'Punch', url:'https://punchng.com/dont-turn-2027-elections-into-battlefield-inec-chairman-warns-politicians/', people:[],
+    h:'INEC chairman to parties: "Don\'t turn 2027 into a battlefield"',
+    d:'At a security meeting called by the Inspector-General with party leaders in Abuja, INEC chairman Joash Amupitan warned that rising political violence, attacks on party members and intimidation of citizens could undermine the elections before a single vote is cast.',
+    why:'The electoral body, the police and the parties were in one room. What each side does next is the real test.'},
+  {id:'yiaga-tech-test', at:'2026-11-24T20:13:00+01:00', img:'news/n102.jpg', tag:'INEC', pri:2, outlet:'TVC News', url:'https://www.tvcnews.tv/yiaga-africa-urges-nigerians-to-prepare-for-inec-technology-test-ahead-of-2027-elections/', people:[],
+    h:'Yiaga Africa: get to know INEC\'s voting technology before Saturday\'s test',
+    d:'Election observer group Yiaga Africa urged Nigerians to learn how INEC\'s technology works before the 28 November mock accreditation and result upload, saying the test is the chance to find gaps and fix weaknesses before the real vote.',
+    why:'If your polling unit is on INEC\'s test list, going on Saturday is the best way to see BVAS and result upload for yourself.'},
+  {id:'obi-free-campaign', at:'2026-11-24T20:37:00+01:00', img:'news/n103.jpg', tag:'Campaign', pri:1, outlet:'Chronicle NG', url:'https://chronicle.ng/2027-elections-obi-candidates-freedom-campaign/', people:['obi'],
+    h:'Obi: every candidate must be free to campaign',
+    d:'The NDC candidate called for an open political environment in which all parties and candidates can reach voters and present their programmes without restrictions, and repeated his call for issue-based campaigns.',
+    why:'Freedom to campaign applies to every party. Reports of blocked rallies or removed posters can be checked locally.'},
+  {id:'shettima-atiku', at:'2026-11-24T17:15:00+01:00', img:'news/n104.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/24/shettima-reveals-why-he-wont-stop-insulting-atiku/', people:['atiku','tinubu'], claim:true,
+    h:'Shettima says he will keep firing back at Atiku',
+    d:'In Maiduguri, Vice President Kashim Shettima said he will keep criticising Atiku as long as Atiku attacks Tinubu, objecting to Atiku calling the President "Bola" in public, and called him a "political tourist" who will retire to Dubai.',
+    why:'Personal attacks get attention; policy comparisons help voters more. Check each side\'s plans in our Compare section.'},
   {id:'court-voids-omo-agege', at:'2026-11-24T14:50:00+01:00', img:'news/n95.jpg', tag:'Court', pri:3, outlet:'Punch', url:'https://punchng.com/2027-court-voids-omo-ageges-ndc-ticket-orders-inec-to-delist-him/', people:[],
     h:'Court voids Omo-Agege\'s NDC Senate ticket, orders INEC to delist him',
     d:'A Federal High Court in Warri nullified former Deputy Senate President Ovie Omo-Agege\'s nomination as NDC candidate for Delta Central, citing non-compliance with the Electoral Act over his exit from the APC, NDC membership and eligibility for the primary. Justice Hyeladzira Nganjiwa ordered INEC to remove his name. The ruling came a day after gunmen attacked his campaign team.',
