@@ -41,7 +41,7 @@
   const promise = d => ({ dur: 6, html: `
     <div class="kicker a" data-a="up">What ${d.he} promises</div>
     ${d.promise.map((p, i) => `<div class="dz-pr a" data-a="right" data-t="${.25 + i * .4}"><span>“</span>${p}</div>`).join('')}
-    <div class="a" data-a="stamp" data-t="${.6 + d.promise.length * .4}" style="margin-top:26px"><span class="stamp amber">Promise</span></div>
+    ${/^No detailed/.test(d.promise[0]) ? '' : `<div class="a" data-a="stamp" data-t="${.6 + d.promise.length * .4}" style="margin-top:26px"><span class="stamp amber">Promise</span></div>`}
     <div class="src a" data-a="fade" data-t="1.8" style="margin-top:64px">${d.promSrc || d.src || 'Premium Times candidate profiles, Oct 2026'}</div>` });
   const questions = d => ({ dur: 6.5, mood: 'red', html: `
     <div class="kicker a red" data-a="up">The questions</div>
