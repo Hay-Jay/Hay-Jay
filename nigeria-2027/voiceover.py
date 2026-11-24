@@ -20,4 +20,14 @@ import edge_tts  # noqa: E402
 voice, rate, text, out = sys.argv[1:5]
 pitch = sys.argv[5] if len(sys.argv) > 5 else '+0Hz'
 volume = sys.argv[6] if len(sys.argv) > 6 else '+0%'
-asyncio.run(edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, volume=volume).save(out))
+import time  # noqa: E402
+
+# The service sometimes returns no audio for a moment; retry a few times before giving up.
+for attempt in range(5):
+    try:
+        asyncio.run(edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, volume=volume).save(out))
+        break
+    except edge_tts.exceptions.NoAudioReceived:
+        if attempt == 4:
+            raise
+        time.sleep(3 * (attempt + 1))
