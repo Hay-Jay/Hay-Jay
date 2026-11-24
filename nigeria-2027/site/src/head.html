@@ -103,6 +103,11 @@ section.view{display:grid;gap:34px}
 .clip .outlet{position:absolute;left:10px;bottom:10px;background:rgba(2,15,8,.88);color:var(--fg);font:800 11px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:7px 9px;border-radius:6px}
 
 /* news */
+/* Watch: latest short videos, played in place */
+.watch{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.watch .vid{display:grid;gap:10px;align-content:start}
+.watch video{width:100%;aspect-ratio:9/16;border-radius:16px;background:#000;border:1px solid var(--line);object-fit:cover}
+.watch .vid h3{font-size:17px;line-height:1.25;margin:0}
 .news-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
 .story{display:grid;gap:12px;align-content:start;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;min-width:0;grid-column:span 2}
 .story.lead{grid-column:span 4;grid-row:span 2}

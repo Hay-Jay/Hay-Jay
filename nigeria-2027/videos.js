@@ -98,7 +98,7 @@ window.VIDEOS = [
   {
     id: 'countdown',
     title: '1 · Nigeria 2027: what you need to know',
-    caption: 'Nigeria votes on 16 January 2027. 110 million registered voters. Three big names. In 2023 only 26.7% of us showed up. Not this time. 🇳🇬 #Nigeria2027 #NigeriaDecides2027 #INEC #PVC #Election',
+    caption: 'Nigeria votes on 16 January 2027. 103 million registered voters. Three big names. In 2023 only 26.7% of us showed up. Not this time. 🇳🇬 #Nigeria2027 #NigeriaDecides2027 #INEC #PVC #Election',
     scenes: [
       { dur: 4, html: `
         <div class="kicker a" data-a="up">Nigeria decides</div>
@@ -112,7 +112,7 @@ window.VIDEOS = [
         <div class="a" data-a="pop" data-t="1.6"><span class="pill"><span class="count a hl" data-a="count" data-t="1.6" data-to="74">74</span> days to go · as of 3 Nov 2026</span></div>` },
       { dur: 5, html: `
         <div class="kicker a" data-a="up">Registered voters</div>
-        <div class="big a" data-a="count" data-t=".1" data-to="110" data-suf="M">110M</div>
+        <div class="big a" data-a="count" data-t=".1" data-to="103.4" data-dec="1" data-suf="M">103.4M</div>
         <div class="body a" data-a="up" data-t=".6">Nigerians on INEC's voter register</div>
         <div class="gap-l"></div>
         <div class="small a" data-a="up" data-t="1">Biggest states</div>
@@ -148,7 +148,7 @@ window.VIDEOS = [
         <div class="h2 a hl" data-a="pop" data-t="1.6">Show up.</div>` },
       sources([
         '<b>INEC</b> revised timetable, Feb 2026 (Jan 16 / Feb 6)',
-        '<b>INEC</b> via Nairametrics, Oct 2026: 110M voters, state totals',
+        '<b>INEC</b>, 6 Oct 2026 (via TVC News): 103,428,715 voters, state totals',
         '<b>INEC</b> candidate list · Wikipedia: 2027 Nigerian general election',
         '<b>INEC</b> 2023 results: 24.97M votes of 93.47M registered',
       ]),
@@ -351,7 +351,7 @@ window.VIDEOS = [
         <div class="body a" data-a="up">In 2023 the winner got</div>
         <div class="big a" data-a="count" data-t=".2" data-to="8.79" data-dec="2" data-suf="M">8.79M</div>
         <div class="body a" data-a="up" data-t=".8">There are</div>
-        <div class="big a hl" data-a="count" data-t="1" data-to="110" data-suf="M">110M</div>
+        <div class="big a hl" data-a="count" data-t="1" data-to="103.4" data-dec="1" data-suf="M">103.4M</div>
         <div class="body a" data-a="up" data-t="1.6">registered voters now. <b>We are the majority.</b></div>` },
       sources([
         '<b>INEC:</b> voter registration, polling units, IReV portal',
@@ -535,7 +535,7 @@ window.VIDEOS = [
 window.NARRATION = {
   'countdown': [
     ['urgent',  'Nigerians... mark this date. January sixteenth, twenty twenty-seven. That is when we choose our next president. Governorship elections follow, on February sixth.'],
-    ['serious', 'One hundred and ten million of us are registered to vote. Lagos, Kano and Kaduna lead the list.'],
+    ['serious', 'One hundred and three million of us are registered to vote. Lagos, Kano and Kaduna lead the list.'],
     ['calm',    'Three names stand out. President Bola Tinubu, APC. Atiku Abubakar, ADC. And Peter Obi, NDC... with Rabiu Kwankwaso as his running mate.'],
     ['grave',   'But listen to this. In twenty twenty-three, only twenty-six point seven percent of registered voters actually voted. Nearly seven out of ten... stayed at home.'],
     ['fired',   'Not this time. Collect your PVC. Know your polling unit. Vote on January sixteenth, and stay until every vote is counted. Show up!'],
@@ -572,7 +572,7 @@ window.NARRATION = {
     ['serious', 'One. Get your PVC. No PVC, no vote. Two. Know your polling unit, and go and see it before election day.'],
     ['serious', 'Three. Go early. Bring water, and bring patience. Four. Stay for the count. Results are counted and posted right there at your unit.'],
     ['urgent',  'Five. Check your unit\'s result on INEC\'s I-Rev portal, and make sure it matches what was posted. And bring five people with you!'],
-    ['fired',   'In twenty twenty-three, the winner got eight point seven nine million votes. Today, one hundred and ten million of us are registered. We are the majority!'],
+    ['fired',   'In twenty twenty-three, the winner got eight point seven nine million votes. Today, one hundred and three million of us are registered. We are the majority!'],
     ['hopeful', 'Share this with everyone you know.'],
   ],
   'promise-vs-reality': [
