@@ -17,7 +17,7 @@ const BIO = {
     record:'In office: ended the petrol subsidy and unified the exchange rate (May–Jun 2023). The World Bank reported 4.2% growth in the first half of 2026. Inflation and food prices rose sharply after the reforms.',
     questions:'A 1993 US civil forfeiture of funds linked to drug proceeds (no criminal charge or conviction).',
     pitch:'Second term to "finish the reforms": growth, investment, security.', src:'ptprof'},
-  atiku:{age:79, born:'25 Nov 1946', from:'Jada, Adamawa', edu:'Law diploma, Ahmadu Bello University', oldest:true,
+  atiku:{age:80, born:'25 Nov 1946', from:'Jada, Adamawa', edu:'Law diploma, Ahmadu Bello University', oldest:true,
     career:['Nigeria Customs Service, 1969–89 (retired as deputy director)','Won the 1998 Adamawa governorship election, then became Obasanjo\'s running mate','Vice President, 1999–2007; chaired the National Council on Privatisation','Presidential candidate in 2007, 2019 and 2023','Won the ADC primary in May 2026, beating Rotimi Amaechi and Hayatu-Deen'],
     record:'Oversaw the privatisation programme of 1999–2007 as VP. Built large business interests (Intels, ABTI). 6.98M votes in 2023 (2nd).',
     questions:'A Sept 2026 arbitration over the Mambilla power project heard about a $500,000 payment to his then-wife; the tribunal found no evidence he used his official duties. Earlier corruption allegations from his VP years were never tested in a Nigerian court. On 5 Nov 2026 a Federal High Court voided his ADC nomination (suit over the party\'s leadership); the ADC is appealing.',

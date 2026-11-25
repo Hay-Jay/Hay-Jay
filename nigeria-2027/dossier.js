@@ -87,7 +87,7 @@
           'His promise: finish the reforms. Dedicated power for factories, and fifty thousand new student hostel beds.',
           'The questions. Inflation and food prices rose sharply after the reforms. And a nineteen ninety-three US civil forfeiture case. No criminal charge, no conviction.',
           'On the campaign trail, he is courting voters in Lagos, the state he lost in twenty twenty-three.'] },
-    { id:'atiku', say:'Atiku', name:'Atiku Abubakar', party:'ADC', age:79, he:'he', photo:'site/photos/atiku.jpg',
+    { id:'atiku', say:'Atiku', name:'Atiku Abubakar', party:'ADC', age:80, he:'he', photo:'site/photos/atiku.jpg',
       hook:'Former vice president. Oldest on the ballot. Fourth time as a presidential candidate.',
       road:[['1969–89','Nigeria Customs Service'],['1999–2007','Vice President'],['2007 · 2019 · 2023','Ran for president'],['May 2026','Won the ADC primary']],
       done:[['Chaired the privatisation council','as Vice President, 1999–2007'],['Built big businesses','Intels, ABTI'],['6.98M votes in 2023','came 2nd']],
