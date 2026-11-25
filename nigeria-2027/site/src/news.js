@@ -3,8 +3,24 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-25T06:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-25T11:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'peace-pact-ndc-boycott', at:'2026-11-25T09:31:00+01:00', img:'news/n111.jpg', tag:'Security', pri:3, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/927832-2027-politics-watch-from-ndcs-police-meeting-boycott-to-court-voiding-omo-ageges-ticket.html', people:['obi'],
+    h:'12 parties sign anti-violence pact as NDC boycotts police meeting; Delta toll put at six',
+    d:'Twelve parties signed a peace agreement in Abuja after a meeting with the police and INEC, pledging to restrain supporters and settle disputes lawfully. The NDC boycotted the Inspector-General\'s meeting over alleged attacks on its supporters. Preliminary police findings put the deaths in Monday\'s Delta violence at six.',
+    why:'The NDC and the AAC (Sowore) are now outside this week\'s peace efforts. Watch whether the parties that signed keep their word.'},
+  {id:'adc-kano-judgment-claim', at:'2026-11-25T09:50:00+01:00', img:'news/n112.jpg', tag:'Court', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/25/adc-calls-for-probe-into-alleged-tinubu-interference-in-kano-governorship-judgment/', people:['tinubu'], claim:true,
+    h:'ADC demands probe after Kano governor\'s reported claim of a deal before Supreme Court ruling',
+    d:'After Kano governor Abba Kabir Yusuf reportedly told BBC Hausa he had an agreement with Tinubu before the Supreme Court ruled on his 2023 election, linked to his later move to the APC, the ADC called on Tinubu to resign or face impeachment and asked the National Assembly to investigate.',
+    why:'A serious allegation resting on a reported interview. Check what the governor and the Presidency say on the record.'},
+  {id:'obi-zamfara-accident', at:'2026-11-25T09:07:00+01:00', img:'news/n113.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/25/peter-obi-warns-nigerians-against-losing-their-humanity-over-politics-after-zamfara-tragedy/', people:['obi'],
+    h:'Obi sends sympathy to APC supporters hurt in Zamfara road accident',
+    d:'Reacting to a road accident that reportedly killed several APC supporters in Zamfara, the NDC candidate said party affiliation should make no difference to how Nigerians respond, and urged medical care for the injured and support for bereaved families.',
+    why:'A rare cross-party moment in a tense week.'},
+  {id:'tinubu-protect-democracy', at:'2026-11-25T11:10:00+01:00', img:'news/n114.jpg', tag:'Campaign', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/927873-tinubu-relives-progressives-struggle-for-democracy-urges-nigerians-to-project-it.html', people:['tinubu'],
+    h:'Tinubu urges Nigerians to protect democracy at launch of book on the Progressives',
+    d:'At the State House presentation of Sam Omatseye\'s "From AD to APC", Tinubu recalled the Progressives\' journey from the Alliance for Democracy to the APC, paid tribute to pro-democracy activists and said democracy needs constant nurturing.',
+    why:'Every candidate says they defend democracy. Judge each by what they do, not only what they say.'},
   {id:'police-invite-omo-agege', at:'2026-11-25T02:00:00+01:00', img:'news/n107.jpg', tag:'Security', pri:3, outlet:'Punch', url:'https://punchng.com/ndc-campaign-violence-police-summon-omo-agege-delta-gov-mourns-six/', people:[],
     h:'Delta police invite Omo-Agege, local council chairman and others over deadly rally attack',
     d:'Delta police invited NDC Senate candidate Ovie Omo-Agege, Ughelli North council chairman Jaro Egbo and several others to the State CID on 26–27 November, "to establish their level of involvement" in the Uduere violence. Governor Sheriff Oborevwori ordered security agencies to arrest those responsible. Punch\'s report puts the death toll at six; earlier reports said four.',
