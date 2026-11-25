@@ -553,8 +553,16 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-24T21:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-25T01:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'makinde-campaign-violence', at:'2026-11-24T19:21:00+01:00', img:'news/n105.jpg', tag:'Security', pri:1, outlet:'The Whistler', url:'https://thewhistler.ng/makinde-campaign-says-apc-violence-wont-save-tinubu-from-defeat/', people:['seyi-makinde','tinubu'], claim:true,
+    h:'Makinde campaign blames APC supporters for attacks on the opposition',
+    d:'The Makinde-Daura campaign condemned the 23 November gun attack on Omo-Agege\'s NDC team in Delta and accused APC supporters of using violence to intimidate opposition parties.',
+    why:'Blame flies fast after attacks. Wait for police findings before deciding who was behind them.'},
+  {id:'aregbesola-police-inec', at:'2026-11-24T23:00:00+01:00', img:'news/n106.jpg', tag:'Security', pri:1, outlet:'BusinessDay', url:'https://businessday.ng/politics/article/aregbesola-faults-police-inec-over-election-management-warns-against-lapses-ahead-of-2027-polls/', people:[], claim:true,
+    h:'Aregbesola says police watched as thugs attacked his campaign team',
+    d:'Former interior minister Rauf Aregbesola criticised the police and INEC over election management, alleging that officers sometimes stood by while suspected political thugs attacked members of his campaign team, and warned that unpunished violence could undermine 2027.',
+    why:'The IGP has promised to discipline partisan officers. Specific complaints like this are where that promise gets tested.'},
   {id:'inec-no-battlefield', at:'2026-11-24T18:45:00+01:00', img:'news/n101.jpg', tag:'INEC', pri:2, outlet:'Punch', url:'https://punchng.com/dont-turn-2027-elections-into-battlefield-inec-chairman-warns-politicians/', people:[],
     h:'INEC chairman to parties: "Don\'t turn 2027 into a battlefield"',
     d:'At a security meeting called by the Inspector-General with party leaders in Abuja, INEC chairman Joash Amupitan warned that rising political violence, attacks on party members and intimidation of citizens could undermine the elections before a single vote is cast.',
