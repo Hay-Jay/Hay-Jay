@@ -2,7 +2,7 @@
    Updated by the twice-daily update task. To add a new poll: add a category,
    then run `node nigeria-2027/site/build.mjs --snapshot` to record movement. */
 const RANK = {
-  updated: '2026-11-25T10:48:17.084Z',     // last time the data was checked (WAT)
+  updated: '2026-11-25T22:44:09.006Z',     // last time the data was checked (WAT)
   changed: '2026-11-25T10:48:17.084Z',     // last time any number changed
   everyHours: 12,
   categories: [
