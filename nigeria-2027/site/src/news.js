@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-25T21:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-26T01:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-ai-unit', at:'2026-11-25T22:50:00+01:00', img:'news/n130.jpg', tag:'INEC', pri:2, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928071-inec-sets-up-ai-unit-to-combat-election-misinformation-ahead-of-2027-polls.html', people:[],
+    h:'INEC sets up an AI unit to fight deepfakes and election misinformation',
+    d:'INEC has created an artificial intelligence division in its ICT department to detect and respond to deepfakes, synthetic voices and fabricated videos, chairman Joash Amupitan said through his spokesman at a CJID summit in Abuja, and will work with media and fact-checkers.',
+    why:'Fake audio and video spread fast near elections. Check INEC\'s own channels before believing a shocking clip.'},
   {id:'police-confirm-edo-attack', at:'2026-11-25T18:52:00+01:00', img:'news/n123.jpg', tag:'Security', pri:3, outlet:'Punch', url:'https://punchng.com/police-confirm-attack-on-ndc-supporters-in-edo-one-injured/', people:['obi'],
     h:'Police confirm gunmen attacked NDC supporters in Benin; one shot, manhunt launched',
     d:'Edo police said three gunmen in a black Toyota Hilux opened fire on NDC supporters along Airport Road, Benin City, during the party\'s rally, injuring one man, Aimionkhale Micheal, in the thighs. The Sun reports police have launched a manhunt.',
