@@ -77,7 +77,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .hero canvas.dig{cursor:grabbing}
 .hero .wrap{position:relative;z-index:1;padding-block:72px 150px;pointer-events:none;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:center}
 .hero .wrap a,.hero .wrap button{pointer-events:auto}
-.hero h1{font-size:clamp(46px,7.6vw,96px);font-weight:800;letter-spacing:-.045em}
+.hero h1{font-size:clamp(40px,6.2vw,80px);font-weight:800;letter-spacing:-.04em}
 .hero h1 .hl{color:var(--vest);display:inline-block}
 .hero .lede{font-size:19px;color:#c4d3e6;max-width:46ch;margin-top:20px}
 .hero .actions{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
@@ -157,6 +157,10 @@ details p{padding-bottom:17px;color:var(--ink-2)}
 .cta-band .wrap{padding-block:48px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
 .cta-band h2{font-size:clamp(28px,4vw,44px)}
 .cta-band .btn{background:var(--night);color:#fff;box-shadow:none}
+.cta-copy{display:flex;flex-direction:column;gap:12px;min-width:0}
+.textus{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700}
+.textus b{font-size:18px}
+.textus .copy{background:#ffffff70;color:#2a0d00}
 
 footer{background:var(--night);color:#9fb3cb;font-size:14px}
 footer .wrap{padding-block:36px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
@@ -291,9 +295,9 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <canvas id="snow" aria-label="Snow you can shovel by dragging across it" role="img"></canvas>
     <div class="wrap">
       <div>
-        <p class="eyebrow" style="color:#8fa6c4">Regina, SK · No contracts · Pay after</p>
-        <h1>Snowed in?<br>Call us. <span class="hl">We dig.</span></h1>
-        <p class="lede">Two Regina students with shovels and a reason to get up early. Book a clear when you need one, pay when it's done. No plans, no sign-ups, no GST.</p>
+        <p class="eyebrow" style="color:#8fa6c4">Snow Way · Regina, SK · Pay after</p>
+        <h1><span class="hl">Snow way</span> you're shovelling this yourself.</h1>
+        <p class="lede">Deji and Jide, two Regina students, clear your driveway and sidewalk the same day or the next morning. Book when it snows, pay when it's done. No plans, no sign-ups, no GST.</p>
         <div class="actions">
           <a class="btn btn-vest" href="#book">Book a clear · <span data-price="single"></span></a>
           <a class="btn btn-ghost" href="#prices" data-jump="prices">Build your price</a>
@@ -302,7 +306,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
       <div class="ticket">
         <span class="eyebrow" style="color:#8fa6c4">Driveway + front walk</span>
         <div class="big"><sup>$</sup><span data-price-num="single"></span></div>
-        <p>Single driveway, the walk to your door, steps and the city sidewalk out front.</p>
+        <p>Single driveway, the walk to your door and the city sidewalk out front.</p>
         <hr>
         <div class="row2"><span>Double driveway</span><b data-price="double"></b></div>
         <div class="row2"><span>Sidewalk only</span><b data-price="walk"></b></div>
@@ -374,8 +378,12 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
             <div class="seg" id="seg-size"></div>
           </div>
           <div>
-            <p class="eyebrow" style="margin-bottom:8px">Add-ons</p>
+            <p class="eyebrow" style="margin-bottom:8px">Extras at your place</p>
             <div class="toggles" id="tg-addons"></div>
+          </div>
+          <div>
+            <p class="eyebrow" style="margin-bottom:8px">This snowfall</p>
+            <div class="toggles" id="tg-visit"></div>
           </div>
           <div class="toggles"><button type="button" id="tg-senior" aria-pressed="false">Senior or living with a disability · 10% off</button></div>
           <div class="total">
@@ -394,14 +402,14 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
       <div class="sec-head"><p class="eyebrow">How it works</p><h2>Snow falls. You tap. We show up.</h2></div>
       <div class="steps">
         <div class="step reveal"><span class="n">Step 1</span><svg viewBox="0 0 44 44" aria-hidden="true"><rect x="10" y="4" width="24" height="36" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="22" cy="34" r="2" fill="currentColor"/><path d="M16 14h12M16 20h8" stroke="#ff6a2b" stroke-width="3" stroke-linecap="round"/></svg><h3>Book in a minute</h3><p>Pick your place, add your address and any notes. Already booked before? It's one tap: "Clear me again."</p></div>
-        <div class="step reveal" style="animation-delay:.08s"><span class="n">Step 2</span><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M22 12v11l7 5" stroke="#ff6a2b" stroke-width="3" stroke-linecap="round" fill="none"/></svg><h3>We text a time</h3><p>Deji or Jide texts you back with when we'll be there, worked around classes. You'll see it switch to "On the way."</p></div>
-        <div class="step reveal" style="animation-delay:.16s"><span class="n">Step 3</span><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M6 34c6-5 11-5 16 0s10 5 16 0" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M14 22l6 6 12-14" stroke="#ff6a2b" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Cleared, then you pay</h3><p>We clear it and mark it done. Pay by Interac e-Transfer or cash after you've seen the job.</p></div>
+        <div class="step reveal" style="animation-delay:.08s"><span class="n">Step 2</span><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M22 12v11l7 5" stroke="#ff6a2b" stroke-width="3" stroke-linecap="round" fill="none"/></svg><h3>We text a time</h3><p>Deji or Jide texts you back with a time, worked around classes. Booked before? We text you the night before snow.</p></div>
+        <div class="step reveal" style="animation-delay:.16s"><span class="n">Step 3</span><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M6 34c6-5 11-5 16 0s10 5 16 0" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M14 22l6 6 12-14" stroke="#ff6a2b" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Cleared, then you pay</h3><p>We clear it and text you a photo of the finished job. Then you pay by Interac e-Transfer or cash.</p></div>
       </div>
       <div class="why">
-        <div><h3>No contracts</h3><p>Book only when it snows. Skip a light dusting, call us for the big one.</p></div>
-        <div><h3>Pay after</h3><p>No deposit, no card on file. If you're not happy, we come back and fix it.</p></div>
-        <div><h3>Local students</h3><p>We live here, we know the plow routes, and we're working our way through school.</p></div>
-        <div><h3>Neighbour deals</h3><p>Book 3+ houses on one street the same day and everyone gets 10% off.</p></div>
+        <div><h3>Same day or next morning</h3><p>We keep our list to about 12 houses so we can always keep that promise, well inside the City's 48 hours.</p></div>
+        <div><h3>Photo when it's done</h3><p>Every clear ends with a photo by text, so you can check the job from work or from Arizona.</p></div>
+        <div><h3>Pay after</h3><p>No deposit, no card on file, no contract. If you're not happy, we come back and fix it.</p></div>
+        <div><h3>Neighbour deals</h3><p>Send a neighbour who books and get $10 off your next clear. Book 3+ houses on one street the same day and everyone gets 10% off.</p></div>
       </div>
     </div>
   </section>
@@ -419,7 +427,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
           <div><p class="eyebrow" style="color:#8fa6c4">Regina sidewalk rule</p><h3 style="color:#fff;margin-top:4px">Clear within 48 hours</h3></div>
         </div>
         <p>The City of Regina expects you to clear the sidewalk in front of your home <b>within 48 hours</b> of a snowfall. Book us and it's handled.</p>
-        <p>The city plow also leaves a <b>windrow</b>, the heavy ridge across the end of your driveway. We clear that too for a few dollars.</p>
+        <p>The city plow also leaves a <b>windrow</b>, the heavy ridge across the end of your driveway. We clear that too for $10.</p>
       </div>
     </div>
   </section>
@@ -428,18 +436,19 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <div class="wrap">
       <div class="sec-head"><p class="eyebrow">Questions</p><h2>Things neighbours ask</h2></div>
       <div class="faq">
-        <details><summary>How fast can you come?</summary><p>When you book, we text you an arrival time. We're students, so we plan around classes and tell you honestly when we can make it. Check the crew status at the top of the page to see if we're taking jobs today.</p></details>
+        <details><summary>How fast can you come?</summary><p>Same day or the next morning. We keep our list to about 12 houses so we can keep that promise around classes. If we're full, we'll tell you and put you on the waitlist. The crew status at the top of the page shows whether we're taking jobs today.</p></details>
         <details><summary>Do I need to sign up for a plan?</summary><p>No. Every clear is a one-time visit. Book when you need us, and skip it when you don't.</p></details>
-        <details><summary>What's included in the price?</summary><p>Your driveway, the walk to your front door, the front steps, and the city sidewalk in front of your house. Windrows, ice melt, a back walk or deck, and brushing off your car are small add-ons.</p></details>
-        <details><summary>What if there's a lot of snow?</summary><p>The price covers a normal Regina snowfall. If there's more than about 25 cm or it's packed down hard, we'll tell you the price before we start. You can always say no.</p></details>
-        <details><summary>How do I pay?</summary><p>Interac e-Transfer or cash, after the job is done. We don't charge GST.</p></details>
-        <details><summary>Can I get you to come back every time it snows?</summary><p>Book once, then use "Clear me again" on the My requests page each time. Your address and notes are saved, so it takes one tap.</p></details>
+        <details><summary>What's included in the price?</summary><p>Your driveway, the walk to your front door and the city sidewalk in front of your house. Steps, a back walk or deck, brushing off your car and ice melt are $5 each. Corner lots are $10 more for the extra sidewalk.</p></details>
+        <details><summary>What if there's a lot of snow?</summary><p>The price covers up to about 15 cm. Over 15 cm, or when the city plow leaves a ridge across your driveway, it's $10 to $15 more. We tell you before we start, and you can always say no.</p></details>
+        <details><summary>Do you deal with ice?</summary><p>We clear the snow and spread ice melt if you add it. Regina ice comes back fast, so we can't promise a walk with no ice on it.</p></details>
+        <details><summary>How do I pay?</summary><p>Interac e-Transfer<span data-etransfer-faq></span> or cash, after the job is done. We text you a photo first. We don't charge GST.</p></details>
+        <details><summary>Can I get you to come back every time it snows?</summary><p>Book once, then tap "Clear me again" on the My requests page each time. Your address and notes are saved. We also text our regulars the night before a big snow.</p></details>
         <details><summary>What if you damage something?</summary><p>Put anything fragile in your notes, like garden beds or a low fence. If we damage something, we fix it or pay for it.</p></details>
       </div>
     </div>
   </section>
 
-  <div class="cta-band"><div class="wrap"><h2>Snow on the ground? Get it gone.</h2><a class="btn" href="#book">Book a clear · <span data-price="single"></span></a></div></div>
+  <div class="cta-band"><div class="wrap"><div class="cta-copy"><h2>Snow on the ground? Get it gone.</h2><p class="textus" id="textus" hidden>Rather text? <b class="mono" id="textus-num"></b><button type="button" class="btn-sm copy" id="copy-phone">Copy number</button></p></div><a class="btn" href="#book">Book a clear · <span data-price="single"></span></a></div></div>
 </div>
 
 <!-- ================= BOOK ================= -->
@@ -451,7 +460,8 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
         <form class="panel" id="book-form" novalidate>
           <div class="form">
             <div class="full"><p class="eyebrow" style="margin-bottom:8px">Your place</p><div class="seg" id="b-size"></div></div>
-            <div class="full"><p class="eyebrow" style="margin-bottom:8px">Add-ons</p><div class="toggles" id="b-addons"></div></div>
+            <div class="full"><p class="eyebrow" style="margin-bottom:8px">Extras at your place</p><div class="toggles" id="b-addons"></div></div>
+            <div class="full"><p class="eyebrow" style="margin-bottom:8px">This snowfall</p><div class="toggles" id="b-visit"></div></div>
             <label for="b-name">Your name<input id="b-name" name="name" autocomplete="name" required placeholder="Pat Morin"></label>
             <label for="b-phone">Mobile number <small>we text you here</small><input id="b-phone" name="phone" type="tel" autocomplete="tel" required placeholder="306-555-0142"></label>
             <label class="full" for="b-address">Street address<input id="b-address" name="address" autocomplete="street-address" required placeholder="1234 Elphinstone St"></label>
@@ -468,7 +478,7 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
           <p class="note" id="b-error" role="alert" style="color:var(--bad);margin-top:10px" hidden></p>
         </form>
         <div class="side">
-          <div class="panel"><h3>What happens next</h3><ol class="note" style="padding-left:18px;margin:10px 0 0;display:flex;flex-direction:column;gap:6px"><li>Deji and Jide get your booking instantly.</li><li>We text you a time and confirm the price.</li><li>We clear it and mark it done.</li><li>You pay by e-Transfer or cash.</li></ol></div>
+          <div class="panel"><h3>What happens next</h3><ol class="note" style="padding-left:18px;margin:10px 0 0;display:flex;flex-direction:column;gap:6px"><li>Deji and Jide get your booking instantly.</li><li>We text you a time and confirm the price.</li><li>We clear it and text you a photo.</li><li>You pay by e-Transfer or cash.</li></ol></div>
           <div class="panel" id="side-status"><h3>Crew status</h3><p class="note" id="side-status-text" style="margin-top:8px">We'll reply with the soonest time we can make.</p></div>
         </div>
       </div>
@@ -483,27 +493,37 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 <div data-view="owner" hidden><section><div class="wrap" id="owner-root"></div></section></div>
 </main>
 
-<footer><div class="wrap"><span><b data-brand style="color:#fff">Snow Way</b> · Regina, Saskatchewan · Deji and Jide</span><span><a href="#faq" data-jump="faq">FAQ</a> · <a href="#area" data-jump="area">Service area</a> · No GST charged</span></div></footer>
+<footer><div class="wrap"><span><b data-brand style="color:#fff">Snow Way</b> · Regina, Saskatchewan · Deji and Jide<span id="foot-phone"></span></span><span><a href="#faq" data-jump="faq">FAQ</a> · <a href="#area" data-jump="area">Service area</a> · No GST charged</span></div></footer>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 /* ===== Business settings: change these and republish ===== */
 const BRAND = "Snow Way";
-const PRICES = { single:30, double:40, corner:45, walk:15 };   // per visit, driveway + walk + steps + city sidewalk
+const PRICES = { single:30, double:40, triple:60, walk:15 };   // per visit: driveway + front walk + city sidewalk. Triple is "from", confirmed on sight.
+// kind "place": extras at the house, saved with the customer. kind "visit": depends on this snowfall, never saved.
 const ADDONS = [
-  { id:"windrow", label:"Windrow (plow ridge)", price:5 },
-  { id:"melt",    label:"Ice melt",             price:5 },
-  { id:"back",    label:"Back walk or deck",    price:5 },
-  { id:"car",     label:"Brush off car",        price:5 },
+  { id:"corner",  label:"Corner lot",          price:10, kind:"place" },
+  { id:"steps",   label:"Steps",               price:5,  kind:"place" },
+  { id:"back",    label:"Back walk or deck",   price:5,  kind:"place" },
+  { id:"car",     label:"Brush off car",       price:5,  kind:"place" },
+  { id:"melt",    label:"Ice melt",            price:5,  kind:"place" },
+  { id:"heavy",   label:"Heavy snow, over 15 cm", price:10, kind:"visit" },
+  { id:"windrow", label:"City plow ridge",     price:10, kind:"visit" },
 ];
+const addonOf=id=>ADDONS.find(a=>a.id===id);
+const addonKind=id=>addonOf(id)?.kind||"place";
+const addonLabel=id=>addonOf(id)?.label||id;
 const SENIOR_DISCOUNT = 0.10;
 const MARKET = [ {who:"Dave's Property Care", val:"$30 – $40"}, {who:"Kijiji Regina crews", val:"$50 +"}, {who:"Weed Pro Regina", val:"plans only"} ];
 const SIZES = {
-  single:{ label:"Single driveway", sub:"1 car wide" },
-  double:{ label:"Double driveway", sub:"2 cars wide" },
-  corner:{ label:"Corner lot / long", sub:"extra sidewalk" },
-  walk:  { label:"Sidewalk only",   sub:"walk + city sidewalk" },
+  single:{ label:"Single driveway", sub:"1 car wide, plus walks" },
+  double:{ label:"Double driveway", sub:"2 cars wide, plus walks" },
+  triple:{ label:"Triple or long",  sub:"we confirm on sight", from:true },
+  walk:  { label:"Sidewalk only",   sub:"front walk + city sidewalk" },
 };
+const basePrice=size=>size in PRICES?PRICES[size]:size==="corner"?PRICES.single+10:PRICES.single;   // "corner" was a size on the old site
+const sizeLabel=size=>SIZES[size]?.label||(size==="corner"?"Corner lot":"");
+const plusFor=size=>SIZES[size]?.from?"+":"";
 const HOODS = ["Harbour Landing","Lakeview","Cathedral","Hillsdale","Whitmore Park","Albert Park","University Park","Wascana View","The Creeks","Greens on Gardiner","Arcola East","Glencairn","Uplands","Normanview","Walsh Acres","Lakewood","Rosemont","Coronation Park","Hawkstone","Kensington Greens"];
 const CREW = ["Deji","Jide"];
 const STATUS_LABEL = { new:"New", scheduled:"Scheduled", ontheway:"On the way", done:"Done", cancelled:"Cancelled" };
@@ -521,28 +541,29 @@ function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeou
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function quote(size,addons=[],senior=false){
-  let t=PRICES[size]+addons.reduce((s,id)=>s+(ADDONS.find(a=>a.id===id)?.price||0),0);
+  let t=basePrice(size)+addons.reduce((s,id)=>s+(addonOf(id)?.price||0),0);
   if(senior) t*=1-SENIOR_DISCOUNT;
   return Math.round(t*100)/100;
 }
 
 /* ===== state ===== */
-const S={ mode:"loading", db:null, uid:null, canEdit:false, me:null, customers:[], ops:{expenses:[]}, status:null,
-  seen:new Set(), seenInit:false, sound:false, ownerTab:"queue", depth:"normal",
+const S={ mode:"loading", db:null, uid:null, canEdit:false, me:null, customers:[], ops:{expenses:[]}, status:null, contact:null,
+  seen:new Set(), seenInit:false, sound:false, ownerTab:"queue", depth:"normal", ridge:false, againNote:"",
   pb:{size:"single",addons:[],senior:false}, bk:{size:"single",addons:[],senior:false} };
 
 /* ===== example data for preview ===== */
 function demoData(){
   const d=h=>new Date(Date.now()-h*36e5).toISOString();
-  const me={id:"demo-me",name:"Pat Morin (example)",phone:"306-555-0142",address:"1234 Elphinstone St",hood:"Lakeview",size:"single",addons:["windrow"],notes:"Pile snow on the left side.",createdAt:d(240),
-    requests:[{id:"r1",kind:"booking",createdAt:d(50),status:"done",assignee:"Jide",price:35,addons:["windrow"],doneAt:d(44),paid:true},{id:"r2",kind:"again",createdAt:d(1.2),depth:"heavy",note:"Plow just went by",status:"ontheway",assignee:"Deji",price:35}],
+  const me={id:"demo-me",name:"Pat Morin (example)",phone:"306-555-0142",address:"1234 Elphinstone St",hood:"Lakeview",size:"single",addons:["steps"],notes:"Pile snow on the left side.",createdAt:d(240),
+    requests:[{id:"r1",kind:"booking",createdAt:d(50),status:"done",assignee:"Jide",price:35,addons:["steps"],doneAt:d(44),paid:true},{id:"r2",kind:"again",createdAt:d(1.2),depth:"heavy",note:"Plow just went by",status:"ontheway",assignee:"Deji",price:55,addons:["steps","heavy","windrow"]}],
     payments:[{id:"p1",amount:35,date:d(43),method:"e-Transfer"}]};
   const others=[
     {id:"demo-2",name:"Linda K. (example)",phone:"306-555-0177",address:"88 Habkirk Dr",hood:"Whitmore Park",size:"double",createdAt:d(200),requests:[{id:"r3",kind:"again",createdAt:d(.4),depth:"normal",status:"new",price:40}],payments:[{id:"p2",amount:40,date:d(150),method:"Cash"}]},
-    {id:"demo-3",name:"Marcus T. (example)",phone:"306-555-0110",address:"4410 Green Apple Dr",hood:"The Creeks",size:"single",createdAt:d(3),requests:[{id:"r4",kind:"booking",createdAt:d(3),status:"scheduled",assignee:"Jide",price:35,addons:["windrow"],when:"Tomorrow after 3 pm"}],payments:[]},
-    {id:"demo-4",name:"Gord & Elaine (example)",phone:"306-555-0193",address:"2701 Albert St",hood:"Albert Park",size:"corner",senior:true,createdAt:d(80),requests:[{id:"r5",kind:"booking",createdAt:d(80),status:"done",assignee:"Deji",price:40.5,doneAt:d(70)}],payments:[]},
+    {id:"demo-3",name:"Marcus T. (example)",phone:"306-555-0110",address:"4410 Green Apple Dr",hood:"The Creeks",size:"single",createdAt:d(3),requests:[{id:"r4",kind:"booking",createdAt:d(3),status:"scheduled",assignee:"Jide",price:40,addons:["windrow"],when:"Tomorrow after 3 pm"}],payments:[]},
+    {id:"demo-4",name:"Gord & Elaine (example)",phone:"306-555-0193",address:"2701 Albert St",hood:"Albert Park",size:"single",addons:["corner"],senior:true,createdAt:d(80),requests:[{id:"r5",kind:"booking",createdAt:d(80),status:"done",assignee:"Deji",price:36,addons:["corner"],doneAt:d(70)}],payments:[]},
   ];
-  return {me,customers:[me,...others],ops:{expenses:[{id:"e1",date:d(300),label:"Ergonomic shovels x2",amount:78},{id:"e2",date:d(250),label:"Ice melt 20 kg",amount:24}]},status:{state:"open",message:"Free after 2 pm today"}};
+  return {me,customers:[me,...others],ops:{expenses:[{id:"e1",date:d(300),label:"Snow pushers x2",amount:78},{id:"e2",date:d(250),label:"Ice melt 10 kg",amount:18}]},status:{state:"open",message:"Free after 2 pm today"},
+    contact:{phone:"306-555-0199",etransfer:"snowway@example.com"}};
 }
 
 /* ===== static rendering ===== */
@@ -551,38 +572,41 @@ function paintPrices(){
   $$("[data-price-num]").forEach(el=>el.textContent=PRICES[el.dataset.priceNum]);
   $$("[data-brand]").forEach(el=>el.textContent=BRAND);
 }
-function segHTML(state){ return Object.entries(SIZES).map(([k,v])=>`<button type="button" data-sz="${k}" aria-pressed="${state.size===k}">${v.label}<small>${v.sub}</small><span class="p">${money(PRICES[k])}</span></button>`).join(""); }
-function addonHTML(state){ return ADDONS.map(a=>`<button type="button" data-ad="${a.id}" aria-pressed="${state.addons.includes(a.id)}">${a.label} +${money(a.price)}</button>`).join(""); }
+function segHTML(state){ return Object.entries(SIZES).map(([k,v])=>`<button type="button" data-sz="${k}" aria-pressed="${state.size===k}">${v.label}<small>${v.sub}</small><span class="p">${money(PRICES[k])}${plusFor(k)}</span></button>`).join(""); }
+function addonHTML(state,kind){ return ADDONS.filter(a=>a.kind===kind).map(a=>`<button type="button" data-ad="${a.id}" aria-pressed="${state.addons.includes(a.id)}">${a.label} +${money(a.price)}</button>`).join(""); }
+function totalLabel(s){
+  const n=s.addons.length, plus=plusFor(s.size);
+  return sizeLabel(s.size)+(n?" + "+n+" extra"+(n>1?"s":""):"")+(plus?", confirmed on sight":", one visit");
+}
 function renderBuilder(){
   const s=S.pb;
-  $("#seg-size").innerHTML=segHTML(s); $("#tg-addons").innerHTML=addonHTML(s);
+  $("#seg-size").innerHTML=segHTML(s); $("#tg-addons").innerHTML=addonHTML(s,"place"); $("#tg-visit").innerHTML=addonHTML(s,"visit");
   $("#tg-senior").setAttribute("aria-pressed",s.senior);
-  const t=quote(s.size,s.addons,s.senior);
-  $("#t-label").textContent=SIZES[s.size].label+(s.addons.length?" + "+s.addons.length+" add-on"+(s.addons.length>1?"s":""):"")+", one visit";
-  tween($("#t-total"),t);
-  $("#scene-tag").textContent=SIZES[s.size].label;
+  $("#t-label").textContent=totalLabel(s);
+  tween($("#t-total"),quote(s.size,s.addons,s.senior),plusFor(s.size));
+  $("#scene-tag").textContent=sizeLabel(s.size)+(s.addons.includes("heavy")?" · heavy snow":"");
   paintScene(s);
 }
 function paintScene(s){
   const show=(id,on)=>{const e=document.getElementById(id); if(e) e.style.opacity=on?1:0;};
   const hit=(id,on)=>{const e=document.getElementById(id); if(!e)return; e.classList.toggle("hit",on); e.style.fill=on?"#ffffff":"#dfe8f2";};
-  const drive=s.size!=="walk", dbl=s.size==="double"||s.size==="corner";
+  const drive=s.size!=="walk", dbl=s.size==="double"||s.size==="triple", corner=s.addons.includes("corner");
   show("p-drive",true); show("p-drive2",dbl); show("g-garage2",dbl);
   hit("p-drive",drive); hit("p-drive2",dbl&&drive);
-  hit("p-walk",true); hit("p-steps",true); hit("p-sidewalk",true);
-  show("p-sidewalk-side",s.size==="corner"); hit("p-sidewalk-side",s.size==="corner");
+  hit("p-walk",true); hit("p-steps",s.addons.includes("steps")); hit("p-sidewalk",true);
+  show("p-sidewalk-side",corner); hit("p-sidewalk-side",corner);
   show("p-windrow",true); const w=$("#p-windrow"); w.classList.toggle("hit",s.addons.includes("windrow"));
   w.style.opacity=s.addons.includes("windrow")?1:.55;
   show("p-back",s.addons.includes("back")); hit("p-back",s.addons.includes("back")); show("t-back",s.addons.includes("back"));
   show("p-melt",s.addons.includes("melt")); show("p-car",s.addons.includes("car")||true);
   const car=$("#p-car"); car.querySelector("path").style.opacity=s.addons.includes("car")?0:1; car.classList.toggle("hit",false);
 }
-function tween(el,to){
+function tween(el,to,suffix=""){
   const from=parseFloat((el.textContent||"0").replace(/[^0-9.]/g,""))||0;
-  if(reduce||from===to){el.textContent=money(to);return;}
-  const t0=performance.now(), dur=380;
   cancelAnimationFrame(el._raf);
-  const step=now=>{const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=money(Math.round((from+(to-from)*e)*100)/100); if(k<1) el._raf=requestAnimationFrame(step);};
+  if(reduce||from===to){el.textContent=money(to)+suffix;return;}
+  const t0=performance.now(), dur=380;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=money(Math.round((from+(to-from)*e)*100)/100)+(k<1?"":suffix); if(k<1) el._raf=requestAnimationFrame(step);};
   el._raf=requestAnimationFrame(step);
 }
 function renderCompare(){
@@ -594,9 +618,9 @@ function renderHoods(sel){
 
 /* ===== booking ===== */
 function renderBookOpts(){
-  const s=S.bk; $("#b-size").innerHTML=segHTML(s); $("#b-addons").innerHTML=addonHTML(s); $("#b-senior").setAttribute("aria-pressed",s.senior);
-  const t=quote(s.size,s.addons,s.senior); tween($("#q-total"),t);
-  $("#q-label").textContent=SIZES[s.size].label+(s.addons.length?" + "+s.addons.map(id=>ADDONS.find(a=>a.id===id).label.toLowerCase()).join(", "):"");
+  const s=S.bk; $("#b-size").innerHTML=segHTML(s); $("#b-addons").innerHTML=addonHTML(s,"place"); $("#b-visit").innerHTML=addonHTML(s,"visit"); $("#b-senior").setAttribute("aria-pressed",s.senior);
+  tween($("#q-total"),quote(s.size,s.addons,s.senior),plusFor(s.size));
+  $("#q-label").textContent=sizeLabel(s.size)+(s.addons.length?" + "+s.addons.map(id=>addonLabel(id).toLowerCase()).join(", "):"")+(plusFor(s.size)?", confirmed on sight":"");
 }
 function fillMe(){
   if(!S.me) return; const f=$("#book-form");
@@ -610,7 +634,7 @@ async function submitBooking(e){
   if(phone.replace(/\D/g,"").length<10){err.textContent="That phone number looks short. Use all 10 digits, like 306-555-0142.";err.hidden=false;return;}
   const s=S.bk, price=quote(s.size,s.addons,s.senior), now=new Date().toISOString();
   const base=S.me?structuredClone(S.me):{createdAt:now,requests:[],payments:[]};
-  Object.assign(base,{name,phone,address,hood:f.hood.value,size:s.size,addons:s.addons,senior:s.senior,notes:f.notes.value.trim(),ref:f.ref.value.trim()||base.ref||"",updatedAt:now});
+  Object.assign(base,{name,phone,address,hood:f.hood.value,size:s.size,addons:s.addons.filter(id=>addonKind(id)==="place"),senior:s.senior,notes:f.notes.value.trim(),ref:f.ref.value.trim()||base.ref||"",updatedAt:now});
   base.requests=(base.requests||[]).slice(-60);
   base.requests.push({id:rid(),kind:"booking",createdAt:now,status:"new",price,addons:s.addons,when:f.when.value});
   $("#b-submit").disabled=true;
@@ -618,9 +642,10 @@ async function submitBooking(e){
   catch(ex){ err.textContent=writeErr(ex); err.hidden=false; }
   finally{ $("#b-submit").disabled=false; }
 }
+const textUs=()=>S.contact?.phone?`Text us at ${S.contact.phone} instead.`:"Text us instead.";
 function writeErr(ex){
-  if(ex&&ex.code==="quota_exceeded") return "Our booking list is full right now. Text us instead.";
-  if(ex&&ex.code==="invalid_argument") return "This page can't save bookings for you yet. Text us instead.";
+  if(ex&&ex.code==="quota_exceeded") return "Our booking list is full right now. "+textUs();
+  if(ex&&ex.code==="invalid_argument") return "This page can't save bookings for you yet. "+textUs();
   return "That didn't save. Check your connection and try again.";
 }
 
@@ -636,6 +661,7 @@ async function saveCustomer(c){
 }
 async function saveOps(){ if(S.mode==="demo"){renderAll();return;} await S.db.doc("ops/main").set(structuredClone(S.ops)); }
 async function saveStatus(st){ S.status=st; if(S.mode==="demo"){renderAll();return;} await S.db.doc("public/status").set(st); }
+async function saveContact(ct){ if(S.mode==="demo"){S.contact=ct;renderAll();return;} await S.db.doc("public/contact").set(ct); }
 
 async function boot(){
   const fb=setTimeout(()=>{ if(S.mode==="loading") startDemo("Preview mode: this view can't reach the booking system, so you're seeing example data. Nothing is saved."); },10000);
@@ -648,6 +674,7 @@ async function boot(){
   try{ S.canEdit=user?(!!(await user.canEdit())||!!(await user.isOwner())):false; }catch(e){ S.canEdit=false; }
   S.mode="live";
   db.doc("public/status").onSnapshot(s=>{ S.status=s.exists?structuredClone(s.data()):null; renderAll(); },()=>{});
+  db.doc("public/contact").onSnapshot(s=>{ S.contact=s.exists?structuredClone(s.data()):null; renderAll(); },()=>{});
   if(S.uid) db.doc("customers/"+S.uid).onSnapshot(s=>{ S.me=s.exists?{id:S.uid,...structuredClone(s.data())}:null; fillMe(); renderAll(); },()=>{});
   if(S.canEdit){
     db.collection("customers").onSnapshot(s=>{ S.customers=s.docs.map(d=>({id:d.id,...structuredClone(d.data())})); checkNew(); renderAll(); },()=>{});
@@ -656,7 +683,7 @@ async function boot(){
   renderAll();
 }
 function startDemo(msg){
-  S.mode="demo"; const d=demoData(); Object.assign(S,{me:d.me,customers:d.customers,ops:d.ops,status:d.status,canEdit:true});
+  S.mode="demo"; const d=demoData(); Object.assign(S,{me:d.me,customers:d.customers,ops:d.ops,status:d.status,contact:d.contact,canEdit:true});
   $("#demo-text").textContent=msg; $("#demo-banner").hidden=false;
   S.customers.forEach(c=>(c.requests||[]).forEach(r=>S.seen.add(r.id))); S.seenInit=true;
   fillMe(); renderAll();
@@ -691,18 +718,20 @@ function renderRequests(){
   if(!me){root.innerHTML=`<div class="sec-head"><p class="eyebrow">My requests</p><h2>Nothing booked yet</h2><p>Book your first clear and this page becomes your snow remote. Next time it snows, one tap brings us back.</p></div><a class="btn btn-vest" href="#book">Book a clear</a>`;return;}
   const reqs=[...(me.requests||[])].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
   const open=reqs.find(r=>["new","scheduled","ontheway"].includes(r.status));
-  const price=quote(me.size||"single",me.addons||[],me.senior);
-  const depths=[["light","Light, under 5 cm"],["normal","Normal, 5 – 15 cm"],["heavy","Heavy, 15 cm +"],["windrow","Just the windrow"]];
+  const price=quote(me.size||"single",againAddons(me),me.senior);
+  const depths=[["light","Light, under 5 cm"],["normal","Normal, 5 – 15 cm"],["heavy","Heavy, over 15 cm · +$10"]];
   const stage=s=>({new:1,scheduled:1,ontheway:2,done:3}[s]||0);
+  const placeAddons=(me.addons||[]).filter(id=>addonKind(id)==="place");
   root.innerHTML=`
-    <div class="sec-head"><p class="eyebrow">My requests</p><h2>Hi ${esc((me.name||"").split(" ")[0]||"there")}</h2><p>${esc(me.address)} · ${esc(SIZES[me.size]?.label||"")}${(me.addons||[]).length?" + "+esc(me.addons.map(id=>ADDONS.find(a=>a.id===id)?.label.toLowerCase()).join(", ")):""}</p></div>
+    <div class="sec-head"><p class="eyebrow">My requests</p><h2>Hi ${esc((me.name||"").split(" ")[0]||"there")}</h2><p>${esc(me.address)} · ${esc(sizeLabel(me.size))}${placeAddons.length?" + "+esc(placeAddons.map(id=>addonLabel(id).toLowerCase()).join(", ")):""}</p></div>
     <div class="two">
       <div class="again">
-        <p class="eyebrow" style="color:#8fa6c4">Same place, same notes · ${money(price)}</p>
+        <p class="eyebrow" style="color:#8fa6c4">Same place, same notes</p>
         <h3 style="font-size:28px;color:#fff">Snowed again?</h3>
         <div class="depth" role="group" aria-label="How much snow">${depths.map(([k,l])=>`<button type="button" data-depth="${k}" aria-pressed="${S.depth===k}">${l}</button>`).join("")}</div>
-        <label for="again-note" style="color:#c9d6e6;width:100%">Anything new? <input id="again-note" placeholder="Car's in the driveway this time" style="background:#ffffff10;color:#fff;border-color:#ffffff30"></label>
-        <button class="go" id="again-btn" ${open?"disabled":""}>Clear me again</button>
+        <div class="depth"><button type="button" id="again-ridge" aria-pressed="${S.ridge}">City plow left a ridge · +$10</button></div>
+        <label for="again-note" style="color:#c9d6e6;width:100%">Anything new? <input id="again-note" value="${esc(S.againNote)}" placeholder="Car's in the driveway this time" style="background:#ffffff10;color:#fff;border-color:#ffffff30"></label>
+        <button class="go" id="again-btn" ${open?"disabled":""}>Clear me again · ${money(price)}${plusFor(me.size)}</button>
         <p>${open?"You already have a request open. We'll update it on the right.":"Deji and Jide both get it right away and text you a time."}</p>
       </div>
       <div class="panel" style="display:flex;flex-direction:column;gap:12px">
@@ -711,17 +740,20 @@ function renderRequests(){
           <div class="req"><div><b>${when(r.createdAt)}</b> <span class="note">· ${money(+r.price||0)}</span><div class="note">${r.assignee&&r.status!=="done"?esc(r.assignee)+" is on it · ":""}${r.doneAt?"Done "+ago(r.doneAt):esc(r.note||r.when||"")}</div></div>
           <span class="pill st-${r.status}">${STATUS_LABEL[r.status]}</span>
           ${r.status==="cancelled"?"":`<div class="track" aria-hidden="true"><i class="${stage(r.status)>=1?"on":""}"></i><i class="${stage(r.status)>=2?"on":""}"></i><i class="${stage(r.status)>=3?"on":""}"></i></div>`}</div>`).join(""):`<div class="empty">No requests yet.</div>`}</div>
-        <p class="note">Pay by Interac e-Transfer or cash after each clear.</p>
+        <p class="note">Pay by Interac e-Transfer${S.contact?.etransfer?" to "+esc(S.contact.etransfer):""} or cash after each clear. We text you a photo first.</p>
         <a class="btn btn-quiet btn-sm" href="#book">Change address or details</a>
       </div>
     </div>`;
 }
+function againAddons(me){
+  return [...(me.addons||[]).filter(id=>addonKind(id)==="place"), ...(S.depth==="heavy"?["heavy"]:[]), ...(S.ridge?["windrow"]:[])];
+}
 async function clearAgain(){
-  const me=structuredClone(S.me), now=new Date().toISOString();
+  const me=structuredClone(S.me), now=new Date().toISOString(), addons=againAddons(me);
   me.requests=(me.requests||[]).slice(-60);
-  me.requests.push({id:rid(),kind:"again",createdAt:now,depth:S.depth,note:($("#again-note")?.value||"").trim(),status:"new",price:quote(me.size||"single",me.addons||[],me.senior),addons:me.addons||[]});
+  me.requests.push({id:rid(),kind:"again",createdAt:now,depth:S.depth,note:($("#again-note")?.value||"").trim(),status:"new",price:quote(me.size||"single",addons,me.senior),addons});
   me.updatedAt=now; $("#again-btn").disabled=true;
-  try{ await saveMe(me); toast("Sent. We'll text you a time."); }catch(ex){ toast(writeErr(ex)); $("#again-btn").disabled=false; }
+  try{ await saveMe(me); S.ridge=false; S.againNote=""; toast("Sent. We'll text you a time."); }catch(ex){ toast(writeErr(ex)); $("#again-btn").disabled=false; }
 }
 
 /* ===== crew dashboard ===== */
@@ -738,14 +770,14 @@ function renderOwner(){
   const doneCount=all.filter(x=>x.r.status==="done").length;
   const expenses=(S.ops.expenses||[]).reduce((s,e)=>s+(+e.amount||0),0);
   const st=S.status||{state:"",message:""};
-  const tabs=[["queue",`Jobs (${active.length})`],["customers",`Customers (${S.customers.length})`],["money","Money"],["alerts","Alerts"]];
+  const tabs=[["queue",`Jobs (${active.length})`],["customers",`Customers (${S.customers.length})`],["money","Money"],["details","Contact details"],["alerts","Alerts"]];
   let body="";
   if(S.ownerTab==="queue"){
     body=active.length?`<div class="q">${active.map(({c,r})=>`
       <div class="job s-${r.status}">
         <div class="who"><div class="row"><b>${esc(c.name)}</b><span class="pill st-${r.status}">${STATUS_LABEL[r.status]}</span>${r.kind==="again"?`<span class="pill st-scheduled">Repeat</span>`:""}</div>
           <span class="meta mono">${esc(c.address)}${c.hood?" · "+esc(c.hood):""} · ${esc(c.phone)}</span>
-          <span class="meta">${ago(r.createdAt)} · ${esc(SIZES[c.size]?.label||"")}${r.depth?" · "+esc({light:"light snow",normal:"5–15 cm",heavy:"15 cm +",windrow:"windrow only"}[r.depth]||""):""}${r.when?" · "+esc(r.when):""}${(r.addons||[]).length?" · + "+esc(r.addons.join(", ")):""} · <b>${money(+r.price||0)}</b></span>
+          <span class="meta">${ago(r.createdAt)} · ${esc(sizeLabel(c.size))}${r.depth?" · "+esc({light:"light snow",normal:"5–15 cm",heavy:"15 cm +",windrow:"windrow only"}[r.depth]||""):""}${r.when?" · "+esc(r.when):""}${(r.addons||[]).length?" · + "+esc(r.addons.map(addonLabel).join(", ")):""} · <b>${money(+r.price||0)}${plusFor(c.size)}</b></span>
           ${r.note||c.notes?`<span class="meta">“${esc(r.note||c.notes)}”</span>`:""}
         </div>
         <div class="acts">
@@ -759,11 +791,11 @@ function renderOwner(){
     if(recent.length) body+=`<h3 style="margin:28px 0 12px">Recently done</h3><div class="tablewrap"><table><thead><tr><th>Customer</th><th>Done</th><th>By</th><th>Price</th><th>Paid</th></tr></thead><tbody>${recent.map(({c,r})=>`<tr><td>${esc(c.name)}</td><td class="num">${r.doneAt?when(r.doneAt):"–"}</td><td>${esc(r.assignee||"–")}</td><td class="num">${money(+r.price||0)}</td><td>${r.paid?`<span class="pill st-done">Paid</span>`:`<button class="btn-quiet btn-sm" data-paid="${c.id}|${r.id}">Mark paid</button>`}</td></tr>`).join("")}</tbody></table></div>`;
   }
   if(S.ownerTab==="customers"){
-    body=`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Address</th><th>Phone</th><th>Place</th><th>Clears</th><th>Paid</th></tr></thead><tbody>${S.customers.length?S.customers.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(c=>`<tr><td><b>${esc(c.name)}</b>${c.senior?` <span class="pill st-cancelled">10% off</span>`:""}</td><td>${esc(c.address)}<div class="note">${esc(c.hood||"")}</div></td><td class="num">${esc(c.phone)}</td><td>${esc(SIZES[c.size]?.label||"–")}</td><td class="num">${(c.requests||[]).filter(r=>r.status==="done").length}</td><td class="num">${money((c.payments||[]).reduce((s,p)=>s+(+p.amount||0),0))}</td></tr>`).join(""):`<tr><td colspan="6"><div class="empty">No customers yet. Add someone who booked by text below.</div></td></tr>`}</tbody></table></div>
+    body=`<div class="tablewrap"><table><thead><tr><th>Name</th><th>Address</th><th>Phone</th><th>Place</th><th>Clears</th><th>Paid</th></tr></thead><tbody>${S.customers.length?S.customers.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")).map(c=>`<tr><td><b>${esc(c.name)}</b>${c.senior?` <span class="pill st-cancelled">10% off</span>`:""}</td><td>${esc(c.address)}<div class="note">${esc(c.hood||"")}</div></td><td class="num">${esc(c.phone)}</td><td>${esc(sizeLabel(c.size)||"–")}${(c.addons||[]).includes("corner")?`<div class="note">corner lot</div>`:""}</td><td class="num">${(c.requests||[]).filter(r=>r.status==="done").length}</td><td class="num">${money((c.payments||[]).reduce((s,p)=>s+(+p.amount||0),0))}</td></tr>`).join(""):`<tr><td colspan="6"><div class="empty">No customers yet. Add someone who booked by text below.</div></td></tr>`}</tbody></table></div>
     <form class="panel" id="add-cust" style="margin-top:16px"><h3 style="margin-bottom:12px">Add a job that came in by phone or text</h3><div class="form">
       <label for="ac-name">Name<input id="ac-name" required></label><label for="ac-phone">Phone<input id="ac-phone" type="tel" required></label>
       <label class="full" for="ac-addr">Address<input id="ac-addr" required></label>
-      <label for="ac-size">Place<select id="ac-size">${Object.entries(SIZES).map(([k,v])=>`<option value="${k}">${v.label} · ${money(PRICES[k])}</option>`).join("")}</select></label>
+      <label for="ac-size">Place<select id="ac-size">${Object.entries(SIZES).map(([k,v])=>`<option value="${k}">${v.label} · ${money(PRICES[k])}${plusFor(k)}</option>`).join("")}</select></label>
       <label for="ac-when">When<input id="ac-when" placeholder="Tomorrow 4 pm"></label>
     </div><button class="btn-vest" style="margin-top:14px" type="submit">Add job</button></form>`;
   }
@@ -781,6 +813,16 @@ function renderOwner(){
       <div class="tablewrap" style="border:0"><table><thead><tr><th>Date</th><th>What</th><th>Amount</th><th></th></tr></thead><tbody>${(S.ops.expenses||[]).length?S.ops.expenses.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<tr><td class="num">${new Date(e.date).toLocaleDateString("en-CA",{month:"short",day:"numeric"})}</td><td>${esc(e.label)}</td><td class="num">${money(+e.amount)}</td><td><button class="btn-quiet btn-sm" data-delexp="${e.id}" aria-label="Remove expense">✕</button></td></tr>`).join(""):`<tr><td colspan="4" class="note">No expenses yet. Add shovels, ice melt, gas and phone costs here.</td></tr>`}</tbody></table></div>
       <form id="add-exp" class="row" style="margin-top:12px"><input id="ex-label" placeholder="Ice melt 20 kg" style="flex:2;min-width:160px" required><input id="ex-amt" type="number" step="0.01" min="0" placeholder="24.99" style="flex:1;min-width:100px" required><button class="btn-vest btn-sm" type="submit">Add expense</button></form>
     </div>`;
+  }
+  if(S.ownerTab==="details"){
+    const ct=S.contact||{};
+    body=`<form class="panel" id="contact-form" style="max-width:680px"><h3>Shown to customers</h3>
+      <p class="note" style="margin:6px 0 16px">Your number appears at the bottom of the site so people can text you. Your e-Transfer email appears in the payment answer and on each customer's requests page. Leave a field empty to hide it.</p>
+      <div class="form">
+        <label for="ct-phone">Number customers text<input id="ct-phone" type="tel" autocomplete="off" value="${esc(ct.phone||"")}" placeholder="306-555-0142"></label>
+        <label for="ct-email">e-Transfer email<input id="ct-email" type="email" autocomplete="off" value="${esc(ct.etransfer||"")}" placeholder="snowway@example.com"></label>
+      </div>
+      <button class="btn-vest" type="submit" style="margin-top:16px">Save details</button></form>`;
   }
   if(S.ownerTab==="alerts"){
     body=`<div class="split"><div class="panel" style="display:flex;flex-direction:column;gap:12px"><h3>While this page is open</h3><p class="note">New bookings pop up at the top of Jobs with a message. Turn on the sound to hear them.</p><div><button class="${S.sound?"btn-quiet":"btn-vest"}" id="sound-btn">${S.sound?"Sound is on · Test it":"Turn on alert sound"}</button></div></div>
@@ -807,15 +849,21 @@ function renderOwner(){
 function findReq(key){const [cid,rq]=key.split("|");const c=S.customers.find(x=>x.id===cid);if(!c)return{};const copy=structuredClone(c);return{copy,r:(copy.requests||[]).find(x=>x.id===rq)};}
 async function ownerUpdate(key,fn,msg){const{copy,r}=findReq(key);if(!r)return;fn(r,copy);copy.updatedAt=new Date().toISOString();try{await saveCustomer(copy);if(msg)toast(msg);}catch(ex){toast("That didn't save. Try again.");}}
 
+function renderContact(){
+  const ph=S.contact?.phone||"", em=S.contact?.etransfer||"";
+  $("#textus").hidden=!ph; $("#textus-num").textContent=ph;
+  $("#foot-phone").textContent=ph?" · Text "+ph:"";
+  $$("[data-etransfer-faq]").forEach(el=>el.textContent=em?" to "+em:"");
+}
 function renderAll(){
-  renderStatus();
+  renderStatus(); renderContact();
   $("#nav-owner").hidden=S.mode==="live"&&!S.canEdit;
   const n=S.canEdit?allReqs().filter(x=>x.r.status==="new").length:0;
   const b=$("#owner-badge"); b.textContent=n; b.hidden=!n;
   document.title=n?`(${n}) ${BRAND}`:BRAND;
   const v=currentView();
   if(v==="requests") renderRequests();
-  if(v==="owner"){ const a=document.activeElement; if(!(a&&a.id==="avail-msg")) renderOwner(); }
+  if(v==="owner"){ const a=document.activeElement; if(!(a&&a.closest&&a.closest("#owner-root")&&a.matches("input,textarea,select"))) renderOwner(); }   // don't wipe what the crew is typing
 }
 
 /* ===== routing ===== */
@@ -843,7 +891,9 @@ document.addEventListener("click",async e=>{
   if(t.id==="b-senior"){ S.bk.senior=!S.bk.senior; renderBookOpts(); }
   if(t.id==="t-book"){ S.bk=structuredClone(S.pb); }
   if(t.dataset.hood){ const h=t.dataset.hood; renderHoods(h); $("#hoodmsg").textContent=h==="__other"?"Book anyway. If we can get there in about 20 minutes, we'll take it and tell you when.":`Yes, we clear driveways in ${h}. Book a clear and we'll text you a time.`; if(h!=="__other") $("#b-hood").value=h; }
-  if(t.dataset.depth){ S.depth=t.dataset.depth; $$("[data-depth]").forEach(b=>b.setAttribute("aria-pressed",b===t)); }
+  if(t.dataset.depth){ S.depth=t.dataset.depth; renderRequests(); }
+  if(t.id==="again-ridge"){ S.ridge=!S.ridge; renderRequests(); }
+  if(t.id==="copy-phone"){ const ph=S.contact?.phone||""; try{ await navigator.clipboard.writeText(ph); toast("Number copied"); }catch(ex){ const r=document.createRange(); r.selectNodeContents($("#textus-num")); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Number selected. Copy it from your menu."); } }
   if(t.id==="again-btn") clearAgain();
   if(t.dataset.otab){ S.ownerTab=t.dataset.otab; renderOwner(); }
   if(t.dataset.avail){ const st={state:t.dataset.avail,message:($("#avail-msg")?.value||"").trim(),updatedAt:new Date().toISOString()}; try{await saveStatus(st); toast("Customers now see: "+AVAIL[st.state]);}catch(ex){toast("That didn't save. Try again.");} }
@@ -854,6 +904,7 @@ document.addEventListener("click",async e=>{
   if(t.id==="sound-btn"||t.id==="sound-quick"){ if(S.sound&&t.id==="sound-btn") beep(); else { S.sound=!S.sound; if(S.sound) beep(); renderOwner(); } }
   if(t.dataset.jump&&currentView()==="home"){ e.preventDefault(); document.getElementById(t.dataset.jump)?.scrollIntoView({behavior:reduce?"auto":"smooth"}); }
 });
+document.addEventListener("input",e=>{ if(e.target.id==="again-note") S.againNote=e.target.value; });
 document.addEventListener("change",async e=>{
   if(e.target.dataset.assign){ const v=e.target.value; await ownerUpdate(e.target.dataset.assign,r=>{r.assignee=v; if(r.status==="new"&&v) r.status="scheduled";}, v?`Assigned to ${v}`:null); }
 });
@@ -863,6 +914,8 @@ document.addEventListener("submit",async e=>{
     const c={id:"manual-"+rid(),name:$("#ac-name").value.trim(),phone:$("#ac-phone").value.trim(),address:$("#ac-addr").value.trim(),size,createdAt:now,payments:[],source:"phone",
       requests:[{id:rid(),kind:"booking",createdAt:now,status:"new",price:PRICES[size],when:$("#ac-when").value.trim()}]};
     if(!c.name||!c.address){toast("Add a name and address.");return;} try{await saveCustomer(c); S.ownerTab="queue"; toast(`Added a job for ${c.name}`);}catch(ex){toast("That didn't save. Try again.");} }
+  if(e.target.id==="contact-form"){ e.preventDefault(); const ct={phone:$("#ct-phone").value.trim(),etransfer:$("#ct-email").value.trim(),updatedAt:new Date().toISOString()};
+    document.activeElement?.blur?.(); try{await saveContact(ct); toast(ct.phone||ct.etransfer?"Saved. Customers now see your details.":"Saved. Your details are hidden.");}catch(ex){toast("That didn't save. Try again.");} }
   if(e.target.id==="add-exp"){ e.preventDefault(); const label=$("#ex-label").value.trim(), amount=+$("#ex-amt").value; if(!label||!(amount>=0))return; S.ops.expenses=[...(S.ops.expenses||[]),{id:rid(),date:new Date().toISOString(),label,amount}]; try{await saveOps(); toast("Expense added");}catch(ex){toast("That didn't save.");} }
 });
 window.addEventListener("hashchange",route);

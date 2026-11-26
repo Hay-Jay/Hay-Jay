@@ -2,7 +2,7 @@
 
 Per-visit snow clearing in Regina, run by Deji and Jide as co-owners: a two-person student crew working around classes. There are no monthly or winter plans. The goal is to be the cheapest crew in the area.
 
-Name decided Nov 26, 2026. It replaces the placeholder "Queen City Snow Co."
+Name decided Nov 26, 2026: "Snow Way" as two words, not "Snoway". It replaces the placeholder "Queen City Snow Co." If you buy a domain, also grab snoway.ca if it's cheap, so misspellings still reach you.
 
 ## Where everything lives
 
@@ -66,7 +66,7 @@ Local competitors charge $30 to $40 for a single and $50 to $55 for a double. No
 
 ## Still open
 
-1. **Website prices don't match the plan yet.** The site charges $45 for "Corner lot / long", $5 for a windrow, and talks about extra charges only above 25 cm. The plan says corner +$10, triple or long $60+, and +$10 to $15 for heavy snow over 15 cm or a plow ridge.
+1. **Add your contact details on the site.** Open the site, go to Crew, then Contact details, and enter the number customers text and your e-Transfer email. Until then the "Rather text?" line stays hidden.
 2. **Going public:** about $20 a year for a domain (for example snowway.ca, availability not checked). Until then only invited people can see the site. Register the name in Saskatchewan (about $60) before taking payments under it.
 3. **Invite Jide** as an editor on the site.
 4. **Raise to $35** next season?
