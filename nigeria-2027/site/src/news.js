@@ -3,8 +3,28 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-26T06:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-26T11:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-pseudo-ballots', at:'2026-11-26T07:06:00+01:00', img:'news/n134.jpg', tag:'INEC', pri:2, outlet:'Punch', url:'https://punchng.com/mock-accreditation-ballot-papers-wont-bear-party-names-inec/', people:[],
+    h:'Saturday\'s mock exercise will use dummy ballots with no party names, INEC says',
+    d:'INEC chairman Joash Amupitan said the ballot papers for the 28 November mock accreditation are "pseudo-ballot papers" carrying no registered party names, responding to fears that the test could be used to rig.',
+    why:'The test checks machines and result upload, not votes. Nothing cast on Saturday counts.'},
+  {id:'apc-replies-kano-claim', at:'2026-11-26T09:10:00+01:00', img:'news/n135.jpg', tag:'Security', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/more-news/928129-apc-replies-ndc-over-assassination-claim-on-social-media-influencer.html', people:['obi','tinubu'], claim:true,
+    h:'Kano APC condemns attack on Kwankwasiyya TikToker but rejects NDC blame',
+    d:'The Kano APC campaign condemned the reported attack on Maryam Golden, a TikToker linked to the Kwankwasiyya movement, and challenged the NDC to produce evidence for its claim that an "armed wing" of the ruling party was behind it, saying blame should wait for the police investigation.',
+    why:'Both parties condemn the attack; only an investigation can say who did it.'},
+  {id:'benue-pistol-arrest', at:'2026-11-26T10:44:00+01:00', img:'news/n136.jpg', tag:'Security', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/26/police-arrest-man-with-pistol-at-apc-campaign-rally-in-benue/', people:[],
+    h:'Police arrest man with a pistol at APC campaign flag-off in Gboko, Benue',
+    d:'Benue police said a Beretta pistol was recovered from a man, Saalu Fidelis Teryange, during security screening at the APC campaign flag-off at J.S. Tarka Stadium, Gboko, on 19 November, and warned against thuggery and intimidation at rallies.',
+    why:'Screening at rallies works. The same checks should apply at every party\'s events.'},
+  {id:'makinde-seaports', at:'2026-11-26T10:40:00+01:00', img:'news/n137.jpg', tag:'Campaign', pri:1, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/26/its-a-joke-makinde-blasts-tinubu-over-sudden-approval-of-3-seaports-3/', people:['seyi-makinde','tinubu'], claim:true,
+    h:'Makinde calls Tinubu\'s new seaport approvals "a joke" timed for the election',
+    d:'The APM candidate said approvals for deep seaports in Ogun, Akwa Ibom and Calabar came only after Tinubu declared for 2027, and argued the timing showed politics rather than development planning.',
+    why:'Approvals are a first step. Watch whether funding and contracts follow.'},
+  {id:'bode-george-atiku', at:'2026-11-26T06:43:00+01:00', img:'news/n138.jpg', tag:'Campaign', pri:1, outlet:'Daily Trust', url:'https://dailytrust.com/step-down-re-contest-in-2031-bode-george-tells-atiku/', people:['atiku'], claim:true,
+    h:'Bode George urges Atiku to step down and run in 2031 instead',
+    d:'Former PDP deputy national chairman Bode George said the North-South power-sharing understanding means the presidency should stay in the South until 2031, and urged Atiku to withdraw now and contest then.',
+    why:'Zoning is a party convention, not a legal rule. Any eligible candidate can stand.'},
   {id:'inec-register-100m', at:'2026-11-26T06:00:00+01:00', img:'news/n131.jpg', tag:'INEC', pri:3, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/registered-nigerian-voters-now-100m-says-inec/', people:[],
     h:'INEC: verified register now "more than 100 million" after 1.6 million records removed',
     d:'INEC chairman Joash Amupitan said removing over 1.6 million invalid, duplicate and deceased records has brought the verified register from the earlier 103 million to more than 100 million. About 10.77 million new registrants were retained, and 232,000 of 311,000 complaints raised during claims and objections were found genuine and addressed.',
