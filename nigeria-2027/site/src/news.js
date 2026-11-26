@@ -3,8 +3,20 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-26T01:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-26T06:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-register-100m', at:'2026-11-26T06:00:00+01:00', img:'news/n131.jpg', tag:'INEC', pri:3, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/registered-nigerian-voters-now-100m-says-inec/', people:[],
+    h:'INEC: verified register now "more than 100 million" after 1.6 million records removed',
+    d:'INEC chairman Joash Amupitan said removing over 1.6 million invalid, duplicate and deceased records has brought the verified register from the earlier 103 million to more than 100 million. About 10.77 million new registrants were retained, and 232,000 of 311,000 complaints raised during claims and objections were found genuine and addressed.',
+    why:'The final register is due on 15 December. Check your name is on it.'},
+  {id:'atiku-oil-revenue', at:'2026-11-26T01:29:00+01:00', img:'news/n132.jpg', tag:'Campaign', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/atiku-to-tinubu-you-must-explain-how-n1-4trn-oil-revenue-vanished/', people:['atiku','tinubu'], claim:true,
+    h:'Atiku demands answers on oil revenue shortfall in Budget Office figures',
+    d:'Citing Budget Office figures, Atiku said gross oil revenue fell by ₦1.44 trillion in the first half of 2026 versus 2025, with ₦7.88 trillion collected against a ₦18.65 trillion target. He asked the government to publish production, sales, deductions and remittances, and repeated his promise of "targeted relief" on locally refined fuel.',
+    why:'The Budget Office figures are public. Compare them with the government\'s own explanation for the shortfall.'},
+  {id:'kaduna-adc-campaign-row', at:'2026-11-26T01:50:00+01:00', img:'news/n133.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/kaduna-faults-adc-over-suspension-of-campaign-activities/', people:['atiku'], claim:true,
+    h:'Kaduna government says ADC, not the state, halted its campaign',
+    d:'Kaduna information commissioner Ahmed Maiyaki, also a spokesman for the APC campaign, rejected ADC claims that the state denied it venues, saying the party had itself suspended rallies pending coalition talks, and challenged it to show any rejected application. Atiku postponed his Kaduna visit this week.',
+    why:'Each side blames the other. Venue applications and refusals are documents that can settle it.'},
   {id:'inec-ai-unit', at:'2026-11-25T22:50:00+01:00', img:'news/n130.jpg', tag:'INEC', pri:2, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928071-inec-sets-up-ai-unit-to-combat-election-misinformation-ahead-of-2027-polls.html', people:[],
     h:'INEC sets up an AI unit to fight deepfakes and election misinformation',
     d:'INEC has created an artificial intelligence division in its ICT department to detect and respond to deepfakes, synthetic voices and fabricated videos, chairman Joash Amupitan said through his spokesman at a CJID summit in Abuja, and will work with media and fact-checkers.',

@@ -378,6 +378,7 @@ const CONFIG = {
 const S = { // sources
   inecTime:{t:'INEC revised timetable (VON)',u:'https://von.gov.ng/inec-issues-revised-timetable-for-2027-general-election/'},
   voters:{t:'INEC voter register, 6 Oct 2026 (via TVC News)',u:'https://www.tvcnews.tv/2027-lagos-kano-kaduna-top-nigerias-voter-register/'},
+  voters2:{t:'INEC chairman via Vanguard, 26 Nov 2026',u:'https://www.vanguardngr.com/2026/11/registered-nigerian-voters-now-100m-says-inec/'},
   wiki27:{t:'2027 Nigerian general election (Wikipedia)',u:'https://en.wikipedia.org/wiki/2027_Nigerian_general_election'},
   wiki23:{t:'2023 presidential election (Wikipedia/INEC)',u:'https://en.wikipedia.org/wiki/2023_Nigerian_presidential_election'},
   poverty:{t:'World Bank via Nairametrics, Apr 2026',u:'https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/'},
@@ -486,7 +487,7 @@ const MATCH = [
 ];
 const KB = [
   ['When is the presidential election?','Saturday 16 January 2027. Governorship and state assembly elections follow on 6 February 2027.','inecTime'],
-  ['How many people are registered to vote?','103,428,715 (INEC, 6 October 2026). Lagos (7.49M), Kano (6.57M) and Kaduna (4.66M) have the most.','voters'],
+  ['How many people are registered to vote?','More than 100 million. INEC announced 103,428,715 on 6 October 2026, then removed about 1.6 million invalid, duplicate and deceased records (INEC chairman, 25 Nov 2026). Lagos (7.49M), Kano (6.57M) and Kaduna (4.66M) have the most.','voters'],
   ['Who are the main candidates?','Bola Tinubu (APC, running mate Kashim Shettima), Atiku Abubakar (ADC, running mate Rotimi Amaechi) and Peter Obi (NDC, running mate Rabiu Kwankwaso). 18 parties field candidates.','wiki27'],
   ['What happened in 2023?','Tinubu won with 8.79M votes (36.6%). Atiku had 6.98M (29.1%), Obi 6.10M (25.4%), Kwankwaso 1.50M (6.2%). Only 26.7% of registered voters voted.','wiki23'],
   ['How many people did not vote in 2023?','About 68.5 million registered voters stayed home. The winning margin was 1.81 million.','wiki23'],
@@ -553,8 +554,20 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-26T01:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-26T06:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-register-100m', at:'2026-11-26T06:00:00+01:00', img:'news/n131.jpg', tag:'INEC', pri:3, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/registered-nigerian-voters-now-100m-says-inec/', people:[],
+    h:'INEC: verified register now "more than 100 million" after 1.6 million records removed',
+    d:'INEC chairman Joash Amupitan said removing over 1.6 million invalid, duplicate and deceased records has brought the verified register from the earlier 103 million to more than 100 million. About 10.77 million new registrants were retained, and 232,000 of 311,000 complaints raised during claims and objections were found genuine and addressed.',
+    why:'The final register is due on 15 December. Check your name is on it.'},
+  {id:'atiku-oil-revenue', at:'2026-11-26T01:29:00+01:00', img:'news/n132.jpg', tag:'Campaign', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/atiku-to-tinubu-you-must-explain-how-n1-4trn-oil-revenue-vanished/', people:['atiku','tinubu'], claim:true,
+    h:'Atiku demands answers on oil revenue shortfall in Budget Office figures',
+    d:'Citing Budget Office figures, Atiku said gross oil revenue fell by ₦1.44 trillion in the first half of 2026 versus 2025, with ₦7.88 trillion collected against a ₦18.65 trillion target. He asked the government to publish production, sales, deductions and remittances, and repeated his promise of "targeted relief" on locally refined fuel.',
+    why:'The Budget Office figures are public. Compare them with the government\'s own explanation for the shortfall.'},
+  {id:'kaduna-adc-campaign-row', at:'2026-11-26T01:50:00+01:00', img:'news/n133.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/kaduna-faults-adc-over-suspension-of-campaign-activities/', people:['atiku'], claim:true,
+    h:'Kaduna government says ADC, not the state, halted its campaign',
+    d:'Kaduna information commissioner Ahmed Maiyaki, also a spokesman for the APC campaign, rejected ADC claims that the state denied it venues, saying the party had itself suspended rallies pending coalition talks, and challenged it to show any rejected application. Atiku postponed his Kaduna visit this week.',
+    why:'Each side blames the other. Venue applications and refusals are documents that can settle it.'},
   {id:'inec-ai-unit', at:'2026-11-25T22:50:00+01:00', img:'news/n130.jpg', tag:'INEC', pri:2, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928071-inec-sets-up-ai-unit-to-combat-election-misinformation-ahead-of-2027-polls.html', people:[],
     h:'INEC sets up an AI unit to fight deepfakes and election misinformation',
     d:'INEC has created an artificial intelligence division in its ICT department to detect and respond to deepfakes, synthetic voices and fabricated videos, chairman Joash Amupitan said through his spokesman at a CJID summit in Abuja, and will work with media and fact-checkers.',
@@ -1407,7 +1420,7 @@ const STATS = [
   {id:'power',label:'Electricity',a:['Promised','15,000 MW',15000],b:['Record peak','5,802 MW',5802],bad:'down',unit:'grid generation',src:'power25'},
   {id:'growth',label:'GDP growth',a:['Promised','12%',12],b:['Best quarter','4.43%',4.43],bad:'down',unit:'a year',src:'gdp'},
   {id:'reserves',label:'Foreign reserves',a:['May 2023','$35.1bn',35.1],b:['Sep 2026','$54.9bn',54.9],bad:'down',unit:'CBN',src:'reserves'},
-  {id:'voters',label:'Registered voters',a:['2023','93.5M',93.5],b:['2027','103.4M',103.4],bad:'none',unit:'INEC',src:'voters'},
+  {id:'voters',label:'Registered voters',a:['2023','93.5M',93.5],b:['2027','100M+',100],bad:'none',unit:'INEC',src:'voters2'},
   {id:'youth',label:'Youth share of register',a:['2023','39.7%',39.65],b:['2027','29.8%',29.79],bad:'down',unit:'INEC',src:'n_youth'},
   {id:'turnout',label:'Turnout',a:['2019','34.8%',34.75],b:['2023','26.7%',26.71],bad:'down',unit:'of registered voters',src:'wiki23'}
 ];
@@ -1481,7 +1494,7 @@ const daysLeft = () => Math.max(0, Math.ceil((ELECTION - new Date()) / 864e5));
 // Latest short videos (also posted on TikTok and Instagram). Newest first.
 const WATCH = [
   {src:'videos/dyk-turnout.mp4', poster:'videos/dyk-turnout.jpg', title:'Did you know? 68 million registered voters stayed home in 2023',
-   d:'103,428,715 Nigerians are registered for 16 January 2027. In 2023 turnout was 26.7%, and the winner got 8,794,726 votes.', srcs:['voters','wiki23']},
+   d:'INEC announced 103,428,715 registered voters in October; after a clean-up it is now more than 100 million. In 2023 turnout was 26.7%, and the winner got 8,794,726 votes.', srcs:['voters','voters2','wiki23']},
 ];
 const watchGrid = list => `<div class="watch">${list.map(w => `<div class="card vid"><video controls playsinline preload="none" poster="${w.poster}" src="${w.src}"></video><h3>${w.title}</h3><p class="muted small">${w.d}</p><div class="src">${w.srcs.map(src).join(' · ')}</div></div>`).join('')}</div>`;
 
@@ -1506,7 +1519,7 @@ const VIEWS = {
     ${(() => { const o = Object.keys(PTS).sort((a, b) => PTS[b].total - PTS[a].total).slice(0, 3); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">The Naija Decides Rank · updated ${when(RANK.updated)}</div><h3>Who is ahead right now?</h3></div><span class="btn">Full rank</span></div><div class="row" style="gap:18px">${o.map((id, i) => { const m = movement(id); return `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1} <span class="mv ${m.cls}">${m.txt}</span></div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${PTS[id].total.toFixed(1)}</span></div></div>`; }).join('')}</div></a>`; })()}
 
     <div class="grid g4">
-      <div class="card stat lift"><div class="k">Registered voters</div><div class="v">103.4M</div><div class="src">${src('voters')}</div></div>
+      <div class="card stat lift"><div class="k">Registered voters</div><div class="v">100M+</div><div class="src">${src('voters2')}</div></div>
       <div class="card stat lift"><div class="k">2023 turnout</div><div class="v" style="color:var(--false)">26.7%</div><div class="src">${src('wiki23')}</div></div>
       <div class="card stat lift"><div class="k">In poverty (2025)</div><div class="v" style="color:var(--false)">63%</div><div class="src">${src('poverty')}</div></div>
       <div class="card stat lift"><div class="k">On the ballot</div><div class="v">18</div><div class="src">${src('n_list')}</div></div>
@@ -1596,7 +1609,7 @@ const VIEWS = {
       <div class="card"><h3>Key dates</h3><ol class="timeline">${TIMELINE.map(([d, h, x, s]) => `<li class="${/2027/.test(d) ? 'up' : ''}"><div class="d">${esc(d)}</div><div><b>${esc(h)}</b><div class="muted small">${esc(x)} <span class="src">${src(s)}</span></div></div></li>`).join('')}</ol></div>
       <div class="grid g2">
         <div class="card"><h3>How to vote, step by step</h3><ol class="steps">${['Collect your PVC from INEC before election day.','Check your name and polling unit when the register is displayed in December.','Go early on 16 January. Polls open at 8:00am.','Get accredited: BVAS checks your fingerprint or face.','Vote in secret, fold your ballot and drop it in the box.','Stay calm and watch the count at your polling unit.','Check that your unit\'s result on IReV matches the sheet posted at the unit.'].map(x => `<li>${x}</li>`).join('')}</ol><div class="src">${src('inecTime')}</div></div>
-        <div class="card"><h3>Where the votes are</h3><div class="bars">${[['Lagos',7.49],['Kano',6.57],['Kaduna',4.66]].map(([n, v]) => barRow({n:`${n} · ${v}M`, v: Math.round(v / 7.49 * 100), c:'var(--accent)'})).join('')}</div><p class="muted small">The three biggest of 103.4M registered voters. Young people are 29.8% of the register.</p><div class="src">${src('voters')} · ${src('n_youth')}</div></div>
+        <div class="card"><h3>Where the votes are</h3><div class="bars">${[['Lagos',7.49],['Kano',6.57],['Kaduna',4.66]].map(([n, v]) => barRow({n:`${n} · ${v}M`, v: Math.round(v / 7.49 * 100), c:'var(--accent)'})).join('')}</div><p class="muted small">The three biggest of 100M+ registered voters (after INEC removed 1.6M invalid records). Young people are 29.8% of the register.</p><div class="src">${src('voters')} · ${src('n_youth')}</div></div>
       </div>
       <div class="card"><h3>Election words, explained</h3><dl class="gloss">${GLOSSARY.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></div>`; }},
   play:{label:'Play', render(){

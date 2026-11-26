@@ -2,6 +2,7 @@
 const S = { // sources
   inecTime:{t:'INEC revised timetable (VON)',u:'https://von.gov.ng/inec-issues-revised-timetable-for-2027-general-election/'},
   voters:{t:'INEC voter register, 6 Oct 2026 (via TVC News)',u:'https://www.tvcnews.tv/2027-lagos-kano-kaduna-top-nigerias-voter-register/'},
+  voters2:{t:'INEC chairman via Vanguard, 26 Nov 2026',u:'https://www.vanguardngr.com/2026/11/registered-nigerian-voters-now-100m-says-inec/'},
   wiki27:{t:'2027 Nigerian general election (Wikipedia)',u:'https://en.wikipedia.org/wiki/2027_Nigerian_general_election'},
   wiki23:{t:'2023 presidential election (Wikipedia/INEC)',u:'https://en.wikipedia.org/wiki/2023_Nigerian_presidential_election'},
   poverty:{t:'World Bank via Nairametrics, Apr 2026',u:'https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/'},
@@ -110,7 +111,7 @@ const MATCH = [
 ];
 const KB = [
   ['When is the presidential election?','Saturday 16 January 2027. Governorship and state assembly elections follow on 6 February 2027.','inecTime'],
-  ['How many people are registered to vote?','103,428,715 (INEC, 6 October 2026). Lagos (7.49M), Kano (6.57M) and Kaduna (4.66M) have the most.','voters'],
+  ['How many people are registered to vote?','More than 100 million. INEC announced 103,428,715 on 6 October 2026, then removed about 1.6 million invalid, duplicate and deceased records (INEC chairman, 25 Nov 2026). Lagos (7.49M), Kano (6.57M) and Kaduna (4.66M) have the most.','voters'],
   ['Who are the main candidates?','Bola Tinubu (APC, running mate Kashim Shettima), Atiku Abubakar (ADC, running mate Rotimi Amaechi) and Peter Obi (NDC, running mate Rabiu Kwankwaso). 18 parties field candidates.','wiki27'],
   ['What happened in 2023?','Tinubu won with 8.79M votes (36.6%). Atiku had 6.98M (29.1%), Obi 6.10M (25.4%), Kwankwaso 1.50M (6.2%). Only 26.7% of registered voters voted.','wiki23'],
   ['How many people did not vote in 2023?','About 68.5 million registered voters stayed home. The winning margin was 1.81 million.','wiki23'],

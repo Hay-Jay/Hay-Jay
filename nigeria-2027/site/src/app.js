@@ -199,7 +199,7 @@ const STATS = [
   {id:'power',label:'Electricity',a:['Promised','15,000 MW',15000],b:['Record peak','5,802 MW',5802],bad:'down',unit:'grid generation',src:'power25'},
   {id:'growth',label:'GDP growth',a:['Promised','12%',12],b:['Best quarter','4.43%',4.43],bad:'down',unit:'a year',src:'gdp'},
   {id:'reserves',label:'Foreign reserves',a:['May 2023','$35.1bn',35.1],b:['Sep 2026','$54.9bn',54.9],bad:'down',unit:'CBN',src:'reserves'},
-  {id:'voters',label:'Registered voters',a:['2023','93.5M',93.5],b:['2027','103.4M',103.4],bad:'none',unit:'INEC',src:'voters'},
+  {id:'voters',label:'Registered voters',a:['2023','93.5M',93.5],b:['2027','100M+',100],bad:'none',unit:'INEC',src:'voters2'},
   {id:'youth',label:'Youth share of register',a:['2023','39.7%',39.65],b:['2027','29.8%',29.79],bad:'down',unit:'INEC',src:'n_youth'},
   {id:'turnout',label:'Turnout',a:['2019','34.8%',34.75],b:['2023','26.7%',26.71],bad:'down',unit:'of registered voters',src:'wiki23'}
 ];
@@ -273,7 +273,7 @@ const daysLeft = () => Math.max(0, Math.ceil((ELECTION - new Date()) / 864e5));
 // Latest short videos (also posted on TikTok and Instagram). Newest first.
 const WATCH = [
   {src:'videos/dyk-turnout.mp4', poster:'videos/dyk-turnout.jpg', title:'Did you know? 68 million registered voters stayed home in 2023',
-   d:'103,428,715 Nigerians are registered for 16 January 2027. In 2023 turnout was 26.7%, and the winner got 8,794,726 votes.', srcs:['voters','wiki23']},
+   d:'INEC announced 103,428,715 registered voters in October; after a clean-up it is now more than 100 million. In 2023 turnout was 26.7%, and the winner got 8,794,726 votes.', srcs:['voters','voters2','wiki23']},
 ];
 const watchGrid = list => `<div class="watch">${list.map(w => `<div class="card vid"><video controls playsinline preload="none" poster="${w.poster}" src="${w.src}"></video><h3>${w.title}</h3><p class="muted small">${w.d}</p><div class="src">${w.srcs.map(src).join(' · ')}</div></div>`).join('')}</div>`;
 
@@ -298,7 +298,7 @@ const VIEWS = {
     ${(() => { const o = Object.keys(PTS).sort((a, b) => PTS[b].total - PTS[a].total).slice(0, 3); return `<a class="card lift" href="#candidates" style="text-decoration:none;color:inherit"><div class="sec-h"><div><div class="eyebrow">The Naija Decides Rank · updated ${when(RANK.updated)}</div><h3>Who is ahead right now?</h3></div><span class="btn">Full rank</span></div><div class="row" style="gap:18px">${o.map((id, i) => { const m = movement(id); return `<div class="row" style="gap:10px">${face(cand(id), 52)}<div><div class="muted small">#${i + 1} <span class="mv ${m.cls}">${m.txt}</span></div><b>${cand(id).name.split(' ')[1]}</b> <span style="font:400 22px var(--display);color:var(--accent)">${PTS[id].total.toFixed(1)}</span></div></div>`; }).join('')}</div></a>`; })()}
 
     <div class="grid g4">
-      <div class="card stat lift"><div class="k">Registered voters</div><div class="v">103.4M</div><div class="src">${src('voters')}</div></div>
+      <div class="card stat lift"><div class="k">Registered voters</div><div class="v">100M+</div><div class="src">${src('voters2')}</div></div>
       <div class="card stat lift"><div class="k">2023 turnout</div><div class="v" style="color:var(--false)">26.7%</div><div class="src">${src('wiki23')}</div></div>
       <div class="card stat lift"><div class="k">In poverty (2025)</div><div class="v" style="color:var(--false)">63%</div><div class="src">${src('poverty')}</div></div>
       <div class="card stat lift"><div class="k">On the ballot</div><div class="v">18</div><div class="src">${src('n_list')}</div></div>
@@ -388,7 +388,7 @@ const VIEWS = {
       <div class="card"><h3>Key dates</h3><ol class="timeline">${TIMELINE.map(([d, h, x, s]) => `<li class="${/2027/.test(d) ? 'up' : ''}"><div class="d">${esc(d)}</div><div><b>${esc(h)}</b><div class="muted small">${esc(x)} <span class="src">${src(s)}</span></div></div></li>`).join('')}</ol></div>
       <div class="grid g2">
         <div class="card"><h3>How to vote, step by step</h3><ol class="steps">${['Collect your PVC from INEC before election day.','Check your name and polling unit when the register is displayed in December.','Go early on 16 January. Polls open at 8:00am.','Get accredited: BVAS checks your fingerprint or face.','Vote in secret, fold your ballot and drop it in the box.','Stay calm and watch the count at your polling unit.','Check that your unit\'s result on IReV matches the sheet posted at the unit.'].map(x => `<li>${x}</li>`).join('')}</ol><div class="src">${src('inecTime')}</div></div>
-        <div class="card"><h3>Where the votes are</h3><div class="bars">${[['Lagos',7.49],['Kano',6.57],['Kaduna',4.66]].map(([n, v]) => barRow({n:`${n} · ${v}M`, v: Math.round(v / 7.49 * 100), c:'var(--accent)'})).join('')}</div><p class="muted small">The three biggest of 103.4M registered voters. Young people are 29.8% of the register.</p><div class="src">${src('voters')} · ${src('n_youth')}</div></div>
+        <div class="card"><h3>Where the votes are</h3><div class="bars">${[['Lagos',7.49],['Kano',6.57],['Kaduna',4.66]].map(([n, v]) => barRow({n:`${n} · ${v}M`, v: Math.round(v / 7.49 * 100), c:'var(--accent)'})).join('')}</div><p class="muted small">The three biggest of 100M+ registered voters (after INEC removed 1.6M invalid records). Young people are 29.8% of the register.</p><div class="src">${src('voters')} · ${src('n_youth')}</div></div>
       </div>
       <div class="card"><h3>Election words, explained</h3><dl class="gloss">${GLOSSARY.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl></div>`; }},
   play:{label:'Play', render(){
