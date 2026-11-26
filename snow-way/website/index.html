@@ -1,189 +1,282 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Snow Way</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Instrument+Sans:wght@400..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: a night-blue hero you can shovel; then a light page of tight sections (price builder, steps, area, FAQ); app views are dense panels. High-vis orange is the one accent, like a crew vest. */
+/* Layout: a dawn street you can shovel, then a bright packed-snow page. The price builder is a 3D model of a Regina lot beside a printed work-order ticket. Crew views are dense panels. Safety orange, like a crew vest, is the one accent. */
 :root{
-  --night:#0a1a33;        /* Regina winter night */
-  --night-2:#12274a;
-  --night-line:#24406b;
-  --ground:#eef3f9;       /* packed-snow page ground */
-  --surface:#ffffff;
-  --ink:#0c1d36;
-  --ink-2:#4b5d78;
-  --line:#d3dde9;
-  --chip:#e3eaf3;
-  --vest:#ff6a2b;         /* high-vis orange accent */
-  --vest-ink:#2a0d00;
-  --ok:#17845a; --warn:#b86e00; --bad:#c43838; --info:#2563b8;
-  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
-  --f-body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --night:#0a1730; --night-2:#11244a; --night-line:#294270;
+  --ground:#edf1f6; --surface:#ffffff; --ink:#0c1a2f; --ink-2:#51617a; --line:#d4dce7; --chip:#e3e9f1;
+  --vest:#ff5a1f; --vest-deep:#c2410c; --vest-ink:#230e00;
+  --paper:#fbfcfe; --paper-ink:#0c1a2f; --paper-2:#5a6a82; --paper-line:#d6deea;
+  --ok:#14805a; --warn:#a96400; --bad:#c53838; --info:#2461b5;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --ground:#07111f; --surface:#0f1d33; --ink:#e7eef8; --ink-2:#9db0c9; --line:#20344f; --chip:#18294a;
+  --ground:#08111f; --surface:#0f1c32; --ink:#e6edf7; --ink-2:#9aaec8; --line:#1f3352; --chip:#172a48;
   --ok:#3cc28a; --warn:#f0a43a; --bad:#f06c6c; --info:#6aa6f0; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --ground:#07111f; --surface:#0f1d33; --ink:#e7eef8; --ink-2:#9db0c9; --line:#20344f; --chip:#18294a;
+  --ground:#08111f; --surface:#0f1c32; --ink:#e6edf7; --ink-2:#9aaec8; --line:#1f3352; --chip:#172a48;
   --ok:#3cc28a; --warn:#f0a43a; --bad:#f06c6c; --info:#6aa6f0; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--night)}
-.wrap{max-width:1140px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.02;margin:0;letter-spacing:-.02em}
-h2{font-size:clamp(30px,4.4vw,48px);font-weight:800}
-h3{font-size:20px;font-weight:700;letter-spacing:-.01em}
+body{background:var(--ground);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--night)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-stretch:112%;text-wrap:balance;line-height:1;margin:0;letter-spacing:-.025em}
+h2{font-size:clamp(32px,4.6vw,54px);font-weight:800}
+h3{font-size:19px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
 p{margin:0}
 a{color:inherit}
-.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
 .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-button,.btn{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:13px 20px;font-weight:800;display:inline-flex;align-items:center;gap:8px;text-decoration:none;justify-content:center;transition:transform .12s ease,filter .12s ease,background .12s}
+.btn,button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:13px 20px;font-weight:700;display:inline-flex;align-items:center;gap:8px;text-decoration:none;justify-content:center;transition:transform .12s ease,filter .12s ease,background .15s,color .15s,box-shadow .15s}
 button:active,.btn:active{transform:translateY(1px) scale(.99)}
-.btn-vest{background:var(--vest);color:var(--vest-ink);box-shadow:0 6px 0 -1px #c2410c}
+.btn-vest{background:var(--vest);color:var(--vest-ink);box-shadow:0 5px 0 -1px var(--vest-deep)}
 .btn-vest:hover{filter:brightness(1.06)}
 .btn-ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 2px currentColor}
 .btn-quiet{background:var(--chip);color:var(--ink)}
 .btn-sm{padding:8px 12px;font-size:14px;border-radius:9px;box-shadow:none}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--vest);outline-offset:2px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--vest);outline-offset:2px}
 button:disabled{opacity:.5;cursor:not-allowed}
 
-/* header */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--night) 92%,transparent);backdrop-filter:blur(8px);color:#eaf2fb;border-bottom:1px solid #ffffff12}
+/* ---------- header ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:color-mix(in srgb,var(--night) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#eaf2fb;border-bottom:1px solid #ffffff14}
 .top .wrap{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
 .brand .wm{display:flex;flex-direction:column;line-height:1}
-.brand .wm b{font-family:var(--f-display);font-weight:800;font-size:19px;letter-spacing:-.01em}
-.brand .wm small{font-family:var(--f-mono);font-size:10px;letter-spacing:.18em;color:#8fa6c4;text-transform:uppercase;margin-top:3px}
-.status{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;padding:5px 11px;border-radius:99px;background:#ffffff12;color:#dfe9f6}
+.brand .wm b{font-family:var(--f-display);font-stretch:118%;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.brand .wm small{font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;color:#8ea6c6;text-transform:uppercase;margin-top:4px}
+.status{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:5px 11px;border-radius:99px;background:#ffffff12;color:#dfe9f6}
 .status i{width:8px;height:8px;border-radius:50%;background:#8fa6c4}
-.status.open i{background:#3cdc8f;box-shadow:0 0 0 0 #3cdc8f;animation:pulse 2s infinite}
+.status.open i{background:#3cdc8f;animation:pulse 2s infinite}
 .status.busy i{background:#ffb238}
 .status.off i{background:#ff6b6b}
 @keyframes pulse{0%{box-shadow:0 0 0 0 #3cdc8f88}70%{box-shadow:0 0 0 8px #3cdc8f00}100%{box-shadow:0 0 0 0 #3cdc8f00}}
 .nav{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap;align-items:center}
-.nav a{padding:8px 11px;border-radius:9px;text-decoration:none;font-weight:700;font-size:15px;color:#bfd0e6}
+.nav a{padding:8px 11px;border-radius:9px;text-decoration:none;font-weight:600;font-size:15px;color:#bfd0e6}
 .nav a:hover{color:#fff}
 .nav a[aria-current="page"]{background:#ffffff18;color:#fff}
-.nav a.cta{background:var(--vest);color:var(--vest-ink);margin-left:6px}
-.badge{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;font-weight:800;margin-left:4px}
-.banner{background:#ffd9c7;color:#4a1800;font-size:14px}
+.nav a.cta{background:var(--vest);color:var(--vest-ink);margin-left:6px;font-weight:700}
+.badge{display:inline-grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#e5484d;color:#fff;font-size:11px;font-weight:800;margin-left:4px}
+.banner{background:#ffdcca;color:#4a1800;font-size:14px}
 .banner .wrap{padding-block:8px}
 
-/* hero with shovelable snow */
-.hero{position:relative;background:radial-gradient(120% 90% at 80% 0%,#1d3d6e 0%,var(--night) 60%);color:#eaf2fb;overflow:hidden;isolation:isolate}
+/* ---------- hero ---------- */
+.hero{position:relative;color:#eaf2fb;overflow:hidden;isolation:isolate;background:linear-gradient(180deg,#050e1d 0%,#0a1b38 34%,#1b2c57 60%,#4a4a77 78%,#b57f7b 92%,#e3a98a 100%)}
 .hero canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;touch-action:pan-y;cursor:grab}
 .hero canvas.dig{cursor:grabbing}
-.hero .wrap{position:relative;z-index:1;padding-block:72px 150px;pointer-events:none;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;align-items:center}
+.hero .wrap{position:relative;z-index:1;padding-block:76px 210px;pointer-events:none;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.9fr);gap:40px;align-items:center}
 .hero .wrap a,.hero .wrap button{pointer-events:auto}
-.hero h1{font-size:clamp(40px,6.2vw,80px);font-weight:800;letter-spacing:-.04em}
-.hero h1 .hl{color:var(--vest);display:inline-block}
-.hero .lede{font-size:19px;color:#c4d3e6;max-width:46ch;margin-top:20px}
+.hero h1{font-size:clamp(40px,5.4vw,72px);font-weight:850;font-stretch:118%;letter-spacing:-.045em;line-height:.96}
+.hero h1 .hl{color:var(--vest);display:block}
+.hero .lede{font-size:19px;color:#c7d5e8;max-width:46ch;margin-top:22px}
 .hero .actions{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap}
 .hero .actions .btn-ghost{color:#eaf2fb}
-.ticket{justify-self:end;background:#ffffff0d;border:1px solid #ffffff22;backdrop-filter:blur(6px);border-radius:20px;padding:22px 24px;max-width:320px;display:flex;flex-direction:column;gap:10px;pointer-events:auto}
-.ticket .big{font-family:var(--f-display);font-weight:800;font-size:76px;line-height:.9;letter-spacing:-.05em}
-.ticket .big sup{font-size:32px;vertical-align:top;margin-right:2px}
-.ticket p{color:#bccbe0;font-size:15px}
-.ticket hr{border:0;border-top:1px dashed #ffffff30;margin:4px 0;width:100%}
-.ticket .row2{display:flex;justify-content:space-between;font-size:14px;color:#d5e1f0}
-.dighint{position:absolute;z-index:2;left:50%;bottom:22px;transform:translateX(-50%);font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#0a1a33;background:#ffffffd9;padding:7px 12px;border-radius:99px;pointer-events:none;white-space:nowrap;transition:opacity .3s}
-.dighint b{color:#c2410c}
+.proof{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:26px;font-size:14px;color:#b9c9de}
+.proof span{display:inline-flex;align-items:center;gap:7px}
+.proof svg{flex:none}
+.hero-ticket{justify-self:end;width:100%;max-width:330px;pointer-events:auto;transform:rotate(1.5deg)}
+.dighint{position:absolute;z-index:2;left:50%;bottom:20px;transform:translateX(-50%);font-family:var(--f-mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#0a1730;background:#ffffffe0;padding:7px 13px;border-radius:99px;pointer-events:none;white-space:nowrap;transition:opacity .3s}
+.dighint b{color:var(--vest-deep)}
 
-section{padding-block:76px}
-.sec-head{display:flex;flex-direction:column;gap:12px;margin-bottom:32px;max-width:720px}
-.sec-head p{color:var(--ink-2);font-size:17px}
+section{padding-block:84px}
+.sec-head{display:flex;flex-direction:column;gap:12px;margin-bottom:34px;max-width:760px}
+.sec-head p{color:var(--ink-2);font-size:18px;max-width:60ch}
 
-/* price builder */
-.builder{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:28px;align-items:stretch}
-.scene{background:linear-gradient(#cfe0f2,#eaf2fb);border-radius:22px;overflow:hidden;border:1px solid var(--line);position:relative;min-height:320px}
-.scene svg{display:block;width:100%;height:100%;position:absolute;inset:0}
-.scene .part{transition:opacity .35s, fill .35s, stroke .35s}
-.scene .hit{stroke:var(--vest);stroke-width:3;stroke-dasharray:6 5;animation:march 1s linear infinite}
-@keyframes march{to{stroke-dashoffset:-22}}
-.scene .tag{position:absolute;left:14px;top:14px;background:var(--night);color:#fff;font-size:13px;font-weight:700;padding:6px 10px;border-radius:9px}
-.opts{display:flex;flex-direction:column;gap:18px}
-.seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.seg button{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;text-align:left;font-weight:700}
-.seg button small{font-weight:500;color:var(--ink-2);font-size:13px}
-.seg button .p{font-family:var(--f-mono);font-size:13px;color:var(--ink-2)}
-.seg button[aria-pressed="true"]{border-color:var(--vest);background:color-mix(in srgb,var(--vest) 9%,var(--surface))}
-.toggles{display:flex;flex-wrap:wrap;gap:8px}
-.toggles button{background:var(--surface);border:1.5px solid var(--line);color:var(--ink);padding:9px 13px;font-size:14px;font-weight:700;border-radius:99px}
-.toggles button[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
-.total{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--night);color:#eaf2fb;border-radius:18px;padding:18px 20px;margin-top:auto}
-.total b{font-family:var(--f-display);font-size:48px;font-weight:800;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
-.total small{display:block;color:#9fb4cf;font-size:13px}
-.compare{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:28px}
-.cmp{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.cmp b{font-family:var(--f-mono);font-size:20px;font-variant-numeric:tabular-nums}
-.cmp span{font-size:13px;color:var(--ink-2)}
-.cmp.us{background:var(--night);color:#fff;border-color:var(--night)}
-.cmp.us span{color:#a9bdd6}
-.src{font-size:13px;color:var(--ink-2);margin-top:10px}
+/* ---------- work-order ticket ---------- */
+.ticket{--cut:0px;background:var(--paper);color:var(--paper-ink);border-radius:16px;position:relative;box-shadow:0 1px 0 #0b18300f,0 24px 48px -24px #0b183066;
+  -webkit-mask:radial-gradient(circle 11px at 0 var(--cut),#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% var(--cut),#0000 98%,#000) right/51% 100% no-repeat;
+          mask:radial-gradient(circle 11px at 0 var(--cut),#0000 98%,#000) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% var(--cut),#0000 98%,#000) right/51% 100% no-repeat}
+.tk-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:18px 20px 12px;border-bottom:2px solid var(--paper-ink)}
+.tk-brand{font-family:var(--f-display);font-stretch:120%;font-weight:850;font-size:17px;letter-spacing:-.01em}
+.tk-head .mono{font-size:11px;letter-spacing:.12em;color:var(--paper-2);text-transform:uppercase}
+.tk-lines{list-style:none;margin:0;padding:12px 20px 14px;display:flex;flex-direction:column;gap:8px;min-height:64px}
+.tk-lines li{display:flex;justify-content:space-between;gap:12px;font-size:15px;align-items:baseline}
+.tk-lines li span{min-width:0}
+.tk-lines li em{font-style:normal;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-2)}
+.tk-lines li b{font-weight:500;font-size:14px;white-space:nowrap}
+.tk-lines li.disc{color:var(--ok)}
+.tk-cut{height:0;border-top:2px dashed var(--paper-line);margin:0 18px}
+.tk-total{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;padding:14px 20px 20px}
+.tk-total small{display:block;font-size:12px;color:var(--paper-2)}
+.tk-total b{display:block;font-family:var(--f-display);font-stretch:112%;font-size:52px;font-weight:850;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums;margin:2px 0 4px}
+.hero-ticket .tk-total b{font-size:64px}
+.hero-ticket .tk-lines li{font-size:14px}
 
-/* steps */
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.step{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px;position:relative}
-.step .n{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
-.step svg{width:44px;height:44px}
-.step p{color:var(--ink-2);font-size:15px}
-.why{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:18px}
-.why div{display:flex;flex-direction:column;gap:6px;padding-top:14px;border-top:3px solid var(--ink)}
-.why p{color:var(--ink-2);font-size:15px}
+/* ---------- price builder ---------- */
+.builder{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);gap:26px;align-items:start}
+.stage{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:5/4;background:linear-gradient(180deg,#8eaad0 0%,#c9d3e3 30%,#e9e2e0 48%,#e4e3e9 58%,#e4e3e9 100%);border:1px solid var(--line);box-shadow:0 30px 60px -40px #0b183080;position:sticky;top:84px}
+.stage .gl{position:absolute;inset:0}
+.stage canvas{display:block;width:100%!important;height:100%!important;touch-action:pan-y;cursor:grab}
+.stage canvas.drag{cursor:grabbing}
+.hud{position:absolute;display:flex;gap:8px;align-items:center;font-size:12px;font-weight:600;color:#0c1a2f;z-index:3}
+.hud.tl{left:14px;top:14px;flex-wrap:wrap}
+.hud.br{right:14px;bottom:14px}
+.hud.bl{left:14px;bottom:14px;flex-wrap:wrap;max-width:calc(100% - 150px)}
+.hud .pill-hud{background:#ffffffd9;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 10px;border-radius:99px;display:inline-flex;gap:6px;align-items:center;box-shadow:0 2px 8px #0b18301f}
+.hud .pill-hud.dark{background:#0a1730d9;color:#eaf2fb}
+.hud button{background:#ffffffd9;color:#0c1a2f;padding:7px 11px;border-radius:99px;font-size:12px;font-weight:700;box-shadow:0 2px 8px #0b18301f}
+.key{display:inline-block;width:10px;height:10px;border-radius:50%}
+.key.on{background:var(--vest)}
+.key.off{background:#fff;box-shadow:inset 0 0 0 2px #0c1a2f55}
+.tags{position:absolute;inset:0;pointer-events:none;z-index:2}
+.tag{position:absolute;left:0;top:0;pointer-events:auto;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:12.5px;font-weight:700;padding:6px 10px 6px 8px;border-radius:99px;background:#fffffff0;color:#0c1a2f;box-shadow:0 4px 14px -4px #0b183055,0 0 0 1px #0c1a2f14;transition:background .15s,color .15s,opacity .2s;will-change:transform}
+.tag::after{content:"";position:absolute;left:50%;bottom:-6px;width:2px;height:6px;margin-left:-1px;background:inherit}
+.tag i{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;line-height:1;background:#0c1a2f14}
+.tag .mono{font-weight:500;color:#51617a}
+.tag.on{background:var(--vest);color:var(--vest-ink)}
+.tag.on i{background:#ffffff66}
+.tag.on .mono{color:var(--vest-ink)}
+.tag.base{background:#0a1730ee;color:#fff}
+.tag.base i{background:#ffffff26}
+.tag.base .mono{color:#a8bad3}
+.tag[hidden]{display:none}
+.stage.nogl .gl,.stage.nogl .hud,.stage.nogl .tags{display:none}
+.gl-fallback{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:24px;color:#0c1a2f}
+.stage.nogl .gl-fallback{display:grid}
 
+.qpanel{display:flex;flex-direction:column;gap:22px}
+.qstep{display:flex;flex-direction:column;gap:10px}
+.qstep-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.qstep-h .eyebrow b{color:var(--vest-deep);font-weight:600;margin-right:6px}
+.sizes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sz{background:var(--surface);color:var(--ink);border:1.5px solid var(--line);flex-direction:column;align-items:flex-start;gap:2px;padding:12px 13px;text-align:left;font-weight:700;border-radius:14px;position:relative}
+.sz svg{width:52px;height:30px;margin-bottom:6px}
+.sz .sz-t{font-size:15px;line-height:1.2}
+.sz .sz-s{font-weight:500;color:var(--ink-2);font-size:12.5px}
+.sz .sz-p{position:absolute;right:12px;top:12px;font-size:13px;font-weight:600;color:var(--ink)}
+.sz[aria-pressed="true"]{border-color:var(--vest);background:color-mix(in srgb,var(--vest) 8%,var(--surface));box-shadow:0 0 0 3px color-mix(in srgb,var(--vest) 18%,transparent)}
+.depthrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.depthval{font-family:var(--f-display);font-stretch:112%;font-weight:800;font-size:30px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.depthword{font-size:13px;font-weight:700;color:var(--ink-2);padding:4px 10px;border-radius:99px;background:var(--chip)}
+.depthword.over{background:color-mix(in srgb,var(--vest) 16%,transparent);color:var(--vest-deep)}
+:root[data-theme="dark"] .depthword.over{color:var(--vest)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .depthword.over{color:var(--vest)}}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;padding:0;border:0;--fill:26%}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--vest) var(--fill),var(--chip) var(--fill))}
+input[type=range]::-moz-range-track{height:8px;border-radius:99px;background:var(--chip)}
+input[type=range]::-moz-range-progress{height:8px;border-radius:99px;background:var(--vest)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--vest);margin-top:-9px;box-shadow:0 3px 10px #0b183040}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--vest);box-shadow:0 3px 10px #0b183040}
+.ticks{position:relative;height:18px;font-family:var(--f-mono);font-size:11px;color:var(--ink-2)}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.ticks span.hv{color:var(--vest-deep);font-weight:600}
+.switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
+.switchrow b{display:block;font-size:15px}
+.switchrow small{color:var(--ink-2);font-size:13px}
+.switch{width:52px;height:30px;border-radius:99px;background:var(--chip);padding:0;position:relative;flex:none;box-shadow:inset 0 0 0 1px var(--line)}
+.switch::after{content:"";position:absolute;left:3px;top:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px #0b183040;transition:transform .18s}
+.switch[aria-pressed="true"]{background:var(--vest);box-shadow:none}
+.switch[aria-pressed="true"]::after{transform:translateX(22px)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--surface);border:1.5px solid var(--line);color:var(--ink);padding:8px 12px 8px 9px;font-size:14px;font-weight:600;border-radius:99px;gap:7px}
+.chip i{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;font-style:normal;font-size:11px;color:transparent}
+.chip .mono{font-weight:500;color:var(--ink-2);font-size:13px}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--ground)}
+.chip[aria-pressed="true"] i{background:var(--vest);box-shadow:none;color:var(--vest-ink)}
+.chip[aria-pressed="true"] .mono{color:color-mix(in srgb,var(--ground) 75%,transparent)}
+
+/* ---------- compare ---------- */
+.compare-wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:40px;align-items:center}
+.cmp{display:flex;flex-direction:column;gap:14px}
+.cmp-row{display:grid;grid-template-columns:150px minmax(0,1fr) 92px;gap:14px;align-items:center}
+.cmp-who{font-weight:600;font-size:15px}
+.cmp-track{position:relative;height:14px;border-radius:99px;background:var(--chip)}
+.cmp-bar{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--ink-2);min-width:14px}
+.cmp-bar.open{background:linear-gradient(90deg,var(--ink-2) 70%,transparent)}
+.cmp-dot{position:absolute;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:var(--vest);box-shadow:0 0 0 4px color-mix(in srgb,var(--vest) 25%,transparent)}
+.cmp-row.us .cmp-who{font-weight:800}
+.cmp-val{font-size:13px;color:var(--ink-2);text-align:right}
+.cmp-row.us .cmp-val{color:var(--ink);font-weight:600}
+.cmp-axis{display:grid;grid-template-columns:150px minmax(0,1fr) 92px;gap:14px}
+.cmp-axis div{position:relative;height:16px;font-family:var(--f-mono);font-size:11px;color:var(--ink-2)}
+.cmp-axis div span{position:absolute;transform:translateX(-50%)}
+.h2-sm{font-size:clamp(28px,3.4vw,42px)}
+.src{font-size:13px;color:var(--ink-2);margin-top:6px}
+
+/* ---------- how it works ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.step{display:flex;flex-direction:column;gap:10px;min-width:0}
+.step .n{font-family:var(--f-mono);font-size:12px;color:var(--vest-deep);font-weight:600;letter-spacing:.08em;margin-top:8px}
+.step p{color:var(--ink-2);font-size:15.5px}
+.phone{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:212px;box-shadow:0 20px 40px -32px #0b183070}
+.ph-bar{font-size:11px;color:var(--ink-2);text-align:center;letter-spacing:.06em;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.ph-card{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:3px;font-size:14px}
+.ph-card .ph-price{margin-top:6px;font-weight:600;color:var(--ink)}
+.ph-btn{margin-top:auto;background:var(--vest);color:var(--vest-ink);border-radius:12px;text-align:center;padding:10px;font-weight:700;font-size:14px}
+.bub{max-width:88%;padding:9px 12px;border-radius:16px;font-size:14px;line-height:1.4}
+.bub b{display:block;font-size:11px;font-family:var(--f-mono);letter-spacing:.06em;color:var(--ink-2);margin-bottom:2px;font-weight:500}
+.bub.in{background:var(--chip);border-bottom-left-radius:5px;align-self:flex-start}
+.bub.out{background:#2f6fe4;color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.snap{display:block;height:92px;border-radius:10px;margin:4px 0 8px;background:
+  linear-gradient(180deg,#c9d3df 0 22%,transparent 22%),
+  linear-gradient(90deg,transparent 0 18%,#d9dee5 18% 21%,transparent 21%),
+  linear-gradient(90deg,#f5f8fc 0 26%,#2f343b 26% 80%,#f5f8fc 80%);position:relative;overflow:hidden}
+.snap::after{content:"";position:absolute;left:30%;right:24%;top:0;height:22%;background:repeating-linear-gradient(180deg,#e9edf2 0 5px,#cfd6df 5px 6px)}
+.promises{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin-top:56px}
+.promises div{display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:3px solid var(--ink)}
+.promises svg{width:28px;height:28px;color:var(--vest-deep)}
+.promises p{color:var(--ink-2);font-size:15px}
+
+/* ---------- area ---------- */
 .dark-band{background:var(--night);color:#eaf2fb}
 .dark-band .sec-head p{color:#b3c3d8}
-.area{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:36px;align-items:start}
+.dark-band .eyebrow{color:#8ea6c6}
+.area{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:start}
 .hoods{display:flex;flex-wrap:wrap;gap:8px}
 .hoods button{border:1px solid var(--night-line);background:transparent;border-radius:99px;padding:7px 13px;font-size:14px;font-weight:600;color:#d6e2f0}
 .hoods button[aria-pressed="true"]{background:var(--vest);color:var(--vest-ink);border-color:var(--vest)}
-.hoodmsg{margin-top:14px;color:#c5d4e6;min-height:24px}
-.bylaw{background:var(--night-2);border:1px solid var(--night-line);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.hoodmsg{margin-top:16px;color:#c5d4e6;min-height:24px}
+.bylaw{background:var(--night-2);border:1px solid var(--night-line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px}
 .bylaw b{color:var(--vest)}
+.bylaw p{color:#c5d4e6}
 .clock{display:flex;align-items:center;gap:16px}
 .clock svg{flex:none}
 
-.faq{display:flex;flex-direction:column;gap:8px;max-width:840px}
+/* ---------- faq ---------- */
+.faq-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:44px;align-items:start}
+.faq-side{position:sticky;top:96px;display:flex;flex-direction:column;gap:14px}
+.faq-side p{color:var(--ink-2)}
+.faq{display:flex;flex-direction:column;gap:8px}
 details{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 18px}
-summary{cursor:pointer;padding:17px 0;font-weight:800;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary{cursor:pointer;padding:17px 0;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
 summary::-webkit-details-marker{display:none}
 summary::after{content:"+";font-family:var(--f-mono);color:var(--ink-2);transition:transform .2s}
 details[open] summary::after{transform:rotate(45deg)}
 details p{padding-bottom:17px;color:var(--ink-2)}
 
 .cta-band{background:var(--vest);color:var(--vest-ink)}
-.cta-band .wrap{padding-block:48px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
-.cta-band h2{font-size:clamp(28px,4vw,44px)}
+.cta-band .wrap{padding-block:52px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.cta-band h2{font-size:clamp(30px,4.4vw,52px)}
 .cta-band .btn{background:var(--night);color:#fff;box-shadow:none}
 .cta-copy{display:flex;flex-direction:column;gap:12px;min-width:0}
-.textus{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700}
+.textus{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:600}
 .textus b{font-size:18px}
-.textus .copy{background:#ffffff70;color:#2a0d00}
-
+.textus .copy{background:#ffffff70;color:#230e00}
 footer{background:var(--night);color:#9fb3cb;font-size:14px}
 footer .wrap{padding-block:36px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
 
-/* forms */
+/* ---------- forms + app views ---------- */
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form .full{grid-column:1/-1}
-label{display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px}
+label{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
 label small{font-weight:500;color:var(--ink-2)}
 input,select,textarea{font:inherit;font-weight:500;padding:12px 13px;border-radius:11px;border:1.5px solid var(--line);background:var(--ground);color:var(--ink);width:100%}
 textarea{min-height:84px;resize:vertical}
-.book-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px;align-items:start}
+.book-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:24px;align-items:start}
 .side{display:flex;flex-direction:column;gap:14px;position:sticky;top:90px}
 .note{font-size:14px;color:var(--ink-2)}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--night);color:#fff;padding:12px 18px;border-radius:12px;z-index:50;box-shadow:0 8px 30px #0005;max-width:calc(100% - 32px);font-weight:700}
-
-/* requests */
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--night);color:#fff;padding:12px 18px;border-radius:12px;z-index:50;box-shadow:0 8px 30px #0005;max-width:calc(100% - 32px);font-weight:600}
+.fsec{display:flex;flex-direction:column;gap:10px}
 .again{background:var(--night);color:#fff;border-radius:22px;padding:28px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
-.again .go{background:var(--vest);color:var(--vest-ink);font-family:var(--f-display);font-size:26px;font-weight:800;padding:22px 26px;border-radius:16px;width:100%;box-shadow:0 8px 0 -2px #c2410c}
+.again .go{background:var(--vest);color:var(--vest-ink);font-family:var(--f-display);font-stretch:112%;font-size:24px;font-weight:800;padding:20px 24px;border-radius:16px;width:100%;box-shadow:0 7px 0 -2px var(--vest-deep)}
 .again p{color:#b9c8da}
 .depth{display:flex;gap:8px;flex-wrap:wrap}
-.depth button{background:#ffffff14;color:#dfe8f3;padding:8px 12px;font-size:14px;font-weight:700}
+.depth button{background:#ffffff14;color:#dfe8f3;padding:8px 12px;font-size:14px;font-weight:600}
 .depth button[aria-pressed="true"]{background:#fff;color:var(--night)}
 .two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
 .timeline{display:flex;flex-direction:column;gap:10px}
@@ -191,7 +284,7 @@ textarea{min-height:84px;resize:vertical}
 .track{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px}
 .track i{height:5px;border-radius:9px;background:var(--chip)}
 .track i.on{background:var(--vest)}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;padding:4px 10px;border-radius:99px;white-space:nowrap;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;white-space:nowrap;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.04em}
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .st-new{color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent)}
 .st-scheduled{color:var(--info);background:color-mix(in srgb,var(--info) 14%,transparent)}
@@ -200,14 +293,12 @@ textarea{min-height:84px;resize:vertical}
 .st-cancelled{color:var(--ink-2);background:var(--chip)}
 .empty{border:1.5px dashed var(--line);border-radius:14px;padding:28px;text-align:center;color:var(--ink-2)}
 .lock{max-width:560px;margin:30px auto;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
-
-/* owner */
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
 .tabs button{background:var(--chip);color:var(--ink-2);padding:10px 15px}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.kpi b{font-family:var(--f-display);font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.kpi b{font-family:var(--f-display);font-stretch:112%;font-size:32px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .kpi span{font-size:13px;color:var(--ink-2)}
 .kpi.alert{border-color:var(--bad)}
 .kpi.alert b{color:var(--bad)}
@@ -232,7 +323,7 @@ textarea{min-height:84px;resize:vertical}
 .tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:16px}
 table{border-collapse:collapse;width:100%;font-size:15px}
 th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:12px;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:600}
+th{font-size:12px;font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink-2);font-weight:500}
 tr:last-child td{border-bottom:0}
 td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .bars{display:flex;align-items:flex-end;gap:6px;height:160px;padding:22px 4px 0;border-bottom:1px solid var(--line)}
@@ -242,36 +333,50 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 .barlabels span{flex:1;text-align:center;font-size:11px;font-family:var(--f-mono);color:var(--ink-2)}
 .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 
-.reveal{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
-@keyframes rise{from{transform:translateY(14px)}to{transform:none}}
-
+@media (max-width:1000px){
+  .builder{grid-template-columns:1fr}
+  .stage{position:relative;top:auto}
+  .compare-wrap,.faq-grid{grid-template-columns:1fr;gap:28px}
+  .faq-side{position:static}
+}
 @media (max-width:920px){
-  .hero .wrap,.builder,.area,.book-grid,.two,.split{grid-template-columns:1fr}
-  .ticket{justify-self:start}
+  .hero .wrap,.area,.book-grid,.two,.split{grid-template-columns:1fr}
+  .hero-ticket{justify-self:start;transform:none}
   .steps{grid-template-columns:1fr}
-  .why,.compare,.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .promises,.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .side{position:static}
 }
 @media (max-width:600px){
   .form{grid-template-columns:1fr}
-  .nav{margin-left:0;width:100%}
+  .top{position:relative;top:auto}
+  .top .wrap{gap:8px 10px}
+  .nav{margin-left:0;width:100%;gap:0}
   .nav a{padding:7px 8px;font-size:14px}
-  .status{order:3}
+  .nav a[data-jump]{display:none}
+  .nav a.cta{margin-left:auto}
+  .status{order:3;font-size:12px}
   .job{grid-template-columns:1fr}
   .job .acts{justify-content:flex-start}
-  .hero .wrap{padding-block:48px 130px}
+  .hero .wrap{padding-block:48px 170px}
+  .stage{aspect-ratio:1/1}
+  .hud.tl .pill-hud:nth-child(2){display:none}
+  .tag{font-size:11.5px;padding:5px 8px 5px 6px}
+  .tag .mono{display:none}
+  .cmp-row,.cmp-axis{grid-template-columns:96px minmax(0,1fr) 76px;gap:10px}
+  .promises{grid-template-columns:1fr}
+  section{padding-block:64px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#home" aria-label="Home">
+    <a class="brand" href="#home" aria-label="Snow Way home">
       <svg width="36" height="36" viewBox="0 0 64 64" aria-hidden="true">
-        <rect width="64" height="64" rx="16" fill="#ff6a2b"/>
+        <rect width="64" height="64" rx="16" fill="#ff5a1f"/>
         <path d="M10 44c8-6 15-6 22 0s14 6 22 0v10H10z" fill="#ffffff"/>
-        <path d="M22 13l16 22" stroke="#0a1a33" stroke-width="5" stroke-linecap="round"/>
-        <path d="M31 33l14-4 4 12-14 4z" fill="#0a1a33"/>
+        <path d="M22 13l16 22" stroke="#0a1730" stroke-width="5" stroke-linecap="round"/>
+        <path d="M31 33l14-4 4 12-14 4z" fill="#0a1730"/>
         <circle cx="47" cy="16" r="2.4" fill="#ffffff"/><circle cx="16" cy="28" r="1.8" fill="#ffffff"/><circle cx="54" cy="27" r="1.6" fill="#ffffff"/>
       </svg>
       <span class="wm"><b data-brand>Snow Way</b><small>Regina · per-visit clearing</small></span>
@@ -292,24 +397,31 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 <!-- ================= HOME ================= -->
 <div data-view="home">
   <div class="hero" id="hero">
-    <canvas id="snow" aria-label="Snow you can shovel by dragging across it" role="img"></canvas>
+    <canvas id="snow" aria-label="A Regina street at dawn with a snowbank you can shovel by dragging across it" role="img"></canvas>
     <div class="wrap">
       <div>
-        <p class="eyebrow" style="color:#8fa6c4">Snow Way · Regina, SK · Pay after</p>
+        <p class="eyebrow" style="color:#8ea6c6">Snow Way · Regina, SK · Pay after</p>
         <h1><span class="hl">Snow way</span> you're shovelling this yourself.</h1>
         <p class="lede">Deji and Jide, two Regina students, clear your driveway and sidewalk the same day or the next morning. Book when it snows, pay when it's done. No plans, no sign-ups, no GST.</p>
         <div class="actions">
           <a class="btn btn-vest" href="#book">Book a clear · <span data-price="single"></span></a>
-          <a class="btn btn-ghost" href="#prices" data-jump="prices">Build your price</a>
+          <a class="btn btn-ghost" href="#prices" data-jump="prices">Build your quote</a>
+        </div>
+        <div class="proof">
+          <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="#ff5a1f" stroke-width="1.8"/><path d="M8 4.5V8l2.4 1.6" stroke="#ff5a1f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>Same day or next morning</span>
+          <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="10" rx="2" fill="none" stroke="#ff5a1f" stroke-width="1.8"/><circle cx="8" cy="8.5" r="2.4" fill="none" stroke="#ff5a1f" stroke-width="1.8"/></svg>Photo when it's done</span>
+          <span><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" stroke="#ff5a1f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Inside the City's 48 hours</span>
         </div>
       </div>
-      <div class="ticket">
-        <span class="eyebrow" style="color:#8fa6c4">Driveway + front walk</span>
-        <div class="big"><sup>$</sup><span data-price-num="single"></span></div>
-        <p>Single driveway, the walk to your door and the city sidewalk out front.</p>
-        <hr>
-        <div class="row2"><span>Double driveway</span><b data-price="double"></b></div>
-        <div class="row2"><span>Sidewalk only</span><b data-price="walk"></b></div>
+      <div class="ticket hero-ticket" style="--cut:156px">
+        <div class="tk-head"><span class="tk-brand">SNOW WAY</span><span class="mono">One visit</span></div>
+        <ul class="tk-lines">
+          <li><span>Single driveway</span><b class="mono">incl.</b></li>
+          <li><span>Front walk</span><b class="mono">incl.</b></li>
+          <li><span>City sidewalk out front</span><b class="mono">incl.</b></li>
+        </ul>
+        <div class="tk-cut"></div>
+        <div class="tk-total"><div><small>Per visit</small><b><span data-price="single"></span></b><small>Double <span data-price="double"></span> · Sidewalk only <span data-price="walk"></span></small></div></div>
       </div>
     </div>
     <div class="dighint" id="dighint">Drag across the snow to <b>shovel it</b></div>
@@ -318,82 +430,59 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
   <section id="prices">
     <div class="wrap">
       <div class="sec-head">
-        <p class="eyebrow">Price builder</p>
-        <h2>Tap your place. See your price.</h2>
-        <p>One flat price per visit. The orange outline shows exactly what we clear.</p>
+        <p class="eyebrow">Build your quote</p>
+        <h2>Your place, your snow, your price.</h2>
+        <p>Pick your driveway, set how much snow fell, and watch what we clear. Tap the tags on the house to add or remove spots. Drag the scene to look around.</p>
       </div>
       <div class="builder">
-        <div class="scene" id="scene">
-          <span class="tag" id="scene-tag">Single driveway</span>
-          <svg viewBox="0 0 600 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Your house, driveway and sidewalk">
-            <rect x="0" y="0" width="600" height="380" fill="none"/>
-            <!-- snowy lawn -->
-            <rect x="0" y="232" width="600" height="148" fill="#f7fbff"/>
-            <!-- house -->
-            <g>
-              <polygon points="90,128 240,52 390,128" fill="#33507d"/>
-              <rect x="110" y="126" width="260" height="110" fill="#c9d6e6"/>
-              <rect x="150" y="150" width="44" height="40" rx="3" fill="#ffe6a8"/>
-              <rect x="206" y="166" width="34" height="70" rx="3" fill="#33507d"/>
-              <polygon points="88,130 240,48 392,130 392,122 240,40 88,122" fill="#ffffff"/>
-              <!-- garage -->
-              <rect id="g-garage" x="270" y="150" width="90" height="86" fill="#9fb3cb" class="part"/>
-              <rect id="g-garage2" x="370" y="150" width="90" height="86" fill="#9fb3cb" class="part"/>
-              <rect x="360" y="126" width="110" height="26" fill="#33507d"/>
-              <rect x="358" y="120" width="114" height="8" fill="#ffffff"/>
-            </g>
-            <!-- front walk -->
-            <rect id="p-walk" x="210" y="236" width="26" height="74" fill="#dfe8f2" class="part"/>
-            <!-- driveway -->
-            <polygon id="p-drive" points="270,236 360,236 372,310 258,310" fill="#dfe8f2" class="part"/>
-            <polygon id="p-drive2" points="360,236 460,236 476,310 372,310" fill="#dfe8f2" class="part"/>
-            <!-- steps -->
-            <rect id="p-steps" x="200" y="230" width="46" height="8" fill="#dfe8f2" class="part"/>
-            <!-- city sidewalk -->
-            <rect id="p-sidewalk" x="0" y="310" width="600" height="22" fill="#dfe8f2" class="part"/>
-            <rect id="p-sidewalk-side" x="560" y="232" width="22" height="78" fill="#dfe8f2" class="part"/>
-            <!-- road -->
-            <rect x="0" y="332" width="600" height="48" fill="#6b7f99"/>
-            <!-- windrow -->
-            <path id="p-windrow" d="M250 334 q20 -14 40 -4 q20 -12 40 -2 q20 -12 40 -2 q20 -10 40 -2 q20 -10 38 2 v10 h-198z" fill="#ffffff" stroke="#c7d6e8" class="part"/>
-            <!-- car -->
-            <g id="p-car" class="part">
-              <rect x="285" y="262" width="62" height="28" rx="8" fill="#c2410c"/>
-              <rect x="294" y="252" width="44" height="16" rx="6" fill="#c2410c"/>
-              <path d="M290 254 q26 -14 52 0" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"/>
-              <circle cx="298" cy="291" r="6" fill="#0a1a33"/><circle cx="334" cy="291" r="6" fill="#0a1a33"/>
-            </g>
-            <!-- back deck hint -->
-            <rect id="p-back" x="60" y="196" width="40" height="40" fill="#dfe8f2" class="part"/>
-            <text x="80" y="190" text-anchor="middle" font-size="11" font-family="JetBrains Mono, monospace" fill="#4b5d78" id="t-back">back</text>
-            <!-- melt dots -->
-            <g id="p-melt" class="part" fill="#2563b8">
-              <circle cx="300" cy="280" r="2.5"/><circle cx="320" cy="300" r="2.5"/><circle cx="340" cy="260" r="2.5"/><circle cx="222" cy="270" r="2.5"/><circle cx="226" cy="296" r="2.5"/><circle cx="350" cy="295" r="2.5"/><circle cx="288" cy="248" r="2.5"/>
-            </g>
-          </svg>
+        <div class="stage" id="stage">
+          <div class="gl"></div>
+          <div class="tags" id="tags"></div>
+          <div class="hud tl"><span class="pill-hud dark mono">7:40 AM · −18 °C</span><span class="pill-hud">Regina bungalow</span></div>
+          <div class="hud bl"><span class="pill-hud"><span class="key on"></span>We clear it</span><span class="pill-hud"><span class="key off"></span>Tap to add</span></div>
+          <div class="hud br"><button type="button" id="cam-reset">Reset view</button></div>
+          <div class="gl-fallback"><div><h3>3D preview isn't available here</h3><p class="note" style="margin-top:8px">Your quote on the right still works.</p></div></div>
         </div>
-        <div class="opts">
-          <div>
-            <p class="eyebrow" style="margin-bottom:8px">Your place</p>
-            <div class="seg" id="seg-size"></div>
+        <div class="qpanel">
+          <div class="qstep">
+            <div class="qstep-h"><p class="eyebrow"><b>1</b>Your place</p></div>
+            <div class="sizes" id="pb-size"></div>
           </div>
-          <div>
-            <p class="eyebrow" style="margin-bottom:8px">Extras at your place</p>
-            <div class="toggles" id="tg-addons"></div>
+          <div class="qstep">
+            <div class="qstep-h"><p class="eyebrow"><b>2</b>How much snow fell</p></div>
+            <div class="depthrow"><span class="depthval" id="pb-depth-val">12 cm</span><span class="depthword" id="pb-depth-word">Normal · included</span></div>
+            <label for="pb-depth" style="position:absolute;left:-9999px">Snow depth in centimetres</label>
+            <input type="range" id="pb-depth" min="2" max="40" step="1" value="12">
+            <div class="ticks" aria-hidden="true"><span style="left:2%">2</span><span style="left:34%">15 cm</span><span class="hv" style="left:58%">Heavy +$10</span><span style="left:97%">40</span></div>
+            <div class="switchrow"><div><b>City plow left a ridge</b><small>The heavy bank across the end of your driveway · +$10</small></div><button type="button" class="switch" id="pb-ridge" aria-pressed="false" aria-label="City plow left a ridge, add $10"></button></div>
           </div>
-          <div>
-            <p class="eyebrow" style="margin-bottom:8px">This snowfall</p>
-            <div class="toggles" id="tg-visit"></div>
+          <div class="qstep">
+            <div class="qstep-h"><p class="eyebrow"><b>3</b>Extras at your place</p></div>
+            <div class="chips" id="pb-extras"></div>
+            <div class="chips"><button type="button" class="chip" id="pb-senior" aria-pressed="false"><i>✓</i>Senior or living with a disability<span class="mono">−10%</span></button></div>
           </div>
-          <div class="toggles"><button type="button" id="tg-senior" aria-pressed="false">Senior or living with a disability · 10% off</button></div>
-          <div class="total">
-            <div><small id="t-label">Single driveway, one visit</small><b id="t-total">$30</b><small>No GST · pay after by e-Transfer or cash</small></div>
-            <a class="btn btn-vest" href="#book" id="t-book">Book this clear</a>
+          <div class="ticket" style="--cut:var(--pb-cut,200px)" id="pb-ticket">
+            <div class="tk-head"><span class="tk-brand">SNOW WAY</span><span class="mono">Work order · Regina</span></div>
+            <ul class="tk-lines" id="pb-lines"></ul>
+            <div class="tk-cut"></div>
+            <div class="tk-total"><div><small>Total per visit</small><b id="pb-total">$30</b><small id="pb-note">No GST · pay after by e-Transfer or cash</small></div><a class="btn btn-vest" href="#book" id="pb-book">Book this clear</a></div>
           </div>
         </div>
       </div>
-      <div class="compare" id="compare"></div>
-      <p class="src">Regina prices checked Nov 2026: Dave's Property Care order form ($30 – $40 single), Kijiji Regina listings ($50 and up). Weed Pro Regina only sells monthly plans ($175 – $355 + GST).</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap compare-wrap">
+      <div class="sec-head" style="margin:0">
+        <p class="eyebrow">Regina prices, Nov 2026</p>
+        <h2 class="h2-sm">The lowest single-driveway price around.</h2>
+        <p>Established crews charge $30 to $40 a visit, and Kijiji listings start at $50. One big company only sells monthly plans.</p>
+      </div>
+      <div>
+        <div class="cmp" id="compare"></div>
+        <p class="src">Sources: Dave's Property Care order form, Kijiji Regina snow removal listings. Weed Pro Regina sells monthly plans only, $175 to $355 + GST.</p>
+      </div>
     </div>
   </section>
 
@@ -401,15 +490,38 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
     <div class="wrap">
       <div class="sec-head"><p class="eyebrow">How it works</p><h2>Snow falls. You tap. We show up.</h2></div>
       <div class="steps">
-        <div class="step reveal"><span class="n">Step 1</span><svg viewBox="0 0 44 44" aria-hidden="true"><rect x="10" y="4" width="24" height="36" rx="5" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="22" cy="34" r="2" fill="currentColor"/><path d="M16 14h12M16 20h8" stroke="#ff6a2b" stroke-width="3" stroke-linecap="round"/></svg><h3>Book in a minute</h3><p>Pick your place, add your address and any notes. Already booked before? It's one tap: "Clear me again."</p></div>
-        <div class="step reveal" style="animation-delay:.08s"><span class="n">Step 2</span><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M22 12v11l7 5" stroke="#ff6a2b" stroke-width="3" stroke-linecap="round" fill="none"/></svg><h3>We text a time</h3><p>Deji or Jide texts you back with a time, worked around classes. Booked before? We text you the night before snow.</p></div>
-        <div class="step reveal" style="animation-delay:.16s"><span class="n">Step 3</span><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M6 34c6-5 11-5 16 0s10 5 16 0" stroke="currentColor" stroke-width="2.5" fill="none"/><path d="M14 22l6 6 12-14" stroke="#ff6a2b" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Cleared, then you pay</h3><p>We clear it and text you a photo of the finished job. Then you pay by Interac e-Transfer or cash.</p></div>
+        <article class="step">
+          <div class="phone" aria-hidden="true">
+            <div class="ph-bar mono">snowway · Book a clear</div>
+            <div class="ph-card"><b>1234 Elphinstone St</b><span class="note">Single driveway · steps</span><span class="note">"Pile snow on the left, not the tulip bed."</span><span class="ph-price mono">$35 per visit</span></div>
+            <div class="ph-btn">Send booking</div>
+          </div>
+          <span class="n">STEP 1</span><h3>Book in a minute</h3>
+          <p>Pick your place and add notes for the crew. Booked before? Next time it's one tap: "Clear me again."</p>
+        </article>
+        <article class="step">
+          <div class="phone" aria-hidden="true">
+            <div class="ph-bar mono">Text · Tue 9:14 PM</div>
+            <p class="bub in"><b>SNOW WAY</b>Snow tonight, about 12 cm. You're on our list. We'll be there by 8:30 am. – Jide</p>
+            <p class="bub out">Perfect, thank you!</p>
+          </div>
+          <span class="n">STEP 2</span><h3>We text before the snow</h3>
+          <p>Deji or Jide texts you a time, worked around classes. Regulars hear from us the night before a big snow.</p>
+        </article>
+        <article class="step">
+          <div class="phone" aria-hidden="true">
+            <div class="ph-bar mono">Text · Wed 8:22 AM</div>
+            <div class="bub in"><b>SNOW WAY</b><span class="snap"></span>All done! $35 by e-Transfer to <span data-etransfer-bubble>our email</span>. Thanks!</div>
+          </div>
+          <span class="n">STEP 3</span><h3>Photo, then you pay</h3>
+          <p>Every clear ends with a photo of the finished job. Then you pay by Interac e-Transfer or cash.</p>
+        </article>
       </div>
-      <div class="why">
-        <div><h3>Same day or next morning</h3><p>We keep our list to about 12 houses so we can always keep that promise, well inside the City's 48 hours.</p></div>
-        <div><h3>Photo when it's done</h3><p>Every clear ends with a photo by text, so you can check the job from work or from Arizona.</p></div>
-        <div><h3>Pay after</h3><p>No deposit, no card on file, no contract. If you're not happy, we come back and fix it.</p></div>
-        <div><h3>Neighbour deals</h3><p>Send a neighbour who books and get $10 off your next clear. Book 3+ houses on one street the same day and everyone gets 10% off.</p></div>
+      <div class="promises">
+        <div><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="11" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M14 8v6.5l4.5 3" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg><h3>Same day or next morning</h3><p>We keep our list to about 12 houses so we can always keep that promise, well inside the City's 48 hours.</p></div>
+        <div><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="7" width="22" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="14" cy="15" r="4" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M10 7l2-3h4l2 3" stroke="currentColor" stroke-width="2.4" fill="none"/></svg><h3>Photo when it's done</h3><p>Check the job from work, or from Arizona. No need to look out the window.</p></div>
+        <div><svg viewBox="0 0 28 28" aria-hidden="true"><rect x="3" y="7" width="22" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M3 12h22" stroke="currentColor" stroke-width="2.4"/><path d="M8 18h5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><h3>Pay after</h3><p>No deposit, no card on file, no contract. If you're not happy, we come back and fix it.</p></div>
+        <div><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M4 14l5-5 5 5v9H4z M14 14l5-5 5 5v9H14z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg><h3>Neighbour deals</h3><p>Send a neighbour who books and get $10 off your next clear. Book 3+ houses on one street the same day and everyone gets 10% off.</p></div>
       </div>
     </div>
   </section>
@@ -417,24 +529,28 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
   <section class="dark-band" id="area">
     <div class="wrap area">
       <div>
-        <div class="sec-head"><p class="eyebrow" style="color:#8fa6c4">Service area</p><h2>Do we come to you?</h2><p>Tap your neighbourhood.</p></div>
+        <div class="sec-head"><p class="eyebrow">Service area</p><h2>Do we come to you?</h2><p>Tap your neighbourhood.</p></div>
         <div class="hoods" id="hoods"></div>
         <p class="hoodmsg" id="hoodmsg" aria-live="polite"></p>
       </div>
       <div class="bylaw">
         <div class="clock">
-          <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="32" fill="none" stroke="#24406b" stroke-width="7"/><circle cx="36" cy="36" r="32" fill="none" stroke="#ff6a2b" stroke-width="7" stroke-dasharray="201" stroke-dashoffset="0" transform="rotate(-90 36 36)"/><text x="36" y="42" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="20" fill="#fff">48h</text></svg>
-          <div><p class="eyebrow" style="color:#8fa6c4">Regina sidewalk rule</p><h3 style="color:#fff;margin-top:4px">Clear within 48 hours</h3></div>
+          <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true"><circle cx="36" cy="36" r="32" fill="none" stroke="#294270" stroke-width="7"/><circle cx="36" cy="36" r="32" fill="none" stroke="#ff5a1f" stroke-width="7" stroke-dasharray="201" stroke-dashoffset="0" transform="rotate(-90 36 36)"/><text x="36" y="42" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="800" font-size="20" fill="#fff">48h</text></svg>
+          <div><p class="eyebrow">Regina sidewalk rule</p><h3 style="color:#fff;margin-top:4px">Clear within 48 hours</h3></div>
         </div>
-        <p>The City of Regina expects you to clear the sidewalk in front of your home <b>within 48 hours</b> of a snowfall. Book us and it's handled.</p>
+        <p>The City of Regina expects you to clear the sidewalk next to your property <b>within 48 hours</b> after snow stops. If it isn't done, the City can clear it and bill you. Book us and it's handled.</p>
         <p>The city plow also leaves a <b>windrow</b>, the heavy ridge across the end of your driveway. We clear that too for $10.</p>
       </div>
     </div>
   </section>
 
   <section id="faq">
-    <div class="wrap">
-      <div class="sec-head"><p class="eyebrow">Questions</p><h2>Things neighbours ask</h2></div>
+    <div class="wrap faq-grid">
+      <div class="faq-side">
+        <p class="eyebrow">Questions</p>
+        <h2 class="h2-sm">Things neighbours ask</h2>
+        <p>Something else? Text us and Deji or Jide will answer.</p>
+      </div>
       <div class="faq">
         <details><summary>How fast can you come?</summary><p>Same day or the next morning. We keep our list to about 12 houses so we can keep that promise around classes. If we're full, we'll tell you and put you on the waitlist. The crew status at the top of the page shows whether we're taking jobs today.</p></details>
         <details><summary>Do I need to sign up for a plan?</summary><p>No. Every clear is a one-time visit. Book when you need us, and skip it when you don't.</p></details>
@@ -459,26 +575,28 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
       <div class="book-grid">
         <form class="panel" id="book-form" novalidate>
           <div class="form">
-            <div class="full"><p class="eyebrow" style="margin-bottom:8px">Your place</p><div class="seg" id="b-size"></div></div>
-            <div class="full"><p class="eyebrow" style="margin-bottom:8px">Extras at your place</p><div class="toggles" id="b-addons"></div></div>
-            <div class="full"><p class="eyebrow" style="margin-bottom:8px">This snowfall</p><div class="toggles" id="b-visit"></div></div>
+            <div class="full fsec"><p class="eyebrow">Your place</p><div class="sizes" id="b-size"></div></div>
+            <div class="full fsec"><p class="eyebrow">This snowfall</p><div class="chips" id="b-visit"></div></div>
+            <div class="full fsec"><p class="eyebrow">Extras at your place</p><div class="chips" id="b-addons"></div><div class="chips"><button type="button" class="chip" id="b-senior" aria-pressed="false"><i>✓</i>Senior or living with a disability<span class="mono">−10%</span></button></div></div>
             <label for="b-name">Your name<input id="b-name" name="name" autocomplete="name" required placeholder="Pat Morin"></label>
             <label for="b-phone">Mobile number <small>we text you here</small><input id="b-phone" name="phone" type="tel" autocomplete="tel" required placeholder="306-555-0142"></label>
             <label class="full" for="b-address">Street address<input id="b-address" name="address" autocomplete="street-address" required placeholder="1234 Elphinstone St"></label>
             <label for="b-hood">Neighbourhood<select id="b-hood" name="hood"></select></label>
             <label for="b-when">When works?<select id="b-when" name="when"><option>As soon as you can</option><option>Today</option><option>Tomorrow morning</option><option>Tomorrow after 3 pm</option><option>Next time it snows</option></select></label>
-            <div class="full toggles"><button type="button" id="b-senior" aria-pressed="false">Senior or living with a disability · 10% off</button></div>
             <label class="full" for="b-notes">Notes for the crew <small>where to pile snow, things to avoid, gate code</small><textarea id="b-notes" name="notes" placeholder="Pile snow on the left side, not on the tulip bed. Dog in the backyard."></textarea></label>
-            <label class="full" for="b-ref">Who sent you? <small>optional</small><input id="b-ref" name="ref" placeholder="A neighbour, a flyer, Facebook…"></label>
+            <label class="full" for="b-ref">Who sent you? <small>optional · they get $10 off</small><input id="b-ref" name="ref" placeholder="A neighbour, a flyer, Facebook…"></label>
           </div>
-          <div class="total" style="margin-top:20px">
-            <div><small id="q-label">Single driveway</small><b id="q-total">$30</b><small>No GST · pay after</small></div>
-            <button class="btn-vest" type="submit" id="b-submit">Send booking</button>
-          </div>
+          <div class="row" style="margin-top:20px;justify-content:flex-end"><button class="btn-vest" type="submit" id="b-submit">Send booking</button></div>
           <p class="note" id="b-error" role="alert" style="color:var(--bad);margin-top:10px" hidden></p>
         </form>
         <div class="side">
-          <div class="panel"><h3>What happens next</h3><ol class="note" style="padding-left:18px;margin:10px 0 0;display:flex;flex-direction:column;gap:6px"><li>Deji and Jide get your booking instantly.</li><li>We text you a time and confirm the price.</li><li>We clear it and text you a photo.</li><li>You pay by e-Transfer or cash.</li></ol></div>
+          <div class="ticket" style="--cut:var(--bk-cut,180px)" id="bk-ticket">
+            <div class="tk-head"><span class="tk-brand">SNOW WAY</span><span class="mono">Your quote</span></div>
+            <ul class="tk-lines" id="bk-lines"></ul>
+            <div class="tk-cut"></div>
+            <div class="tk-total"><div><small>Total per visit</small><b id="bk-total">$30</b><small id="bk-note">No GST · pay after</small></div></div>
+          </div>
+          <div class="panel"><h3>What happens next</h3><ol class="note" style="padding-left:18px;margin:10px 0 0;display:flex;flex-direction:column;gap:6px"><li>Deji and Jide get your booking right away.</li><li>We text you a time and confirm the price.</li><li>We clear it and text you a photo.</li><li>You pay by e-Transfer or cash.</li></ol></div>
           <div class="panel" id="side-status"><h3>Crew status</h3><p class="note" id="side-status-text" style="margin-top:8px">We'll reply with the soonest time we can make.</p></div>
         </div>
       </div>
@@ -496,34 +614,30 @@ td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:n
 <footer><div class="wrap"><span><b data-brand style="color:#fff">Snow Way</b> · Regina, Saskatchewan · Deji and Jide<span id="foot-phone"></span></span><span><a href="#faq" data-jump="faq">FAQ</a> · <a href="#area" data-jump="area">Service area</a> · No GST charged</span></div></footer>
 <div class="toast" id="toast" role="status" hidden></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* ===== Business settings: change these and republish ===== */
 const BRAND = "Snow Way";
 const PRICES = { single:30, double:40, triple:60, walk:15 };   // per visit: driveway + front walk + city sidewalk. Triple is "from", confirmed on sight.
 // kind "place": extras at the house, saved with the customer. kind "visit": depends on this snowfall, never saved.
 const ADDONS = [
-  { id:"corner",  label:"Corner lot",          price:10, kind:"place" },
-  { id:"steps",   label:"Steps",               price:5,  kind:"place" },
-  { id:"back",    label:"Back walk or deck",   price:5,  kind:"place" },
-  { id:"car",     label:"Brush off car",       price:5,  kind:"place" },
-  { id:"melt",    label:"Ice melt",            price:5,  kind:"place" },
+  { id:"corner",  label:"Corner lot",            price:10, kind:"place" },
+  { id:"steps",   label:"Steps",                 price:5,  kind:"place" },
+  { id:"back",    label:"Back walk or deck",     price:5,  kind:"place" },
+  { id:"car",     label:"Brush off car",         price:5,  kind:"place" },
+  { id:"melt",    label:"Ice melt",              price:5,  kind:"place" },
   { id:"heavy",   label:"Heavy snow, over 15 cm", price:10, kind:"visit" },
-  { id:"windrow", label:"City plow ridge",     price:10, kind:"visit" },
+  { id:"windrow", label:"City plow ridge",       price:10, kind:"visit" },
 ];
-const addonOf=id=>ADDONS.find(a=>a.id===id);
-const addonKind=id=>addonOf(id)?.kind||"place";
-const addonLabel=id=>addonOf(id)?.label||id;
+const HEAVY_CM = 15;
 const SENIOR_DISCOUNT = 0.10;
-const MARKET = [ {who:"Dave's Property Care", val:"$30 – $40"}, {who:"Kijiji Regina crews", val:"$50 +"}, {who:"Weed Pro Regina", val:"plans only"} ];
+const MARKET = [ {who:"Dave's Property Care", lo:30, hi:40, note:"$30 – $40"}, {who:"Kijiji Regina crews", lo:50, hi:60, open:true, note:"$50 and up"} ];
 const SIZES = {
-  single:{ label:"Single driveway", sub:"1 car wide, plus walks" },
-  double:{ label:"Double driveway", sub:"2 cars wide, plus walks" },
-  triple:{ label:"Triple or long",  sub:"we confirm on sight", from:true },
-  walk:  { label:"Sidewalk only",   sub:"front walk + city sidewalk" },
+  single:{ label:"Single driveway", sub:"1 car wide, plus walks", lanes:1 },
+  double:{ label:"Double driveway", sub:"2 cars wide, plus walks", lanes:2 },
+  triple:{ label:"Triple or long",  sub:"confirmed on sight", lanes:3, from:true },
+  walk:  { label:"Sidewalk only",   sub:"front walk + city sidewalk", lanes:0 },
 };
-const basePrice=size=>size in PRICES?PRICES[size]:size==="corner"?PRICES.single+10:PRICES.single;   // "corner" was a size on the old site
-const sizeLabel=size=>SIZES[size]?.label||(size==="corner"?"Corner lot":"");
-const plusFor=size=>SIZES[size]?.from?"+":"";
 const HOODS = ["Harbour Landing","Lakeview","Cathedral","Hillsdale","Whitmore Park","Albert Park","University Park","Wascana View","The Creeks","Greens on Gardiner","Arcola East","Glencairn","Uplands","Normanview","Walsh Acres","Lakewood","Rosemont","Coronation Park","Hawkstone","Kensington Greens"];
 const CREW = ["Deji","Jide"];
 const STATUS_LABEL = { new:"New", scheduled:"Scheduled", ontheway:"On the way", done:"Done", cancelled:"Cancelled" };
@@ -534,22 +648,54 @@ const SEASON_START = "2026-11-01";
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money=n=>"$"+(Math.round(n*100)/100).toLocaleString("en-CA",{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+const money2=n=>"$"+(Math.round(n*100)/100).toFixed(2);
 const rid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
 const ago=iso=>{const m=Math.round((Date.now()-new Date(iso))/6e4); if(m<1)return"just now"; if(m<60)return m+" min ago"; const h=Math.round(m/60); if(h<24)return h+" h ago"; return new Date(iso).toLocaleDateString("en-CA",{month:"short",day:"numeric"});};
 const when=iso=>new Date(iso).toLocaleString("en-CA",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
 function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200);}
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const addonOf=id=>ADDONS.find(a=>a.id===id);
+const addonKind=id=>addonOf(id)?.kind||"place";
+const addonLabel=id=>addonOf(id)?.label||id;
+const basePrice=size=>size in PRICES?PRICES[size]:size==="corner"?PRICES.single+10:PRICES.single;   // "corner" was a size on the old site
+const sizeLabel=size=>SIZES[size]?.label||(size==="corner"?"Corner lot":"");
+const plusFor=size=>SIZES[size]?.from?"+":"";
 
 function quote(size,addons=[],senior=false){
   let t=basePrice(size)+addons.reduce((s,id)=>s+(addonOf(id)?.price||0),0);
   if(senior) t*=1-SENIOR_DISCOUNT;
   return Math.round(t*100)/100;
 }
+function lineItems(st){
+  const items=[{label:st.size==="walk"?"Front walk + city sidewalk":sizeLabel(st.size)+", front walk, city sidewalk",amt:basePrice(st.size),from:!!SIZES[st.size]?.from}];
+  ADDONS.forEach(a=>{ if(st.addons.includes(a.id)) items.push({label:a.id==="heavy"&&st.depth?`Heavy snow, ${st.depth} cm`:a.label,amt:a.price}); });
+  const sub=items.reduce((s,i)=>s+i.amt,0), disc=st.senior?Math.round(sub*SENIOR_DISCOUNT*100)/100:0;
+  return {items,disc,total:Math.round((sub-disc)*100)/100,plus:plusFor(st.size)};
+}
+function paintTicket(prefix,st){
+  const L=lineItems(st);
+  $(`#${prefix}-lines`).innerHTML=L.items.map(i=>`<li><span>${esc(i.label)}${i.from?" <em>from</em>":""}</span><b class="mono">${i===L.items[0]?"":"+"}${money2(i.amt)}</b></li>`).join("")+(L.disc?`<li class="disc"><span>Senior or disability, 10% off</span><b class="mono">−${money2(L.disc)}</b></li>`:"");
+  tween($(`#${prefix}-total`),L.total,L.plus);
+  const n=$(`#${prefix}-note`); if(n) n.textContent=L.plus?"Confirmed on sight · No GST · pay after":"No GST · pay after by e-Transfer or cash";
+  cutAll();
+}
+// line the ticket's punched notches up with its dashed tear line
+function cutAll(){ $$(".ticket").forEach(tk=>{ const c=tk.querySelector(".tk-cut"); if(c&&c.offsetParent) tk.style.setProperty("--cut",c.offsetTop+"px"); }); }
+function tween(el,to,suffix=""){
+  const from=parseFloat((el.textContent||"0").replace(/[^0-9.]/g,""))||0;
+  cancelAnimationFrame(el._raf);
+  if(reduce||from===to){el.textContent=money(to)+suffix;return;}
+  const t0=performance.now(), dur=380;
+  const step=now=>{const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=money(Math.round((from+(to-from)*e)*100)/100)+(k<1?"":suffix); if(k<1) el._raf=requestAnimationFrame(step);};
+  el._raf=requestAnimationFrame(step);
+}
 
 /* ===== state ===== */
 const S={ mode:"loading", db:null, uid:null, canEdit:false, me:null, customers:[], ops:{expenses:[]}, status:null, contact:null,
   seen:new Set(), seenInit:false, sound:false, ownerTab:"queue", depth:"normal", ridge:false, againNote:"",
-  pb:{size:"single",addons:[],senior:false}, bk:{size:"single",addons:[],senior:false} };
+  pb:{size:"single",addons:[],senior:false,depth:12}, bk:{size:"single",addons:[],senior:false} };
+const pbAddons=()=>[...S.pb.addons.filter(id=>id!=="heavy"), ...(S.pb.depth>HEAVY_CM?["heavy"]:[])];
+const pbState=()=>({size:S.pb.size,addons:pbAddons(),senior:S.pb.senior,depth:S.pb.depth});
 
 /* ===== example data for preview ===== */
 function demoData(){
@@ -569,48 +715,37 @@ function demoData(){
 /* ===== static rendering ===== */
 function paintPrices(){
   $$("[data-price]").forEach(el=>el.textContent=money(PRICES[el.dataset.price]));
-  $$("[data-price-num]").forEach(el=>el.textContent=PRICES[el.dataset.priceNum]);
   $$("[data-brand]").forEach(el=>el.textContent=BRAND);
 }
-function segHTML(state){ return Object.entries(SIZES).map(([k,v])=>`<button type="button" data-sz="${k}" aria-pressed="${state.size===k}">${v.label}<small>${v.sub}</small><span class="p">${money(PRICES[k])}${plusFor(k)}</span></button>`).join(""); }
-function addonHTML(state,kind){ return ADDONS.filter(a=>a.kind===kind).map(a=>`<button type="button" data-ad="${a.id}" aria-pressed="${state.addons.includes(a.id)}">${a.label} +${money(a.price)}</button>`).join(""); }
-function totalLabel(s){
-  const n=s.addons.length, plus=plusFor(s.size);
-  return sizeLabel(s.size)+(n?" + "+n+" extra"+(n>1?"s":""):"")+(plus?", confirmed on sight":", one visit");
+function sizeIcon(k){
+  const n=SIZES[k].lanes, lane=n?Math.min(14,40/n):0, x0=26-(lane*n)/2;
+  let lanes=""; for(let i=0;i<n;i++) lanes+=`<rect x="${x0+i*lane+.8}" y="4" width="${lane-1.6}" height="16" rx="1.5" fill="currentColor" opacity=".9"/>`;
+  return `<svg viewBox="0 0 52 30" aria-hidden="true"><rect x="0" y="22" width="52" height="5" rx="1" fill="#ff5a1f"/>${n?`<rect x="${x0-1}" y="3" width="${lane*n+2}" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".4"/>`:""}${lanes}${n?"":`<rect x="20" y="4" width="5" height="18" rx="1" fill="#ff5a1f"/>`}</svg>`;
 }
+function sizeCards(st){ return Object.entries(SIZES).map(([k,v])=>`<button type="button" class="sz" data-sz="${k}" aria-pressed="${st.size===k}">${sizeIcon(k)}<span class="sz-t">${v.label}</span><span class="sz-s">${v.sub}</span><span class="sz-p mono">${money(PRICES[k])}${plusFor(k)}</span></button>`).join(""); }
+function addonHTML(state,kind){ return ADDONS.filter(a=>a.kind===kind).map(a=>`<button type="button" class="chip" data-ad="${a.id}" aria-pressed="${state.addons.includes(a.id)}"><i>✓</i>${a.label}<span class="mono">+${money(a.price)}</span></button>`).join(""); }
+
+let scene=null;
 function renderBuilder(){
-  const s=S.pb;
-  $("#seg-size").innerHTML=segHTML(s); $("#tg-addons").innerHTML=addonHTML(s,"place"); $("#tg-visit").innerHTML=addonHTML(s,"visit");
-  $("#tg-senior").setAttribute("aria-pressed",s.senior);
-  $("#t-label").textContent=totalLabel(s);
-  tween($("#t-total"),quote(s.size,s.addons,s.senior),plusFor(s.size));
-  $("#scene-tag").textContent=sizeLabel(s.size)+(s.addons.includes("heavy")?" · heavy snow":"");
-  paintScene(s);
+  $("#pb-size").innerHTML=sizeCards(S.pb);
+  $("#pb-extras").innerHTML=addonHTML(S.pb,"place");
+  $("#pb-ridge").setAttribute("aria-pressed",S.pb.addons.includes("windrow"));
+  $("#pb-senior").setAttribute("aria-pressed",S.pb.senior);
+  paintDepth(); paintTicket("pb",pbState()); scene?.update(pbState());
 }
-function paintScene(s){
-  const show=(id,on)=>{const e=document.getElementById(id); if(e) e.style.opacity=on?1:0;};
-  const hit=(id,on)=>{const e=document.getElementById(id); if(!e)return; e.classList.toggle("hit",on); e.style.fill=on?"#ffffff":"#dfe8f2";};
-  const drive=s.size!=="walk", dbl=s.size==="double"||s.size==="triple", corner=s.addons.includes("corner");
-  show("p-drive",true); show("p-drive2",dbl); show("g-garage2",dbl);
-  hit("p-drive",drive); hit("p-drive2",dbl&&drive);
-  hit("p-walk",true); hit("p-steps",s.addons.includes("steps")); hit("p-sidewalk",true);
-  show("p-sidewalk-side",corner); hit("p-sidewalk-side",corner);
-  show("p-windrow",true); const w=$("#p-windrow"); w.classList.toggle("hit",s.addons.includes("windrow"));
-  w.style.opacity=s.addons.includes("windrow")?1:.55;
-  show("p-back",s.addons.includes("back")); hit("p-back",s.addons.includes("back")); show("t-back",s.addons.includes("back"));
-  show("p-melt",s.addons.includes("melt")); show("p-car",s.addons.includes("car")||true);
-  const car=$("#p-car"); car.querySelector("path").style.opacity=s.addons.includes("car")?0:1; car.classList.toggle("hit",false);
-}
-function tween(el,to,suffix=""){
-  const from=parseFloat((el.textContent||"0").replace(/[^0-9.]/g,""))||0;
-  cancelAnimationFrame(el._raf);
-  if(reduce||from===to){el.textContent=money(to)+suffix;return;}
-  const t0=performance.now(), dur=380;
-  const step=now=>{const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3); el.textContent=money(Math.round((from+(to-from)*e)*100)/100)+(k<1?"":suffix); if(k<1) el._raf=requestAnimationFrame(step);};
-  el._raf=requestAnimationFrame(step);
+function paintDepth(){
+  const d=S.pb.depth, el=$("#pb-depth");
+  if(+el.value!==d) el.value=d;
+  el.style.setProperty("--fill",((d-2)/38*100)+"%");
+  $("#pb-depth-val").textContent=`${d} cm`;
+  const word=d<5?"Light":d<=HEAVY_CM?"Normal":d<=30?"Heavy":"Very heavy";
+  const w=$("#pb-depth-word"); w.textContent=word+(d>HEAVY_CM?" · +$10":" · included"); w.classList.toggle("over",d>HEAVY_CM);
 }
 function renderCompare(){
-  $("#compare").innerHTML=`<div class="cmp us"><span>${esc(BRAND)}</span><b>${money(PRICES.single)}</b><span>single, per visit, no GST</span></div>`+MARKET.map(m=>`<div class="cmp"><span>${esc(m.who)}</span><b>${esc(m.val)}</b><span>single, per visit</span></div>`).join("");
+  const max=60, pct=v=>Math.min(100,v/max*100);
+  const rows=[{who:BRAND,lo:PRICES.single,hi:PRICES.single,us:true,note:money(PRICES.single)},...MARKET];
+  $("#compare").innerHTML=rows.map(r=>`<div class="cmp-row${r.us?" us":""}"><span class="cmp-who">${esc(r.who)}</span><div class="cmp-track">${r.lo===r.hi?`<i class="cmp-dot" style="left:${pct(r.lo)}%"></i>`:`<i class="cmp-bar${r.open?" open":""}" style="left:${pct(r.lo)}%;width:${pct(r.hi)-pct(r.lo)}%"></i>`}</div><span class="cmp-val mono">${esc(r.note)}</span></div>`).join("")
+    +`<div class="cmp-axis"><span></span><div>${[0,20,40,60].map(v=>`<span style="left:${pct(v)}%">$${v}</span>`).join("")}</div><span class="mono note" style="font-size:11px;text-align:right">single, per visit</span></div>`;
 }
 function renderHoods(sel){
   $("#hoods").innerHTML=HOODS.map(h=>`<button type="button" data-hood="${esc(h)}" aria-pressed="${sel===h}">${esc(h)}</button>`).join("")+`<button type="button" data-hood="__other" aria-pressed="${sel==="__other"}">Somewhere else</button>`;
@@ -618,9 +753,8 @@ function renderHoods(sel){
 
 /* ===== booking ===== */
 function renderBookOpts(){
-  const s=S.bk; $("#b-size").innerHTML=segHTML(s); $("#b-addons").innerHTML=addonHTML(s,"place"); $("#b-visit").innerHTML=addonHTML(s,"visit"); $("#b-senior").setAttribute("aria-pressed",s.senior);
-  tween($("#q-total"),quote(s.size,s.addons,s.senior),plusFor(s.size));
-  $("#q-label").textContent=sizeLabel(s.size)+(s.addons.length?" + "+s.addons.map(id=>addonLabel(id).toLowerCase()).join(", "):"")+(plusFor(s.size)?", confirmed on sight":"");
+  const s=S.bk; $("#b-size").innerHTML=sizeCards(s); $("#b-addons").innerHTML=addonHTML(s,"place"); $("#b-visit").innerHTML=addonHTML(s,"visit"); $("#b-senior").setAttribute("aria-pressed",s.senior);
+  paintTicket("bk",{...s,depth:0});
 }
 function fillMe(){
   if(!S.me) return; const f=$("#book-form");
@@ -700,7 +834,7 @@ let actx=null;
 function beep(){ try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)(); const t=actx.currentTime;
   [880,1175,880].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=f;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.0001,t+i*.18);g.gain.exponentialRampToValueAtTime(.25,t+i*.18+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.18+.16);o.start(t+i*.18);o.stop(t+i*.18+.17);}); }catch(e){} }
 
-/* ===== status pill ===== */
+/* ===== status + contact ===== */
 function renderStatus(){
   const st=S.status, pill=$("#status-pill");
   if(!st||!AVAIL[st.state]){ pill.hidden=true; $("#side-status-text").textContent="We'll reply with the soonest time we can make."; return; }
@@ -708,8 +842,18 @@ function renderStatus(){
   $("#status-text").textContent=AVAIL[st.state]+(st.message?" · "+st.message:"");
   $("#side-status-text").textContent=AVAIL[st.state]+(st.message?". "+st.message:"")+".";
 }
+function renderContact(){
+  const ph=S.contact?.phone||"", em=S.contact?.etransfer||"";
+  $("#textus").hidden=!ph; $("#textus-num").textContent=ph;
+  $("#foot-phone").textContent=ph?" · Text "+ph:"";
+  $$("[data-etransfer-faq]").forEach(el=>el.textContent=em?" to "+em:"");
+  $$("[data-etransfer-bubble]").forEach(el=>el.textContent=em||"our email");
+}
 
 /* ===== my requests ===== */
+function againAddons(me){
+  return [...(me.addons||[]).filter(id=>addonKind(id)==="place"), ...(S.depth==="heavy"?["heavy"]:[]), ...(S.ridge?["windrow"]:[])];
+}
 function renderRequests(){
   const root=$("#req-root");
   if(S.mode==="loading"){root.innerHTML=`<div class="empty">Loading…</div>`;return;}
@@ -726,7 +870,7 @@ function renderRequests(){
     <div class="sec-head"><p class="eyebrow">My requests</p><h2>Hi ${esc((me.name||"").split(" ")[0]||"there")}</h2><p>${esc(me.address)} · ${esc(sizeLabel(me.size))}${placeAddons.length?" + "+esc(placeAddons.map(id=>addonLabel(id).toLowerCase()).join(", ")):""}</p></div>
     <div class="two">
       <div class="again">
-        <p class="eyebrow" style="color:#8fa6c4">Same place, same notes</p>
+        <p class="eyebrow" style="color:#8ea6c6">Same place, same notes</p>
         <h3 style="font-size:28px;color:#fff">Snowed again?</h3>
         <div class="depth" role="group" aria-label="How much snow">${depths.map(([k,l])=>`<button type="button" data-depth="${k}" aria-pressed="${S.depth===k}">${l}</button>`).join("")}</div>
         <div class="depth"><button type="button" id="again-ridge" aria-pressed="${S.ridge}">City plow left a ridge · +$10</button></div>
@@ -744,9 +888,6 @@ function renderRequests(){
         <a class="btn btn-quiet btn-sm" href="#book">Change address or details</a>
       </div>
     </div>`;
-}
-function againAddons(me){
-  return [...(me.addons||[]).filter(id=>addonKind(id)==="place"), ...(S.depth==="heavy"?["heavy"]:[]), ...(S.ridge?["windrow"]:[])];
 }
 async function clearAgain(){
   const me=structuredClone(S.me), now=new Date().toISOString(), addons=againAddons(me);
@@ -811,7 +952,7 @@ function renderOwner(){
     </div>
     <div class="panel" style="margin-top:16px"><h3 style="margin-bottom:12px">Expenses</h3>
       <div class="tablewrap" style="border:0"><table><thead><tr><th>Date</th><th>What</th><th>Amount</th><th></th></tr></thead><tbody>${(S.ops.expenses||[]).length?S.ops.expenses.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<tr><td class="num">${new Date(e.date).toLocaleDateString("en-CA",{month:"short",day:"numeric"})}</td><td>${esc(e.label)}</td><td class="num">${money(+e.amount)}</td><td><button class="btn-quiet btn-sm" data-delexp="${e.id}" aria-label="Remove expense">✕</button></td></tr>`).join(""):`<tr><td colspan="4" class="note">No expenses yet. Add shovels, ice melt, gas and phone costs here.</td></tr>`}</tbody></table></div>
-      <form id="add-exp" class="row" style="margin-top:12px"><input id="ex-label" placeholder="Ice melt 20 kg" style="flex:2;min-width:160px" required><input id="ex-amt" type="number" step="0.01" min="0" placeholder="24.99" style="flex:1;min-width:100px" required><button class="btn-vest btn-sm" type="submit">Add expense</button></form>
+      <form id="add-exp" class="row" style="margin-top:12px"><input id="ex-label" placeholder="Ice melt 10 kg" style="flex:2;min-width:160px" required><input id="ex-amt" type="number" step="0.01" min="0" placeholder="17.99" style="flex:1;min-width:100px" required><button class="btn-vest btn-sm" type="submit">Add expense</button></form>
     </div>`;
   }
   if(S.ownerTab==="details"){
@@ -849,12 +990,6 @@ function renderOwner(){
 function findReq(key){const [cid,rq]=key.split("|");const c=S.customers.find(x=>x.id===cid);if(!c)return{};const copy=structuredClone(c);return{copy,r:(copy.requests||[]).find(x=>x.id===rq)};}
 async function ownerUpdate(key,fn,msg){const{copy,r}=findReq(key);if(!r)return;fn(r,copy);copy.updatedAt=new Date().toISOString();try{await saveCustomer(copy);if(msg)toast(msg);}catch(ex){toast("That didn't save. Try again.");}}
 
-function renderContact(){
-  const ph=S.contact?.phone||"", em=S.contact?.etransfer||"";
-  $("#textus").hidden=!ph; $("#textus-num").textContent=ph;
-  $("#foot-phone").textContent=ph?" · Text "+ph:"";
-  $$("[data-etransfer-faq]").forEach(el=>el.textContent=em?" to "+em:"");
-}
 function renderAll(){
   renderStatus(); renderContact();
   $("#nav-owner").hidden=S.mode==="live"&&!S.canEdit;
@@ -877,19 +1012,30 @@ function route(){
   if(v==="requests") renderRequests();
   if(v==="owner") renderOwner();
   if(v==="book") renderBookOpts();
+  scene?.setActive(v==="home"); requestAnimationFrame(cutAll);
   if(v==="home"&&h&&h!=="home"){const t=document.getElementById(h); if(t) requestAnimationFrame(()=>t.scrollIntoView({block:"start"}));}
   else window.scrollTo(0,0);
 }
 
 /* ===== events ===== */
+function zoneTap(z){
+  const s=S.pb;
+  if(z==="driveway"){ s.size=s.size==="walk"?"single":"walk"; toast(s.size==="walk"?"Switched to sidewalk only":"Driveway added"); }
+  else if(z==="walk"||z==="sidewalk"){ toast(z==="walk"?"The front walk comes with every clear.":"The city sidewalk comes with every clear."); return; }
+  else { s.addons=s.addons.includes(z)?s.addons.filter(x=>x!==z):[...s.addons,z]; }
+  renderBuilder();
+}
 document.addEventListener("click",async e=>{
   const t=e.target.closest("button,a"); if(!t) return;
   const inBook=!!t.closest("#book-form");
-  if(t.dataset.sz){ const s=inBook?S.bk:S.pb; s.size=t.dataset.sz; inBook?renderBookOpts():renderBuilder(); }
-  if(t.dataset.ad){ const s=inBook?S.bk:S.pb; const id=t.dataset.ad; s.addons=s.addons.includes(id)?s.addons.filter(x=>x!==id):[...s.addons,id]; inBook?renderBookOpts():renderBuilder(); }
-  if(t.id==="tg-senior"){ S.pb.senior=!S.pb.senior; renderBuilder(); }
+  if(t.dataset.zone){ zoneTap(t.dataset.zone); return; }
+  if(t.dataset.sz){ if(inBook){S.bk.size=t.dataset.sz;renderBookOpts();} else {S.pb.size=t.dataset.sz;renderBuilder();} }
+  if(t.dataset.ad){ const s=inBook?S.bk:S.pb, id=t.dataset.ad; s.addons=s.addons.includes(id)?s.addons.filter(x=>x!==id):[...s.addons,id]; inBook?renderBookOpts():renderBuilder(); }
+  if(t.id==="pb-ridge"){ const s=S.pb; s.addons=s.addons.includes("windrow")?s.addons.filter(x=>x!=="windrow"):[...s.addons,"windrow"]; renderBuilder(); }
+  if(t.id==="pb-senior"){ S.pb.senior=!S.pb.senior; renderBuilder(); }
   if(t.id==="b-senior"){ S.bk.senior=!S.bk.senior; renderBookOpts(); }
-  if(t.id==="t-book"){ S.bk=structuredClone(S.pb); }
+  if(t.id==="pb-book"){ S.bk={size:S.pb.size,addons:pbAddons(),senior:S.pb.senior}; }
+  if(t.id==="cam-reset"){ scene?.resetView(); }
   if(t.dataset.hood){ const h=t.dataset.hood; renderHoods(h); $("#hoodmsg").textContent=h==="__other"?"Book anyway. If we can get there in about 20 minutes, we'll take it and tell you when.":`Yes, we clear driveways in ${h}. Book a clear and we'll text you a time.`; if(h!=="__other") $("#b-hood").value=h; }
   if(t.dataset.depth){ S.depth=t.dataset.depth; renderRequests(); }
   if(t.id==="again-ridge"){ S.ridge=!S.ridge; renderRequests(); }
@@ -904,7 +1050,10 @@ document.addEventListener("click",async e=>{
   if(t.id==="sound-btn"||t.id==="sound-quick"){ if(S.sound&&t.id==="sound-btn") beep(); else { S.sound=!S.sound; if(S.sound) beep(); renderOwner(); } }
   if(t.dataset.jump&&currentView()==="home"){ e.preventDefault(); document.getElementById(t.dataset.jump)?.scrollIntoView({behavior:reduce?"auto":"smooth"}); }
 });
-document.addEventListener("input",e=>{ if(e.target.id==="again-note") S.againNote=e.target.value; });
+document.addEventListener("input",e=>{
+  if(e.target.id==="again-note") S.againNote=e.target.value;
+  if(e.target.id==="pb-depth"){ S.pb.depth=+e.target.value; paintDepth(); paintTicket("pb",pbState()); scene?.update(pbState()); }
+});
 document.addEventListener("change",async e=>{
   if(e.target.dataset.assign){ const v=e.target.value; await ownerUpdate(e.target.dataset.assign,r=>{r.assignee=v; if(r.status==="new"&&v) r.status="scheduled";}, v?`Assigned to ${v}`:null); }
 });
@@ -920,11 +1069,308 @@ document.addEventListener("submit",async e=>{
 });
 window.addEventListener("hashchange",route);
 
-/* ===== shovel-the-snow hero ===== */
+/* ===== 3D lot: a Regina bungalow you can clear ===== */
+function makeDiorama(stage){
+  const T=window.THREE; if(!T) return null;
+  let R; try{ R=new T.WebGLRenderer({antialias:true,alpha:true}); }catch(e){ return null; }
+  if(!R||!R.getContext()) return null;
+  const glWrap=stage.querySelector(".gl"), tagsEl=stage.querySelector(".tags");
+  const small=matchMedia("(max-width:700px)").matches;
+  R.setPixelRatio(Math.min(2,devicePixelRatio||1));
+  R.outputEncoding=T.sRGBEncoding; R.toneMapping=T.ACESFilmicToneMapping; R.toneMappingExposure=0.95;
+  R.shadowMap.enabled=true; R.shadowMap.type=T.PCFSoftShadowMap;
+  glWrap.appendChild(R.domElement);
+  const scene3=new T.Scene(); scene3.fog=new T.Fog(0xdde2ea,62,150);
+  const cam=new T.PerspectiveCamera(32,1,0.5,240);
+  scene3.add(new T.HemisphereLight(0xbfd2f2,0x8d9bb3,0.55));   // cool sky fill, blue-grey shade on the snow
+  // low morning sun from the east and a little behind the house, so long shadows fall toward the street
+  const sun=new T.DirectionalLight(0xffd2a1,2.1); sun.position.set(20,17,-5); sun.castShadow=true;
+  const SM=small?1024:2048; sun.shadow.mapSize.set(SM,SM);
+  Object.assign(sun.shadow.camera,{left:-28,right:28,top:24,bottom:-24,near:1,far:90}); sun.shadow.camera.updateProjectionMatrix();
+  sun.shadow.bias=-0.0005; sun.shadow.normalBias=0.03; sun.target.position.set(-1,0,-1); scene3.add(sun,sun.target);
+
+  const M=(c,o={})=>new T.MeshStandardMaterial({color:c,roughness:o.r??0.85,metalness:o.m??0,emissive:o.e??0x000000,emissiveIntensity:o.ei??1});
+  const mat={ snow:M(0xeef3f9,{r:0.93}), asphalt:M(0x2b2f36,{r:0.96}), road:M(0x434a55,{r:0.86}), concrete:M(0xa7adb6,{r:0.9}), siding:M(0x6f87a0,{r:0.8}), siding2:M(0xb9a483,{r:0.85}), siding3:M(0x86937a,{r:0.85}),
+    trim:M(0xf2f4f7,{r:0.6}), roof:M(0x3a414e,{r:0.9}), door:M(0x1e3a5f,{r:0.55}), gdoor:M(0xe2e6eb,{r:0.7}), groove:M(0xb8c0ca,{r:0.8}), glass:M(0x2a3a4c,{r:0.25,m:0.3,e:0xffc56e,ei:0.6}),
+    brick:M(0x7a4b3a,{r:0.9}), wood:M(0x7d5f43,{r:0.85}), trunk:M(0x4a3b30,{r:0.95}), spruce:M(0x1f3d30,{r:0.9}), car:M(0xb8321a,{r:0.32,m:0.45}), carGlass:M(0x16212d,{r:0.12,m:0.7}),
+    tire:M(0x15191e,{r:0.9}), head:M(0xfff3d6,{e:0xfff0c8,ei:1.2}), tail:M(0x7a0f0f,{e:0xff2a2a,ei:0.6}), lamp:M(0xffe2a8,{e:0xffd38a,ei:1.6}), pole:M(0x56606e,{r:0.55,m:0.5}) };
+  const n2=(x,z)=>Math.sin(x*1.7+z*0.6)*0.5+Math.sin(x*0.43-z*1.9+1.3)*0.35+Math.sin(x*3.9+z*3.1+2.1)*0.15;
+  const sstep=k=>k<=0?0:k>=1?1:k*k*(3-2*k);
+
+  // snow-covered ground as one heightfield, so cleared paths cut real walls into the snow
+  const GW=66,GD=54,GX=-2,GZ=-8, SX=Math.round(GW/(small?0.36:0.3)), SZ=Math.round(GD/(small?0.36:0.3));
+  const gGeo=new T.PlaneGeometry(GW,GD,SX,SZ); gGeo.rotateX(-Math.PI/2); gGeo.translate(GX,0,GZ);
+  const gp=gGeo.attributes.position, NV=gp.count, gx=new Float32Array(NV), gz=new Float32Array(NV), gn=new Float32Array(NV);
+  for(let i=0;i<NV;i++){gx[i]=gp.getX(i);gz[i]=gp.getZ(i);gn[i]=n2(gx[i]*0.9,gz[i]*0.9);}
+  const ground=new T.Mesh(gGeo,mat.snow); ground.receiveShadow=true; scene3.add(ground);
+
+  function lumpGeo(w,d,seed=0,soft=0.16){
+    const sx=Math.max(2,Math.round(w/0.14)), sz=Math.max(2,Math.round(d/0.14));
+    const g=new T.BoxGeometry(w,1,d,sx,1,sz), p=g.attributes.position;
+    for(let i=0;i<p.count;i++){ if(p.getY(i)<0){p.setY(i,0);continue;} const x=p.getX(i), z=p.getZ(i);
+      const e=Math.min((w/2-Math.abs(x))/soft,(d/2-Math.abs(z))/soft,1); p.setY(i,Math.max(0.03,sstep(e)*(1+n2(x*2.3+seed,z*2.3-seed)*0.12))); }
+    g.computeVertexNormals(); return g;
+  }
+  function gable(w,d,rh,over,m){
+    const s=new T.Shape(); s.moveTo(-d/2-over,0); s.lineTo(d/2+over,0); s.lineTo(0,rh); s.closePath();
+    const g=new T.ExtrudeGeometry(s,{depth:w+over*2,bevelEnabled:false}); g.translate(0,0,-(w+over*2)/2); g.rotateY(Math.PI/2);
+    const me=new T.Mesh(g,m); me.castShadow=true; me.receiveShadow=true; return me;
+  }
+
+  let lot=null, L=null, Z={}, zoneMesh={}, tagDefs=[], melt=null, lastKey="", st=null;
+  const Zt={}, Zg={}; let revealed=false;
+  let hCur=0.29, hTarget=0.29;
+  const snowH=()=>hCur;
+
+  function add(me,parent){ me.castShadow=true; me.receiveShadow=true; (parent||lot).add(me); return me; }
+  function box(w,h,d,m,x,y,z,parent){ const me=new T.Mesh(new T.BoxGeometry(w,h,d),m); me.position.set(x,y,z); return add(me,parent); }
+  function zoneLump(zone,w,d,x,y,z,base,amt,parent){ const me=new T.Mesh(lumpGeo(w,d,x+z),mat.snow); me.position.set(x,y,z); me.userData={base,amt}; add(me,parent); (zoneMesh[zone]=zoneMesh[zone]||[]).push(me); return me; }
+
+  function house(x0,x1,z0,z1,sid,roofH,opts={}){
+    const w=x1-x0, d=z1-z0, cx=(x0+x1)/2, cz=(z0+z1)/2, wh=opts.wall||2.7;
+    box(w+0.12,0.32,d+0.12,mat.concrete,cx,0.16,cz);
+    box(w,wh,d,sid,cx,wh/2+0.3,cz);
+    const r=gable(w,d,roofH,0.45,mat.roof); r.position.set(cx,wh+0.3,cz); add(r);
+    const sn=gable(w-0.15,d-0.04,roofH*0.98,0.43,mat.snow); sn.position.set(cx,wh+0.3+0.16,cz); add(sn);
+    (opts.windows||[]).forEach(([wx,wy,ww,whh,face])=>{
+      if(face==="front"){ box(ww+0.2,whh+0.2,0.06,mat.trim,wx,wy,z1+0.03); box(ww,whh,0.08,mat.glass,wx,wy,z1+0.05); }
+      else { box(0.06,whh+0.2,ww+0.2,mat.trim,x0-0.03,wy,wx); box(0.08,whh,ww,mat.glass,x0-0.05,wy,wx); }
+    });
+  }
+  function spruce(x,z,s){
+    const g=new T.Group(); g.position.set(x,0,z); lot.add(g);
+    const tr=new T.Mesh(new T.CylinderGeometry(0.14*s,0.2*s,0.9*s,8),mat.trunk); tr.position.y=0.45*s; add(tr,g);
+    for(let k=0;k<4;k++){ const r=(1.45-k*0.3)*s, h=(1.7-k*0.18)*s, y=(0.75+k*0.82)*s;
+      const c=new T.Mesh(new T.ConeGeometry(r,h,10),mat.spruce); c.position.y=y+h/2; add(c,g);
+      const sc=new T.Mesh(new T.ConeGeometry(r*0.84,h*0.42,10),mat.snow); sc.position.y=y+h*0.72; add(sc,g); }
+  }
+  function elm(x,z,seed){
+    const g=new T.Group(); g.position.set(x,0,z); lot.add(g);
+    let s=seed; const rnd=()=>(s=(s*16807)%2147483647)/2147483647; const up=new T.Vector3(0,1,0);
+    const br=(p,dir,len,r,depth)=>{ const geo=new T.CylinderGeometry(r*0.68,r,len,6); geo.translate(0,len/2,0); const me=new T.Mesh(geo,mat.trunk); me.position.copy(p); me.quaternion.setFromUnitVectors(up,dir); add(me,g);
+      if(depth<=0) return; const end=p.clone().add(dir.clone().multiplyScalar(len));
+      const kids=depth>2?3:2; for(let k=0;k<kids;k++){ const a=rnd()*Math.PI*2, tilt=0.45+rnd()*0.45; const nd=new T.Vector3(Math.cos(a)*Math.sin(tilt),Math.cos(tilt),Math.sin(a)*Math.sin(tilt)).add(dir.clone().multiplyScalar(0.9)).normalize(); br(end,nd,len*(0.68+rnd()*0.12),r*0.62,depth-1); } };
+    br(new T.Vector3(0,0,0),new T.Vector3(0,1,0),2.4,0.32,4);
+  }
+  function car(x,z){
+    const g=new T.Group(); g.position.set(x,0,z); lot.add(g);
+    box(1.82,0.62,4.4,mat.car,0,0.62,0,g); box(1.62,0.56,2.2,mat.carGlass,0,1.2,0.3,g); box(1.64,0.08,2.0,mat.car,0,1.5,0.3,g);
+    box(1.86,0.2,0.18,mat.tire,0,0.42,-2.22,g); box(1.86,0.2,0.18,mat.tire,0,0.42,2.22,g);
+    [[-0.55,-2.21],[0.55,-2.21]].forEach(([hx,hz])=>box(0.36,0.13,0.04,mat.head,hx,0.74,hz,g));
+    [[-0.62,2.21],[0.62,2.21]].forEach(([hx,hz])=>box(0.3,0.13,0.04,mat.tail,hx,0.74,hz,g));
+    [[-0.86,-1.4],[0.86,-1.4],[-0.86,1.4],[0.86,1.4]].forEach(([wx,wz])=>{ const w=new T.Mesh(new T.CylinderGeometry(0.34,0.34,0.24,18),mat.tire); w.rotation.z=Math.PI/2; w.position.set(wx,0.34,wz); add(w,g); });
+    zoneLump("car",1.5,1.9,0,1.54,0.3,0.04,0.8,g); zoneLump("car",1.62,1.15,0,0.93,-1.55,0.04,0.7,g); zoneLump("car",1.62,0.7,0,0.93,1.8,0.04,0.6,g);
+  }
+  function streetlight(x,z){
+    box(0.14,5.2,0.14,mat.pole,x,2.6,z); box(1.3,0.1,0.1,mat.pole,x+0.6,5.15,z); box(0.5,0.16,0.3,mat.lamp,x+1.2,5.05,z);
+    const pl=new T.PointLight(0xffd59a,0.7,11,2); pl.position.set(x+1.2,4.8,z); lot.add(pl);
+  }
+
+  function layout(s){
+    const dw={single:3.4,double:6,triple:8.6,walk:3.4}[s.size]||3.4, corner=s.addons.includes("corner");
+    const l={dw,corner,hX0:-6.6,hX1:2.6,hZ0:-9.5,hZ1:-2.2,dL:3.2,dR:3.2+dw,dZ0:-2.2,swZ0:5,swZ1:6.8,wX0:-3.2,wX1:-2.0,wZ0:-0.6,bX0:-8.6,bX1:-7.6,bZ0:-9.0,bZ1:-0.1,sX0:-11,sX1:-9.4,sZ0:-16};
+    l.lotL=-9.2; l.lotR=l.dR+2.6; l.gX1=l.dR+0.3;
+    return l;
+  }
+  function zonesFor(l){
+    const z={
+      driveway:{rects:[{x0:l.dL,x1:l.dR,z0:l.dZ0,z1:l.swZ0,ax:"z",dir:1,s:0.32}]},
+      walk:{rects:[{x0:l.wX0,x1:l.wX1,z0:l.wZ0,z1:l.swZ0,ax:"z",dir:1,s:0.28}]},
+      sidewalk:{rects:[{x0:l.corner?l.sX0:l.lotL,x1:l.lotR,z0:l.swZ0,z1:l.swZ1,ax:"x",dir:1,s:0.3}]},
+      back:{rects:[{x0:l.bX0,x1:l.wX0,z0:l.bZ1-0.9,z1:l.bZ1,ax:"x",dir:-1,s:0.24,t0:0,t1:0.35},{x0:l.bX0,x1:l.bX1,z0:l.bZ0,z1:l.bZ1-0.9,ax:"z",dir:-1,s:0.24,t0:0.35,t1:1}]},
+    };
+    if(l.corner) z.side={rects:[{x0:l.sX0,x1:l.sX1,z0:l.sZ0,z1:l.swZ0,ax:"z",dir:-1,s:0.3}]};
+    return z;
+  }
+  function staticClear(l){
+    const r=[{x0:-90,x1:90,z0:l.swZ1,z1:40,s:0.5},{x0:l.hX0,x1:l.hX1,z0:l.hZ0,z1:l.hZ1,s:0.1},{x0:l.hX1,x1:l.gX1,z0:-8.4,z1:l.hZ1,s:0.1},{x0:-3.5,x1:-1.7,z0:l.hZ1,z1:l.wZ0,s:0.1},
+      {x0:l.lotR+2.6,x1:l.lotR+11.8,z0:-9.5,z1:-2.2,s:0.1}];
+    if(l.corner) r.push({x0:-90,x1:l.sX0-0.2,z0:-90,z1:40,s:0.5}); else r.push({x0:l.lotL-11.8,x1:l.lotL-2.6,z0:-9.5,z1:-2.2,s:0.1});
+    return r;
+  }
+  let SC=[];
+  function build(s){
+    if(lot){ lot.traverse(o=>{ if(o.geometry) o.geometry.dispose(); }); scene3.remove(lot); }
+    lot=new T.Group(); scene3.add(lot); zoneMesh={};
+    const l=L=layout(s); Z=zonesFor(l); SC=staticClear(l);
+    // street, curb, sidewalk
+    box(180,0.04,60,mat.road,0,0,l.swZ1+30);
+    box(180,0.15,0.22,mat.concrete,0,0.07,l.swZ1-0.11);
+    box(l.corner?90-l.sX0:180,0.08,l.swZ1-l.swZ0-0.22,mat.concrete,l.corner?(l.sX0+90)/2:0,0,(l.swZ0+l.swZ1-0.22)/2);
+    const strip=(a,b)=>{ if(b-a<0.5) return; const m=new T.Mesh(lumpGeo(b-a,0.45,a,0.2),mat.snow); m.position.set((a+b)/2,0.02,l.swZ1+0.3); m.scale.y=0.12; add(m); };
+    strip(l.corner?l.sX0:-60,l.dL-0.6); strip(l.dR+0.6,60);
+    if(l.corner){ box(60,0.04,86.8,mat.road,l.sX0-0.2-30,0,-36.6); box(0.22,0.15,l.swZ1-l.sZ0+20,mat.concrete,l.sX0-0.11,0.07,(l.sZ0-20+l.swZ1)/2); box(l.sX1-l.sX0,0.08,l.swZ0-l.sZ0,mat.concrete,(l.sX0+l.sX1)/2,0,(l.sZ0+l.swZ0)/2); }
+    // driveway, walks, back path
+    box(l.dw,0.07,l.swZ0-l.dZ0,mat.asphalt,(l.dL+l.dR)/2,0,(l.dZ0+l.swZ0)/2);
+    box(l.wX1-l.wX0,0.08,l.swZ0-l.wZ0,mat.concrete,(l.wX0+l.wX1)/2,0,(l.wZ0+l.swZ0)/2);
+    box(l.wX0-l.bX0,0.07,0.9,mat.concrete,(l.bX0+l.wX0)/2,0,l.bZ1-0.45);
+    box(l.bX1-l.bX0,0.07,l.bZ1-0.9-l.bZ0,mat.concrete,(l.bX0+l.bX1)/2,0,(l.bZ0+l.bZ1-0.9)/2);
+    // porch + steps, with their own snow
+    box(1.8,0.54,0.7,mat.concrete,-2.6,0.27,l.hZ1+0.35); zoneLump("steps",1.8,0.7,-2.6,0.54,l.hZ1+0.35,0.03,0.8);
+    for(let k=0;k<3;k++){ const h=0.18*(3-k), zc=l.hZ1+0.7+0.15+k*0.3; box(1.6,h,0.3,mat.concrete,-2.6,h/2,zc); zoneLump("steps",1.6,0.3,-2.6,h,zc,0.03,0.7); }
+    // house + garage
+    house(l.hX0,l.hX1,l.hZ0,l.hZ1,mat.siding,2.0,{windows:[[-5.0,1.75,2.0,1.3,"front"],[0.6,1.75,1.4,1.2,"front"],[-4.2,1.75,1.4,1.1,"side"],[-7.4,1.75,1.4,1.1,"side"]]});
+    box(1.0,2.1,0.08,mat.door,-2.6,1.6,l.hZ1+0.04); box(0.7,1.7,0.7,mat.brick,-4.6,4.2,-6.8);
+    const cap=new T.Mesh(lumpGeo(0.8,0.8,9),mat.snow); cap.position.set(-4.6,5.05,-6.8); cap.scale.y=0.14; add(cap);
+    house(l.hX1,l.gX1,-8.4,l.hZ1,mat.siding,1.2,{wall:2.4});
+    const doors=s.size==="double"?[5.2]:s.size==="triple"?[5.2,2.7]:[2.7]; let gx0=l.dL+0.25;
+    doors.forEach(w=>{ box(w,2.1,0.08,mat.gdoor,gx0+w/2,1.35,l.hZ1+0.05); for(let k=1;k<4;k++) box(w-0.1,0.03,0.1,mat.groove,gx0+w/2,0.3+k*0.52,l.hZ1+0.07); gx0+=w+0.3; });
+    // fence + gate to the back
+    box(l.bX0-l.lotL,1.5,0.08,mat.wood,(l.lotL+l.bX0)/2,0.75,l.bZ0); box(l.hX0-l.bX1,1.5,0.08,mat.wood,(l.bX1+l.hX0)/2,0.75,l.bZ0); box(l.bX1-l.bX0-0.1,1.4,0.06,mat.wood,(l.bX0+l.bX1)/2,0.72,l.bZ0-0.02);
+    box(0.08,1.5,6,mat.wood,l.lotL,0.75,l.bZ0-3);
+    // neighbours
+    house(l.lotR+2.6,l.lotR+11.8,-9.5,-2.2,mat.siding2,1.9,{windows:[[l.lotR+5,1.75,1.8,1.2,"front"],[l.lotR+9.4,1.75,1.4,1.2,"front"]]});
+    if(!l.corner) house(l.lotL-11.8,l.lotL-2.6,-9.5,-2.2,mat.siding3,1.9,{windows:[[l.lotL-9.4,1.75,1.8,1.2,"front"],[l.lotL-5,1.75,1.4,1.2,"front"]]});
+    // trees, light, car, plow ridge
+    spruce(-5.6,2.4,1); spruce(l.lotR-0.9,-0.6,0.8); elm(-8.2,3.6,7); elm(l.lotR+5,3.4,13);
+    streetlight(l.lotR+1.2,l.swZ0-0.5);
+    const carX=l.dL+1.7, carZ=0.9; car(carX,carZ);
+    zoneLump("windrow",l.dw+0.9,1.0,(l.dL+l.dR)/2,0.02,l.swZ1+0.6,0.22,1.25);
+    // ice-melt specks
+    const pts=[]; const rects=[...Object.values(Z).flatMap(z=>z.rects)];
+    rects.forEach(r=>{ const n=Math.round((r.x1-r.x0)*(r.z1-r.z0)*6); for(let i=0;i<n;i++) pts.push(r.x0+Math.random()*(r.x1-r.x0),0.075,r.z0+Math.random()*(r.z1-r.z0)); });
+    const mg=new T.BufferGeometry(); mg.setAttribute("position",new T.Float32BufferAttribute(pts,3));
+    melt=new T.Points(mg,new T.PointsMaterial({color:0x8fc3ff,size:0.07,transparent:true,opacity:0})); lot.add(melt);
+    // tags
+    const dMid=(l.dL+l.dR)/2;
+    tagDefs=[
+      {id:"driveway",label:"Driveway",at:[dMid+(l.dw>4?1.2:0.9),0.4,3.9]},
+      {id:"walk",label:"Front walk",at:[(l.wX0+l.wX1)/2,0.4,2.2]},
+      {id:"sidewalk",label:"City sidewalk",at:[l.lotL+2.4,0.3,(l.swZ0+l.swZ1)/2]},
+      {id:"steps",label:"Steps",price:5,at:[-2.6,1.0,l.hZ1+0.9]},
+      {id:"back",label:"Back walk",price:5,at:[(l.bX0+l.bX1)/2,0.4,-4.6]},
+      {id:"car",label:"Brush off car",price:5,at:[carX,1.9,carZ+0.3]},
+      {id:"windrow",label:"Plow ridge",price:10,at:[dMid,0.6,l.swZ1+0.6]},
+      {id:"corner",label:"Corner lot",price:10,at:l.corner?[(l.sX0+l.sX1)/2,0.3,-3]:[l.lotL-0.3,0.4,1.2]},
+    ];
+    for(const k of ["driveway","walk","sidewalk","side","back","steps","car","windrow"]) if(Zt[k]==null) Zt[k]=0;
+  }
+  function targetsFor(s){
+    const a=s.addons;
+    return {driveway:s.size!=="walk"?1:0,walk:1,sidewalk:1,side:a.includes("corner")?1:0,back:a.includes("back")?1:0,steps:a.includes("steps")?1:0,car:a.includes("car")?1:0,windrow:a.includes("windrow")?1:0};
+  }
+  function subRect(r,t){
+    const p=Math.max(0,Math.min(1,(t-(r.t0||0))/((r.t1??1)-(r.t0||0)))); if(p<=0) return null;
+    const o={x0:r.x0,x1:r.x1,z0:r.z0,z1:r.z1,s:r.s};
+    if(r.ax==="z"){ const len=(r.z1-r.z0)*p; if(r.dir>0) o.z1=r.z0+len; else o.z0=r.z1-len; }
+    else { const len=(r.x1-r.x0)*p; if(r.dir>0) o.x1=r.x0+len; else o.x0=r.x1-len; }
+    return o;
+  }
+  function heights(){
+    const h=snowH(), clr=[...SC];
+    for(const k in Z){ const t=Zt[k]||0; if(t<=0) continue; Z[k].rects.forEach(r=>{ const o=subRect(r,t); if(o) clr.push(o); }); }
+    const l=L, piles=[];
+    const td=Zt.driveway||0, tw=Zt.walk||0, ts=Zt.sidewalk||0;
+    if(td>0){ piles.push({ax:"z",c:l.dR+0.8,a0:l.dZ0+0.5,a1:l.swZ0-0.5,amp:h*1.5*td,sg:0.45}); piles.push({ax:"z",c:l.dL-0.75,a0:l.dZ0+0.8,a1:l.swZ0-0.6,amp:h*1.1*td,sg:0.38}); }
+    if(tw>0){ piles.push({ax:"z",c:l.wX0-0.5,a0:l.wZ0+0.4,a1:l.swZ0-0.5,amp:h*0.6*tw,sg:0.3}); piles.push({ax:"z",c:l.wX1+0.5,a0:l.wZ0+0.4,a1:l.swZ0-0.5,amp:h*0.6*tw,sg:0.3}); }
+    if(ts>0) piles.push({ax:"x",c:l.swZ0-0.55,a0:(l.corner?l.sX0:l.lotL)+0.3,a1:l.lotR-0.3,amp:h*0.85*ts,sg:0.34});
+    if((Zt.side||0)>0&&l.corner) piles.push({ax:"z",c:l.sX1+0.55,a0:l.sZ0,a1:l.swZ0-0.4,amp:h*0.85*Zt.side,sg:0.34});
+    const win=(v,a,b)=>sstep((v-a)/0.8)*sstep((b-v)/0.8);
+    for(let i=0;i<NV;i++){
+      const x=gx[i], z=gz[i]; let f=1;
+      for(let j=0;j<clr.length;j++){ const r=clr[j]; if(x<r.x0-r.s||x>r.x1+r.s||z<r.z0-r.s||z>r.z1+r.s) continue;
+        const dx=Math.max(r.x0-x,0,x-r.x1), dz=Math.max(r.z0-z,0,z-r.z1), v=sstep(Math.hypot(dx,dz)/r.s); if(v<f){ f=v; if(f===0) break; } }
+      let y=0;
+      if(f>0){ y=h*(1+gn[i]*0.13)*f;
+        for(let j=0;j<piles.length;j++){ const p=piles[j]; const along=p.ax==="z"?z:x, across=p.ax==="z"?x-p.c:z-p.c; if(along<p.a0-1||along>p.a1+1||Math.abs(across)>p.sg*3) continue;
+          y+=p.amp*win(along,p.a0,p.a1)*Math.exp(-across*across/(2*p.sg*p.sg))*f; } }
+      gp.setY(i,y);
+    }
+    gp.needsUpdate=true; gGeo.computeVertexNormals();
+    const h2=snowH();
+    for(const k in zoneMesh){ const t=Zt[k]||0; zoneMesh[k].forEach(me=>{ const sy=(me.userData.base+h2*me.userData.amt)*(1-t); me.scale.y=Math.max(0.001,sy); me.visible=sy>0.004; }); }
+  }
+
+  // falling snow
+  const FN=small?700:1300, fp=new Float32Array(FN*3), fv=new Float32Array(FN);
+  for(let i=0;i<FN;i++){ fp[i*3]=-24+Math.random()*44; fp[i*3+1]=Math.random()*16; fp[i*3+2]=-22+Math.random()*36; fv[i]=0.6+Math.random()*0.8; }
+  const fg=new T.BufferGeometry(); fg.setAttribute("position",new T.BufferAttribute(fp,3));
+  const fc=document.createElement("canvas"); fc.width=fc.height=32; const fx=fc.getContext("2d"); const grd=fx.createRadialGradient(16,16,0,16,16,16); grd.addColorStop(0,"rgba(255,255,255,1)"); grd.addColorStop(0.5,"rgba(255,255,255,.7)"); grd.addColorStop(1,"rgba(255,255,255,0)"); fx.fillStyle=grd; fx.fillRect(0,0,32,32);
+  const flakes=new T.Points(fg,new T.PointsMaterial({size:0.17,map:new T.CanvasTexture(fc),transparent:true,depthWrite:false,opacity:0.95})); scene3.add(flakes);
+
+  // camera: drag to turn, gentle sway when idle
+  const BASE_YAW=-0.38, BASE_PITCH=0.66; let yaw=BASE_YAW, pitch=BASE_PITCH, yawT=yaw, pitchT=pitch, dist=34, target=new T.Vector3(), targetT=new T.Vector3(), lastTouch=-1e9, W=1, H=1;
+  const cv=R.domElement; let drag=null;
+  cv.addEventListener("pointerdown",e=>{ drag={x:e.clientX,y:e.clientY,yaw:yawT,pitch:pitchT}; cv.classList.add("drag"); lastTouch=performance.now(); });
+  addEventListener("pointermove",e=>{ if(!drag) return; yawT=Math.max(-1.15,Math.min(0.55,drag.yaw-(e.clientX-drag.x)*0.006)); pitchT=Math.max(0.32,Math.min(1.0,drag.pitch+(e.clientY-drag.y)*0.004)); lastTouch=performance.now(); });
+  const end=()=>{ if(drag){ drag=null; cv.classList.remove("drag"); } };
+  addEventListener("pointerup",end); cv.addEventListener("pointercancel",end);
+  function fit(){
+    const r=stage.getBoundingClientRect(); W=Math.max(1,r.width); H=Math.max(1,r.height);
+    R.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix();
+    const span=(L?L.lotR-L.lotL:13)+(L&&L.corner?4:0);
+    dist=Math.max(27,span*1.6)*Math.max(1,1.2/cam.aspect);
+    if(!running&&L){ placeCam(); R.render(scene3,cam); placeTags(); }
+  }
+  function placeCam(){ cam.position.set(target.x+Math.sin(yaw)*Math.cos(pitch)*dist,target.y+Math.sin(pitch)*dist,target.z+Math.cos(yaw)*Math.cos(pitch)*dist); cam.lookAt(target); }
+  new ResizeObserver(fit).observe(stage);
+
+  let running=false, visible=false, active=true, raf=0, last=0;
+  function placeTags(){
+    const v=new T.Vector3(), h=snowH();
+    tagsEl.querySelectorAll(".tag").forEach(el=>{ const d=tagDefs.find(t=>t.id===el.dataset.zone); if(!d) return;
+      v.set(d.at[0],d.at[1]+h,d.at[2]).project(cam);
+      const off=v.z>1||v.x<-1.1||v.x>1.1||v.y<-1.1||v.y>1.1; el.style.opacity=off?0:1;
+      el.style.transform=`translate(${(v.x+1)/2*W}px,${(1-v.y)/2*H}px) translate(-50%,calc(-100% - 8px))`; });
+  }
+  function frame(now){
+    raf=0; if(!running) return;
+    const dt=Math.min(0.05,(now-last)/1000||0.016); last=now;
+    let dirty=false;
+    if(revealed){ for(const k in Zg){ const tg=Zg[k]; const cur=Zt[k]||0; if(cur!==tg){ dirty=true; const sp=reduce?1:dt/0.9; Zt[k]=tg>cur?Math.min(tg,cur+sp):Math.max(tg,cur-sp); } } }
+    if(hCur!==hTarget){ dirty=true; hCur+=(hTarget-hCur)*Math.min(1,dt*9); if(Math.abs(hCur-hTarget)<0.003) hCur=hTarget; }
+    if(dirty) heights();
+    if(melt){ const want=st&&st.addons.includes("melt")?0.95:0; melt.material.opacity+=(want-melt.material.opacity)*Math.min(1,dt*5); melt.visible=melt.material.opacity>0.02; }
+    const fall=reduce?0:1, count=Math.round(FN*Math.min(1,0.2+(st?st.depth:12)/34));
+    for(let i=0;i<count;i++){ let y=fp[i*3+1]-fv[i]*dt*1.6*fall; if(y<0){ y=14+Math.random()*2; } fp[i*3+1]=y; fp[i*3]+=Math.sin(now*0.0006+i)*dt*0.25*fall; }
+    fg.setDrawRange(0,count); fg.attributes.position.needsUpdate=true;
+    const idle=!reduce&&now-lastTouch>4000&&!drag, sway=idle?Math.sin(now*0.00018)*0.07:0;
+    yaw+=(yawT+sway-yaw)*Math.min(1,dt*4); pitch+=(pitchT-pitch)*Math.min(1,dt*4); target.lerp(targetT,Math.min(1,dt*3));
+    placeCam(); R.render(scene3,cam); placeTags();
+    raf=requestAnimationFrame(frame);
+  }
+  function sync(){ const want=visible&&active&&!document.hidden; if(want&&!running){ running=true; last=performance.now(); raf=requestAnimationFrame(frame); } else if(!want&&running){ running=false; if(raf) cancelAnimationFrame(raf); raf=0; } }
+  new IntersectionObserver(es=>{ visible=es[0].isIntersecting; if(visible&&!revealed) setTimeout(()=>{ revealed=true; },reduce?0:450); sync(); },{threshold:0.15}).observe(stage);
+  document.addEventListener("visibilitychange",sync);
+
+  return {
+    update(s){
+      st=s; const key=s.size+"|"+s.addons.includes("corner");
+      if(key!==lastKey){ build(s); lastKey=key; fit(); targetT.set((L.lotL+L.lotR)/2+(L.corner?-1.2:0)+0.4,0,-0.6); if(target.lengthSq()===0) target.copy(targetT); }
+      Object.assign(Zg,targetsFor(s)); if(!L.corner){ Zg.side=0; }
+      hTarget=Math.max(0.04,s.depth/100*2.4);
+      tagsEl.innerHTML=tagDefs.map(d=>{ const base=d.id==="walk"||d.id==="sidewalk"||(d.id==="driveway"&&s.size!=="walk"); const on=!base&&(d.id==="driveway"?false:s.addons.includes(d.id));
+        const cls=base?"base":on?"on":""; const price=base?"incl.":d.id==="driveway"?"":"+$"+d.price;
+        return `<button type="button" class="tag ${cls}" data-zone="${d.id}" aria-pressed="${base||on}" aria-label="${esc(d.label)}${base?", included":on?", added, tap to remove":", tap to add"}" style="opacity:0"><i>${base||on?"✓":"+"}</i>${esc(d.label)}${price?` <span class="mono">${price}</span>`:""}</button>`; }).join("");
+      heights(); if(!running){ placeCam(); R.render(scene3,cam); } placeTags();
+    },
+    setActive(a){ active=a; sync(); },
+    resetView(){ yawT=BASE_YAW; pitchT=BASE_PITCH; lastTouch=-1e9; }
+  };
+}
+
+/* ===== shovel-the-snow hero: a Regina street at dawn ===== */
 function snowHero(){
   const hero=$("#hero"), c=$("#snow"), x=c.getContext("2d");
-  let W=0,H=0,dpr=1,col=4,cols=0,h=[],flakes=[],chunks=[],cleared=0,dug=false,start=0;
-  const base=()=>Math.min(110,H*.22);
+  let W=0,H=0,dpr=1,col=4,cols=0,h=[],flakes=[],chunks=[],cleared=0,dug=false,start=0,sky=null;
+  const base=()=>Math.min(100,H*.2);
+  function skyline(){
+    const off=document.createElement("canvas"); off.width=Math.max(1,W*dpr); off.height=Math.max(1,H*dpr); const g=off.getContext("2d"); g.setTransform(dpr,0,0,dpr,0,0);
+    let s=11; const r=()=>(s=(s*16807)%2147483647)/2147483647;
+    const groundY=H-base()*.62;
+    const tree=(tx,ty,th,fill)=>{ g.strokeStyle=fill; g.lineCap="round"; const br=(x0,y0,a,len,w,d)=>{ const x1=x0+Math.cos(a)*len, y1=y0+Math.sin(a)*len; g.lineWidth=w; g.beginPath(); g.moveTo(x0,y0); g.lineTo(x1,y1); g.stroke(); if(d>0){ br(x1,y1,a-.3-r()*.35,len*.74,w*.66,d-1); br(x1,y1,a+.3+r()*.35,len*.74,w*.66,d-1); } }; br(tx,ty,-Math.PI/2,th*.36,Math.max(1.5,th*.07),6); };
+    const lamp=(lx,ly,sc)=>{ const gr=g.createRadialGradient(lx+13*sc,ly-66*sc,0,lx+13*sc,ly-66*sc,60*sc); gr.addColorStop(0,"rgba(255,206,140,.5)"); gr.addColorStop(1,"rgba(255,206,140,0)"); g.fillStyle=gr; g.fillRect(lx-50*sc,ly-130*sc,130*sc,130*sc); g.fillStyle="#060e1e"; g.fillRect(lx,ly-70*sc,2.6*sc,70*sc); g.fillRect(lx,ly-70*sc,15*sc,2.6*sc); g.fillStyle="#ffe2a8"; g.fillRect(lx+10*sc,ly-68*sc,8*sc,3*sc); };
+    const row=(yb,sc,fill,lit,trees)=>{ let px=-30*sc; while(px<W+60){ const w=(78+r()*70)*sc, wh=(30+r()*20)*sc, rh=(18+r()*14)*sc;
+      g.fillStyle=fill; g.fillRect(px,yb-wh,w,wh+40); g.beginPath(); g.moveTo(px-7*sc,yb-wh); g.lineTo(px+w/2,yb-wh-rh); g.lineTo(px+w+7*sc,yb-wh); g.closePath(); g.fill();
+      g.strokeStyle="rgba(222,233,247,.8)"; g.lineWidth=2.6*sc; g.beginPath(); g.moveTo(px-7*sc,yb-wh+1); g.lineTo(px+w/2,yb-wh-rh); g.lineTo(px+w+7*sc,yb-wh+1); g.stroke();
+      const nw=Math.max(1,Math.floor(w/(30*sc))); for(let k=0;k<nw;k++){ if(r()<lit){ const wx=px+10*sc+k*(w-20*sc)/nw, wy=yb-wh*.66; g.fillStyle="#ffcf7a"; g.shadowColor="#ffad42"; g.shadowBlur=12; g.fillRect(wx,wy,11*sc,10*sc); g.shadowBlur=0; } }
+      px+=w+(18+r()*30)*sc;
+      if(r()<trees) tree(px-9*sc,yb,(46+r()*34)*sc,fill);
+      if(r()<.16) lamp(px-6*sc,yb,sc); } };
+    row(groundY-14,.72,"#1d2a52",.22,.5);
+    row(groundY,1,"#0a1530",.42,.55);
+    sky=off;
+  }
   function size(){
     const r=hero.getBoundingClientRect(); dpr=Math.min(2,devicePixelRatio||1); W=r.width; H=r.height;
     c.width=W*dpr; c.height=H*dpr; x.setTransform(dpr,0,0,dpr,0,0);
@@ -932,6 +1378,7 @@ function snowHero(){
     h=Array.from({length:cols},(_,i)=>b*(.78+.22*Math.sin(i*.045)+.08*Math.sin(i*.17)));
     start=h.reduce((s,v)=>s+v,0);
     flakes=Array.from({length:Math.round(W/7)},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.9+.5,s:Math.random()*.7+.35,d:Math.random()*6.28}));
+    skyline();
   }
   size(); let lastW=W,lastH=H; new ResizeObserver(()=>{const r=hero.getBoundingClientRect(); if(Math.abs(r.width-lastW)>1||Math.abs(r.height-lastH)>1){ size(); lastW=W; lastH=H; }}).observe(hero);
   function dig(px,py,dx){
@@ -948,12 +1395,16 @@ function snowHero(){
   let down=false,lx=0;
   const pos=e=>{const r=c.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top];};
   c.addEventListener("pointerdown",e=>{down=true;c.classList.add("dig");const[px,py]=pos(e);lx=px;dig(px,py,0);});
-  c.addEventListener("pointermove",e=>{const[px,py]=pos(e); if(down||e.pointerType==="mouse"&&py>H-base()-30&&e.buttons){dig(px,py,px-lx);} lx=px;});
+  c.addEventListener("pointermove",e=>{const[px,py]=pos(e); if(down){dig(px,py,px-lx);} lx=px;});
   addEventListener("pointerup",()=>{down=false;c.classList.remove("dig");});
   c.addEventListener("pointercancel",()=>{down=false;});
+  let on=true, looping=false;
+  const kick=()=>{ if(!looping&&on){ looping=true; requestAnimationFrame(draw); } };
+  new IntersectionObserver(es=>{ on=es[0].isIntersecting; kick(); }).observe(hero);
   function draw(){
+    if(!on||hero.offsetParent===null){ looping=false; return; }
     x.clearRect(0,0,W,H);
-    // falling snow
+    if(sky) x.drawImage(sky,0,0,W,H);
     x.fillStyle="#ffffff";
     for(const f of flakes){
       if(!reduce){ f.y+=f.s; f.d+=.012; f.x+=Math.sin(f.d)*.35; }
@@ -962,17 +1413,13 @@ function snowHero(){
       x.globalAlpha=.4+f.r/4; x.beginPath(); x.arc(f.x,f.y,f.r,0,6.283); x.fill();
     }
     x.globalAlpha=1;
-    // smooth a little so the bank settles
-    for(let i=1;i<cols-1;i++){ const avg=(h[i-1]+h[i+1])/2; h[i]+= (avg-h[i])*.04; }
-    // pavement revealed under the snow
-    x.fillStyle="#2a3d5c"; x.fillRect(0,H-16,W,16);
+    for(let i=1;i<cols-1;i++){ const avg=(h[i-1]+h[i+1])/2; h[i]+=(avg-h[i])*.04; }
+    x.fillStyle="#26344f"; x.fillRect(0,H-16,W,16);
     x.fillStyle="#ffd34d"; for(let px=20;px<W;px+=70) x.fillRect(px,H-9,34,3);
-    // snow bank
-    const g=x.createLinearGradient(0,H-base()*1.2,0,H); g.addColorStop(0,"#ffffff"); g.addColorStop(1,"#d6e4f5");
+    const g=x.createLinearGradient(0,H-base()*1.2,0,H); g.addColorStop(0,"#ffffff"); g.addColorStop(1,"#cfdcef");
     x.fillStyle=g; x.beginPath(); x.moveTo(0,H);
     for(let i=0;i<cols;i++) x.lineTo(i*col,H-h[i]);
     x.lineTo(W,H); x.closePath(); x.fill();
-    // flying chunks
     for(let j=chunks.length-1;j>=0;j--){ const p=chunks[j]; p.vy+=.35; p.x+=p.vx; p.y+=p.vy; p.life-=.02;
       x.globalAlpha=Math.max(0,p.life); x.fillStyle="#ffffff"; x.beginPath(); x.arc(p.x,p.y,p.r,0,6.283); x.fill();
       if(p.life<=0||p.y>H) chunks.splice(j,1); }
@@ -981,13 +1428,15 @@ function snowHero(){
       const hint=$("#dighint"); if(cleared>=55){ hint.innerHTML=`Nice shovelling. <b>We'll do yours for ${money(PRICES.single)}.</b>`; hint.style.opacity=1; } }
     requestAnimationFrame(draw);
   }
-  draw();
+  window.addEventListener("hashchange",()=>{ if(currentView()==="home") kick(); });
+  kick();
 }
 
 /* ===== init ===== */
 paintPrices();
 $("#b-hood").innerHTML=HOODS.map(h=>`<option>${h}</option>`).join("")+"<option>Other</option>";
+try{ scene=makeDiorama($("#stage")); }catch(e){ scene=null; }
+if(!scene) $("#stage").classList.add("nogl");
 renderBuilder(); renderCompare(); renderHoods(null); renderBookOpts(); route(); snowHero(); boot();
+document.fonts?.ready?.then(cutAll); addEventListener("resize",cutAll);
 </script>
-
-</body></html>
