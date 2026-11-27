@@ -554,8 +554,28 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-27T01:20:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-27T06:20:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'tinubu-manifesto-food', at:'2026-11-27T06:05:00+01:00', img:'news/n162.jpg', tag:'Manifesto', pri:2, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928312-2027-tinubu-retains-old-promises-sets-new-food-storage-targets-in-agricultural-plan.html', people:['tinubu'],
+    h:'Tinubu\'s 2027–2031 plan keeps 2023 farm promises and adds food-storage targets',
+    d:'Premium Times found that the manifesto repeats 2023 pledges on irrigation, farm finance, commodity boards, grain reserves and rural roads. New are timelines: national storage capacity up 50% by 2028, lower post-harvest losses by 2030, and a monthly food-price tracker.',
+    why:'Repeated promises are a fair test: ask what was delivered from the 2023 list before judging the new targets.'},
+  {id:'inec-eec8a-result-check', at:'2026-11-27T05:09:00+01:00', img:'news/n161.jpg', tag:'INEC', pri:2, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928300-2027-polls-inec-to-deploy-electronic-checks-to-prevent-result-manipulation.html', people:[],
+    h:'INEC adds an electronic result sheet that blocks uploads when figures do not match',
+    d:'Polling officials will type the figures from the paper Form EC8A into an electronic version (EEC8A) on the BVAS. The system checks them against accreditation numbers and blocks the upload to IReV if they do not tally, INEC\'s voter education director Victoria Eta-Messi said.',
+    why:'Mismatches between paper and uploaded results fuelled disputes in 2023. Saturday\'s test is a first look.'},
+  {id:'inec-violence-nine-states', at:'2026-11-27T03:38:00+01:00', img:'news/n160.jpg', tag:'INEC', pri:3, outlet:'The Sun', url:'https://thesun.ng/political-violence-threatens-polls-in-9-states-inec-raises-alarm/', people:[],
+    h:'INEC chairman names nine states hit by campaign violence and promises prosecutions',
+    d:'Joash Amupitan listed Lagos, Edo, Ekiti, Enugu, Ebonyi, Delta, Cross River, Oyo and Benue as states with political violence since campaigns began, warned it could keep voters away and put 1.41 million ad hoc staff at risk, and said offenders will be prosecuted once police send case files.',
+    why:'INEC can prosecute electoral offences but depends on the police to investigate. Watch for the first charges.'},
+  {id:'obi-minna-ibb', at:'2026-11-27T03:35:00+01:00', img:'news/n159.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/obi-in-minna-meets-ibb-says-nigeria-needs-peace-security/', people:['obi'],
+    h:'Obi visits Babangida in Minna; says fuel subsidy can be afforded by cutting corruption',
+    d:'At a town hall in Minna with Kwankwaso, Obi said removing the fuel subsidy has pushed millions into poverty and that Nigeria can afford it by tackling corruption and leakages. The Sun reports he called its restoration "non-negotiable". He then visited Ibrahim Babangida, a day after Tinubu\'s delegation did.',
+    why:'A subsidy is a large cost. Ask how much it would cost and where the money comes from, as with every candidate\'s fuel pledge.'},
+  {id:'opposition-talks-denials', at:'2026-11-27T01:30:00+01:00', img:'news/n158.jpg', tag:'Party', pri:2, outlet:'Punch', url:'https://punchng.com/2027-apc-unfazed-as-atiku-obi-makinde-meet-monday/', people:['atiku','seyi-makinde','donald-duke','sandy-ojang-onor','obi'], claim:true,
+    h:'Talk of power-sharing deals before Monday\'s opposition meeting; Makinde and Onor camps deny withdrawals',
+    d:'Punch reports that Atiku, Obi, Makinde and Duke are expected at Monday\'s meeting at the NAF Conference Centre, Abuja. Unnamed sources claimed Atiku and Makinde discussed power-sharing, and that Onor might step down for Tinubu. The APM and PDP said both candidates remain in the race.',
+    why:'These claims come from unnamed sources and have been denied. Only a withdrawal filed with INEC changes the ballot.'},
   {id:'wike-atiku-privatisation', at:'2026-11-27T00:45:00+01:00', img:'news/n157.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/wike-challenges-atiku-amaechi-to-account-for-101-sold-assets-missing-39m-n68bn-projects/', people:['atiku'], claim:true,
     h:'Wike tells Atiku and Amaechi to account for the 101 enterprises privatised under Obasanjo and Rivers spending',
     d:'At a PDP Rainbow Coalition town hall in Okrika, FCT Minister Nyesom Wike said Nigerians have little to show for the privatisation Atiku oversaw as vice president, questioned Rivers spending under his running mate Amaechi, and urged voters to reject the ADC ticket.',
