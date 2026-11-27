@@ -554,8 +554,32 @@ MONEY.forEach((m, i) => m.img = MIMG[i]);
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-27T11:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-27T16:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'kano-govt-replies-kwankwaso', at:'2026-11-27T15:45:00+01:00', img:'news/n177.jpg', tag:'Party', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928415-kano-govt-dismisses-kwankwasos-efcc-allegations-against-governor-yusuf.html', people:['obi'], claim:true,
+    h:'Kano government denies Governor Yusuf is behind Kwankwaso\'s EFCC case',
+    d:'Information commissioner Sunusi Bature said Governor Abba Yusuf has "absolutely no involvement" in Kwankwaso\'s dealings with the EFCC, which he said predate the current government, and called the claim politically motivated. He said court cases involving the NDC come from the party\'s internal disputes.',
+    why:'Both sides have now spoken. The EFCC has not commented on its dealings with Kwankwaso.'},
+  {id:'nctc-protect-inec', at:'2026-11-27T15:07:00+01:00', img:'news/n175.jpg', tag:'Security', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-national-counter-terrorism-centre-moves-to-foil-attacks-on-inec-facilities-personnel/', people:[],
+    h:'Counter-terrorism centre says it is working to prevent attacks on INEC offices and staff',
+    d:'Maj. Gen. Adamu Laka of the National Counter Terrorism Centre said it is working with security agencies to protect INEC offices, staff, voters and election materials, counter fake news and strengthen early warning in communities. He urged young people not to be used for political violence.',
+    why:'INEC offices have been attacked before past elections. Security for polling materials matters as much as for rallies.'},
+  {id:'lagos-sanitation-cancelled', at:'2026-11-27T15:02:00+01:00', img:'news/n176.jpg', tag:'INEC', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928408-lagos-cancels-november-environmental-sanitation-exercise-over-inec-mock-accreditation.html', people:[],
+    h:'Lagos cancels Saturday\'s sanitation exercise so it does not clash with INEC\'s test',
+    d:'Governor Babajide Sanwo-Olu called off the monthly sanitation (6:30–8:30am) so residents can reach INEC\'s mock accreditation, which starts at 8:30am in two polling units per registration area.',
+    why:'If your polling unit is selected, you can now go without movement restrictions.'},
+  {id:'ok-movement-quits-ndc', at:'2026-11-27T14:37:00+01:00', img:'news/n174.jpg', tag:'Party', pri:2, outlet:'Punch', url:'https://punchng.com/ok-movement-faction-withdraws-support-for-obi-ndc/', people:['obi'],
+    h:'OK Movement withdraws support for Obi and the NDC, says Obi ended the relationship',
+    d:'Director-general John Ughulu said the group, named after Obi and Kwankwaso, was told that Obi and the NDC had decided to end their relationship with it. It is pulling its ward, local and state structures out of NDC activities and will name another party and candidate on Monday. Punch describes it as a faction of the movement.',
+    why:'Support groups mobilise voters but are not parties. The NDC has not yet given its side.'},
+  {id:'ndc-edo-goat-apology', at:'2026-11-27T13:57:00+01:00', img:'news/n173.jpg', tag:'Campaign', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/ndc-spokesperson-apologises-to-tinubu-okpebholo-over-goat-remarks/', people:['obi','tinubu'],
+    h:'Edo NDC spokesman apologises for calling Tinubu and Okpebholo "goats"',
+    d:'Rev. Olu Martins, the NDC\'s head of media in Edo, apologised in a video for insulting the president and the governor at a 25 November town hall, saying campaigns should be "clean, devoid of dirty and street languages".',
+    why:'A rare public climbdown in a tense state. Insults on all sides have raised the temperature this month.'},
+  {id:'makinde-why-left-tinubu', at:'2026-11-27T11:42:00+01:00', img:'news/n172.jpg', tag:'Campaign', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928391-why-i-supported-tinubu-in-2023-but-now-challenge-him-makinde.html', people:['seyi-makinde','tinubu','atiku','obi'],
+    h:'Makinde explains why he backed Tinubu in 2023 and is now running against him',
+    d:'On Chude Jideonwo\'s podcast, Makinde said the PDP\'s G5 governors met both Obi and Tinubu in 2023 to discuss a government of national unity, and backed Tinubu because they found his answer more convincing. He said his split with the PDP began when it did not zone its ticket to the South.',
+    why:'A candidate\'s own account of past choices. His national unity plan is in his fact file.'},
   {id:'inec-57000-bvas', at:'2026-11-27T11:10:00+01:00', img:'news/n171.jpg', tag:'INEC', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-election%e2%81%a0%e2%81%a0%e2%81%a0-inec-procures/', people:[],
     h:'INEC buys 57,000 new BVAS devices and cuts voters per machine from 1,250 to 850',
     d:'Speaking through a deputy director at an Anglican Diocese of Abuja seminar, INEC chairman Joash Amupitan said the commission has procured 57,000 new BVAS units and lowered the number of voters each machine serves. He said IReV now has automatic checks for over-voting and arithmetic errors on Form EC8A.',
