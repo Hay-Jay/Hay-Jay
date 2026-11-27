@@ -1,0 +1,4 @@
+{
+  "cleanUrls": true,
+  "headers": [{ "source": "/(news|photos|img)/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }]
+}

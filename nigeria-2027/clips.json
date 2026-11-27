@@ -1,0 +1,248 @@
+[
+ {
+  "id": "promise-growth",
+  "outlet": "BusinessDay",
+  "date": "2022",
+  "url": "https://businessday.ng/politics/article/tinubu-targets-12-gdp-growth-in-economic-agenda/",
+  "headline": true,
+  "below": 150
+ },
+ {
+  "id": "reality-growth",
+  "outlet": "Nairametrics",
+  "date": "2026-08-31",
+  "url": "https://nairametrics.com/2026/08/31/nigerias-gdp-grows-by-4-43-in-q2-2026/",
+  "find": [
+   "4.43%"
+  ]
+ },
+ {
+  "id": "promise-power",
+  "outlet": "Nairametrics",
+  "date": "2022-06-10",
+  "url": "https://nairametrics.com/2022/06/10/tinubu-says-his-administration-will-focus-on-building-15000mw-power-generation/",
+  "find": [
+   "15,000"
+  ]
+ },
+ {
+  "id": "reality-power",
+  "outlet": "Nairametrics",
+  "date": "2025-03-06",
+  "url": "https://nairametrics.com/2025/03/06/nigerias-power-generation-hits-record-5801-84mw-tcn",
+  "find": [
+   "5,801.84"
+  ]
+ },
+ {
+  "id": "reality-meters",
+  "outlet": "Nairametrics",
+  "date": "2026-10-02",
+  "url": "https://nairametrics.com/2026/10/02/fg-installs-707765-meters-in-q2-4-8-million-electricity-customers-remain-unmetered/",
+  "headline": true
+ },
+ {
+  "id": "reality-poverty",
+  "outlet": "Nairametrics",
+  "date": "2026-04-10",
+  "url": "https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/",
+  "find": [
+   "63%",
+   "63 per cent"
+  ]
+ },
+ {
+  "id": "reality-refinery",
+  "outlet": "Nairametrics",
+  "date": "2026-02-05",
+  "url": "https://nairametrics.com/2026/02/05/nnpc-shuts-state-owned-refineries-after-assessments-show-value-leakage-ojulari",
+  "find": [
+   "shut",
+   "value leakage"
+  ]
+ },
+ {
+  "id": "factcheck-economy",
+  "outlet": "FactCheckHub",
+  "date": "2026-10-02",
+  "url": "https://factcheckhub.com/nigeria-at-66-fact-checking-tinubus-independence-day-economics/",
+  "find": [
+   "highest quarterly",
+   "4.43 per cent"
+  ]
+ },
+ {
+  "id": "fc-fdi",
+  "outlet": "FactCheckHub",
+  "date": "2024-10",
+  "url": "https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/",
+  "find": [
+   "worth more than $30 billion in 2023 is FALSE"
+  ]
+ },
+ {
+  "id": "fc-waysmeans",
+  "outlet": "FactCheckHub",
+  "date": "2024-10",
+  "url": "https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/",
+  "find": [
+   "ways and means debt of over N30 trillion is MISLEADING"
+  ]
+ },
+ {
+  "id": "fc-oldvideo",
+  "outlet": "Dubawa",
+  "date": "2024-08-10",
+  "url": "https://dubawa.org/presidency-tinubus-x-pages-circulate-old-video-amid-endbadgovernance-protest/",
+  "find": [
+   "recycled from a July 2023 broadcast",
+   "old and, therefore, misleading"
+  ]
+ },
+ {
+  "id": "m-audit",
+  "outlet": "Daily Trust",
+  "date": "2026-07",
+  "url": "https://dailytrust.com/25-mdas-varsities-others-flagged-in-n1-34trn-audit-lapses/",
+  "find": [
+   "estimated at over N1.34 trillion"
+  ]
+ },
+ {
+  "id": "m-cashtransfer",
+  "outlet": "StatePress",
+  "date": "2026-09",
+  "url": "https://www.statepress.ng/2026/09/auditor-general-queries-n3375bn-cash.html",
+  "find": [
+   "records were insufficient to establish"
+  ]
+ },
+ {
+  "id": "m-bettaedu",
+  "outlet": "ICIR",
+  "date": "2024-01",
+  "url": "https://www.icirnigeria.org/efcc-grills-betta-edu-over-n585m-scandal/",
+  "find": [
+   "to pay N585 million into a private account"
+  ]
+ },
+ {
+  "id": "m-emefiele",
+  "outlet": "Naija News",
+  "date": "2026-10-20",
+  "url": "https://www.naijanews.com/2026/10/20/6-23-million-fraud-emefiele-has-case-to-answer-efcc-tells-court/",
+  "find": [
+   "amended 20-count charge"
+  ]
+ },
+ {
+  "id": "m-bello",
+  "outlet": "Nairametrics",
+  "date": "2026-04-24",
+  "url": "https://nairametrics.com/2026/04/24/yahaya-bello-efcc-n80-billion-alleged-fraud-case-adjourned-to-may-6/",
+  "find": [
+   "alleged N80 billion money laundering case"
+  ]
+ },
+ {
+  "id": "m-suvs",
+  "outlet": "Dubawa",
+  "date": "2024-08-11",
+  "url": "https://dubawa.org/fact-checking-five-economic-claims-in-viral-response-to-tinubus-speech/",
+  "find": [
+   "N70 billion was allocated"
+  ]
+ },
+ {
+  "id": "s-tinubu",
+  "outlet": "Vanguard",
+  "date": "2023-04",
+  "url": "https://www.vanguardngr.com/2023/04/alleged-drug-case-why-tinubu-forfeited-460000-in-us-apc-tells-court/",
+  "find": [
+   "not a fine but a decree of forfeiture"
+  ]
+ },
+ {
+  "id": "s-atiku",
+  "outlet": "Vanguard",
+  "date": "2017-12",
+  "url": "https://www.vanguardngr.com/2017/12/u-s-senate-report-abubakar-atikus-albatross/",
+  "find": [
+   "over $40 million in suspect funds"
+  ]
+ },
+ {
+  "id": "s-obi",
+  "outlet": "ICIR",
+  "date": "2021-10",
+  "url": "https://www.icirnigeria.org/pandora-papers-inside-peter-obis-secret-businesses-and-how-he-broke-the-law/",
+  "find": [
+   "did not declare these companies"
+  ]
+ },
+ {
+  "id": "s-obi-reply",
+  "outlet": "ThisDay",
+  "date": "2021-10-07",
+  "url": "https://thisdaylive.com/index.php/2021/10/07/pandora-papers-i-broke-no-law-says-peter-obi",
+  "find": [
+   "did not in any respect whatsoever violate any law"
+  ]
+ },
+ {
+  "id": "n-youth",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/inec-explains-drop-youth-voter-registration-ahead-2027-elections/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-statepolice",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/national-assembly-to-transmit-state-police-bill-to-president-tinubu/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-sokoto",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/atiku-disrupt-adc-campaign-rally-in-sokoto/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-elrufai",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/el-rufai-issues-directives-on-2027-elections/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-melaye",
+  "outlet": "Naija News",
+  "date": "2026-11-03",
+  "url": "https://www.naijanews.com/2026/11/03/inec-apc-2027-elections-dino-melaye-alarm/",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-deepfakes",
+  "outlet": "The Sun",
+  "date": "2026-11",
+  "url": "https://thesun.ng/2027-elections-inec-raises-alarm-over-deepfakes-ai-generated-fake-news",
+  "headline": true,
+  "below": 520
+ },
+ {
+  "id": "n-list",
+  "outlet": "Naija News",
+  "date": "2026-09-12",
+  "url": "https://www.naijanews.com/2026/09/12/inec-releases-presidential-candidates/",
+  "headline": true,
+  "below": 520
+ }
+]

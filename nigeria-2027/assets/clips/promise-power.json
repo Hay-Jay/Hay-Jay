@@ -1,0 +1,43 @@
+{
+ "id": "promise-power",
+ "outlet": "Nairametrics",
+ "url": "https://nairametrics.com/2022/06/10/tinubu-says-his-administration-will-focus-on-building-15000mw-power-generation/",
+ "title": "Tinubu says his administration will focus on building 15,000MW power generation",
+ "date": "2022-06-10",
+ "sentence": "Bola Ahmed Tinubu, the presidential candidate of the All Progressive Congress (APC), has promised to build 15,000 megawatts of power generation if elected as the next president of Nigeria in the 2023 presidential election.",
+ "head": {
+  "w": 600,
+  "h": 624
+ },
+ "quote": {
+  "w": 600,
+  "h": 128
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.1328125,
+   "w": 0.79546875,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.3203125,
+   "w": 0.8283072916666666,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.5078125,
+   "w": 0.9333854166666666,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.6953125,
+   "w": 0.5732552083333333,
+   "h": 0.1640625
+  }
+ ]
+}

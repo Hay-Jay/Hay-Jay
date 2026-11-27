@@ -1,0 +1,43 @@
+{
+ "id": "m-cashtransfer",
+ "outlet": "StatePress",
+ "url": "https://www.statepress.ng/2026/09/auditor-general-queries-n3375bn-cash.html",
+ "title": "Auditor-General queries N33.75bn cash transfers to 3.29m households",
+ "date": "2026-09",
+ "sentence": "The Auditor-General for the Federation has raised questions over the disbursement of N33.75 billion in cash transfers to more than 3.29 million households across 35 states in 2023, saying available records were insufficient to establish that the funds reached legitimate beneficiaries.",
+ "head": {
+  "w": 581,
+  "h": 655
+ },
+ "quote": {
+  "w": 581,
+  "h": 110.375
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.027538726333907058,
+   "y": 0.15402038505096263,
+   "w": 0.8975903614457831,
+   "h": 0.15402038505096263
+  },
+  {
+   "x": 0.027538726333907058,
+   "y": 0.33154020385050964,
+   "w": 0.914506239242685,
+   "h": 0.15402038505096263
+  },
+  {
+   "x": 0.027538726333907058,
+   "y": 0.5090600226500567,
+   "w": 0.862736660929432,
+   "h": 0.15402038505096263
+  },
+  {
+   "x": 0.027538726333907058,
+   "y": 0.6865798414496036,
+   "w": 0.2502689328743546,
+   "h": 0.15402038505096263
+  }
+ ]
+}

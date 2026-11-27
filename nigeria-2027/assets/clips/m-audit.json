@@ -1,0 +1,43 @@
+{
+ "id": "m-audit",
+ "outlet": "Daily Trust",
+ "url": "https://dailytrust.com/25-mdas-varsities-others-flagged-in-n1-34trn-audit-lapses/",
+ "title": "25 MDAs, varsities, others flagged in N1.34trn audit lapses",
+ "date": "2026-07",
+ "sentence": "An audit report by the Office of the Auditor-General for the Federation (AuGF) has uncovered financial irregularities, weak internal controls and other lapses involving Ministries, Departments and Agencies (MDAs) estimated at over N1.34 trillion.",
+ "head": {
+  "w": 548,
+  "h": 716
+ },
+ "quote": {
+  "w": 548,
+  "h": 154.375
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.029197080291970802,
+   "y": 0.12955465587044535,
+   "w": 0.9416058394160584,
+   "h": 0.14251012145748987
+  },
+  {
+   "x": 0.029197080291970802,
+   "y": 0.3277327935222672,
+   "w": 0.9416058394160584,
+   "h": 0.14251012145748987
+  },
+  {
+   "x": 0.029197080291970802,
+   "y": 0.525910931174089,
+   "w": 0.9416058394160584,
+   "h": 0.14251012145748987
+  },
+  {
+   "x": 0.029197080291970802,
+   "y": 0.724089068825911,
+   "w": 0.5305086678832117,
+   "h": 0.14251012145748987
+  }
+ ]
+}

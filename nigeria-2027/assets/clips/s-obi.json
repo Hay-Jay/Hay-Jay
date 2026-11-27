@@ -1,0 +1,49 @@
+{
+ "id": "s-obi",
+ "outlet": "ICIR",
+ "url": "https://www.icirnigeria.org/pandora-papers-inside-peter-obis-secret-businesses-and-how-he-broke-the-law/",
+ "title": "Pandora Papers: Inside Peter Obi’s secret businesses – and how he broke the law",
+ "date": "2021-10",
+ "sentence": "The former governor admitted that he did not declare these companies and the funds and properties they hold in his asset declaration filings with the Code of Conduct Bureau, the Nigerian government agency that deals with the issues of corruption, conflict of interest, and abuse of office by public servants.",
+ "head": {
+  "w": 592,
+  "h": 617.1875
+ },
+ "quote": {
+  "w": 592,
+  "h": 167.9375
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02702702702702703,
+   "y": 0.10718273167100856,
+   "w": 0.9055373733108109,
+   "h": 0.13100111648678825
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.26907331596576106,
+   "w": 0.8825221706081081,
+   "h": 0.13100111648678825
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.43096390026051357,
+   "w": 0.9120038006756757,
+   "h": 0.13100111648678825
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.5928544845552661,
+   "w": 0.9435177364864865,
+   "h": 0.13100111648678825
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.7547450688500186,
+   "w": 0.24012880067567569,
+   "h": 0.13100111648678825
+  }
+ ]
+}

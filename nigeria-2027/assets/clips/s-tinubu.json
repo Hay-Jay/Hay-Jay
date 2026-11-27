@@ -1,0 +1,49 @@
+{
+ "id": "s-tinubu",
+ "outlet": "Vanguard",
+ "url": "https://www.vanguardngr.com/2023/04/alleged-drug-case-why-tinubu-forfeited-460000-in-us-apc-tells-court/",
+ "title": "Alleged Drug Case: Why Tinubu forfeited $460,000 in US — APC tells court",
+ "date": "2023-04",
+ "sentence": "According to the APC, the purported decision of the United State District Court Northern District of Illinois, Eastern division in the said case, was not a fine but a decree of forfeiture of the amount of $460,000 to the United State pursuant to the settlement of claim by the parties to the case.",
+ "head": {
+  "w": 580,
+  "h": 620.03125
+ },
+ "quote": {
+  "w": 562,
+  "h": 159.5
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.028469750889679714,
+   "y": 0.10658307210031348,
+   "w": 0.8938500889679716,
+   "h": 0.14420062695924765
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.2664576802507837,
+   "w": 0.9407528914590747,
+   "h": 0.14420062695924765
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.4263322884012539,
+   "w": 0.8564279359430605,
+   "h": 0.14420062695924765
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.5862068965517241,
+   "w": 0.9386955071174378,
+   "h": 0.14420062695924765
+  },
+  {
+   "x": 0.028469750889679714,
+   "y": 0.7460815047021944,
+   "w": 0.31400133451957296,
+   "h": 0.14420062695924765
+  }
+ ]
+}

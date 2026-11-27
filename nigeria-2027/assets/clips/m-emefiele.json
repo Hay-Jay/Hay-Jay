@@ -1,0 +1,49 @@
+{
+ "id": "m-emefiele",
+ "outlet": "Naija News",
+ "url": "https://www.naijanews.com/2026/10/20/6-23-million-fraud-emefiele-has-case-to-answer-efcc-tells-court/",
+ "title": "$6.23 Million Fraud: Emefiele Has Case To Answer, EFCC Tells Court",
+ "date": "2026-10-20",
+ "sentence": "Emefiele is facing an amended 20-count charge bordering on alleged criminal breach of trust, forgery, abuse of office, conspiracy and obtaining money by false pretence, including allegations relating to the withdrawal of $6.23 million and the conferment of corrupt advantage in the award of CBN contracts.",
+ "head": {
+  "w": 600,
+  "h": 611.96875
+ },
+ "quote": {
+  "w": 600,
+  "h": 163.71875
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.1099446459247948,
+   "w": 0.8778125,
+   "h": 0.12826875357892728
+  },
+  {
+   "x": 0.02,
+   "y": 0.2708532162626455,
+   "w": 0.9355989583333333,
+   "h": 0.12826875357892728
+  },
+  {
+   "x": 0.02,
+   "y": 0.4317617866004963,
+   "w": 0.9455208333333334,
+   "h": 0.12826875357892728
+  },
+  {
+   "x": 0.02,
+   "y": 0.592670356938347,
+   "w": 0.9506510416666667,
+   "h": 0.12826875357892728
+  },
+  {
+   "x": 0.02,
+   "y": 0.7535789272761978,
+   "w": 0.12791666666666668,
+   "h": 0.12826875357892728
+  }
+ ]
+}

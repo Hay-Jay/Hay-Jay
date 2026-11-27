@@ -1,0 +1,37 @@
+{
+ "id": "reality-poverty",
+ "outlet": "Nairametrics",
+ "url": "https://nairametrics.com/2026/04/10/nigerias-poverty-rate-hits-63-in-2025-despite-inflation-slowdown-world-bank/",
+ "title": "Nigeria’s poverty rate hits 63% in 2025 despite inflation slowdown – World Bank",
+ "date": "2026-04-10",
+ "sentence": "Nigeria’s poverty rate rose to 63% in 2025, even as inflation eased sharply, highlighting weak transmission of macroeconomic gains to households, according to the World Bank.",
+ "head": {
+  "w": 600,
+  "h": 624
+ },
+ "quote": {
+  "w": 600,
+  "h": 104
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.16346153846153846,
+   "w": 0.9421354166666667,
+   "h": 0.20192307692307693
+  },
+  {
+   "x": 0.02,
+   "y": 0.3942307692307692,
+   "w": 0.9517708333333333,
+   "h": 0.20192307692307693
+  },
+  {
+   "x": 0.02,
+   "y": 0.625,
+   "w": 0.5917708333333334,
+   "h": 0.20192307692307693
+  }
+ ]
+}

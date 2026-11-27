@@ -1,0 +1,55 @@
+{
+ "id": "fc-waysmeans",
+ "outlet": "FactCheckHub",
+ "url": "https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/",
+ "title": "Fact-checking Tinubu’s independence day speech",
+ "date": "2024-10",
+ "sentence": "The claim by Tinubu that Nigeria has cleared the ways and means debt of over N30 trillion is MISLEADING, as official document shows it is expected to be repaid over a period of 40 years.",
+ "head": {
+  "w": 593,
+  "h": 612.78125
+ },
+ "quote": {
+  "w": 592,
+  "h": 118.390625
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02702702702702703,
+   "y": 0.16048568034842287,
+   "w": 0.9377375422297297,
+   "h": 0.17737890985878316
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.40372178962650124,
+   "w": 0.24308488175675674,
+   "h": 0.17737890985878316
+  },
+  {
+   "x": 0.27011190878378377,
+   "y": 0.40372178962650124,
+   "w": 0.17026499155405406,
+   "h": 0.17737890985878316
+  },
+  {
+   "x": 0.27011190878378377,
+   "y": 0.40372178962650124,
+   "w": 0.17026499155405406,
+   "h": 0.17737890985878316
+  },
+  {
+   "x": 0.44037690033783783,
+   "y": 0.40372178962650124,
+   "w": 0.4123997043918919,
+   "h": 0.17737890985878316
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.6469578989045797,
+   "w": 0.5923247466216216,
+   "h": 0.17737890985878316
+  }
+ ]
+}

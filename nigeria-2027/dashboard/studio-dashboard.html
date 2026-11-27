@@ -1,0 +1,442 @@
+<title>Naija Decides Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800;900&display=swap">
+<style>
+/* Layout: a broadcast control room. On-air header with clock + countdown ring, "post today" spotlight, KPI rail, performance charts, calendar, phone-frame video library. */
+:root{
+  --bg:#020d07; --panel:#07201a; --panel2:#0b2c22; --line:rgba(225,245,232,.12);
+  --fg:#f0faf3; --muted:#98b9a5; --accent:#3dff9a; --ink:#022313;
+  --done:#3dff9a; --plan:#ffc83d; --late:#ff6a5c; --rec:#ff3b4f;
+  --tt:#ff2d6f; --ig:#c56bff; --x:#e8e8e8;
+  --display:"Anton",Impact,"Arial Narrow",sans-serif; --body:"Inter",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 70px;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(50% 35% at 0% 0%,rgba(0,179,95,.25),transparent 70%),radial-gradient(40% 30% at 100% 20%,rgba(255,45,111,.10),transparent 70%),radial-gradient(40% 30% at 80% 100%,rgba(197,107,255,.10),transparent 70%)}
+.wrap{max-width:1220px;margin:0 auto;display:grid;gap:20px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-transform:uppercase;margin:0;letter-spacing:.01em;line-height:.95;text-wrap:balance}
+h1{font-size:clamp(40px,7vw,78px)} h2{font-size:clamp(24px,3.4vw,34px)} h3{font-size:20px}
+.eyebrow{font:800 11px/1.2 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.muted{color:var(--muted)} .small{font-size:12px}
+button,select,input{font:inherit;color:inherit} button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 40%),var(--panel);border:1px solid var(--line);border-radius:22px;padding:18px;display:grid;gap:14px;align-content:start;min-width:0}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;gap:7px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:8px 12px;font:800 12px var(--body);text-decoration:none;color:var(--fg)}
+.btn.pri{background:var(--accent);color:var(--ink);border-color:transparent}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* on-air header */
+.onair{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;padding:22px;border-radius:26px;border:1px solid var(--line);background:linear-gradient(120deg,rgba(0,135,81,.35),rgba(2,13,7,.2) 55%),var(--panel);overflow:hidden;position:relative}
+.onair::before{content:"";position:absolute;inset:auto -60px -80px auto;width:280px;height:280px;border-radius:50%;border:40px solid rgba(61,255,154,.06)}
+@media (max-width:700px){.onair{grid-template-columns:1fr}}
+.tally{display:inline-flex;gap:8px;align-items:center;font:900 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;background:var(--rec);color:#fff;padding:7px 10px;border-radius:6px}
+.tally::before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.2}}
+.flag{display:inline-flex;height:16px;border-radius:3px;overflow:hidden;vertical-align:-2px}
+.flag i{width:9px;background:#008751}.flag i:nth-child(2){background:#fff}
+.ring{position:relative;width:150px;height:150px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring b{font:400 50px/1 var(--display);color:var(--accent);display:block}
+.clock{font:800 13px var(--body);font-variant-numeric:tabular-nums;color:var(--muted)}
+
+/* today spotlight */
+.spot{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:560px){.spot{grid-template-columns:1fr}}
+.phone{position:relative;width:150px;aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:#06301f;box-shadow:0 0 0 6px #111,0 0 0 7px rgba(255,255,255,.15),0 20px 50px rgba(0,0,0,.5)}
+.phone img,.phone video{width:100%;height:100%;object-fit:cover;display:block}
+.phone .ph{width:100%;height:100%;display:grid;place-items:center;text-align:center;font:400 24px/1 var(--display);color:var(--plan);padding:12px}
+
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:grid;gap:6px}
+.kpi .k{font:800 10px/1.2 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font:400 34px/1 var(--display);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:6px}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+
+/* posts */
+.post{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;align-items:center;padding:10px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.post .th{width:52px;aspect-ratio:9/16;border-radius:9px;overflow:hidden;background:#06301f;display:grid;place-items:center;font:400 13px/1 var(--display);color:var(--plan);text-align:center}
+.post .th img{width:100%;height:100%;object-fit:cover}
+.post .t{font-weight:800;line-height:1.25}
+.post .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 10px 5px 8px;font:800 12px/1 var(--body);display:inline-flex;gap:6px;align-items:center}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip[data-s="posted"]{background:rgba(61,255,154,.14);border-color:rgba(61,255,154,.5)}
+.chip[data-s="posted"]::after{content:"✓";color:var(--done)}
+.chip[data-s="planned"].late{border-color:rgba(255,106,92,.6)}
+.chip[data-s="skip"]{opacity:.45;text-decoration:line-through}
+.tag{font:800 10px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:6px;background:rgba(255,200,61,.15);color:var(--plan)}
+.tag.ready{background:rgba(61,255,154,.14);color:var(--done)}
+.tag.today{background:var(--accent);color:var(--ink)}
+
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal .dow{font:800 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:center}
+.day{min-height:68px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);padding:5px;display:grid;align-content:start;gap:3px;text-align:left;min-width:0}
+.day.out{opacity:.3}.day.sun{border-color:rgba(255,200,61,.35)}.day.today{outline:2px solid var(--accent)}
+.day.elect{background:rgba(61,255,154,.2);border-color:var(--accent)}
+.day .n{font:800 12px var(--body)}
+.day .p{font-size:10px;line-height:1.2;padding:3px 4px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.day .p.done{background:rgba(61,255,154,.2)}.day .p.todo{background:rgba(255,200,61,.14)}
+@media (max-width:560px){.day{min-height:48px}.day .p{font-size:0;height:6px;padding:0}}
+
+/* charts */
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.chart{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px;align-content:start}
+.hb{display:grid;gap:8px}
+.hb .r{display:grid;grid-template-columns:110px minmax(0,1fr) 70px;gap:8px;align-items:center;font-size:13px}
+.hb .r .t{height:12px;border-radius:7px;background:rgba(255,255,255,.07);overflow:hidden}
+.hb .r .t i{display:block;height:100%;border-radius:7px}
+.hb .r b{font-variant-numeric:tabular-nums;text-align:right}
+svg.line{width:100%;height:150px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+
+/* connect */
+.connect{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.conn{border-radius:16px;padding:14px;display:grid;gap:8px;border:1px solid var(--line);background:linear-gradient(140deg,color-mix(in srgb,var(--c) 18%,transparent),transparent 60%),var(--panel2)}
+.conn .nm{font:400 22px/1 var(--display);text-transform:uppercase}
+.status{font:800 10px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;padding:5px 7px;border-radius:6px;background:rgba(255,255,255,.1);justify-self:start}
+
+/* library */
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px}
+.vcard{display:grid;gap:10px;align-content:start;background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:12px;min-width:0}
+.vcard .phone{width:100%}
+.vcard .t{font-weight:800;line-height:1.25}
+.vcard .meta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.vcard .phone .play{position:absolute;inset:auto 10px 10px auto;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;color:#fff;font-size:16px;border:0}
+.filter{display:flex;gap:6px;flex-wrap:wrap}
+.filter button{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 11px;font:800 12px var(--body)}
+.filter button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+
+form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}
+label{display:grid;gap:4px;font:800 10px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+input,select{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 10px;text-transform:none;letter-spacing:0;font-weight:400;min-width:0;width:100%}
+.plats{display:flex;gap:10px;flex-wrap:wrap}
+.plats label{display:flex;gap:6px;align-items:center;color:var(--fg);font:600 13px var(--body);text-transform:none;letter-spacing:0}
+.plats input{width:auto}
+.notice{padding:12px 14px;border-radius:12px;border:1px dashed var(--line);color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:var(--ink);font-weight:800;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+dialog{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:18px;max-width:min(620px,94vw);padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+.sgrid{display:grid;grid-template-columns:90px repeat(3,minmax(0,1fr));gap:8px;align-items:center}
+.sgrid .h{font:800 11px var(--body);text-transform:uppercase;letter-spacing:.08em}
+.kit{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(46%,180px),1fr));gap:12px;margin-top:10px}
+.kit figure{margin:0;display:grid;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px}
+.kit figure.wide{grid-column:span 2}
+.kit img{width:100%;border-radius:10px;display:block;background:#020f08}
+.kit figcaption{display:grid;gap:6px;justify-items:start}
+.kit.covers{grid-template-columns:repeat(auto-fill,minmax(min(46%,130px),1fr))}
+.kit.covers img{aspect-ratio:9/16;object-fit:cover}
+.kit.hls{grid-template-columns:repeat(auto-fill,minmax(min(30%,96px),1fr))}
+.kit.hls img{aspect-ratio:1;object-fit:cover;object-position:center;border-radius:50%}
+.kh{margin:22px 0 4px;font:400 20px/1.1 var(--display);text-transform:uppercase;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.bios{display:grid;gap:10px;margin-top:8px}
+.bio{display:grid;gap:4px;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--fg);font:600 15px/1.4 var(--body);cursor:pointer}
+.bio:hover{border-color:var(--accent)}
+.steps{margin:8px 0 0;padding-left:20px;display:grid;gap:8px}
+.times{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px;margin-top:8px}
+.times div{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:4px}
+.times b{font:400 26px/1 var(--display)}
+@media (max-width:560px){.kit figure.wide{grid-column:1/-1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="onair">
+    <div style="display:grid;gap:10px">
+      <div class="row"><span class="tally">On air</span><span class="eyebrow"><span class="flag"><i></i><i></i><i></i></span> Posting control room</span></div>
+      <h1>Naija Decides<br>Studio</h1>
+      <div class="muted">TikTok · Instagram Reels · X. Plan it, post it, track it. Every video ends by sending viewers to the Naija Decides site.</div>
+      <div class="clock" id="clock"></div>
+    </div>
+    <div class="ring" aria-label="Days to the presidential vote">
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="10"/><circle id="ringarc" cx="60" cy="60" r="52" fill="none" stroke="#3dff9a" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
+      <div class="c"><div><b id="days">–</b><span class="muted small">days to vote</span></div></div>
+    </div>
+  </header>
+
+  <div id="dbnote" class="notice" hidden></div>
+
+  <section class="panel" aria-labelledby="h-today"><div class="head"><h2 id="h-today">Post today</h2><span class="muted small" id="todaynote"></span></div><div id="today"></div></section>
+
+  <section class="kpis" id="kpis" aria-label="Progress"></section>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="h-next"><div class="head"><h2 id="h-next">Up next</h2><span class="muted small">Tap a platform once posted</span></div><div id="next" style="display:grid;gap:10px"></div></section>
+    <section class="panel" aria-labelledby="h-cal"><div class="head"><h2 id="h-cal">Calendar</h2><div class="row"><button class="btn" id="prev" aria-label="Previous month">‹</button><b id="month"></b><button class="btn" id="nextm" aria-label="Next month">›</button></div></div><div class="cal" id="cal"></div><div class="muted small">Gold border: Sunday news slot. Green: posted. Gold: to post. Tap a day for details.</div></section>
+  </div>
+
+  <section class="panel" aria-labelledby="h-perf">
+    <div class="head"><h2 id="h-perf">Performance</h2><div class="row"><button class="btn" id="logf">Log followers</button></div></div>
+    <div class="charts" id="charts"></div>
+    <div class="muted small">Log each post's numbers with "Log stats" on any post. Stats fill in automatically once TikTok and Instagram are connected (see below).</div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-conn">
+    <h2 id="h-conn">Connect your accounts</h2>
+    <div class="connect">
+      <div class="conn" style="--c:var(--tt)"><span class="nm" style="color:var(--tt)">TikTok</span><span class="status">Manual stats for now</span><span class="muted small">Connect <b>Supermetrics</b> (organic TikTok insights) or <b>vidIQ</b> in claude.ai → Settings → Connectors, then ask Claude to sync your stats here.</span></div>
+      <div class="conn" style="--c:var(--ig)"><span class="nm" style="color:var(--ig)">Instagram</span><span class="status">Manual stats for now</span><span class="muted small">Needs an Instagram Professional (Business or Creator) account linked to a Facebook Page, then <b>Supermetrics</b> in claude.ai connectors.</span></div>
+      <div class="conn" style="--c:var(--x)"><span class="nm">X</span><span class="status">Manual stats</span><span class="muted small">Log post views from X Analytics with "Log stats". Free accounts can upload videos up to 2:20, so every video fits.</span></div>
+      <div class="conn" style="--c:var(--accent)"><span class="nm" style="color:var(--accent)">Website</span><span class="status">Link in bio</span><span class="muted small">Every video now ends: "Compare the candidates, check the claims, follow the live rank on Naija Decides. Link in bio." Put the site link in all three bios.</span></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-kit">
+    <div class="head"><h2 id="h-kit">Profile kit</h2><span class="muted small">Everything for a sharp TikTok &amp; Instagram page. Tap to save to your iPhone.</span></div>
+    <div class="kit">
+      <figure><img src="kit/profile/profile-photo-monogram.png" alt="Profile photo, ND monogram" loading="lazy"><figcaption><b>Profile photo</b><span class="muted small">Monogram, 1080×1080 · recommended</span><button class="btn pri" data-kit="profile/profile-photo-monogram.png">⬇ Save</button></figcaption></figure>
+      <figure><img src="kit/profile/profile-photo-wordmark.png" alt="Profile photo, wordmark" loading="lazy"><figcaption><b>Profile photo, alt</b><span class="muted small">Wordmark, 1080×1080</span><button class="btn" data-kit="profile/profile-photo-wordmark.png">⬇ Save</button></figcaption></figure>
+      <figure class="wide"><img src="kit/banner/banner-1500x500.png" alt="Profile banner" loading="lazy"><figcaption><b>Banner</b><span class="muted small">1500×500 · TikTok profile banner and X header</span><button class="btn pri" data-kit="banner/banner-1500x500.png">⬇ Save</button></figcaption></figure>
+    </div>
+    <h3 class="kh">Video covers <span class="muted small">1080×1920, text kept inside the profile-grid crop</span></h3>
+    <div class="kit covers" id="kcovers"></div>
+    <h3 class="kh">Instagram highlight covers</h3>
+    <div class="kit hls" id="khls"></div>
+    <h3 class="kh">Bio &amp; name <span class="muted small">Tap to copy</span></h3>
+    <div class="bios">
+      <button class="bio" data-bio="name"><span class="muted small">Name (both apps)</span><b>Naija Decides 🇳🇬 2027</b></button>
+      <button class="bio" data-bio="tt"><span class="muted small">TikTok bio · 80 characters max</span><b>Facts, fact-checks &amp; the live rank for Nigeria 2027 🇳🇬 Vote 16 Jan 👇</b></button>
+      <button class="bio" data-bio="ig"><span class="muted small">Instagram bio · 150 characters max</span><b>Nigeria 2027, explained 🇳🇬 Facts • fact-checks • all 18 candidates • live rank. Neutral, sourced, no party. Vote 16 Jan 2027 🗳️ Site 👇</b></button>
+    </div>
+    <h3 class="kh">Best quality from your iPhone</h3>
+    <ol class="steps">
+      <li><b>Save</b> the MP4 here (⬇ Download), then in the share sheet tap <b>Save Video</b>. It lands in Photos at full 1080×1920.</li>
+      <li><b>TikTok:</b> Profile → ☰ → Settings and privacy → <b>Data saver: off</b>. On the post screen, check <b>More options → Allow high-quality uploads</b> if your app shows it.</li>
+      <li><b>Instagram:</b> Settings → Media quality → <b>Upload at highest quality: on</b>, and Data saver off.</li>
+      <li>Upload on <b>Wi-Fi</b>. Don't add TikTok filters or re-trim: re-editing re-compresses the video.</li>
+      <li>Cover: on the post screen tap <b>Edit cover</b> → pick from your photos and choose the saved cover PNG.</li>
+      <li>Paste the caption from <b>Copy caption</b>. Add 3–5 hashtags, not 20.</li>
+    </ol>
+    <h3 class="kh">When to post <span class="muted small" id="tzline"></span></h3>
+    <div class="times" id="times"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-lib">
+    <div class="head"><h2 id="h-lib">Video library</h2><div class="filter" id="libf"></div></div>
+    <div class="lib" id="lib"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-add">
+    <h2 id="h-add">Schedule a post</h2>
+    <form class="grid" id="addform">
+      <label>Video<select id="f-video" required></select></label>
+      <label>Date<input id="f-date" type="date" required></label>
+      <label>Time (WAT)<input id="f-time" type="time" value="19:00" required></label>
+      <div><div class="eyebrow" style="color:var(--muted);margin-bottom:6px">Platforms</div><div class="plats"><label><input type="checkbox" id="f-tt" checked> TikTok</label><label><input type="checkbox" id="f-ig" checked> Instagram</label><label><input type="checkbox" id="f-x" checked> X</label></div></div>
+      <label>Note<input id="f-note" placeholder="Optional"></label>
+      <button class="btn pri" type="submit" style="padding:11px 14px">Add to calendar</button>
+    </form>
+  </section>
+</div>
+
+<dialog id="dlg"><div id="dlgbody"></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" id="dlgclose">Close</button></div></dialog>
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+  const ELECTION = new Date('2027-01-16T08:00:00+01:00'), START = new Date('2026-11-04T00:00:00+01:00');
+  const PL = {tiktok:{n:'TikTok',c:'var(--tt)',hex:'#ff2d6f'}, instagram:{n:'Instagram',c:'var(--ig)',hex:'#c56bff'}, x:{n:'X',c:'var(--x)',hex:'#e8e8e8'}};
+  const METRICS = [['views','Views'],['likes','Likes'],['comments','Comments'],['shares','Shares'],['saves','Saves']];
+  const state = {videos:{}, posts:[], followers:[], loaded:false};
+  let db = null, dl = null, month = null, libFilter = 'ready';
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const today = () => new Date(Date.now() + (60 + new Date().getTimezoneOffset()) * 60000).toISOString().slice(0, 10);
+
+  const COVERS = ['spotlight-seyi-makinde','spotlight-donald-duke','countdown','your-money','promise-vs-reality','fact-check','know-the-candidates','where-the-money-went','candidate-scorecard','rewind-2023','protect-your-vote'];
+  const BIOS = {name:'Naija Decides 🇳🇬 2027', tt:'Facts, fact-checks & the live rank for Nigeria 2027 🇳🇬 Vote 16 Jan 👇', ig:'Nigeria 2027, explained 🇳🇬 Facts • fact-checks • all 18 candidates • live rank. Neutral, sourced, no party. Vote 16 Jan 2027 🗳️ Site 👇'};
+  const LOCAL_TZ = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Lagos'; } catch (e) { return 'Africa/Lagos'; } })();
+  const watToDate = (date, time) => new Date(`${date}T${time || '19:00'}:00+01:00`);
+  const youT = d => d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  const youAt = p => LOCAL_TZ === 'Africa/Lagos' ? '' : ` (${youT(watToDate(p.date, p.time))} your time)`;
+  function kitRender(){
+    const c = document.getElementById('kcovers'); if (!c) return;
+    c.innerHTML = COVERS.map(id => `<figure><img src="kit/covers/${id}.png" alt="${id} cover" loading="lazy"><figcaption><button class="btn" data-kit="covers/${id}.png">⬇ Save</button></figcaption></figure>`).join('');
+    document.getElementById('khls').innerHTML = ['news','facts','rank','candidates','vote'].map(id => `<figure><img src="kit/highlights/${id}.png" alt="${id} highlight cover" loading="lazy"><figcaption><button class="btn" data-kit="highlights/${id}.png">⬇ ${id[0].toUpperCase() + id.slice(1)}</button></figcaption></figure>`).join('');
+    const d = new Date().toISOString().slice(0, 10);
+    const slots = [['19:00','Main slot · weekdays','After work and school in Nigeria: the busiest TikTok hours.'],['18:00','Sundays','Weekly news recap, when people wind down.'],['12:30','Bonus slot','Lunch scroll. Use it for a second post on big news days.'],['07:00','Election day only','Before polls open on 16 Jan.']];
+    document.getElementById('tzline').textContent = LOCAL_TZ === 'Africa/Lagos' ? 'All times are Lagos time (WAT)' : `Lagos time (WAT) → your time (${LOCAL_TZ.split('/').pop().replace(/_/g, ' ')})`;
+    document.getElementById('times').innerHTML = slots.map(([t, h, n]) => `<div><span class="muted small">${h}</span><b>${t} WAT${LOCAL_TZ === 'Africa/Lagos' ? '' : ` → ${youT(watToDate(d, t))}`}</b><span class="small">${n}</span></div>`).join('');
+  }
+  const fmtDate = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'short'});
+  const num = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'K' : String(n || 0);
+  const toast = m => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 1700); };
+  const thumb = v => v && v.status === 'ready' ? `<img src="thumbs/${esc(v.id)}.jpg" alt="" loading="lazy">` : `<div class="ph">${esc(v ? (v.short || 'NEW') : '?')}</div>`;
+  const postStatus = p => { const l = Object.values(p.platforms || {}).filter(s => s !== 'skip'); return l.length && l.every(s => s === 'posted') ? 'done' : 'todo'; };
+  const views = p => Object.values(p.stats || {}).reduce((a, s) => a + (+s.views || 0), 0);
+
+  function tick(){
+    const now = new Date(); const d = Math.max(0, Math.ceil((ELECTION - now) / 864e5)); $('#days').textContent = d;
+    const frac = Math.min(1, (now - START) / (ELECTION - START)); $('#ringarc').style.strokeDashoffset = 326.7 * (1 - frac);
+    $('#clock').textContent = (LOCAL_TZ !== 'Africa/Lagos' ? 'You ' + now.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) + ' · ' : '') + 'Lagos ' + now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', timeZone:'Africa/Lagos'}) + ' WAT · ' + now.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long', timeZone:'Africa/Lagos'});
+  }
+  tick(); setInterval(tick, 30000);
+
+  function render(){
+    const posts = [...state.posts].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+    const vids = Object.values(state.videos).sort((a, b) => (a.order || 99) - (b.order || 99));
+    const t = today();
+    // today
+    const tp = posts.filter(p => p.date === t);
+    const nextUp = tp[0] || posts.find(p => p.date > t && postStatus(p) === 'todo');
+    $('#todaynote').textContent = tp.length ? `${tp.length} post${tp.length > 1 ? 's' : ''} today` : nextUp ? 'Nothing today. Next one below.' : '';
+    $('#today').innerHTML = nextUp ? (() => { const v = state.videos[nextUp.videoId] || {}; return `<div class="spot"><div class="phone">${thumb(v)}</div><div style="display:grid;gap:10px;min-width:0">
+      <div class="row">${nextUp.date === t ? '<span class="tag today">Today</span>' : `<span class="tag">${fmtDate(nextUp.date)}</span>`}<span class="muted small">${esc(nextUp.time)} WAT${youAt(nextUp)}</span></div>
+      <h2>${esc(v.title || nextUp.videoId)}</h2>${nextUp.note ? `<div style="color:var(--plan)">${esc(nextUp.note)}</div>` : ''}
+      ${v.caption ? `<div class="muted small" style="background:rgba(0,0,0,.25);border-radius:10px;padding:10px">${esc(v.caption)}</div>` : '<div class="notice">This video still needs to be made.</div>'}
+      <div class="row">${v.status === 'ready' ? `<button class="btn pri" data-dl="${esc(v.id)}">⬇ Download MP4</button>${COVERS.includes(v.id) ? `<button class="btn" data-kit="covers/${esc(v.id)}.png">⬇ Cover</button>` : ''}` : ''}${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Copy caption</button>` : ''}${chips(nextUp)}</div></div></div>`; })() : `<div class="notice">${state.loaded ? 'Nothing scheduled. Add a post below.' : 'Today\'s post appears here with its video, caption and download button.'}</div>`;
+    // kpis
+    let slots = 0, done = 0; const per = {tiktok:[0,0], instagram:[0,0], x:[0,0]};
+    posts.forEach(p => Object.entries(p.platforms || {}).forEach(([k, s]) => { if (s === 'skip' || !per[k]) return; slots++; per[k][1]++; if (s === 'posted') { done++; per[k][0]++; } }));
+    const ready = vids.filter(v => v.status === 'ready').length; const totalViews = posts.reduce((a, p) => a + views(p), 0);
+    const lastF = [...state.followers].sort((a, b) => a.date.localeCompare(b.date)).pop();
+    const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+    $('#kpis').innerHTML = `
+      <div class="kpi"><div class="k">Videos ready</div><div class="v">${ready}<span class="muted" style="font-size:16px"> / ${vids.length}</span></div><div class="bar"><i style="width:${pct(ready, vids.length)}%"></i></div></div>
+      <div class="kpi"><div class="k">Posts done</div><div class="v">${done}<span class="muted" style="font-size:16px"> / ${slots}</span></div><div class="bar"><i style="width:${pct(done, slots)}%"></i></div></div>
+      ${Object.entries(per).map(([k, [a, b]]) => `<div class="kpi"><div class="k" style="color:${PL[k].c}">${PL[k].n}</div><div class="v">${a}<span class="muted" style="font-size:16px"> / ${b}</span></div><div class="bar"><i style="width:${pct(a, b)}%;background:${PL[k].c}"></i></div></div>`).join('')}
+      <div class="kpi"><div class="k">Total views</div><div class="v">${num(totalViews)}</div><div class="muted small">${lastF ? `${num((+lastF.tiktok || 0) + (+lastF.instagram || 0) + (+lastF.x || 0))} followers` : 'Log stats to track'}</div></div>`;
+    // next
+    const upcoming = posts.filter(p => postStatus(p) === 'todo').slice(0, 6);
+    $('#next').innerHTML = upcoming.length ? upcoming.map(postRow).join('') : `<div class="notice">${state.loaded ? 'All caught up.' : 'Upcoming posts appear here with a button per platform.'}</div>`;
+    renderCal(posts, t); renderCharts(posts); renderLib(vids, posts);
+    const sel = $('#f-video'); const cur = sel.value; sel.innerHTML = vids.map(v => `<option value="${esc(v.id)}">${esc(v.title)}${v.status === 'ready' ? '' : ' (to make)'}</option>`).join(''); if (cur) sel.value = cur;
+  }
+  function chips(p){ const t = today(); return Object.keys(PL).filter(k => p.platforms && k in p.platforms).map(k => `<button class="chip ${p.date < t ? 'late' : ''}" style="--c:${PL[k].c}" data-s="${p.platforms[k]}" data-post="${esc(p.id)}" data-pl="${k}"><span class="dot"></span>${PL[k].n}</button>`).join(''); }
+  function postRow(p){
+    const v = state.videos[p.videoId]; const t = today(); const vw = views(p);
+    return `<div class="post"><div class="th">${v && v.status === 'ready' ? `<img src="thumbs/${esc(v.id)}.jpg" alt="">` : esc(v ? v.short : '?')}</div><div style="min-width:0">
+      <div class="d">${p.date === t ? '<span class="tag today">Today</span> ' : ''}${fmtDate(p.date)} · ${esc(p.time)} WAT${youAt(p)}${vw ? ` · <b style="color:var(--fg)">${num(vw)} views</b>` : ''}</div>
+      <div class="t">${esc(v ? v.title : p.videoId)}</div>${p.note ? `<div class="small" style="color:var(--plan)">${esc(p.note)}</div>` : ''}
+      <div class="chips">${chips(p)}<button class="btn" data-stats="${esc(p.id)}">Log stats</button>${v && v.status === 'ready' ? `<button class="btn" data-dl="${esc(v.id)}" aria-label="Download video">⬇</button>` : ''}<button class="btn" data-del="${esc(p.id)}" aria-label="Remove post">✕</button></div>
+    </div></div>`;
+  }
+  function renderCal(posts, t){
+    if (!month) { const d = new Date(t + 'T12:00:00'); month = new Date(d.getFullYear(), d.getMonth(), 1); }
+    $('#month').textContent = month.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+    const start = new Date(month); start.setDate(1 - ((month.getDay() + 6) % 7));
+    let h = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => `<div class="dow">${d}</div>`).join('');
+    for (let i = 0; i < 42; i++) {
+      const d = new Date(start); d.setDate(start.getDate() + i);
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      const ps = posts.filter(p => p.date === iso);
+      h += `<button class="${['day', d.getMonth() !== month.getMonth() && 'out', d.getDay() === 0 && 'sun', iso === t && 'today', iso === '2027-01-16' && 'elect'].filter(Boolean).join(' ')}" data-day="${iso}"><span class="n">${d.getDate()}</span>${iso === '2027-01-16' ? '<span class="p done">ELECTION</span>' : ''}${ps.map(p => `<span class="p ${postStatus(p) === 'done' ? 'done' : 'todo'}">${esc((state.videos[p.videoId] || {}).short || p.videoId)}</span>`).join('')}</button>`;
+      if (i === 34 && new Date(start.getTime() + 35 * 864e5).getMonth() !== month.getMonth()) break;
+    }
+    $('#cal').innerHTML = h;
+  }
+  function renderCharts(posts){
+    const byPl = {tiktok:{}, instagram:{}, x:{}}; let any = false;
+    posts.forEach(p => Object.entries(p.stats || {}).forEach(([k, s]) => { if (!byPl[k]) return; METRICS.forEach(([m]) => { byPl[k][m] = (byPl[k][m] || 0) + (+s[m] || 0); if (+s[m]) any = true; }); }));
+    const maxV = Math.max(1, ...Object.values(byPl).map(x => x.views || 0));
+    const top = posts.map(p => ({p, v: views(p)})).filter(x => x.v).sort((a, b) => b.v - a.v).slice(0, 5); const maxT = Math.max(1, ...top.map(x => x.v));
+    const eng = Object.entries(byPl).map(([k, s]) => [k, s.views ? ((s.likes || 0) + (s.comments || 0) + (s.shares || 0) + (s.saves || 0)) / s.views * 100 : 0]);
+    const F = [...state.followers].sort((a, b) => a.date.localeCompare(b.date));
+    const line = (() => { if (F.length < 2) return '<div class="notice">Log followers at least twice to see growth.</div>';
+      const W = 300, H = 140, P = 10; const all = F.flatMap(f => Object.keys(PL).map(k => +f[k] || 0)); const mx = Math.max(1, ...all);
+      const x = i => P + i * (W - 2 * P) / (F.length - 1), y = v => H - P - v / mx * (H - 2 * P);
+      return `<svg class="line" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Followers over time">${[0, .5, 1].map(f => `<line x1="${P}" x2="${W - P}" y1="${y(mx * f)}" y2="${y(mx * f)}" stroke="rgba(255,255,255,.08)"/>`).join('')}${Object.entries(PL).map(([k, pl]) => `<polyline fill="none" stroke="${pl.hex}" stroke-width="2.5" points="${F.map((f, i) => `${x(i)},${y(+f[k] || 0)}`).join(' ')}"/><circle cx="${x(F.length - 1)}" cy="${y(+F[F.length - 1][k] || 0)}" r="4" fill="${pl.hex}"/>`).join('')}</svg><div class="legend">${Object.entries(PL).map(([k, pl]) => `<span><i style="background:${pl.hex}"></i>${pl.n} ${num(+F[F.length - 1][k] || 0)}</span>`).join('')}</div>`; })();
+    $('#charts').innerHTML = `
+      <div class="chart"><div class="eyebrow">Views by platform</div>${any ? `<div class="hb">${Object.entries(byPl).map(([k, s]) => `<div class="r"><span>${PL[k].n}</span><span class="t"><i style="width:${(s.views || 0) / maxV * 100}%;background:${PL[k].c}"></i></span><b>${num(s.views || 0)}</b></div>`).join('')}</div>` : '<div class="notice">No stats logged yet.</div>'}</div>
+      <div class="chart"><div class="eyebrow">Top videos</div>${top.length ? `<div class="hb">${top.map(({p, v}) => `<div class="r"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((state.videos[p.videoId] || {}).short || p.videoId)}</span><span class="t"><i style="width:${v / maxT * 100}%;background:var(--accent)"></i></span><b>${num(v)}</b></div>`).join('')}</div>` : '<div class="notice">Your best performers rank here.</div>'}</div>
+      <div class="chart"><div class="eyebrow">Engagement rate</div><div class="hb">${eng.map(([k, e]) => `<div class="r"><span>${PL[k].n}</span><span class="t"><i style="width:${Math.min(100, e * 5)}%;background:${PL[k].c}"></i></span><b>${e ? e.toFixed(1) + '%' : '—'}</b></div>`).join('')}</div><div class="muted small">(likes + comments + shares + saves) ÷ views</div></div>
+      <div class="chart"><div class="eyebrow">Followers</div>${line}</div>`;
+  }
+  function renderLib(vids, posts){
+    const counts = {all: vids.length, ready: vids.filter(v => v.status === 'ready').length, todo: vids.filter(v => v.status !== 'ready').length};
+    $('#libf').innerHTML = [['ready','Ready'],['todo','To make'],['all','All']].map(([k, l]) => `<button data-lf="${k}" aria-pressed="${libFilter === k}">${l} ${counts[k]}</button>`).join('');
+    const list = vids.filter(v => libFilter === 'all' || (libFilter === 'ready' ? v.status === 'ready' : v.status !== 'ready'));
+    $('#lib').innerHTML = list.length ? list.map(v => { const ps = posts.filter(p => p.videoId === v.id); const vw = ps.reduce((a, p) => a + views(p), 0);
+      return `<article class="vcard"><div class="phone" data-vid="${esc(v.id)}">${thumb(v)}${v.status === 'ready' ? `<button class="play" data-play="${esc(v.id)}" aria-label="Preview ${esc(v.title)}">▶</button>` : ''}</div>
+        <div class="t">${esc(v.title)}</div><div class="meta"><span class="tag ${v.status === 'ready' ? 'ready' : ''}">${v.status === 'ready' ? 'Ready' : 'To make'}</span>${v.secs ? `<span>${Math.floor(v.secs / 60)}:${String(v.secs % 60).padStart(2, '0')}</span>` : ''}<span>${ps.length ? `${ps.filter(p => postStatus(p) === 'done').length}/${ps.length} posted` : 'Not scheduled'}</span>${vw ? `<span>${num(vw)} views</span>` : ''}</div>
+        <div class="row">${v.status === 'ready' ? `<button class="btn pri" data-dl="${esc(v.id)}">⬇ Download</button>${COVERS.includes(v.id) ? `<button class="btn" data-kit="covers/${esc(v.id)}.png">⬇ Cover</button>` : ''}` : ''}${v.caption ? `<button class="btn" data-copy="${esc(v.id)}">Caption</button>` : ''}<button class="btn" data-sched="${esc(v.id)}">Schedule</button></div></article>`; }).join('') : '<div class="notice">Nothing here.</div>';
+  }
+
+  // ---- actions
+  const order = ['planned','posted','skip'];
+  async function write(fn, ok){ if (!db) { toast('Open this page in Claude to save changes'); return; } try { await fn(); if (ok) toast(ok); } catch (e) { toast(e && e.code === 'invalid_argument' ? 'You can view this plan but not change it' : 'Could not save. Try again'); } }
+  async function saveFile(url, filename){
+    dl = dl || (window.claude ? await window.claude.use('downloads') : null);
+    if (!dl) { toast('Downloads work when this page is open in Claude'); return; }
+    try { toast('Preparing…'); const r = await fetch(url); if (!r.ok) throw new Error('missing'); await dl.save({filename, data: await r.blob()}); toast('Saved'); }
+    catch (e) { toast(e && e.code === 'declined' ? 'Download cancelled' : e && e.code === 'rate_limited' ? 'One download at a time' : 'Not available yet'); }
+  }
+  async function download(id){
+    const v = state.videos[id]; if (!v) return;
+    dl = dl || (window.claude ? await window.claude.use('downloads') : null);
+    if (!dl) { toast('Downloads work when this page is open in Claude'); return; }
+    try { toast('Preparing ' + v.short + '…'); const r = await fetch(`videos/${id}.mp4`); if (!r.ok) throw new Error('missing'); const blob = await r.blob();
+      await dl.save({filename: `NaijaDecides-${id}.mp4`, data: blob}); toast('Saved'); }
+    catch (e) { toast(e && e.code === 'declined' ? 'Download cancelled' : e && e.code === 'rate_limited' ? 'One download at a time' : 'Video not available yet'); }
+  }
+  function statsDialog(p){
+    const v = state.videos[p.videoId] || {}; const pls = Object.keys(PL).filter(k => p.platforms && k in p.platforms); const s = p.stats || {};
+    $('#dlgbody').innerHTML = `<h2>Log stats</h2><div class="muted small" style="margin:4px 0 12px">${esc(v.title || p.videoId)} · ${fmtDate(p.date)}</div>
+      <form id="sform"><div class="sgrid"><span></span>${pls.map(k => `<span class="h" style="color:${PL[k].c}">${PL[k].n}</span>`).join('')}${'<span></span>'.repeat(3 - pls.length)}
+      ${METRICS.map(([m, l]) => `<span class="small">${l}</span>${pls.map(k => `<input type="number" min="0" inputmode="numeric" id="s-${k}-${m}" value="${(s[k] || {})[m] ?? ''}" aria-label="${PL[k].n} ${l}">`).join('')}${'<span></span>'.repeat(3 - pls.length)}`).join('')}</div>
+      <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn pri" type="submit">Save stats</button></div></form>`;
+    $('#dlg').showModal();
+    $('#sform').onsubmit = e => { e.preventDefault(); const stats = {}; pls.forEach(k => { stats[k] = {}; METRICS.forEach(([m]) => { const val = $(`#s-${k}-${m}`).value; if (val !== '') stats[k][m] = +val; }); });
+      write(() => db.doc('posts/' + p.id).update({stats}), 'Stats saved').then(() => $('#dlg').close()); };
+  }
+  function followersDialog(){
+    const last = [...state.followers].sort((a, b) => a.date.localeCompare(b.date)).pop() || {};
+    $('#dlgbody').innerHTML = `<h2>Log followers</h2><div class="muted small" style="margin:4px 0 12px">Today's follower count on each platform.</div>
+      <form id="fform" class="grid">${Object.entries(PL).map(([k, pl]) => `<label style="color:${pl.c}">${pl.n}<input type="number" min="0" id="fo-${k}" value="${last[k] ?? ''}"></label>`).join('')}<button class="btn pri" type="submit">Save</button></form>`;
+    $('#dlg').showModal();
+    $('#fform').onsubmit = e => { e.preventDefault(); const d = today(); const body = {date: d}; Object.keys(PL).forEach(k => { const v = $('#fo-' + k).value; if (v !== '') body[k] = +v; });
+      write(() => db.doc('followers/' + d).set(body), 'Followers saved').then(() => $('#dlg').close()); };
+  }
+  document.addEventListener('click', e => {
+    const c = e.target.closest('[data-post]');
+    if (c) { const p = state.posts.find(x => x.id === c.dataset.post); if (!p) return; const nxt = order[(order.indexOf(p.platforms[c.dataset.pl]) + 1) % 3];
+      write(() => db.doc('posts/' + p.id).update({platforms: {[c.dataset.pl]: nxt}}), nxt === 'posted' ? `Posted on ${PL[c.dataset.pl].n}` : nxt === 'skip' ? 'Marked skipped' : 'Reset to planned'); return; }
+    const del = e.target.closest('[data-del]');
+    if (del) { if (del.dataset.armed) write(() => db.doc('posts/' + del.dataset.del).delete(), 'Post removed'); else { del.dataset.armed = '1'; del.textContent = 'Remove?'; setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.textContent = '✕'; } }, 2500); } return; }
+    const cp = e.target.closest('[data-copy]'); if (cp) { navigator.clipboard.writeText(state.videos[cp.dataset.copy].caption).then(() => toast('Caption copied'), () => toast('Copy blocked on this device')); return; }
+    const d = e.target.closest('[data-dl]'); if (d) { download(d.dataset.dl); return; }
+    const kf = e.target.closest('[data-kit]'); if (kf) { saveFile('kit/' + kf.dataset.kit, 'NaijaDecides-' + kf.dataset.kit.split('/').pop()); return; }
+    const bc = e.target.closest('[data-bio]'); if (bc) { navigator.clipboard.writeText(BIOS[bc.dataset.bio]).then(() => toast('Copied'), () => toast('Copy failed')); return; }
+    const st = e.target.closest('[data-stats]'); if (st) { const p = state.posts.find(x => x.id === st.dataset.stats); if (p) statsDialog(p); return; }
+    const pl = e.target.closest('[data-play]'); if (pl) { const box = pl.closest('.phone'); box.innerHTML = `<video src="videos/${esc(pl.dataset.play)}.mp4" controls autoplay playsinline></video>`; return; }
+    const lf = e.target.closest('[data-lf]'); if (lf) { libFilter = lf.dataset.lf; render(); return; }
+    const sc = e.target.closest('[data-sched]'); if (sc) { $('#f-video').value = sc.dataset.sched; document.getElementById('h-add').scrollIntoView({behavior:'smooth'}); $('#f-date').focus(); return; }
+    const day = e.target.closest('[data-day]');
+    if (day) { const ps = state.posts.filter(p => p.date === day.dataset.day).sort((a, b) => a.time.localeCompare(b.time));
+      $('#dlgbody').innerHTML = `<h2>${fmtDate(day.dataset.day)}</h2>${day.dataset.day === '2027-01-16' ? '<p>Presidential and National Assembly elections.</p>' : ''}<div style="display:grid;gap:10px;margin-top:10px">${ps.length ? ps.map(postRow).join('') : '<div class="notice">Nothing scheduled.</div>'}</div>`; $('#dlg').showModal(); return; }
+  });
+  $('#logf').onclick = followersDialog;
+  $('#dlgclose').onclick = () => $('#dlg').close();
+  $('#prev').onclick = () => { month = new Date(month.getFullYear(), month.getMonth() - 1, 1); render(); };
+  $('#nextm').onclick = () => { month = new Date(month.getFullYear(), month.getMonth() + 1, 1); render(); };
+  $('#addform').addEventListener('submit', e => { e.preventDefault();
+    const platforms = {}; if ($('#f-tt').checked) platforms.tiktok = 'planned'; if ($('#f-ig').checked) platforms.instagram = 'planned'; if ($('#f-x').checked) platforms.x = 'planned';
+    if (!Object.keys(platforms).length) { toast('Pick at least one platform'); return; }
+    write(() => db.collection('posts').add({videoId: $('#f-video').value, date: $('#f-date').value, time: $('#f-time').value, platforms, note: $('#f-note').value.trim()}), 'Added to calendar').then(() => { $('#f-note').value = ''; }); });
+  $('#f-date').value = today();
+
+  render(); kitRender();
+  (async () => {
+    db = window.claude && await window.claude.use('db');
+    if (!db) { const n = $('#dbnote'); n.hidden = false; n.textContent = 'Your saved plan loads when this page is open in Claude while you are signed in.'; return; }
+    let pending = 3; const timer = setTimeout(() => { const n = $('#dbnote'); n.hidden = false; n.textContent = 'Still loading your plan. Check your connection.'; }, 10000);
+    const settle = s => { if (!s.metadata.fromCache && --pending <= 0) { clearTimeout(timer); $('#dbnote').hidden = true; } state.loaded = true; render(); };
+    const fail = () => { clearTimeout(timer); const n = $('#dbnote'); n.hidden = false; n.textContent = 'Your plan could not be loaded right now. Reopen the page to try again.'; };
+    db.collection('videos').onSnapshot(s => { state.videos = {}; s.docs.forEach(d => state.videos[d.id] = {id: d.id, ...d.data()}); settle(s); }, fail);
+    db.collection('posts').onSnapshot(s => { state.posts = s.docs.map(d => ({id: d.id, ...d.data()})); settle(s); }, fail);
+    db.collection('followers').onSnapshot(s => { state.followers = s.docs.map(d => ({id: d.id, ...d.data()})); settle(s); }, fail);
+  })();
+})();
+</script>

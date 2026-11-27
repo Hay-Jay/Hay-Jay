@@ -1,0 +1,61 @@
+{
+ "id": "m-suvs",
+ "outlet": "Dubawa",
+ "url": "https://dubawa.org/fact-checking-five-economic-claims-in-viral-response-to-tinubus-speech/",
+ "title": "Fact-checking five economic claims in viral response to Tinubu’s speech",
+ "date": "2024-08-11",
+ "sentence": "In this amended budget, N70 billion was allocated to ease work stress for the 469 members of the National Assembly, who will each get a Toyota Prado SUV worth between N130 million and N160 million.",
+ "head": {
+  "w": 600,
+  "h": 624.375
+ },
+ "quote": {
+  "w": 584,
+  "h": 237.734375
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.2944135273972603,
+   "y": 0.4550115018074269,
+   "w": 0.674630779109589,
+   "h": 0.08412750575090372
+  },
+  {
+   "x": 0.0273972602739726,
+   "y": 0.5786395004929346,
+   "w": 0.9146243578767124,
+   "h": 0.08412750575090372
+  },
+  {
+   "x": 0.0273972602739726,
+   "y": 0.7022674991784423,
+   "w": 0.2690496575342466,
+   "h": 0.08412750575090372
+  },
+  {
+   "x": 0.2964469178082192,
+   "y": 0.7022674991784423,
+   "w": 0.24740475171232876,
+   "h": 0.08412750575090372
+  },
+  {
+   "x": 0.2964469178082192,
+   "y": 0.7022674991784423,
+   "w": 0.24740475171232876,
+   "h": 0.08412750575090372
+  },
+  {
+   "x": 0.543851669520548,
+   "y": 0.7022674991784423,
+   "w": 0.3843107876712329,
+   "h": 0.08412750575090372
+  },
+  {
+   "x": 0.0273972602739726,
+   "y": 0.82589549786395,
+   "w": 0.23167273116438356,
+   "h": 0.08412750575090372
+  }
+ ]
+}

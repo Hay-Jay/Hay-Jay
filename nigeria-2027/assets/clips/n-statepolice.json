@@ -1,0 +1,28 @@
+{
+ "id": "n-statepolice",
+ "outlet": "Naija News",
+ "url": "https://www.naijanews.com/2026/11/03/national-assembly-to-transmit-state-police-bill-to-president-tinubu/",
+ "title": "National Assembly To Transmit State Police Bill To President Tinubu",
+ "date": "2026-11-03",
+ "sentence": "National Assembly To Transmit State Police Bill To President Tinubu",
+ "head": {
+  "w": 600,
+  "h": 661.96875
+ },
+ "quote": null,
+ "marksOn": "head",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.13444743426332437,
+   "w": 0.955703125,
+   "h": 0.04229806920643912
+  },
+  {
+   "x": 0.02,
+   "y": 0.17370060897889816,
+   "w": 0.11005208333333333,
+   "h": 0.04229806920643912
+  }
+ ]
+}

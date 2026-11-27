@@ -1,0 +1,152 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Naija Decides brand kit</title>
+<style>
+@font-face{font-family:Anton;src:url(../../assets/fonts/anton-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Anton;src:url(../../assets/fonts/anton-latin-ext-400-normal.woff2) format("woff2");unicode-range:U+0100-02AF,U+20A0-20CF}
+@font-face{font-family:Inter;font-weight:400;src:url(../../assets/fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:800;src:url(../../assets/fonts/inter-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:900;src:url(../../assets/fonts/inter-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:Inter;font-weight:800;src:url(../../assets/fonts/inter-latin-ext-800-normal.woff2) format("woff2");unicode-range:U+0100-02AF,U+20A0-20CF}
+:root{--bg:#020f08;--g:#008751;--a:#3dff9a;--fg:#f1faf4;--mut:#a3c4b0;--red:#ff5a4e;--amb:#ffc83d}
+*{box-sizing:border-box}
+body{margin:0;background:#111;display:grid;gap:40px;padding:40px;justify-items:start;font-family:Inter,sans-serif;color:var(--fg)}
+.board{position:relative;overflow:hidden;background:radial-gradient(120% 70% at 50% 110%,#0b6b3c 0%,#04301b 38%,var(--bg) 70%);flex:none}
+.board::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 64px);pointer-events:none}
+.anton{font-family:Anton,Impact,sans-serif;text-transform:uppercase;line-height:.88;letter-spacing:.005em}
+.flag{display:flex;border-radius:8px;overflow:hidden}.flag i{flex:1;background:var(--g)}.flag i:nth-child(2){background:#fff}
+.pill{display:inline-flex;align-items:center;gap:14px;font:900 30px/1 Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
+.face{border-radius:50%;background:#0c3022 center 22%/cover no-repeat;box-shadow:0 0 0 8px var(--c),0 0 0 16px rgba(2,15,8,.9),0 30px 60px rgba(0,0,0,.5)}
+.tick{color:var(--a)}
+/* profile picture */
+#pfp{width:1080px;height:1080px;display:grid;place-items:center;background:radial-gradient(70% 70% at 50% 40%,#0c5a33,#020f08 75%)}
+#pfp .ring{position:absolute;inset:60px;border-radius:50%;border:14px solid transparent;background:linear-gradient(90deg,var(--g) 0 33.3%,#fff 0 66.6%,var(--g) 0) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box exclude,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) padding-box exclude,linear-gradient(#000 0 0)}
+#pfp .m{position:relative;display:grid;justify-items:center;gap:34px}
+#pfp .nd{font-size:430px;line-height:.8;display:flex;align-items:flex-end}
+#pfp .nd .box{width:150px;height:150px;border:22px solid var(--a);border-radius:22px;margin-left:18px;margin-bottom:22px;display:grid;place-items:center;font:900 120px/1 Inter;color:var(--a)}
+#pfp .w{font:900 54px/1 Inter;letter-spacing:.32em;margin-right:-.32em;color:var(--fg)}
+/* profile picture B: wordmark */
+#pfp2{width:1080px;height:1080px;display:grid;place-items:center;background:radial-gradient(70% 70% at 50% 40%,#0c5a33,#020f08 75%)}
+#pfp2 .t{font-size:250px;text-align:center}
+#pfp2 .t b{display:block;color:var(--a);font-weight:400}
+#pfp2 .flag{position:absolute;left:50%;top:150px;transform:translateX(-50%);width:150px;height:72px}
+/* banner */
+#banner{width:1500px;height:500px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:56px;padding:0 120px}
+#banner .faces{display:flex}
+#banner .faces .face{width:190px;height:190px;margin-left:-34px}
+#banner .faces .face:first-child{margin-left:0}
+#banner h1{margin:0;font-size:120px}
+#banner h1 b{color:var(--a);font-weight:400}
+#banner p{margin:14px 0 0;font:800 27px/1.35 Inter;color:var(--mut)}
+#banner .flag{position:absolute;top:0;left:0;right:0;height:14px;border-radius:0}
+/* covers */
+.cover{width:1080px;height:1920px;display:grid;align-content:center;justify-items:center;text-align:center;gap:40px;padding:0 70px}
+.cover .top{position:absolute;top:150px;left:0;right:0;display:flex;justify-content:center}
+.cover .ep{position:absolute;bottom:170px;left:0;right:0;font:900 30px/1 Inter;letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
+.cover .ttl{font-size:140px}
+.cover .ttl b{color:var(--a);font-weight:400}
+.cover .sub{font:800 44px/1.25 Inter;color:var(--mut);max-width:880px}
+.big{font-size:330px;line-height:.85}
+.row{display:flex;gap:30px;justify-content:center;align-items:flex-end}
+.stamp{display:inline-block;font:400 120px/1 Anton;text-transform:uppercase;padding:18px 34px;border:12px solid var(--amb);color:var(--amb);border-radius:18px;transform:rotate(-7deg)}
+.card{max-height:620px;border-radius:26px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 6px rgba(255,255,255,.12);background:#fff}
+.card img{display:block;width:100%;max-height:620px;object-fit:cover;object-position:top}
+.tri{display:flex;gap:26px}
+.tri .face{width:270px;height:270px}
+.tri.sm .face{width:220px;height:220px}
+.cap{font:900 30px/1 Inter;letter-spacing:.12em;text-transform:uppercase;margin-top:28px}
+.steps{display:grid;gap:22px;text-align:left}
+.steps div{display:flex;gap:26px;align-items:center;font:800 54px/1 Inter}
+.steps i{font-style:normal;width:84px;height:84px;border-radius:18px;background:var(--a);color:#022313;display:grid;place-items:center;font:400 58px Anton}
+/* highlight covers */
+.hl{width:1080px;height:1920px;display:grid;place-items:center}
+.hl .disc{width:760px;height:760px;border-radius:50%;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 50% 30%,#0e6a3c,#03200f);box-shadow:inset 0 0 0 14px var(--a)}
+.hl .ic{font-size:300px;line-height:1}
+.hl .lb{font:900 64px/1 Inter;letter-spacing:.14em;text-transform:uppercase;margin-top:10px}
+</style></head><body>
+
+<div class="board" id="pfp"><div class="ring"></div><div class="m"><div class="nd anton">ND<span class="box">✓</span></div><div class="w">NAIJA DECIDES</div></div></div>
+
+<div class="board" id="pfp2"><div class="flag"><i></i><i></i><i></i></div><div class="t anton">Naija<b>Decides</b></div></div>
+
+<div class="board" id="banner"><div class="flag"><i></i><i></i><i></i></div>
+  <div class="faces"><div class="face" style="--c:#4aa3ff;background-image:url(../../site/photos/tinubu.jpg)"></div><div class="face" style="--c:#ff9d3a;background-image:url(../../site/photos/atiku.jpg)"></div><div class="face" style="--c:#3dff9a;background-image:url(../../site/photos/obi.jpg)"></div></div>
+  <div><h1 class="anton">Naija <b>Decides</b> 2027</h1><p>Facts, fact-checks &amp; the live rank on all 18 candidates.<br>Nigeria votes 16 Jan 2027 · link in bio</p></div></div>
+
+<!-- COVERS -->
+<div class="board cover" id="c-countdown"><div class="top"><span class="pill"><span class="flag" style="width:60px;height:30px"><i></i><i></i><i></i></span>Naija Decides</span></div>
+  <div class="anton big">Jan 16<br><span class="tick">2027</span></div>
+  <div class="anton ttl" style="font-size:120px">What you need<br>to know</div>
+  <div class="tri sm"><div class="face" style="--c:#4aa3ff;background-image:url(../../site/photos/tinubu.jpg)"></div><div class="face" style="--c:#ff9d3a;background-image:url(../../site/photos/atiku.jpg)"></div><div class="face" style="--c:#3dff9a;background-image:url(../../site/photos/obi.jpg)"></div></div>
+  <div class="ep">Episode 1 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-your-money"><div class="top"><span class="pill">Naija Decides · Your money</span></div>
+  <div class="cap" style="color:var(--mut);font-size:40px">Petrol, per litre</div>
+  <div class="row anton"><span style="font-size:150px;color:var(--mut)">₦185</span><span style="font-size:110px;color:var(--mut)">→</span><span style="font-size:190px;color:var(--red)">₦1,335</span></div>
+  <div class="anton ttl">Your money:<br><b>2023 vs now</b></div>
+  <div class="sub">Petrol, the naira, food and poverty: the numbers, with sources.</div>
+  <div class="ep">Episode 2 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-promise-vs-reality"><div class="top"><span class="pill">Naija Decides · Receipts</span></div>
+  <div class="anton ttl">Promise<br><span style="color:var(--mut);font-size:110px">vs</span><br><b>Reality</b></div>
+  <div class="card" style="width:700px;transform:rotate(-3deg)"><img src="../../site/img/reality-growth.jpg"></div>
+  <div class="sub">3 years in: what was promised in 2022, and what the data says now.</div>
+  <div class="ep">Episode 3 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-fact-check"><div class="top"><span class="pill">Naija Decides · Fact-check</span></div>
+  <div class="anton ttl">Fact<br>check</div>
+  <div style="position:relative"><div class="card" style="width:680px;transform:rotate(2deg)"><img src="../../site/img/fc-waysmeans.jpg"></div><div class="stamp" style="position:absolute;right:-30px;bottom:-50px;background:rgba(2,15,8,.85)">Misleading</div></div>
+  <div class="sub" style="margin-top:80px">What the presidency said vs what the records show.</div>
+  <div class="ep">Episode 4 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-know-the-candidates"><div class="top"><span class="pill">Naija Decides · 2027</span></div>
+  <div class="anton ttl">Know the<br><b>candidates</b></div>
+  <div class="tri"><div><div class="face" style="--c:#4aa3ff;background-image:url(../../site/photos/tinubu.jpg)"></div><div class="cap">Tinubu</div></div><div><div class="face" style="--c:#ff9d3a;background-image:url(../../site/photos/atiku.jpg)"></div><div class="cap">Atiku</div></div><div><div class="face" style="--c:#3dff9a;background-image:url(../../site/photos/obi.jpg)"></div><div class="cap">Obi</div></div></div>
+  <div class="sub">Who they are, what they did, what they promise.</div>
+  <div class="ep">Episode 5 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-where-the-money-went"><div class="top"><span class="pill">Naija Decides · Follow the money</span></div>
+  <div class="cap" style="color:var(--mut);font-size:40px">Flagged in one federal audit</div>
+  <div class="anton big" style="color:var(--red);font-size:270px">₦1.34tn</div>
+  <div class="anton ttl">Where did<br><b>the money go?</b></div>
+  <div class="sub">Audits, probes and court cases: what the records show.</div>
+  <div class="ep">Episode 6 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-candidate-scorecard"><div class="top"><span class="pill">Naija Decides · Debate</span></div>
+  <div class="anton ttl">Candidate<br><b>scorecard</b></div>
+  <div class="tri"><div class="face" style="--c:#4aa3ff;background-image:url(../../site/photos/tinubu.jpg)"></div><div class="face" style="--c:#ff9d3a;background-image:url(../../site/photos/atiku.jpg)"></div><div class="face" style="--c:#3dff9a;background-image:url(../../site/photos/obi.jpg)"></div></div>
+  <div class="anton" style="font-size:90px;color:var(--amb)">3 rounds. You judge.</div>
+  <div class="ep">Episode 7 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-rewind-2023"><div class="top"><span class="pill">Naija Decides · 2023 rewind</span></div>
+  <div class="anton big" style="color:var(--a)">26.7%</div>
+  <div class="sub" style="font-size:52px;color:var(--fg)">of registered voters voted in 2023</div>
+  <div class="anton ttl">The votes that<br><b>never came</b></div>
+  <div class="ep">Episode 8 · #Nigeria2027</div></div>
+
+<div class="board cover" id="c-protect-your-vote"><div class="top"><span class="pill">Naija Decides · Your vote</span></div>
+  <div class="anton ttl">Make your<br><b>vote count</b></div>
+  <div class="steps"><div><i>1</i>Get your PVC</div><div><i>2</i>Know your polling unit</div><div><i>3</i>Go early</div><div><i>4</i>Stay for the count</div><div><i>5</i>Check it on IReV</div></div>
+  <div class="ep">Episode 9 · #Nigeria2027</div></div>
+
+
+<div class="board cover" id="c-spotlight-seyi-makinde"><div class="top"><span class="pill">Naija Decides · Meet the 18</span></div>
+  <div class="face" style="--c:#9fd3ff;width:560px;height:560px;background-image:url(../../site/photos/makinde.jpg)"></div>
+  <div class="anton ttl" style="margin-top:30px">Seyi<br><b>Makinde</b></div>
+  <div class="sub">APM · Oyo governor · record, questions, pitch</div>
+  <div class="ep">Meet the 18 · Part 1</div></div>
+<div class="board cover" id="c-spotlight-donald-duke"><div class="top"><span class="pill">Naija Decides · Meet the 18</span></div>
+  <div class="face" style="--c:#ff5050;width:560px;height:560px;background-image:url(../../site/photos/duke.jpg)"></div>
+  <div class="anton ttl" style="margin-top:30px">Donald<br><b>Duke</b></div>
+  <div class="sub">PRP · ex-Cross River governor · petrol at ₦300?</div>
+  <div class="ep">Meet the 18 · Part 2</div></div>
+
+<div class="board" id="og" style="width:1200px;height:630px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:50px;padding:0 80px"><div class="flag" style="position:absolute;top:0;left:0;right:0;height:14px;border-radius:0"><i></i><i></i><i></i></div>
+  <div style="display:grid;gap:0"><div style="display:flex"><div class="face" style="--c:#4aa3ff;width:170px;height:170px;background-image:url(../../site/photos/tinubu.jpg)"></div><div class="face" style="--c:#ff9d3a;width:170px;height:170px;margin-left:-30px;background-image:url(../../site/photos/atiku.jpg)"></div></div><div style="display:flex;margin-top:-10px;margin-left:70px"><div class="face" style="--c:#3dff9a;width:170px;height:170px;background-image:url(../../site/photos/obi.jpg)"></div></div></div>
+  <div><div class="pill" style="font-size:24px">Nigeria votes · 16 Jan 2027</div><h1 class="anton" style="margin:14px 0 0;font-size:118px">Naija <b style="color:var(--a);font-weight:400">Decides</b></h1><p style="margin:16px 0 0;font:800 30px/1.35 Inter;color:var(--mut)">Compare all 18 candidates, check the claims, follow the live rank and the latest news.</p></div></div>
+<!-- IG highlight covers -->
+<div class="board hl" id="h-news"><div class="disc"><div><div class="ic">📰</div><div class="lb">News</div></div></div></div>
+<div class="board hl" id="h-facts"><div class="disc"><div><div class="ic">✅</div><div class="lb">Facts</div></div></div></div>
+<div class="board hl" id="h-rank"><div class="disc"><div><div class="ic">📊</div><div class="lb">Rank</div></div></div></div>
+<div class="board hl" id="h-candidates"><div class="disc"><div><div class="ic">👥</div><div class="lb">Candidates</div></div></div></div>
+<div class="board hl" id="h-vote"><div class="disc"><div><div class="ic">🗳️</div><div class="lb">Vote</div></div></div></div>
+</body></html>

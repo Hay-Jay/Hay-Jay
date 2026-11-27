@@ -1,0 +1,49 @@
+{
+ "id": "fc-fdi",
+ "outlet": "FactCheckHub",
+ "url": "https://factcheckhub.com/fact-checking-tinubus-independence-day-speech/",
+ "title": "Fact-checking Tinubu’s independence day speech",
+ "date": "2024-10",
+ "sentence": "The claim that Nigeria attracted foreign direct investments worth more than $30 billion in 2023 is FALSE, according to NBS data.",
+ "head": {
+  "w": 593,
+  "h": 612.78125
+ },
+ "quote": {
+  "w": 592,
+  "h": 89.59375
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02702702702702703,
+   "y": 0.21206836414370422,
+   "w": 0.9074641047297297,
+   "h": 0.2343913498430415
+  },
+  {
+   "x": 0.02702702702702703,
+   "y": 0.5334844785490059,
+   "w": 0.33501372466216217,
+   "h": 0.2343913498430415
+  },
+  {
+   "x": 0.3620407516891892,
+   "y": 0.5334844785490059,
+   "w": 0.08303420608108109,
+   "h": 0.2343913498430415
+  },
+  {
+   "x": 0.3620407516891892,
+   "y": 0.5334844785490059,
+   "w": 0.08303420608108109,
+   "h": 0.2343913498430415
+  },
+  {
+   "x": 0.4450749577702703,
+   "y": 0.5334844785490059,
+   "w": 0.3002269847972973,
+   "h": 0.2343913498430415
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+{
+ "id": "m-bello",
+ "outlet": "Nairametrics",
+ "url": "https://nairametrics.com/2026/04/24/yahaya-bello-efcc-n80-billion-alleged-fraud-case-adjourned-to-may-6/",
+ "title": "Yahaya Bello: EFCC N80 billion alleged fraud case adjourned to May 6",
+ "date": "2026-04-24",
+ "sentence": "The Federal High Court in Abuja on Friday adjourned the alleged N80 billion money laundering case filed against former Kogi State Governor, Yahaya Bello, by the Economic and Financial Crimes Commission (EFCC) to May 6.",
+ "head": {
+  "w": 600,
+  "h": 624
+ },
+ "quote": {
+  "w": 600,
+  "h": 128
+ },
+ "marksOn": "quote",
+ "marks": [
+  {
+   "x": 0.02,
+   "y": 0.1328125,
+   "w": 0.9100260416666667,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.3203125,
+   "w": 0.9280729166666667,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.5078125,
+   "w": 0.886171875,
+   "h": 0.1640625
+  },
+  {
+   "x": 0.02,
+   "y": 0.6953125,
+   "w": 0.4236979166666667,
+   "h": 0.1640625
+  }
+ ]
+}
