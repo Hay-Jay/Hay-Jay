@@ -3,8 +3,28 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-26T21:20:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-27T01:20:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'wike-atiku-privatisation', at:'2026-11-27T00:45:00+01:00', img:'news/n157.jpg', tag:'Campaign', pri:1, outlet:'The Sun', url:'https://thesun.ng/wike-challenges-atiku-amaechi-to-account-for-101-sold-assets-missing-39m-n68bn-projects/', people:['atiku'], claim:true,
+    h:'Wike tells Atiku and Amaechi to account for the 101 enterprises privatised under Obasanjo and Rivers spending',
+    d:'At a PDP Rainbow Coalition town hall in Okrika, FCT Minister Nyesom Wike said Nigerians have little to show for the privatisation Atiku oversaw as vice president, questioned Rivers spending under his running mate Amaechi, and urged voters to reject the ADC ticket.',
+    why:'A political rival\'s questions, not findings. Atiku\'s privatisation record and the allegations against him are in his fact file.'},
+  {id:'kebbi-apc-adc-thugs-claim', at:'2026-11-27T00:20:00+01:00', img:'news/n156.jpg', tag:'Security', pri:2, outlet:'Punch', url:'https://punchng.com/2027-kebbi-apc-accuses-adc-of-sponsoring-thugs/', people:['atiku','tinubu'], claim:true,
+    h:'Kebbi APC accuses the ADC of sponsoring thugs during Atiku\'s visit and a later protest',
+    d:'An adviser to Governor Nasir Idris alleged that hoodlums brought in from Sokoto and Zamfara destroyed APC billboards and injured residents during Atiku\'s visit to Argungu and Birnin Kebbi, that an ADC protest in Jega damaged APC members\' property, and that an ADC youth leader called for violence.',
+    why:'Allegations from one party against another. Kebbi police charged three people after an ADC gathering last week. Watch for police findings.'},
+  {id:'opposition-pact-monday', at:'2026-11-26T22:06:00+01:00', img:'news/n155.jpg', tag:'Party', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/26/2027-atiku-peter-obi-makinde-to-sign-unity-pact-monday-to-unseat-tinubu-2/', people:['atiku','obi','seyi-makinde'], claim:true,
+    h:'Coalition says Atiku, Obi and Makinde camps are expected to sign a "unity pact" on Monday',
+    d:'Salihu Lukman of the Coalition for Democracy said the three candidates are expected to lead their camps to Monday\'s opposition summit in Abuja, to move "from talks to a binding commitment". Member parties include the ADC, APM, NDC, PDP, PRP and SDP. The candidates have not confirmed.',
+    why:'A pact is not a withdrawal: all three are still on the ballot. Earlier today Makinde\'s campaign said he is fully in the race.'},
+  {id:'delta-cp-neutrality', at:'2026-11-26T21:16:00+01:00', img:'news/n154.jpg', tag:'Security', pri:1, outlet:'Punch', url:'https://punchng.com/2027-delta-cp-warns-officers-against-partisanship-extortion/', people:[],
+    h:'Delta police chief orders officers to stay non-partisan and move risky rallies to safer venues',
+    d:'Commissioner Samuel Erale told senior officers that everyone is entitled to equal police protection regardless of party, and that campaigns in areas that are hard to police should be moved to secure venues. He also restated zero tolerance for extortion.',
+    why:'Delta has seen the deadliest campaign attack so far. Neutral policing there will be closely watched.'},
+  {id:'tinubu-delegation-ibb', at:'2026-11-26T21:12:00+01:00', img:'news/n153.jpg', tag:'Campaign', pri:1, outlet:'Daily Trust', url:'https://dailytrust.com/gbajabiamila-leads-tinubus-delegation-to-ibb-abdulsalami/', people:['tinubu'], claim:true,
+    h:'Tinubu sends chief of staff to visit ex-heads of state Babangida and Abdulsalami',
+    d:'Femi Gbajabiamila led a delegation to Minna. In his statement, he said Babangida reaffirmed support for Tinubu and Abdulsalami praised the administration\'s performance.',
+    why:'The account of the elders\' views comes from the president\'s office. Neither former leader has issued his own statement.'},
   {id:'baba-ahmed-violence-claim', at:'2026-11-26T20:15:00+01:00', img:'news/n152.jpg', tag:'Security', pri:2, outlet:'Daily Post', url:'https://dailypost.ng/2026/11/26/2027-tinubus-govt-complicit-in-electoral-killings-violence-baba-ahmed/', people:['tinubu'], claim:true,
     h:'PRP chieftain Hakeem Baba-Ahmed says the government is "complicit" in election violence',
     d:'On Channels\' Politics Today, Baba-Ahmed said the country has "never seen anything like" the current political violence and that the federal government, as a major political player, cannot convince Nigerians it is neutral. He responded to the NSA\'s pledge earlier today to protect voters.',
