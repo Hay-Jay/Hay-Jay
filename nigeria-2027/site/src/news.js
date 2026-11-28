@@ -3,8 +3,32 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-28T06:20:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-28T11:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'adebayo-n200-petrol', at:'2026-11-28T10:32:00+01:00', img:'news/n193.jpg', tag:'Manifesto', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-sdp-candidate-promises-n200-petrol-free-healthcare/', people:['adewole-adebayo'],
+    h:'Adebayo promises petrol at ₦200 a litre "without subsidy", plus free healthcare',
+    d:'At an SDP town hall in Nasarawa, Adewole Adebayo said petrol could sell at ₦200 with NNPC still making a profit "because we will stop funding corruption". He also pledged free healthcare, free and compulsory education, more food production and better support for people with disabilities.',
+    why:'Ask how ₦200 petrol works without a subsidy, as with every candidate\'s fuel promise.'},
+  {id:'remi-tinubu-subsidy-roads', at:'2026-11-28T09:10:00+01:00', img:'news/n192.jpg', tag:'Campaign', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/subsidy-removal-boosting-development-remi-tinubu/', people:['tinubu'], claim:true,
+    h:'First Lady says subsidy removal is paying for roads as she opens Warri–Ode Itsekiri road',
+    d:'Commissioning the 20.95km Trans Warri–Ode Itsekiri road, first awarded in 2006, Oluremi Tinubu said ending the fuel subsidy freed money for infrastructure, that governors no longer owe salaries, and urged a second term to finish projects like the Lagos–Calabar coastal road.',
+    why:'Campaign claims about where subsidy savings went can be checked against federal and state budgets.'},
+  {id:'ipac-140-killed', at:'2026-11-28T08:00:00+01:00', img:'news/n191.jpg', tag:'Security', pri:3, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/headlines/928533-2027-politics-watch-140-killed-in-election-related-violence-ipac.html', people:[],
+    h:'About 140 killed in election-related violence across 26 states, party council says',
+    d:'The Inter-Party Advisory Council (IPAC), which brings together registered parties, gave the estimate in Premium Times\' daily Politics Watch. The Situation Room civil society group welcomed the mock exercise but criticised poor public communication and difficulty finding the list of participating polling units.',
+    why:'The first overall toll from a cross-party body. Official police figures have not been published.'},
+  {id:'opposition-strategy-analysis', at:'2026-11-28T06:41:00+01:00', img:'news/n190.jpg', tag:'Party', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/2027-alliance-atiku-or-obi/', people:['atiku','obi','seyi-makinde','donald-duke','adewole-adebayo'], claim:true,
+    h:'Monday\'s opposition meeting may aim for a runoff, not a single candidate, sources say',
+    d:'Daily Trust reports that Atiku, Obi, Makinde, Duke and Adebayo are due in Abuja on Monday. Unnamed opposition sources said one plan is for each to stay on the ballot and focus on their strongest regions, to stop anyone winning outright in the first round. Makinde has said any arrangement would not be a merger like the APC\'s in 2015.',
+    why:'To win in the first round, a candidate needs the most votes plus 25% in at least two-thirds of states. Failing that, there is a runoff.'},
+  {id:'jega-gambari-inec-concerns', at:'2026-11-28T06:37:00+01:00', img:'news/n189.jpg', tag:'INEC', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/2027-jega-gambari-others-call-for-transparency-level-playing-field/', people:[],
+    h:'Ex-INEC chair Jega, Gambari and others question manual entry in INEC\'s new e-result form',
+    d:'A group of 10 "Concerned Nigerians" said unanswered questions about the voters\' register, results management and procurement are hurting confidence. They said typing figures into the electronic EC8A adds human intervention, questioned dropping Form EC40G-PU, and asked INEC to publish its probe of 54 staff linked to registration irregularities.',
+    why:'Respected voices from across the system. INEC\'s answers on the e-EC8A will matter for trust in results.'},
+  {id:'cash-behind-2027', at:'2026-11-28T06:33:00+01:00', img:'news/n188.jpg', tag:'Campaign', pri:2, outlet:'Daily Trust', url:'https://dailytrust.com/the-cash-behind-2027/', people:['tinubu'],
+    h:'Daily Trust tallies the cash and vehicles flowing into the APC campaign',
+    d:'The report lists donations including more than 600 vehicles worth about ₦3.68bn from a Tompolo-linked group, a reported 1,000 vehicles from minister Bello Matawalle, a ₦1.06bn package from a Borno lawmaker, SUVs from the First Lady to APC youth leaders, and ₦50,000 grants promised to 400,000 people by the City Boy Movement.',
+    why:'Big donations raise questions about spending limits and who funds campaigns. The same scrutiny applies to every party.'},
   {id:'obi-makinde-dunamis', at:'2026-11-28T05:15:00+01:00', img:'news/n187.jpg', tag:'Campaign', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928517-2027-polls-obi-makinde-dino-join-dunamis-church-at-all-night-prayer.html', people:['obi','seyi-makinde'],
     h:'Obi and Makinde pray together at Dunamis all-night service, two days before opposition meeting',
     d:'The NDC and APM candidates, with ADC chieftain Dino Melaye, attended the church\'s 30th anniversary service in Abuja, where pastor Paul Enenche called them to the altar at about 1am to pray for Nigeria and a peaceful election.',
