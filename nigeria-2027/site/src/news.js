@@ -3,8 +3,12 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-28T01:20:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-28T06:20:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'obi-makinde-dunamis', at:'2026-11-28T05:15:00+01:00', img:'news/n187.jpg', tag:'Campaign', pri:1, outlet:'Premium Times', url:'https://www.premiumtimesng.com/news/top-news/928517-2027-polls-obi-makinde-dino-join-dunamis-church-at-all-night-prayer.html', people:['obi','seyi-makinde'],
+    h:'Obi and Makinde pray together at Dunamis all-night service, two days before opposition meeting',
+    d:'The NDC and APM candidates, with ADC chieftain Dino Melaye, attended the church\'s 30th anniversary service in Abuja, where pastor Paul Enenche called them to the altar at about 1am to pray for Nigeria and a peaceful election.',
+    why:'Candidates often appear at big religious events. Monday\'s opposition meeting is where any real deal would show.'},
   {id:'inec-mock-network-test', at:'2026-11-28T00:40:00+01:00', img:'news/n186.jpg', tag:'INEC', pri:1, outlet:'Punch', url:'https://punchng.com/inec-tests-result-transmission-network-for-2027-polls-today/', people:[],
     h:'Mock exercise today will test whether the network can carry result uploads, INEC says',
     d:'INEC deputy director Wilfred Ifogah told Channels that a main aim of today\'s exercise is to test network capacity for uploading results to IReV. He said materials have been sent to the states and supervising officials are in place, and the dummy ballots carry no party names.',
