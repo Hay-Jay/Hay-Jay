@@ -3,8 +3,32 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-28T11:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-28T16:25:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'mock-low-turnout', at:'2026-11-28T15:50:00+01:00', img:'news/n195.jpg', tag:'INEC', pri:2, outlet:'Punch', url:'https://punchng.com/low-turnout-mars-inec-mock-accreditation-in-kogi-anambra-jigawa/', people:[],
+    h:'Mock exercise: low turnout in many states, with some units seeing no voters at all',
+    d:'Punch correspondents found few voters in Kogi, Anambra and Jigawa, with some residents unaware the test was happening. Some BVAS machines accredited voters within a minute while others had glitches. Similar low turnout was reported in Lagos, Bayelsa, Katsina, Abia and Borno, where one unit had no one after three hours.',
+    why:'Turnout at a test is not a guide to January. The machine glitches matter more, and INEC says it will fix them.'},
+  {id:'delta-police-arrests-wanted', at:'2026-11-28T15:13:00+01:00', img:'news/n194.jpg', tag:'Security', pri:3, outlet:'Punch', url:'https://punchng.com/campaign-violence-delta-police-insist-omo-agege-honour-invitation-declare-14-wanted/', people:['obi'],
+    h:'Delta police arrest four over the Uduere rally killings and declare 14 wanted',
+    d:'Police said four suspects are in custody over the deadly 23 November attack on the NDC campaign in Ughelli North and named 14 others as wanted. They also insisted that NDC Senate candidate Ovie Omo-Agege answer their invitation, saying he declined calls before a letter was sent. His aide had said he received no invitation.',
+    why:'The first arrests over the deadliest campaign attack so far. Prosecutions are the real test.'},
+  {id:'mbah-enugu-declaration', at:'2026-11-28T14:27:00+01:00', img:'news/n198.jpg', tag:'Campaign', pri:2, outlet:'Punch', url:'https://punchng.com/2027-mbah-unveils-enugu-declaration-urges-south-east-to-back-tinubu/', people:['tinubu'], claim:true,
+    h:'At Tinubu\'s Enugu rally, Governor Mbah launches an "Enugu Declaration" for South-East support',
+    d:'Enugu governor Peter Mbah urged the South-East to back Tinubu\'s re-election, citing infrastructure and the value of political collaboration. Vanguard and Daily Post report that Tinubu told the rally the Eastern gas pipeline and a railway have been approved and that electricity will improve.',
+    why:'The South-East voted heavily for Obi in 2023. Watch whether endorsements by governors change that.'},
+  {id:'shettima-atiku-obi-money', at:'2026-11-28T14:22:00+01:00', img:'news/n199.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/2027-atiku-obi-not-contesting-to-win-says-shettima/', people:['atiku','obi','tinubu'], claim:true,
+    h:'Shettima claims Atiku and Obi are "not in this contest to win" but to make money',
+    d:'At the Enugu rally, Vice President Kashim Shettima said Atiku and Obi are running "to make money and foment mischief". He also said Atiku has campaigned in six states, none in the South, and Obi in 17.',
+    why:'An attack from a rival campaign, with no evidence for the money claim. The campaign-stop counts can be checked against rally reports.'},
+  {id:'mock-ondo-glitches', at:'2026-11-28T13:38:00+01:00', img:'news/n196.jpg', tag:'INEC', pri:2, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/low-turnout-bvas-glitches-mar-inec-mock-accreditation-in-ondo/', people:[],
+    h:'Ondo mock test: BVAS struggled to capture some elderly voters\' faces',
+    d:'Vanguard found two voters out of 470 registered at one unit and 11 of 940 at another, while one unit had a large turnout. Some BVAS machines failed to capture the faces of elderly voters.',
+    why:'Face capture problems for older voters need fixing before January. This is what the test is for.'},
+  {id:'amupitan-mock-verdict', at:'2026-11-28T13:36:00+01:00', img:'news/n197.jpg', tag:'INEC', pri:2, outlet:'Punch', url:'https://punchng.com/amupitan-hails-mock-election-assures-nigerians-of-credible-2027-polls/', people:[],
+    h:'INEC chairman calls Jos mock exercise "impressive", says voters were accredited in seconds',
+    d:'Monitoring in Jos South, Joash Amupitan said accreditation was quick and orderly and the test will help INEC find problems before election day. He said low turnout in some places should not be read as poor mobilisation and suggested sanitation exercises may have kept people at home.',
+    why:'INEC\'s own view. Independent observer reports from Yiaga and the Situation Room will give a fuller picture.'},
   {id:'adebayo-n200-petrol', at:'2026-11-28T10:32:00+01:00', img:'news/n193.jpg', tag:'Manifesto', pri:1, outlet:'Vanguard', url:'https://www.vanguardngr.com/2026/11/2027-sdp-candidate-promises-n200-petrol-free-healthcare/', people:['adewole-adebayo'],
     h:'Adebayo promises petrol at ₦200 a litre "without subsidy", plus free healthcare',
     d:'At an SDP town hall in Nasarawa, Adewole Adebayo said petrol could sell at ₦200 with NNPC still making a profit "because we will stop funding corruption". He also pledged free healthcare, free and compulsory education, more food production and better support for people with disabilities.',
