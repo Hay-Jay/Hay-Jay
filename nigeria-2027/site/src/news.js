@@ -3,8 +3,16 @@
    2 = notable, 1 = routine), h (headline), d (summary), why (why it matters), outlet, url,
    people (candidate ids), claim (true when it rests on someone's allegation).
    Order on the site = newest first, with pressing stories boosted. Updated every 5 hours. */
-const NEWS_META = { updated: '2026-11-27T21:25:00+01:00', everyHours: 5 };
+const NEWS_META = { updated: '2026-11-28T01:20:00+01:00', everyHours: 5 };
 const NEWS_ITEMS = [
+  {id:'inec-mock-network-test', at:'2026-11-28T00:40:00+01:00', img:'news/n186.jpg', tag:'INEC', pri:1, outlet:'Punch', url:'https://punchng.com/inec-tests-result-transmission-network-for-2027-polls-today/', people:[],
+    h:'Mock exercise today will test whether the network can carry result uploads, INEC says',
+    d:'INEC deputy director Wilfred Ifogah told Channels that a main aim of today\'s exercise is to test network capacity for uploading results to IReV. He said materials have been sent to the states and supervising officials are in place, and the dummy ballots carry no party names.',
+    why:'Upload delays fuelled distrust in 2023. Watch how quickly test results appear on IReV today.'},
+  {id:'enugu-roads-tinubu-visit', at:'2026-11-28T00:06:00+01:00', img:'news/n185.jpg', tag:'Campaign', pri:1, outlet:'Punch', url:'https://punchng.com/enugu-restricts-movement-for-tinubus-visit/', people:['tinubu'],
+    h:'Enugu closes major roads today for Tinubu\'s campaign visit',
+    d:'The state government listed closures around Ogui Road, Otigba Roundabout, Presidential Road, Okpara Square and Government House, with alternative routes for motorists. The visit falls on the same day as INEC\'s nationwide mock exercise.',
+    why:'If you are in Enugu and your polling unit is in the mock exercise, check the closures and plan your route.'},
   {id:'ndc-replies-ok-movement', at:'2026-11-27T20:57:00+01:00', img:'news/n184.jpg', tag:'Party', pri:1, outlet:'Punch', url:'https://punchng.com/2027-ndc-dismisses-ok-movements-exit-as-sponsored-distraction/', people:['obi'], claim:true,
     h:'NDC calls the OK Movement exit a "sponsored distraction", says Obi had disowned the group\'s parallel council',
     d:'NDC campaign director-general Ibrahim Abdulkarim said the withdrawal is an attempt to slow the Obi-Kwankwaso campaign, and that Obi had months ago publicly disowned a parallel campaign council set up by John Ughulu\'s faction.',
